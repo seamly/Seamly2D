@@ -19,6 +19,14 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ### [ ] Task Layout.96 - Implement - Seamly2D Piece Properties - Tilt: change to radio buttons "None", "CCW", "CW". If "CCW" or "CW' chosen then enable a text field 'Degrees' that accepts integers between 0 and 90. Default radio button is "None", Default Degrees is "0". Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
 
+- [x] Layout.96.1 Piece Properties > Tilt: radio buttons None, CCW, CW; new row "Degrees:" spin box 0–90 (suffix °), enabled for CCW and CW only. Default None, 0. A piece set to None saves 0 degrees.
+- [x] Layout.96.2 Data: `PieceTilt`; `VPieceLabelData::GetTilt`, `getTiltDegrees` (clamped 0–90), `tiltToString`, `stringToTilt`, `tiltDisplayText`. Label `%pTilt%` shows "CCW 15"; None shows "None".
+- [x] Layout.96.3 Schema 0.7.7: `tilt` type `pieceTilt` (`None`, `CCW`, `CW`); new attribute `tiltDegrees` type `tiltDegrees` (0–90). `VAbstractPattern::AttrTiltDegrees`.
+- [x] Layout.96.4 Converter `tiltToV0_7_7`: old "CW X" / "CCW X" → direction, 0 degrees; "CCW 15" → CCW, 15; a number past 90 → 0; any other value → None without `tiltDegrees`.
+- [x] Layout.96.5 Tests: `TST_VPiece::PieceTiltValuesRoundTrip`, `ConverterSplitsTilt` (6 rows). Passed in the scratch harness, with the rotation tests (13 passed). `cl /Zs` on every changed `.cpp`. Fusion render of the dialog. Not run: Qt suites (next MSI).
+- [ ] Layout.96.6 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
+- DXF `Tilt:` line and the handoff attribute: Layout.93.4, 93.5.
+
 ### [ ] Layout.97 - Implement - Seamly2D Piece Properties - Fold: Seamly2D gives Up/Down or Left/Right. D6673 Fold: is Y or N, and means the piece may go on the fold of tubular fabric. Change Seamly2D Piece Properties "On Fold" to be a checkbox that saves as "True" or "False", which exports to 'Y' or 'N' in DXF formats. This removes the possibility for 'Up/Down' folds as this is not typical for soft goods development. (Default is unchecked/"False"). Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
 
 ### [ ] Task Layout.98 - Implement - Seamly2D Piece Properties - Flip: change Flip to radio buttons 'None', 'Horizontal', 'Vertical', and 'Both' are enabled. (Default is 'None'); create test.

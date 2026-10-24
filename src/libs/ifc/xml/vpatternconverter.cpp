@@ -164,6 +164,8 @@ static const QString strMy                        = QStringLiteral("my");
 static const QString strForbidFlipping            = QStringLiteral("forbidFlipping");
 static const QString strRotationWay               = QStringLiteral("rotationWay");
 static const QString strNone                      = QStringLiteral("None");
+static const QString strTilt                      = QStringLiteral("tilt");
+static const QString strTiltDegrees               = QStringLiteral("tiltDegrees");
 static const QString strInLayout                  = QStringLiteral("inLayout");
 static const QString strSeamAllowance             = QStringLiteral("seamAllowance");
 static const QString strNodeType                  = QStringLiteral("nodeType");
@@ -1490,13 +1492,15 @@ void VPatternConverter::toVersion0_7_6()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/// @brief Version 0.7.7 limits the piece label data attribute "rotationWay" to None, 1-Way, 2-Way, 4-Way and Any.
+/// @brief Version 0.7.7 limits the piece label data attribute "rotationWay" to None, 1-Way, 2-Way, 4-Way and Any,
+///        and splits "tilt" into a direction (None, CCW, CW) and the attribute "tiltDegrees" (0 to 90).
 void VPatternConverter::toVersion0_7_7()
 {
     // Delete when the minimal supported version is 0.7.7.
     Q_STATIC_ASSERT_X(VPatternConverter::PatternMinVer < CONVERTER_VERSION_CHECK(0, 7, 7),
                       "Time to refactor the code.");
     rotationWayToV0_7_7();
+    tiltToV0_7_7();
     setVersion(QStringLiteral("0.7.7"));
     Save();
 }
@@ -1520,6 +1524,41 @@ void VPatternConverter::rotationWayToV0_7_7()
         if (!allowed.contains(data.attribute(strRotationWay)))
         {
             data.setAttribute(strRotationWay, strNone);
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Splits "tilt" of each piece label data element into a direction and "tiltDegrees".
+///
+/// Older files hold the text of the piece dialog list: None, "CW X" or "CCW X", where X is a placeholder or a number.
+/// A number from 0 to 90 becomes "tiltDegrees"; any other X gives 0 degrees. An unknown value becomes None.
+void VPatternConverter::tiltToV0_7_7()
+{
+    // Delete when the minimal supported version is 0.7.7.
+    Q_STATIC_ASSERT_X(VPatternConverter::PatternMinVer < CONVERTER_VERSION_CHECK(0, 7, 7),
+                      "Time to refactor the code.");
+
+    const QString ccw = QStringLiteral("CCW");
+    const QString cw = QStringLiteral("CW");
+    const QDomNodeList dataList = elementsByTagName(strData);
+    for (int i = 0; i < dataList.size(); ++i)
+    {
+        QDomElement data = dataList.at(i).toElement();
+        const QStringList words = data.attribute(strTilt).split(QLatin1Char(' '), Qt::SkipEmptyParts);
+        const QString direction = words.value(0);
+
+        if (direction == ccw || direction == cw)
+        {
+            bool isNumber = false;
+            const int degrees = words.value(1).toInt(&isNumber);
+            data.setAttribute(strTilt, direction);
+            data.setAttribute(strTiltDegrees, isNumber && degrees >= 0 && degrees <= 90 ? degrees : 0);
+        }
+        else
+        {
+            data.setAttribute(strTilt, strNone);
+            data.removeAttribute(strTiltDegrees);
         }
     }
 }

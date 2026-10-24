@@ -157,6 +157,7 @@ const QString VAbstractPattern::AttrAnnotation          = QStringLiteral("annota
 const QString VAbstractPattern::AttrOrientation         = QStringLiteral("orientation");
 const QString VAbstractPattern::AttrRotationWay         = QStringLiteral("rotationWay");
 const QString VAbstractPattern::AttrTilt                = QStringLiteral("tilt");
+const QString VAbstractPattern::AttrTiltDegrees         = QStringLiteral("tiltDegrees");
 const QString VAbstractPattern::AttrFoldPosition        = QStringLiteral("foldPosition");
 const QString VAbstractPattern::AttrQuantity            = QStringLiteral("quantity");
 const QString VAbstractPattern::AttrOnFold              = QStringLiteral("onFold");

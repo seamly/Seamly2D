@@ -118,6 +118,9 @@ private slots:
     void PieceRotationValuesRoundTrip() const;
     void ConverterSetsRotationWay_data() const;
     void ConverterSetsRotationWay() const;
+    void PieceTiltValuesRoundTrip() const;
+    void ConverterSplitsTilt_data() const;
+    void ConverterSplitsTilt() const;
 
 private:
     Q_DISABLE_COPY(TST_VPiece)

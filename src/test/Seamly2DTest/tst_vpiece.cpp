@@ -2038,3 +2038,74 @@ void TST_VPiece::ConverterSetsRotationWay() const
         QFAIL(qUtf8Printable(error.ErrorMessage()));
     }
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PieceTiltValuesRoundTrip checks the pattern file values of the tilt directions and the tilt angle range.
+ */
+void TST_VPiece::PieceTiltValuesRoundTrip() const
+{
+    const QVector<PieceTilt> tilts{PieceTilt::None, PieceTilt::CounterClockwise, PieceTilt::Clockwise};
+    for (const PieceTilt tilt : tilts)
+    {
+        QVERIFY(VPieceLabelData::stringToTilt(VPieceLabelData::tiltToString(tilt)) == tilt);
+    }
+
+    QCOMPARE(VPieceLabelData::tiltToString(PieceTilt::CounterClockwise), QStringLiteral("CCW"));
+    QCOMPARE(VPieceLabelData::tiltToString(PieceTilt::Clockwise), QStringLiteral("CW"));
+    QVERIFY(VPieceLabelData::stringToTilt(QStringLiteral("CW X")) == PieceTilt::None);
+
+    VPieceLabelData data;
+    QVERIFY(data.GetTilt() == PieceTilt::None);
+    QCOMPARE(data.getTiltDegrees(), 0);
+    data.setTiltDegrees(120);
+    QCOMPARE(data.getTiltDegrees(), 90);
+    data.setTiltDegrees(-5);
+    QCOMPARE(data.getTiltDegrees(), 0);
+
+    QCOMPARE(VPieceLabelData::tiltDisplayText(PieceTilt::Clockwise, 15), QStringLiteral("CW 15"));
+    QCOMPARE(VPieceLabelData::tiltDisplayText(PieceTilt::None, 15), QStringLiteral("None"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::ConverterSplitsTilt_data() const
+{
+    QTest::addColumn<QString>("oldValue");
+    QTest::addColumn<QString>("tilt");
+    QTest::addColumn<QString>("degrees");
+
+    QTest::newRow("none") << QStringLiteral("None") << QStringLiteral("None") << QString();
+    QTest::newRow("empty value") << QString() << QStringLiteral("None") << QString();
+    QTest::newRow("translated value") << QStringLiteral("Aucune") << QStringLiteral("None") << QString();
+    QTest::newRow("clockwise placeholder") << QStringLiteral("CW X") << QStringLiteral("CW") << QStringLiteral("0");
+    QTest::newRow("counterclockwise number") << QStringLiteral("CCW 15") << QStringLiteral("CCW")
+                                            << QStringLiteral("15");
+    QTest::newRow("angle past 90") << QStringLiteral("CW 120") << QStringLiteral("CW") << QStringLiteral("0");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief ConverterSplitsTilt checks that a 0.7.6 tilt text converts to a direction and a tilt angle.
+ */
+void TST_VPiece::ConverterSplitsTilt() const
+{
+    QFETCH(QString, oldValue);
+    QFETCH(QString, tilt);
+    QFETCH(QString, degrees);
+
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString path = dir.filePath(QStringLiteral("tilt.sm2d"));
+    QVERIFY(writeOnePiecePattern(path, QString(), QStringLiteral("tilt=\"%1\"").arg(oldValue)));
+
+    try
+    {
+        const QDomElement data = convertedPieceData(path);
+        QCOMPARE(data.attribute(VAbstractPattern::AttrTilt), tilt);
+        QCOMPARE(data.attribute(VAbstractPattern::AttrTiltDegrees), degrees);
+    }
+    catch (VException &error)
+    {
+        QFAIL(qUtf8Printable(error.ErrorMessage()));
+    }
+}

@@ -860,7 +860,101 @@ QListWidget::item:selected {
                </widget>
               </item>
               <item row="8" column="1">
-               <widget class="QComboBox" name="tilt_ComboBox">
+               <widget class="QWidget" name="tilt_Widget">
+                <property name="toolTip">
+                 <string>Direction in which a layout may tilt the piece off its grainline.</string>
+                </property>
+                <layout class="QGridLayout" name="tilt_GridLayout">
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item row="0" column="0">
+                  <widget class="QRadioButton" name="tiltNone_RadioButton">
+                   <property name="font">
+                    <font>
+                     <pointsize>9</pointsize>
+                     <bold>false</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>None</string>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">tilt_ButtonGroup</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QRadioButton" name="tiltCounterClockwise_RadioButton">
+                   <property name="font">
+                    <font>
+                     <pointsize>9</pointsize>
+                     <bold>false</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>CCW</string>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">tilt_ButtonGroup</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                 <item row="0" column="2">
+                  <widget class="QRadioButton" name="tiltClockwise_RadioButton">
+                   <property name="font">
+                    <font>
+                     <pointsize>9</pointsize>
+                     <bold>false</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>CW</string>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">tilt_ButtonGroup</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="9" column="0">
+               <widget class="QLabel" name="tiltDegrees_Label">
+                <property name="minimumSize">
+                 <size>
+                  <width>110</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Degrees:</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="1">
+               <widget class="QSpinBox" name="tiltDegrees_SpinBox">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -879,24 +973,18 @@ QListWidget::item:selected {
                   <bold>false</bold>
                  </font>
                 </property>
-                <item>
-                 <property name="text">
-                  <string>None</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string notr="true">CW X</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string notr="true">CCW X</string>
-                 </property>
-                </item>
+                <property name="toolTip">
+                 <string>Largest tilt angle, 0 to 90 degrees.</string>
+                </property>
+                <property name="suffix">
+                 <string>°</string>
+                </property>
+                <property name="maximum">
+                 <number>90</number>
+                </property>
                </widget>
               </item>
-              <item row="9" column="0">
+              <item row="10" column="0">
                <widget class="QLabel" name="label_16">
                 <property name="minimumSize">
                  <size>
@@ -918,7 +1006,7 @@ QListWidget::item:selected {
                 </property>
                </widget>
               </item>
-              <item row="9" column="1">
+              <item row="10" column="1">
                <widget class="VLineEdit" name="annotation_LineEdit">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
@@ -6081,6 +6169,7 @@ QListWidget::item:selected {
   </connection>
  </connections>
  <buttongroups>
+  <buttongroup name="tilt_ButtonGroup"/>
   <buttongroup name="rotation_ButtonGroup"/>
   <buttongroup name="notchSubType_ButtonGroup"/>
   <buttongroup name="notchType_ButtonGroup"/>
