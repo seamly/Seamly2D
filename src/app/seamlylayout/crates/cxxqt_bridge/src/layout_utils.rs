@@ -1462,21 +1462,16 @@ mod tests {
 
     // @brief Real multisize handoff: jacket2_40-146.sm2d with gost_man_ru.smms, 8 pieces
     // in 26 sizes (220-720), base size 500, captured with SEAMLYLAYOUT_SAVE_HANDOFF
-    // from MSI 26.10.1416. The pieces carry the names of the installed sample: two
-    // Cyrillic names and six pieces named "Detail".
+    // from MSI 26.10.2023. Two materials: Fabric (7 pieces) and Lining (Detail 4).
+    // Grainlines and labels shown on most pieces; Back has a fold line.
     const JACKET2_HANDOFF_SVG: &str = include_str!("../test_data/jacket2_40-146_handoff.svg");
     const JACKET2_BASE_SIZE: &str = "500";
-
-    // @brief jacket2 handoff with two materials (Fabric: 7 pieces, Lining: Detail 4), shown
-    // grainlines and labels, and a fold line on Back; captured with SEAMLYLAYOUT_SAVE_HANDOFF
-    // from MSI 26.10.2023.
-    const JACKET2_MATERIALS_HANDOFF_SVG: &str = include_str!("../test_data/jacket2_40-146_materials_handoff.svg");
 
     // @brief Nested: after the import alignment, every size of a piece-set has its grainline,
     // piece label and pattern label in one place, so each stack reads as one.
     #[test]
     fn jacket2_nested_stacks_each_piece_set_annotations() {
-        let doc = Document::parse(JACKET2_MATERIALS_HANDOFF_SVG).expect("jacket2 handoff parses");
+        let doc = Document::parse(JACKET2_HANDOFF_SVG).expect("jacket2 handoff parses");
         let mut checked = 0;
         for part in crate::material_split::split_by_material(doc) {
             let mut input = part.doc;
@@ -1848,7 +1843,8 @@ mod tests {
     // `Rectangles` group was: just before the size groups.
     #[test]
     fn jacket2_nested_export_keeps_the_smallest_size_annotations() {
-        // The fixture has no grainline or label; the import adds a size label to every piece.
+        // Per size the fixture shows 7 grainlines, 3 piece labels and 2 pattern labels;
+        // the import adds a size label to every piece.
         let (mut input_dom, sizes) = jacket2_handoff();
         assert_eq!(crate::size_labels::add_size_labels(&mut input_dom), 208);
         let nested = process_jacket2_input(&input_dom, true, 60.0, 300.0);
@@ -1866,7 +1862,7 @@ mod tests {
         annotation_sizes(&doc.root, "", &mut before);
         let smallest = sizes.iter().min_by(|a, b| crate::size_groups::compare_sizes(a, b)).expect("sizes").clone();
         let kept = before.iter().filter(|s| **s == smallest).count();
-        assert_eq!(kept, 8, "size {smallest}: one size label per piece");
+        assert_eq!(kept, 20, "size {smallest}: 7 grainlines, 3 piece labels, 2 pattern labels, 8 size labels");
 
         let removed = crate::nested_annotations::keep_smallest_size_annotations(&mut doc);
         assert_eq!(removed, before.len() - kept);
@@ -1904,7 +1900,7 @@ mod tests {
         let smallest = sizes.iter().min_by(|a, b| crate::size_groups::compare_sizes(a, b)).expect("sizes").clone();
         let mut kept = Vec::new();
         annotation_sizes(&flat_dom.root, "", &mut kept);
-        assert_eq!(kept, vec![smallest; 8], "one size label per piece-set, of the smallest size");
+        assert_eq!(kept, vec![smallest; 20], "the grainlines and labels of the smallest size only");
     } // jacket2_nested_sheet_export_keeps_the_smallest_size_annotations
 
     // @brief Marker packs every size of every piece as its own unit, numbered by its piece-set.
@@ -2070,7 +2066,7 @@ mod tests {
     } // jacket2_marker_widens_narrow_roll
 
     // @brief The DXF-ASTM warning dialog lists each piece once, by the name the user wrote.
-    // The fixture jacket2 hides every grainline, so all 8 pieces are listed.
+    // Only Подборт hides its grainline in the fixture, so it is the only piece listed.
     #[test]
     fn jacket2_missing_piece_data_lists_each_piece_once() {
         let layouts = [("nested", process_jacket2(true, 60.0, 300.0)), ("base size", process_jacket2_size(JACKET2_BASE_SIZE))];
@@ -2079,16 +2075,12 @@ mod tests {
             let mut pieces: Vec<&str> =
                 text.lines().filter_map(|l| l.strip_prefix("\u{2022} ")).map(|l| l.split(':').next().unwrap()).collect();
             pieces.sort_unstable();
-            assert_eq!(
-                pieces,
-                vec!["Detail (3)", "Detail (4)", "Detail (5)", "Detail (6)", "Detail (7)", "Detail (8)", "Комір", "Подборт"],
-                "{tab}: {text}"
-            );
+            assert_eq!(pieces, vec!["Подборт"], "{tab}: {text}");
         } // for each tab
     } // jacket2_missing_piece_data_lists_each_piece_once
 
     // @brief The Base Size DXF-ASTM export: one block per piece, `Piece Name:` non-ASCII as
-    // `\U+XXXX`, repeated names numbered, and `# n` texts on every piece that grades.
+    // `\U+XXXX`, and `# n` texts on every piece that grades.
     #[test]
     fn jacket2_base_size_export_names_and_grades_each_piece() {
         let layout = process_jacket2_size(JACKET2_BASE_SIZE);
@@ -2105,27 +2097,24 @@ mod tests {
         let podbort = r"\U+041F\U+043E\U+0434\U+0431\U+043E\U+0440\U+0442";
         assert_eq!(
             names,
-            vec!["Detail (3)", "Detail (4)", "Detail (5)", "Detail (6)", "Detail (7)", "Detail (8)", komir, podbort],
+            vec!["Back", "Detail 2", "Detail 3", "Detail 4", "Sleeve 1", "Sleeve 2", komir, podbort],
             "one block per piece"
         );
         let sizes: Vec<&str> = lines.iter().filter_map(|l| l.strip_prefix("Size Name:")).collect();
         assert!(sizes.len() == 8 && sizes.iter().all(|s| *s == JACKET2_BASE_SIZE), "{sizes:?}");
         assert!(lines.contains(&"Sample Size:500"), "sample size");
 
-        // Detail (3) and (6) stay ungraded: their lines differ in shape between sizes.
-        // Detail (3), sizes 660-700: the seam line reverses 0.2 mm past a corner, so the
-        // corner has two turn points. Detail (6), sizes 220-340: the cut line's last seam
-        // allowance corner is two vertices; from 360 it is one. Warnings name the piece as
-        // the user wrote it, and the first size whose turn points differ from the sample size.
-        let expected: Vec<String> = [(3, 660), (6, 220)]
-            .iter()
-            .map(|(n, size)| format!("Detail ({n}): not graded, size {size} has other turn points than size 500 on the cut line."))
-            .collect();
-        assert_eq!(warnings, expected);
+        // Detail 4 stays ungraded: its cut line has 8 turn points in sizes 220 and 240,
+        // 6 in size 520 and 7 in the other sizes. The warning names the piece as the user
+        // wrote it, and the first size whose turn points differ from the sample size.
+        assert_eq!(
+            warnings,
+            vec!["Detail 4: not graded, size 220 has other turn points than size 500 on the cut line.".to_string()]
+        );
         let reference_lines = lines.windows(4).filter(|w| w[0] == "0" && w[1] == "LINE" && w[2] == "8" && w[3] == "5").count();
-        assert_eq!(reference_lines, 6, "one layer 5 line per graded piece");
+        assert_eq!(reference_lines, 7, "one layer 5 line per graded piece");
         assert!(lines.contains(&"# 1"), "grade rule identifiers");
-        let rul = rul.expect("six graded pieces write the rule table");
+        let rul = rul.expect("graded pieces write the rule table");
         assert!(rul.contains("SAMPLE SIZE:500") && rul.contains("NUMBER OF SIZES:26"), "{rul}");
     } // jacket2_base_size_export_names_and_grades_each_piece
 
@@ -2143,16 +2132,18 @@ mod tests {
         let mut listed: Vec<&str> =
             text.lines().filter_map(|l| l.strip_prefix("\u{2022} ")).map(|l| l.split(':').next().unwrap()).collect();
         listed.sort_unstable();
-        let expected: Vec<String> = ["Подборт", "Комір", "Detail", "Detail", "Detail", "Detail", "Detail", "Detail"]
+        // Piece number and letter of each piece-set, in document order: Fabric, then Lining.
+        let expected: Vec<String> = [
+            (1, "Подборт_G"), (2, "Комір_H"), (3, "Back_A"), (4, "Detail_2_B"),
+            (5, "Detail_3_C"), (6, "Sleeve_2_F"), (7, "Sleeve_1_E"), (8, "Detail_4_D"),
+        ]
             .iter()
-            .enumerate()
-            .map(|(i, name)| format!("Size_500_Piece_{}_{name}", i + 1))
+            .map(|(n, name)| format!("Size_500_Piece_{n}_{name}"))
             .collect();
-        let mut sorted = expected.clone();
-        sorted.sort_unstable();
-        assert_eq!(listed, sorted, "{text}");
+        // Only Подборт hides its grainline.
+        assert_eq!(listed, vec!["Size_500_Piece_1_Подборт_G"], "{text}");
 
-        // `Piece Name:` escapes the non-ASCII characters; the numbers keep the Detail pieces apart.
+        // `Piece Name:` escapes the non-ASCII characters.
         let grading = crate::exports::DxfGradingSource { input, sizes, base_size: JACKET2_BASE_SIZE.to_string() };
         let (warnings, dxf, rul, _) = export_dxf_for_test(&layout, "jacket2_assigned_names", Some(grading));
         let lines: Vec<&str> = dxf.lines().map(str::trim).collect();
@@ -2162,13 +2153,12 @@ mod tests {
         written.sort_unstable();
         assert_eq!(names, written, "one block per piece");
 
-        // The same two pieces stay ungraded, named as the dialog names them.
-        let not_graded: Vec<String> = [(3, 660), (6, 220)]
-            .iter()
-            .map(|(n, size)| format!("Size_500_Piece_{n}_Detail: not graded, size {size} has other turn points than size 500 on the cut line."))
-            .collect();
-        assert_eq!(warnings, not_graded);
-        assert!(rul.is_some(), "six graded pieces write the rule table");
+        // Detail 4 stays ungraded, named as the dialog names it.
+        assert_eq!(
+            warnings,
+            vec!["Size_500_Piece_8_Detail_4_D: not graded, size 220 has other turn points than size 500 on the cut line.".to_string()]
+        );
+        assert!(rul.is_some(), "graded pieces write the rule table");
     } // jacket2_assigned_names_reach_the_base_size_export
 
     // @brief Consecutive POLYLINE vertices of a DXF, as written, 0.01 mm apart or closer.

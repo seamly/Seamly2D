@@ -286,6 +286,8 @@ public:
                                         QVector<QPointF> *nodeVertices = nullptr, QVector<int> *cutCorners = nullptr);
     static QVector<int>     turnPointIndices(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices,
                                              bool closed);
+    static QVector<QPointF> snapNodeVertices(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices,
+                                             bool closed);
     static QVector<int>     nodeVertexIndices(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices,
                                               bool closed);
     static QVector<int>     addTurnPoints(const QVector<QPointF> &points, const QVector<int> &turnPoints,

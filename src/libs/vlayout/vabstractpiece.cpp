@@ -61,6 +61,7 @@
 #include <QPainterPath>
 
 #include <algorithm>
+#include <limits>
 
 const qreal maxL = 2.4;
 
@@ -528,6 +529,54 @@ QVector<int> VAbstractPiece::nodeVertexIndices(const QVector<QPointF> &points, c
         }
     }
     return indices;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief snapNodeVertices puts each node vertex that RemoveDublicates() erased back on the polyline.
+ *
+ * RemoveDublicates() erases the later of two vertices closer than accuracyPointOnLine. When a curve point comes
+ * just before a node vertex, the node vertex goes and the curve point stays, a fraction of a pixel away. That
+ * happens in some pattern sizes only, so the node count of the line changes with the size and unifyTurnPoints()
+ * cannot match the nodes. The vertex nearest to such a node moves onto it.
+ * @param points       polyline after RemoveDublicates(); a closed polyline may repeat its first vertex.
+ * @param nodeVertices node vertex positions.
+ * @param closed       whether the polyline is a closed loop.
+ * @return the polyline with every node vertex within accuracyPointOnLine of a vertex at its exact position.
+ */
+QVector<QPointF> VAbstractPiece::snapNodeVertices(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices,
+                                                  bool closed)
+{
+    QVector<QPointF> snapped = points;
+    const bool repeats = repeatsFirstVertex(points, closed);
+    for (const QPointF &node : nodeVertices)
+    {
+        // Nearest vertex to the node.
+        int nearest = -1;
+        qreal nearestLength = std::numeric_limits<qreal>::infinity();
+        for (int i = 0; i < snapped.size(); ++i)
+        {
+            const qreal length = QLineF(snapped.at(i), node).length();
+            if (length < nearestLength)
+            {
+                nearest = i;
+                nearestLength = length;
+            }
+        }
+
+        // A matched node stays; a vertex farther than a removed duplicate could be is another point.
+        if (nearest >= 0 && nearestLength >= kNodeMatchTolerance && nearestLength <= accuracyPointOnLine)
+        {
+            snapped[nearest] = node;
+            // The closing repeat of the first vertex moves with it.
+            if (repeats && (nearest == 0 || nearest == snapped.size() - 1))
+            {
+                snapped.first() = node;
+                snapped.last() = node;
+            }
+        }
+    }
+    return snapped;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

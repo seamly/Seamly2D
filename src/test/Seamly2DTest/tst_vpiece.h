@@ -127,6 +127,7 @@ private slots:
     void LayoutPieceKeepsFlip() const;
     void LayoutPieceKeepsPieceProperties() const;
     void RotationStepDegrees() const;
+    void SnapNodeVerticesRestoresErasedNode() const;
     void ConverterRemovesForbidFlipping_data() const;
     void ConverterRemovesForbidFlipping() const;
 

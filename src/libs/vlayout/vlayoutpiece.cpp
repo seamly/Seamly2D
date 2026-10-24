@@ -797,6 +797,7 @@ void VLayoutPiece::setMainPathPoints(const QVector<QPointF> &points, bool hideMa
     d->contourNodeIndices.clear();
     if (!nodeVertices.isEmpty())
     {
+        d->contour = snapNodeVertices(d->contour, nodeVertices, true);
         d->contourTurnPoints = turnPointIndices(d->contour, nodeVertices, true);
         d->contourNodeIndices = nodeVertexIndices(d->contour, nodeVertices, true);
     }
@@ -831,6 +832,7 @@ void VLayoutPiece::setSeamAllowancePoints(const QVector<QPointF> &points, bool s
             d->seamAllowance = RemoveDublicates(d->seamAllowance, false);
             if (!nodeVertices.isEmpty())
             {
+                d->seamAllowance = snapNodeVertices(d->seamAllowance, nodeVertices, true);
                 d->seamAllowanceTurnPoints = turnPointIndices(d->seamAllowance, nodeVertices, true);
                 d->seamAllowanceNodeIndices = nodeVertexIndices(d->seamAllowance, nodeVertices, true);
             }
@@ -893,6 +895,7 @@ void VLayoutPiece::setBuiltInSeamLinePoints(const QVector<QPointF> &points, cons
     d->builtInSeamLineNodeIndices.clear();
     if (!d->builtInSeamLine.isEmpty() && !nodeVertices.isEmpty())
     {
+        d->builtInSeamLine = snapNodeVertices(d->builtInSeamLine, nodeVertices, true);
         d->builtInSeamLineTurnPoints = turnPointIndices(d->builtInSeamLine, nodeVertices, true);
         d->builtInSeamLineNodeIndices = nodeVertexIndices(d->builtInSeamLine, nodeVertices, true);
     }
