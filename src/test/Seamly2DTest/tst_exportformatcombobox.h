@@ -35,7 +35,7 @@
  * @brief TST_ExportFormatCombobox tests the format list shared by the export
  * dialogs and the command line help.
  *
- * PS and EPS are exported by SeamlyLayout only; Seamly2D offers neither.
+ * PS, EPS and tiled PDF are exported by SeamlyLayout only; Seamly2D offers none of them.
  */
 class TST_ExportFormatCombobox : public QObject
 {
@@ -46,6 +46,7 @@ public:
 private slots:
     void offersPdfAndSvg();
     void offersNoPostScript();
+    void offersNoTiledPdf();
     void keepsFormatNumbers();
 
 private:

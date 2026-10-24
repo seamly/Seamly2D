@@ -13,7 +13,6 @@ HEADERS += \
     $$PWD/vbestsquare.h \
     $$PWD/vposition.h \
     $$PWD/vtextmanager.h \
-    $$PWD/vposter.h \
     $$PWD/vgraphicsfillitem.h \
     $$PWD/vabstractpiece.h \
     $$PWD/vabstractpiece_p.h \
@@ -31,7 +30,6 @@ SOURCES += \
     $$PWD/vbestsquare.cpp \
     $$PWD/vposition.cpp \
     $$PWD/vtextmanager.cpp \
-    $$PWD/vposter.cpp \
     $$PWD/vgraphicsfillitem.cpp \
     $$PWD/vabstractpiece.cpp \
     $$PWD/vlayoutpiece.cpp \

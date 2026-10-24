@@ -100,7 +100,6 @@ public:
 
 protected:
     virtual void            showEvent(QShowEvent *event) override;
-    void                    initTemplates(QComboBox *templates);
 
 private slots:
     void                    save();

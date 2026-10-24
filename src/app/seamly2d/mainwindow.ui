@@ -71,36 +71,11 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <widget class="QMenu" name="print_Menu">
-     <property name="title">
-      <string>Print</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../../libs/vmisc/share/resources/theme.qrc">
-       <normaloff>:/icons/win.icon.theme/32x32/actions/document-print.png</normaloff>:/icons/win.icon.theme/32x32/actions/document-print.png</iconset>
-     </property>
-     <addaction name="print_Action"/>
-     <addaction name="printTiled_Action"/>
-    </widget>
-    <widget class="QMenu" name="preview_Menu">
-     <property name="title">
-      <string>Preview</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../../libs/vmisc/share/resources/theme.qrc">
-       <normaloff>:/icons/win.icon.theme/32x32/actions/document-print-preview.png</normaloff>:/icons/win.icon.theme/32x32/actions/document-print-preview.png</iconset>
-     </property>
-     <addaction name="printPreview_Action"/>
-     <addaction name="printPreviewTiled_Action"/>
-    </widget>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
     <addaction name="closePattern_Action"/>
     <addaction name="save_Action"/>
     <addaction name="saveAs_Action"/>
-    <addaction name="separator"/>
-    <addaction name="print_Menu"/>
-    <addaction name="preview_Menu"/>
     <addaction name="separator"/>
     <addaction name="exportAs_Action"/>
     <addaction name="separator"/>
@@ -3865,78 +3840,6 @@
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
-   </property>
-  </action>
-  <action name="print_Action">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset theme="document-print">
-     <normaloff>.</normaloff>.</iconset>
-   </property>
-   <property name="text">
-    <string>Print</string>
-   </property>
-   <property name="toolTip">
-    <string>Print an original layout</string>
-   </property>
-   <property name="shortcut">
-    <string notr="true"/>
-   </property>
-  </action>
-  <action name="printTiled_Action">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset theme="document-print">
-     <normaloff>.</normaloff>.</iconset>
-   </property>
-   <property name="text">
-    <string>Print tiled PDF</string>
-   </property>
-   <property name="toolTip">
-    <string>Split and print a layout into smaller pages (for regular printers)</string>
-   </property>
-   <property name="shortcut">
-    <string notr="true"/>
-   </property>
-  </action>
-  <action name="printPreview_Action">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset theme="document-print-preview">
-     <normaloff>.</normaloff>.</iconset>
-   </property>
-   <property name="text">
-    <string>Print preview</string>
-   </property>
-   <property name="toolTip">
-    <string>Print preview original layout</string>
-   </property>
-   <property name="shortcut">
-    <string notr="true"/>
-   </property>
-  </action>
-  <action name="printPreviewTiled_Action">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset theme="document-print-preview">
-     <normaloff>.</normaloff>.</iconset>
-   </property>
-   <property name="text">
-    <string>Preview tiled PDF</string>
-   </property>
-   <property name="toolTip">
-    <string>Print preview tiled layout</string>
-   </property>
-   <property name="shortcut">
-    <string notr="true"/>
    </property>
   </action>
   <action name="exportAs_Action">

@@ -5840,10 +5840,6 @@ void MainWindow::SetLayoutModeActions()
     const bool enabled = !scenes.isEmpty();
 
     ui->exportAs_Action->setEnabled(enabled);
-    ui->printPreview_Action->setEnabled(enabled);
-    ui->printPreviewTiled_Action->setEnabled(enabled);
-    ui->print_Action->setEnabled(enabled);
-    ui->printTiled_Action->setEnabled(enabled);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -6473,10 +6469,6 @@ void MainWindow::createActions()
     });
 
     connect(ui->exportAs_Action, &QAction::triggered, this, &MainWindow::exportLayoutAs);
-    connect(ui->printPreview_Action, &QAction::triggered, this, &MainWindow::PrintPreviewOrigin);
-    connect(ui->printPreviewTiled_Action, &QAction::triggered, this, &MainWindow::PrintPreviewTiled);
-    connect(ui->print_Action, &QAction::triggered, this, &MainWindow::PrintOrigin);
-    connect(ui->printTiled_Action, &QAction::triggered, this, &MainWindow::PrintTiled);
 
     connect(ui->appPreferences_Action, &QAction::triggered, this, &MainWindow::Preferences);
     connect(ui->patternPreferences_Action, &QAction::triggered, this, [this]()
@@ -8041,7 +8033,6 @@ void MainWindow::exportDraftBlocksAs()
                     exportPDF(filename, paper, draftScene, true, margins);
                     break;
                 }
-            case LayoutExportFormat::PDFTiled:
             case LayoutExportFormat::OBJ:
             case LayoutExportFormat::DXF_AC1006_Flat:
             case LayoutExportFormat::DXF_AC1009_Flat:

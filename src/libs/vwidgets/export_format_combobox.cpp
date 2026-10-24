@@ -106,7 +106,6 @@ QVector<std::pair<QString, LayoutExportFormat>> ExportFormatCombobox::initFormat
 
     InitFormat(LayoutExportFormat::SVG);
     InitFormat(LayoutExportFormat::PDF);
-    InitFormat(LayoutExportFormat::PDFTiled);
     InitFormat(LayoutExportFormat::PNG);
     InitFormat(LayoutExportFormat::JPG);
     InitFormat(LayoutExportFormat::BMP);
@@ -224,8 +223,6 @@ QString ExportFormatCombobox::exportFormatDescription(LayoutExportFormat format)
             return QString("AutoCAD DXF 2010 ASTM %1 %2").arg(filesStr, dxfSuffix);
         case LayoutExportFormat::DXF_AC1027_ASTM:
             return QString("AutoCAD DXF 2013 ASTM %1 %2").arg(filesStr, dxfSuffix);
-        case LayoutExportFormat::PDFTiled:
-            return QString("PDF tiled %1 (*.pdf)").arg(filesStr);
         default:
             return QString();
     }

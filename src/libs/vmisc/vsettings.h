@@ -188,19 +188,6 @@ public:
     static bool    GetDefTextAsPaths();
     void           setTextAsPaths(bool value);
 
-    // settings for the tiled PDFs
-    QMarginsF      GetTiledPDFMargins(const Unit &unit) const;
-    void           setTiledPDFMargins(const QMarginsF &value, const Unit &unit);
-
-    qreal          getTiledPDFPaperHeight(const Unit &unit) const;
-    void           setTiledPDFPaperHeight(qreal value, const Unit &unit);
-
-    qreal          getTiledPDFPaperWidth(const Unit &unit) const;
-    void           setTiledPDFPaperWidth(qreal value, const Unit &unit);
-
-    PageOrientation getTiledPDFOrientation() const;
-    void            setTiledPDFOrientation(PageOrientation value);
-
 private:
     Q_DISABLE_COPY(VSettings)
 };

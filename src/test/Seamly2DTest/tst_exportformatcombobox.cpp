@@ -63,10 +63,22 @@ void TST_ExportFormatCombobox::offersNoPostScript()
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief Tiled PDF is not offered: SeamlyLayout makes the tiled PDF.
+ */
+void TST_ExportFormatCombobox::offersNoTiledPdf()
+{
+    const QString help = ExportFormatCombobox::makeHelpFormatList();
+    QVERIFY2(!help.contains(QLatin1String("PDF tiled")), qUtf8Printable(help));
+    QVERIFY2(!help.contains(QLatin1String(" = 2\n")), qUtf8Printable(help));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief Command line format numbers after the removed PS and EPS do not move.
  */
 void TST_ExportFormatCombobox::keepsFormatNumbers()
 {
+    QCOMPARE(static_cast<int>(LayoutExportFormat::PNG), 3);
     QCOMPARE(static_cast<int>(LayoutExportFormat::OBJ), 7);
     QCOMPARE(static_cast<int>(LayoutExportFormat::DXF_AC1006_Flat), 10);
     const QString help = ExportFormatCombobox::makeHelpFormatList();

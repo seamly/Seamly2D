@@ -120,7 +120,7 @@ enum class LayoutExportFormat : char
 {
     SVG = 0,
     PDF = 1,
-    PDFTiled = 2,
+    PDFTiled = 2,         /* Not exported; kept so later format numbers stay the same. */
     PNG = 3,
     JPG = 4,
     BMP = 5,
@@ -166,8 +166,6 @@ enum class Unit : char { Mm = 0, Cm, Inch, Px, LAST_UNIT_DO_NOT_USE};
 enum class Source : char { FromGui, FromFile, FromTool };
 enum class NodeUsage : bool {NotInUse = false, InUse = true};
 enum class SelectionType : bool {ByMousePress, ByMouseRelease};
-
-enum class PageOrientation : bool {Portrait = true, Landscape = false};
 
 enum class PieceNodeAngle : unsigned char
 {
@@ -614,9 +612,6 @@ Q_REQUIRED_RESULT QString AbsoluteMPath(const QString &patternPath, const QStrin
 Q_REQUIRED_RESULT QString fileDialog(QWidget *parent, const QString &title,  const QString &dir,
                                      const QString &filter, QString *selectedFilter, QFileDialog::Options options,
                                      QFileDialog::FileMode mode,  QFileDialog::AcceptMode accept);
-
-Q_REQUIRED_RESULT QSharedPointer<QPrinter> PreparePrinter(const QPrinterInfo &info,
-                                                          QPrinter::PrinterMode mode = QPrinter::ScreenResolution);
 
 QMarginsF GetMinPrinterFields(const QSharedPointer<QPrinter> &printer);
 QMarginsF GetPrinterFields(const QSharedPointer<QPrinter> &printer);

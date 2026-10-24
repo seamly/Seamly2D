@@ -93,7 +93,6 @@ int main(int argc, char *argv[])
     Q_INIT_RESOURCE(schema);
     Q_INIT_RESOURCE(theme);
     Q_INIT_RESOURCE(flags);
-    Q_INIT_RESOURCE(icons);
     Q_INIT_RESOURCE(toolicon);
     Q_INIT_RESOURCE(sounds);
     Q_INIT_RESOURCE(diagrams);

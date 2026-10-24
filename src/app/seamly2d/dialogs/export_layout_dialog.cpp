@@ -57,7 +57,6 @@
 #include "../vmisc/vsettings.h"
 #include "../ifc/exception/vexception.h"
 #include "../vwidgets/export_format_combobox.h"
-#include "../vwidgets/page_format_combobox.h"
 
 #include <QDir>
 #include <QFileDialog>
@@ -153,12 +152,7 @@ ExportLayoutDialog::ExportLayoutDialog(int count, Draw mode, const QString &file
     removeFormatFromList(LayoutExportFormat::OBJ);
 #endif
 
-    if (m_mode != Draw::Layout)
-    {
-        removeFormatFromList(LayoutExportFormat::PDFTiled);
-        ui->tiledPDF_Widget->hide();
-    }
-    else
+    if (m_mode == Draw::Layout)
     {
         ui->textAsPaths_Checkbox->setVisible(false);
     }
@@ -206,8 +200,6 @@ ExportLayoutDialog::ExportLayoutDialog(int count, Draw mode, const QString &file
 
     ui->path_LineEdit->setText(qApp->Seamly2DSettings()->getLayoutPath());
 
-    initTemplates(ui->templates_ComboBox);
-
     // Size selection group box: hidden by default, shown when setAvailableSizes() is called
     ui->sizeSelection_GroupBox->setVisible(false);
 
@@ -230,15 +222,6 @@ ExportLayoutDialog::ExportLayoutDialog(int count, Draw mode, const QString &file
     adjustSize();
     setFixedHeight(this->height());
 }
-
-//---------------------------------------------------------------------------------------------------------------------
-void ExportLayoutDialog::initTemplates(QComboBox *templates_ComboBox)
-{
-    // remove the custom format,
-    int indexCustom = templates_ComboBox->count() -1;
-    templates_ComboBox->removeItem(indexCustom);
-}
-
 
 //---------------------------------------------------------------------------------------------------------------------
 bool ExportLayoutDialog::isBinaryDXFFormat() const
@@ -275,7 +258,6 @@ bool ExportLayoutDialog::isBinaryDXFFormat() const
             return ui->binaryDXF_CheckBox->isChecked();
         case LayoutExportFormat::SVG:
         case LayoutExportFormat::PDF:
-        case LayoutExportFormat::PDFTiled:
         case LayoutExportFormat::PNG:
         case LayoutExportFormat::JPG:
         case LayoutExportFormat::BMP:
@@ -323,7 +305,6 @@ void ExportLayoutDialog::enableBinaryDXFFormatCheckbox()
     case LayoutExportFormat::DXF_AC1027_ASTM:
         ui->binaryDXF_CheckBox->setEnabled(true);
         break;
-    case LayoutExportFormat::PDFTiled:
     case LayoutExportFormat::PNG:
     case LayoutExportFormat::JPG:
     case LayoutExportFormat::PDF:
@@ -352,7 +333,6 @@ QString ExportLayoutDialog::exportFormatSuffix(LayoutExportFormat format)
         case LayoutExportFormat::SVG:
             return ".svg";
         case LayoutExportFormat::PDF:
-        case LayoutExportFormat::PDFTiled:
             return ".pdf";
         case LayoutExportFormat::PNG:
             return ".png";
@@ -527,72 +507,40 @@ void ExportLayoutDialog::showExportFiles()
     const LayoutExportFormat currentFormat = format();
     ui->textAsPaths_Checkbox->setEnabled(true);
     ui->quality_Slider->setEnabled(false);
-    ui->tiledPDF_Widget->setEnabled(false);
     ui->export_Frame->show();
     adjustSize();
 
-    if (currentFormat == LayoutExportFormat::PDFTiled)
+    // Batch mode
+    if (!selectedSizes().isEmpty())
     {
-        // Batch mode
-        if (!selectedSizes().isEmpty())
+        for (const QString &size : selectedSizes())
         {
-            for (const QString &size : selectedSizes())
+            for (int i=0; i < m_count; ++i)
             {
-                const QString name = QString("%1_%2%3")
+                const QString name = QString("%1_%2_0%3%4")
                 .arg(fileName())                     //1
                 .arg(size)                           //2
-                .arg(exportFormatSuffix(format()));  //3
+                .arg(QString::number(i+1))           //3
+                .arg(exportFormatSuffix(format()));  //4
 
                 QListWidgetItem *item = new QListWidgetItem(name);
                 SCASSERT(item != nullptr)
                 ui->exportFiles_ListWidget->addItem(item);
             }
-        }
-        else
-        {
-            const QString name = QString("%1%2")
-            .arg(fileName())                     //1
-            .arg(exportFormatSuffix(format()));  //2
-
-            QListWidgetItem *item = new QListWidgetItem(name);
-            SCASSERT(item != nullptr)
-            ui->exportFiles_ListWidget->addItem(item);
         }
     }
     else
     {
-        // Batch mode
-        if (!selectedSizes().isEmpty())
+        for (int i=0; i < m_count; ++i)
         {
-            for (const QString &size : selectedSizes())
-            {
-                for (int i=0; i < m_count; ++i)
-                {
-                    const QString name = QString("%1_%2_0%3%4")
-                    .arg(fileName())                     //1
-                    .arg(size)                           //2
-                    .arg(QString::number(i+1))           //3
-                    .arg(exportFormatSuffix(format()));  //4
+            const QString name = QString("%1_0%2%3")
+            .arg(fileName())                     //1
+            .arg(QString::number(i+1))           //2
+            .arg(exportFormatSuffix(format()));  //3
 
-                    QListWidgetItem *item = new QListWidgetItem(name);
-                    SCASSERT(item != nullptr)
-                    ui->exportFiles_ListWidget->addItem(item);
-                }
-            }
-        }
-        else
-        {
-            for (int i=0; i < m_count; ++i)
-            {
-                const QString name = QString("%1_0%2%3")
-                .arg(fileName())                     //1
-                .arg(QString::number(i+1))           //2
-                .arg(exportFormatSuffix(format()));  //3
-
-                QListWidgetItem *item = new QListWidgetItem(name);
-                SCASSERT(item != nullptr)
-                ui->exportFiles_ListWidget->addItem(item);
-            }
+            QListWidgetItem *item = new QListWidgetItem(name);
+            SCASSERT(item != nullptr)
+            ui->exportFiles_ListWidget->addItem(item);
         }
     }
 
@@ -626,9 +574,6 @@ void ExportLayoutDialog::showExportFiles()
         case LayoutExportFormat::DXF_AC1024_ASTM:
         case LayoutExportFormat::DXF_AC1027_ASTM:
             ui->binaryDXF_CheckBox->setEnabled(true);
-            break;
-        case LayoutExportFormat::PDFTiled:
-            ui->tiledPDF_Widget->setEnabled(true);
             break;
         case LayoutExportFormat::PNG:
             ui->quality_Slider->setEnabled(true);
@@ -683,91 +628,23 @@ void ExportLayoutDialog::removeFormatFromList(LayoutExportFormat format)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-//  Reads the values of the variables needed for the save layout dialog, for instance
-//  the margins, teamplte and orientation of tiled pdf. Then sets the corresponding
-//  elements of the dialog to these values.
-//
-//  @brief ExportLayoutDialog::readSettings
-//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief readSettings sets the image quality control from the settings.
+ */
 void ExportLayoutDialog::readSettings()
 {
     VSettings *settings = qApp->Seamly2DSettings();
-    const Unit unit = qApp->patternUnit();
-
-    // read Margins top, right, bottom, left
-    QMarginsF margins = settings->GetTiledPDFMargins(unit);
-
-    ui->leftField_DoubleSpinBox->setValue(margins.left());
-    ui->topField_DoubleSpinBox->setValue(margins.top());
-    ui->rightField_DoubleSpinBox->setValue(margins.right());
-    ui->bottomField_DoubleSpinBox->setValue(margins.bottom());
     ui->quality_Slider->setValue(settings->getExportQuality());
     ui->percent_SpinBox->setValue(ui->quality_Slider->value());
-
-    // read Template
-    QSizeF size = QSizeF(settings->getTiledPDFPaperWidth(Unit::Mm), settings->getTiledPDFPaperHeight(Unit::Mm));
-
-    const int max = static_cast<int>(PaperSizeFormat::Custom);
-    for (int i=0; i < max; ++i)
-    {
-
-        const QSizeF tmplSize = getTemplateSize(static_cast<PaperSizeFormat>(i), Unit::Mm);
-        if (size == tmplSize)
-        {
-            ui->templates_ComboBox->setCurrentIndex(i);
-            break;
-        }
-    }
-
-    // read Orientation
-    if(settings->getTiledPDFOrientation() == PageOrientation::Portrait)
-    {
-        ui->portrait_ToolButton->setChecked(true);
-    }
-    else
-    {
-        ui->landscape_ToolButton->setChecked(true);
-    }
-
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-//  Writes the values of some variables (like the margins, template and orientation of tiled pdf).
-//  of the save layout dialog into the settings.
-//
-//  @brief ExportLayoutDialog::writeSettings
-//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief writeSettings saves the image quality and, when the user wants it, the export format.
+ */
 void ExportLayoutDialog::writeSettings() const
 {
-    VSettings *settings = qApp->Seamly2DSettings();
-    const Unit unit = qApp->patternUnit();
-
-    // Margins:  left, top, right, bottom
-    QMarginsF margins = QMarginsF(ui->leftField_DoubleSpinBox->value(),
-                                  ui->topField_DoubleSpinBox->value(),
-                                  ui->rightField_DoubleSpinBox->value(),
-                                  ui->bottomField_DoubleSpinBox->value());
-
-    settings->setTiledPDFMargins(margins,unit);
-    settings->setExportQuality(ui->quality_Slider->value());
-
-    // write Template
-    PaperSizeFormat temp;
-    temp = static_cast<PaperSizeFormat>(ui->templates_ComboBox->currentData().toInt());
-    const QSizeF size = getTemplateSize(temp, Unit::Mm);
-
-    settings->setTiledPDFPaperHeight(size.height(),Unit::Mm);
-    settings->setTiledPDFPaperWidth(size.width(),Unit::Mm);
-
-    // write Orientation
-    if(ui->portrait_ToolButton->isChecked())
-    {
-        settings->setTiledPDFOrientation(PageOrientation::Portrait);
-    }
-    else
-    {
-        settings->setTiledPDFOrientation(PageOrientation::Landscape);
-    }
+    qApp->Seamly2DSettings()->setExportQuality(ui->quality_Slider->value());
 
     //Export Format
     if (qApp->Settings()->useLastExportFormat())
