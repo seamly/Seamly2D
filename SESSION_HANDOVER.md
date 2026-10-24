@@ -2,6 +2,17 @@
 
 ## Current status
 
+### 2026-10-24 — Seamly2D.11 built-in seam allowance; merged into local `run-seamlyLayout` (c18f080c0e), not pushed
+
+- Piece mode draws the built-in seam line (seam line style) inside the main path (cut line style); hatch between; Hide Seam Line hides it. Dialog preview draws it too.
+- Fold line: the seam line stops on the fold line at both ends, open, not along it (`VPiece::builtInSeamLinePoints`). Handoff `seamline` is an open path; SeamlyLayout DXF-ASTM keeps it open (no Rust code change).
+- Decisions to confirm: Automatic tab (widths) stays enabled for Built in, Custom tab and Angle disabled; View > Seam Allowance off keeps both lines.
+- User (2026-10-24): `src/libs/vlayout` is deprecated and goes at the SeamlyLayout release; the layout algorithm is Rust. Edits there were limited to the handoff path (`VLayoutPiece` open seam line) and the DXF-AAMA layer 8 fix in `vdxf`.
+- Verified: scratch harness (HEAD test objects + in-tree libs, changed sources rebuilt) passed every Seamly2D suite; `cargo test -p seamly_svg2ezdxf` 68 passed; `cl /Zs` clean. Not run: MSI (ask first), GUI.
+- Open: Seamly2D.11.8 (Qt suites in the next MSI), Seamly2D.11.9 user check `AGENT_CHECKLIST.md` §27.
+- Scratch tools (session scratchpad `3348cfb9-…`): `harness/make_build.py` builds the full Seamly2DTests exe from main tree objects plus worktree sources; `make_zs.py`.
+- Uncommitted user files left untouched: both `jacket2_40-146.sm2d` copies, the `TODO_SEAMLYLAYOUT.md` reorder, `test-seamly-layout/foldline_arrowline.*`, `test-seamly-layout/layouts/jacket2/2026102*/`. `TODO_SEAMLY2D.md` user edits are committed (they hold the Seamly2D.11 text).
+
 ### 2026-10-23 (evening) — Layout.95–98, 92, 93.4–93.6, 94, 27.13.4; merged into local `run-seamlyLayout`, not pushed
 
 - Pattern format 0.7.7 (`v0.7.7.xsd`, `toVersion0_7_7`): `rotationWay` and `tilt` enumerations, new `tiltDegrees`, piece `flip`; no `foldPosition`, no `forbidFlipping`. Decision: a new version, since builds already wrote 0.7.6 files.

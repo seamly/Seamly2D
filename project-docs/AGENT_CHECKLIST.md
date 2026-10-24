@@ -31,6 +31,7 @@ MALE_SHIRT
 | Layout.96.6 | 24 | S2D > male_shirt > Piece Properties: Tilt radio buttons and degrees | ?
 | Layout.97.5 | 24 | S2D > male_shirt, jacket2 > Piece Properties: On fold check box, no fold position | ?
 | Layout.98.6 | 24 | S2D > male_shirt > Piece Properties: Flip radio buttons, Flip submenu | ?
+| Seamly2D.11.9 | 27 | S2D > male_shirt > Built-in seam line in Piece mode, at a fold line | ?
 
 | Layout.83.4 | 15 | SL > male_shirt > Nested legend squares | ?
 | Layout.82.3 | 16 | SL > male_shirt > Nested size colors: dark and pastel | ?
@@ -429,3 +430,20 @@ Needs the next MSI. jacket2 handoff (grainlines and labels shown).
 - [ ] Size 220 and Size 720 tabs: each piece's grainline and labels sit in the same place inside the piece as on the Base Size 500 tab.
 - [ ] Lining, Nested tab: Detail 4's grainline, piece label and pattern label each stack as one.
 - [ ] Seamly2D: move Back's pattern label toward the middle of the piece. Press Layout: no warning.
+
+## 27. male_shirt: built-in seam line in Piece mode
+
+Needs the next MSI. Do not save the pattern changes.
+
+- [ ] Piece mode. Pick one piece. Piece Properties > Seam allowance: check Seam allowance and Built in. Note the width W.
+  - [ ] Automatic tab: Width, Before and After stay editable. Angle is disabled. The Custom tab is disabled.
+  - [ ] Uncheck Seam allowance, then check it again: the Automatic tab is enabled again.
+- [ ] OK. The canvas draws the main path in the cut line style and a seam line W inside it in the seam line style. A hatch fills the space between.
+- [ ] Right-click > Hide Seam Line: the seam line goes; the cut line stays. Show it again.
+- [ ] View > Seam Allowance off: both lines stay; the hatch goes. Turn it on again.
+- [ ] Piece Properties > Path: mark two neighbouring point nodes as Fold Line. OK.
+  - [ ] Both ends of the seam line lie on the fold line. No seam line runs along the fold line or crosses it.
+- [ ] Piece tool: draw a new piece with Built in checked. The preview shows the seam line inside the path; changing the width moves it.
+- [ ] Press Layout. SeamlyLayout shows the cut line, the open seam line and the fold line.
+- [ ] SeamlyLayout Export > DXF > DXF-ASTM (R13). Layer 1 is the cut line. Layer 14 is the seam line, open; its ends lie on the layer 6 mirror line.
+- [ ] Seamly2D Piece mode > Export Pieces As, a DXF AAMA format. Layer 8 is the seam line, not a copy of the layer 1 outline.

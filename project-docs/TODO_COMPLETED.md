@@ -2,6 +2,34 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Completed subtasks from Task Seamly2D.11 — Built-in seam allowance: calculation, display and export
+
+Open in `TODO_SEAMLY2D.md`: Seamly2D.11.8 (Qt suites, next MSI), Seamly2D.11.9 (user check).
+
+- [x] Seamly2D.11.1 Display the seam line
+  - `PatternPieceTool::RefreshGeometry()`: the main path is the cut line (`m_cutLine`, cut line style). The item draws `VPiece::builtInSeamLinePath()` in the seam line style. The hatch fills the space between them while seam allowances are shown
+  - Piece dialog preview: `PatternPieceVisual` draws the seam line in the seam line color and line type. It follows Built in, Hide Seam Line and width changes
+  - Both lines show by default. Hide Seam Line hides the seam line; the cut line stays
+  - Decision taken: View > Seam Allowance off keeps both lines; only the hatch goes. The cut line is the main path, so it always shows
+- [x] Seamly2D.11.2 Seam line inside the main path
+  - The main path is the cut line. Seam line = main path offset inward (`VPiece::builtInSeamLinePoints()`, Layout.28.1). Corner types shape only the cut line
+  - Decision taken: Piece Properties keeps the Automatic tab (width, before, after) enabled for a built-in seam allowance: the widths place the seam line. The Custom tab and the Angle list are disabled. Before, the whole tab was disabled, so a built-in width could not change
+  - Fix: checking Seam allowance again re-enabled no tab. It emitted `toggled`; only `stateChanged` had a receiver
+- [x] Seamly2D.11.3 Fold line along the main path
+  - The fold line edge offsets by 0 (`setFoldLineWidths`); `openAtFoldLine` removes the seam line run on the fold line. The seam line is open: it starts and ends on the fold line, and does not cross it
+  - At an obtuse corner the seam line meets the fold line farther from the node than the width
+- [x] Seamly2D.11.4 Handoff and piece exports: `cutline` (main path), `seamline` (open with a fold line), `fold_line`
+  - `VLayoutPiece::setBuiltInSeamLinePoints(..., closed)`, `isBuiltInSeamLineClosed()`: open SVG path, open turn points (both ends count); `unifyTurnPoints` matches open lines as open
+  - Piece mode Export Pieces As uses the same items (`GetItem`). DXF-AAMA layer 8 now holds the built-in seam line; before, it held the main path again, on the layer 1 outline
+  - SeamlyLayout: no code change. DXF-ASTM keeps the open seam line as an open layer 14 sew line; its ends lie on the layer 6 mirror line
+  - `src/libs/vlayout` is deprecated and goes at the SeamlyLayout release (user). The handoff producer that replaces it must keep the open seam line rule (`SVG-DATA-ATTRIBUTES.md`)
+- [x] Seamly2D.11.5 Tests
+  - Qt: `TST_VPiece::BuiltInSeamLineStopsAtFoldLine` (3 rows), `BuiltInSeamLineStopsAtFoldLineAfterCurve`; `BuiltInSeamLineUsesWiderNodeWidth` checks a closed line; `TST_SvgComponentTags::BuiltInPieceWithFoldLineSendsOpenSeamline`
+  - Rust: `seamly_svg2ezdxf` `built_in_seam_line_stops_on_the_fold_line`
+  - Scratch harness (test objects and in-tree libs of `f788586157`, changed sources rebuilt): every Seamly2D suite passed; TST_VPiece 105, TST_SvgComponentTags 48. `cargo test -p seamly_svg2ezdxf`: 68 passed. `cl /Zs` clean on every changed `.cpp`
+- [x] Seamly2D.11.6 Schema: no change. The seam line is computed from the existing widths and `foldLine` nodes; no new pattern data
+- [x] Seamly2D.11.7 Docs: `SVG-DATA-ATTRIBUTES.md` (built-in seam allowance, `fold_line`), `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`
+
 ## Task Seamly2D.12 — Layout: SeamlyLayout opens behind Seamly2D (completed 2026-10-21)
 
 jacket2 (26 sizes, labels visible): Seamly2D did not respond for about 26 s, then SeamlyLayout opened behind Seamly2D. The user saw no window and pressed Layout again: two SeamlyLayout windows.
