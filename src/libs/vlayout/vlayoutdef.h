@@ -56,20 +56,6 @@
     #include <ciso646>
 #endif /* Q_CC_MSVC */
 
-enum class LayoutErrors : char
-{
-    NoError,
-    PrepareLayoutError,
-    ProcessStoped,
-    EmptyPaperError
-};
-
-enum class BestFrom : char
-{
-    Rotation = 0,
-    Combine = 1
-};
-
 /**
  * @brief QGraphicsItem::data() keys shared between the layout piece items and the SVG exporter.
  *
