@@ -1295,21 +1295,55 @@ void PatternPieceDialog::enableSeamAllowance(bool enable)
     if (!enable)
     {
         ui->autoCustom_TabWidget->setEnabled(enable);
+        refreshPreview();
     }
     else
     {
-        emit ui->builtIn_CheckBox->toggled(ui->builtIn_CheckBox->isChecked());
+        enableBuiltIn(ui->builtIn_CheckBox->isChecked());
     }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief enableBuiltIn sets the seam allowance widgets for a seam allowance built into the main path, or not.
+ * @param enable true when the seam allowance is built in.
+ *
+ * A built-in seam allowance keeps its widths: they place the seam line inside the main path. Custom seam
+ * allowance paths and corner types do not apply to it: the main path is the cut line.
+ */
 void PatternPieceDialog::enableBuiltIn(bool enable)
 {
-    ui->autoCustom_TabWidget->setEnabled(!enable);
+    ui->autoCustom_TabWidget->setEnabled(ui->seams_CheckBox->isChecked());
+    if (enable)
+    {
+        ui->autoCustom_TabWidget->setCurrentWidget(ui->tab);
+    }
+    ui->autoCustom_TabWidget->setTabEnabled(ui->autoCustom_TabWidget->indexOf(ui->tab_2), !enable);
 
     if (enable)
     {
         initializeNodesList();
+    }
+    nodeChanged(ui->nodes_ComboBox->currentIndex());
+    refreshPreview();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief refreshPreview redraws the piece preview from the dialog values while a new piece is drawn.
+ */
+void PatternPieceDialog::refreshPreview()
+{
+    if (applyAllowed || vis.isNull())
+    {
+        return;
+    }
+
+    auto visPath = qobject_cast<PatternPieceVisual *>(vis);
+    if (visPath != nullptr)
+    {
+        visPath->SetPiece(CreatePiece());
+        visPath->RefreshGeometry();
     }
 }
 
@@ -1356,8 +1390,8 @@ void PatternPieceDialog::nodeChanged(int index)
 
             ui->afterWidthFormula_PlainTextEdit->setPlainText(w2Formula);
 
-            //Angle type
-            ui->angle_ComboBox->setEnabled(true);
+            // Corner types shape only a cut line outside the main path.
+            ui->angle_ComboBox->setEnabled(!ui->builtIn_CheckBox->isChecked());
             const int index = ui->angle_ComboBox->findData(static_cast<unsigned char>(node.GetAngleType()));
             if (index != -1)
             {
@@ -2450,6 +2484,7 @@ void PatternPieceDialog::evaluateBeforeWidth()
         const QString formulaSABefore = getFormulaFromUser(ui->beforeWidthFormula_PlainTextEdit);
         updateNodeBeforeSeamAllowance(formulaSABefore);
         enableDefaultButton(ui->beforeDefault_PushButton, formulaSABefore);
+        refreshPreview();
     }
 }
 
@@ -2466,6 +2501,7 @@ void PatternPieceDialog::evaluateAfterWidth()
         const QString formulaSAAfter = getFormulaFromUser(ui->afterWidthFormula_PlainTextEdit);
         updateNodeAfterSeamAllowance(formulaSAAfter);
         enableDefaultButton(ui->afterDefault_PushButton, formulaSAAfter);
+        refreshPreview();
     }
 }
 
@@ -3196,6 +3232,7 @@ void PatternPieceDialog::initializeSeamAllowanceTab()
 
     connect(ui->seams_CheckBox,   &QCheckBox::stateChanged, this, &PatternPieceDialog::enableSeamAllowance);
     connect(ui->builtIn_CheckBox, &QCheckBox::stateChanged, this, &PatternPieceDialog::enableBuiltIn);
+    connect(ui->hideSeamLine_CheckBox, &QCheckBox::stateChanged, this, &PatternPieceDialog::refreshPreview);
 
     // Initialize the default seam allowance, convert the value if app unit is different than pattern unit
     m_saWidth = UnitConvertor(qApp->Settings()->GetDefaultSeamAllowance(),

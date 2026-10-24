@@ -253,6 +253,7 @@ private:
 
     void                        updateNodeBeforeSeamAllowance(const QString &formula);
     void                        updateNodeAfterSeamAllowance(const QString &formula);
+    void                        refreshPreview();
 
     void                        initializeMainPathTab();
     void                        initializeSeamAllowanceTab();
