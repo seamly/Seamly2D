@@ -2109,3 +2109,42 @@ void TST_VPiece::ConverterSplitsTilt() const
         QFAIL(qUtf8Printable(error.ErrorMessage()));
     }
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::ConverterRemovesFoldPosition_data() const
+{
+    QTest::addColumn<QString>("foldPosition");
+    QTest::addColumn<QString>("onFold");
+
+    QTest::newRow("up/down on fold") << QStringLiteral("Up/Down") << QStringLiteral("true");
+    QTest::newRow("left/right not on fold") << QStringLiteral("Left/Right") << QStringLiteral("false");
+    QTest::newRow("undefined") << QStringLiteral("Undefined") << QStringLiteral("false");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief ConverterRemovesFoldPosition checks that a 0.7.6 file loses its fold position and keeps its on fold flag.
+ */
+void TST_VPiece::ConverterRemovesFoldPosition() const
+{
+    QFETCH(QString, foldPosition);
+    QFETCH(QString, onFold);
+
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString path = dir.filePath(QStringLiteral("fold.sm2d"));
+    QVERIFY(writeOnePiecePattern(path, QString(),
+                                 QStringLiteral("foldPosition=\"%1\" onFold=\"%2\"").arg(foldPosition, onFold)));
+
+    try
+    {
+        const QDomElement data = convertedPieceData(path);
+        QVERIFY(!data.isNull());
+        QVERIFY(!data.hasAttribute(QStringLiteral("foldPosition")));
+        QCOMPARE(data.attribute(VAbstractPattern::AttrOnFold), onFold);
+    }
+    catch (VException &error)
+    {
+        QFAIL(qUtf8Printable(error.ErrorMessage()));
+    }
+}
