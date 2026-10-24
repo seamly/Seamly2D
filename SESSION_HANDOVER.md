@@ -2,6 +2,18 @@
 
 ## Current status
 
+### 2026-10-23 — DXF piece data from Piece Properties, merged into local `run-seamlyLayout`, not pushed
+
+- Rule (user decision): Piece Properties are the source of truth; a label only displays them. A hidden label or grainline drops no piece data.
+- Layout.93.1: `Material:` from the piece `data-material`, else `Fabric` (`converter::material_from_piece`).
+- Layout.93.3: `Quantity:` from `data-quantity` only; the "Cut N" label fallback is gone. `MissingPieceData` has no label flag.
+- Layout.93.2: no code. A hidden grainline is no grainline: no layer 7 line, and Missing Piece Data still names it.
+- User decisions: aw.fyi layer 5 caption is a viewer note; layer 15 holds shown labels only. Rotation, Tilt, Fold, Flip values: Layout.95–98.
+- Verified: `cargo test --workspace` 599 passed. Not run: ctest (QML comment-only change), GUI, MSI (ask first).
+- User check: Layout.93.7, `AGENT_CHECKLIST.md` §23.
+- Open: Layout.93.4–93.6 (handoff attributes and DXF text for Rotation, Tilt, Fold, Flip) wait on Layout.95–98.
+- Uncommitted user files left untouched: both `jacket2_40-146.sm2d` copies, the `TODO_SEAMLYLAYOUT.md` task reorder, `test-seamly-layout/layouts/jacket2/2026102*/`.
+
 ### 2026-10-22 — Fold lines on the left edge for paper too, merged into local `run-seamlyLayout`, not pushed
 
 - User decision: the left margin is 0 on fabric, not on paper. The setting now applies to every media and sits under "Add scale check grid"; it no longer needs Fabric Folded.
