@@ -55,18 +55,22 @@
 #include "../vpatterndb/PieceMirrorPath.h"
 #include "../vpatterndb/floatItemData/vgrainlinedata.h"
 #include "../vpatterndb/floatItemData/vpatternlabeldata.h"
+#include "../vpatterndb/floatItemData/vpiecelabeldata.h"
 #include "../vgeometry/vcubicbezierpath.h"
 #include "../vgeometry/vgobject.h"
 #include "../vgeometry/vpointf.h"
 #include "../vgeometry/vspline.h"
 #include "../vgeometry/vsplinepath.h"
+#include "../ifc/exception/vexception.h"
 #include "../ifc/xml/vabstractpattern.h"
+#include "../ifc/xml/vpatternconverter.h"
 #include "../vlayout/vlayoutpiece.h"
 #include "../vmisc/vabstractapplication.h"
 #include "../vmisc/vcommonsettings.h"
 #include "../vtools/tools/new_piece_defaults.h"
 
 #include <QtTest>
+#include <QFile>
 #include <QPolygonF>
 #include <QTemporaryDir>
 #include <QDomDocument>
@@ -1909,4 +1913,128 @@ void TST_VPiece::SplineInteriorNodeKeepsNodeCount() const
     const QPair<int, int> after = nodeCounts(curvePoints.at((middle + curvePoints.size()) / 2));
     QCOMPARE(after.first, before.first);
     QCOMPARE(after.second, before.second);
+}
+
+namespace
+{
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief writeOnePiecePattern writes a read-only pattern file of format 0.7.6 with one piece.
+ *
+ * A read-only file keeps the converter from writing a backup copy into the user's backup directory.
+ * @param path file to write.
+ * @param pieceAttributes extra attributes of the piece element, as XML text.
+ * @param dataAttributes attributes of the piece label data element, as XML text.
+ * @return true when the file was written.
+ */
+bool writeOnePiecePattern(const QString &path, const QString &pieceAttributes, const QString &dataAttributes)
+{
+    const QString content = QStringLiteral(R"(<?xml version="1.0" encoding="UTF-8"?>
+<pattern readOnly="true">
+    <version>0.7.6</version>
+    <unit>cm</unit>
+    <description/>
+    <notes/>
+    <measurements/>
+    <variables/>
+    <draftBlock name="Block 1">
+        <calculation>
+            <point id="1" mx="0.1" my="0.2" name="A" type="single" x="0" y="0"/>
+        </calculation>
+        <modeling/>
+        <pieces>
+            <piece id="2" name="Back" %1>
+                <data letter="A" %2/>
+                <nodes>
+                    <node idObject="1" type="NodePoint"/>
+                </nodes>
+            </piece>
+        </pieces>
+    </draftBlock>
+</pattern>
+)").arg(pieceAttributes, dataAttributes);
+
+    QFile file(path);
+    bool written = false;
+    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    {
+        written = file.write(content.toUtf8()) > 0;
+    }
+    return written;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief convertedPieceData converts a pattern file to the current format.
+ *
+ * The converter validates the result against the current schema and throws VException when it is not valid.
+ * @param path pattern file of an older format.
+ * @return the first piece label data element of the converted file; a null element when it cannot be read.
+ */
+QDomElement convertedPieceData(const QString &path)
+{
+    VPatternConverter converter(path);
+    QFile converted(converter.Convert());
+    QDomDocument doc;
+    if (converted.open(QIODevice::ReadOnly))
+    {
+        doc.setContent(&converted);
+    }
+    return doc.elementsByTagName(QStringLiteral("data")).at(0).toElement();
+}
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PieceRotationValuesRoundTrip checks the pattern file values of the piece rotation choices.
+ */
+void TST_VPiece::PieceRotationValuesRoundTrip() const
+{
+    const QVector<PieceRotation> rotations{PieceRotation::None, PieceRotation::OneWay, PieceRotation::TwoWay,
+                                           PieceRotation::FourWay, PieceRotation::Any};
+    for (const PieceRotation rotation : rotations)
+    {
+        QVERIFY(VPieceLabelData::stringToRotation(VPieceLabelData::rotationToString(rotation)) == rotation);
+    }
+
+    QCOMPARE(VPieceLabelData::rotationToString(PieceRotation::TwoWay), QStringLiteral("2-Way"));
+    QVERIFY(VPieceLabelData::stringToRotation(QString()) == PieceRotation::None);
+    QVERIFY(VPieceLabelData::stringToRotation(QStringLiteral("2-way")) == PieceRotation::None);
+    QVERIFY(VPieceLabelData().getRotationWay() == PieceRotation::None);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::ConverterSetsRotationWay_data() const
+{
+    QTest::addColumn<QString>("oldValue");
+    QTest::addColumn<QString>("newValue");
+
+    QTest::newRow("allowed value") << QStringLiteral("2-Way") << QStringLiteral("2-Way");
+    QTest::newRow("empty value") << QString() << QStringLiteral("None");
+    QTest::newRow("translated value") << QStringLiteral("Aucune") << QStringLiteral("None");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief ConverterSetsRotationWay checks that a 0.7.6 file converts to a rotation value the current schema allows.
+ */
+void TST_VPiece::ConverterSetsRotationWay() const
+{
+    QFETCH(QString, oldValue);
+    QFETCH(QString, newValue);
+
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString path = dir.filePath(QStringLiteral("rotation.sm2d"));
+    QVERIFY(writeOnePiecePattern(path, QString(), QStringLiteral("rotationWay=\"%1\"").arg(oldValue)));
+
+    try
+    {
+        const QDomElement data = convertedPieceData(path);
+        QCOMPARE(data.attribute(VAbstractPattern::AttrRotationWay), newValue);
+    }
+    catch (VException &error)
+    {
+        QFAIL(qUtf8Printable(error.ErrorMessage()));
+    }
 }

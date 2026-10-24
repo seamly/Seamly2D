@@ -115,6 +115,9 @@ private slots:
     void CubicBezierPathNodeVertices_data() const;
     void CubicBezierPathNodeVertices() const;
     void SplineInteriorNodeKeepsNodeCount() const;
+    void PieceRotationValuesRoundTrip() const;
+    void ConverterSetsRotationWay_data() const;
+    void ConverterSetsRotationWay() const;
 
 private:
     Q_DISABLE_COPY(TST_VPiece)
