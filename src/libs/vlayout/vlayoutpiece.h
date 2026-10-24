@@ -140,6 +140,8 @@ public:
     void                      setQuantity(int quantity);
     bool                      isOnFold() const;
     void                      setOnFold(bool onFold);
+    VPieceLabelData           getPieceProperties() const;
+    void                      setPieceProperties(const VPieceLabelData &properties);
     QVector<QPointF>          getFoldLine() const;
     void                      setFoldLine(const QVector<QPointF> &points);
 

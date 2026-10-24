@@ -283,6 +283,16 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
     if let Some(q) = &block.quantity {
         system_lines.push(format!("Quantity:{}", q));
     } // if quantity
+    if !aama {
+        // D6673 §4.3.1.2 layout rules, in its order; a piece that allows nothing writes no line.
+        // DXF-AAMA piece text has no Rotation, Flip, Tilt or Fold.
+        let rules = [("Rotation", &block.rotation), ("Flip", &block.flip), ("Tilt", &block.tilt), ("Fold", &block.fold)];
+        for (identifier, value) in rules {
+            if let Some(value) = value {
+                system_lines.push(format!("{identifier}:{value}"));
+            } // if value
+        } // for each rule
+    } // if DXF-ASTM
     system_lines.push(format!("Material:{}", block.material));
     for (i, line) in system_lines.iter().enumerate() {
         let position = Point::new(anchor.x, anchor.y - (i as f64 + 1.0) * SYSTEM_TEXT_HEIGHT_MM * 1.5);

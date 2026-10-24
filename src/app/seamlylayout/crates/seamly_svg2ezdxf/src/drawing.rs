@@ -98,6 +98,14 @@ pub struct Block {
     pub parent: Option<String>,
     // `Quantity:` system text in "R,L" form, from `data-quantity`.
     pub quantity: Option<String>,
+    // `Rotation:` system text: the rotation step in degrees, from `data-rotation`. None writes no line.
+    pub rotation: Option<String>,
+    // `Flip:` system text: X, Y or XY, from `data-flip`. None writes no line.
+    pub flip: Option<String>,
+    // `Tilt:` system text: the largest tilt in degrees with its sign, from `data-tilt`. None writes no line.
+    pub tilt: Option<String>,
+    // `Fold:` system text: Y or N, from `data-on-fold`. None for a piece of an untagged SVG.
+    pub fold: Option<String>,
     // `Size Name:` system text: the piece `data-size`, else the pattern sample size.
     pub size: Option<String>,
     // `Material:` system text: the piece `data-material`, else `DEFAULT_MATERIAL`.
@@ -135,6 +143,10 @@ impl Block {
             name,
             entities: Vec::new(),
             quantity: None,
+            rotation: None,
+            flip: None,
+            tilt: None,
+            fold: None,
             size: None,
             material: DEFAULT_MATERIAL.to_string(),
             boundary: None,

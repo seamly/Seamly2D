@@ -19,5 +19,10 @@ data-seam-allowances,data-type=notch,"space-separated seam allowance width in mm
 data-quantity,data-type=piece,cut count from the piece label data (Quantity),
 data-material,data-type=pattern | piece,Fabric,{Lining | Interfacing | Interlining} material the piece is cut from (Piece Properties > Material); one pattern group per material
 data-on-fold,data-type=piece,"true when the piece label data says cut on fold, or the piece has a fold line; omitted otherwise",
+data-rotation,data-type=piece,"rotation step in degrees from Piece Properties > Rotation: 360 (1-Way) | 180 (2-Way) | 90 (4-Way) | 1 (Any); omitted for None",
+data-tilt,data-type=piece,"largest tilt in degrees from Piece Properties > Tilt: positive counterclockwise, negative clockwise; omitted for None or 0",
+data-flip,data-type=piece,"mirror a layout may apply from Piece Properties > Flip: Horizontal | Vertical | Both; omitted for None",
+data-orientation,data-type=piece,"piece orientation from Piece Properties > Orientation: Left | Right; omitted when undefined",
+data-annotation,data-type=piece,"piece annotation text from Piece Properties > Annotation; omitted when empty",
 data-notch-type,data-type=notch,"space-separated Seamly2D notch type per notch (d order): slit | tNotch | uNotch | vInternal | vExternal | castle | diamond; omitted when unknown",
 data-notch-segments,data-type=notch,"space-separated line segment count per notch (d order); one segment = one d subpath; sum = M count in d; omitted when unknown, and then data-seam-allowances and data-notch-type are omitted too",

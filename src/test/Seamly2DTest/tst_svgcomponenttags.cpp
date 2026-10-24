@@ -37,6 +37,7 @@
 #include "../vlayout/vlayoutpiece.h"
 #include "../vlayout/vlayoutpiecepath.h"
 #include "../vpatterndb/floatItemData/vgrainlinedata.h"
+#include "../vpatterndb/floatItemData/vpiecelabeldata.h"
 #include "../vpatterndb/vcontainer.h"
 
 #include <QtTest>
@@ -1017,6 +1018,55 @@ void TST_SvgComponentTags::PieceCarriesQuantityAndFold() const
     QCOMPARE(plainPieces.size(), 1);
     QCOMPARE(plainPieces.at(0).attribute(QStringLiteral("data-quantity")), QStringLiteral("1"));
     QVERIFY(!plainPieces.at(0).hasAttribute(QStringLiteral("data-on-fold")));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PieceCarriesPieceProperties checks that the piece group carries rotation, tilt, flip, orientation and
+ * annotation from the Piece Properties, and no attribute for a value that allows nothing.
+ */
+void TST_SvgComponentTags::PieceCarriesPieceProperties() const
+{
+    VPieceLabelData properties;
+    properties.SetRotationWay(PieceRotation::TwoWay);
+    properties.SetTilt(PieceTilt::Clockwise);
+    properties.setTiltDegrees(15);
+    properties.SetOrientation(QStringLiteral("Left"));
+    properties.SetAnnotation(QStringLiteral("Cut in contrast"));
+    properties.SetVisible(false); // a hidden label still sends the Piece Properties
+
+    VLayoutPiece collar = makeTestPiece(QStringLiteral("Collar"));
+    collar.setPieceProperties(properties);
+    collar.setFlip(PieceFlip::Horizontal);
+    const QVector<QDomElement> pieces = groupsOfType(exportPieceSvg(collar), QStringLiteral("piece"));
+    QCOMPARE(pieces.size(), 1);
+    QCOMPARE(pieces.at(0).attribute(QStringLiteral("data-rotation")), QStringLiteral("180"));
+    QCOMPARE(pieces.at(0).attribute(QStringLiteral("data-tilt")), QStringLiteral("-15"));
+    QCOMPARE(pieces.at(0).attribute(QStringLiteral("data-flip")), QStringLiteral("Horizontal"));
+    QCOMPARE(pieces.at(0).attribute(QStringLiteral("data-orientation")), QStringLiteral("Left"));
+    QCOMPARE(pieces.at(0).attribute(QStringLiteral("data-annotation")), QStringLiteral("Cut in contrast"));
+
+    // Counterclockwise tilt is positive.
+    properties.SetTilt(PieceTilt::CounterClockwise);
+    collar.setPieceProperties(properties);
+    const QVector<QDomElement> ccw = groupsOfType(exportPieceSvg(collar), QStringLiteral("piece"));
+    QCOMPARE(ccw.at(0).attribute(QStringLiteral("data-tilt")), QStringLiteral("15"));
+
+    // Defaults, a tilt of 0 degrees and an undefined orientation allow nothing: no attributes.
+    VPieceLabelData nothing;
+    nothing.SetTilt(PieceTilt::CounterClockwise);
+    nothing.SetOrientation(QStringLiteral("Undefined"));
+    VLayoutPiece back = makeTestPiece(QStringLiteral("Back"));
+    back.setPieceProperties(nothing);
+    const QVector<QDomElement> plain = groupsOfType(exportPieceSvg(back), QStringLiteral("piece"));
+    QCOMPARE(plain.size(), 1);
+    const QStringList attributes{QStringLiteral("data-rotation"), QStringLiteral("data-tilt"),
+                                 QStringLiteral("data-flip"), QStringLiteral("data-orientation"),
+                                 QStringLiteral("data-annotation")};
+    for (const QString &attribute : attributes)
+    {
+        QVERIFY2(!plain.at(0).hasAttribute(attribute), qPrintable(attribute));
+    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------

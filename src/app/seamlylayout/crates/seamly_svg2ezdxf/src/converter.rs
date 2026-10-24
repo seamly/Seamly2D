@@ -613,6 +613,57 @@ fn quantity_from_piece(piece: &Element) -> Option<String> {
     Some(if total % 2 == 0 && !on_fold { format!("{},{}", total / 2, total / 2) } else { format!("{},0", total) })
 } // fn quantity_from_piece
 
+// @brief `Rotation:` value for a piece: the rotation step in degrees, from `data-rotation`.
+// @details D6673 §4.3.1.2: the piece may rotate in this step up to 360 degrees. Seamly2D sends
+//          360 (1-Way), 180 (2-Way), 90 (4-Way) or 1 (Any), and no attribute for None.
+// @return None when `data-rotation` is absent or not a step from 1 to 360.
+fn rotation_from_piece(piece: &Element) -> Option<String> {
+    piece
+        .attributes
+        .get("data-rotation")
+        .and_then(|v| v.trim().parse::<u32>().ok())
+        .filter(|step| (1..=360).contains(step))
+        .map(|step| step.to_string())
+} // fn rotation_from_piece
+
+// @brief `Flip:` value for a piece, from `data-flip`.
+// @details D6673 §4.3.1.2: X flips the piece about the horizontal axis, Y about the vertical axis.
+//          Seamly2D's Horizontal flip mirrors left to right, about the vertical axis, so it is Y;
+//          Vertical is X; Both allows either and is written XY.
+// @return None when `data-flip` is absent or not one of Horizontal, Vertical, Both.
+fn flip_from_piece(piece: &Element) -> Option<String> {
+    piece
+        .attributes
+        .get("data-flip")
+        .and_then(|v| match v.trim() {
+            "Horizontal" => Some("Y"),
+            "Vertical"   => Some("X"),
+            "Both"       => Some("XY"),
+            _            => None,
+        }) // and_then
+        .map(str::to_string)
+} // fn flip_from_piece
+
+// @brief `Tilt:` value for a piece, from `data-tilt`: "+15" counterclockwise, "-15" clockwise.
+// @details D6673 §4.3.1.2 `Tilt:<+/-0..90>`: the largest tilt in degrees. Seamly2D sends a
+//          negative angle for a clockwise tilt, and no attribute for a piece that may not tilt.
+// @return None when `data-tilt` is absent, 0, or past 90 degrees either way.
+fn tilt_from_piece(piece: &Element) -> Option<String> {
+    piece
+        .attributes
+        .get("data-tilt")
+        .and_then(|v| v.trim().parse::<i32>().ok())
+        .filter(|degrees| *degrees != 0 && degrees.abs() <= 90)
+        .map(|degrees| format!("{degrees:+}"))
+} // fn tilt_from_piece
+
+// @brief `Fold:` value for a piece: Y when `data-on-fold="true"`, else N.
+// @details D6673 §4.3.1.2: Fold says the piece may be placed on the fold of tubular fabric.
+fn fold_from_piece(piece: &Element) -> String {
+    let on_fold = piece.attributes.get("data-on-fold").is_some_and(|v| v.trim() == "true");
+    (if on_fold { "Y" } else { "N" }).to_string()
+} // fn fold_from_piece
+
 // @brief `Material:` value for a piece: its `data-material`, else `DEFAULT_MATERIAL`.
 fn material_from_piece(piece: &Element) -> String {
     piece
@@ -673,6 +724,10 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
     // Seamly2D prints "<empty>" for unset label fields; it carries no information.
     block.annotations.retain(|a| !a.text.is_empty() && a.text != "<empty>");
     block.quantity = quantity_from_piece(piece);
+    block.rotation = rotation_from_piece(piece);
+    block.flip = flip_from_piece(piece);
+    block.tilt = tilt_from_piece(piece);
+    block.fold = Some(fold_from_piece(piece));
     block.material = material_from_piece(piece);
 
     // Boundary: the longest closed cut line, else the longest closed seam line.

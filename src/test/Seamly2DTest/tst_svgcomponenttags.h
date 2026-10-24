@@ -78,6 +78,7 @@ private slots:
     void NotchGroupCarriesSeamAllowances() const;
     void NotchGroupCarriesNotchTypes() const;
     void PieceCarriesQuantityAndFold() const;
+    void PieceCarriesPieceProperties() const;
     void FoldLineSendsFoldLineGroup() const;
     void PiecesOfEachMaterialShareAPatternGroup() const;
     void OneMaterialKeepsOnePatternGroup() const;

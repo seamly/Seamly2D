@@ -33,6 +33,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | Style Name | Input base name: the imported SVG's base name, or the `--document-name` value. Else the pattern `data-name`, else the output file stem | User decision. The output stem carries a timestamp |
 | Size | `Size Name:` piece text: piece `data-size` (multisize). Individual: pattern `data-sample-size` = `bust_circ`, else `waist_circ`. Omitted when neither exists | User decision. A multisize layout tab holds one size. Identifier is `Size Name:` (D6673-01 name), not AAMA-292 `Size:` |
 | Material | Piece `data-material`, else `Fabric` | Piece Properties > Material is the source, not the label text |
+| Rotation, Flip, Tilt, Fold | After `Quantity:`, in D6673 order. `Rotation:` = piece `data-rotation` (360, 180, 90 or 1). `Flip:` = `Y` for `data-flip="Horizontal"`, `X` for `Vertical`, `XY` for `Both`. `Tilt:` = `data-tilt` with its sign: `+15` counterclockwise, `-15` clockwise. `Fold:Y` for `data-on-fold="true"`, else `Fold:N`. A rule that allows nothing (Rotation, Flip or Tilt None) writes no line. DXF-AAMA writes none | D6673 §4.3.1.2. Piece Properties are the source. D6673 X flips about the horizontal axis, Y about the vertical axis. Both is written `XY`: D6673 defines only `X` or `Y` |
 | Category | Not written | User decision. `Category:` is ANSI/AAMA-292 piece text, not valid in any DXF-ASTM edition. A piece classification, not material. Seamly2D stores no category; a pattern library could supply one. D6673-10 §4.1 names "category", but §4.3.1.2 defines no `Category:` identifier. See `seamlylayout_DXF_ASTM_D6673_INCONSISTENCIES.md` and `seamlylayout_DXF_ASTM_D6673_from_AAMA.md` |
 | Sample Size, Grade Rule Table | Graded export: `data-base-size`, and the output file stem (separators → `_`). Otherwise blank | Required identifiers. An individual pattern or a size tab exports one ungraded size |
 | Grading | Only the **Base Size** tab of a multisize layout: the base size block with `# n` identifiers, plus the `.rul` table file. No graded nest | User decision. Every size is drafted in the handoff SVG, so no other tab is built from the rules |
@@ -138,7 +139,6 @@ Seamly2D sends no source data for these. Tracked in `TODO_SEAMLYLAYOUT.md`.
 
 ## Known producer gaps
 
-- No `data-material` attribute; material is always `Fabric` (Seamly2D.7 / Layout.15).
 - `data-notch-type` is read by no exporter: DXF-ASTM writes every notch as a slit.
 
 ## aw.fyi results

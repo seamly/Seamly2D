@@ -2225,3 +2225,42 @@ void TST_VPiece::ConverterRemovesForbidFlipping() const
         QFAIL(qUtf8Printable(error.ErrorMessage()));
     }
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief LayoutPieceKeepsPieceProperties checks that the layout piece keeps the Piece Properties when the piece label
+ * is hidden.
+ */
+void TST_VPiece::LayoutPieceKeepsPieceProperties() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    VPiece piece = squareSlitPiece(data.data(), false, QString());
+    piece.GetPatternPieceData().SetVisible(false);
+    piece.GetPatternPieceData().SetRotationWay(PieceRotation::Any);
+    piece.GetPatternPieceData().SetTilt(PieceTilt::CounterClockwise);
+    piece.GetPatternPieceData().setTiltDegrees(5);
+    piece.GetPatternPieceData().SetAnnotation(QStringLiteral("Nap up"));
+
+    const VLayoutPiece layoutPiece = VLayoutPiece::Create(piece, data.data());
+    const VPieceLabelData properties = layoutPiece.getPieceProperties();
+    QVERIFY(properties.getRotationWay() == PieceRotation::Any);
+    QVERIFY(properties.GetTilt() == PieceTilt::CounterClockwise);
+    QCOMPARE(properties.getTiltDegrees(), 5);
+    QCOMPARE(properties.GetAnnotation(), QStringLiteral("Nap up"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief RotationStepDegrees checks the DXF rotation step of each rotation choice.
+ */
+void TST_VPiece::RotationStepDegrees() const
+{
+    QCOMPARE(VPieceLabelData::rotationStepDegrees(PieceRotation::None), 0);
+    QCOMPARE(VPieceLabelData::rotationStepDegrees(PieceRotation::OneWay), 360);
+    QCOMPARE(VPieceLabelData::rotationStepDegrees(PieceRotation::TwoWay), 180);
+    QCOMPARE(VPieceLabelData::rotationStepDegrees(PieceRotation::FourWay), 90);
+    QCOMPARE(VPieceLabelData::rotationStepDegrees(PieceRotation::Any), 1);
+}

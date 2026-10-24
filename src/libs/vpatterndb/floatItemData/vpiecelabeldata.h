@@ -89,6 +89,7 @@ public:
     static QString       rotationToString(PieceRotation rotation);
     static PieceRotation stringToRotation(const QString &value);
     static QString       rotationDisplayName(PieceRotation rotation);
+    static int           rotationStepDegrees(PieceRotation rotation);
 
     static QString   tiltToString(PieceTilt tilt);
     static PieceTilt stringToTilt(const QString &value);
