@@ -26,6 +26,7 @@ MALE_SHIRT
 | Layout.80.7 | 20 | S2D > male_shirt > mark a fold line | ?
 | Layout.80.3.1 | 20 | S2D: male_shirt > Piece Mirror tool | ?
 | Layout.95.6 | 24 | S2D > male_shirt > Piece Properties: Rotation radio buttons | ?
+| Layout.96.6 | 24 | S2D > male_shirt > Piece Properties: Tilt radio buttons and degrees | ?
 
 | Layout.83.4 | 15 | SL > male_shirt > Nested legend squares | ?
 | Layout.82.3 | 16 | SL > male_shirt > Nested size colors: dark and pastel | ?
@@ -384,3 +385,7 @@ Needs the next MSI. Pattern: `male_shirt.sm2d`, an older format. Save it under a
 - [ ] Select 2-Way. OK. Save. Close and reopen the pattern: Rotation is still 2-Way.
 - [ ] Open the saved `.sm2d` in a text editor: `<version>0.7.7</version>`; the piece `data` element has `rotationWay="2-Way"`.
 - [ ] Add a new piece: Rotation is None.
+- [ ] Tilt shows three radio buttons: None, CCW, CW. None is selected. Degrees reads 0° and is disabled.
+- [ ] Select CCW: Degrees is enabled. Type 100: the field stops at 90. Set 15. OK. Save, reopen: CCW, 15°.
+- [ ] The saved `.sm2d` piece `data` element has `tilt="CCW"` and `tiltDegrees="15"`.
+- [ ] Select None. OK. Save: `tilt="None"`, `tiltDegrees="0"`.
