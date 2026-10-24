@@ -2264,3 +2264,31 @@ void TST_VPiece::RotationStepDegrees() const
     QCOMPARE(VPieceLabelData::rotationStepDegrees(PieceRotation::FourWay), 90);
     QCOMPARE(VPieceLabelData::rotationStepDegrees(PieceRotation::Any), 1);
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief SnapNodeVerticesRestoresErasedNode checks that a node vertex RemoveDublicates() erased comes back, so the
+ * node count does not depend on where a curve point falls.
+ */
+void TST_VPiece::SnapNodeVerticesRestoresErasedNode() const
+{
+    const QVector<QPointF> nodes{QPointF(0, 0), QPointF(100, 0), QPointF(100, 100)};
+
+    // A curve point 0.3 px before the node at (100, 0) made RemoveDublicates() erase the node vertex.
+    const QVector<QPointF> erased{QPointF(0, 0), QPointF(50, 0.5), QPointF(99.7, 0.1), QPointF(100, 100)};
+    QCOMPARE(VAbstractPiece::nodeVertexIndices(erased, nodes, false).size(), 2);
+    const QVector<QPointF> snapped = VAbstractPiece::snapNodeVertices(erased, nodes, false);
+    QCOMPARE(snapped.at(2), QPointF(100, 0));
+    QCOMPARE(VAbstractPiece::nodeVertexIndices(snapped, nodes, false), (QVector<int>{0, 2, 3}));
+    QCOMPARE(snapped.at(1), QPointF(50, 0.5));
+
+    // A vertex farther from the node than a removed duplicate can be stays where it is.
+    const QVector<QPointF> distant{QPointF(0, 0), QPointF(98, 0), QPointF(100, 100)};
+    QCOMPARE(VAbstractPiece::snapNodeVertices(distant, nodes, false), distant);
+
+    // A closed loop that repeats its first vertex moves both copies.
+    const QVector<QPointF> loop{QPointF(0.2, 0.2), QPointF(100, 0), QPointF(100, 100), QPointF(0.2, 0.2)};
+    const QVector<QPointF> closedSnap = VAbstractPiece::snapNodeVertices(loop, nodes, true);
+    QCOMPARE(closedSnap.first(), QPointF(0, 0));
+    QCOMPARE(closedSnap.last(), QPointF(0, 0));
+}
