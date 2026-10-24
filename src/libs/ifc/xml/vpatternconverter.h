@@ -75,7 +75,7 @@ public:
     static const QString PatternMaxVerStr;
     static const QString CurrentSchema;
     static constexpr const int PatternMinVer = CONVERTER_VERSION_CHECK(0, 1, 0);
-    static constexpr const int PatternMaxVer = CONVERTER_VERSION_CHECK(0, 7, 6);
+    static constexpr const int PatternMaxVer = CONVERTER_VERSION_CHECK(0, 7, 7);
 
 protected:
     virtual int     minVer() const override;
@@ -144,6 +144,7 @@ private:
     void          toVersion0_7_4();
     void          toVersion0_7_5();
     void          toVersion0_7_6();
+    void          toVersion0_7_7();
 
     void          TagUnitToV0_2_0();
     void          TagIncrementToV0_2_0();
@@ -194,6 +195,7 @@ private:
     void          PortPieceLabelstoV0_6_0();
     void          RemoveUnusedTagsV0_6_0();
     void          RemoveUniqueTagV0_6_0(const QString &tag);
+    void          rotationWayToV0_7_7();
     void          renameAttribute(QDomElement &element, const QString &oldName,
                                   const QString &newName, const QString &value) const;
 };
