@@ -684,7 +684,7 @@
                         <xs:attribute name="color" type="xs:string"/>
                         <xs:attribute name="fill" type="xs:string"/>
                         <xs:attribute name="inLayout" type="xs:boolean"/>
-                        <xs:attribute name="forbidFlipping" type="xs:boolean"/>
+                        <xs:attribute name="flip" type="pieceFlip"/>
                         <xs:attribute name="width" type="xs:string"/>
                         <xs:attribute name="seamAllowance" type="xs:boolean"/>
                         <xs:attribute name="seamAllowanceBuiltIn" type="xs:boolean"/>
@@ -1080,6 +1080,14 @@
   <xs:simpleType name="tiltDegrees">
     <xs:restriction base="xs:unsignedInt">
       <xs:maxInclusive value="90"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="pieceFlip">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="None"/><!--no flip line in a DXF-ASTM export-->
+      <xs:enumeration value="Horizontal"/><!--mirror left to right, about the vertical axis-->
+      <xs:enumeration value="Vertical"/><!--mirror top to bottom, about the horizontal axis-->
+      <xs:enumeration value="Both"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="directionType">
