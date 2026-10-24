@@ -565,6 +565,35 @@ mod tests {
         assert_eq!(front_quantity(&[(front, r#"data-name="Front" data-quantity="x">"#)]), None);
     }
 
+    // @brief Rotation, flip, tilt and fold of the Front block for a Front tag with `attributes`.
+    fn front_layout_rules(attributes: &str) -> (Option<String>, Option<String>, Option<String>, Option<String>) {
+        let svg = TAGGED.replace(r#"data-name="Front">"#, &format!(r#"data-name="Front" {attributes}>"#));
+        let doc = Document::parse(&svg).expect("fixture parses");
+        let block = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts").blocks.remove(0);
+        (block.rotation, block.flip, block.tilt, block.fold)
+    }
+
+    // @brief Rotation, Flip, Tilt and Fold come from the piece attributes, never from labels.
+    #[test]
+    fn layout_rules_come_from_piece_properties() {
+        let some = |s: &str| Some(s.to_string());
+        assert_eq!(
+            front_layout_rules(r#"data-rotation="180" data-flip="Horizontal" data-tilt="-15" data-on-fold="true""#),
+            (some("180"), some("Y"), some("-15"), some("Y"))
+        );
+        assert_eq!(front_layout_rules(r#"data-flip="Vertical" data-tilt="5""#), (None, some("X"), some("+5"), some("N")));
+        assert_eq!(front_layout_rules(r#"data-flip="Both" data-rotation="1""#).0, some("1"));
+        assert_eq!(front_layout_rules(r#"data-flip="Both""#).1, some("XY"));
+        // No attribute: no Rotation, Flip or Tilt line; Fold is N.
+        assert_eq!(front_layout_rules(""), (None, None, None, some("N")));
+        // Values outside the D6673 ranges write no line.
+        assert_eq!(
+            front_layout_rules(r#"data-rotation="0" data-flip="Sideways" data-tilt="95""#),
+            (None, None, None, some("N"))
+        );
+        assert_eq!(front_layout_rules(r#"data-rotation="720" data-tilt="0""#), (None, None, None, some("N")));
+    }
+
     #[test]
     fn piece_on_fold_counts_every_cut_as_right() {
         let front = r#"data-name="Front">"#;

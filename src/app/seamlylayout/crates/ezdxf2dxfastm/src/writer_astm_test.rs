@@ -155,6 +155,36 @@ mod tests {
         assert_eq!(texts, vec!["Piece Name:Front", "Size Name:102", "Quantity:1,1", "Material:Fabric"]);
     }
 
+    // @brief The D6673 layout rules follow Quantity in D6673 order; a rule without a value writes no line.
+    //        DXF-AAMA piece text has none of them.
+    #[test]
+    fn layout_rule_text_follows_quantity_in_d6673_order() {
+        let mut drawing = sample_drawing();
+        drawing.blocks[0].rotation = Some("180".to_string());
+        drawing.blocks[0].flip = Some("Y".to_string());
+        drawing.blocks[0].tilt = Some("-15".to_string());
+        drawing.blocks[0].fold = Some("N".to_string());
+        let system_texts = |dxf: &ParsedDxf| -> Vec<String> {
+            dxf.blocks[0].1.iter().filter(|e| e.kind == "TEXT" && e.layer() == "1").map(|e| e.get(1).unwrap().to_string()).collect()
+        };
+
+        let astm = parse_dxf(&export_to_string(&drawing, "rules", &DxfAstmExportOptions::default()));
+        assert_eq!(
+            system_texts(&astm),
+            vec!["Piece Name:Front", "Quantity:1,1", "Rotation:180", "Flip:Y", "Tilt:-15", "Fold:N", "Material:Fabric"]
+        );
+
+        drawing.blocks[0].flip = None;
+        drawing.blocks[0].tilt = None;
+        let fewer = parse_dxf(&export_to_string(&drawing, "rules_fewer", &DxfAstmExportOptions::default()));
+        assert_eq!(system_texts(&fewer), vec!["Piece Name:Front", "Quantity:1,1", "Rotation:180", "Fold:N", "Material:Fabric"]);
+
+        drawing.version = DxfVersion::R11;
+        let aama = parse_dxf(&export_to_string(&drawing, "rules_aama", &aama_options()));
+        let texts = system_texts(&aama);
+        assert!(texts.iter().all(|t| !["Rotation:", "Flip:", "Tilt:", "Fold:"].iter().any(|id| t.starts_with(id))), "{texts:?}");
+    }
+
     #[test]
     fn piece_block_uses_astm_layers_and_entities() {
         let dxf = parse_dxf(&export_to_string(&sample_drawing(), "block", &DxfAstmExportOptions::default()));
@@ -450,7 +480,7 @@ mod tests {
         let (name, front) = &parsed.blocks[0];
         assert_eq!(count(front, "LINE", "5"), 1, "{name}: layer 5 line");
         let system: Vec<String> = texts(front, "1").into_iter().filter(|t| !is_rule_text(t)).collect();
-        assert_eq!(system, vec!["Piece Name:Front", "Size Name:36", "Quantity:1,1", "Material:Fabric"]);
+        assert_eq!(system, vec!["Piece Name:Front", "Size Name:36", "Quantity:1,1", "Fold:N", "Material:Fabric"]);
         assert!(count(front, "POINT", "2") > 0 && count(front, "POINT", "4") == 1, "{name}: turn points and notch");
         assert!(texts(front, "1").iter().any(is_rule_text), "{name}: rule text on layer 1");
         assert_eq!(texts(front, "4").len(), 1, "{name}: rule text on the notch");
