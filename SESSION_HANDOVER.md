@@ -2,6 +2,21 @@
 
 ## Current status
 
+### 2026-10-23 (evening) — Layout.95–98, 92, 93.4–93.6, 94, 27.13.4; merged into local `run-seamlyLayout`, not pushed
+
+- Pattern format 0.7.7 (`v0.7.7.xsd`, `toVersion0_7_7`): `rotationWay` and `tilt` enumerations, new `tiltDegrees`, piece `flip`; no `foldPosition`, no `forbidFlipping`. Decision: a new version, since builds already wrote 0.7.6 files.
+- Piece Properties: radio buttons for Rotation, Tilt (+ Degrees 0–90), Flip; "Fold: On fold" check box only. Piece menu "Flip" submenu; the F key and the Preferences "Forbid flipping" default are gone.
+- Converted pieces get flip None (decision: old `forbidFlipping="false"` was a default, not a choice).
+- Layout.92: Create Layout lays out every material; material tabs over both canvases show the same material; a switch keeps each material's layouts (`MaterialLayout`).
+- Layout.93.4–93.6: handoff `data-rotation`, `data-tilt`, `data-flip`, `data-orientation`, `data-annotation`; DXF-ASTM `Rotation:`, `Flip:`, `Tilt:`, `Fold:` after `Quantity:`. Decisions: Flip Both = `XY`; Tilt signed (`-n` clockwise); every tagged piece writes `Fold:Y/N`; DXF-AAMA writes none.
+- Layout.94: `annotation_alignment.rs` moves each size's grainline and labels to the base size's offset from the outline centre; `center_piece_sets` centres on the outline. jacket2: Back's pattern label leaves sizes 220–280 (import warning).
+- Layout.90/91: research only, `dxf-docs/seamlylayout_DXF_PAPER_AND_MODEL_SPACE.md`. User decision needed (P1/P2, M1/M2/M3).
+- Layout.27.13.4: MSI 26.10.2023 capture is now `jacket2_40-146_handoff.svg`; 7 of 8 graded, Detail 4 not. Seamly2D fix `snapNodeVertices` for node vertices that `RemoveDublicates` erased (node counts differ by size). Two Detail 4 geometry differences stay open (27.13.6).
+- Verified: `cargo test --workspace` 611 passed; `ctest --preset debug` 6 of 6; scratch QtTest harness 21 passed (new `TST_VPiece` cases); `cl /Zs` on every changed `.cpp`; 8 samples and 13 CollectionTest patterns convert to 0.7.7 and validate. Not run: Qt suites, MSI (ask first), GUI.
+- User checks: `AGENT_CHECKLIST.md` §23 (extended), §24 (Rotation, Tilt, Fold, Flip), §25 (material tabs), §26 (grainline and label places); Layout.27.13.6.2 needs a new jacket2 capture.
+- Scratch tools in the session scratchpad: `harness/` (QtTest harness for new `TST_VPiece` tests), `uirender/` (renders a `.ui` to PNG), `make_zs.py` (`cl /Zs`), `cargo.cmd`, `ctest_debug.cmd`.
+- Uncommitted user files left untouched: both `jacket2_40-146.sm2d` copies, `test-seamly-layout/layouts/jacket2/2026102*/`.
+
 ### 2026-10-23 — DXF piece data from Piece Properties, merged into local `run-seamlyLayout`, not pushed
 
 - Rule (user decision): Piece Properties are the source of truth; a label only displays them. A hidden label or grainline drops no piece data.
