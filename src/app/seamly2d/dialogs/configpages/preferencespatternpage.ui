@@ -156,28 +156,6 @@
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QCheckBox" name="forbidFlipping_CheckBox">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="font">
-               <font>
-                <pointsize>9</pointsize>
-                <bold>true</bold>
-               </font>
-              </property>
-              <property name="toolTip">
-               <string>By default forbid flipping for all new created workpieces</string>
-              </property>
-              <property name="text">
-               <string>Forbid flipping</string>
-              </property>
-             </widget>
-            </item>
            </layout>
           </item>
          </layout>

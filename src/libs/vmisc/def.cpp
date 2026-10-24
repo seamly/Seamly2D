@@ -827,6 +827,25 @@ NotchSubType stringToNotchSubType(const QString &value)
     return NotchSubType::Straightforward;
 }
 
+// Piece flip values as the pattern file stores them, in PieceFlip order.
+const QStringList pieceFlipNames = QStringList() << QStringLiteral("None") << QStringLiteral("Horizontal")
+                                                 << QStringLiteral("Vertical") << QStringLiteral("Both");
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Piece flip value as the pattern file stores it.
+QString pieceFlipToString(PieceFlip flip)
+{
+    return pieceFlipNames.at(static_cast<int>(flip));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Piece flip of a pattern file value; an empty or unknown value is PieceFlip::None.
+PieceFlip stringToPieceFlip(const QString &value)
+{
+    const int index = pieceFlipNames.indexOf(value);
+    return index < 0 ? PieceFlip::None : static_cast<PieceFlip>(index);
+}
+
 
 //---------------------------------------------------------------------------------------------------------------------
 Unit StrToUnits(const QString &unit)

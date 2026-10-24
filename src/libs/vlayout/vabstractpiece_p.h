@@ -57,6 +57,7 @@
 #include <QCoreApplication>
 
 #include "../vmisc/diagnostic.h"
+#include "../vmisc/def.h"
 
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_GCC("-Weffc++")
@@ -71,7 +72,7 @@ public:
         , m_color("white")
         ,  m_fill("nobrush")
         , m_pieceLock(false)
-        , m_forbidFlipping(false)
+        , m_flip(PieceFlip::None)
         , m_seamAllowance(false)
         , m_seamAllowanceBuiltIn(false)
         , m_hideMainPath(false)
@@ -87,7 +88,7 @@ public:
         , m_color(piece.m_color)
         , m_fill(piece.m_fill)
         , m_pieceLock(piece.m_pieceLock)
-        , m_forbidFlipping(piece.m_forbidFlipping)
+        , m_flip(piece.m_flip)
         , m_seamAllowance(piece.m_seamAllowance)
         , m_seamAllowanceBuiltIn(piece.m_seamAllowanceBuiltIn)
         , m_hideMainPath(piece.m_hideMainPath)
@@ -103,8 +104,8 @@ public:
     QString m_color;
     QString m_fill;
     bool    m_pieceLock;
-    /** @brief forbidFlipping forbid piece be mirrored in a layout. */
-    bool    m_forbidFlipping;
+    /** @brief m_flip mirror a layout may apply to the piece. */
+    PieceFlip m_flip;
     bool    m_seamAllowance;
     bool    m_seamAllowanceBuiltIn;
     bool    m_hideMainPath;

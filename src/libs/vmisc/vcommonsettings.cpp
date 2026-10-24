@@ -182,7 +182,6 @@ const QString settingGraphicsUseToolColor                = QStringLiteral("graph
 
 const QString settingPatternUndo                         = QStringLiteral("pattern/undo");
 const QString settingSelectionSound                      = QStringLiteral("pattern/selectionSound");
-const QString settingPatternForbidFlipping               = QStringLiteral("pattern/forbidFlipping");
 const QString settingPatternHideSeamLine                 = QStringLiteral("pattern/hideMainPath");
 
 // Legacy notch size keys hold the Default Units of their time. The cm keys replace them.
@@ -2103,18 +2102,6 @@ void VCommonSettings::SetDateOfLastRemind(const QDate &date)
     QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     settings.setValue(settingDateOfLastRemind, date);
     settings.sync();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-bool VCommonSettings::getForbidPieceFlipping() const
-{
-    return value(settingPatternForbidFlipping, false).toBool();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void VCommonSettings::setForbidPieceFlipping(bool value)
-{
-    setValue(settingPatternForbidFlipping, value);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

@@ -147,15 +147,23 @@ void VAbstractPiece::setLock(bool value)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-bool VAbstractPiece::IsForbidFlipping() const
+/// @brief Mirror a layout may apply to the piece.
+PieceFlip VAbstractPiece::getFlip() const
 {
-    return d->m_forbidFlipping;
+    return d->m_flip;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void VAbstractPiece::SetForbidFlipping(bool value)
+void VAbstractPiece::setFlip(PieceFlip value)
 {
-    d->m_forbidFlipping = value;
+    d->m_flip = value;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief True when a layout may not mirror the piece (flip None).
+bool VAbstractPiece::IsForbidFlipping() const
+{
+    return d->m_flip == PieceFlip::None;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

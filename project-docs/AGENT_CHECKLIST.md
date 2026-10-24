@@ -28,6 +28,7 @@ MALE_SHIRT
 | Layout.95.6 | 24 | S2D > male_shirt > Piece Properties: Rotation radio buttons | ?
 | Layout.96.6 | 24 | S2D > male_shirt > Piece Properties: Tilt radio buttons and degrees | ?
 | Layout.97.5 | 24 | S2D > male_shirt, jacket2 > Piece Properties: On fold check box, no fold position | ?
+| Layout.98.6 | 24 | S2D > male_shirt > Piece Properties: Flip radio buttons, Flip submenu | ?
 
 | Layout.83.4 | 15 | SL > male_shirt > Nested legend squares | ?
 | Layout.82.3 | 16 | SL > male_shirt > Nested size colors: dark and pastel | ?
@@ -393,3 +394,7 @@ Needs the next MSI. Pattern: `male_shirt.sm2d`, an older format. Save it under a
 - [ ] No "Fold position" row. The row "Fold:" has an "On fold" check box, unchecked on a new piece.
 - [ ] Check On fold. OK. Save: the piece `data` element has `onFold="true"` and no `foldPosition`. Uncheck, save: `onFold="false"`.
 - [ ] Open an older pattern with a fold position (jacket2 Back: `foldPosition="Up/Down"`). Save it under a new name: no `foldPosition`; Back keeps `onFold="true"`.
+- [ ] Attributes: "Flip:" shows None, Horizontal, Vertical, Both. None is selected. No "Forbid" check box.
+- [ ] Select Vertical. OK. Save: the `piece` element has `flip="Vertical"` and no `forbidFlipping`. Reopen: Vertical.
+- [ ] Right-click the piece: "Flip" submenu, Vertical checked. Choose Both. Undo: back to Vertical.
+- [ ] Preferences > Pattern: no "Forbid flipping" check box. Help > Shortcuts: no "Forbid Flipping F" row.

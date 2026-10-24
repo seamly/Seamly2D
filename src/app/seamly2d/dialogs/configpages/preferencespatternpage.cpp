@@ -134,7 +134,6 @@ void PreferencesPatternPage::Apply()
     settings->setDefaultFoldLineLinetype(ui->defaultFoldLineLinetype_ComboBox->currentData().toString());
     settings->setDefaultFoldLineLineweight(ui->defaultFoldLineLineweight_ComboBox->currentData().toReal());
 
-    settings->setForbidPieceFlipping(ui->forbidFlipping_CheckBox->isChecked());
     settings->setHideSeamLine(ui->hideSeamLine_CheckBox->isChecked());
 
     settings->setDefaultNotchType(ui->defaultNotchType_ComboBox->currentData().toString());
@@ -167,7 +166,6 @@ void PreferencesPatternPage::Apply()
 //---------------------------------------------------------------------------------------------------------------------
 void PreferencesPatternPage::initDefaultSeamAllowance()
 {
-    ui->forbidFlipping_CheckBox->setChecked(qApp->Seamly2DSettings()->getForbidPieceFlipping());
     ui->hideSeamLine_CheckBox->setChecked(qApp->Seamly2DSettings()->isHideSeamLine());
     ui->showSeamAllowances_CheckBox->setChecked(qApp->Seamly2DSettings()->getDefaultSeamAllowanceVisibilty());
     ui->defaultSeamAllowance_DoubleSpinBox->setValue(qApp->Seamly2DSettings()->GetDefaultSeamAllowance());

@@ -253,8 +253,9 @@ public:
     bool    getLock() const;
     void    setLock(bool value);
 
-    bool IsForbidFlipping() const;
-    void SetForbidFlipping(bool value);
+    PieceFlip getFlip() const;
+    void      setFlip(PieceFlip value);
+    bool      IsForbidFlipping() const;
 
     bool hasSeamAllowance() const;
     void SetSeamAllowance(bool value);

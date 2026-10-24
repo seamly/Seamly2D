@@ -673,7 +673,7 @@ VLayoutPiece VLayoutPiece::Create(const VPiece &piece, const VContainer *pattern
     }
 
     layoutPiece.SetSAWidth(qApp->toPixel(piece.GetSAWidth()));
-    layoutPiece.SetForbidFlipping(piece.IsForbidFlipping());
+    layoutPiece.setFlip(piece.getFlip());
 
     return layoutPiece;
 }

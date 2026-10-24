@@ -407,8 +407,6 @@ public:
     QDate                GetDateOfLastRemind() const;
     void                 SetDateOfLastRemind(const QDate &date);
 
-    bool                 getForbidPieceFlipping() const;
-    void                 setForbidPieceFlipping(bool value);
 
     bool                 isHideSeamLine() const;
     void                 setHideSeamLine(bool value);

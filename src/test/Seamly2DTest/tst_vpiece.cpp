@@ -1965,13 +1965,15 @@ bool writeOnePiecePattern(const QString &path, const QString &pieceAttributes, c
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief convertedPieceData converts a pattern file to the current format.
+ * @brief convertedElement converts a pattern file to the current format.
  *
  * The converter validates the result against the current schema and throws VException when it is not valid.
+ * The returned element keeps its attributes, but not its place in the document.
  * @param path pattern file of an older format.
- * @return the first piece label data element of the converted file; a null element when it cannot be read.
+ * @param tagName element to return.
+ * @return the first tagName element of the converted file; a null element when it cannot be read.
  */
-QDomElement convertedPieceData(const QString &path)
+QDomElement convertedElement(const QString &path, const QString &tagName)
 {
     VPatternConverter converter(path);
     QFile converted(converter.Convert());
@@ -1980,7 +1982,7 @@ QDomElement convertedPieceData(const QString &path)
     {
         doc.setContent(&converted);
     }
-    return doc.elementsByTagName(QStringLiteral("data")).at(0).toElement();
+    return doc.elementsByTagName(tagName).at(0).toElement();
 }
 }
 
@@ -2030,7 +2032,7 @@ void TST_VPiece::ConverterSetsRotationWay() const
 
     try
     {
-        const QDomElement data = convertedPieceData(path);
+        const QDomElement data = convertedElement(path, QStringLiteral("data"));
         QCOMPARE(data.attribute(VAbstractPattern::AttrRotationWay), newValue);
     }
     catch (VException &error)
@@ -2100,7 +2102,7 @@ void TST_VPiece::ConverterSplitsTilt() const
 
     try
     {
-        const QDomElement data = convertedPieceData(path);
+        const QDomElement data = convertedElement(path, QStringLiteral("data"));
         QCOMPARE(data.attribute(VAbstractPattern::AttrTilt), tilt);
         QCOMPARE(data.attribute(VAbstractPattern::AttrTiltDegrees), degrees);
     }
@@ -2138,10 +2140,85 @@ void TST_VPiece::ConverterRemovesFoldPosition() const
 
     try
     {
-        const QDomElement data = convertedPieceData(path);
+        const QDomElement data = convertedElement(path, QStringLiteral("data"));
         QVERIFY(!data.isNull());
         QVERIFY(!data.hasAttribute(QStringLiteral("foldPosition")));
         QCOMPARE(data.attribute(VAbstractPattern::AttrOnFold), onFold);
+    }
+    catch (VException &error)
+    {
+        QFAIL(qUtf8Printable(error.ErrorMessage()));
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PieceFlipValuesRoundTrip checks the pattern file values of the flip choices and the default.
+ */
+void TST_VPiece::PieceFlipValuesRoundTrip() const
+{
+    const QVector<PieceFlip> flips{PieceFlip::None, PieceFlip::Horizontal, PieceFlip::Vertical, PieceFlip::Both};
+    for (const PieceFlip flip : flips)
+    {
+        QVERIFY(stringToPieceFlip(pieceFlipToString(flip)) == flip);
+    }
+
+    QCOMPARE(pieceFlipToString(PieceFlip::Horizontal), QStringLiteral("Horizontal"));
+    QVERIFY(stringToPieceFlip(QString()) == PieceFlip::None);
+    QVERIFY(stringToPieceFlip(QStringLiteral("true")) == PieceFlip::None);
+
+    VPiece piece;
+    QVERIFY(piece.getFlip() == PieceFlip::None);
+    QVERIFY(piece.IsForbidFlipping());
+    piece.setFlip(PieceFlip::Vertical);
+    QVERIFY(!piece.IsForbidFlipping());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief LayoutPieceKeepsFlip checks that the layout piece keeps the flip choice of the piece.
+ */
+void TST_VPiece::LayoutPieceKeepsFlip() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    VPiece piece = squareSlitPiece(data.data(), false, QString());
+    piece.setFlip(PieceFlip::Both);
+
+    const VLayoutPiece layoutPiece = VLayoutPiece::Create(piece, data.data());
+    QVERIFY(layoutPiece.getFlip() == PieceFlip::Both);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::ConverterRemovesForbidFlipping_data() const
+{
+    QTest::addColumn<QString>("forbidFlipping");
+
+    QTest::newRow("forbidden") << QStringLiteral("true");
+    QTest::newRow("allowed") << QStringLiteral("false");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief ConverterRemovesForbidFlipping checks that a 0.7.6 piece loses forbidFlipping and gets no flip: None.
+ */
+void TST_VPiece::ConverterRemovesForbidFlipping() const
+{
+    QFETCH(QString, forbidFlipping);
+
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString path = dir.filePath(QStringLiteral("flip.sm2d"));
+    QVERIFY(writeOnePiecePattern(path, QStringLiteral("forbidFlipping=\"%1\"").arg(forbidFlipping), QString()));
+
+    try
+    {
+        const QDomElement piece = convertedElement(path, QStringLiteral("piece"));
+        QVERIFY(!piece.isNull());
+        QVERIFY(!piece.hasAttribute(QStringLiteral("forbidFlipping")));
+        QVERIFY(!piece.hasAttribute(QStringLiteral("flip")));
     }
     catch (VException &error)
     {

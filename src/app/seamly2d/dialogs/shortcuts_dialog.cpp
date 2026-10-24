@@ -299,8 +299,7 @@ ShortcutsDialog::ShortcutsDialog(QWidget *parent)
                                     "<tr><td width = 50%>%16       </td><td>%17</td></tr>"
                                     "<tr><td width = 50%>%18       </td><td>%19</td></tr>"
                                     "<tr><td width = 50%>%20       </td><td>%21</td></tr>"
-                                    "<tr><td width = 50%>%22       </td><td>%23</td></tr>"
-                                    "<tr><td width = 50%>%24       </td><td>%25<br></td></tr>"
+                                    "<tr><td width = 50%>%22       </td><td>%23<br></td></tr>"
                                   "</table>")
                                   .arg(tr("Pattern Piece"))                           //1
                                   .arg(tr("New Pattern Piece")).arg(QString("N, P"))  //2 & 3
@@ -310,11 +309,10 @@ ShortcutsDialog::ShortcutsDialog(QWidget *parent)
                                   .arg(tr("Edit Properties")).arg(QString("P"))       //10 & 11
                                   .arg(tr("Toggle Lock")).arg(tr("Ctrl+L"))           //12 & 13
                                   .arg(tr("Include in Layout")).arg(QString("I"))     //14 & 15
-                                  .arg(tr("Forbid Flipping")).arg(QString("F"))       //16 & 17
-                                  .arg(tr("Raise To Top")).arg(tr("Ctrl+Home"))       //18 & 19
-                                  .arg(tr("Lower To Bottom")).arg(tr("Ctrl+End"))     //20 & 21
-                                  .arg(tr("Rename")).arg(QString("F2"))                    //21 & 23
-                                  .arg(tr("Delete")).arg(tr("Del"));                  //24 & 25
+                                  .arg(tr("Raise To Top")).arg(tr("Ctrl+Home"))       //16 & 17
+                                  .arg(tr("Lower To Bottom")).arg(tr("Ctrl+End"))     //18 & 19
+                                  .arg(tr("Rename")).arg(QString("F2"))               //20 & 21
+                                  .arg(tr("Delete")).arg(tr("Del"));                  //22 & 23
 
     const QString details = QString("<table style=font-size:11pt; font-weight:600>"
                                     "<tr><td width = 50%><b>%1</b></td><td></td></tr>"

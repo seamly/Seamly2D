@@ -88,6 +88,7 @@
 #include <QGraphicsView>
 #include <QInputDialog>
 #include <QKeyEvent>
+#include <QActionGroup>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPainterPathStroker>
@@ -101,7 +102,7 @@ const QString PatternPieceTool::TagIPaths  = QStringLiteral("iPaths");
 const QString PatternPieceTool::TagAnchors = QStringLiteral("anchors");
 
 const QString PatternPieceTool::AttrVersion              = QStringLiteral("version");
-const QString PatternPieceTool::AttrForbidFlipping       = QStringLiteral("forbidFlipping");
+const QString PatternPieceTool::AttrFlip                 = QStringLiteral("flip");
 const QString PatternPieceTool::AttrPieceColor           = QStringLiteral("color");
 const QString PatternPieceTool::AttrPieceFill            = QStringLiteral("fill");
 const QString PatternPieceTool::AttrPieceLock            = QStringLiteral("locked");
@@ -264,7 +265,7 @@ void PatternPieceTool::addAttributes(VAbstractPattern *doc, QDomElement &domElem
     doc->SetAttribute(domElement, AttrMx,               qApp->fromPixel(piece.GetMx()));
     doc->SetAttribute(domElement, AttrMy,               qApp->fromPixel(piece.GetMy()));
     doc->SetAttribute(domElement, AttrInLayout,         piece.isInLayout());
-    doc->SetAttribute(domElement, AttrForbidFlipping,   piece.IsForbidFlipping());
+    doc->SetAttribute(domElement, AttrFlip,             pieceFlipToString(piece.getFlip()));
     doc->SetAttribute(domElement, AttrSeamAllowance,    piece.hasSeamAllowance());
     doc->SetAttribute(domElement, AttrHideSeamLine,     piece.isHideSeamLine());
     doc->SetAttribute(domElement, AttrMaterial,         piece.getMaterial());
@@ -1176,10 +1177,19 @@ void PatternPieceTool::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     inLayoutOption->setChecked(piece.isInLayout());
     inLayoutOption->setEnabled(lock);
 
-    QAction *forbidFlipping = menu.addAction(tr("Forbid Flipping") + "\tF");
-    forbidFlipping->setCheckable(true);
-    forbidFlipping->setChecked(piece.IsForbidFlipping());
-    forbidFlipping->setEnabled(lock);
+    // Flip submenu: one checked choice; the data of each action is its PieceFlip value.
+    QMenu *flipMenu = menu.addMenu(tr("Flip"));
+    flipMenu->setEnabled(lock);
+    QActionGroup *flipGroup = new QActionGroup(flipMenu);
+    const QStringList flipNames{tr("None"), tr("Horizontal"), tr("Vertical"), tr("Both")};
+    for (int i = 0; i < flipNames.size(); ++i)
+    {
+        QAction *flipAction = flipMenu->addAction(flipNames.at(i));
+        flipAction->setCheckable(true);
+        flipAction->setData(i);
+        flipAction->setChecked(static_cast<int>(piece.getFlip()) == i);
+        flipGroup->addAction(flipAction);
+    }
 
     separator = new QAction(this);
     separator->setSeparator(true);
@@ -1238,9 +1248,9 @@ void PatternPieceTool::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     {
         toggleInLayout(selectedAction->isChecked());
     }
-    else if (selectedAction == forbidFlipping)
+    else if (selectedAction != nullptr && selectedAction->actionGroup() == flipGroup)
     {
-        toggleFlipping(selectedAction->isChecked());
+        setPieceFlip(static_cast<PieceFlip>(selectedAction->data().toInt()), selectedAction->text());
     }
     else if (selectedAction == raiseToTop)
     {
@@ -1333,15 +1343,6 @@ void PatternPieceTool::keyReleaseEvent(QKeyEvent *event)
                 if (!piece.isLocked())
                 {
                     toggleInLayout(!piece.isInLayout());
-                }
-                break;
-            }
-
-        case Qt::Key_F:
-            {
-                if (!piece.isLocked())
-                {
-                    toggleFlipping(!piece.IsForbidFlipping());
                 }
                 break;
             }
@@ -2250,20 +2251,21 @@ void PatternPieceTool::togglePieceLock(bool checked)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/// @brief toggleFlipping - routine to toggle forbidding flipping.
-/// @param checked - true if flipping is forbidden.
+/// @brief setPieceFlip - routine to set the mirror a layout may apply to the piece.
+/// @param flip - new flip choice.
+/// @param flipName - translated name of the choice, for the status bar.
 //---------------------------------------------------------------------------------------------------------------------
-void PatternPieceTool::toggleFlipping(bool checked)
+void PatternPieceTool::setPieceFlip(PieceFlip flip, const QString &flipName)
 {
     VPiece oldPiece = VAbstractTool::data.GetPiece(m_id);
     VPiece newPiece = oldPiece;
-    newPiece.SetForbidFlipping(checked);
+    newPiece.setFlip(flip);
 
     SavePieceOptions *undoCommand = new SavePieceOptions(oldPiece, newPiece, doc, m_id);
-    undoCommand->setText(tr("Forbid Flipping"));
+    undoCommand->setText(tr("Flip"));
     qApp->getUndoStack()->push(undoCommand);
 
-    showStatus(tr("Forbid Flipping changed: ") + (checked ? tr("Enabled") : tr("Disabled")));
+    showStatus(tr("Flip changed: ") + flipName);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

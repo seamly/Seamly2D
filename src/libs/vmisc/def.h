@@ -258,6 +258,18 @@ enum class NotchSubType : unsigned char
 QString      notchSubTypeToString(NotchSubType type);
 NotchSubType stringToNotchSubType(const QString &value);
 
+// mirror a layout may apply to a piece; the values keep the order of the piece dialog choices
+enum class PieceFlip : unsigned char
+{
+    None = 0, // Default
+    Horizontal,
+    Vertical,
+    Both
+};
+
+QString   pieceFlipToString(PieceFlip flip);
+PieceFlip stringToPieceFlip(const QString &value);
+
 
 Unit         StrToUnits(const QString &unit);
 QString      UnitsToStr(const Unit &unit, const bool translate = false);

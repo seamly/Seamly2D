@@ -1495,7 +1495,8 @@ void VPatternConverter::toVersion0_7_6()
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief Version 0.7.7 limits the piece label data attribute "rotationWay" to None, 1-Way, 2-Way, 4-Way and Any,
 ///        splits "tilt" into a direction (None, CCW, CW) and the attribute "tiltDegrees" (0 to 90), and drops
-///        "foldPosition": the boolean "onFold" is the only fold property.
+///        "foldPosition": the boolean "onFold" is the only fold property. The piece attribute "flip" (None,
+///        Horizontal, Vertical, Both) replaces "forbidFlipping".
 void VPatternConverter::toVersion0_7_7()
 {
     // Delete when the minimal supported version is 0.7.7.
@@ -1504,6 +1505,7 @@ void VPatternConverter::toVersion0_7_7()
     rotationWayToV0_7_7();
     tiltToV0_7_7();
     removeFoldPositionV0_7_7();
+    removeForbidFlippingV0_7_7();
     setVersion(QStringLiteral("0.7.7"));
     Save();
 }
@@ -1578,6 +1580,24 @@ void VPatternConverter::removeFoldPositionV0_7_7()
     for (int i = 0; i < dataList.size(); ++i)
     {
         dataList.at(i).toElement().removeAttribute(strFoldPosition);
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Removes "forbidFlipping" from each piece. The piece gets no "flip" attribute, which reads as None.
+///
+/// Older files hold forbidFlipping="false" on most pieces only because it was the default. Flip None writes no
+/// Flip line in a DXF-ASTM export, as before.
+void VPatternConverter::removeForbidFlippingV0_7_7()
+{
+    // Delete when the minimal supported version is 0.7.7.
+    Q_STATIC_ASSERT_X(VPatternConverter::PatternMinVer < CONVERTER_VERSION_CHECK(0, 7, 7),
+                      "Time to refactor the code.");
+
+    const QDomNodeList pieceList = elementsByTagName(strPiece);
+    for (int i = 0; i < pieceList.size(); ++i)
+    {
+        pieceList.at(i).toElement().removeAttribute(strForbidFlipping);
     }
 }
 

@@ -300,7 +300,7 @@ void PatternPieceDialog::SetPiece(const VPiece &piece)
 
     customSeamAllowanceChanged(0);
 
-    ui->forbidFlipping_CheckBox->setChecked(piece.IsForbidFlipping());
+    ui->flip_ButtonGroup->button(static_cast<int>(piece.getFlip()))->setChecked(true);
     ui->seams_CheckBox->setChecked(piece.hasSeamAllowance());
     ui->builtIn_CheckBox->setChecked(piece.hasSeamAllowanceBuiltIn());
     ui->pieceName_LineEdit->setText(piece.GetName());
@@ -2681,7 +2681,7 @@ VPiece PatternPieceDialog::CreatePiece() const
     piece.SetCustomSARecords(GetListInternals<CustomSARecord>(ui->customSeamAllowance_ListWidget));
     piece.SetInternalPaths(GetListInternals<quint32>(ui->internalPaths_ListWidget));
     piece.setAnchors(GetListInternals<quint32>(ui->anchorPoints_ListWidget));
-    piece.SetForbidFlipping(ui->forbidFlipping_CheckBox->isChecked());
+    piece.setFlip(static_cast<PieceFlip>(ui->flip_ButtonGroup->checkedId()));
     piece.SetSeamAllowance(ui->seams_CheckBox->isChecked());
     piece.SetSeamAllowanceBuiltIn(ui->builtIn_CheckBox->isChecked());
     piece.setHideSeamLine(ui->hideSeamLine_CheckBox->isChecked());
@@ -3137,7 +3137,6 @@ void PatternPieceDialog::updateNodeAfterSeamAllowance(const QString &formula)
 //---------------------------------------------------------------------------------------------------------------------
 void PatternPieceDialog::initializeMainPathTab()
 {
-    ui->forbidFlipping_CheckBox->setChecked(qApp->Settings()->getForbidPieceFlipping());
     ui->hideSeamLine_CheckBox->setChecked(qApp->Settings()->isHideSeamLine());
 
     ui->mainPath_ListWidget->installEventFilter(this);
@@ -3338,6 +3337,13 @@ void PatternPieceDialog::initializePropertiesTab()
         ui->tiltDegrees_SpinBox->setEnabled(!ui->tiltNone_RadioButton->isChecked());
     });
     ui->tiltNone_RadioButton->setChecked(true);
+
+    // Each flip button id is its PieceFlip value.
+    ui->flip_ButtonGroup->setId(ui->flipNone_RadioButton, static_cast<int>(PieceFlip::None));
+    ui->flip_ButtonGroup->setId(ui->flipHorizontal_RadioButton, static_cast<int>(PieceFlip::Horizontal));
+    ui->flip_ButtonGroup->setId(ui->flipVertical_RadioButton, static_cast<int>(PieceFlip::Vertical));
+    ui->flip_ButtonGroup->setId(ui->flipBoth_RadioButton, static_cast<int>(PieceFlip::Both));
+    ui->flipNone_RadioButton->setChecked(true);
 
     QColor color = QColor(Qt::white);
     ui->color_Label->setText(color.name());
