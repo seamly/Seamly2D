@@ -84,6 +84,7 @@ private slots:
     void OneMaterialKeepsOnePatternGroup() const;
     void BuiltInPieceSendsCutlineAndSeamline() const;
     void BuiltInPieceHiddenSeamLineSendsCutlineOnly() const;
+    void BuiltInPieceWithFoldLineSendsOpenSeamline() const;
     void SizesShareNodeTurnPoints() const;
     void SizesWithDifferentNodeCountsKeepTurnPoints() const;
     void LoopStartingAtAnotherNodeSharesTurnPoints() const;

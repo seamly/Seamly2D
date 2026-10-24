@@ -66,6 +66,8 @@
 #include <QtDebug>
 #include <QtNumeric>
 
+#include <algorithm>
+
 #include "global.h"
 #include "../vpatterndb/floatItemData/vpatternlabeldata.h"
 #include "../vpatterndb/floatItemData/vpiecelabeldata.h"
@@ -119,6 +121,21 @@ QPainterPath closedPath(const QVector<QPointF> &points)
         path.lineTo(points.at(i));
     }
     path.lineTo(points.first());
+    return path;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief openPath draws a polyline that is not closed; no points give an empty path.
+ */
+QPainterPath openPath(const QVector<QPointF> &points)
+{
+    QPainterPath path;
+    if (points.isEmpty())
+    {
+        return path;
+    }
+    path.addPolygon(QPolygonF(points));
     return path;
 }
 
@@ -618,7 +635,9 @@ VLayoutPiece VLayoutPiece::Create(const VPiece &piece, const VContainer *pattern
     layoutPiece.setSeamAllowanceCorners(seamAllowanceCorners);
     QVector<QPointF> builtInSeamLineNodes;
     const QVector<QPointF> builtInSeamLine = piece.builtInSeamLinePoints(pattern, &builtInSeamLineNodes);
-    layoutPiece.setBuiltInSeamLinePoints(builtInSeamLine, builtInSeamLineNodes);
+    // A closed seam line repeats its first point; one that a fold line cut open ends elsewhere.
+    const bool builtInSeamLineClosed = builtInSeamLine.size() < 2 || builtInSeamLine.first() == builtInSeamLine.last();
+    layoutPiece.setBuiltInSeamLinePoints(builtInSeamLine, builtInSeamLineNodes, builtInSeamLineClosed);
     layoutPiece.setInternalPaths(convertInternalPaths (piece, pattern, false));
     layoutPiece.setCutoutPaths(convertInternalPaths (piece, pattern, true));
     // Clip cutline notches to the cutline, as the canvas does.
@@ -882,22 +901,35 @@ QVector<QPointF> VLayoutPiece::getBuiltInSeamLinePoints() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief isBuiltInSeamLineClosed tells whether the built-in seam line is a closed loop.
+ * @return false when a fold line cuts it open: then both ends lie on the fold line.
+ */
+bool VLayoutPiece::isBuiltInSeamLineClosed() const
+{
+    return d->builtInSeamLineClosed;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief setBuiltInSeamLinePoints stores the seam line of a piece whose seam allowance is built into the main path.
  * @param points from VPiece::builtInSeamLinePoints(). Used only while the seam allowance is built in.
  * @param nodeVertices vertices that can break the tangent. Empty = turn points unknown, so the seam line gets no
  *        data-turn-points attribute.
+ * @param closed false for a line that a fold line cut open: its ends are not joined.
  */
-void VLayoutPiece::setBuiltInSeamLinePoints(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices)
+void VLayoutPiece::setBuiltInSeamLinePoints(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices,
+                                            bool closed)
 {
-    // Stored open, like the contour: closedPath() closes it.
-    d->builtInSeamLine = RemoveDublicates(points, true);
+    d->builtInSeamLineClosed = closed;
+    // A closed line is stored without its closing point, like the contour: closedPath() closes it.
+    d->builtInSeamLine = RemoveDublicates(points, closed);
     d->builtInSeamLineTurnPoints.reset();
     d->builtInSeamLineNodeIndices.clear();
     if (!d->builtInSeamLine.isEmpty() && !nodeVertices.isEmpty())
     {
-        d->builtInSeamLine = snapNodeVertices(d->builtInSeamLine, nodeVertices, true);
-        d->builtInSeamLineTurnPoints = turnPointIndices(d->builtInSeamLine, nodeVertices, true);
-        d->builtInSeamLineNodeIndices = nodeVertexIndices(d->builtInSeamLine, nodeVertices, true);
+        d->builtInSeamLine = snapNodeVertices(d->builtInSeamLine, nodeVertices, closed);
+        d->builtInSeamLineTurnPoints = turnPointIndices(d->builtInSeamLine, nodeVertices, closed);
+        d->builtInSeamLineNodeIndices = nodeVertexIndices(d->builtInSeamLine, nodeVertices, closed);
     }
 }
 
@@ -917,10 +949,11 @@ void VLayoutPiece::unifyTurnPoints(const QVector<VLayoutPiece *> &sizes)
         return;
     }
 
-    // Seam line, cut line and built-in seam line: closed loops, one per piece.
+    // Seam line, cut line and built-in seam line: one per piece; closed loops, except a built-in seam line that a
+    // fold line cuts open.
     const auto unifyLoop = [&sizes](QVector<QPointF> VLayoutPieceData::*points,
                                     std::optional<QVector<int>> VLayoutPieceData::*turnPoints,
-                                    QVector<int> VLayoutPieceData::*nodeIndices)
+                                    QVector<int> VLayoutPieceData::*nodeIndices, bool closed)
     {
         QVector<SizeLine> lines;
         for (const VLayoutPiece *piece : sizes)
@@ -928,18 +961,27 @@ void VLayoutPiece::unifyTurnPoints(const QVector<VLayoutPiece *> &sizes)
             const VLayoutPieceData *data = piece->d.constData();
             lines.append({data->*points, data->*turnPoints, data->*nodeIndices});
         }
-        const QVector<QVector<int>> turns = unifyNodeTurnPoints(lines, true);
+        const QVector<QVector<int>> turns = unifyNodeTurnPoints(lines, closed);
         for (int s = 0; s < turns.size(); ++s)
         {
             sizes.at(s)->d.data()->*turnPoints = turns.at(s);
         }
     };
     unifyLoop(&VLayoutPieceData::contour, &VLayoutPieceData::contourTurnPoints,
-              &VLayoutPieceData::contourNodeIndices);
+              &VLayoutPieceData::contourNodeIndices, true);
     unifyLoop(&VLayoutPieceData::seamAllowance, &VLayoutPieceData::seamAllowanceTurnPoints,
-              &VLayoutPieceData::seamAllowanceNodeIndices);
-    unifyLoop(&VLayoutPieceData::builtInSeamLine, &VLayoutPieceData::builtInSeamLineTurnPoints,
-              &VLayoutPieceData::builtInSeamLineNodeIndices);
+              &VLayoutPieceData::seamAllowanceNodeIndices, true);
+    // Sizes whose built-in seam lines differ in closed and open keep their turn points.
+    const bool builtInClosed = sizes.first()->d.constData()->builtInSeamLineClosed;
+    const bool sameBuiltInShape = std::all_of(sizes.cbegin(), sizes.cend(), [builtInClosed](const VLayoutPiece *piece)
+    {
+        return piece->d.constData()->builtInSeamLineClosed == builtInClosed;
+    });
+    if (sameBuiltInShape)
+    {
+        unifyLoop(&VLayoutPieceData::builtInSeamLine, &VLayoutPieceData::builtInSeamLineTurnPoints,
+                  &VLayoutPieceData::builtInSeamLineNodeIndices, builtInClosed);
+    }
 
     // Internal and cutout paths match by their order in the piece, so every size needs the same path count.
     const auto unifyPaths = [&sizes](QVector<VLayoutPiecePath> VLayoutPieceData::*paths)
@@ -1992,7 +2034,14 @@ void VLayoutPiece::createSeamlineItem(QGraphicsItem *parent) const
     item->setData(PieceItemData::ItemType, QStringLiteral("seamline"));
     if (hasSeamAllowance() && hasSeamAllowanceBuiltIn())
     {
-        item->setPath(isHideSeamLine() ? QPainterPath() : closedPath(getBuiltInSeamLinePoints()));
+        // A seam line that a fold line cuts open ends on the fold line; it is not closed along it.
+        const QVector<QPointF> seamLine = getBuiltInSeamLinePoints();
+        QPainterPath path;
+        if (!isHideSeamLine())
+        {
+            path = d->builtInSeamLineClosed ? closedPath(seamLine) : openPath(seamLine);
+        }
+        item->setPath(path);
         setTurnPointsData(item, d->builtInSeamLineTurnPoints);
     }
     else

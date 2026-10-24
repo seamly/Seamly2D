@@ -110,7 +110,9 @@ public:
 
     QVector<QPointF>          getBuiltInSeamLinePoints() const;
     void                      setBuiltInSeamLinePoints(const QVector<QPointF> &points,
-                                                       const QVector<QPointF> &nodeVertices = QVector<QPointF>());
+                                                       const QVector<QPointF> &nodeVertices = QVector<QPointF>(),
+                                                       bool closed = true);
+    bool                      isBuiltInSeamLineClosed() const;
 
     static void               unifyTurnPoints(const QVector<VLayoutPiece *> &sizes);
 
