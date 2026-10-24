@@ -1467,6 +1467,59 @@ mod tests {
     const JACKET2_HANDOFF_SVG: &str = include_str!("../test_data/jacket2_40-146_handoff.svg");
     const JACKET2_BASE_SIZE: &str = "500";
 
+    // @brief jacket2 handoff with two materials (Fabric: 7 pieces, Lining: Detail 4), shown
+    // grainlines and labels, and a fold line on Back; captured with SEAMLYLAYOUT_SAVE_HANDOFF
+    // from MSI 26.10.2023.
+    const JACKET2_MATERIALS_HANDOFF_SVG: &str = include_str!("../test_data/jacket2_40-146_materials_handoff.svg");
+
+    // @brief Nested: after the import alignment, every size of a piece-set has its grainline,
+    // piece label and pattern label in one place, so each stack reads as one.
+    #[test]
+    fn jacket2_nested_stacks_each_piece_set_annotations() {
+        let doc = Document::parse(JACKET2_MATERIALS_HANDOFF_SVG).expect("jacket2 handoff parses");
+        let mut checked = 0;
+        for part in crate::material_split::split_by_material(doc) {
+            let mut input = part.doc;
+            let report = crate::annotation_alignment::align_size_annotations(&mut input);
+            assert!(report.moved > 0, "material {}: sizes take the base size's places", part.name);
+            // Back's pattern label sits near its edge in size 500 and leaves the four smallest sizes.
+            let expected_outside: Vec<String> = if part.name == "Fabric" {
+                vec!["Back: pattern label past the cut line in sizes 220, 240, 260, 280".to_string()]
+            } else {
+                Vec::new()
+            }; // expected_outside
+            assert_eq!(report.outside, expected_outside, "material {}", part.name);
+
+            let nested = process_jacket2_input(&input, true, 60.0, 300.0);
+            for set in nested.output_doc.root.children.iter().filter_map(|n| n.as_element())
+                .filter(|e| e.attributes.get("data-type").is_some_and(|t| t == "piece-set"))
+            {
+                for data_type in ["grainline", "piece_label", "pattern_label"] {
+                    // Reference point of each size, in the piece-set frame.
+                    let points: Vec<geometry::Point> = set.children.iter().filter_map(|n| n.as_element())
+                        .filter(|e| e.attributes.get("data-type").is_some_and(|t| t == "piece"))
+                        .filter_map(|piece| {
+                            let group = crate::annotation_alignment::child_of_type(piece, data_type)?;
+                            let point = crate::annotation_alignment::reference_point(group)?;
+                            Some(crate::annotation_alignment::own_transform(piece).apply_to_point(point))
+                        }) // filter_map
+                        .collect();
+                    if points.len() < 2 {
+                        continue; // the piece does not show it
+                    } // if not shown
+                    let spread = points.iter()
+                        .map(|p| (p.x - points[0].x).abs().max((p.y - points[0].y).abs()))
+                        .fold(0.0f32, f32::max);
+                    let set_id = set.attributes.get("id").cloned().unwrap_or_default();
+                    assert!(spread < 0.5, "{set_id} {data_type}: sizes {spread} px apart");
+                    checked += 1;
+                } // for each annotation type
+            } // for each piece-set
+        } // for each material
+        // Grainlines of 7 pieces, piece labels of 3, pattern labels of 2.
+        assert_eq!(checked, 12, "annotation stacks checked");
+    } // jacket2_nested_stacks_each_piece_set_annotations
+
     // @brief The jacket2 handoff and its sizes, from the pattern group's `data-sizes`.
     fn jacket2_handoff() -> (Document, Vec<String>) {
         let doc = Document::parse(JACKET2_HANDOFF_SVG).expect("jacket2 handoff should parse");
