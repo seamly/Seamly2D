@@ -943,59 +943,17 @@ ApplicationWindow {
                 spacing: 0
 
                 // One tab per material of the import: Fabric, Lining, ...
-                // Hidden for one material.  A switch drops the shown layout, so it is
-                // locked while a layout runs or Adjust Mode is open.
-                TabBar {
+                // Hidden for one material.  Each material keeps its own layouts; a switch
+                // is locked while a layout runs or Adjust Mode is open.
+                MaterialTabBar {
                     id: materialTabs
                     Layout.fillWidth: true
                     visible:    appController.materialLabels.length > 1
                     enabled:    !appController.isLayoutInProgress && !appController.isAdjustMode
-                    background: Rectangle { color: Theme.appBackground }
-
-                    // Follow the controller imperatively: a click assigns currentIndex.
-                    Connections {
-                        target: appController
-                        function onActiveMaterialChanged() { materialTabs.currentIndex = appController.activeMaterial }
-                        function onMaterialLabelsChanged() { materialTabs.currentIndex = appController.activeMaterial }
-                    } // Connections appController
-
-                    Repeater {
-                        model: appController.materialLabels
-                        TabButton {
-                            id: materialTab
-                            required property string modelData
-                            required property int index
-                            text:  modelData
-                            // 1.5 × the Fusion tab size; TabBar sizes its bar from implicitHeight.
-                            implicitWidth:  Math.round(1.5 * (implicitContentWidth  + leftPadding + rightPadding))
-                            implicitHeight: Math.round(1.5 * (implicitContentHeight + topPadding + bottomPadding))
-                            width: implicitWidth
-                            contentItem: Text {
-                                text:  materialTab.text
-                                color: materialTab.checked ? Theme.violetDark : Theme.textOnDark
-                                font.pixelSize: Theme.fontSizeNormal
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment:   Text.AlignVCenter
-                            } // Text contentItem
-                            background: Rectangle {
-                                color: materialTab.checked ? Theme.canvasBackground
-                                     : materialTab.hovered ? Theme.violetMedium : Theme.violet
-                                border.color: Theme.violetLight
-                                border.width: 1
-                            } // Rectangle background
-                            // The new material keeps the submitted settings: its blank
-                            // canvas is built again, so Create Layout stays available.
-                            onClicked: {
-                                var hadSettings = appController.isCreateLayoutEnabled || appController.isLayoutReady
-                                if (!appController.selectMaterial(index)) {
-                                    materialTabs.currentIndex = appController.activeMaterial // refused: snap back
-                                } else if (hadSettings) {
-                                    appController.initializeLayout(settingsModel.toJson())
-                                } // if selected
-                            } // onClicked
-                        } // TabButton
-                    } // Repeater
-                } // TabBar materialTabs
+                    labels:     appController.materialLabels
+                    shownIndex: appController.activeMaterial
+                    onMaterialClicked: function(index) { appController.selectMaterial(index) }
+                } // MaterialTabBar materialTabs
 
                 // Height of every size of a multisize import, chosen in Seamly2D.
                 Rectangle {
@@ -1038,14 +996,29 @@ ApplicationWindow {
                 border.color: appController.isAdjustMode ? Theme.violetLight : "transparent"
                 border.width: appController.isAdjustMode ? 3 : 0
 
-                // Material of the laid-out pieces, above the layout tabs and canvas.
+                // Material tabs over the layout: every material is laid out, and these tabs
+                // show the same material as the tabs over the left canvas.
+                MaterialTabBar {
+                    id: materialLayoutTabs
+                    anchors.top:   parent.top
+                    anchors.left:  parent.left
+                    anchors.right: parent.right
+                    visible:    appController.materialLabels.length > 1 && !appController.isAdjustMode
+                    enabled:    !appController.isLayoutInProgress
+                    labels:     appController.materialLabels
+                    shownIndex: appController.activeMaterial
+                    onMaterialClicked: function(index) { appController.selectMaterial(index) }
+                } // MaterialTabBar materialLayoutTabs
+
+                // Material of the laid-out pieces when the import names one material only.
                 Rectangle {
                     id: materialHeader
                     anchors.top:   parent.top
                     anchors.left:  parent.left
                     anchors.right: parent.right
                     height:        visible ? materialHeaderText.implicitHeight + 8 : 0
-                    visible:       appController.activeMaterialName !== "" && !appController.isAdjustMode
+                    visible:       appController.activeMaterialName !== "" && appController.materialLabels.length < 2
+                                   && !appController.isAdjustMode
                     color:         Theme.appBackground
 
                     Text {
@@ -1065,7 +1038,8 @@ ApplicationWindow {
                 // the canvas; a scroll bar below it reaches tabs past the right edge.
                 Flickable {
                     id: layoutViewTabStrip
-                    anchors.top:   materialHeader.visible ? materialHeader.bottom : parent.top
+                    anchors.top:   materialLayoutTabs.visible ? materialLayoutTabs.bottom
+                                 : materialHeader.visible ? materialHeader.bottom : parent.top
                     anchors.left:  parent.left
                     anchors.right: parent.right
                     height:        layoutViewTabs.height
@@ -1167,6 +1141,7 @@ ApplicationWindow {
                     id: rightCanvas
                     anchors.top:     layoutViewTabScrollBar.visible ? layoutViewTabScrollBar.bottom
                                    : layoutViewTabStrip.visible ? layoutViewTabStrip.bottom
+                                   : materialLayoutTabs.visible ? materialLayoutTabs.bottom
                                    : materialHeader.visible ? materialHeader.bottom
                                    : parent.top
                     anchors.left:    parent.left
@@ -1841,4 +1816,58 @@ ApplicationWindow {
 
         padding: 16
     } // Popup exportProgressPopup
+
+    // @brief Material tab bar: one tab per material of the import (Fabric, Lining, ...).
+    // The tabs over both canvases use it, so they look and behave the same.
+    // Self-contained: inline components cannot rely on ids of this file.
+    component MaterialTabBar: TabBar {
+        id: materialTabBar
+
+        // @brief Tab texts: the material names.
+        required property var labels
+
+        // @brief Index of the shown material.
+        required property int shownIndex
+
+        // @brief Emitted when the user clicks a tab.  The handler selects the material
+        //        or refuses; the current tab then follows `shownIndex` either way.
+        signal materialClicked(int index)
+
+        background: Rectangle { color: Theme.appBackground }
+
+        // Follow shownIndex imperatively: a click assigns currentIndex, which would break a binding.
+        onShownIndexChanged: materialTabBar.currentIndex = materialTabBar.shownIndex
+        onLabelsChanged:     materialTabBar.currentIndex = materialTabBar.shownIndex
+
+        Repeater {
+            model: materialTabBar.labels
+            TabButton {
+                id: materialTab
+                required property string modelData
+                required property int index
+                text:  modelData
+                // 1.5 × the Fusion tab size; TabBar sizes its bar from implicitHeight.
+                implicitWidth:  Math.round(1.5 * (implicitContentWidth  + leftPadding + rightPadding))
+                implicitHeight: Math.round(1.5 * (implicitContentHeight + topPadding + bottomPadding))
+                width: implicitWidth
+                contentItem: Text {
+                    text:  materialTab.text
+                    color: materialTab.checked ? Theme.violetDark : Theme.textOnDark
+                    font.pixelSize: Theme.fontSizeNormal
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment:   Text.AlignVCenter
+                } // Text contentItem
+                background: Rectangle {
+                    color: materialTab.checked ? Theme.canvasBackground
+                         : materialTab.hovered ? Theme.violetMedium : Theme.violet
+                    border.color: Theme.violetLight
+                    border.width: 1
+                } // Rectangle background
+                onClicked: {
+                    materialTabBar.materialClicked(materialTab.index)
+                    materialTabBar.currentIndex = materialTabBar.shownIndex // refused: snap back
+                } // onClicked
+            } // TabButton materialTab
+        } // Repeater
+    } // component MaterialTabBar
 }
