@@ -116,7 +116,7 @@ fn grainline_placement(piece: &Element) -> Option<((f64, f64), f64)> {
 } // fn grainline_placement
 
 // @brief First and last point of the first `<path>` in `elem`, in the piece frame.
-fn first_path_ends(elem: &Element, parent: Matrix2D) -> Option<(Point, Point)> {
+pub(crate) fn first_path_ends(elem: &Element, parent: Matrix2D) -> Option<(Point, Point)> {
     let matrix = parent.mul(&own_transform(elem));
     if elem.name == "path" {
         let path = Path::parse_path_attribute(elem.attributes.get("d")?).ok()?;

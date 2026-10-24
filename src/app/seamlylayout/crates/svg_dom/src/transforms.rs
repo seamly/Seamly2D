@@ -762,7 +762,7 @@ pub fn center_piece_sets(doc: &mut Document) -> usize {
         let mut others: Vec<XMLNode> = Vec::new();
         for node in children {
             let measured = match &node {
-                XMLNode::Element(e) if e.name == "g" => Some(bbox_area_centre(e)),
+                XMLNode::Element(e) if e.name == "g" => Some(outline_area_centre(e)),
                 _ => None, // text, comments, non-group elements stay in front
             }; // match node
             match measured {
@@ -793,13 +793,46 @@ pub fn center_piece_sets(doc: &mut Document) -> usize {
     count
 } // fn center_piece_sets
 
+/// @brief AABB area and centre of a piece outline: its `cutline` groups, else its `seamline`
+///        groups, else every point of the `<g>`.
+/// @details A grainline or label that sticks out of the outline does not move the centre, so
+///          sizes whose annotations share an offset from the outline centre stack them exactly.
+/// @param member  Piece `<g>` of a piece-set.
+/// @return (area, (cx, cy)), or `None` if no geometry was found.
+fn outline_area_centre(member: &Element) -> Option<(f32, (f32, f32))> {
+    let outline_of = |data_type: &str| -> Vec<&Element> {
+        member.children.iter()
+            .filter_map(|n| match n { XMLNode::Element(e) => Some(e), _ => None })
+            .filter(|e| e.attributes.get("data-type").is_some_and(|t| t == data_type))
+            .collect()
+    }; // outline_of
+    let mut outline = outline_of("cutline");
+    if outline.is_empty() {
+        outline = outline_of("seamline");
+    } // if no cut line
+    if outline.is_empty() {
+        return bbox_area_centre(member); // untagged member: every point
+    } // if no outline
+
+    let mut points: Vec<Point> = Vec::new();
+    for group in outline {
+        collect_all_points(group, &mut points);
+    } // for each outline group
+    points_area_centre(&points)
+} // fn outline_area_centre
+
 /// @brief Compute the AABB area and centre of a `<g>`.
 /// @param group  `<g>` element to measure.
 /// @return (area, (cx, cy)), or `None` if no geometry was found.
 fn bbox_area_centre(group: &Element) -> Option<(f32, (f32, f32))> {
     let mut points: Vec<Point> = Vec::new();
     collect_all_points(group, &mut points);
+    points_area_centre(&points)
+} // fn bbox_area_centre
 
+/// @brief AABB area and centre of a point set.
+/// @return (area, (cx, cy)), or `None` for no points.
+fn points_area_centre(points: &[Point]) -> Option<(f32, (f32, f32))> {
     if points.is_empty() {
         return None; // no geometry
     } // if no points
@@ -810,7 +843,7 @@ fn bbox_area_centre(group: &Element) -> Option<(f32, (f32, f32))> {
     let max_y = points.iter().map(|p| p.y).fold(f32::NEG_INFINITY, f32::max);
 
     Some(((max_x - min_x) * (max_y - min_y), ((min_x + max_x) / 2.0, (min_y + max_y) / 2.0)))
-} // fn bbox_area_centre
+} // fn points_area_centre
 
 // ---------------------------------------------------------------------------
 // Public API — translate_dom

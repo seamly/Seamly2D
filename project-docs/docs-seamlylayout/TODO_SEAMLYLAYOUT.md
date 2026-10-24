@@ -97,6 +97,16 @@ This information should be tracked in the layout data even if it's not shown in 
 
 Select the position of the base size's grainline (when visible), pattern label (when visible), and piece label (when visible); replace the reamining pieces' grainline, pattern label, and piece label 's positions with the base size's positions.
 
+- [x] Layout.94.1 At import, every size's grainline, piece label and pattern label move to the base size's place: the same offset from the centre of the outline's bounding box. Only shown (handed-off) groups move. `cxxqt_bridge/src/annotation_alignment.rs`, called by `finish_import` before the piece names; size labels follow the moved grainline.
+  - Reference point: grainline middle; label first text line anchor.
+- [x] Layout.94.2 Nested stacks the sizes on the outline centre (`svg_dom::center_piece_sets` now measures the cut line, else the seam line), the same centre the move uses. jacket2: 12 stacks, each within 0.5 px.
+- [x] Layout.94.3 Cut line check: a grainline end or label line anchor outside a size's cut line is named in one import warning.
+  - Finding: jacket2 Back's pattern label sits near the edge in size 500 and leaves sizes 220–280: "Back: pattern label past the cut line in sizes 220, 240, 260, 280". Fix in Seamly2D: move Back's pattern label toward the middle in the base size.
+  - Decision taken: positions stay the base size's even then (the task's rule); the warning names the sizes. No label is moved inward on its own.
+  - Open: on the Nested canvas the size labels of every size stack too ("Size 220" over "Size 240"). Nested exports keep the smallest size's only (Layout.84).
+- [x] Layout.94.4 Tests: `annotation_alignment` (5); `layout_utils::jacket2_nested_stacks_each_piece_set_annotations` with the new fixture `jacket2_40-146_materials_handoff.svg` (MSI 26.10.2023 capture). `cargo test --workspace` 611 passed. Doc: `SVG-DATA-ATTRIBUTES.md`, "Multisize grainline and label positions".
+- [ ] Layout.94.5 Next MSI: user check, `AGENT_CHECKLIST.md` §26.
+
 ### [ ] Task Layout.90 - Implement - DXF-R13 - Paper Space information
 
 

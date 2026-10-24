@@ -81,7 +81,7 @@ Each piece is a `piece-set` group holding that piece once per size.
 
 - Producer: `MainWindow::prepareMultisizePieceLists()` → `MainWindowsNoGUI::generateMultisizePiecesSvgDocument()` → `SvgGenerator::setMultisize()` and `addSvgFromScene(..., size, pieceSetKey)`.
 - The same piece is matched across sizes by its `VPiece` id.
-- Each size keeps its drafted position. SeamlyLayout stacks the sizes (`svg_dom::center_piece_sets`).
+- Each size keeps its drafted position. The Nested tab stacks the sizes on the centre of each outline's bounding box: the `cutline` groups, else the `seamline` groups (`svg_dom::center_piece_sets`).
 - Tests: `TST_SvgComponentTags::Multisize*` (producer), `piece_extractor` and `layout_utils` `multisize` tests (consumer).
 
 ### Materials
@@ -93,6 +93,16 @@ Seamly2D hands off one pattern group per material, in the order the materials fi
 - Settings Submit makes a blank canvas for every material. Create Layout lays out every material: the shown material first, then each other material in tab order, each with all its tabs. The progress popup names the material: "Laying out Lining: Size 36 (30 of 56)…".
 - A material switch keeps every layout: the controller parks the shown material's layouts, shown tab and Adjust edits in `layout_views::MaterialLayout` and takes out the new material's. Exports, Export all tabs and Adjust Mode work on the shown material.
 - One material: the right canvas shows "Material: <material>" above the layout instead of tabs. With several materials, a default export name has `_<material>` after the variant segment: `<base>[_<segment>]_<material>[_<tab>]_<stamp>`.
+
+### Multisize grainline and label positions
+
+At import, SeamlyLayout moves the `grainline`, `piece_label` and `pattern_label` group of every size of a piece-set to the place the base size (`data-base-size`) has it: the same offset from the centre of the outline's bounding box, the centre `center_piece_sets` uses. On the Nested tab each stack then reads as one; every tab shows them in the same place in each size.
+
+- Reference point: a grainline's middle; a label's first text line anchor; a label drawn as paths, the centre of its points. The move is a `translate` prepended to the group's `transform`.
+- Only groups the handoff has move: Seamly2D sends none for a hidden grainline or label. A piece-set without a base size piece is not changed.
+- A grainline end or label line anchor that then lies outside a size's cut line is reported in one import warning: "Back: pattern label past the cut line in sizes 220, 240, 260, 280". Move the label toward the middle of the piece in the base size in Seamly2D.
+- Size labels follow: `add_size_labels` runs after the move, 5 px past the moved grainline.
+- Code: `cxxqt_bridge/src/annotation_alignment.rs`, called by `finish_import` before the piece names.
 
 ### Size labels
 
