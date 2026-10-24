@@ -437,7 +437,6 @@ PatternPieceTool* createFullPiece(PieceMirrorContext& context, const VPiece& hal
     remapAnchors(full, anchor_copies);
     full.SetName(PieceMirrorTool::tr("%1 Mirrored").arg(half.GetName()));
     full.GetPatternPieceData().SetOnFold(false);
-    full.GetPatternPieceData().SetFoldPosition(QString());
     full.setForcedCornerCuts(QVector<int>());
     full.SetUnited(false);
     full.setInLayout(true);

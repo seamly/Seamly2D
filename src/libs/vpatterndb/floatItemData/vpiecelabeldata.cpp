@@ -170,18 +170,6 @@ void VPieceLabelData::setTiltDegrees(int degrees)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QString VPieceLabelData::GetFoldPosition() const
-{
-    return d->m_foldPosition;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void VPieceLabelData::SetFoldPosition(const QString &val)
-{
-    d->m_foldPosition = val;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
 int VPieceLabelData::GetQuantity() const
 {
     return d->m_quantity;

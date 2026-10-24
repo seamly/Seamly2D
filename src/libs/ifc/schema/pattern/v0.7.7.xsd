@@ -571,7 +571,6 @@
                               <xs:attribute name="rotationWay" type="pieceRotation"/>
                               <xs:attribute name="tilt" type="pieceTilt"/>
                               <xs:attribute name="tiltDegrees" type="tiltDegrees"/>
-                              <xs:attribute name="foldPosition" type="xs:string"/>
                               <xs:attribute name="visible" type="xs:boolean"/>
                               <xs:attribute name="onFold" type="xs:boolean"/>
                               <xs:attribute name="fontSize" type="xs:unsignedInt"/>

@@ -77,9 +77,6 @@ public:
     int  getTiltDegrees() const;
     void setTiltDegrees(int degrees);
 
-    QString GetFoldPosition() const;
-    void    SetFoldPosition(const QString &val);
-
     int  GetQuantity() const;
     void SetQuantity(int val);
 

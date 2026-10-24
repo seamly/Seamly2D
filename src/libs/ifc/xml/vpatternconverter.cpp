@@ -166,6 +166,7 @@ static const QString strRotationWay               = QStringLiteral("rotationWay"
 static const QString strNone                      = QStringLiteral("None");
 static const QString strTilt                      = QStringLiteral("tilt");
 static const QString strTiltDegrees               = QStringLiteral("tiltDegrees");
+static const QString strFoldPosition              = QStringLiteral("foldPosition");
 static const QString strInLayout                  = QStringLiteral("inLayout");
 static const QString strSeamAllowance             = QStringLiteral("seamAllowance");
 static const QString strNodeType                  = QStringLiteral("nodeType");
@@ -1493,7 +1494,8 @@ void VPatternConverter::toVersion0_7_6()
 
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief Version 0.7.7 limits the piece label data attribute "rotationWay" to None, 1-Way, 2-Way, 4-Way and Any,
-///        and splits "tilt" into a direction (None, CCW, CW) and the attribute "tiltDegrees" (0 to 90).
+///        splits "tilt" into a direction (None, CCW, CW) and the attribute "tiltDegrees" (0 to 90), and drops
+///        "foldPosition": the boolean "onFold" is the only fold property.
 void VPatternConverter::toVersion0_7_7()
 {
     // Delete when the minimal supported version is 0.7.7.
@@ -1501,6 +1503,7 @@ void VPatternConverter::toVersion0_7_7()
                       "Time to refactor the code.");
     rotationWayToV0_7_7();
     tiltToV0_7_7();
+    removeFoldPositionV0_7_7();
     setVersion(QStringLiteral("0.7.7"));
     Save();
 }
@@ -1560,6 +1563,21 @@ void VPatternConverter::tiltToV0_7_7()
             data.setAttribute(strTilt, strNone);
             data.removeAttribute(strTiltDegrees);
         }
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Removes "foldPosition" (Undefined, Up/Down, Left/Right) from each piece label data element.
+void VPatternConverter::removeFoldPositionV0_7_7()
+{
+    // Delete when the minimal supported version is 0.7.7.
+    Q_STATIC_ASSERT_X(VPatternConverter::PatternMinVer < CONVERTER_VERSION_CHECK(0, 7, 7),
+                      "Time to refactor the code.");
+
+    const QDomNodeList dataList = elementsByTagName(strData);
+    for (int i = 0; i < dataList.size(); ++i)
+    {
+        dataList.at(i).toElement().removeAttribute(strFoldPosition);
     }
 }
 
