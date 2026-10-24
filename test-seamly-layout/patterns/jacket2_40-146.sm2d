@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pattern>
-    <!--Pattern created with Seamly2D v26.10.1608 (https://seamly.io).-->
-    <version>0.7.5</version>
+    <!--Pattern created with Seamly2D v26.10.2312 (https://seamly.io).-->
+    <version>0.7.6</version>
     <unit>mm</unit>
     <description/>
     <notes/>
@@ -16,7 +16,7 @@
         <line alignment="0" bold="false" italic="true" sfIncrement="0" text="%customer%"/>
         <line alignment="0" bold="false" italic="true" sfIncrement="0" text="%date%"/>
     </patternLabel>
-    <measurements>../../../../../../../seamly2d/measurements/multisize/gost_man_ru.smms</measurements>
+    <measurements>../../../../seamly2d/measurements/multisize/gost_man_ru.smms</measurements>
     <variables>
         <variable description="Высота основания" formula="16.1" name="#Пс_впрз"/>
         <variable description="проймы сзади АГ" formula="14" name="#Пк_впрз1"/>
@@ -196,8 +196,8 @@
                     <node idObject="123" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="0" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="253" inLayout="true" locked="false" mx="-28.0985" my="44.9608" name="Detail 1" seamAllowance="true" united="false" version="2" width="7">
-                <data annotation="" foldPosition="Undefined" fontSize="0" height="50" letter="A" mx="950.443" my="3136.56" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="50">
+            <piece closed="0" color="#ffeadc" fill="solidpattern" forbidFlipping="true" hideMainPath="false" id="253" inLayout="true" locked="false" material="Fabric" mx="-28.0985" my="44.9608" name="Back" seamAllowance="true" united="false" version="2" width="7">
+                <data annotation="" foldPosition="Up/Down" fontSize="0" height="50" letter="A" mx="950.443" my="3136.56" onFold="true" orientation="Right" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="50">
                     <line alignment="4" bold="true" italic="false" sfIncrement="6" text="%pLetter%"/>
                     <line alignment="4" bold="true" italic="false" sfIncrement="2" text="%pName%"/>
                     <line alignment="4" bold="false" italic="false" sfIncrement="0" text="%mFabric%, %wCut% %pQuantity%"/>
@@ -205,17 +205,17 @@
                 <patternInfo fontSize="0" height="50" mx="503.062" my="3153.44" rotation="0" visible="true" width="50"/>
                 <grainline arrowLength="12.7" arrows="0" length="100" mx="814.752" my="3422.4" rotation="90" visible="true"/>
                 <nodes>
-                    <node before="0" idObject="245" type="NodePoint"/>
+                    <node before="0" foldLine="true" idObject="245" type="NodePoint"/>
                     <node idObject="246" reverse="0" type="NodeSplinePath"/>
                     <node idObject="247" type="NodePoint"/>
                     <node idObject="248" type="NodePoint"/>
                     <node idObject="249" reverse="0" type="NodeSplinePath"/>
                     <node idObject="250" type="NodePoint"/>
                     <node idObject="251" type="NodePoint"/>
-                    <node after="0" idObject="252" type="NodePoint"/>
+                    <node after="0" foldLine="true" idObject="252" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="299" inLayout="true" locked="false" mx="24.105" my="-36.5952" name="Detail 2" seamAllowance="true" united="false" version="2" width="7">
+            <piece closed="1" color="#20ff54" fill="solidpattern" forbidFlipping="false" hideMainPath="false" id="299" inLayout="true" locked="false" material="Fabric" mx="24.105" my="-36.5952" name="Detail 2" seamAllowance="true" united="false" version="2" width="7">
                 <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="B" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="12.7" arrows="0" length="100" mx="2212.95" my="2691.32" rotation="90" visible="true"/>
@@ -241,8 +241,8 @@
                     <node idObject="304" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="312" inLayout="true" locked="false" mx="21.7402" my="56.6207" name="Detail 4" seamAllowance="true" united="false" version="2" width="7">
-                <data annotation="" foldPosition="Undefined" fontSize="0" height="50" letter="D" mx="2101.56" my="3530.43" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="50">
+            <piece closed="1" color="#deffe2" fill="solidpattern" forbidFlipping="false" hideMainPath="false" id="312" inLayout="true" locked="false" material="Lining" mx="21.7402" my="56.6207" name="Detail 4" seamAllowance="true" united="false" version="2" width="7">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="50" letter="D" mx="2101.56" my="3530.43" onFold="false" orientation="Undefined" quantity="2" rotation="0" rotationWay="None" tilt="None" visible="true" width="50">
                     <line alignment="4" bold="true" italic="false" sfIncrement="6" text="%pLetter%"/>
                     <line alignment="4" bold="true" italic="false" sfIncrement="2" text="%pName%"/>
                     <line alignment="4" bold="false" italic="false" sfIncrement="0" text="%mFabric%, %wCut% %pQuantity%"/>
@@ -353,7 +353,7 @@
                     <node idObject="325" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="333" inLayout="true" locked="false" mx="35.0805" my="-63.5407" name="Sleeve 1" seamAllowance="true" united="false" version="2" width="7">
+            <piece closed="1" color="#b4beff" fill="solidpattern" forbidFlipping="false" hideMainPath="false" id="333" inLayout="true" locked="false" material="Fabric" mx="35.0805" my="-63.5407" name="Sleeve 1" seamAllowance="true" united="false" version="2" width="7">
                 <data annotation="" foldPosition="Undefined" fontSize="0" height="50" letter="E" mx="3375.25" my="3728.2" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="50">
                     <line alignment="4" bold="true" italic="false" sfIncrement="6" text="%pLetter%"/>
                     <line alignment="4" bold="true" italic="false" sfIncrement="2" text="%pName%"/>

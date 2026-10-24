@@ -4,124 +4,6 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Implement
 
-
-### [ ] Task Layout.95 - Implement - Seamly2D Piece Properties - Rotation" Change Rotation to be radio buttons for: None, 1-Way → 360, 2-Way → 180, 4-Way → 90, Any → 1. None or Undefined writes no line. (Default is "None"). Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
-
-- [x] Layout.95.1 Piece Properties > Rotation: five radio buttons in three columns. Default None. `rotation_ButtonGroup`; button id = `PieceRotation` value.
-- [x] Layout.95.2 Data: `PieceRotation` (`floatitemdef.h`); `VPieceLabelData::getRotationWay`, `rotationToString`, `stringToRotation`, `rotationDisplayName`. Label `%pRotation%` shows the translated name.
-- [x] Layout.95.3 Schema: pattern format 0.7.7 (`v0.7.7.xsd`), `rotationWay` type `pieceRotation`: `None`, `1-Way`, `2-Way`, `4-Way`, `Any`.
-  - Decision taken: a new format 0.7.7, not a change to 0.7.6. Builds already wrote 0.7.6 files (jacket2, trousers samples) with free-text values; a 0.7.6 file is not converted again.
-  - Layout.96–98 add to the same 0.7.7 format.
-- [x] Layout.95.4 Converter: `VPatternConverter::toVersion0_7_7`, `rotationWayToV0_7_7`. An empty, unknown or translated value becomes `None`.
-- [x] Layout.95.5 Tests: `TST_VPiece::PieceRotationValuesRoundTrip`, `ConverterSetsRotationWay` (3 rows). Passed in a scratch harness (in-tree libs, current `vpatternconverter.cpp`, `vpiecelabeldata.cpp`, `schema.qrc`); the converted file validates against `v0.7.7.xsd`. `cl /Zs` on every changed `.cpp`. Fusion render of the dialog: the page fits. Not run: Qt suites (next MSI).
-- [ ] Layout.95.6 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
-- DXF `Rotation:` line and the handoff attribute: Layout.93.4, 93.5.
-
-### [ ] Task Layout.96 - Implement - Seamly2D Piece Properties - Tilt: change to radio buttons "None", "CCW", "CW". If "CCW" or "CW' chosen then enable a text field 'Degrees' that accepts integers between 0 and 90. Default radio button is "None", Default Degrees is "0". Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
-
-- [x] Layout.96.1 Piece Properties > Tilt: radio buttons None, CCW, CW; new row "Degrees:" spin box 0–90 (suffix °), enabled for CCW and CW only. Default None, 0. A piece set to None saves 0 degrees.
-- [x] Layout.96.2 Data: `PieceTilt`; `VPieceLabelData::GetTilt`, `getTiltDegrees` (clamped 0–90), `tiltToString`, `stringToTilt`, `tiltDisplayText`. Label `%pTilt%` shows "CCW 15"; None shows "None".
-- [x] Layout.96.3 Schema 0.7.7: `tilt` type `pieceTilt` (`None`, `CCW`, `CW`); new attribute `tiltDegrees` type `tiltDegrees` (0–90). `VAbstractPattern::AttrTiltDegrees`.
-- [x] Layout.96.4 Converter `tiltToV0_7_7`: old "CW X" / "CCW X" → direction, 0 degrees; "CCW 15" → CCW, 15; a number past 90 → 0; any other value → None without `tiltDegrees`.
-- [x] Layout.96.5 Tests: `TST_VPiece::PieceTiltValuesRoundTrip`, `ConverterSplitsTilt` (6 rows). Passed in the scratch harness, with the rotation tests (13 passed). `cl /Zs` on every changed `.cpp`. Fusion render of the dialog. Not run: Qt suites (next MSI).
-- [ ] Layout.96.6 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
-- DXF `Tilt:` line and the handoff attribute: Layout.93.4, 93.5.
-
-### [ ] Layout.97 - Implement - Seamly2D Piece Properties - Fold: Seamly2D gives Up/Down or Left/Right. D6673 Fold: is Y or N, and means the piece may go on the fold of tubular fabric. Change Seamly2D Piece Properties "On Fold" to be a checkbox that saves as "True" or "False", which exports to 'Y' or 'N' in DXF formats. This removes the possibility for 'Up/Down' folds as this is not typical for soft goods development. (Default is unchecked/"False"). Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
-
-- [x] Layout.97.1 Piece Properties: the Fold position list is removed. The row "Placement:" is now "Fold:" with the check box "On fold" (tooltip names DXF `Fold:Y`). Default unchecked. A valid fold line still checks and locks it.
-- [x] Layout.97.2 The pattern file keeps `onFold` (`xs:boolean`: `true` / `false`). `VPieceLabelData` has no fold position; `VAbstractPattern::AttrFoldPosition` is removed.
-- [x] Layout.97.3 Schema 0.7.7: no `foldPosition` attribute. Converter `removeFoldPositionV0_7_7` drops it; `onFold` is unchanged.
-  - Decision taken: a fold position (Up/Down, Left/Right) does not set `onFold`; the check box was the fold flag before too.
-  - Label placeholder `%pFoldPosition%`: removed from the label editor Insert menu; an old template prints nothing for it. No sample or template uses it.
-- [x] Layout.97.4 Tests: `TST_VPiece::ConverterRemovesFoldPosition` (3 rows). Harness: 16 passed. `cl /Zs` on every changed `.cpp`. Fusion render: the page fits again. Not run: Qt suites (next MSI).
-- [ ] Layout.97.5 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
-- DXF `Fold:Y` / `Fold:N`: Layout.93.5.
-
-### [ ] Task Layout.98 - Implement - Seamly2D Piece Properties - Flip: change Flip to radio buttons 'None', 'Horizontal', 'Vertical', and 'Both' are enabled. (Default is 'None'); create test.
-
-- [x] Layout.98.1 Piece Properties > Attributes: "Flip:" radio buttons None, Horizontal, Vertical (first row), Both. All four are enabled. Default None. Replaces the "Flipping: Forbid" check box.
-- [x] Layout.98.2 Data: `PieceFlip` (`def.h`), `pieceFlipToString`, `stringToPieceFlip`; `VAbstractPiece::getFlip`, `setFlip`. `IsForbidFlipping()` is now true for None; the Seamly2D layout engine (`vlayoutpaper.cpp`, `vposition.cpp`) keeps using it. `VLayoutPiece` keeps the flip.
-- [x] Layout.98.3 Schema 0.7.7: piece attribute `flip` type `pieceFlip`; `forbidFlipping` removed. Converter `removeForbidFlippingV0_7_7`.
-  - Decision taken: every converted piece gets flip None, also `forbidFlipping="false"`. Most old files hold `false` only because it was the default; a DXF export then writes no `Flip:` line, as before. Change the piece to allow a flip.
-- [x] Layout.98.4 Other places that set the old flag:
-  - Piece context menu: "Flip" submenu with the four choices replaces "Forbid Flipping".
-  - Decision taken: the F key no longer toggles flipping (four states); the Shortcuts dialog row is removed.
-  - Preferences > Pattern: the "Forbid flipping" default is removed (`VCommonSettings::getForbidPieceFlipping`, key `pattern/forbidFlipping`): a new piece is always None.
-- [x] Layout.98.5 Tests: `TST_VPiece::PieceFlipValuesRoundTrip`, `LayoutPieceKeepsFlip`, `ConverterRemovesForbidFlipping` (2 rows). Harness: 19 passed (`LayoutPieceKeepsFlip` needs a rebuilt `vlayout`; Qt suites). The harness also converted the 8 committed samples and 13 CollectionTest patterns to 0.7.7; all validate. Not converted: 4 inputs that fail before conversion (seamtest1–3 at 0.4.0, the empty `text.sm2d`) and 21 formats older than `readOnly`. `cl /Zs` on every changed `.cpp`. Fusion and Windows renders of the dialog. Not run: Qt suites (next MSI).
-- [ ] Layout.98.6 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
-- DXF `Flip:` line and the handoff attribute: Layout.93.4, 93.5.
-
-### [ ] Task Layout.92 - Implement - right layout canvas - Material tabs
-
-Currently SeamlyLayout's left input canvas displays the Material types in tabs; the layout algorithm processes only the currently selected Material tab from the left hand canvas. Update the layout algorithm to generate the layouts for all material tabs, and display the material layouts in the right hand canvas using Material tabs (as is done in the left input canvas).
-
-- [x] Layout.92.1 Create Layout lays out every material: the shown material first, then each other material in tab order, each with its first layout (individual layout or Marker) and all its tabs. One progress popup; labels name the material: "Laying out Lining: Size 220 (30 of 56)…".
-  - `layout_views::layout_jobs`, `LayoutJob`; `TabLayoutQueue` holds jobs of every material, labels (`job_label`), the Base Size reuse per material, and the final warning (`final_warning`: left-out pieces, then fold lines off the edge).
-  - Settings Submit makes a blank canvas per material (`initialize_layout`); the oversized-pieces dialog lists the pieces of every material.
-- [x] Layout.92.2 Right canvas: material tabs above the layout tabs, the same tabs as over the left canvas (`Main.qml` inline component `MaterialTabBar`). One material: the "Material: <m>" header stays.
-  - Decision taken: both tab bars show the same material. A click on either shows that material's pieces on the left and its layouts on the right.
-  - Decision taken: a material switch keeps every layout, its shown tab and its Adjust edits (`layout_views::MaterialLayout`; `select_material` parks and restores, as tabs do). Replaces the Layout.77.1.2 rule that a switch drops the layout.
-  - Exports and Export all tabs work on the shown material, as before.
-- [x] Layout.92.3 Tests: `layout_views` `layout_jobs_cover_every_material`, `job_labels_name_the_material`, `final_warning_joins_problems_and_fold_lines`, `material_layout_resets_to_its_blank_canvas`; `tab_queue_messages_count_up` and `base_size_layout_is_reused_once_kept` updated. Existing `material_split::material_layout_holds_its_own_pieces` lays out each material. Doc: `SVG-DATA-ATTRIBUTES.md`, "Materials".
-  - Checked: `cargo test --workspace` 603 passed; `ctest --preset debug` 6 of 6 (debug build with the new QML); `qmllint`: no new kind of warning. Not run: GUI, MSI.
-- [ ] Layout.92.4 Next MSI: user check, `AGENT_CHECKLIST.md` §25.
-
-### [ ] Task Layout.93 - Implement - DXF - for each piece, use its 'piece tool' properties and attributes as source of truth instead of labels for names, letter, quantity, material, foldline, etc.; track this data with the layout pieces.
-
-This information should be tracked in the layout data even if it's not shown in a label. The DXF export can then access piece properties instead of label data to generate the exported file.
-
-- [x] Layout.93.1 DXF `Material:` from `data-material`. Today every block writes `Material:Fabric` (`drawing.rs` `DEFAULT_MATERIAL`), also for Lining. Keep the default as 'Fabric'.
-  - Done: `converter::material_from_piece`; an empty or absent `data-material` gives `Fabric`. Test: `piece_material_comes_from_data_material`.
-- [x] Layout.93.2 DXF layer 7 grainline from `data-grainline-angle` when the grainline is hidden. Today jacket2 Подборт has no layer 7 line. --> don't add a grainline in dXF if the piece grainline is hidden. "A hidden grainline indicates that there is no grainline"
-- [x] Layout.93.3 Missing Piece Data: a hidden label is not missing data. Report only data that Piece Properties lack. "Hidden label(s) don't indicate anything. Use piece properties, not piece labels, to get data for DXF export"
-  - Layer 15 holds only the labels the piece shows; a hidden label writes no layer 15 text (user decision). The piece system text carries the data.
-  - Done: `MissingPieceData` has no label flag. `Quantity:` reads `data-quantity` only, never a "Cut N" label line. Tests: `hidden_label_is_not_missing_data`, `quantity_comes_from_data_quantity_only`.
-  - Layout.93.2 needs no code: a hidden grainline writes no layer 7 line, and Missing Piece Data still reports "no grainline".
-- [x] Layout.93.4 Seamly2D handoff: add `data-*` attributes for Rotation, Tilt, Fold position, Orientation, Annotation and Forbid flipping. Update `SVG-DATA-ATTRIBUTES.md` and `NEW-ATTRIBUTES.csv`.
-  - Done: `data-rotation` (step: 360, 180, 90, 1), `data-tilt` (degrees, negative clockwise), `data-flip` (Horizontal, Vertical, Both), `data-orientation` (Left, Right), `data-annotation`. A value that allows nothing writes no attribute. `VLayoutPiece::setPieceProperties` keeps the Piece Properties, also with a hidden label; `VPieceLabelData::rotationStepDegrees`.
-  - Fold position is gone (Layout.97): `data-on-fold` carries the fold. Forbid flipping is now Flip (Layout.98): `data-flip`.
-- [x] Layout.93.5 DXF piece system text from them: `Rotation:`, `Tilt:`, `Fold:`, `Flip:` (D6673 §4.3.1.2). Values: Layout.95 (Rotation), Layout.96 (Tilt), Layout.97 (Fold), Layout.98 (Flip).
-  - Done: after `Quantity:`, in D6673 order: `Rotation:180`, `Flip:Y`, `Tilt:-15`, `Fold:N`, then `Material:`. Rotation, Flip or Tilt None writes no line. `converter::rotation_from_piece`, `flip_from_piece`, `tilt_from_piece`, `fold_from_piece`; `write_astm_block`.
-  - Decision taken: Flip Horizontal (left to right) is `Y`, Vertical is `X` (D6673: X flips about the horizontal axis). Both is `XY`; D6673 defines only `X` or `Y`. Change if a reader refuses it.
-  - Decision taken: Tilt has its sign: `+15` counterclockwise, `-15` clockwise. A direction with 0 degrees writes no line.
-  - Decision taken: every tagged piece writes `Fold:Y` or `Fold:N`.
-  - Decision taken: DXF-AAMA writes none of the four: AAMA piece text has no such identifiers.
-- [x] Layout.93.6 Tests: `TST_SvgComponentTags`; Rust converter and writer tests with hidden labels and grainlines.
-  - `TST_SvgComponentTags::PieceCarriesPieceProperties` (hidden label); `TST_VPiece::LayoutPieceKeepsPieceProperties`, `RotationStepDegrees` (harness: passed); `astm_piece_test::layout_rules_come_from_piece_properties`; `writer_astm_test::layout_rule_text_follows_quantity_in_d6673_order`; `graded_sample_blocks_follow_d6673` expects `Fold:N`. Hidden labels and grainlines: Layout.93.1–93.3 tests.
-  - Checked: `cargo test --workspace` 605 passed; `cl /Zs` on every changed `.cpp`. Not run: Qt suites (next MSI).
-  - Docs: `SVG-DATA-ATTRIBUTES.md` (piece attributes), `NEW-ATTRIBUTES.csv`, `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
-- [ ] Layout.93.7 Next MSI: user check, `AGENT_CHECKLIST.md` §23.
-
-### [ ] Task Layout.94 - Implement - Multisize the grainline, pattern label, and piece label all have the same position relative to local space within their piece. One of the results will be that the Nested layout's grainlines, pattern label, and piece label stack exactly on top of each other to make the nested layout visually more simple and easier to read. Another results is that no grainline, piece label, pattern label is placed outside or extends beyond the cutline.
-
-Select the position of the base size's grainline (when visible), pattern label (when visible), and piece label (when visible); replace the reamining pieces' grainline, pattern label, and piece label 's positions with the base size's positions.
-
-- [x] Layout.94.1 At import, every size's grainline, piece label and pattern label move to the base size's place: the same offset from the centre of the outline's bounding box. Only shown (handed-off) groups move. `cxxqt_bridge/src/annotation_alignment.rs`, called by `finish_import` before the piece names; size labels follow the moved grainline.
-  - Reference point: grainline middle; label first text line anchor.
-- [x] Layout.94.2 Nested stacks the sizes on the outline centre (`svg_dom::center_piece_sets` now measures the cut line, else the seam line), the same centre the move uses. jacket2: 12 stacks, each within 0.5 px.
-- [x] Layout.94.3 Cut line check: a grainline end or label line anchor outside a size's cut line is named in one import warning.
-  - Finding: jacket2 Back's pattern label sits near the edge in size 500 and leaves sizes 220–280: "Back: pattern label past the cut line in sizes 220, 240, 260, 280". Fix in Seamly2D: move Back's pattern label toward the middle in the base size.
-  - Decision taken: positions stay the base size's even then (the task's rule); the warning names the sizes. No label is moved inward on its own.
-  - Open: on the Nested canvas the size labels of every size stack too ("Size 220" over "Size 240"). Nested exports keep the smallest size's only (Layout.84).
-- [x] Layout.94.4 Tests: `annotation_alignment` (5); `layout_utils::jacket2_nested_stacks_each_piece_set_annotations` with the MSI 26.10.2023 capture as fixture (now `jacket2_40-146_handoff.svg`, Layout.27.13.4). `cargo test --workspace` 611 passed. Doc: `SVG-DATA-ATTRIBUTES.md`, "Multisize grainline and label positions".
-- [ ] Layout.94.5 Next MSI: user check, `AGENT_CHECKLIST.md` §26.
-
-### [ ] Task Layout.90 - Implement - DXF-R13 - Paper Space information
-
-
-Look up what 'Paper space' information is in the DXF-ASTM standard and prompt the developer to read this information; create a plan to implement and discuss with developer for approval; if developer approves then implement this in the DXF-ASTM (R13) export. If this information is utilized in the DXF-AAMA (R11) export then implement this for DXF-AAMA (R11) export, too.
-
-- [x] Layout.90.1 Research and plan: `dxf-docs/seamlylayout_DXF_PAPER_AND_MODEL_SPACE.md`. D6673-10 names no paper space; R13 already writes the empty `*PAPER_SPACE` block it requires. AAMA (R11) uses none.
-- [ ] Layout.90.2 User decision: P1, no change (recommended), or P2, an R13 paper space viewport with `$PLIMMIN` / `$PLIMMAX`.
-
-### [ ] Task Layout.91 - Implement - DXF-R13 - Model Space information
-
-Look up what 'Model space' information is in the DXF-ASTM standard and prompt the developer to read this information; create a plan to implement and discuss with developer for approval; if developer approves then implement this in the DXF-ASTM (R13) export. If this information is utilized in the DXF-AAMA (R11) export then implement this for DXF-AAMA (R11) export, too.
-
-- [x] Layout.91.1 Research and plan: same file. D6673-10 names no model space; ENTITIES (the model space) already holds the style system text and one INSERT per piece, as §3.2.1 and §4.3.1.3 ask.
-- [ ] Layout.91.2 User decision: M1, no change (recommended); M2, header `$EXTMIN` / `$EXTMAX` / `$LIMMIN` / `$LIMMAX`; or M3, blocks around their own origin (not recommended).
-
 ## VERIFY
 
 ### [ ] Task Layout.6 — Verify - DXF-ASTM grading
@@ -444,7 +326,7 @@ For oversized individual-pattern pieces, ask whether to split them or enlarge th
 
 ### [ ] Task Layout.87 - Verify - Export - Marker - Disable 'PDF (Tiled)' layout for Marker layout (seamlylayout will lock up when exporting a Marker as a tiled layout)
 
-### [ ] Task Layout.85 - Exports - add an option to export DXF 10 (DXF-AAMA)
+### [ ] Task Layout.85 - Verify - Exports - add an option to export DXF 10 (DXF-AAMA)
 
 Export > DXF > "DXF-AAMA (R11)": ANSI/AAMA-292 content in a DXF R11 (AC1009) file, the DXF version the standard builds on. Same pipeline as DXF-ASTM; `DxfAstmExportOptions::aama` selects the AAMA layers. Reference: `dxf-docs/seamlylayout_DXF_AAMA.md`.
 
@@ -471,4 +353,106 @@ Export > DXF > "DXF-AAMA (R11)": ANSI/AAMA-292 content in a DXF R11 (AC1009) fil
   - Open: an untagged SVG (no `data-type`) keeps its generic layers, so its text stays on layer 15.
 - [ ] Layout.85.5 Next MSI: user check, `AGENT_CHECKLIST.md` §22. Import the file in an AAMA reader (CLO3D or another pattern CAD).
 
+
+### [ ] Task Layout.95 - Verify - Seamly2D Piece Properties - Rotation" Change Rotation to be radio buttons for: None, 1-Way → 360, 2-Way → 180, 4-Way → 90, Any → 1. None or Undefined writes no line. (Default is "None"). Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
+
+- [x] Layout.95.1 Piece Properties > Rotation: five radio buttons in three columns. Default None. `rotation_ButtonGroup`; button id = `PieceRotation` value.
+- [x] Layout.95.2 Data: `PieceRotation` (`floatitemdef.h`); `VPieceLabelData::getRotationWay`, `rotationToString`, `stringToRotation`, `rotationDisplayName`. Label `%pRotation%` shows the translated name.
+- [x] Layout.95.3 Schema: pattern format 0.7.7 (`v0.7.7.xsd`), `rotationWay` type `pieceRotation`: `None`, `1-Way`, `2-Way`, `4-Way`, `Any`.
+  - Decision taken: a new format 0.7.7, not a change to 0.7.6. Builds already wrote 0.7.6 files (jacket2, trousers samples) with free-text values; a 0.7.6 file is not converted again.
+  - Layout.96–98 add to the same 0.7.7 format.
+- [x] Layout.95.4 Converter: `VPatternConverter::toVersion0_7_7`, `rotationWayToV0_7_7`. An empty, unknown or translated value becomes `None`.
+- [x] Layout.95.5 Tests: `TST_VPiece::PieceRotationValuesRoundTrip`, `ConverterSetsRotationWay` (3 rows). Passed in a scratch harness (in-tree libs, current `vpatternconverter.cpp`, `vpiecelabeldata.cpp`, `schema.qrc`); the converted file validates against `v0.7.7.xsd`. `cl /Zs` on every changed `.cpp`. Fusion render of the dialog: the page fits. Not run: Qt suites (next MSI).
+- [ ] Layout.95.6 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
+- DXF `Rotation:` line and the handoff attribute: Layout.93.4, 93.5.
+
+### [ ] Task Layout.96 - Verify - Seamly2D Piece Properties - Tilt: change to radio buttons "None", "CCW", "CW". If "CCW" or "CW' chosen then enable a text field 'Degrees' that accepts integers between 0 and 90. Default radio button is "None", Default Degrees is "0". Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
+
+- [x] Layout.96.1 Piece Properties > Tilt: radio buttons None, CCW, CW; new row "Degrees:" spin box 0–90 (suffix °), enabled for CCW and CW only. Default None, 0. A piece set to None saves 0 degrees.
+- [x] Layout.96.2 Data: `PieceTilt`; `VPieceLabelData::GetTilt`, `getTiltDegrees` (clamped 0–90), `tiltToString`, `stringToTilt`, `tiltDisplayText`. Label `%pTilt%` shows "CCW 15"; None shows "None".
+- [x] Layout.96.3 Schema 0.7.7: `tilt` type `pieceTilt` (`None`, `CCW`, `CW`); new attribute `tiltDegrees` type `tiltDegrees` (0–90). `VAbstractPattern::AttrTiltDegrees`.
+- [x] Layout.96.4 Converter `tiltToV0_7_7`: old "CW X" / "CCW X" → direction, 0 degrees; "CCW 15" → CCW, 15; a number past 90 → 0; any other value → None without `tiltDegrees`.
+- [x] Layout.96.5 Tests: `TST_VPiece::PieceTiltValuesRoundTrip`, `ConverterSplitsTilt` (6 rows). Passed in the scratch harness, with the rotation tests (13 passed). `cl /Zs` on every changed `.cpp`. Fusion render of the dialog. Not run: Qt suites (next MSI).
+- [ ] Layout.96.6 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
+- DXF `Tilt:` line and the handoff attribute: Layout.93.4, 93.5.
+
+### [ ] Layout.97 - Verify - Seamly2D Piece Properties - Fold: Seamly2D gives Up/Down or Left/Right. D6673 Fold: is Y or N, and means the piece may go on the fold of tubular fabric. Change Seamly2D Piece Properties "On Fold" to be a checkbox that saves as "True" or "False", which exports to 'Y' or 'N' in DXF formats. This removes the possibility for 'Up/Down' folds as this is not typical for soft goods development. (Default is unchecked/"False"). Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
+
+- [x] Layout.97.1 Piece Properties: the Fold position list is removed. The row "Placement:" is now "Fold:" with the check box "On fold" (tooltip names DXF `Fold:Y`). Default unchecked. A valid fold line still checks and locks it.
+- [x] Layout.97.2 The pattern file keeps `onFold` (`xs:boolean`: `true` / `false`). `VPieceLabelData` has no fold position; `VAbstractPattern::AttrFoldPosition` is removed.
+- [x] Layout.97.3 Schema 0.7.7: no `foldPosition` attribute. Converter `removeFoldPositionV0_7_7` drops it; `onFold` is unchanged.
+  - Decision taken: a fold position (Up/Down, Left/Right) does not set `onFold`; the check box was the fold flag before too.
+  - Label placeholder `%pFoldPosition%`: removed from the label editor Insert menu; an old template prints nothing for it. No sample or template uses it.
+- [x] Layout.97.4 Tests: `TST_VPiece::ConverterRemovesFoldPosition` (3 rows). Harness: 16 passed. `cl /Zs` on every changed `.cpp`. Fusion render: the page fits again. Not run: Qt suites (next MSI).
+- [ ] Layout.97.5 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
+- DXF `Fold:Y` / `Fold:N`: Layout.93.5.
+
+### [ ] Task Layout.98 - Verify - Seamly2D Piece Properties - Flip: change Flip to radio buttons 'None', 'Horizontal', 'Vertical', and 'Both' are enabled. (Default is 'None'); create test.
+
+- [x] Layout.98.1 Piece Properties > Attributes: "Flip:" radio buttons None, Horizontal, Vertical (first row), Both. All four are enabled. Default None. Replaces the "Flipping: Forbid" check box.
+- [x] Layout.98.2 Data: `PieceFlip` (`def.h`), `pieceFlipToString`, `stringToPieceFlip`; `VAbstractPiece::getFlip`, `setFlip`. `IsForbidFlipping()` is now true for None; the Seamly2D layout engine (`vlayoutpaper.cpp`, `vposition.cpp`) keeps using it. `VLayoutPiece` keeps the flip.
+- [x] Layout.98.3 Schema 0.7.7: piece attribute `flip` type `pieceFlip`; `forbidFlipping` removed. Converter `removeForbidFlippingV0_7_7`.
+  - Decision taken: every converted piece gets flip None, also `forbidFlipping="false"`. Most old files hold `false` only because it was the default; a DXF export then writes no `Flip:` line, as before. Change the piece to allow a flip.
+- [x] Layout.98.4 Other places that set the old flag:
+  - Piece context menu: "Flip" submenu with the four choices replaces "Forbid Flipping".
+  - Decision taken: the F key no longer toggles flipping (four states); the Shortcuts dialog row is removed.
+  - Preferences > Pattern: the "Forbid flipping" default is removed (`VCommonSettings::getForbidPieceFlipping`, key `pattern/forbidFlipping`): a new piece is always None.
+- [x] Layout.98.5 Tests: `TST_VPiece::PieceFlipValuesRoundTrip`, `LayoutPieceKeepsFlip`, `ConverterRemovesForbidFlipping` (2 rows). Harness: 19 passed (`LayoutPieceKeepsFlip` needs a rebuilt `vlayout`; Qt suites). The harness also converted the 8 committed samples and 13 CollectionTest patterns to 0.7.7; all validate. Not converted: 4 inputs that fail before conversion (seamtest1–3 at 0.4.0, the empty `text.sm2d`) and 21 formats older than `readOnly`. `cl /Zs` on every changed `.cpp`. Fusion and Windows renders of the dialog. Not run: Qt suites (next MSI).
+- [ ] Layout.98.6 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
+- DXF `Flip:` line and the handoff attribute: Layout.93.4, 93.5.
+
+### [ ] Task Layout.92 - Verify - right layout canvas - Material tabs
+
+Currently SeamlyLayout's left input canvas displays the Material types in tabs; the layout algorithm processes only the currently selected Material tab from the left hand canvas. Update the layout algorithm to generate the layouts for all material tabs, and display the material layouts in the right hand canvas using Material tabs (as is done in the left input canvas).
+
+- [x] Layout.92.1 Create Layout lays out every material: the shown material first, then each other material in tab order, each with its first layout (individual layout or Marker) and all its tabs. One progress popup; labels name the material: "Laying out Lining: Size 220 (30 of 56)…".
+  - `layout_views::layout_jobs`, `LayoutJob`; `TabLayoutQueue` holds jobs of every material, labels (`job_label`), the Base Size reuse per material, and the final warning (`final_warning`: left-out pieces, then fold lines off the edge).
+  - Settings Submit makes a blank canvas per material (`initialize_layout`); the oversized-pieces dialog lists the pieces of every material.
+- [x] Layout.92.2 Right canvas: material tabs above the layout tabs, the same tabs as over the left canvas (`Main.qml` inline component `MaterialTabBar`). One material: the "Material: <m>" header stays.
+  - Decision taken: both tab bars show the same material. A click on either shows that material's pieces on the left and its layouts on the right.
+  - Decision taken: a material switch keeps every layout, its shown tab and its Adjust edits (`layout_views::MaterialLayout`; `select_material` parks and restores, as tabs do). Replaces the Layout.77.1.2 rule that a switch drops the layout.
+  - Exports and Export all tabs work on the shown material, as before.
+- [x] Layout.92.3 Tests: `layout_views` `layout_jobs_cover_every_material`, `job_labels_name_the_material`, `final_warning_joins_problems_and_fold_lines`, `material_layout_resets_to_its_blank_canvas`; `tab_queue_messages_count_up` and `base_size_layout_is_reused_once_kept` updated. Existing `material_split::material_layout_holds_its_own_pieces` lays out each material. Doc: `SVG-DATA-ATTRIBUTES.md`, "Materials".
+  - Checked: `cargo test --workspace` 603 passed; `ctest --preset debug` 6 of 6 (debug build with the new QML); `qmllint`: no new kind of warning. Not run: GUI, MSI.
+- [ ] Layout.92.4 Next MSI: user check, `AGENT_CHECKLIST.md` §25.
+
+### [ ] Task Layout.93 - Verify - DXF - for each piece, use its 'piece tool' properties and attributes as source of truth instead of labels for names, letter, quantity, material, foldline, etc.; track this data with the layout pieces.
+
+This information should be tracked in the layout data even if it's not shown in a label. The DXF export can then access piece properties instead of label data to generate the exported file.
+
+- [x] Layout.93.1 DXF `Material:` from `data-material`. Today every block writes `Material:Fabric` (`drawing.rs` `DEFAULT_MATERIAL`), also for Lining. Keep the default as 'Fabric'.
+  - Done: `converter::material_from_piece`; an empty or absent `data-material` gives `Fabric`. Test: `piece_material_comes_from_data_material`.
+- [x] Layout.93.2 DXF layer 7 grainline from `data-grainline-angle` when the grainline is hidden. Today jacket2 Подборт has no layer 7 line. --> don't add a grainline in dXF if the piece grainline is hidden. "A hidden grainline indicates that there is no grainline"
+- [x] Layout.93.3 Missing Piece Data: a hidden label is not missing data. Report only data that Piece Properties lack. "Hidden label(s) don't indicate anything. Use piece properties, not piece labels, to get data for DXF export"
+  - Layer 15 holds only the labels the piece shows; a hidden label writes no layer 15 text (user decision). The piece system text carries the data.
+  - Done: `MissingPieceData` has no label flag. `Quantity:` reads `data-quantity` only, never a "Cut N" label line. Tests: `hidden_label_is_not_missing_data`, `quantity_comes_from_data_quantity_only`.
+  - Layout.93.2 needs no code: a hidden grainline writes no layer 7 line, and Missing Piece Data still reports "no grainline".
+- [x] Layout.93.4 Seamly2D handoff: add `data-*` attributes for Rotation, Tilt, Fold position, Orientation, Annotation and Forbid flipping. Update `SVG-DATA-ATTRIBUTES.md` and `NEW-ATTRIBUTES.csv`.
+  - Done: `data-rotation` (step: 360, 180, 90, 1), `data-tilt` (degrees, negative clockwise), `data-flip` (Horizontal, Vertical, Both), `data-orientation` (Left, Right), `data-annotation`. A value that allows nothing writes no attribute. `VLayoutPiece::setPieceProperties` keeps the Piece Properties, also with a hidden label; `VPieceLabelData::rotationStepDegrees`.
+  - Fold position is gone (Layout.97): `data-on-fold` carries the fold. Forbid flipping is now Flip (Layout.98): `data-flip`.
+- [x] Layout.93.5 DXF piece system text from them: `Rotation:`, `Tilt:`, `Fold:`, `Flip:` (D6673 §4.3.1.2). Values: Layout.95 (Rotation), Layout.96 (Tilt), Layout.97 (Fold), Layout.98 (Flip).
+  - Done: after `Quantity:`, in D6673 order: `Rotation:180`, `Flip:Y`, `Tilt:-15`, `Fold:N`, then `Material:`. Rotation, Flip or Tilt None writes no line. `converter::rotation_from_piece`, `flip_from_piece`, `tilt_from_piece`, `fold_from_piece`; `write_astm_block`.
+  - Decision taken: Flip Horizontal (left to right) is `Y`, Vertical is `X` (D6673: X flips about the horizontal axis). Both is `XY`; D6673 defines only `X` or `Y`. Change if a reader refuses it.
+  - Decision taken: Tilt has its sign: `+15` counterclockwise, `-15` clockwise. A direction with 0 degrees writes no line.
+  - Decision taken: every tagged piece writes `Fold:Y` or `Fold:N`.
+  - Decision taken: DXF-AAMA writes none of the four: AAMA piece text has no such identifiers.
+- [x] Layout.93.6 Tests: `TST_SvgComponentTags`; Rust converter and writer tests with hidden labels and grainlines.
+  - `TST_SvgComponentTags::PieceCarriesPieceProperties` (hidden label); `TST_VPiece::LayoutPieceKeepsPieceProperties`, `RotationStepDegrees` (harness: passed); `astm_piece_test::layout_rules_come_from_piece_properties`; `writer_astm_test::layout_rule_text_follows_quantity_in_d6673_order`; `graded_sample_blocks_follow_d6673` expects `Fold:N`. Hidden labels and grainlines: Layout.93.1–93.3 tests.
+  - Checked: `cargo test --workspace` 605 passed; `cl /Zs` on every changed `.cpp`. Not run: Qt suites (next MSI).
+  - Docs: `SVG-DATA-ATTRIBUTES.md` (piece attributes), `NEW-ATTRIBUTES.csv`, `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
+- [ ] Layout.93.7 Next MSI: user check, `AGENT_CHECKLIST.md` §23.
+
+### [ ] Task Layout.94 - Verify - Multisize the grainline, pattern label, and piece label all have the same position relative to local space within their piece. One of the results will be that the Nested layout's grainlines, pattern label, and piece label stack exactly on top of each other to make the nested layout visually more simple and easier to read. Another results is that no grainline, piece label, pattern label is placed outside or extends beyond the cutline.
+
+Select the position of the base size's grainline (when visible), pattern label (when visible), and piece label (when visible); replace the reamining pieces' grainline, pattern label, and piece label 's positions with the base size's positions.
+
+- [x] Layout.94.1 At import, every size's grainline, piece label and pattern label move to the base size's place: the same offset from the centre of the outline's bounding box. Only shown (handed-off) groups move. `cxxqt_bridge/src/annotation_alignment.rs`, called by `finish_import` before the piece names; size labels follow the moved grainline.
+  - Reference point: grainline middle; label first text line anchor.
+- [x] Layout.94.2 Nested stacks the sizes on the outline centre (`svg_dom::center_piece_sets` now measures the cut line, else the seam line), the same centre the move uses. jacket2: 12 stacks, each within 0.5 px.
+- [x] Layout.94.3 Cut line check: a grainline end or label line anchor outside a size's cut line is named in one import warning.
+  - Finding: jacket2 Back's pattern label sits near the edge in size 500 and leaves sizes 220–280: "Back: pattern label past the cut line in sizes 220, 240, 260, 280". Fix in Seamly2D: move Back's pattern label toward the middle in the base size.
+  - Decision taken: positions stay the base size's even then (the task's rule); the warning names the sizes. No label is moved inward on its own.
+  - Open: on the Nested canvas the size labels of every size stack too ("Size 220" over "Size 240"). Nested exports keep the smallest size's only (Layout.84).
+- [x] Layout.94.4 Tests: `annotation_alignment` (5); `layout_utils::jacket2_nested_stacks_each_piece_set_annotations` with the MSI 26.10.2023 capture as fixture (now `jacket2_40-146_handoff.svg`, Layout.27.13.4). `cargo test --workspace` 611 passed. Doc: `SVG-DATA-ATTRIBUTES.md`, "Multisize grainline and label positions".
+- [ ] Layout.94.5 Next MSI: user check, `AGENT_CHECKLIST.md` §26.
 
