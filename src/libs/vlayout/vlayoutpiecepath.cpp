@@ -210,6 +210,7 @@ QVector<int> VLayoutPiecePath::nodeIndices() const
  */
 void VLayoutPiecePath::setNodeVertices(const QVector<QPointF> &nodeVertices, bool closed)
 {
+    d->m_points = VAbstractPiece::snapNodeVertices(d->m_points, nodeVertices, closed);
     d->m_turnPoints = VAbstractPiece::turnPointIndices(d->m_points, nodeVertices, closed);
     d->m_nodeIndices = VAbstractPiece::nodeVertexIndices(d->m_points, nodeVertices, closed);
 }
