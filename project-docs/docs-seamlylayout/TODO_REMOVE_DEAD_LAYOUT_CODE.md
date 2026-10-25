@@ -47,6 +47,12 @@ Steps, in order:
   - [x] Dead.4.2.3 Trim the export dialog to Export Draft Blocks: SVG, PDF, PNG, JPG, BMP, TIF, PPM; no binary DXF, text as paths or size list. Test: `TST_ExportFormatCombobox::offersNoDxfOrObj`
   - [ ] Dead.4.2.4 MSI build and user check, `AGENT_CHECKLIST.md` §28 (with Dead.4.1.5)
 - [ ] Dead.4.3 Move `VAbstractPiece` → `AbstractPiece` and `VTextManager` → `LabelTextManager` into `vpatterndb`; restyle; port their tests
+  - Decisions (user): keep the method names; `VSAPoint` → `SeamAllowancePoint`; one exit point per function; no namespace
+  - [x] Dead.4.3.1 Move: `vpatterndb/AbstractPiece.{h,cpp}`, `AbstractPieceData.h`, `SeamAllowancePoint.h`, `LabelTextManager.{h,cpp}`. vpatterndb uses no vlayout header; it adds QtXml
+  - [x] Dead.4.3.2 Restyle: briefs, snake_case, one exit point. `LabelTextManager::min_font_size` replaces `MIN_FONT_SIZE`; `TextLine` members are `text`, `font_size_increment`, `bold`, `italic`, `alignment`
+  - [x] Dead.4.3.3 Link vlayout before vpatterndb in `seamly2d.pro`, `seamlyme.pro`, `Seamly2DTest.pro`, `CollectionTest.pro`
+  - [x] Dead.4.3.4 Tests: `TST_AbstractPiece` (new case `SeamAllowancePointWidths`), `TST_LabelTextManager`
+  - [ ] Dead.4.3.5 MSI build, Qt suites and user check, `AGENT_CHECKLIST.md` §30
 - [ ] Dead.4.4 Write `layout_handoff`: `HandoffDocument`, `HandoffPiece`, `HandoffLabel`, `handoff_turn_points`, `handoff_ids`
   - Port `TST_SvgComponentTags`, `BuiltInPieceWithFoldLineSendsOpenSeamline` and `FoldLineGroupHoldsArrowAndLabel` included
   - Port the `fold_line` group: fold line path out to the cut line, then the `fold_line_arrow` and `fold_line_label` parts (`VLayoutPiece::createFoldLineItem()`, nested parts in `SvgGenerator::addComponentGroups()`)
