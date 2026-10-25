@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------------------------------------------------
-//  @file   vtextmanager.cpp
+//  @file   LabelTextManager.cpp
 //  @author Douglas S Caskey
 //  @date   1 Mar, 2026
 //
@@ -23,7 +23,7 @@
 //---------------------------------------------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------------------------------------------------
-//  @file   vtextmanager.cpp
+//  @file   LabelTextManager.cpp
 //  @author Bojan Kverh
 //  @date   July 19, 2016
 //
@@ -48,91 +48,104 @@
 //  along with Valentina.  If not, see <http://www.gnu.org/licenses/>.
 //---------------------------------------------------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------------------------------------------------
+//  @file   LabelTextManager.cpp
+//  @author slspencer
+//
+//  @brief
+//  Text lines of a piece label or the pattern label, and the font size that fits them into the label.
+//
+//  @copyright
+//  Copyright (C) 2026 Seamly2D Project
+//  https://github.com/fashionfreedom/seamly2d
+//
+//  SPDX-License-Identifier: GPL-3.0-or-later
+//
+//  Seamly2D is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  Seamly2D is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with Seamly2D. If not, see <http://www.gnu.org/licenses/>.
+//---------------------------------------------------------------------------------------------------------------------
+
+#include "LabelTextManager.h"
+
 #include <QDate>
+#include <QDebug>
 #include <QFileInfo>
 #include <QFontMetrics>
 #include <QHash>
 #include <QLatin1String>
-#include <QRegularExpression>
-#include <QApplication>
-#include <QDebug>
+#include <QLocale>
+#include <QMap>
+#include <QTime>
 
 #include "../ifc/xml/vabstractpattern.h"
-#include "../vpatterndb/floatItemData/vpiecelabeldata.h"
 #include "../vmisc/vabstractapplication.h"
 #include "../vmisc/vmath.h"
-#include "../vpatterndb/vcontainer.h"
-#include "LabelTextManager.h"
-
-//---------------------------------------------------------------------------------------------------------------------
-/// @brief TextLine::TextLine default constructor
-//---------------------------------------------------------------------------------------------------------------------
-TextLine::TextLine()
-    : m_text()
-    , m_iFontSize(MIN_FONT_SIZE)
-    , bold(false)
-    , italic(false)
-    , m_eAlign(Qt::AlignCenter)
-{}
-
-QList<TextLine> LabelTextManager::m_patternLabelLines = QList<TextLine>();
+#include "floatItemData/vpiecelabeldata.h"
+#include "vcontainer.h"
 
 namespace
 {
+/// @brief Fit results kept before the cache starts over.
+constexpr int max_fitted_sizes = 1000;
 
 //---------------------------------------------------------------------------------------------------------------------
-QMap<QString, QString> PreparePlaceholders(const VAbstractPattern *doc)
+/**
+ * @brief preparePlaceholders maps each label placeholder to its pattern value; piece placeholders stay empty.
+ * @param document pattern; must not be null.
+ */
+QMap<QString, QString> preparePlaceholders(const VAbstractPattern* document)
 {
-    SCASSERT(doc != nullptr)
+    SCASSERT(document != nullptr)
 
     QMap<QString, QString> placeholders;
 
     // Pattern tags
-    QLocale locale(qApp->Settings()->getLocale());
+    const QLocale locale(qApp->Settings()->getLocale());
+    placeholders.insert(pl_date, locale.toString(QDate::currentDate(), document->GetLabelDateFormat()));
+    placeholders.insert(pl_time, locale.toString(QTime::currentTime(), document->GetLabelTimeFormat()));
 
-    const QString date = locale.toString(QDate::currentDate(), doc->GetLabelDateFormat());
-    placeholders.insert(pl_date, date);
-
-    const QString time = locale.toString(QTime::currentTime(), doc->GetLabelTimeFormat());
-    placeholders.insert(pl_time, time);
-
-    placeholders.insert(pl_patternName, doc->GetPatternName());
-    placeholders.insert(pl_patternNumber, doc->GetPatternNumber());
-    placeholders.insert(pl_author, doc->GetCompanyName());
-    placeholders.insert(pl_customer, doc->GetCustomerName());
+    placeholders.insert(pl_patternName, document->GetPatternName());
+    placeholders.insert(pl_patternNumber, document->GetPatternNumber());
+    placeholders.insert(pl_author, document->GetCompanyName());
+    placeholders.insert(pl_customer, document->GetCustomerName());
     placeholders.insert(pl_pExt, QFileInfo(qApp->getFilePath()).suffix());
     placeholders.insert(pl_pFileName, QFileInfo(qApp->getFilePath()).baseName());
 
-    placeholders.insert(pl_mExt, QFileInfo(doc->MPath()).suffix());
-    placeholders.insert(pl_mFileName, QFileInfo(doc->MPath()).baseName());
+    placeholders.insert(pl_mExt, QFileInfo(document->MPath()).suffix());
+    placeholders.insert(pl_mFileName, QFileInfo(document->MPath()).baseName());
 
-    QString curSize;
-    QString curHeight;
-    if (qApp->patternType() == MeasurementsType::Multisize)
+    // Size and height are known only when the pattern has measurements.
+    QString current_size;
+    QString current_height;
+    if (qApp->patternType() == MeasurementsType::Multisize || qApp->patternType() == MeasurementsType::Individual)
     {
-        curSize = QString::number(VContainer::size());
-        curHeight = QString::number(VContainer::height());
+        current_size = QString::number(VContainer::size());
+        current_height = QString::number(VContainer::height());
     }
-    else if (qApp->patternType() == MeasurementsType::Individual)
-    {
-        curSize = QString::number(VContainer::size());
-        curHeight = QString::number(VContainer::height());
-    }
-
-    placeholders.insert(pl_size, curSize);
-    placeholders.insert(pl_height, curHeight);
+    placeholders.insert(pl_size, current_size);
+    placeholders.insert(pl_height, current_height);
 
     // Piece tags
-    placeholders.insert(pl_pLetter, "");
-    placeholders.insert(pl_pAnnotation, "");
-    placeholders.insert(pl_pOrientation, "");
-    placeholders.insert(pl_pRotation, "");
-    placeholders.insert(pl_pTilt, "");
+    placeholders.insert(pl_pLetter, QString());
+    placeholders.insert(pl_pAnnotation, QString());
+    placeholders.insert(pl_pOrientation, QString());
+    placeholders.insert(pl_pRotation, QString());
+    placeholders.insert(pl_pTilt, QString());
     // Fold position is no longer a piece property; an old label template prints nothing for it.
-    placeholders.insert(pl_pFoldPosition, "");
-    placeholders.insert(pl_pName, "");
-    placeholders.insert(pl_pQuantity, "");
-    placeholders.insert(pl_wOnFold, "");
+    placeholders.insert(pl_pFoldPosition, QString());
+    placeholders.insert(pl_pName, QString());
+    placeholders.insert(pl_pQuantity, QString());
+    placeholders.insert(pl_wOnFold, QString());
     placeholders.insert(pl_mFabric, QObject::tr("Fabric"));
     placeholders.insert(pl_mLining, QObject::tr("Lining"));
     placeholders.insert(pl_mInterfacing, QObject::tr("Interfacing"));
@@ -143,7 +156,10 @@ QMap<QString, QString> PreparePlaceholders(const VAbstractPattern *doc)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InitPiecePlaceholders(QMap<QString, QString> &placeholders, const QString &name, const VPieceLabelData& data)
+/**
+ * @brief initPiecePlaceholders fills the piece placeholders from the piece name and its label data.
+ */
+void initPiecePlaceholders(QMap<QString, QString>& placeholders, const QString& name, const VPieceLabelData& data)
 {
     placeholders[pl_pLetter] = data.GetLetter();
     placeholders[pl_pAnnotation] = data.GetAnnotation();
@@ -160,244 +176,280 @@ void InitPiecePlaceholders(QMap<QString, QString> &placeholders, const QString &
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QString ReplacePlaceholders(const QMap<QString, QString> &placeholders, QString line)
+/**
+ * @brief replacePlaceholders replaces each %placeholder% in a line with its value.
+ */
+QString replacePlaceholders(const QMap<QString, QString>& placeholders, QString line)
 {
-    QChar per('%');
-    auto i = placeholders.constBegin();
-    while (i != placeholders.constEnd())
+    const QChar percent('%');
+    for (auto i = placeholders.constBegin(); i != placeholders.constEnd(); ++i)
     {
-        line.replace(per+i.key()+per, i.value());
-        ++i;
+        line.replace(percent + i.key() + percent, i.value());
     }
     return line;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QList<TextLine> PrepareLines(const QVector<VLabelTemplateLine> &lines)
+/**
+ * @brief prepareLines makes a text line of each template line that is not empty.
+ */
+QList<TextLine> prepareLines(const QVector<VLabelTemplateLine>& lines)
 {
-    QList<TextLine> textLines;
-
-    for (int i=0; i < lines.size(); ++i)
+    QList<TextLine> text_lines;
+    for (const VLabelTemplateLine& template_line : lines)
     {
-        if (not lines.at(i).line.isEmpty())
+        if (!template_line.line.isEmpty())
         {
-            TextLine tl;
-            tl.m_text = lines.at(i).line;
-            tl.m_eAlign = static_cast<Qt::Alignment>(lines.at(i).alignment);
-            tl.m_iFontSize = lines.at(i).fontSizeIncrement;
-            tl.bold = lines.at(i).bold;
-            tl.italic = lines.at(i).italic;
-
-            textLines << tl;
+            TextLine text_line;
+            text_line.text = template_line.line;
+            text_line.alignment = static_cast<Qt::Alignment>(template_line.alignment);
+            text_line.font_size_increment = template_line.fontSizeIncrement;
+            text_line.bold = template_line.bold;
+            text_line.italic = template_line.italic;
+            text_lines << text_line;
         }
     }
-
-    return textLines;
-}
+    return text_lines;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/// @brief LabelTextManager::LabelTextManager constructor
-//---------------------------------------------------------------------------------------------------------------------
-LabelTextManager::LabelTextManager()
-     : m_font()
-     , m_liLines()
-{}
-
-//---------------------------------------------------------------------------------------------------------------------
-LabelTextManager::LabelTextManager(const LabelTextManager &text)
-    : m_font(text.GetFont())
-    , m_liLines(text.GetAllSourceLines())
-{}
-
-//---------------------------------------------------------------------------------------------------------------------
-LabelTextManager &LabelTextManager::operator=(const LabelTextManager &text)
+/**
+ * @brief fitKey returns the cache key of a font fit: the box size, the font, and every line with its style.
+ *
+ * The fit sets every pixel size it measures, so the key ignores the current one. Text lengths in the key keep two
+ * different line lists from making the same key.
+ */
+QString fitKey(const QFont& font, const QList<TextLine>& lines, qreal width, qreal height)
 {
-    if ( &text == this )
+    QFont key_font = font;
+    key_font.setPixelSize(LabelTextManager::min_font_size);
+    QString key = QString::number(width, 'g', 17) + QLatin1Char(' ') + QString::number(height, 'g', 17)
+                  + QLatin1Char(' ') + key_font.key();
+    for (const TextLine& line : lines)
     {
-        return *this;
+        key += QLatin1Char(' ') + QString::number(line.font_size_increment) + QLatin1Char(line.bold ? 'b' : '-')
+               + QLatin1Char(line.italic ? 'i' : '-') + QString::number(line.text.size()) + QLatin1Char(':')
+               + line.text;
     }
-    m_font = text.GetFont();
-    m_liLines = text.GetAllSourceLines();
+    return key;
+}
+} // namespace
+
+QList<TextLine> LabelTextManager::m_pattern_label_lines = QList<TextLine>();
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief TextLine makes an empty, centered line.
+ */
+TextLine::TextLine()
+    : text()
+    , font_size_increment(LabelTextManager::min_font_size)
+    , bold(false)
+    , italic(false)
+    , alignment(Qt::AlignCenter)
+{
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief LabelTextManager makes a manager with no lines and the default font.
+ */
+LabelTextManager::LabelTextManager()
+    : m_font()
+    , m_lines()
+{
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief LabelTextManager copies the font and the lines of another manager.
+ */
+LabelTextManager::LabelTextManager(const LabelTextManager& text)
+    : m_font(text.GetFont())
+    , m_lines(text.GetAllSourceLines())
+{
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief operator= copies the font and the lines of another manager.
+ */
+LabelTextManager& LabelTextManager::operator=(const LabelTextManager& text)
+{
+    if (&text != this)
+    {
+        m_font = text.GetFont();
+        m_lines = text.GetAllSourceLines();
+    }
     return *this;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-// @brief GetSpacing returns the vertical spacing between the lines
-// @return spacing
-//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief GetSpacing returns the vertical spacing between the lines, in pixels.
+ */
 int LabelTextManager::GetSpacing() const
 {
     return 0;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-// @brief SetFont set the text base font
-// @param font text base font
-//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setFont sets the base font of the label text.
+ */
 void LabelTextManager::setFont(const QFont& font)
 {
     m_font = font;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-// @brief GetFont returns the text base font
-// @return text base font
-//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief GetFont returns the base font of the label text.
+ */
 const QFont& LabelTextManager::GetFont() const
 {
     return m_font;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-// @brief SetFontSize sets the font size
-// @param iFS font size in pixels
-//---------------------------------------------------------------------------------------------------------------------
-void LabelTextManager::SetFontSize(int iFS)
+/**
+ * @brief SetFontSize sets the base font size in pixels; a size below min_font_size sets min_font_size.
+ */
+void LabelTextManager::SetFontSize(int font_size)
 {
-    iFS < MIN_FONT_SIZE ? m_font.setPixelSize(MIN_FONT_SIZE) : m_font.setPixelSize(iFS);
+    m_font.setPixelSize(font_size < min_font_size ? min_font_size : font_size);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief GetAllSourceLines returns the label text lines.
+ */
 QList<TextLine> LabelTextManager::GetAllSourceLines() const
 {
-    return m_liLines;
+    return m_lines;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-// @brief LabelTextManager::GetSourceLinesCount returns the number of input text lines
-// @return number of text lines that were added to the list by calling AddLine
-//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief GetSourceLinesCount returns the number of label text lines.
+ */
 int LabelTextManager::GetSourceLinesCount() const
 {
-    return m_liLines.count();
+    return m_lines.count();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-// @brief LabelTextManager::GetSourceLine returns the reference to i-th text line
-// @param i index of the requested line
-// @return reference to the requested TextLine object
-//---------------------------------------------------------------------------------------------------------------------
-const TextLine& LabelTextManager::GetSourceLine(int i) const
+/**
+ * @brief GetSourceLine returns one label text line.
+ * @param index line index; must be in range.
+ */
+const TextLine& LabelTextManager::GetSourceLine(int index) const
 {
-    Q_ASSERT(i >= 0);
-    Q_ASSERT(i < m_liLines.count());
-    return m_liLines.at(i);
+    Q_ASSERT(index >= 0);
+    Q_ASSERT(index < m_lines.count());
+    return m_lines.at(index);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-// @brief LabelTextManager::FitFontSize sets the font size just big enough, so that the text fits into rectangle of
-// size (fW, fH)
-// @param fW rectangle width
-// @param fH rectangle height
-//---------------------------------------------------------------------------------------------------------------------
-void LabelTextManager::FitFontSize(qreal fW, qreal fH)
+/**
+ * @brief FitFontSize sets the base font size just big enough for the lines to fit into a width by height box.
+ *
+ * Every pixel size loads its own font engine, which is slow. A multisize layout fits the same lines into the same
+ * box once for each size, so the result of each fit is kept.
+ */
+void LabelTextManager::FitFontSize(qreal width, qreal height)
 {
-    // Every pixel size loads its own font engine, which is slow. A multisize layout fits the same lines into
-    // the same box once for each size, so the result of each fit is kept. The fit sets every pixel size it
-    // measures, so the key ignores the current one. Text lengths in the key keep two different line lists
-    // from making the same key.
-    thread_local QHash<QString, int> fittedSizes;
-    QFont keyFont = m_font;
-    keyFont.setPixelSize(MIN_FONT_SIZE);
-    QString key = QString::number(fW, 'g', 17) + QLatin1Char(' ') + QString::number(fH, 'g', 17)
-                  + QLatin1Char(' ') + keyFont.key();
-    for (const TextLine &tl : m_liLines)
+    thread_local QHash<QString, int> fitted_sizes;
+    const QString key = fitKey(m_font, m_lines, width, height);
+
+    int font_size = 0;
+    const auto fitted = fitted_sizes.constFind(key);
+    if (fitted != fitted_sizes.constEnd())
     {
-        key += QLatin1Char(' ') + QString::number(tl.m_iFontSize) + QLatin1Char(tl.bold ? 'b' : '-')
-               + QLatin1Char(tl.italic ? 'i' : '-') + QString::number(tl.m_text.size()) + QLatin1Char(':')
-               + tl.m_text;
+        font_size = fitted.value();
     }
-
-    const auto fitted = fittedSizes.constFind(key);
-    if (fitted != fittedSizes.constEnd())
+    else
     {
-        SetFontSize(fitted.value());
-        return;
-    }
-
-    int iFS = 0;
-    if (GetSourceLinesCount() > 0)
-    {//division by zero
-        iFS = 3*qFloor(fH/GetSourceLinesCount())/4;
-    }
-
-    if (iFS < MIN_FONT_SIZE)
-    {
-        iFS = MIN_FONT_SIZE;
-    }
-
-    // get ratio between char width and height
-
-    int iMaxLen = 0;
-    TextLine maxLine;
-    QFont fnt;
-    for (int i = 0; i < GetSourceLinesCount(); ++i)
-    {
-        const TextLine& tl = GetSourceLine(i);
-        fnt = m_font;
-        fnt.setPixelSize(iFS + tl.m_iFontSize);
-        fnt.setBold(tl.bold);
-        fnt.setItalic(tl.italic);
-        QFontMetrics fm(fnt);
-        const int iTW = fm.horizontalAdvance(tl.m_text);
-        if (iTW > iMaxLen)
+        // Start with the size that fits the line count into the height.
+        if (GetSourceLinesCount() > 0)
         {
-            iMaxLen = iTW;
-            maxLine = tl;
+            font_size = 3 * qFloor(height / GetSourceLinesCount()) / 4;
         }
-    }
-    if (iMaxLen > fW)
-    {
-        iFS = largestFittingSize(m_font, maxLine, iFS, iMaxLen, fW);
+        if (font_size < min_font_size)
+        {
+            font_size = min_font_size;
+        }
+
+        // Find the widest line at that size.
+        int max_width = 0;
+        TextLine widest_line;
+        for (const TextLine& line : m_lines)
+        {
+            QFont line_font = m_font;
+            line_font.setPixelSize(font_size + line.font_size_increment);
+            line_font.setBold(line.bold);
+            line_font.setItalic(line.italic);
+            const int line_width = QFontMetrics(line_font).horizontalAdvance(line.text);
+            if (line_width > max_width)
+            {
+                max_width = line_width;
+                widest_line = line;
+            }
+        }
+
+        // Shrink the font until the widest line fits.
+        if (max_width > width)
+        {
+            font_size = largestFittingSize(m_font, widest_line, font_size, max_width, width);
+        }
+
+        if (fitted_sizes.size() >= max_fitted_sizes)
+        {
+            fitted_sizes.clear();
+        }
+        fitted_sizes.insert(key, font_size);
+        qDebug() << "Font size" << GetSourceLinesCount() << font_size;
     }
 
-    if (fittedSizes.size() >= 1000)
-    {
-        fittedSizes.clear();
-    }
-    fittedSizes.insert(key, iFS);
-
-    SetFontSize(iFS);
-    qDebug() << "Font size" << GetSourceLinesCount() << iFS;
+    SetFontSize(font_size);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-// @brief LabelTextManager::largestFittingSize returns the largest base font size below tooWideSize at which line fits
-// into width.
-// @param font font family and style; the line sets bold, italic and its own size increment
-// @param tooWideSize base font size at which the line is wider than width
-// @param tooWideWidth line width in pixels at tooWideSize
-// @param width available width in pixels
-// @return MIN_FONT_SIZE when no larger size fits
-//---------------------------------------------------------------------------------------------------------------------
-int LabelTextManager::largestFittingSize(const QFont &font, const TextLine &line, int tooWideSize, int tooWideWidth,
-                                         qreal width)
+/**
+ * @brief largestFittingSize returns the largest base font size below too_wide_size at which a line fits a width.
+ * @param font           font family and style; the line sets bold, italic and its own size increment.
+ * @param too_wide_size  base font size at which the line is wider than width.
+ * @param too_wide_width line width in pixels at too_wide_size.
+ * @param width          available width in pixels.
+ * @return min_font_size when no larger size fits.
+ */
+int LabelTextManager::largestFittingSize(const QFont& font, const TextLine& line, int too_wide_size,
+                                         int too_wide_width, qreal width)
 {
-    QFont fnt = font;
-    fnt.setBold(line.bold);
-    fnt.setItalic(line.italic);
+    QFont line_font = font;
+    line_font.setBold(line.bold);
+    line_font.setItalic(line.italic);
 
-    const auto lineWidth = [&fnt, &line](int size)
+    const auto line_width = [&line_font, &line](int size)
     {
-        fnt.setPixelSize(size + line.m_iFontSize);
-        return QFontMetrics(fnt).horizontalAdvance(line.m_text);
+        line_font.setPixelSize(size + line.font_size_increment);
+        return QFontMetrics(line_font).horizontalAdvance(line.text);
     };
 
     // Each pixel size loads its own font engine, which is slow. The line width grows about linearly with the
-    // pixel size, so start at the estimated size and step from there, not down from tooWideSize.
-    int size = tooWideSize - 1;
-    if (tooWideWidth > 0)
+    // pixel size, so start at the estimated size and step from there, not down from too_wide_size.
+    int size = too_wide_size - 1;
+    if (too_wide_width > 0)
     {
-        size = qFloor(width * (tooWideSize + line.m_iFontSize) / tooWideWidth) - line.m_iFontSize;
+        size = qFloor(width * (too_wide_size + line.font_size_increment) / too_wide_width) - line.font_size_increment;
     }
-    size = qMax(MIN_FONT_SIZE, qMin(size, tooWideSize - 1));
+    size = qMax(min_font_size, qMin(size, too_wide_size - 1));
 
-    while (size > MIN_FONT_SIZE && lineWidth(size) > width)
+    while (size > min_font_size && line_width(size) > width)
     {
         --size;
     }
-    while (size + 1 < tooWideSize && lineWidth(size + 1) <= width)
+    while (size + 1 < too_wide_size && line_width(size + 1) <= width)
     {
         ++size;
     }
@@ -405,53 +457,53 @@ int LabelTextManager::largestFittingSize(const QFont &font, const TextLine &line
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-// @brief LabelTextManager::Update updates the text lines with detail data
-// @param qsName detail name
-// @param data reference to the detail data
-//---------------------------------------------------------------------------------------------------------------------
-void LabelTextManager::Update(const QString& qsName, const VPieceLabelData& data)
+/**
+ * @brief Update sets the lines from the piece label template, with the placeholders replaced.
+ * @param name piece name.
+ * @param data piece label data.
+ */
+void LabelTextManager::Update(const QString& name, const VPieceLabelData& data)
 {
-    m_liLines.clear();
-
-    QMap<QString, QString> placeholders = PreparePlaceholders(qApp->getCurrentDocument());
-    InitPiecePlaceholders(placeholders, qsName, data);
+    QMap<QString, QString> placeholders = preparePlaceholders(qApp->getCurrentDocument());
+    initPiecePlaceholders(placeholders, name, data);
 
     QVector<VLabelTemplateLine> lines = data.GetLabelTemplate();
-
-    for (int i=0; i<lines.size(); ++i)
+    for (VLabelTemplateLine& line : lines)
     {
-        lines[i].line = ReplacePlaceholders(placeholders, lines.at(i).line);
+        line.line = replacePlaceholders(placeholders, line.line);
     }
 
-    m_liLines = PrepareLines(lines);
+    m_lines = prepareLines(lines);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-// @brief LabelTextManager::Update updates the text lines with pattern info
-// @param pDoc pointer to the abstract pattern object
-//---------------------------------------------------------------------------------------------------------------------
-void LabelTextManager::Update(VAbstractPattern *pDoc)
+/**
+ * @brief Update sets the lines from the pattern label template, with the placeholders replaced.
+ *
+ * The pattern label lines are kept for every manager until the pattern changes.
+ * @param document pattern; its changed flag is cleared after a new parse.
+ */
+void LabelTextManager::Update(VAbstractPattern* document)
 {
-    m_liLines.clear();
+    m_lines.clear();
 
-    if (m_patternLabelLines.isEmpty() || pDoc->GetPatternWasChanged())
+    if (m_pattern_label_lines.isEmpty() || document->GetPatternWasChanged())
     {
-        QVector<VLabelTemplateLine> lines = pDoc->getPatternLabelTemplate();
-        if (lines.isEmpty() && m_patternLabelLines.isEmpty())
+        QVector<VLabelTemplateLine> lines = document->getPatternLabelTemplate();
+
+        // An empty template with no kept lines leaves nothing to parse.
+        if (!lines.isEmpty() || !m_pattern_label_lines.isEmpty())
         {
-            return; // Nothing to parse
+            const QMap<QString, QString> placeholders = preparePlaceholders(document);
+            for (VLabelTemplateLine& line : lines)
+            {
+                line.line = replacePlaceholders(placeholders, line.line);
+            }
+
+            document->SetPatternWasChanged(false);
+            m_pattern_label_lines = prepareLines(lines);
         }
-
-        const QMap<QString, QString> placeholders = PreparePlaceholders(pDoc);
-
-        for (int i=0; i<lines.size(); ++i)
-        {
-            lines[i].line = ReplacePlaceholders(placeholders, lines.at(i).line);
-        }
-
-        pDoc->SetPatternWasChanged(false);
-        m_patternLabelLines = PrepareLines(lines);
     }
 
-    m_liLines = m_patternLabelLines;
+    m_lines = m_pattern_label_lines;
 }

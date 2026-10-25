@@ -44,8 +44,8 @@ int lineWidth(const QFont &font, const TextLine &line, int size)
     QFont fnt = font;
     fnt.setBold(line.bold);
     fnt.setItalic(line.italic);
-    fnt.setPixelSize(size + line.m_iFontSize);
-    return QFontMetrics(fnt).horizontalAdvance(line.m_text);
+    fnt.setPixelSize(size + line.font_size_increment);
+    return QFontMetrics(fnt).horizontalAdvance(line.text);
 }
 } // namespace
 
@@ -70,7 +70,8 @@ void TST_VTextManager::LargestFittingSize_data() const
     QTest::newRow("italic line") << QStringLiteral("Interfacing, Cut 2 on fold") << 0 << false << true << 40
                                  << 150.0;
     QTest::newRow("nothing fits") << QStringLiteral("WWWWWWWWWW") << 6 << true << false << 20 << 10.0;
-    QTest::newRow("start at the minimum") << QStringLiteral("Front") << 0 << false << false << MIN_FONT_SIZE << 1.0;
+    QTest::newRow("start at the minimum") << QStringLiteral("Front") << 0 << false << false
+                                          << LabelTextManager::min_font_size << 1.0;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -78,7 +79,7 @@ void TST_VTextManager::LargestFittingSize_data() const
  * @brief LargestFittingSize checks that the result fits and the next size up does not.
  *
  * The search starts from an estimate instead of stepping down from the size that is too wide. It must still
- * return the same size as that step-down search: the largest one that fits, or MIN_FONT_SIZE.
+ * return the same size as that step-down search: the largest one that fits, or LabelTextManager::min_font_size.
  */
 void TST_VTextManager::LargestFittingSize() const
 {
@@ -90,8 +91,8 @@ void TST_VTextManager::LargestFittingSize() const
     QFETCH(qreal, width);
 
     TextLine line;
-    line.m_text = text;
-    line.m_iFontSize = increment;
+    line.text = text;
+    line.font_size_increment = increment;
     line.bold = bold;
     line.italic = italic;
 
@@ -101,9 +102,9 @@ void TST_VTextManager::LargestFittingSize() const
 
     const int size = LabelTextManager::largestFittingSize(font, line, tooWideSize, tooWideWidth, width);
 
-    QVERIFY(size >= MIN_FONT_SIZE);
-    QVERIFY(size <= qMax(MIN_FONT_SIZE, tooWideSize - 1));
-    if (size > MIN_FONT_SIZE)
+    QVERIFY(size >= LabelTextManager::min_font_size);
+    QVERIFY(size <= qMax(LabelTextManager::min_font_size, tooWideSize - 1));
+    if (size > LabelTextManager::min_font_size)
     {
         QVERIFY2(lineWidth(font, line, size) <= width, "The result must fit.");
     }

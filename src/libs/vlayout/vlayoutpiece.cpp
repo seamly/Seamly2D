@@ -573,7 +573,7 @@ QStringList getLabelText (const QVector<QPointF> &labelShape, const LabelTextMan
     {
         for (int i = 0; i < tm.GetSourceLinesCount(); ++i)
         {
-            text.append(tm.GetSourceLine(i).m_text);
+            text.append(tm.GetSourceLine(i).text);
         }
     }
     return text;
@@ -1866,7 +1866,7 @@ void VLayoutPiece::createLabelItem(QGraphicsItem *parent, const QVector<QPointF>
         {
             const TextLine& tl = tm.GetSourceLine(i);
             QFont fnt = tm.GetFont();
-            fnt.setPixelSize(tm.GetFont().pixelSize() + tl.m_iFontSize);
+            fnt.setPixelSize(tm.GetFont().pixelSize() + tl.font_size_increment);
             fnt.setBold(tl.bold);
             fnt.setItalic(tl.italic);
 
@@ -1882,16 +1882,16 @@ void VLayoutPiece::createLabelItem(QGraphicsItem *parent, const QVector<QPointF>
                 break;
             }
 
-            QString qsText = tl.m_text;
+            QString qsText = tl.text;
             if (fm.horizontalAdvance(qsText) > dW)
             {
                 qsText = fm.elidedText(qsText, Qt::ElideMiddle, static_cast<int>(dW));
             }
-            if ((tl.m_eAlign & Qt::AlignLeft) > 0)
+            if ((tl.alignment & Qt::AlignLeft) > 0)
             {
                 dX = 0;
             }
-            else if ((tl.m_eAlign & Qt::AlignHCenter) > 0)
+            else if ((tl.alignment & Qt::AlignHCenter) > 0)
             {
                 dX = (dW - fm.horizontalAdvance(qsText))/2;
             }

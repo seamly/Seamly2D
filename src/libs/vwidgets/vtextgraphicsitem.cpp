@@ -194,11 +194,11 @@ void VTextGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem 
     {
         const TextLine& textLine = m_textMananger.GetSourceLine(i);
 
-        font.setPixelSize(m_textMananger.GetFont().pixelSize() + textLine.m_iFontSize);
+        font.setPixelSize(m_textMananger.GetFont().pixelSize() + textLine.font_size_increment);
         font.setBold(textLine.bold);
         font.setItalic(textLine.italic);
 
-        QString text = textLine.m_text;
+        QString text = textLine.text;
         QFontMetrics fm(font);
 
         // check if the next line will go out of bounds
@@ -213,7 +213,7 @@ void VTextGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem 
         }
 
         painter->setFont(font);
-        painter->drawText(0, yPos, width, fm.height(), static_cast<int>(textLine.m_eAlign), text);
+        painter->drawText(0, yPos, width, fm.height(), static_cast<int>(textLine.alignment), text);
         yPos += fm.height() + m_textMananger.GetSpacing();
     }
 
