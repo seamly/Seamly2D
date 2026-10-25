@@ -15,6 +15,18 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 - [ ] Layout.101.3 Tests: valid, empty, relative, and unwritable directory.
 - Starts after the `develop` merge that brings `configureDataDirectory`.
 
+### [ ] Task Layout.102 — Implement - DXF-ASTM (CLO3D): follow the McNeel layer guide
+
+- Guide: `dxf-docs/seamlylayout_DXF_AAMA.md`, "McNeel guide" (layers 0 to 19, piece text).
+- CLO3D's default DXF import swaps the cut outline (layer 1) and the net line (layer 14).
+- A CLO3D import option (like "swap internal and external seam allowance") restores the order.
+- Today the CLO3D export is D6673 plus group 250: 0 = boundary, 2 = sew line (`DxfAstmExportOptions::clo3d_group_250`).
+- [ ] Layout.102.1 Find the name and default of the CLO3D import option in the current CLO3D release.
+- [ ] Layout.102.2 Decide: swap layers 1 and 14 in the CLO3D export, or keep D6673 layers and tell the user which option to set.
+- [ ] Layout.102.3 Check every CLO3D export layer against the guide.
+- [ ] Layout.102.4 Tests for the chosen layer order.
+- [ ] Layout.102.5 User check: import a CLO3D export in CLO3D, with the default settings and with the option set.
+
 ## VERIFY
 
 ### [ ] Task Layout.6 — Verify - DXF-ASTM grading

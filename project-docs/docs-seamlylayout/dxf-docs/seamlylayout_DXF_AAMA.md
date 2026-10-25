@@ -45,6 +45,51 @@ Same in both: layer 1 boundary and system text, `Piece Name:`, `Quantity:`, `Mat
 - An untagged SVG (no `data-type`) keeps its generic layers. Its `<text>` stays on layer 15.
 - Unicode piece names keep the `\U+XXXX` escape. A reader that does not decode it shows the escape as text.
 
+## McNeel guide
+
+Two McNeel forum posts give AAMA practice (implementation evidence, not the normative 292 text). This table compares them with SeamlyLayout DXF-AAMA output.
+
+### Style and piece text
+
+| Item | Guide | SeamlyLayout |
+|---|---|---|
+| `Style Name:` | Project name; best the file name | Pattern `data-name`, else the file stem |
+| `Creation Date:` | `DD-MM-YYYY` | `dd-mm-yyyy`, UTC |
+| `Creation Time:` | `HH:MM:SS` | `hh-mm`, UTC (the D6673 form) |
+| `Author:` | System, version | `Seamly;Seamly2D;<release>` |
+| `Sample Size:` | Base size of the garment | Base size of a graded export, else blank |
+| `Units:` | `METRIC` (mm) or `ENGLISH` (inch) | `METRIC`; geometry in mm |
+| Block name | `<piece name>_<size>` | `<svg id>_M` (CLO3D naming) |
+| `Piece Name:` | Piece name, under 8 characters | Full piece name |
+| `Size:` | Garment size | `data-size`, in pattern units |
+| `Annotation:` | Piece description | Not written; Seamly2D sends `data-annotation` |
+| `Category:` | Short classification: material, piece type | Not written (user decision) |
+| `Quantity:` | `1,0` for one piece; `1,1` for a pair | `R,L` from `data-quantity` |
+| `Material:` (or `Fabric:`) | Short fabric code, 2 characters | Full `data-material`, else `Fabric` |
+
+### Layers
+
+| Layer | Guide | SeamlyLayout |
+|---|---|---|
+| 0 | Empty | Empty |
+| 1 | Every entity; cut outline and piece text | Same |
+| 2 | Corner points; grade and turn points | Turn points; `# n` rule text |
+| 3 | Curve points | Curve points; `# n` rule text |
+| 4 | Notch points; notch lines go on 11 | One notch POINT each |
+| 5 | Empty, optional | Grade reference line of a graded export |
+| 6 | Mirror (symmetry) line | Same |
+| 7 | Grainline | Same |
+| 8 | Internal lines | Same |
+| 9, 10, 12 | Empty, optional | Empty |
+| 11 | Internal cut | Internal cutouts |
+| 13 | Drill and punch holes | None: Seamly2D sends no drill holes |
+| 14 | Net line (no seam allowance) | Sew line |
+| 15 | First post: ASTM text notes. Second post: quality lines | Not used: AAMA defines layers 1 to 14 |
+| 16 to 18 | Never | Not used |
+| 19 | Modaris text notes; other readers take them on layer 1 | Not used: label text on layer 1 |
+
+The two posts disagree on layer 15. D6673 puts text notes on 15 and quality lines on 84 to 87.
+
 ## Code
 
 | Item | Place |
