@@ -20,6 +20,7 @@ SOURCES += \
     $$PWD/variables/vcurveclength.cpp \
     $$PWD/vpiece.cpp \
     $$PWD/PieceMirrorPath.cpp \
+    $$PWD/FoldLineGraphic.cpp \
     $$PWD/vpiecenode.cpp \
     $$PWD/vpiecepath.cpp \
     $$PWD/floatItemData/vpiecelabeldata.cpp \
@@ -62,6 +63,7 @@ HEADERS += \
     $$PWD/vpiece.h \
     $$PWD/vpiece_p.h \
     $$PWD/PieceMirrorPath.h \
+    $$PWD/FoldLineGraphic.h \
     $$PWD/vpiecenode.h \
     $$PWD/vpiecenode_p.h \
     $$PWD/vpiecepath.h \
