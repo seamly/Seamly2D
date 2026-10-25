@@ -11980,7 +11980,7 @@ Menti a módosításokat?</translation>
     </message>
 </context>
 <context>
-    <name>VAbstractPieceData</name>
+    <name>AbstractPieceData</name>
     <message>
         <source>Piece</source>
         <translation>Darab</translation>

@@ -48,8 +48,8 @@
 //  along with Valentina.  If not, see <http://www.gnu.org/licenses/>.
 //---------------------------------------------------------------------------------------------------------------------
 
-#ifndef VABSTRACTPIECE_H
-#define VABSTRACTPIECE_H
+#ifndef ABSTRACTPIECE_H
+#define ABSTRACTPIECE_H
 
 #include <QtGlobal>
 #include <QSharedDataPointer>
@@ -62,7 +62,7 @@
 
 // template <class T> class QVector;
 
-class VAbstractPieceData;
+class AbstractPieceData;
 
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_GCC("-Weffc++")
@@ -227,19 +227,19 @@ struct SeamAllowanceCorners
 
 QT_WARNING_POP
 
-class VAbstractPiece
+class AbstractPiece
 {
 public:
-    VAbstractPiece();
-    VAbstractPiece(const VAbstractPiece &piece);
-    virtual ~VAbstractPiece();
+    AbstractPiece();
+    AbstractPiece(const AbstractPiece &piece);
+    virtual ~AbstractPiece();
 
-    VAbstractPiece &operator=(const VAbstractPiece &piece);
+    AbstractPiece &operator=(const AbstractPiece &piece);
 #ifdef Q_COMPILER_RVALUE_REFS
-	VAbstractPiece &operator=(VAbstractPiece &&piece) noexcept;
+	AbstractPiece &operator=(AbstractPiece &&piece) noexcept;
 #endif
 
-	void Swap(VAbstractPiece &piece) noexcept;
+	void Swap(AbstractPiece &piece) noexcept;
 
     QString GetName() const;
     void    SetName(const QString &value);
@@ -312,7 +312,7 @@ protected:
     static bool       IsEkvPointOnLine(const VSAPoint &iPoint, const VSAPoint &prevPoint, const VSAPoint &nextPoint);
 
 private:
-    QSharedDataPointer<VAbstractPieceData> d;
+    QSharedDataPointer<AbstractPieceData> d;
 
     static bool             CheckIntersection(const QVector<QPointF> &points, int i, int iNext, int j, int jNext,
                                               const QPointF &crossPoint);
@@ -343,7 +343,7 @@ private:
     static qreal            AngleBetweenBisectors(const QLineF &b1, const QLineF &b2);
 };
 
-Q_DECLARE_TYPEINFO(VAbstractPiece, Q_MOVABLE_TYPE);
+Q_DECLARE_TYPEINFO(AbstractPiece, Q_MOVABLE_TYPE);
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
@@ -352,7 +352,7 @@ Q_DECLARE_TYPEINFO(VAbstractPiece, Q_MOVABLE_TYPE);
  * @return corrected list.
  */
 template <class T>
-QVector<T> VAbstractPiece::CorrectEquidistantPoints(const QVector<T> &points, bool removeFirstAndLast)
+QVector<T> AbstractPiece::CorrectEquidistantPoints(const QVector<T> &points, bool removeFirstAndLast)
 {
     if (points.size()<4)//Better don't check if only three points. We can destroy equidistant.
     {
@@ -407,7 +407,7 @@ QVector<T> VAbstractPiece::CorrectEquidistantPoints(const QVector<T> &points, bo
 
 //---------------------------------------------------------------------------------------------------------------------
 template <class T>
-QVector<T> VAbstractPiece::RemoveDublicates(const QVector<T> &points, bool removeFirstAndLast)
+QVector<T> AbstractPiece::RemoveDublicates(const QVector<T> &points, bool removeFirstAndLast)
 {
     QVector<T> p = points;
 
@@ -444,4 +444,4 @@ QVector<T> VAbstractPiece::RemoveDublicates(const QVector<T> &points, bool remov
     return p;
 }
 
-#endif // VABSTRACTPIECE_H
+#endif // ABSTRACTPIECE_H

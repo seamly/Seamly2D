@@ -55,7 +55,7 @@
 #include "../vgeometry/vabstractcubicbezierpath.h"
 #include "../vgeometry/vspline.h"
 #include "../vgeometry/vsplinepoint.h"
-#include "../vlayout/vabstractpiece.h"
+#include "AbstractPiece.h"
 #include "../vmisc/vabstractapplication.h"
 #include "../ifc/exception/vexceptionobjecterror.h"
 
@@ -532,7 +532,7 @@ QVector<QPointF> VPiecePath::PathPoints(const VContainer *data, const QVector<QP
 /**
  * @brief pathNodeVertices returns the PathPoints() vertices that can break the tangent.
  * @details Node vertices are point nodes, curve segment ends, and spline end nodes. All
- *          other PathPoints() vertices are curve interior points. See VAbstractPiece::turnPointIndices().
+ *          other PathPoints() vertices are curve interior points. See AbstractPiece::turnPointIndices().
  */
 QVector<QPointF> VPiecePath::pathNodeVertices(const VContainer *data) const
 {

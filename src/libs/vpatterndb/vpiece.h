@@ -57,7 +57,7 @@
 #include <QSharedPointer>
 #include <QStringList>
 
-#include "../vlayout/vabstractpiece.h"
+#include "AbstractPiece.h"
 
 struct NotchData
 {
@@ -86,7 +86,7 @@ class VContainer;
 class QPainterPath;
 class VPointF;
 
-class VPiece : public VAbstractPiece
+class VPiece : public AbstractPiece
 {
 public:
                              VPiece();

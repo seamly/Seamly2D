@@ -49,8 +49,8 @@
  **
  *************************************************************************/
 
-#ifndef VABSTRACTPIECE_P_H
-#define VABSTRACTPIECE_P_H
+#ifndef ABSTRACTPIECEDATA_H
+#define ABSTRACTPIECEDATA_H
 
 #include <QSharedData>
 #include <QString>
@@ -63,11 +63,11 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_GCC("-Weffc++")
 QT_WARNING_DISABLE_GCC("-Wnon-virtual-dtor")
 
-class VAbstractPieceData : public QSharedData
+class AbstractPieceData : public QSharedData
 {
-    Q_DECLARE_TR_FUNCTIONS(VAbstractPieceData)
+    Q_DECLARE_TR_FUNCTIONS(AbstractPieceData)
 public:
-    VAbstractPieceData()
+    AbstractPieceData()
         : m_name(tr("Piece"))
         , m_color("white")
         ,  m_fill("nobrush")
@@ -82,7 +82,7 @@ public:
         , m_material(QStringLiteral("Fabric"))
     {}
 
-    VAbstractPieceData(const VAbstractPieceData &piece)
+    AbstractPieceData(const AbstractPieceData &piece)
         : QSharedData(piece)
         , m_name(piece.m_name)
         , m_color(piece.m_color)
@@ -98,7 +98,7 @@ public:
         , m_material(piece.m_material)
     {}
 
-    ~VAbstractPieceData() Q_DECL_EQ_DEFAULT;
+    ~AbstractPieceData() Q_DECL_EQ_DEFAULT;
 
     QString m_name;
     QString m_color;
@@ -116,9 +116,9 @@ public:
     QString m_material;
 
 private:
-    VAbstractPieceData &operator=(const VAbstractPieceData &) Q_DECL_EQ_DELETE;
+    AbstractPieceData &operator=(const AbstractPieceData &) Q_DECL_EQ_DELETE;
 };
 
 QT_WARNING_POP
 
-#endif // VABSTRACTPIECE_P_H
+#endif // ABSTRACTPIECEDATA_H

@@ -308,7 +308,7 @@ void PatternPieceDialog::SetPiece(const VPiece &piece)
     int materialIndex = ui->material_ComboBox->findData(piece.getMaterial());
     if (materialIndex < 0)
     {
-        ui->material_ComboBox->addItem(VAbstractPiece::materialDisplayName(piece.getMaterial()), piece.getMaterial());
+        ui->material_ComboBox->addItem(AbstractPiece::materialDisplayName(piece.getMaterial()), piece.getMaterial());
         materialIndex = ui->material_ComboBox->count() - 1;
     }
     ui->material_ComboBox->setCurrentIndex(materialIndex);
@@ -3375,11 +3375,11 @@ void PatternPieceDialog::initializePropertiesTab()
     ui->annotation_LineEdit->setClearButtonEnabled(true);
 
     // Item text is translated; item data is the name the pattern file stores.
-    for (const QString &material : VAbstractPiece::materialNames())
+    for (const QString &material : AbstractPiece::materialNames())
     {
-        ui->material_ComboBox->addItem(VAbstractPiece::materialDisplayName(material), material);
+        ui->material_ComboBox->addItem(AbstractPiece::materialDisplayName(material), material);
     }
-    ui->material_ComboBox->setCurrentIndex(ui->material_ComboBox->findData(VAbstractPiece::defaultMaterial()));
+    ui->material_ComboBox->setCurrentIndex(ui->material_ComboBox->findData(AbstractPiece::defaultMaterial()));
 
     // Each rotation button id is its PieceRotation value.
     ui->rotation_ButtonGroup->setId(ui->rotationNone_RadioButton, static_cast<int>(PieceRotation::None));

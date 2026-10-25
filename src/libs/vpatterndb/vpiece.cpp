@@ -361,17 +361,17 @@ VPiece &VPiece::operator=(VPiece &&piece) noexcept
 #endif
 
 void VPiece::Swap(VPiece &piece) noexcept
-{ VAbstractPiece::Swap(piece); std::swap(d, piece.d); }
+{ AbstractPiece::Swap(piece); std::swap(d, piece.d); }
 
 //---------------------------------------------------------------------------------------------------------------------
 VPiece::VPiece()
-    : VAbstractPiece()
+    : AbstractPiece()
     , d(new VPieceData(PiecePathType::PiecePath))
 {}
 
 //---------------------------------------------------------------------------------------------------------------------
 VPiece::VPiece(const VPiece &piece)
-    : VAbstractPiece(piece)
+    : AbstractPiece(piece)
     , d(piece.d)
 {}
 
@@ -382,7 +382,7 @@ VPiece &VPiece::operator=(const VPiece &piece)
     {
         return *this;
     }
-    VAbstractPiece::operator=(piece);
+    AbstractPiece::operator=(piece);
     d = piece.d;
     return *this;
 }
@@ -1490,7 +1490,7 @@ bool VPiece::getSeamNotchSAPoint(const VSAPoint &previousSAPoint, const VSAPoint
     QVector<QPointF> ekvPoints;
     const qreal width = ToPixel(GetSAWidth(), *data->GetPatternUnit());
 
-    /* Because method VAbstractPiece::EkvPoint has troubles with edges on the same line we should specially treat such
+    /* Because method AbstractPiece::EkvPoint has troubles with edges on the same line we should specially treat such
        cases.
        First check if two edges and seam allowance create parallel lines.
        Second case check if two edges are on a same line geometrically and a notch point has equal SA width.*/
@@ -1502,7 +1502,7 @@ bool VPiece::getSeamNotchSAPoint(const VSAPoint &previousSAPoint, const VSAPoint
     {
         QLineF line (notchSAPoint, nextSAPoint);
         line.setAngle(line.angle() + 90);
-        line.setLength(VAbstractPiece::MaxLocalSA(notchSAPoint, width));
+        line.setLength(AbstractPiece::MaxLocalSA(notchSAPoint, width));
         ekvPoints.append(line.p2());
     }
     else

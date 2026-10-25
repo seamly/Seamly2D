@@ -276,7 +276,7 @@ QVector<QVector<int>> unifyNodeTurnPoints(const QVector<SizeLine> &lines, bool c
                 added.append(line.nodeIndices.at((k + offsets.at(s)) % nodeCount));
             }
         }
-        turns.append(VAbstractPiece::addTurnPoints(line.points, line.turnPoints.value(), added, closed));
+        turns.append(AbstractPiece::addTurnPoints(line.points, line.turnPoints.value(), added, closed));
     }
     return turns;
 }
@@ -587,17 +587,17 @@ VLayoutPiece &VLayoutPiece::operator=(VLayoutPiece &&piece) noexcept { Swap(piec
 #endif
 
 void VLayoutPiece::Swap(VLayoutPiece &piece) noexcept
-{ VAbstractPiece::Swap(piece); std::swap(d, piece.d); }
+{ AbstractPiece::Swap(piece); std::swap(d, piece.d); }
 
 //---------------------------------------------------------------------------------------------------------------------
 VLayoutPiece::VLayoutPiece()
-    : VAbstractPiece()
+    : AbstractPiece()
     , d(new VLayoutPieceData)
 {}
 
 //---------------------------------------------------------------------------------------------------------------------
 VLayoutPiece::VLayoutPiece(const VLayoutPiece &piece)
-    : VAbstractPiece(piece)
+    : AbstractPiece(piece)
     , d(piece.d)
 {}
 
@@ -608,7 +608,7 @@ VLayoutPiece &VLayoutPiece::operator=(const VLayoutPiece &piece)
     {
         return *this;
     }
-    VAbstractPiece::operator=(piece);
+    AbstractPiece::operator=(piece);
     d = piece.d;
     return *this;
 }

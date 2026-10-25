@@ -52,7 +52,7 @@
 #include "vlayoutpiecepath.h"
 #include "vlayoutpiecepath_p.h"
 #include "vlayoutdef.h"
-#include "vabstractpiece.h"
+#include "../vpatterndb/AbstractPiece.h"
 
 #include <QPainterPath>
 
@@ -185,7 +185,7 @@ std::optional<QVector<int>> VLayoutPiecePath::turnPoints() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief setTurnPoints stores the turn point indices into Points(), from VAbstractPiece::turnPointIndices().
+ * @brief setTurnPoints stores the turn point indices into Points(), from AbstractPiece::turnPointIndices().
  */
 void VLayoutPiecePath::setTurnPoints(const QVector<int> &indices)
 {
@@ -194,7 +194,7 @@ void VLayoutPiecePath::setTurnPoints(const QVector<int> &indices)
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief nodeIndices returns the node vertex indices into Points(), from VAbstractPiece::nodeVertexIndices().
+ * @brief nodeIndices returns the node vertex indices into Points(), from AbstractPiece::nodeVertexIndices().
  * @return ascending indices; empty when the node vertices are unknown.
  */
 QVector<int> VLayoutPiecePath::nodeIndices() const
@@ -210,7 +210,7 @@ QVector<int> VLayoutPiecePath::nodeIndices() const
  */
 void VLayoutPiecePath::setNodeVertices(const QVector<QPointF> &nodeVertices, bool closed)
 {
-    d->m_points = VAbstractPiece::snapNodeVertices(d->m_points, nodeVertices, closed);
-    d->m_turnPoints = VAbstractPiece::turnPointIndices(d->m_points, nodeVertices, closed);
-    d->m_nodeIndices = VAbstractPiece::nodeVertexIndices(d->m_points, nodeVertices, closed);
+    d->m_points = AbstractPiece::snapNodeVertices(d->m_points, nodeVertices, closed);
+    d->m_turnPoints = AbstractPiece::turnPointIndices(d->m_points, nodeVertices, closed);
+    d->m_nodeIndices = AbstractPiece::nodeVertexIndices(d->m_points, nodeVertices, closed);
 }

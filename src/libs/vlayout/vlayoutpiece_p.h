@@ -64,7 +64,7 @@
 #include "../vpatterndb/floatItemData/vgrainlinedata.h"
 #include "../vpatterndb/FoldLineGraphic.h"
 #include "../vmisc/diagnostic.h"
-#include "vabstractpiece.h"
+#include "../vpatterndb/AbstractPiece.h"
 #include "vlayoutpiecepath.h"
 
 #include "vtextmanager.h"

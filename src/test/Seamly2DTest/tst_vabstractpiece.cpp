@@ -50,7 +50,7 @@
  *************************************************************************/
 
 #include "tst_vabstractpiece.h"
-#include "../vlayout/vabstractpiece.h"
+#include "../vpatterndb/AbstractPiece.h"
 
 #include <QPointF>
 #include <QtMath>
@@ -126,7 +126,7 @@ void TST_VAbstractPiece::EquidistantRemoveLoop() const
     QFETCH(qreal, width);
     QFETCH(QVector<QPointF>, ekvOrig);
 
-    const QVector<QPointF> ekv = VAbstractPiece::Equidistant(points, width);
+    const QVector<QPointF> ekv = AbstractPiece::Equidistant(points, width);
 
     // Begin comparison
     Comparison(ekv, ekvOrig);
@@ -1999,7 +1999,7 @@ void TST_VAbstractPiece::TurnPointIndices() const
     QFETCH(bool, closed);
     QFETCH(QVector<int>, expect);
 
-    QCOMPARE(VAbstractPiece::turnPointIndices(points, nodes, closed), expect);
+    QCOMPARE(AbstractPiece::turnPointIndices(points, nodes, closed), expect);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -2019,7 +2019,7 @@ void TST_VAbstractPiece::EquidistantReportsNodeVertices() const
     points.insert(3, interior);
 
     QVector<QPointF> nodeVertices;
-    const QVector<QPointF> ekv = VAbstractPiece::Equidistant(points, 10, &nodeVertices);
+    const QVector<QPointF> ekv = AbstractPiece::Equidistant(points, 10, &nodeVertices);
     QVERIFY(!ekv.isEmpty());
     QVERIFY(nodeVertices.size() >= 4);
     for (const QPointF &node : nodeVertices)
@@ -2040,8 +2040,8 @@ void TST_VAbstractPiece::NodeVertexIndices() const
                                   QPointF(0, 100), QPointF(0, 0)};
     const QVector<QPointF> nodes{QPointF(0, 0), QPointF(100, 0), QPointF(100, 100), QPointF(0, 100)};
 
-    QCOMPARE(VAbstractPiece::nodeVertexIndices(points, nodes, true), (QVector<int>{0, 2, 3, 4}));
-    QCOMPARE(VAbstractPiece::nodeVertexIndices(points, nodes, false), (QVector<int>{0, 2, 3, 4, 5}));
+    QCOMPARE(AbstractPiece::nodeVertexIndices(points, nodes, true), (QVector<int>{0, 2, 3, 4}));
+    QCOMPARE(AbstractPiece::nodeVertexIndices(points, nodes, false), (QVector<int>{0, 2, 3, 4, 5}));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -2358,7 +2358,7 @@ void TST_VAbstractPiece::PathRemoveLoop() const
     QFETCH(QVector<QPointF>, path);
     QFETCH(QVector<QPointF>, expect);
 
-    QVector<QPointF> res = VAbstractPiece::CheckLoops(path);
+    QVector<QPointF> res = AbstractPiece::CheckLoops(path);
     Comparison(res, expect);
 }
 
@@ -2570,7 +2570,7 @@ void TST_VAbstractPiece::PathLoopsCase() const
     QFETCH(QVector<QPointF>, path);
     QFETCH(QVector<QPointF>, expect);
 
-    const QVector<QPointF> res = VAbstractPiece::CheckLoops(path);
+    const QVector<QPointF> res = AbstractPiece::CheckLoops(path);
     Comparison(res, expect);
 }
 
@@ -2864,7 +2864,7 @@ void TST_VAbstractPiece::BrokenDetailEquidistant() const
     QFETCH(qreal, width);
     QFETCH(QVector<QPointF>, ekvOrig);
 
-    const QVector<QPointF> ekv = VAbstractPiece::Equidistant(points, width);// Take result
+    const QVector<QPointF> ekv = AbstractPiece::Equidistant(points, width);// Take result
 
     // Begin comparison
     Comparison(ekv, ekvOrig);
@@ -2954,7 +2954,7 @@ void TST_VAbstractPiece::CorrectEquidistantPoints() const
     QFETCH(QVector<QPointF>, expect);
     QFETCH(bool, removeFirstAndLast);
 
-    const QVector<QPointF> res = VAbstractPiece::CorrectEquidistantPoints(points, removeFirstAndLast);
+    const QVector<QPointF> res = AbstractPiece::CorrectEquidistantPoints(points, removeFirstAndLast);
 
     // Begin comparison
     Comparison(res, expect);
@@ -3132,7 +3132,7 @@ void TST_VAbstractPiece::TestCorrectEquidistantPoints() const
     QFETCH(QVector<QPointF>, before);
     QFETCH(QVector<QPointF>, expect);
 
-    QVector<QPointF> after = VAbstractPiece::CorrectEquidistantPoints(before);
+    QVector<QPointF> after = AbstractPiece::CorrectEquidistantPoints(before);
     Comparison(after, expect);
 }
 
@@ -3275,7 +3275,7 @@ void TST_VAbstractPiece::PossibleInfiniteClearLoops() const
     QFETCH(QVector<QPointF>, path);
     QFETCH(QVector<QPointF>, expect);
 
-    QVector<QPointF> res = VAbstractPiece::CheckLoops(path);
+    QVector<QPointF> res = AbstractPiece::CheckLoops(path);
     Comparison(res, expect);
 }
 #endif //#ifndef Q_OS_WIN
@@ -3285,7 +3285,7 @@ void TST_VAbstractPiece::Case3() const
 {
     const QVector<QPointF> points = InputPointsCase3a(); // Input points.
 
-    const qreal result = VAbstractPiece::sumTrapezoids(points);
+    const qreal result = AbstractPiece::sumTrapezoids(points);
     QVERIFY(result < 0);
 }
 
@@ -3294,7 +3294,7 @@ void TST_VAbstractPiece::Case4() const
 {
     const QVector<QPointF> points = InputPointsCase4a(); // Input points.
 
-    const qreal result = VAbstractPiece::sumTrapezoids(points);
+    const qreal result = AbstractPiece::sumTrapezoids(points);
     QVERIFY(result > 0);
 }
 
@@ -3303,7 +3303,7 @@ void TST_VAbstractPiece::Case5() const
 {
     const QVector<QPointF> points = InputPointsCase5a(); // Input points.
 
-    const qreal result = VAbstractPiece::sumTrapezoids(points);
+    const qreal result = AbstractPiece::sumTrapezoids(points);
     QVERIFY(qFuzzyIsNull(result));
 }
 

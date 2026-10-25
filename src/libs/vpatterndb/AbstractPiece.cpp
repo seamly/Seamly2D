@@ -49,8 +49,8 @@
  **
  *************************************************************************/
 
-#include "vabstractpiece.h"
-#include "vabstractpiece_p.h"
+#include "AbstractPiece.h"
+#include "AbstractPieceData.h"
 #include "../vmisc/vabstractapplication.h"
 #include "../vgeometry/vpointf.h"
 
@@ -66,25 +66,25 @@
 const qreal maxL = 2.4;
 
 #ifdef Q_COMPILER_RVALUE_REFS
-VAbstractPiece &VAbstractPiece::operator=(VAbstractPiece &&piece) noexcept
+AbstractPiece &AbstractPiece::operator=(AbstractPiece &&piece) noexcept
 { Swap(piece); return *this; }
 #endif
 
-void VAbstractPiece::Swap(VAbstractPiece &piece) noexcept
+void AbstractPiece::Swap(AbstractPiece &piece) noexcept
 { std::swap(d, piece.d); }
 
 //---------------------------------------------------------------------------------------------------------------------
-VAbstractPiece::VAbstractPiece()
-    : d(new VAbstractPieceData)
+AbstractPiece::AbstractPiece()
+    : d(new AbstractPieceData)
 {}
 
 //---------------------------------------------------------------------------------------------------------------------
-VAbstractPiece::VAbstractPiece(const VAbstractPiece &piece)
+AbstractPiece::AbstractPiece(const AbstractPiece &piece)
     :d (piece.d)
 {}
 
 //---------------------------------------------------------------------------------------------------------------------
-VAbstractPiece &VAbstractPiece::operator=(const VAbstractPiece &piece)
+AbstractPiece &AbstractPiece::operator=(const AbstractPiece &piece)
 {
     if ( &piece == this )
     {
@@ -95,110 +95,110 @@ VAbstractPiece &VAbstractPiece::operator=(const VAbstractPiece &piece)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-VAbstractPiece::~VAbstractPiece()
+AbstractPiece::~AbstractPiece()
 {}
 
 //---------------------------------------------------------------------------------------------------------------------
-QString VAbstractPiece::GetName() const
+QString AbstractPiece::GetName() const
 {
     return d->m_name;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void VAbstractPiece::SetName(const QString &value)
+void AbstractPiece::SetName(const QString &value)
 {
     d->m_name = value;
 }
 
 
 //---------------------------------------------------------------------------------------------------------------------
-QString VAbstractPiece::getColor() const
+QString AbstractPiece::getColor() const
 {
     return d->m_color;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void VAbstractPiece::setColor(const QString &value)
+void AbstractPiece::setColor(const QString &value)
 {
     d->m_color = value;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QString VAbstractPiece::getFill() const
+QString AbstractPiece::getFill() const
 {
     return d->m_fill;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void VAbstractPiece::setFill(const QString &value)
+void AbstractPiece::setFill(const QString &value)
 {
     d->m_fill = value;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-bool VAbstractPiece::getLock() const
+bool AbstractPiece::getLock() const
 {
     return d->m_pieceLock;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void VAbstractPiece::setLock(bool value)
+void AbstractPiece::setLock(bool value)
 {
     d->m_pieceLock = value;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief Mirror a layout may apply to the piece.
-PieceFlip VAbstractPiece::getFlip() const
+PieceFlip AbstractPiece::getFlip() const
 {
     return d->m_flip;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void VAbstractPiece::setFlip(PieceFlip value)
+void AbstractPiece::setFlip(PieceFlip value)
 {
     d->m_flip = value;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief True when a layout may not mirror the piece (flip None).
-bool VAbstractPiece::IsForbidFlipping() const
+bool AbstractPiece::IsForbidFlipping() const
 {
     return d->m_flip == PieceFlip::None;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-bool VAbstractPiece::hasSeamAllowance() const
+bool AbstractPiece::hasSeamAllowance() const
 {
     return d->m_seamAllowance;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void VAbstractPiece::SetSeamAllowance(bool value)
+void AbstractPiece::SetSeamAllowance(bool value)
 {
     d->m_seamAllowance = value;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-bool VAbstractPiece::hasSeamAllowanceBuiltIn() const
+bool AbstractPiece::hasSeamAllowanceBuiltIn() const
 {
     return d->m_seamAllowanceBuiltIn;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void VAbstractPiece::SetSeamAllowanceBuiltIn(bool value)
+void AbstractPiece::SetSeamAllowanceBuiltIn(bool value)
 {
     d->m_seamAllowanceBuiltIn = value;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-bool VAbstractPiece::isHideSeamLine() const
+bool AbstractPiece::isHideSeamLine() const
 {
     return d->m_hideMainPath;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void VAbstractPiece::setHideSeamLine(bool value)
+void AbstractPiece::setHideSeamLine(bool value)
 {
     d->m_hideMainPath = value;
 }
@@ -216,21 +216,21 @@ const char *const pieceMaterials[] = {
 
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief Material the piece is cut from, as the pattern file stores it (untranslated).
-QString VAbstractPiece::getMaterial() const
+QString AbstractPiece::getMaterial() const
 {
     return d->m_material;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 /// @param value one of materialNames(); an empty value means defaultMaterial().
-void VAbstractPiece::setMaterial(const QString &value)
+void AbstractPiece::setMaterial(const QString &value)
 {
     d->m_material = value.isEmpty() ? defaultMaterial() : value;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief Every material a piece can have, untranslated, in the order the piece dialog lists them.
-QStringList VAbstractPiece::materialNames()
+QStringList AbstractPiece::materialNames()
 {
     QStringList names;
     for (const char *name : pieceMaterials)
@@ -242,26 +242,26 @@ QStringList VAbstractPiece::materialNames()
 
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief Material of a piece that does not name one.
-QString VAbstractPiece::defaultMaterial()
+QString AbstractPiece::defaultMaterial()
 {
     return QString::fromLatin1(pieceMaterials[0]);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief Translated material name for display; an unknown name is shown as it is.
-QString VAbstractPiece::materialDisplayName(const QString &material)
+QString AbstractPiece::materialDisplayName(const QString &material)
 {
     return QCoreApplication::translate("PieceMaterial", material.toUtf8().constData());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-qreal VAbstractPiece::GetSAWidth() const
+qreal AbstractPiece::GetSAWidth() const
 {
     return d->m_width;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void VAbstractPiece::SetSAWidth(qreal value)
+void AbstractPiece::SetSAWidth(qreal value)
 {
     value >= 0 ? d->m_width = value : d->m_width = 0;
 }
@@ -274,7 +274,7 @@ void VAbstractPiece::SetSAWidth(qreal value)
  * @param cutCorners when not null, receives VSAPoint::cornerIndex() of each node point whose ByLength corner
  *        was cut short, in path order.
  */
-QVector<QPointF> VAbstractPiece::Equidistant(const QVector<VSAPoint> &points, qreal width,
+QVector<QPointF> AbstractPiece::Equidistant(const QVector<VSAPoint> &points, qreal width,
                                              QVector<QPointF> *nodeVertices, QVector<int> *cutCorners)
 {
     if (width < 0)
@@ -406,7 +406,7 @@ bool repeatsFirstVertex(const QVector<QPointF> &points, bool closed)
  * @param closed       whether the polyline is a closed loop. Open ends are always turn points.
  * @return ascending indices into @p points.
  */
-QVector<int> VAbstractPiece::turnPointIndices(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices,
+QVector<int> AbstractPiece::turnPointIndices(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices,
                                               bool closed)
 {
     QVector<int> turns;
@@ -512,7 +512,7 @@ QVector<int> VAbstractPiece::turnPointIndices(const QVector<QPointF> &points, co
  * @param closed       whether the polyline is a closed loop.
  * @return ascending indices into @p points. A closing repeat vertex is not listed: it is the first vertex.
  */
-QVector<int> VAbstractPiece::nodeVertexIndices(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices,
+QVector<int> AbstractPiece::nodeVertexIndices(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices,
                                                bool closed)
 {
     QVector<int> indices;
@@ -544,7 +544,7 @@ QVector<int> VAbstractPiece::nodeVertexIndices(const QVector<QPointF> &points, c
  * @param closed       whether the polyline is a closed loop.
  * @return the polyline with every node vertex within accuracyPointOnLine of a vertex at its exact position.
  */
-QVector<QPointF> VAbstractPiece::snapNodeVertices(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices,
+QVector<QPointF> AbstractPiece::snapNodeVertices(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices,
                                                   bool closed)
 {
     QVector<QPointF> snapped = points;
@@ -589,7 +589,7 @@ QVector<QPointF> VAbstractPiece::snapNodeVertices(const QVector<QPointF> &points
  * @return ascending indices without repeats. As in turnPointIndices(), a closing repeat vertex is a turn point
  *         when the first vertex is one.
  */
-QVector<int> VAbstractPiece::addTurnPoints(const QVector<QPointF> &points, const QVector<int> &turnPoints,
+QVector<int> AbstractPiece::addTurnPoints(const QVector<QPointF> &points, const QVector<int> &turnPoints,
                                            const QVector<int> &added, bool closed)
 {
     QVector<int> turns = turnPoints + added;
@@ -603,7 +603,7 @@ QVector<int> VAbstractPiece::addTurnPoints(const QVector<QPointF> &points, const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-qreal VAbstractPiece::sumTrapezoids(const QVector<QPointF> &points)
+qreal AbstractPiece::sumTrapezoids(const QVector<QPointF> &points)
 {
     // Calculation a polygon area through the sum of the areas of trapezoids
     qreal s, res = 0;
@@ -644,7 +644,7 @@ qreal VAbstractPiece::sumTrapezoids(const QVector<QPointF> &points)
  * @return true for clockwise direction.
  * return false for counterclock-wise direction.
  */
-bool VAbstractPiece::isClockwise(const QVector<QPointF> &points)
+bool AbstractPiece::isClockwise(const QVector<QPointF> &points)
 {
     if(points.count() < 3)
     {
@@ -662,7 +662,7 @@ bool VAbstractPiece::isClockwise(const QVector<QPointF> &points)
  * @param points vector of points of equidistant.
  * @return vector of points of equidistant.
  */
-QVector<QPointF> VAbstractPiece::CheckLoops(const QVector<QPointF> &points)
+QVector<QPointF> AbstractPiece::CheckLoops(const QVector<QPointF> &points)
 {
     int count = points.size();
     /*If we got less than 4 points no need seek loops.*/
@@ -797,14 +797,14 @@ QVector<QPointF> VAbstractPiece::CheckLoops(const QVector<QPointF> &points)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-constexpr qreal VAbstractPiece::PointPosition(const QPointF &p, const QLineF &line)
+constexpr qreal AbstractPiece::PointPosition(const QPointF &p, const QLineF &line)
 {
     return (line.p2().x() - line.p1().x()) * (p.y() - line.p1().y()) -
            (line.p2().y() - line.p1().y()) * (p.x() - line.p1().x());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-qreal VAbstractPiece::MaxLocalSA(const VSAPoint &p, qreal width)
+qreal AbstractPiece::MaxLocalSA(const VSAPoint &p, qreal width)
 {
     qreal w1 = p.GetSAAfter();
     if (w1 < 0)
@@ -829,7 +829,7 @@ qreal VAbstractPiece::MaxLocalSA(const VSAPoint &p, qreal width)
  * @param cut when not null, receives true when a ByLength corner was cut short.
  * @return seam allowance points.
  */
-QVector<QPointF> VAbstractPiece::EkvPoint(const VSAPoint &p1Line1, const VSAPoint &p2Line1,
+QVector<QPointF> AbstractPiece::EkvPoint(const VSAPoint &p1Line1, const VSAPoint &p2Line1,
                                           const VSAPoint &p1Line2, const VSAPoint &p2Line2, qreal width,
                                           bool *cut)
 {
@@ -971,7 +971,7 @@ QT_WARNING_POP
  *        pattern gets the same corner shape.
  * @param cut when not null, receives true when the corner was cut.
  */
-QVector<QPointF> VAbstractPiece::AngleByLength(const QPointF &p2, const QPointF &sp1, const QPointF &sp2,
+QVector<QPointF> AbstractPiece::AngleByLength(const QPointF &p2, const QPointF &sp1, const QPointF &sp2,
                                                const QPointF &sp3, qreal width, bool forceCut, bool *cut)
 {
     QVector<QPointF> points;
@@ -1015,7 +1015,7 @@ QVector<QPointF> VAbstractPiece::AngleByLength(const QPointF &p2, const QPointF 
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> VAbstractPiece::AngleByIntersection(const QPointF &p1, const QPointF &p2, const QPointF &p3,
+QVector<QPointF> AbstractPiece::AngleByIntersection(const QPointF &p1, const QPointF &p2, const QPointF &p3,
                                                      const QPointF &sp1, const QPointF &sp2, const QPointF &sp3,
                                                      qreal width)
 {
@@ -1056,7 +1056,7 @@ QVector<QPointF> VAbstractPiece::AngleByIntersection(const QPointF &p1, const QP
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> VAbstractPiece::AngleByFirstSymmetry(const QPointF &p1, const QPointF &p2,
+QVector<QPointF> AbstractPiece::AngleByFirstSymmetry(const QPointF &p1, const QPointF &p2,
                                                       const QPointF &sp1, const QPointF &sp2, const QPointF &sp3,
                                                       qreal width)
 {
@@ -1097,7 +1097,7 @@ QVector<QPointF> VAbstractPiece::AngleByFirstSymmetry(const QPointF &p1, const Q
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> VAbstractPiece::AngleBySecondSymmetry(const QPointF &p2, const QPointF &p3,
+QVector<QPointF> AbstractPiece::AngleBySecondSymmetry(const QPointF &p2, const QPointF &p3,
                                                        const QPointF &sp1, const QPointF &sp2, const QPointF &sp3,
                                                        qreal width)
 {
@@ -1138,7 +1138,7 @@ QVector<QPointF> VAbstractPiece::AngleBySecondSymmetry(const QPointF &p2, const 
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> VAbstractPiece::AngleByFirstRightAngle(const QPointF &p1, const QPointF &p2,
+QVector<QPointF> AbstractPiece::AngleByFirstRightAngle(const QPointF &p1, const QPointF &p2,
                                                         const QPointF &sp1, const QPointF &sp2, const QPointF &sp3,
                                                         qreal width)
 {
@@ -1176,7 +1176,7 @@ QVector<QPointF> VAbstractPiece::AngleByFirstRightAngle(const QPointF &p1, const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> VAbstractPiece::AngleBySecondRightAngle(const QPointF &p2, const QPointF &p3,
+QVector<QPointF> AbstractPiece::AngleBySecondRightAngle(const QPointF &p2, const QPointF &p3,
                                                          const QPointF &sp1, const QPointF &sp2, const QPointF &sp3,
                                                          qreal width)
 {
@@ -1214,7 +1214,7 @@ QVector<QPointF> VAbstractPiece::AngleBySecondRightAngle(const QPointF &p2, cons
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QLineF VAbstractPiece::createParallelLine(const VSAPoint &p1, const VSAPoint &p2, qreal width)
+QLineF AbstractPiece::createParallelLine(const VSAPoint &p1, const VSAPoint &p2, qreal width)
 {
     qreal w1 = p1.GetSAAfter();
     if (w1 < 0)
@@ -1234,7 +1234,7 @@ QLineF VAbstractPiece::createParallelLine(const VSAPoint &p1, const VSAPoint &p2
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QLineF VAbstractPiece::createParallelLine(const QPointF &p1, const QPointF &p2, qreal width)
+QLineF AbstractPiece::createParallelLine(const QPointF &p1, const QPointF &p2, qreal width)
 {
     const QLineF parallel = QLineF(SingleParallelPoint(p1, p2, 90, width),
                                   SingleParallelPoint(p2, p1, -90, width));
@@ -1242,7 +1242,7 @@ QLineF VAbstractPiece::createParallelLine(const QPointF &p1, const QPointF &p2, 
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QPointF VAbstractPiece::SingleParallelPoint(const QPointF &p1, const QPointF &p2, qreal angle, qreal width)
+QPointF AbstractPiece::SingleParallelPoint(const QPointF &p1, const QPointF &p2, qreal angle, qreal width)
 {
     QLineF pLine(p1, p2);
     pLine.setAngle( pLine.angle() + angle );
@@ -1251,7 +1251,7 @@ QPointF VAbstractPiece::SingleParallelPoint(const QPointF &p1, const QPointF &p2
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QLineF VAbstractPiece::BisectorLine(const QPointF &p1, const QPointF &p2, const QPointF &p3)
+QLineF AbstractPiece::BisectorLine(const QPointF &p1, const QPointF &p2, const QPointF &p3)
 {
     QLineF line1(p2, p1);
     QLineF line2(p2, p3);
@@ -1275,7 +1275,7 @@ QLineF VAbstractPiece::BisectorLine(const QPointF &p1, const QPointF &p2, const 
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-qreal VAbstractPiece::AngleBetweenBisectors(const QLineF &b1, const QLineF &b2)
+qreal AbstractPiece::AngleBetweenBisectors(const QLineF &b1, const QLineF &b2)
 {
     const QLineF newB2 = b2.translated(-(b2.p1().x() - b1.p1().x()), -(b2.p1().y() - b1.p1().y()));
 
@@ -1302,7 +1302,7 @@ qreal VAbstractPiece::AngleBetweenBisectors(const QLineF &b1, const QLineF &b2)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-bool VAbstractPiece::CheckIntersection(const QVector<QPointF> &points, int i, int iNext, int j, int jNext,
+bool AbstractPiece::CheckIntersection(const QVector<QPointF> &points, int i, int iNext, int j, int jNext,
                                         const QPointF &crossPoint)
 {
     QVector<QPointF> sub1 = SubPath(points, iNext, j);
@@ -1333,7 +1333,7 @@ bool VAbstractPiece::CheckIntersection(const QVector<QPointF> &points, int i, in
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-bool VAbstractPiece::ParallelCrossPoint(const QLineF &line1, const QLineF &line2, QPointF &point)
+bool AbstractPiece::ParallelCrossPoint(const QLineF &line1, const QLineF &line2, QPointF &point)
 {
     const bool l1p1el2p1 = (line1.p1() == line2.p1());
     const bool l1p2el2p2 = (line1.p2() == line2.p2());
@@ -1358,7 +1358,7 @@ bool VAbstractPiece::ParallelCrossPoint(const QLineF &line1, const QLineF &line2
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-bool VAbstractPiece::Crossing(const QVector<QPointF> &sub1, const QVector<QPointF> &sub2)
+bool AbstractPiece::Crossing(const QVector<QPointF> &sub1, const QVector<QPointF> &sub2)
 {
     if (sub1.isEmpty() || sub2.isEmpty())
     {
@@ -1401,7 +1401,7 @@ bool VAbstractPiece::Crossing(const QVector<QPointF> &sub1, const QVector<QPoint
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> VAbstractPiece::SubPath(const QVector<QPointF> &path, int startIndex, int endIndex)
+QVector<QPointF> AbstractPiece::SubPath(const QVector<QPointF> &path, int startIndex, int endIndex)
 {
     if (path.isEmpty()
        || startIndex < 0 || startIndex >= path.size()
@@ -1427,13 +1427,13 @@ QVector<QPointF> VAbstractPiece::SubPath(const QVector<QPointF> &path, int start
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-bool VAbstractPiece::IsEkvPointOnLine(const QPointF &iPoint, const QPointF &prevPoint, const QPointF &nextPoint)
+bool AbstractPiece::IsEkvPointOnLine(const QPointF &iPoint, const QPointF &prevPoint, const QPointF &nextPoint)
 {
     return VGObject::IsPointOnLineviaPDP(iPoint, prevPoint, nextPoint);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-bool VAbstractPiece::IsEkvPointOnLine(const VSAPoint &iPoint, const VSAPoint &prevPoint, const VSAPoint &nextPoint)
+bool AbstractPiece::IsEkvPointOnLine(const VSAPoint &iPoint, const VSAPoint &prevPoint, const VSAPoint &nextPoint)
 {
     // See bug #671
     const qreal tmpWidth = 10;
@@ -1447,25 +1447,25 @@ bool VAbstractPiece::IsEkvPointOnLine(const VSAPoint &iPoint, const VSAPoint &pr
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-qreal VAbstractPiece::GetMx() const
+qreal AbstractPiece::GetMx() const
 {
     return d->m_mx;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void VAbstractPiece::SetMx(qreal value)
+void AbstractPiece::SetMx(qreal value)
 {
     d->m_mx = value;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-qreal VAbstractPiece::GetMy() const
+qreal AbstractPiece::GetMy() const
 {
     return d->m_my;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void VAbstractPiece::SetMy(qreal value)
+void AbstractPiece::SetMy(qreal value)
 {
     d->m_my = value;
 }

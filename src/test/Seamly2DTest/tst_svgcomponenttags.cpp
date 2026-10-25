@@ -95,7 +95,7 @@ VLayoutPiecePath makePath(const QVector<QPointF> &points, bool cut)
 /**
  * @brief makeTestPiece builds a minimal piece: a square contour with a seam
  * allowance, one notch, one plain internal path and two cutout paths.
- * @param name piece name; VAbstractPieceData defaults a piece to the
+ * @param name piece name; AbstractPieceData defaults a piece to the
  *             localized "Piece" when SetName() is never called, so an empty
  *             name must still be set explicitly to test the no-name case.
  * @return the layout piece.
@@ -1198,9 +1198,9 @@ void TST_SvgComponentTags::OneMaterialKeepsOnePatternGroup() const
 {
     VLayoutPiece back = makeTestPiece(QStringLiteral("Back"));
     back.setMaterial(QString());
-    QCOMPARE(back.getMaterial(), VAbstractPiece::defaultMaterial());
-    QCOMPARE(VAbstractPiece::defaultMaterial(), QStringLiteral("Fabric"));
-    QCOMPARE(VAbstractPiece::materialNames(), QStringList({QStringLiteral("Fabric"), QStringLiteral("Lining"),
+    QCOMPARE(back.getMaterial(), AbstractPiece::defaultMaterial());
+    QCOMPARE(AbstractPiece::defaultMaterial(), QStringLiteral("Fabric"));
+    QCOMPARE(AbstractPiece::materialNames(), QStringList({QStringLiteral("Fabric"), QStringLiteral("Lining"),
                                                             QStringLiteral("Interfacing"),
                                                             QStringLiteral("Interlining")}));
 

@@ -11969,7 +11969,7 @@ carregar no SeamlyME como de costume.
     </message>
 </context>
 <context>
-    <name>VAbstractPieceData</name>
+    <name>AbstractPieceData</name>
     <message>
         <source>Piece</source>
         <translation>Peça</translation>

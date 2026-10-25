@@ -11981,7 +11981,7 @@ Czy chcesz zapisać zmiany?</translation>
     </message>
 </context>
 <context>
-    <name>VAbstractPieceData</name>
+    <name>AbstractPieceData</name>
     <message>
         <source>Piece</source>
         <translation>Kawałek</translation>

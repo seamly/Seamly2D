@@ -69,7 +69,7 @@
 #include "../vpatterndb/floatItemData/vpiecelabeldata.h"
 #include "../vpatterndb/FoldLineGraphic.h"
 #include "../vpatterndb/vcontainer.h"
-#include "vabstractpiece.h"
+#include "../vpatterndb/AbstractPiece.h"
 
 class VLayoutPieceData;
 class VLayoutPiecePath;
@@ -77,7 +77,7 @@ class QGraphicsItem;
 class QGraphicsPathItem;
 class VTextManager;
 
-class VLayoutPiece :public VAbstractPiece
+class VLayoutPiece :public AbstractPiece
 {
     Q_DECLARE_TR_FUNCTIONS(VLayoutPiece)
 public:

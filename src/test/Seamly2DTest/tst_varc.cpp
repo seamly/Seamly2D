@@ -51,7 +51,7 @@
 
 #include "tst_varc.h"
 #include "../vgeometry/varc.h"
-#include "../vlayout/vabstractpiece.h"
+#include "../vpatterndb/AbstractPiece.h"
 #include "../vmisc/logging.h"
 
 #include <QtTest>
@@ -226,7 +226,7 @@ void TST_VArc::TestGetPoints()
         }
 
         // calculated square
-        const qreal cSquare = qAbs(VAbstractPiece::sumTrapezoids(points)/2.0);
+        const qreal cSquare = qAbs(AbstractPiece::sumTrapezoids(points)/2.0);
         const qreal value = qAbs(gSquere - cSquare);
         const QString errorMsg =
                 QString("Broken the second rule. Interpolation has too big computing error. Error ='%1'.").arg(value);
