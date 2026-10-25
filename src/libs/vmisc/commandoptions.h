@@ -54,57 +54,8 @@
 
 #include <QString>
 
-extern const QString LONG_OPTION_BASENAME;
-extern const QString SINGLE_OPTION_BASENAME;
-
-extern const QString LONG_OPTION_DESTINATION;
-extern const QString SINGLE_OPTION_DESTINATION;
-
 extern const QString LONG_OPTION_MEASUREFILE;
 extern const QString SINGLE_OPTION_MEASUREFILE;
-
-extern const QString LONG_OPTION_PAGETEMPLATE;
-extern const QString SINGLE_OPTION_PAGETEMPLATE;
-
-extern const QString LONG_OPTION_EXP2FORMAT;
-extern const QString SINGLE_OPTION_EXP2FORMAT;
-
-extern const QString LONG_OPTION_BINARYDXF;
-extern const QString LONG_OPTION_TEXT2PATHS;
-extern const QString LONG_OPTION_EXPORTONLYDETAILS;
-
-extern const QString LONG_OPTION_ROTATE;
-extern const QString SINGLE_OPTION_ROTATE;
-
-extern const QString LONG_OPTION_CROP;
-extern const QString SINGLE_OPTION_CROP;
-
-extern const QString LONG_OPTION_UNITE;
-extern const QString SINGLE_OPTION_UNITE;
-
-extern const QString LONG_OPTION_PAGEW;
-extern const QString SINGLE_OPTION_PAGEW;
-
-extern const QString LONG_OPTION_PAGEH;
-extern const QString SINGLE_OPTION_PAGEH;
-
-extern const QString LONG_OPTION_PAGEUNITS;
-extern const QString SINGLE_OPTION_PAGEUNITS;
-
-extern const QString LONG_OPTION_SAVELENGTH;
-extern const QString SINGLE_OPTION_SAVELENGTH;
-
-extern const QString LONG_OPTION_SHIFTLENGTH;
-extern const QString SINGLE_OPTION_SHIFTLENGTH;
-
-extern const QString LONG_OPTION_SHIFTUNITS;
-extern const QString SINGLE_OPTION_SHIFTUNITS;
-
-extern const QString LONG_OPTION_GAPWIDTH;
-extern const QString SINGLE_OPTION_GAPWIDTH;
-
-extern const QString LONG_OPTION_GROUPPING;
-extern const QString SINGLE_OPTION_GROUPPING;
 
 extern const QString LONG_OPTION_TEST;
 extern const QString SINGLE_OPTION_TEST;
@@ -114,21 +65,6 @@ extern const QString SINGLE_OPTION_GRADATIONSIZE;
 
 extern const QString LONG_OPTION_GRADATIONHEIGHT;
 extern const QString SINGLE_OPTION_GRADATIONHEIGHT;
-
-extern const QString LONG_OPTION_IGNORE_MARGINS;
-extern const QString SINGLE_OPTION_IGNORE_MARGINS;
-
-extern const QString LONG_OPTION_LEFT_MARGIN;
-extern const QString SINGLE_OPTION_LEFT_MARGIN;
-
-extern const QString LONG_OPTION_RIGHT_MARGIN;
-extern const QString SINGLE_OPTION_RIGHT_MARGIN;
-
-extern const QString LONG_OPTION_TOP_MARGIN;
-extern const QString SINGLE_OPTION_TOP_MARGIN;
-
-extern const QString LONG_OPTION_BOTTOM_MARGIN;
-extern const QString SINGLE_OPTION_BOTTOM_MARGIN;
 
 QStringList AllKeys();
 

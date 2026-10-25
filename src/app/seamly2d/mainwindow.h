@@ -166,8 +166,6 @@ protected:
     virtual bool eventFilter(QObject *watched, QEvent *event) override;
     virtual void closeEvent(QCloseEvent *event) override;
     virtual void customEvent(QEvent * event) override;
-    virtual void CleanLayout() override;
-    virtual void PrepareSceneList() override;
     virtual void exportToCSVData(const QString &fileName, const DialogExportToCSV &dialog) final;
     void         handleExportToCSV();
     void         handleExportFinalMeasurementsToCSV();
@@ -185,14 +183,11 @@ private slots:
     void changeDraftBlockGlobally(const QString &patternPiece);
     void initToolBarStyles();
     void resetOrigins();
-    void showLayoutPages(int index);
     void Preferences();
     void updatePreferences();
 #if defined(Q_OS_MAC)
     void CreateMeasurements();
 #endif
-    void exportLayoutAs();
-    void exportPiecesAs();
     void exportDraftBlocksAs();
 
     void handleArrowTool(bool checked);
@@ -248,7 +243,6 @@ private slots:
     void handleUnionTool(bool checked);
     void handlePieceMirrorTool(bool checked);
 
-    void handleNewLayout(bool checked);
 
     void changeDraftBlock(Selection selection);
 
@@ -324,7 +318,6 @@ private:
     bool                              isToolOptionsDockVisible;
     bool                              isGroupsDockVisible;
     bool                              isPiecesDockVisible;
-    bool                              isLayoutsDockVisible;
     bool                              isToolboxDockVisible;
     bool                              drawMode;            /// @brief drawMode true if draft scene active.
 
@@ -383,7 +376,6 @@ private:
     void                              handleOperationsMenu();
     void                              handlePatternPiecesMenu();
     void                              handlePieceMenu();
-    void                              handleLayoutMenu();
     void                              handleImagesMenu();
 
 
@@ -391,7 +383,6 @@ private:
 
     void               setWidgetsEnabled(bool enable);
     void               setToolsEnabled(bool enable);
-    void               SetLayoutModeActions();
 
     void               setSceneBackgroundColor();
     void               SaveCurrentScene();
@@ -467,7 +458,6 @@ private:
     void               raiseSeamlyLayout() const;
 
     void               reopenFilesAfterCrash(QStringList &args);
-    void               DoExport(const VCommandLinePtr& expParams);
 
     bool               setSize(const QString &text);
     bool               setHeight(const QString & text);

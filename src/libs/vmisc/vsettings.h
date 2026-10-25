@@ -61,7 +61,6 @@
 #include <QMargins>
 
 #include "../vmisc/def.h"
-#include "../vlayout/vbank.h"
 #include "vcommonsettings.h"
 
 template <class T> class QSharedPointer;
@@ -129,77 +128,6 @@ public:
 
     QString        GetUserPassword() const;
     void           SetUserPassword(const QString &value);
-
-    // Layout settings
-    qreal          GetLayoutPaperHeight() const;
-    void           SetLayoutPaperHeight(qreal value);
-
-    qreal          GetLayoutPaperWidth() const;
-    void           SetLayoutPaperWidth(qreal value);
-
-    qreal          GetLayoutShift() const;
-    static qreal   GetDefLayoutShift();
-    void           SetLayoutShift(qreal value);
-
-    qreal          getLayoutGap() const;
-    static qreal   getDefLayoutGap();
-    void           setLayoutGap(qreal value);
-
-    QMarginsF      GetFields(const QMarginsF &def = QMarginsF()) const;
-    void           SetFields(const QMarginsF &value);
-
-    Cases          GetLayoutGroup() const;
-    static Cases   GetDefLayoutGroup();
-    void           SetLayoutGroup(const Cases &value);
-
-    bool           GetLayoutRotate() const;
-    static bool    GetDefLayoutRotate();
-    void           SetLayoutRotate(bool value);
-
-    int            GetLayoutRotationIncrease() const;
-    static int     GetDefLayoutRotationIncrease();
-    void           SetLayoutRotationIncrease(int value);
-
-    bool           GetLayoutAutoCrop() const;
-    static bool    GetDefLayoutAutoCrop();
-    void           SetLayoutAutoCrop(bool value);
-
-    bool           GetLayoutSaveLength() const;
-    static bool    GetDefLayoutSaveLength();
-    void           SetLayoutSaveLength(bool value);
-
-    bool           GetLayoutUnitePages() const;
-    static bool    GetDefLayoutUnitePages();
-    void           SetLayoutUnitePages(bool value);
-
-    bool           GetIgnoreAllFields() const;
-    static bool    GetDefIgnoreAllFields();
-    void           SetIgnoreAllFields(bool value);
-
-    bool           useStripOptimization() const;
-    static bool    useDefStripOptimization();
-    void           setStripOptimization(bool value);
-
-    quint8         GetMultiplier() const;
-    static quint8  GetDefMultiplier();
-    void           SetMultiplier(quint8 value);
-
-    bool           GetTextAsPaths() const;
-    static bool    GetDefTextAsPaths();
-    void           setTextAsPaths(bool value);
-
-    // settings for the tiled PDFs
-    QMarginsF      GetTiledPDFMargins(const Unit &unit) const;
-    void           setTiledPDFMargins(const QMarginsF &value, const Unit &unit);
-
-    qreal          getTiledPDFPaperHeight(const Unit &unit) const;
-    void           setTiledPDFPaperHeight(qreal value, const Unit &unit);
-
-    qreal          getTiledPDFPaperWidth(const Unit &unit) const;
-    void           setTiledPDFPaperWidth(qreal value, const Unit &unit);
-
-    PageOrientation getTiledPDFOrientation() const;
-    void            setTiledPDFOrientation(PageOrientation value);
 
 private:
     Q_DISABLE_COPY(VSettings)

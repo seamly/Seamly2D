@@ -54,17 +54,14 @@
 #define MAINWINDOWSNOGUI_H
 
 #include <QMainWindow>
-#include <QPrinter>
 #include <QToolButton>
 
 #include "../vlayout/vlayoutpiece.h"
 #include "xml/vpattern.h"
 #include "dialogs/export_layout_dialog.h"
-#include "../vlayout/vlayoutgenerator.h"
 #include "../vwidgets/vabstractmainwindow.h"
 
 class QGraphicsScene;
-struct PosterData;
 class QGraphicsRectItem;
 
 class MainWindowsNoGUI : public VAbstractMainWindow
@@ -75,16 +72,10 @@ public:
     virtual ~MainWindowsNoGUI() override;
 
 public slots:
-    void toolLayoutSettings(QToolButton *tButton, bool checked);
-    void PrintPreviewOrigin();
-    void PrintPreviewTiled();
-    void PrintOrigin();
-    void PrintTiled();
     void refreshLabels();
     void refreshGrainLines();
     void refreshSeamAllowances();
     void exportSVG(const QString &name, QGraphicsRectItem *paper, QGraphicsScene *scene)const;
-    void exportSVG(const QString &name, QGraphicsRectItem *paper, const QList<QGraphicsItem *> &pieces)const;
     QString buildPiecesSvgString(QGraphicsRectItem *paper, const QList<QGraphicsItem *> &pieces)const;
     QString individualSampleSize() const;
     void exportPNG(const QString &name, QGraphicsScene *scene)const;
@@ -120,105 +111,23 @@ protected:
     VContainer     *pattern;         /** @brief pattern container with data (points, arcs, splines, spline paths, variables) */
     VPattern       *doc;             /** @brief doc dom document container */
 
-    QList<QGraphicsItem *>          papers;
-    QList<QGraphicsItem *>          shadows;
-    QList<QGraphicsScene *>         scenes;
-    QList<QList<QGraphicsItem *>  > pieces;
-    QVector<QVector<VLayoutPiece> > piecesOnLayout;
-
     QAction     *undoAction;
     QAction     *redoAction;
     QAction     *actionDockWidgetToolOptions;
     QAction     *actionDockWidgetGroups;
     QAction     *actionDockWidgetPieces;
-    QAction     *actionDockWidgetLayouts;
     QAction     *actionDockWidgetToolbox;
 
     bool         isNoScaling;
-    bool         isLayoutStale;
-    bool         ignoreMargins;
-    QMarginsF    margins;
-    QSizeF       paperSize;
 
     static QVector<VLayoutPiece> preparePiecesForLayout(const QHash<quint32, VPiece> &pieces);
 
-    void         ExportData(const QVector<VLayoutPiece> &pieceList, const ExportLayoutDialog &dialog);
-
     void         InitTempLayoutScene();
-    virtual void CleanLayout()=0;
-    virtual void PrepareSceneList()=0;
-    QIcon        ScenePreview(int i) const;
-    bool         LayoutSettings(VLayoutGenerator& lGenerator);
-    int          ContinueIfLayoutStale();
     QString      FileName() const;
     void         setSizeHeightForIndividualM() const;
 
-private slots:
-    void         PrintPages (QPrinter *printer);
-    void         ErrorConsoleMode(const LayoutErrors &state);
-
 private:
     Q_DISABLE_COPY(MainWindowsNoGUI)
-
-    bool         isTiled;
-    bool         isAutoCrop;
-    bool         isUnitePages;
-
-    QString      layoutPrinterName;
-
-    static QList<QGraphicsItem *> CreateShadows(const QList<QGraphicsItem *> &papers);
-    static QList<QGraphicsScene *> CreateScenes(const QList<QGraphicsItem *> &papers,
-                                                const QList<QGraphicsItem *> &shadows,
-                                                const QList<QList<QGraphicsItem *> > &pieces);
-
-
-
-    void PdfTiledFile(const QString &name);
-
-    void ObjFile(const QString &name, QGraphicsRectItem *paper, QGraphicsScene *scene)const;
-    void FlatDxfFile(const QString &name, int version, bool binary, QGraphicsRectItem *paper, QGraphicsScene *scene,
-                     const QList<QList<QGraphicsItem *> > &pieces)const;
-    void AAMADxfFile(const QString &name, int version, bool binary, const QSize &size,
-                     const QVector<VLayoutPiece> &pieces) const;
-
-    void PreparePaper(int index) const;
-    void RestorePaper(int index) const;
-
-    void PrepareTextForDXF(const QString &placeholder, const QList<QList<QGraphicsItem *> > &pieces) const;
-    void RestoreTextAfterDXF(const QString &placeholder, const QList<QList<QGraphicsItem *> > &pieces) const;
-
-    void PrintPreview();
-    void LayoutPrint();
-
-    enum class PrintType : char {PrintPDF, PrintPreview, PrintNative};
-
-    void SetPrinterSettings(QPrinter *printer, const PrintType &printType);
-    bool IsLayoutGrayscale() const;
-    QPageSize FindQPrinterPageSize(const QSizeF &size) const;
-
-    bool isPagesUniform() const;
-    bool IsPagesFit(const QSizeF &printPaper) const;
-
-    void ExportScene(const ExportLayoutDialog &dialog,
-                     const QList<QGraphicsScene *> &scenes,
-                     const QList<QGraphicsItem *> &papers,
-                     const QList<QGraphicsItem *> &shadows,
-                     const QList<QList<QGraphicsItem *> > &pieces,
-                     bool ignoreMargins, const QMarginsF &margins) const;
-
-    void ExportApparelLayout(const ExportLayoutDialog &dialog, const QVector<VLayoutPiece> &pieces, const QString &name,
-                             const QSize &size) const;
-
-    void exportPiecesAsApparelLayout(const ExportLayoutDialog &dialog, QVector<VLayoutPiece> pieceList);
-
-    void ExportFlatLayout(const ExportLayoutDialog &dialog,
-                          const QList<QGraphicsScene *> &scenes,
-                          const QList<QGraphicsItem *> &papers,
-                          const QList<QGraphicsItem *> &shadows,
-                          const QList<QList<QGraphicsItem *> > &pieces,
-                          bool ignoreMargins, const QMarginsF &margins);
-
-    void exportPiecesAsFlatLayout(const ExportLayoutDialog &dialog, const QVector<VLayoutPiece> &pieceList);
 
     QList<QGraphicsItem *> arrangePieceItemsFlat(QGraphicsScene *scene, const QVector<VLayoutPiece> &pieceList,
                                                  bool textAsPaths) const;

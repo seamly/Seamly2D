@@ -39,7 +39,7 @@ TST_ExportFormatCombobox::TST_ExportFormatCombobox(QObject *parent)
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief Piece Mode needs PDF and SVG export.
+ * @brief Export Draft Blocks needs PDF and SVG export.
  */
 void TST_ExportFormatCombobox::offersPdfAndSvg()
 {
@@ -50,7 +50,7 @@ void TST_ExportFormatCombobox::offersPdfAndSvg()
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief PS and EPS are not offered, so the command line rejects formats 8 and 9.
+ * @brief PS and EPS are not offered.
  */
 void TST_ExportFormatCombobox::offersNoPostScript()
 {
@@ -63,12 +63,36 @@ void TST_ExportFormatCombobox::offersNoPostScript()
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief Command line format numbers after the removed PS and EPS do not move.
+ * @brief Tiled PDF is not offered: SeamlyLayout makes the tiled PDF.
+ */
+void TST_ExportFormatCombobox::offersNoTiledPdf()
+{
+    const QString help = ExportFormatCombobox::makeHelpFormatList();
+    QVERIFY2(!help.contains(QLatin1String("PDF tiled")), qUtf8Printable(help));
+    QVERIFY2(!help.contains(QLatin1String(" = 2\n")), qUtf8Printable(help));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief DXF and Wavefront OBJ are not offered: they served the removed Export Pieces.
+ */
+void TST_ExportFormatCombobox::offersNoDxfOrObj()
+{
+    const QString help = ExportFormatCombobox::makeHelpFormatList();
+    QVERIFY2(!help.contains(QLatin1String("(*.dxf)")), qUtf8Printable(help));
+    QVERIFY2(!help.contains(QLatin1String("(*.obj)")), qUtf8Printable(help));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Format numbers do not move when formats are removed: the TIF number follows the unused DXF numbers.
  */
 void TST_ExportFormatCombobox::keepsFormatNumbers()
 {
+    QCOMPARE(static_cast<int>(LayoutExportFormat::PNG), 3);
     QCOMPARE(static_cast<int>(LayoutExportFormat::OBJ), 7);
     QCOMPARE(static_cast<int>(LayoutExportFormat::DXF_AC1006_Flat), 10);
+    QCOMPARE(static_cast<int>(LayoutExportFormat::TIF), 37);
     const QString help = ExportFormatCombobox::makeHelpFormatList();
-    QVERIFY2(help.contains(QLatin1String("(*.dxf) = 10\n")), qUtf8Printable(help));
+    QVERIFY2(help.contains(QLatin1String("(*.tif) = 37\n")), qUtf8Printable(help));
 }

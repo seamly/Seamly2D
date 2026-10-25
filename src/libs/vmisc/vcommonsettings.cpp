@@ -132,7 +132,6 @@ const QString settingGraphicsViewShowArcToolBar          = QStringLiteral("graph
 const QString settingGraphicsViewShowOpsToolBar          = QStringLiteral("graphicsview/showOpsToolbar");
 const QString settingGraphicsViewShowPieceToolBar        = QStringLiteral("graphicsview/showPieceToolbar");
 const QString settingGraphicsViewShowDetailsToolBar      = QStringLiteral("graphicsview/showDetailsToolbar");
-const QString settingGraphicsViewShowLayoutToolBar       = QStringLiteral("graphicsview/showLayoutToolbar");
 const QString settingGraphicsAutoClearFx                 = QStringLiteral("graphicsview/autoClearFx");
 
 const QString settingGraphicsViewDialogPosition          = QStringLiteral("graphicsview/dialogPosition");
@@ -1361,18 +1360,6 @@ bool VCommonSettings::getShowDetailsToolBar() const
 void VCommonSettings::setShowDetailsToolBar(const bool &value)
 {
     setValue(settingGraphicsViewShowDetailsToolBar, value);
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-bool VCommonSettings::getShowLayoutToolBar() const
-{
-    return value(settingGraphicsViewShowLayoutToolBar, false).toBool();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void VCommonSettings::setShowLayoutToolBar(const bool &value)
-{
-    setValue(settingGraphicsViewShowLayoutToolBar, value);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

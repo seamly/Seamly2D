@@ -2,6 +2,18 @@
 
 ## Current status
 
+### 2026-10-24 — Dead.4.1 and Dead.4.2: old Seamly2D layout, print, console export, Export Pieces, `vdxf`, `vobj` removed; merged into local `run-seamlyLayout`, not pushed
+
+- Plan: Task Dead.4 in `project-docs/docs-seamlylayout/TODO_REMOVE_DEAD_LAYOUT_CODE.md` replaces `src/libs/vlayout` in five steps. Dead.4.1 and Dead.4.2 are done; their MSI + user check (`AGENT_CHECKLIST.md` §28) is open.
+- User decisions: delete the nesting engine, print tiling, layout UI, Export Pieces, File > Export As, the console export mode, `vdxf`, `vobj`. Keep Export Draft Blocks.
+- User decisions: rewrite the handoff writer as new library `src/libs/layout_handoff/` (no `v` names, new code style, every `SVG-DATA-ATTRIBUTES.md` rule incl. the open seam line). Rename and restyle `VAbstractPiece` → `AbstractPiece`, `VTextManager` → `LabelTextManager` in `vpatterndb`.
+- Removed: `--basename` export mode and its options (`-e` is `--gheight` and stays); Print/Preview/Tiled; tiled PDF; `VPoster`; New Print Layout, Layout Pages dock, Layout toolbar/toolbox, File > Export As; `LayoutSettingsDialog`, `DialogLayoutProgress`, `AbstractLayoutDialog`, `PageFormatCombobox`, `ExportProgressDialog`; layout settings; nesting engine classes; Export Pieces; `src/libs/vdxf`, `src/libs/vobj`.
+- The export dialog now serves Export Draft Blocks only: SVG, PDF, PNG, JPG, BMP, TIF, PPM.
+- Kept for later steps: `VLayoutPiece`, `VLayoutPiecePath`, `SvgGenerator`, `SvgTextItem`, `VGraphicsFillItem`, `VAbstractPiece`, `VTextManager`.
+- Verified: `cl /Zs` on every `.cpp` of seamly2d, seamlyme, the touched libs and the Qt test suites. Not run: Qt suites, MSI (ask first), GUI.
+- Next: Dead.4.3 (move and restyle `VAbstractPiece`, `VTextManager`).
+- Work done in worktree `C:\Users\susan\Projects\s2d-layout-engine` (removed after the merge).
+
 ### 2026-10-24 — Seamly2D.11 built-in seam allowance; merged into local `run-seamlyLayout` (c18f080c0e), not pushed
 
 - Piece mode draws the built-in seam line (seam line style) inside the main path (cut line style); hatch between; Hide Seam Line hides it. Dialog preview draws it too.

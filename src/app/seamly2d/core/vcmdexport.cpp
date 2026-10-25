@@ -27,15 +27,9 @@
  *************************************************************************/
 
 #include "vcmdexport.h"
-#include "../dialogs/layoutsettings_dialog.h"
-#include "../vwidgets/export_format_combobox.h"
-#include "../ifc/xml/vdomdocument.h"
 #include "../vformat/measurements.h"
 #include "../vmisc/commandoptions.h"
 #include "../vmisc/def.h"
-#include "../vmisc/vsettings.h"
-#include "../vlayout/vlayoutgenerator.h"
-#include "../vwidgets/page_format_combobox.h"
 
 #include <QDebug>
 
@@ -79,43 +73,9 @@ VCommandLine::VCommandLine() : parser(), optionsUsed(), optionsIndex(), isGuiEna
 
 //  --------------------
 /*
- * @brief Converts a layout unit value from string to pixels.
- *
- * This function takes a layout value provided as a string (e.g., "25.4") and
- * converts it to pixels using the provided layout settings.
- *
- * @param src The source layout value as a QString (expected to be numeric).
- * @param converter A reference to the LayoutSettingsDialog that provides
- *        the conversion method from layout units to pixels.
- * @return The equivalent value in pixels as a qreal.
- */
-qreal VCommandLine::Lo2Px(const QString &src, const LayoutSettingsDialog &converter)
-{
-    return converter.LayoutToPixels(src.toDouble());
-}
-
-//  --------------------
-/*
- * @brief Converts a page unit value from string to pixels.
- *
- * This function accepts a page size value as string (e.g., "210" for mm)
- * and converts it to pixels using provided layout settings.
- *
- * @param src The source page value as a QString (expected to be numeric).
- * @param converter A reference to the LayoutSettingsDialog that provides
- *        the conversion method from page units to pixels.
- * @return The equivalent value in pixels as a qreal.
- */
-qreal VCommandLine::Pg2Px(const QString& src, const LayoutSettingsDialog& converter)
-{
-    return converter.PageToPixels(src.toDouble());
-}
-
-//  --------------------
-/*
  * @brief Initializes the list of command-line options and their index.
  *
- * This method defines all supported CLI options for Seamly2D's export and automation features.
+ * This method defines all supported CLI options for Seamly2D's test mode and display features.
  * Options are added in a grouped, user-friendly order for consistency in help output.
  *
  * @param options A reference to the list where all VCommandLineOptions will be stored.
@@ -129,419 +89,42 @@ void VCommandLine::initOptions(VCommandLineOptions &options, QMap<QString, int> 
     // Options are grouped for usability; order matters for help display
     // ================================================================================================================
 
-    // --basename: Base filename for exported layout files (enables CLI export mode)
-    optionsIndex.insert(LONG_OPTION_BASENAME, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_BASENAME, LONG_OPTION_BASENAME},
-        translate("VCommandLine", "The base filename of exported layout files. Use it to "
-                                  "enable console export mode."),
-        translate("VCommandLine", "The base filename of layout files")));
-
-    // --destination: Output directory for exported files
-    optionsIndex.insert(LONG_OPTION_DESTINATION, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_DESTINATION, LONG_OPTION_DESTINATION},
-        translate("VCommandLine", "The path to output destination folder. By default the directory "
-                                  "at which the application was started."),
-        translate("VCommandLine", "The destination folder")));
-
-    // --measurefile: Path to custom measurement file
+    // --mfile: Path to custom measurement file
     optionsIndex.insert(LONG_OPTION_MEASUREFILE, index++);
     options.append(new QCommandLineOption({SINGLE_OPTION_MEASUREFILE, LONG_OPTION_MEASUREFILE},
-        translate("VCommandLine", "Path to custom measure file (export mode)."),
+        translate("VCommandLine", "Path to custom measure file (test mode)."),
         translate("VCommandLine", "The measure file")));
 
-    // --format: Output file format (e.g., SVG, PDF, DXF)
-    optionsIndex.insert(LONG_OPTION_EXP2FORMAT, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_EXP2FORMAT, LONG_OPTION_EXP2FORMAT},
-        translate("VCommandLine", "Number corresponding to output format "
-                                  "(default = 0, export mode):") +
-                                  ExportFormatCombobox::makeHelpFormatList(),
-        translate("VCommandLine", "Format number"), "0"));
-
-    // --binarydxf: Export DXF files in binary form
-    optionsIndex.insert(LONG_OPTION_BINARYDXF, index++);
-    options.append(new QCommandLineOption({LONG_OPTION_BINARYDXF},
-        translate("VCommandLine", "Export dxf in binary form.")));
-
-    // --textaspath: Export text elements as vector paths
-    optionsIndex.insert(LONG_OPTION_TEXT2PATHS, index++);
-    options.append(new QCommandLineOption({LONG_OPTION_TEXT2PATHS},
-        translate("VCommandLine", "Export text as paths.")));
-
-    // --exportonlydetails: Only export detailed parts, ignoring layout
-    optionsIndex.insert(LONG_OPTION_EXPORTONLYDETAILS, index++);
-    options.append(new QCommandLineOption({LONG_OPTION_EXPORTONLYDETAILS},
-        translate("VCommandLine", "Export only details. Export details as they positioned in "
-                                  "the details mode. Any layout related options will be ignored.")));
-
-    // --gradationsize: Size value for multi-size patterns
+    // --gsize: Size value for multi-size patterns
     optionsIndex.insert(LONG_OPTION_GRADATIONSIZE, index++);
     options.append(new QCommandLineOption({SINGLE_OPTION_GRADATIONSIZE, LONG_OPTION_GRADATIONSIZE},
         translate("VCommandLine", "Set size value a pattern file, that was opened with multisize "
-                                  "measurements (export mode). Valid values: %1cm.")
+                                  "measurements (test mode). Valid values: %1cm.")
                                  .arg(MeasurementVariable::WholeListSizes(Unit::Cm).join(", ")),
         translate("VCommandLine", "The size value")));
 
-    // --gradationheight: Height value for multi-size patterns
+    // --gheight: Height value for multi-size patterns
     optionsIndex.insert(LONG_OPTION_GRADATIONHEIGHT, index++);
     options.append(new QCommandLineOption({SINGLE_OPTION_GRADATIONHEIGHT, LONG_OPTION_GRADATIONHEIGHT},
         translate("VCommandLine", "Set height value a pattern file, that was opened with multisize "
-                                  "measurements (export mode). Valid values: %1cm.")
+                                  "measurements (test mode). Valid values: %1cm.")
                                   .arg(MeasurementVariable::WholeListHeights(Unit::Cm).join(", ")),
         translate("VCommandLine", "The height value")));
-
-    // ... [Omitting unchanged lines for brevity—continues as previously documented]
-
-    // --pagetemplate: Number of page template
-    optionsIndex.insert(LONG_OPTION_PAGETEMPLATE, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_PAGETEMPLATE, LONG_OPTION_PAGETEMPLATE},
-        translate("VCommandLine", "Number corresponding to page template "
-                                  "(default = 0, export mode):") +
-                                   PageFormatCombobox::MakeHelpTemplateList(),
-        translate("VCommandLine", "Template number"), "0"));
-
-    // --pagewidth: Page width in current units
-    optionsIndex.insert(LONG_OPTION_PAGEW, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_PAGEW, LONG_OPTION_PAGEW},
-        translate("VCommandLine", "Page width in current units like 12.0 (cannot be "
-                                  "used with \"%1\", export mode).")
-                                  .arg(LONG_OPTION_PAGETEMPLATE),
-        translate("VCommandLine", "The page width")));
-
-    // --pageheight: Page height in current units
-    optionsIndex.insert(LONG_OPTION_PAGEH, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_PAGEH, LONG_OPTION_PAGEH},
-        translate("VCommandLine", "Page height in current units like 12.0 (cannot "
-                                  "be used with \"%1\", export mode).")
-                                  .arg(LONG_OPTION_PAGETEMPLATE),
-        translate("VCommandLine", "The page height")));
-
-    // --pageunits: Page measurement units
-    optionsIndex.insert(LONG_OPTION_PAGEUNITS, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_PAGEUNITS, LONG_OPTION_PAGEUNITS},
-        translate("VCommandLine", "Page height/width measure units (cannot be used "
-                                  "with \"%1\", export mode). Valid values: %2.")
-                                  .arg(LONG_OPTION_PAGETEMPLATE)
-                                  .arg(VDomDocument::UnitsHelpString()),
-        translate("VCommandLine", "The measure unit")));
-
-    // --ignoremargins: Set all margins to zero.
-    optionsIndex.insert(LONG_OPTION_IGNORE_MARGINS, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_IGNORE_MARGINS, LONG_OPTION_IGNORE_MARGINS},
-        translate("VCommandLine", "Ignore margins printing (export mode). Disable value keys: "
-                                  "\"%1\", \"%2\", \"%3\", \"%4\". Set all margins to 0.")
-                                  .arg(LONG_OPTION_LEFT_MARGIN).arg(LONG_OPTION_RIGHT_MARGIN)
-                                  .arg(LONG_OPTION_TOP_MARGIN).arg(LONG_OPTION_BOTTOM_MARGIN)));
-
-    // --leftmargin: Set left margin value in current page units
-    optionsIndex.insert(LONG_OPTION_LEFT_MARGIN, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_LEFT_MARGIN, LONG_OPTION_LEFT_MARGIN},
-        translate("VCommandLine", "Page left margin in current units like 3.0 (export mode). If "
-                                  "not set will be used value from default printer. Or 0 if none "
-                                  "printers was found. Value will be ignored if key \"%1\" is used.")
-                                  .arg(LONG_OPTION_IGNORE_MARGINS),
-        translate("VCommandLine", "The left margin")));
-
-    // --rightmargin: Set right margin value in current page units
-    optionsIndex.insert(LONG_OPTION_RIGHT_MARGIN, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_RIGHT_MARGIN, LONG_OPTION_RIGHT_MARGIN},
-        translate("VCommandLine", "Page right margin in current units like 3.0 (export mode). If "
-                                  "not set will be used value from default printer. Or 0 if none "
-                                  "printers was found. Value will be ignored if key \"%1\" is used.")
-                                  .arg(LONG_OPTION_IGNORE_MARGINS),
-        translate("VCommandLine", "The right margin")));
-
-    // --topmargin: Set top margin value in current page units
-    optionsIndex.insert(LONG_OPTION_TOP_MARGIN, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_TOP_MARGIN, LONG_OPTION_TOP_MARGIN},
-        translate("VCommandLine", "Page top margin in current units like 3.0 (export mode). If "
-                                  "not set will be used value from default printer. Or 0 if none "
-                                  "printers was found. Value will be ignored if key \"%1\" is used.")
-                                  .arg(LONG_OPTION_IGNORE_MARGINS),
-        translate("VCommandLine", "The top margin")));
-
-    // --bottommargin: Set bottom margin value in current page units
-    optionsIndex.insert(LONG_OPTION_BOTTOM_MARGIN, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_BOTTOM_MARGIN, LONG_OPTION_BOTTOM_MARGIN},
-        translate("VCommandLine", "Page bottom margin in current units like 3.0 (export mode). If "
-                                  "not set will be used value from default printer. Or 0 if none "
-                                  "printers was found. Value will be ignored if key \"%1\" is used.")
-                                  .arg(LONG_OPTION_IGNORE_MARGINS),
-        translate("VCommandLine", "The bottom margin")));
-
-    // --rotate: Rotation of pieces in degrees
-    optionsIndex.insert(LONG_OPTION_ROTATE, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_ROTATE, LONG_OPTION_ROTATE},
-        translate("VCommandLine", "Rotation in degrees (one of predefined, export mode). "
-                                  "Default value is 180. 0 is no-rotate. Valid values: "
-                                  "%1. Each value show how many times details will be rotated. For "
-                                  "example 180 mean two times (360/180=2) by 180 degree.")
-                                  .arg("0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 15, 18, 20, 24, 30, 36, 40, 45, "
-                                       "60, 72, 90, 180"),
-        translate("VCommandLine", "Angle")));
-
-    // --crop: Autocrop unused length of page
-    optionsIndex.insert(LONG_OPTION_CROP, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_CROP, LONG_OPTION_CROP},
-                                          translate("VCommandLine", "Auto crop unused length (export mode).")));
-
-    // --unite: Unite pages if possible
-    optionsIndex.insert(LONG_OPTION_UNITE, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_UNITE, LONG_OPTION_UNITE},
-        translate("VCommandLine", "Unite pages if possible (export mode). Maximum "
-                                  "value limited by QImage that supports only a maximum of "
-                                  "32768x32768 px images.")));
-
-    // --savelength: Save length of sheet when set
-    optionsIndex.insert(LONG_OPTION_SAVELENGTH, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_SAVELENGTH, LONG_OPTION_SAVELENGTH},
-        translate("VCommandLine", "Save length of the sheet if set (export mode). The option tells "
-                                  "the program to use as much as possible width of sheet. Quality "
-                                  "of a layout can be worse when this option was used.")));
-
-    // --shiftunits: Set the shift / offset units for layout
-    optionsIndex.insert(LONG_OPTION_SHIFTUNITS, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_SHIFTUNITS, LONG_OPTION_SHIFTUNITS},
-        translate("VCommandLine", "Layout units (as paper's one except px, export mode)."),
-        translate("VCommandLine", "The unit")));
-
-    // --shiftlength: Shift length measured in layout units
-    optionsIndex.insert(LONG_OPTION_SHIFTLENGTH, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_SHIFTLENGTH, LONG_OPTION_SHIFTLENGTH},
-        translate("VCommandLine", "Shift/Offset layout length measured in layout "
-                                  "units (export mode). The option show how many points along edge "
-                                  "will be used in creating a layout."),
-        translate("VCommandLine", "Shift/Offset length")));
-
-    // --gapwidth: gap width between pattern pieces in layout units
-    optionsIndex.insert(LONG_OPTION_GAPWIDTH, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_GAPWIDTH, LONG_OPTION_GAPWIDTH},
-        translate("VCommandLine", "The layout gap width x2, measured in layout units (export mode). "
-                                  "Set distance between details and a detail and a sheet."),
-        translate("VCommandLine", "The gap width")));
-
-    // --grouping: Sets the grouping type of pieces
-    optionsIndex.insert(LONG_OPTION_GROUPPING, index++);
-    options.append(new QCommandLineOption({SINGLE_OPTION_GROUPPING, LONG_OPTION_GROUPPING},
-        translate("VCommandLine", "Sets layout groupping cases (export mode): %1.")
-                                 .arg(LayoutSettingsDialog::MakeGroupsHelp()),
-        translate("VCommandLine", "Grouping type"), "2"));
 
     // --test: Run program in test mode with single pattern file without showing mainwindow
     optionsIndex.insert(LONG_OPTION_TEST, index++);
     options.append(new QCommandLineOption({SINGLE_OPTION_TEST, LONG_OPTION_TEST},
         translate("VCommandLine", "Run the program in a test mode. The program in "
                                   "this mode loads a single pattern file and silently quit without "
-                                  "showing the main window. The key have priority before key '%1'.")
-                                  .arg(LONG_OPTION_BASENAME)));
+                                  "showing the main window.")));
 
-
-    // --no-hdpi-scaling: Disable high DPI auto-scaling (useful on some systems)
+    // --no-scaling: Disable high DPI auto-scaling (useful on some systems)
     optionsIndex.insert(LONG_OPTION_NO_HDPI_SCALING, index++);
     options.append(new QCommandLineOption({LONG_OPTION_NO_HDPI_SCALING},
         translate("VCommandLine", "Disable high dpi scaling. Call this option if has problem "
                                   "with scaling (by default scaling enabled). Alternatively you "
                                   "can use the %1 environment variable.")
                                   .arg("QT_AUTO_SCREEN_SCALE_FACTOR=0")));
-}
-
-
-//  --------------------
-/*
- * @brief Constructs a default layout generator based on command-line options.
- *
- * This function reads CLI options and populates a VLayoutGenerator via a LayoutSettingsDialog,
- * performing validation and error-checking on mutually dependent options. If invalid or incomplete
- * option combinations are detected, it prints an error message and exits via parser.showHelp().
- *
- * @return VLayoutGeneratorPtr A smart pointer to the fully initialized layout generator.
- */
-VLayoutGeneratorPtr VCommandLine::DefaultGenerator() const
-{
-    // Initialize the layout generator and settings dialog
-    VLayoutGeneratorPtr res(new VLayoutGenerator());
-    LayoutSettingsDialog diag(res.get(), nullptr, true);
-
-    {
-        // Check for conflict between page template and manual page size/unit options
-        bool x = parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_PAGETEMPLATE)));
-
-        bool a = parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_PAGEH)));
-        bool b = parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_PAGEW)));
-        bool c = parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_PAGEUNITS)));
-
-        if ((a || b || c) && x)
-        {
-            qCritical() << translate("VCommandLine", "Cannot use pageformat and page explicit size/units together.")
-                        << "\n";
-            const_cast<VCommandLine*>(this)->parser.showHelp(V_EX_USAGE);
-        }
-
-        if ((a || b || c) && !(a && b && c))
-        {
-            qCritical() << translate("VCommandLine", "Page height, width, units must be used all 3 at once.") << "\n";
-            const_cast<VCommandLine*>(this)->parser.showHelp(V_EX_USAGE);
-        }
-    }
-
-    {
-        // Validate shift length and shift units are both set or neither
-        bool a = parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_SHIFTLENGTH)));
-        bool b = parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_SHIFTUNITS)));
-
-        if ((a || b) && !(a && b))
-        {
-            qCritical() << translate("VCommandLine", "Shift/Offset length must be used together with shift units.")
-                        << "\n";
-            const_cast<VCommandLine*>(this)->parser.showHelp(V_EX_USAGE);
-        }
-    }
-
-    {
-        // Validate gap width and shift units
-        bool a = parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_GAPWIDTH)));
-        bool b = parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_SHIFTUNITS)));
-
-        if ((a || b) && !(a && b))
-        {
-            qCritical() << translate("VCommandLine", "Gap width must be used together with shift units.") << "\n";
-            const_cast<VCommandLine*>(this)->parser.showHelp(V_EX_USAGE);
-        }
-    }
-
-    // Margin validation blocks
-    {
-        // Validate left margin and page units. If either is set, both must be set
-        bool a = parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_LEFT_MARGIN)));
-        bool b = parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_PAGEUNITS)));
-        if ((a || b) && !(a && b))
-        {
-            qCritical() << translate("VCommandLine", "Left margin must be used together with page units.") << "\n";
-            const_cast<VCommandLine*>(this)->parser.showHelp(V_EX_USAGE);
-        }
-    }
-    {
-        // Validate right margin and page units. If either is set, both must be set
-        bool a = parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_RIGHT_MARGIN)));
-        bool b = parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_PAGEUNITS)));
-        if ((a || b) && !(a && b))
-        {
-            qCritical() << translate("VCommandLine", "Right margin must be used together with page units.") << "\n";
-            const_cast<VCommandLine*>(this)->parser.showHelp(V_EX_USAGE);
-        }
-    }
-    {
-        // Validate top margin and page units. If either is set, both must be set
-        bool a = parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_TOP_MARGIN)));
-        bool b = parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_PAGEUNITS)));
-        if ((a || b) && !(a && b))
-        {
-            qCritical() << translate("VCommandLine", "Top margin must be used together with page units.") << "\n";
-            const_cast<VCommandLine*>(this)->parser.showHelp(V_EX_USAGE);
-        }
-    }
-    {
-        // Validate bottom margin and page units. If either is set, both must be set
-        // Also check if bottom margin is used with top margin
-        bool a = parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_BOTTOM_MARGIN)));
-        bool b = parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_PAGEUNITS)));
-        if ((a || b) && !(a && b))
-        {
-            qCritical() << translate("VCommandLine", "Bottom margin must be used together with page units.") << "\n";
-            const_cast<VCommandLine*>(this)->parser.showHelp(V_EX_USAGE);
-        }
-    }
-
-    // Handle layout rotation
-    const int rotateDegree = OptRotation();
-    diag.SetRotate(rotateDegree != 0); // Enable rotation toggle
-
-    if (rotateDegree != VSettings::GetDefLayoutRotationIncrease()) // Non-default value
-    {
-        if (!diag.SetIncrease(rotateDegree))
-        {
-            qCritical() << translate("VCommandLine", "Invalid rotation value. That must be one of predefined values.")
-                        << "\n";
-            const_cast<VCommandLine*>(this)->parser.showHelp(V_EX_USAGE);
-        }
-    }
-
-    // Set page template (must come before units)
-    if (!diag.SelectTemplate(OptPaperSize()))
-    {
-        qCritical() << translate("VCommandLine", "Unknown page templated selected.") << "\n";
-        const_cast<VCommandLine*>(this)->parser.showHelp(V_EX_USAGE);
-    }
-
-    // Handle manual page size input
-    if (parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_PAGEH))))
-    {
-        if (!diag.SelectPaperUnit(parser.value(*optionsUsed.value(optionsIndex.value(LONG_OPTION_PAGEUNITS)))))
-        {
-            qCritical() << translate("VCommandLine", "Unsupported paper units.") << "\n";
-            const_cast<VCommandLine*>(this)->parser.showHelp(V_EX_USAGE);
-        }
-
-        diag.SetPaperHeight(Pg2Px(parser.value(*optionsUsed.value(optionsIndex.value(LONG_OPTION_PAGEH))), diag));
-        diag.SetPaperWidth(Pg2Px(parser.value(*optionsUsed.value(optionsIndex.value(LONG_OPTION_PAGEW))), diag));
-    }
-
-    // Layout units and dimensions
-    if (parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_SHIFTUNITS))))
-    {
-        if (!diag.SelectLayoutUnit(parser.value(*optionsUsed.value(optionsIndex.value(LONG_OPTION_SHIFTUNITS)))))
-        {
-            qCritical() << translate("VCommandLine", "Unsupported layout units.") << "\n";
-            const_cast<VCommandLine*>(this)->parser.showHelp(V_EX_USAGE);
-        }
-    }
-
-    // If the --shiftlength option is provided, convert its value from layout units to pixels
-    // and apply it to the layout generator. This shift determines how much the layout will be offset.
-    if (parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_SHIFTLENGTH))))
-    {
-        diag.SetShift(Lo2Px(parser.value(*optionsUsed.value(optionsIndex.value(LONG_OPTION_SHIFTLENGTH))), diag));
-    }
-
-    if (parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_GAPWIDTH))))
-    {
-        diag.setLayoutGap(Lo2Px(parser.value(*optionsUsed.value(optionsIndex.value(LONG_OPTION_GAPWIDTH))), diag));
-    }
-
-    // Simple toggle options
-    diag.SetAutoCrop(parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_CROP)))); // Enable auto-cropping
-    diag.SetUnitePages(parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_UNITE)))); // Enable page unification
-    diag.SetSaveLength(parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_SAVELENGTH)))); // Enable save length
-    diag.SetGroup(OptGroup()); // Set grouping option
-
-    // Handle margins if not ignored
-    if (parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_IGNORE_MARGINS))))
-    {
-        diag.SetIgnoreAllFields(true);
-    }
-    else
-    {
-        QMarginsF margins = diag.GetFields();
-
-        const QCommandLineOption *option;
-
-        option = optionsUsed.value(optionsIndex.value(LONG_OPTION_LEFT_MARGIN));
-        if (parser.isSet(*option)) margins.setLeft(Pg2Px(parser.value(*option), diag));
-
-        option = optionsUsed.value(optionsIndex.value(LONG_OPTION_RIGHT_MARGIN));
-        if (parser.isSet(*option)) margins.setRight(Pg2Px(parser.value(*option), diag));
-
-        option = optionsUsed.value(optionsIndex.value(LONG_OPTION_TOP_MARGIN));
-        if (parser.isSet(*option)) margins.setTop(Pg2Px(parser.value(*option), diag));
-
-        option = optionsUsed.value(optionsIndex.value(LONG_OPTION_BOTTOM_MARGIN));
-        if (parser.isSet(*option)) margins.setBottom(Pg2Px(parser.value(*option), diag));
-
-        diag.SetFields(margins);
-    }
-
-    // Finalize layout generator setup
-    diag.DialogAccepted();
-    return res;
 }
 
 
@@ -564,7 +147,7 @@ VCommandLinePtr VCommandLine::Get(const QCoreApplication &app)
     commandLine->parser.process(app);          // Process CLI arguments with the parser
 
     // FIXME: Add more conditions here if new CLI modes are introduced that should disable the GUI
-    commandLine->isGuiEnabled = !(commandLine->IsExportEnabled() || commandLine->IsTestModeEnabled());
+    commandLine->isGuiEnabled = !commandLine->IsTestModeEnabled();
 
     return commandLine;
 }
@@ -633,94 +216,10 @@ bool VCommandLine::IsNoScalingEnabled() const
 
 //  --------------------
 /*
- * @brief Checks whether the export mode is enabled.
- *
- * This function determines if the --basename option is set, indicating export mode.
- * It also validates that exactly one input file is provided; otherwise, it shows an error and exits.
- *
- * @return true if export mode is enabled; otherwise false.
- */
-bool VCommandLine::IsExportEnabled() const
-{
-    const bool r = parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_BASENAME)));
-    if (r && parser.positionalArguments().size() != 1)
-    {
-        qCritical() << translate("VCommandLine", "Export options can be used with single input file only.") << "/n";
-        const_cast<VCommandLine*>(this)->parser.showHelp(V_EX_USAGE);
-    }
-    return r;
-}
-
-//  --------------------
-/*
- * @brief Retrieves the selected paper size template.
- *
- * If the --pagetemplate option is provided, its integer value is parsed and cast
- * to a PaperSizeFormat enum. Defaults to 0 if not set.
- *
- * @return PaperSizeFormat value corresponding to the selected page template.
- */
-PaperSizeFormat VCommandLine::OptPaperSize() const
-{
-    int ppsize = 0;
-    if (parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_PAGETEMPLATE))))
-    {
-        ppsize = parser.value(*optionsUsed.value(optionsIndex.value(LONG_OPTION_PAGETEMPLATE))).toInt();
-    }
-    return static_cast<PaperSizeFormat>(ppsize);
-}
-
-//  --------------------
-/*
- * @brief Retrieves the layout rotation value from command-line options.
- *
- * Checks if the --rotate option is set. If so, parses the value and verifies it's a valid integer.
- * Falls back to the default rotation if parsing fails or the option is not set.
- *
- * @return Integer value representing the rotation angle.
- */
-int VCommandLine::OptRotation() const
-{
-    int rotate = VSettings::GetDefLayoutRotationIncrease();
-    if (parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_ROTATE))))
-    {
-        bool ok = false;
-        rotate = parser.value(*optionsUsed.value(optionsIndex.value(LONG_OPTION_ROTATE))).toInt(&ok);
-
-        if (not ok)
-        {
-            rotate = VSettings::GetDefLayoutRotationIncrease();
-        }
-    }
-
-    return rotate;
-}
-
-//  --------------------
-/*
- * @brief Retrieves the selected layout grouping type.
- *
- * Parses the --groupping option value as an integer and maps it to a Cases enum value.
- * Returns 0 (default case) if the value is invalid or out of range.
- *
- * @return Cases enum representing the selected grouping mode.
- */
-Cases VCommandLine::OptGroup() const
-{
-    int r = parser.value(*optionsUsed.value(optionsIndex.value(LONG_OPTION_GROUPPING))).toInt();
-    if (r < 0 || r >= static_cast<int>(Cases::UnknownCase))
-    {
-        r = 0;
-    }
-    return static_cast<Cases>(r);
-}
-
-//  --------------------
-/*
  * @brief Retrieves the path to the measurement file if applicable.
  *
  * Only returns the measurement file path if the --measurefile option is set
- * and the app is running in export or test mode.
+ * and the app is running in test mode.
  *
  * @return QString containing the measurement file path, or empty if not applicable.
  */
@@ -728,101 +227,13 @@ QString VCommandLine::OptMeasurePath() const
 {
     QString measure;
     if (parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_MEASUREFILE)))
-        && (IsExportEnabled() || IsTestModeEnabled()))
+        && IsTestModeEnabled())
         // TODO: Currently restricting general use of measure file until window handling is improved
     {
         measure = parser.value(*optionsUsed.value(optionsIndex.value(LONG_OPTION_MEASUREFILE)));
     }
 
     return measure;
-}
-
-//  --------------------
-/*
- * @brief Retrieves the base name for exported files.
- *
- * Only returns the value if the application is in export mode.
- *
- * @return QString containing the base file name, or empty if export mode is not active.
- */
-QString VCommandLine::OptBaseName() const
-{
-    QString path;
-    if (IsExportEnabled())
-    {
-        path = parser.value(*optionsUsed.value(optionsIndex.value(LONG_OPTION_BASENAME)));
-    }
-
-    return path;
-}
-
-//  --------------------
-/*
- * @brief Retrieves the destination path for export output.
- *
- * Only returns the path if export mode is enabled.
- *
- * @return QString containing the destination folder path, or empty if not applicable.
- */
- QString VCommandLine::OptDestinationPath() const
- {
-     QString path;
-     if (IsExportEnabled())
-     {
-         path = parser.value(*optionsUsed.value(optionsIndex.value(LONG_OPTION_DESTINATION)));
-     }
-     return path;
- }
-
-//  --------------------
-/*
- * @brief Retrieves the selected export format type.
- *
- * Parses the --exp2format option if set, returning its integer value.
- *
- * @return Integer indicating the export file format.
- */
-int VCommandLine::OptExportType() const
-{
-    int r = 0;
-    if (parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_EXP2FORMAT))))
-    {
-        r = parser.value(*optionsUsed.value(optionsIndex.value(LONG_OPTION_EXP2FORMAT))).toInt();
-    }
-    return r;
-}
-
-//  --------------------
- /*
-  * @brief Checks whether DXF export should be in binary format.
-  *
-  * @return Non-zero if binary DXF mode is enabled, otherwise 0.
-  */
-int VCommandLine::IsBinaryDXF() const
-{
-    return parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_BINARYDXF)));
-}
-
-//  --------------------
-/*
- * @brief Checks whether text should be exported as paths.
- *
- * @return Non-zero if text-as-paths mode is enabled, otherwise 0.
- */
-int VCommandLine::isTextAsPaths() const
-{
-    return parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_TEXT2PATHS)));
-}
-
-//  --------------------
-/*
- * @brief Checks whether only pieces/details should be exported.
- *
- * @return Non-zero if only details export is enabled, otherwise 0.
- */
-int VCommandLine::exportOnlyPieces() const
-{
-    return parser.isSet(*optionsUsed.value(optionsIndex.value(LONG_OPTION_EXPORTONLYDETAILS)));
 }
 
 //  --------------------

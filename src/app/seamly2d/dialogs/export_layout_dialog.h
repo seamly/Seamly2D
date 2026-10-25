@@ -58,21 +58,18 @@
 
 #include "../vgeometry/vgeometrydef.h"
 #include "../vmisc/def.h"
-#include "abstractlayout_dialog.h"
 
 namespace Ui
 {
     class ExportLayoutDialog;
 }
 
-
-class ExportLayoutDialog : public  AbstractLayoutDialog
+class ExportLayoutDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit                ExportLayoutDialog(int count, Draw mode = Draw::Layout, const QString &fileName = QString(),
-                                           QWidget *parent = nullptr);
+    explicit                ExportLayoutDialog(const QString &fileName, QWidget *parent = nullptr);
 
     virtual                ~ExportLayoutDialog();
 
@@ -84,46 +81,22 @@ public:
 
     LayoutExportFormat      format() const;
     QString                 formatText() const;
-    void                    selectFormat(LayoutExportFormat format);
-
-    void                    setBinaryDXFFormat(bool binary);
-    bool                    isBinaryDXFFormat() const;
-    void                    enableBinaryDXFFormatCheckbox();
-
-    void                    setDestinationPath(const QString& cmdDestinationPath);
-
-    Draw                    mode() const;
 
     static QString          exportFormatSuffix(LayoutExportFormat format);
 
-    bool                    isTextAsPaths() const;
-    void                    setTextAsPaths(bool textAsPaths);
-
-    void                    setAvailableSizes(const QStringList &sizes);
-    QStringList             selectedSizes() const;
-    bool                    isBatchExport() const;
-
 protected:
     virtual void            showEvent(QShowEvent *event) override;
-    void                    initTemplates(QComboBox *templates);
 
 private slots:
     void                    save();
     void                    pathChanged(const QString &text);
-    void                    showExportFiles();
-    void                    selectAllSizes();
-    void                    deselectAllSizes();
 
 private:
     Q_DISABLE_COPY(ExportLayoutDialog)
     Ui::ExportLayoutDialog *ui;
-    int                     m_count;
     bool                    m_isInitialized;
-    Draw                    m_mode;
     QPushButton            *m_saveButton;
     QColor                  m_foreGroundColor;
-
-    void                    removeFormatFromList(LayoutExportFormat format);
 
     void                    readSettings();
     void                    writeSettings() const;

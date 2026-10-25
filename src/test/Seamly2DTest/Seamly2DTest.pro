@@ -34,7 +34,6 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 SOURCES += \
     qttestmainlambda.cpp \
-    tst_vposter.cpp \
     tst_vspline.cpp \
     tst_nameregexp.cpp \
     tst_vlayoutdetail.cpp \
@@ -67,7 +66,6 @@ SOURCES += \
 *msvc*:SOURCES += stable.cpp
 
 HEADERS += \
-    tst_vposter.h \
     tst_vspline.h \
     tst_nameregexp.h \
     tst_vlayoutdetail.h \

@@ -61,7 +61,6 @@
 #include "dialogs/dialogs.h"
 #include "dialogs/calculator_dialog.h"
 #include "dialogs/decimalchart_dialog.h"
-#include "dialogs/export_progress_dialog.h"
 #include "../ifc/exception/vexceptionobjecterror.h"
 #include "../ifc/exception/vexceptionconversionerror.h"
 #include "../ifc/exception/vexceptionemptyparameter.h"
@@ -206,7 +205,6 @@ MainWindow::MainWindow(QWidget *parent)
     , isToolOptionsDockVisible(true)
     , isGroupsDockVisible(true)
     , isPiecesDockVisible(true)
-    , isLayoutsDockVisible(false)
     , isToolboxDockVisible(true)
     , drawMode(true)
     , m_seamlyLayoutProcess(nullptr)
@@ -313,9 +311,6 @@ MainWindow::MainWindow(QWidget *parent)
         setCurrentFile(""); // Set a new unsaved pattern filename to an empty string.
         setWindowsLocale(); // Set the mainwindow locale based on the OS separator set in the prefs.
 
-        // Show the layout page that is selected in the Layout Pages dock.
-        connect(ui->listWidget, &QListWidget::currentRowChanged, this, &MainWindow::showLayoutPages);
-
         // Handle changes made to a measurment file.
         connect(m_watcher, &QFileSystemWatcher::fileChanged, this, &MainWindow::measurementsChanged);
 
@@ -370,7 +365,6 @@ MainWindow::MainWindow(QWidget *parent)
         ui->groups_DockWidget->setVisible(false);
         ui->pieces_DockWidget->setVisible(false);
         ui->toolProperties_DockWidget->setVisible(false);
-        ui->layoutPages_DockWidget->setVisible(false);
     }
 
 
@@ -2083,18 +2077,6 @@ void MainWindow::closePieceMirrorDialog(int result)
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief handleNewLayout handler for New Layout tool.
- * @param tButton - toolbutton.
- * @param checked true - button checked.
- */
-void MainWindow::handleNewLayout(bool checked)
-{
-      toolLayoutSettings(ui->layoutSettings_ToolButton, checked);
-}
-
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
  * @brief triggers the update of the groups
  */
 void MainWindow::updateGroups()
@@ -2247,35 +2229,6 @@ void MainWindow::customEvent(QEvent *event)
     if (event->type() == UNDO_EVENT)
     {
         qApp->getUndoStack()->undo();
-    }
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void MainWindow::CleanLayout()
-{
-    qDeleteAll (scenes);
-    scenes.clear();
-    shadows.clear();
-    papers.clear();
-    ui->listWidget->clear();
-    groups_widget->clear();
-    piecesWidget->clear();
-    SetLayoutModeActions();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void MainWindow::PrepareSceneList()
-{
-    for (int i=1; i<=scenes.size(); ++i)
-    {
-        QListWidgetItem *item = new QListWidgetItem(ScenePreview(i-1), QString::number(i));
-        ui->listWidget->addItem(item);
-    }
-
-    if (!scenes.isEmpty())
-    {
-        ui->listWidget->setCurrentRow(0);
-        SetLayoutModeActions();
     }
 }
 
@@ -3059,11 +3012,6 @@ void MainWindow::initializeToolBarVisibility()
         ui->details_ToolBar->setVisible(visible);
         qApp->Settings()->setShowDetailsToolBar(visible);
     });
-    connect(ui->layout_ToolBar, &QToolBar::visibilityChanged, this, [this](bool visible)
-    {
-        ui->layout_ToolBar->setVisible(visible);
-        qApp->Settings()->setShowLayoutToolBar(visible);
-    });
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -3147,7 +3095,6 @@ void MainWindow::updateToolBarVisibility()
     setToolBarVisibility(ui->operations_ToolBar, qApp->Settings()->getShowOpsToolBar());
     setToolBarVisibility(ui->pieces_ToolBar, qApp->Settings()->getShowPieceToolBar());
     setToolBarVisibility(ui->details_ToolBar, qApp->Settings()->getShowDetailsToolBar());
-    setToolBarVisibility(ui->layout_ToolBar, qApp->Settings()->getShowLayoutToolBar());
 }
 
 void MainWindow::setToolBarVisibility(QToolBar *toolbar, bool visible)
@@ -3356,7 +3303,6 @@ void MainWindow::initializeToolButtons()
     connect(ui->lineIntersectAxis_ToolButton,   &QToolButton::clicked, this, &MainWindow::handleLineIntersectAxisTool);
     connect(ui->curveIntersectAxis_ToolButton,  &QToolButton::clicked, this, &MainWindow::handleCurveIntersectAxisTool);
     connect(ui->arcIntersectAxis_ToolButton,    &QToolButton::clicked, this, &MainWindow::handleArcIntersectAxisTool);
-    connect(ui->layoutSettings_ToolButton,      &QToolButton::clicked, this, &MainWindow::handleNewLayout);
     connect(ui->pointOfIntersectionArcs_ToolButton,    &QToolButton::clicked,
             this, &MainWindow::handlePointOfIntersectionArcsTool);
     connect(ui->pointOfIntersectionCircles_ToolButton, &QToolButton::clicked,
@@ -3376,7 +3322,6 @@ void MainWindow::initializeToolButtons()
     connect(ui->mirrorByAxis_ToolButton,   &QToolButton::clicked, this, &MainWindow::handleMirrorByAxisTool);
     connect(ui->move_ToolButton,           &QToolButton::clicked, this, &MainWindow::handleMoveTool);
     connect(ui->midpoint_ToolButton,       &QToolButton::clicked, this, &MainWindow::handleMidpointTool);
-    connect(ui->exportPiecesAs_ToolButton, &QToolButton::clicked, this, &MainWindow::exportPiecesAs);
     connect(ui->ellipticalArc_ToolButton,  &QToolButton::clicked, this, &MainWindow::handleEllipticalArcTool);
     connect(ui->anchorPoint_ToolButton,    &QToolButton::clicked, this, &MainWindow::handleAnchorPointTool);
     connect(ui->importImage_ToolButton,    &QToolButton::clicked, this, &MainWindow::handleImageTool);
@@ -3771,7 +3716,6 @@ void MainWindow::handlePatternPiecesMenu()
     QAction *action_Union        = menu.addAction(QIcon(":/toolicon/32x32/union.png"),  tr("Union Tool") + "\tU");
     QAction *action_PieceMirror  = menu.addAction(QIcon(":/toolicon/32x32/piece_mirror.png"),
                                                   tr("Piece Mirror") + "\tM, P");
-    QAction *action_ExportPieces = menu.addAction(QIcon(":/toolicon/32x32/export.png"), tr("Export Pattern Pieces") + "\tE, P");
     QAction *selectedAction      = menu.exec(QCursor::pos());
 
     if(selectedAction == nullptr)
@@ -3789,34 +3733,6 @@ void MainWindow::handlePatternPiecesMenu()
         ui->piece_ToolBox->setCurrentWidget(ui->details_Page);
         ui->pieceMirror_ToolButton->setChecked(true);
         handlePieceMirrorTool(true);
-    }
-    else if (selectedAction == action_ExportPieces)
-    {
-        ui->piece_ToolBox->setCurrentWidget(ui->details_Page);
-        exportPiecesAs();
-    }
-}
-
-void MainWindow::handleLayoutMenu()
-{
-    qCDebug(vMainWindow, "Layout Menu selected. \n");
-
-
-    QMenu menu;
-
-    QAction *action_NewLayout = menu.addAction(QIcon(":/toolicon/32x32/layout_settings.png"), tr("New Print Layout") + "\tN, L");
-
-    QAction *selectedAction = menu.exec(QCursor::pos());
-
-    if(selectedAction == nullptr)
-    {
-        return;
-    }
-    else if (selectedAction == action_NewLayout)
-    {
-        ui->layout_ToolBox->setCurrentWidget(ui->layout_Page);
-        ui->layoutSettings_ToolButton->setChecked(true);
-        handleNewLayout(true);
     }
 }
 
@@ -4167,10 +4083,6 @@ void MainWindow::setSceneBackgroundColor()
     draftScene->setBackgroundBrush(color);
     pieceScene->setBackgroundBrush(color);
     layout_scene->setBackgroundBrush(color);
-    for (auto *scene : scenes)
-    {
-        scene->setBackgroundBrush(color);
-    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -4282,7 +4194,6 @@ void MainWindow::showDraftMode(bool checked)
         ui->groups_DockWidget->setVisible(true);
         ui->pieces_DockWidget->setVisible(false);
         ui->toolProperties_DockWidget->setVisible(true);
-        ui->layoutPages_DockWidget->setVisible(false);
 
         SaveCurrentScene();
 
@@ -4352,7 +4263,6 @@ void MainWindow::showPieceMode(bool checked)
         ui->groups_DockWidget->setVisible(false);
         ui->pieces_DockWidget->setVisible(true);
         ui->toolProperties_DockWidget->setVisible(false);
-        ui->layoutPages_DockWidget->setVisible(false);
 
         if(!qApp->getOpeningPattern())
         {
@@ -4518,7 +4428,7 @@ void MainWindow::showLayoutMode(bool checked)
         m_seamlyLayoutPriorStageWasDraft = (priorStage == Draw::Calculation);
         if (priorStage == Draw::Calculation)
         {
-            currentToolBoxIndex = ui->layout_ToolBox->currentIndex();
+            currentToolBoxIndex = ui->draft_ToolBox->currentIndex();
         }
         doc->setDraftStage(Draw::Layout);
         setToolsEnabled(true);
@@ -5022,8 +4932,9 @@ void MainWindow::Clear()
 #ifndef QT_NO_CURSOR
     QGuiApplication::restoreOverrideCursor();
 #endif
-    CleanLayout();
-    pieceList.clear(); // don't move to CleanLayout()
+    groups_widget->clear();
+    piecesWidget->clear();
+    pieceList.clear();
     doc->clearBackgroundImageMap();
     doc->clearHistory();
     qApp->getUndoStack()->clear();
@@ -5033,7 +4944,6 @@ void MainWindow::Clear()
     ui->groups_DockWidget->setVisible(false);
     ui->pieces_DockWidget->setVisible(false);
     ui->toolProperties_DockWidget->setVisible(false);
-    ui->layoutPages_DockWidget->setVisible(false);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -5282,7 +5192,6 @@ void MainWindow::setWidgetsEnabled(bool enable)
     const bool draftStage = (doc->getDraftStage() == Draw::Calculation);
     const bool pieceStage = (doc->getDraftStage() == Draw::Modeling);
     const bool designStage = (draftStage || pieceStage);
-    const bool layoutStage = (doc->getDraftStage() == Draw::Layout);
 
     draft_block_combobox->setEnabled(enable && draftStage);
     ui->arrow_Action->setEnabled(enable && designStage);
@@ -5355,11 +5264,9 @@ void MainWindow::setWidgetsEnabled(bool enable)
     ui->groups_DockWidget->setEnabled(enable && draftStage);
     ui->pieces_DockWidget->setEnabled(enable && pieceStage);
     ui->toolProperties_DockWidget->setEnabled(enable && draftStage);
-    ui->layoutPages_DockWidget->setEnabled(enable && layoutStage);
     actionDockWidgetToolOptions->setEnabled(enable && draftStage);
     actionDockWidgetGroups->setEnabled(enable && draftStage);
     actionDockWidgetPieces->setEnabled(enable && pieceStage);
-    actionDockWidgetLayouts->setEnabled(enable && layoutStage);
 
     //Now we don't want allow user call context menu
     draftScene->setToolsDisabled(!enable, doc->getActiveDraftBlockName());
@@ -5476,7 +5383,6 @@ void MainWindow::patternChangesWereSaved(bool saved)
         const bool state = doc->IsModified() || !saved;
         setWindowModified(state);
         not patternReadOnly ? ui->save_Action->setEnabled(state): ui->save_Action->setEnabled(false);
-        isLayoutStale = true;
     }
 }
 
@@ -5744,10 +5650,6 @@ void MainWindow::setToolsEnabled(bool enable)
     //Details
     ui->unitePieces_ToolButton->setEnabled(pieceTools);
     ui->pieceMirror_ToolButton->setEnabled(pieceTools);
-    ui->exportPiecesAs_ToolButton->setEnabled(pieceTools);
-
-    //Layout
-    ui->layoutSettings_ToolButton->setEnabled(layoutTools);
 
     //enable Toolbox Toolbar actions
     ui->arrow_Action->setEnabled(enable);
@@ -5758,7 +5660,6 @@ void MainWindow::setToolsEnabled(bool enable)
     ui->modifications_Action->setEnabled(draftTools);
     ui->pieces_Action->setEnabled(draftTools);
     ui->details_Action->setEnabled(pieceTools);
-    ui->layout_Action->setEnabled(layoutTools);
     ui->images_Action->setEnabled(layoutTools);
 
     //Menu Actions
@@ -5823,27 +5724,12 @@ void MainWindow::setToolsEnabled(bool enable)
     //Details
     ui->union_Action->setEnabled(pieceTools);
     ui->pieceMirror_Action->setEnabled(pieceTools);
-    ui->exportPieces_Action->setEnabled(pieceTools);
 
-    //Layout
-    ui->newPrintLayout_Action->setEnabled(layoutTools);
     ui->lastTool_Action->setEnabled(draftTools);
 
     ui->arrowPointer_ToolButton->setEnabled(draftTools || pieceTools);
     ui->arrowPointer_ToolButton->setChecked(draftTools || pieceTools);
     ui->arrow_Action->setChecked(draftTools || pieceTools);
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void MainWindow::SetLayoutModeActions()
-{
-    const bool enabled = !scenes.isEmpty();
-
-    ui->exportAs_Action->setEnabled(enabled);
-    ui->printPreview_Action->setEnabled(enabled);
-    ui->printPreviewTiled_Action->setEnabled(enabled);
-    ui->print_Action->setEnabled(enabled);
-    ui->printTiled_Action->setEnabled(enabled);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -5980,7 +5866,6 @@ void MainWindow::ReadSettings()
     isToolOptionsDockVisible = ui->toolProperties_DockWidget->isVisible();
     isGroupsDockVisible      = ui->groups_DockWidget->isVisible();
     isPiecesDockVisible      = ui->pieces_DockWidget->isVisible();
-    isLayoutsDockVisible     = ui->layoutPages_DockWidget->isVisible();
     isToolboxDockVisible     = ui->toolbox_DockWidget->isVisible();
 }
 
@@ -6136,13 +6021,6 @@ void MainWindow::createMenus()
         isPiecesDockVisible = visible;
     });
 
-    actionDockWidgetLayouts = ui->layoutPages_DockWidget->toggleViewAction();
-    ui->view_Menu->addAction(actionDockWidgetLayouts);
-    connect(ui->layoutPages_DockWidget, &QDockWidget::visibilityChanged, this, [this](bool visible)
-    {
-        isLayoutsDockVisible = visible;
-    });
-
     actionDockWidgetToolbox = ui->toolbox_DockWidget->toggleViewAction();
     ui->view_Menu->addAction(actionDockWidgetToolbox);
     connect(ui->toolbox_DockWidget, &QDockWidget::visibilityChanged, this, [this](bool visible)
@@ -6198,7 +6076,6 @@ void MainWindow::createMenus()
     menu->addAction(ui->operations_ToolBar->toggleViewAction());
     menu->addAction(ui->pieces_ToolBar->toggleViewAction());
     menu->addAction(ui->details_ToolBar->toggleViewAction());
-    menu->addAction(ui->layout_ToolBar->toggleViewAction());
     menu->addAction(ui->object_name_toolbar->toggleViewAction());
 }
 
@@ -6435,7 +6312,6 @@ void MainWindow::initializeDocksContain()
     ui->groups_DockWidget->setEnabled(false);
     ui->pieces_DockWidget->setEnabled(false);
     ui->toolProperties_DockWidget->setEnabled(false);
-    ui->layoutPages_DockWidget->setEnabled(false);
 
     tabifyDockWidget(ui->groups_DockWidget, ui->toolProperties_DockWidget);
 
@@ -6471,12 +6347,6 @@ void MainWindow::createActions()
             Clear();
         }
     });
-
-    connect(ui->exportAs_Action, &QAction::triggered, this, &MainWindow::exportLayoutAs);
-    connect(ui->printPreview_Action, &QAction::triggered, this, &MainWindow::PrintPreviewOrigin);
-    connect(ui->printPreviewTiled_Action, &QAction::triggered, this, &MainWindow::PrintPreviewTiled);
-    connect(ui->print_Action, &QAction::triggered, this, &MainWindow::PrintOrigin);
-    connect(ui->printTiled_Action, &QAction::triggered, this, &MainWindow::PrintTiled);
 
     connect(ui->appPreferences_Action, &QAction::triggered, this, &MainWindow::Preferences);
     connect(ui->patternPreferences_Action, &QAction::triggered, this, [this]()
@@ -6892,12 +6762,6 @@ void MainWindow::createActions()
         handlePieceMirrorTool(true);
     });
 
-    connect(ui->exportPieces_Action, &QAction::triggered, this, [this]
-    {
-        ui->piece_ToolBox->setCurrentWidget(ui->details_Page);
-        exportPiecesAs();
-    });
-
     //Tools->Piece submenu actions
     connect(ui->addPiece_Action, &QAction::triggered, this, [this]
     {
@@ -6930,14 +6794,6 @@ void MainWindow::createActions()
     {
         ui->draft_ToolBox->setCurrentWidget(ui->backgroundImage_Page);
         handleImageTool();
-    });
-
-    //Tools->Layout submenu actions
-    connect(ui->newPrintLayout_Action, &QAction::triggered, this, [this]
-    {
-        ui->layout_ToolBox->setCurrentWidget(ui->layout_Page);
-        ui->layoutSettings_ToolButton->setChecked(true);
-        handleNewLayout(true);
     });
 
     connect(ui->lastTool_Action, &QAction::triggered, this, &MainWindow::LastUsedTool);
@@ -7106,7 +6962,6 @@ void MainWindow::createActions()
     connect(ui->modifications_Action, &QAction::triggered, this, &MainWindow::handleOperationsMenu);
     connect(ui->details_Action,       &QAction::triggered, this, &MainWindow::handlePatternPiecesMenu);
     connect(ui->pieces_Action,        &QAction::triggered, this, &MainWindow::handlePieceMenu);
-    connect(ui->layout_Action,        &QAction::triggered, this, &MainWindow::handleLayoutMenu);
     connect(ui->images_Action,        &QAction::triggered, this, &MainWindow::handleImagesMenu);
 }
 
@@ -7185,7 +7040,8 @@ QString MainWindow::createDraftBlockName(const QString &text)
 MainWindow::~MainWindow()
 {
     CancelTool();
-    CleanLayout();
+    groups_widget->clear();
+    piecesWidget->clear();
 
     if (m_seamlyLayoutProcess != nullptr)
     {
@@ -7546,21 +7402,6 @@ void MainWindow::resetOrigins()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void MainWindow::showLayoutPages(int index)
-{
-    if (index < 0 || index >= scenes.size())
-    {
-        ui->view->setScene(layout_scene);
-    }
-    else
-    {
-        ui->view->setScene(scenes.at(index));
-    }
-
-    ui->view->fitInView(ui->view->scene()->sceneRect(), Qt::KeepAspectRatio);
-}
-
-//---------------------------------------------------------------------------------------------------------------------
 void MainWindow::Preferences()
 {
     // Calling constructor of the dialog take some time. Because of this user have time to call the dialog twice.
@@ -7626,338 +7467,6 @@ void MainWindow::CreateMeasurements()
 #endif
 
 //---------------------------------------------------------------------------------------------------------------------
-void MainWindow::exportLayoutAs()
-{
-    if (isLayoutStale)
-    {
-        if (ContinueIfLayoutStale() == QMessageBox::No)
-        {
-            return;
-        }
-    }
-
-    try
-    {
-        ExportLayoutDialog dialog(scenes.size(), Draw::Layout, FileName(), this);
-
-        // Populate size selection if multisize pattern
-        if (qApp->patternType() == MeasurementsType::Multisize)
-        {
-            const QStringList sizes = MeasurementVariable::ListSizes(doc->GetGradationSizes(), qApp->patternUnit());
-            dialog.setAvailableSizes(sizes);
-        }
-
-        if (dialog.exec() == QDialog::Rejected)
-        {
-            return;
-        }
-
-        if (!dialog.isBatchExport())
-        {
-            // Original single-export path (unchanged)
-            ExportData(QVector<VLayoutPiece>(), dialog);
-        }
-        else
-        {
-            // Batch export: iterate over selected sizes
-            const QStringList sizes = dialog.selectedSizes();
-            const QString originalFileName = dialog.fileName();
-
-            // Save current state
-            const int originalSize = static_cast<int>(VContainer::size());
-            const int currentHeight = static_cast<int>(VContainer::height());
-            const QString measurementPath = AbsoluteMPath(qApp->getFilePath(), doc->MPath());
-
-            int exportedCount = 0;
-            bool exportFailed = false;
-
-            ExportProgressDialog *progressDialog = new ExportProgressDialog(0, sizes.size(), this);
-            progressDialog->showProgressBar(false);
-
-            for (const QString &size : sizes)
-            {
-                bool ok;
-                const int newSize = size.toInt(&ok);
-                if (!ok)
-                {
-                    exportFailed = true;
-                    continue;
-                }
-
-                // Apply new size
-                if (!updateMeasurements(measurementPath, newSize, currentHeight))
-                {
-                    exportFailed = true;
-                    continue;
-                }
-                doc->LiteParseTree(Document::LiteParse);
-
-                // Regenerate piece list for new size
-                const QString exportFilename = originalFileName + QStringLiteral("_") + size;
-                setStatusMessage(tr("Exporting...") + exportFilename + ExportLayoutDialog::exportFormatSuffix(dialog.format()));
-
-                const QHash<quint32, VPiece> *allPieces = pattern->DataPieces();
-                QHash<quint32, VPiece> piecesInLayout;
-                QHash<quint32, VPiece>::const_iterator it = allPieces->constBegin();
-                while (it != allPieces->constEnd())
-                {
-                    if (it.value().isInLayout())
-                    {
-                        piecesInLayout.insert(it.key(), it.value());
-                    }
-                    ++it;
-                }
-                pieceList = preparePiecesForLayout(piecesInLayout);
-
-                // Recreate layout generator with saved settings
-                VLayoutGenerator lGenerator;
-                const VSettings *settings = qApp->Seamly2DSettings();
-                lGenerator.setLayoutGap(settings->getLayoutGap());
-                lGenerator.setCaseType(settings->GetLayoutGroup());
-                lGenerator.SetPaperHeight(settings->GetLayoutPaperHeight());
-                lGenerator.SetPaperWidth(settings->GetLayoutPaperWidth());
-                lGenerator.SetShift(static_cast<quint32>(qFloor(settings->GetLayoutShift())));
-                lGenerator.SetRotate(settings->GetLayoutRotate());
-                lGenerator.SetRotationIncrease(settings->GetLayoutRotationIncrease());
-                lGenerator.SetAutoCrop(settings->GetLayoutAutoCrop());
-                lGenerator.SetSaveLength(settings->GetLayoutSaveLength());
-                lGenerator.SetUnitePages(settings->GetLayoutUnitePages());
-                lGenerator.setStripOptimization(settings->useStripOptimization());
-                lGenerator.SetMultiplier(settings->GetMultiplier());
-                lGenerator.setTextAsPaths(settings->GetTextAsPaths());
-
-                if (settings->GetIgnoreAllFields())
-                {
-                    lGenerator.SetPrinterFields(false, QMarginsF());
-                }
-                else
-                {
-                    lGenerator.SetPrinterFields(true, settings->GetFields(QMarginsF()));
-                }
-
-                if (!LayoutSettings(lGenerator))
-                {
-                    exportFailed = true;
-                }
-
-                // Set filename with size suffix and export
-                dialog.setFileName(exportFilename);
-                ExportData(QVector<VLayoutPiece>(), dialog);
-
-                // Insert current file
-                progressDialog->insertFileName(exportFilename + ExportLayoutDialog::exportFormatSuffix(dialog.format()));
-                if (exportFailed)
-                {
-                    progressDialog->setFileStatus(ProgressStatus::Failed);
-                    exportFailed = false;
-                }
-                else
-                {
-                    progressDialog->setFileStatus(ProgressStatus::Completed);
-                }
-
-                exportedCount++;
-                progressDialog->setProgress(exportedCount);
-            }
-            setStatusMessage("");
-
-            // Restore original size
-            if (updateMeasurements(measurementPath, originalSize, currentHeight))
-            {
-                doc->LiteParseTree(Document::LiteParse);
-                emit pieceScene->DimensionsChanged();
-            }
-
-            // Regenerate original layout
-            const QHash<quint32, VPiece> *allPieces = pattern->DataPieces();
-            QHash<quint32, VPiece> piecesInLayout;
-            QHash<quint32, VPiece>::const_iterator it = allPieces->constBegin();
-            while (it != allPieces->constEnd())
-            {
-                if (it.value().isInLayout())
-                {
-                    piecesInLayout.insert(it.key(), it.value());
-                }
-                ++it;
-            }
-            pieceList = preparePiecesForLayout(piecesInLayout);
-
-            VLayoutGenerator lGenerator;
-            const VSettings *settings = qApp->Seamly2DSettings();
-            lGenerator.setLayoutGap(settings->getLayoutGap());
-            lGenerator.setCaseType(settings->GetLayoutGroup());
-            lGenerator.SetPaperHeight(settings->GetLayoutPaperHeight());
-            lGenerator.SetPaperWidth(settings->GetLayoutPaperWidth());
-            lGenerator.SetShift(static_cast<quint32>(qFloor(settings->GetLayoutShift())));
-            lGenerator.SetRotate(settings->GetLayoutRotate());
-            lGenerator.SetRotationIncrease(settings->GetLayoutRotationIncrease());
-            lGenerator.SetAutoCrop(settings->GetLayoutAutoCrop());
-            lGenerator.SetSaveLength(settings->GetLayoutSaveLength());
-            lGenerator.SetUnitePages(settings->GetLayoutUnitePages());
-            lGenerator.setStripOptimization(settings->useStripOptimization());
-            lGenerator.SetMultiplier(settings->GetMultiplier());
-            lGenerator.setTextAsPaths(settings->GetTextAsPaths());
-            if (settings->GetIgnoreAllFields())
-            {
-                lGenerator.SetPrinterFields(false, QMarginsF());
-            }
-            else
-            {
-                lGenerator.SetPrinterFields(true, settings->GetFields(QMarginsF()));
-            }
-            LayoutSettings(lGenerator);
-
-            // Restore original filename in dialog
-            dialog.setFileName(originalFileName);
-
-            // Show summary
-            progressDialog->show();
-        }
-    }
-
-    catch (const VException &exception)
-    {
-        qCritical("%s\n\n%s\n\n%s", qUtf8Printable(tr("Export exception.")),
-                  qUtf8Printable(exception.ErrorMessage()), qUtf8Printable(exception.DetailedInformation()));
-        return;
-    }
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void MainWindow::exportPiecesAs()
-{
-    setStatusMessage(QString(""));
-
-    ui->arrowPointer_ToolButton->setChecked(false);
-    ui->arrow_Action->setChecked(false);
-    ui->exportPiecesAs_ToolButton->setChecked(true);
-
-    const QHash<quint32, VPiece> *allPieces = pattern->DataPieces();
-    QHash<quint32, VPiece>::const_iterator i = allPieces->constBegin();
-    QHash<quint32, VPiece> piecesInLayout;
-    while (i != allPieces->constEnd())
-    {
-        if (i.value().isInLayout())
-        {
-            piecesInLayout.insert(i.key(), i.value());
-        }
-        ++i;
-    }
-
-    if (piecesInLayout.count() == 0)
-    {
-        QMessageBox::information(this, tr("Layout mode"),  tr("You don't have any pieces to export. Please, "
-                                                              "include at least one piece in layout."),
-                                 QMessageBox::Ok, QMessageBox::Ok);
-        return;
-    }
-
-    QVector<VLayoutPiece> pieceList;
-    try
-    {
-        pieceList = preparePiecesForLayout(piecesInLayout);
-    }
-
-    catch (VException &exception)
-    {
-        QMessageBox::warning(this, tr("Export pieces"),
-                             tr("Can't export pieces.") + QLatin1String(" \n") + exception.ErrorMessage(),
-                             QMessageBox::Ok, QMessageBox::Ok);
-        return;
-    }
-
-    try
-    {
-        ExportLayoutDialog dialog(1, Draw::Modeling, FileName(), this);
-        dialog.setWindowTitle("Export Pattern Pieces");
-
-        // Populate size selection if multisize pattern
-        if (qApp->patternType() == MeasurementsType::Multisize)
-        {
-            const QStringList sizes = MeasurementVariable::ListSizes(doc->GetGradationSizes(), qApp->patternUnit());
-            dialog.setAvailableSizes(sizes);
-        }
-
-        if (dialog.exec() == QDialog::Rejected)
-        {
-            ui->exportPiecesAs_ToolButton->setChecked(false);
-            return;
-        }
-
-        if (dialog.isBatchExport())
-        {
-            const QStringList selectedSizes = dialog.selectedSizes();
-            const QString baseName = FileName();
-            const qreal originalSize = VContainer::size();
-            int exportCount = 0;
-            bool  failed = false;
-
-            ExportProgressDialog *exportProgress = new ExportProgressDialog(0, selectedSizes.size(), this);
-            exportProgress->showProgressBar(true);
-            exportProgress->show();
-
-            for (const QString &size : selectedSizes)
-            {
-                // Switch to this size. The size list and VContainer::size() are both in pattern units.
-                recalculateAtSize(size.toInt(), static_cast<int>(VContainer::height()));
-
-                QVector<VLayoutPiece> sizePieceList;
-                try
-                {
-                    sizePieceList = preparePiecesForLayout(currentLayoutPieces());
-                }
-                catch (VException &)
-                {
-                    failed = true;
-                    continue;
-                }
-
-                // Set size-suffixed filename and export
-                const QFileInfo fileInfo(baseName);
-                const QString sizeName = fileInfo.baseName() + "_" + size;
-                dialog.setFileName(sizeName);
-                ExportData(sizePieceList, dialog);
-
-                // Insert current file
-                exportProgress->insertFileName(sizeName + ExportLayoutDialog::exportFormatSuffix(dialog.format()));
-                if (failed)
-                {
-                    exportProgress->setFileStatus(ProgressStatus::Failed);
-                    failed = false;
-                }
-                else
-                {
-                    exportProgress->setFileStatus(ProgressStatus::Completed);
-                }
-
-                ++exportCount;
-                exportProgress->setProgress(exportCount);
-                QCoreApplication::processEvents();
-            }
-
-            // Restore original size
-            recalculateAtSize(static_cast<int>(originalSize), static_cast<int>(VContainer::height()));
-        }
-        else
-        {
-            ExportData(pieceList, dialog);
-        }
-    }
-
-    catch (const VException &exception)
-    {
-        ui->exportPiecesAs_ToolButton->setChecked(false);
-        qCritical("%s\n\n%s\n\n%s", qUtf8Printable(tr("Export exception.")),
-                  qUtf8Printable(exception.ErrorMessage()), qUtf8Printable(exception.DetailedInformation()));
-        return;
-    }
-
-    ui->arrowPointer_ToolButton->setChecked(true);
-    ui->arrow_Action->setChecked(true);
-    ui->exportPiecesAs_ToolButton->setChecked(false);
-}
-
-//---------------------------------------------------------------------------------------------------------------------
 void MainWindow::exportDraftBlocksAs()
 {
     setStatusMessage(QString(""));
@@ -7988,7 +7497,7 @@ void MainWindow::exportDraftBlocksAs()
     draftScene->setOriginsVisible(false);
 
     //Open a file dialog to save export
-    ExportLayoutDialog dialog(1, Draw::Calculation, FileName(), this);
+    ExportLayoutDialog dialog(FileName(), this);
     dialog.setWindowTitle("Export Draft Blocks");
 
     if (dialog.exec() == QDialog::Accepted)
@@ -8041,35 +7550,6 @@ void MainWindow::exportDraftBlocksAs()
                     exportPDF(filename, paper, draftScene, true, margins);
                     break;
                 }
-            case LayoutExportFormat::PDFTiled:
-            case LayoutExportFormat::OBJ:
-            case LayoutExportFormat::DXF_AC1006_Flat:
-            case LayoutExportFormat::DXF_AC1009_Flat:
-            case LayoutExportFormat::DXF_AC1012_Flat:
-            case LayoutExportFormat::DXF_AC1014_Flat:
-            case LayoutExportFormat::DXF_AC1015_Flat:
-            case LayoutExportFormat::DXF_AC1018_Flat:
-            case LayoutExportFormat::DXF_AC1021_Flat:
-            case LayoutExportFormat::DXF_AC1024_Flat:
-            case LayoutExportFormat::DXF_AC1027_Flat:
-            case LayoutExportFormat::DXF_AC1006_AAMA:
-            case LayoutExportFormat::DXF_AC1009_AAMA:
-            case LayoutExportFormat::DXF_AC1012_AAMA:
-            case LayoutExportFormat::DXF_AC1014_AAMA:
-            case LayoutExportFormat::DXF_AC1015_AAMA:
-            case LayoutExportFormat::DXF_AC1018_AAMA:
-            case LayoutExportFormat::DXF_AC1021_AAMA:
-            case LayoutExportFormat::DXF_AC1024_AAMA:
-            case LayoutExportFormat::DXF_AC1027_AAMA:
-            case LayoutExportFormat::DXF_AC1006_ASTM:
-            case LayoutExportFormat::DXF_AC1009_ASTM:
-            case LayoutExportFormat::DXF_AC1012_ASTM:
-            case LayoutExportFormat::DXF_AC1014_ASTM:
-            case LayoutExportFormat::DXF_AC1015_ASTM:
-            case LayoutExportFormat::DXF_AC1018_ASTM:
-            case LayoutExportFormat::DXF_AC1021_ASTM:
-            case LayoutExportFormat::DXF_AC1024_ASTM:
-            case LayoutExportFormat::DXF_AC1027_ASTM:
             default:
                 break;
         }
@@ -8398,75 +7878,6 @@ void MainWindow::zoomFirstShow()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void MainWindow::DoExport(const VCommandLinePtr &expParams)
-{
-    const QHash<quint32, VPiece> *pieces = pattern->DataPieces();
-    if(!qApp->getOpeningPattern())
-    {
-        if (pieces->count() == 0)
-        {
-            qCCritical(vMainWindow, "%s", qUtf8Printable(tr("You can't export empty scene.")));
-            qApp->exit(V_EX_DATAERR);
-            return;
-        }
-    }
-    pieceList = preparePiecesForLayout(*pieces);
-
-    const bool exportOnlyPieces = expParams->exportOnlyPieces();
-    if (exportOnlyPieces)
-    {
-        try
-        {
-            ExportLayoutDialog dialog(1, Draw::Modeling, expParams->OptBaseName(), this);
-            dialog.setDestinationPath(expParams->OptDestinationPath());
-            dialog.selectFormat(static_cast<LayoutExportFormat>(expParams->OptExportType()));
-            dialog.setBinaryDXFFormat(expParams->IsBinaryDXF());
-            dialog.setTextAsPaths(expParams->isTextAsPaths());
-
-            ExportData(pieceList, dialog);
-        }
-
-        catch (const VException &exception)
-        {
-            qCCritical(vMainWindow, "%s\n\n%s", qUtf8Printable(tr("Export exception.")), qUtf8Printable(exception.ErrorMessage()));
-            qApp->exit(V_EX_DATAERR);
-            return;
-        }
-    }
-    else
-    {
-        auto settings = expParams->DefaultGenerator();
-        settings->setTextAsPaths(expParams->isTextAsPaths());
-
-        if (LayoutSettings(*settings.get()))
-        {
-            try
-            {
-                ExportLayoutDialog dialog(scenes.size(), Draw::Layout, expParams->OptBaseName(), this);
-                dialog.setDestinationPath(expParams->OptDestinationPath());
-                dialog.selectFormat(static_cast<LayoutExportFormat>(expParams->OptExportType()));
-                dialog.setBinaryDXFFormat(expParams->IsBinaryDXF());
-
-                ExportData(pieceList, dialog);
-            }
-
-            catch (const VException &exception)
-            {
-                qCCritical(vMainWindow, "%s\n\n%s", qUtf8Printable(tr("Export exception.")), qUtf8Printable(exception.ErrorMessage()));
-                qApp->exit(V_EX_DATAERR);
-                return;
-            }
-        }
-        else
-        {
-            return;
-        }
-    }
-
-    qApp->exit(V_EX_OK);
-}
-
-//---------------------------------------------------------------------------------------------------------------------
 bool MainWindow::setSize(const QString &text)
 {
     if (!Application2D::isGUIMode())
@@ -8583,36 +7994,16 @@ void MainWindow::processCommandLine()
             return; // process only one input file
         }
 
-        bool hSetted = true;
-        bool sSetted = true;
-        if (loaded && (cmd->IsTestModeEnabled() || cmd->IsExportEnabled()))
+        if (loaded && cmd->IsTestModeEnabled())
         {
             if (cmd->IsSetGradationSize())
             {
-                sSetted = setSize(cmd->OptGradationSize());
+                setSize(cmd->OptGradationSize());
             }
 
             if (cmd->IsSetGradationHeight())
             {
-                hSetted = setHeight(cmd->OptGradationHeight());
-            }
-        }
-
-        if (!cmd->IsTestModeEnabled())
-        {
-            if (cmd->IsExportEnabled())
-            {
-                if (loaded && hSetted && sSetted)
-                {
-                    DoExport(cmd);
-                    return; // process only one input file
-                }
-                else
-                {
-                    qApp->exit(V_EX_DATAERR);
-                    return;
-                }
-                break;
+                setHeight(cmd->OptGradationHeight());
             }
         }
     }

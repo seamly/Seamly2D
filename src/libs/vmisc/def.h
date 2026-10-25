@@ -97,30 +97,16 @@ enum class Position : char
     Center
 };
 
-enum class PaperSizeFormat : char { A0 = 0,
-                                    A1,
-                                    A2,
-                                    A3,
-                                    A4,
-                                    Letter,
-                                    Legal,
-                                    Tabloid,
-                                    AnsiC,
-                                    AnsiD,
-                                    AnsiE,
-                                    Roll24in,     // Be careful when changing order roll type
-                                    Roll30in,     // Used also for showing icon
-                                    Roll36in,
-                                    Roll42in,
-                                    Roll44in,
-                                    Custom
-};
-
+/**
+ * @brief Export formats of Export Draft Blocks: SVG, PDF, PNG, JPG, BMP, PPM and TIF.
+ *
+ * The other values are not exported. They keep their numbers so a stored format number keeps its meaning.
+ */
 enum class LayoutExportFormat : char
 {
     SVG = 0,
     PDF = 1,
-    PDFTiled = 2,
+    PDFTiled = 2,         /* Not exported; kept so later format numbers stay the same. */
     PNG = 3,
     JPG = 4,
     BMP = 5,
@@ -166,8 +152,6 @@ enum class Unit : char { Mm = 0, Cm, Inch, Px, LAST_UNIT_DO_NOT_USE};
 enum class Source : char { FromGui, FromFile, FromTool };
 enum class NodeUsage : bool {NotInUse = false, InUse = true};
 enum class SelectionType : bool {ByMousePress, ByMouseRelease};
-
-enum class PageOrientation : bool {Portrait = true, Landscape = false};
 
 enum class PieceNodeAngle : unsigned char
 {
@@ -614,12 +598,6 @@ Q_REQUIRED_RESULT QString AbsoluteMPath(const QString &patternPath, const QStrin
 Q_REQUIRED_RESULT QString fileDialog(QWidget *parent, const QString &title,  const QString &dir,
                                      const QString &filter, QString *selectedFilter, QFileDialog::Options options,
                                      QFileDialog::FileMode mode,  QFileDialog::AcceptMode accept);
-
-Q_REQUIRED_RESULT QSharedPointer<QPrinter> PreparePrinter(const QPrinterInfo &info,
-                                                          QPrinter::PrinterMode mode = QPrinter::ScreenResolution);
-
-QMarginsF GetMinPrinterFields(const QSharedPointer<QPrinter> &printer);
-QMarginsF GetPrinterFields(const QSharedPointer<QPrinter> &printer);
 
 Q_REQUIRED_RESULT QPixmap darkenPixmap(const QPixmap &pixmap);
 

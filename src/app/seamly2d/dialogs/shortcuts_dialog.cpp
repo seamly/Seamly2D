@@ -316,23 +316,17 @@ ShortcutsDialog::ShortcutsDialog(QWidget *parent)
 
     const QString details = QString("<table style=font-size:11pt; font-weight:600>"
                                     "<tr><td width = 50%><b>%1</b></td><td></td></tr>"
-                                    "<tr><td width = 50%>%2       </td><td>%3</td></tr>"
-                                    "<tr><td width = 50%>%4       </td><td>%5<br></td></tr>"
+                                    "<tr><td width = 50%>%2       </td><td>%3<br></td></tr>"
                                  "</table>")
                                  .arg(tr("Details"))                                         //1
-                                 .arg(tr("Unite Pieces")).arg(QString("U"))                  //2 & 3
-                                 .arg(tr("Export Pieces")).arg(QString("E, P"));             //4 & 5
+                                 .arg(tr("Unite Pieces")).arg(QString("U"));                 //2 & 3
 
     const QString layout = QString("<table style=font-size:11pt; font-weight:600>"
                                     "<tr><td width = 50%><b>%1</b></td><td></td></tr>"
-                                    "<tr><td width = 50%>%2       </td><td>%3</td></tr>"
-                                    "<tr><td width = 50%>%4       </td><td>%5</td></tr>"
-                                    "<tr><td width = 50%>%6       </td><td>%7<br></td></tr>"
+                                    "<tr><td width = 50%>%2       </td><td>%3<br></td></tr>"
                                  "</table>")
-                                 .arg(tr("Layout"))                                          //1
-                                 .arg(tr("New Layout")).arg(QString("N, L"))                 //2 & 3
-                                 .arg(tr("Export Layout")).arg(QString("E, L"))              //4 & 5
-                                 .arg(tr("Last Tool")).arg(tr("Ctrl+Shift+L"));              //6 & 7
+                                 .arg(tr("Tools"))                                           //1
+                                 .arg(tr("Last Tool")).arg(tr("Ctrl+Shift+L"));              //2 & 3
 
 
     const QString history = QString("<table style=font-size:11pt; font-weight:600>"

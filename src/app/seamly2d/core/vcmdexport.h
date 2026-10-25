@@ -35,14 +35,12 @@
 #include <QCoreApplication>
 #include <QCommandLineParser>
 
-#include "../dialogs/layoutsettings_dialog.h"
 #include "../vmisc/def.h"
 #include "../vmisc/vsysexits.h"
 
 class VCommandLine;
 typedef std::shared_ptr<VCommandLine> VCommandLinePtr;
 typedef QList<QCommandLineOption *> VCommandLineOptions;
-typedef std::shared_ptr<VLayoutGenerator> VLayoutGeneratorPtr;
 
 class VCommandLine
 {
@@ -51,15 +49,7 @@ public:
 
     bool                   IsTestModeEnabled() const;
     bool                   IsNoScalingEnabled() const;
-    bool                   IsExportEnabled() const;
     QString                OptMeasurePath() const;
-    QString                OptBaseName() const;
-    QString                OptDestinationPath() const;
-    int                    OptExportType() const;
-    int                    IsBinaryDXF() const;
-    int                    isTextAsPaths() const;
-    int                    exportOnlyPieces() const;
-    VLayoutGeneratorPtr    DefaultGenerator() const;
     QStringList            OptInputFileNames() const;
     bool                   IsGuiEnabled()const;
     bool                   IsSetGradationSize() const;
@@ -70,9 +60,6 @@ public:
 protected:
     VCommandLine();
 
-    PaperSizeFormat        OptPaperSize() const;
-    int                    OptRotation() const;
-    Cases                  OptGroup() const;
     static void            Reset();
     static VCommandLinePtr Get(const QCoreApplication& app);
 
@@ -84,12 +71,6 @@ private:
     QMap<QString, int>     optionsIndex;
     bool                   isGuiEnabled;
     friend class           Application2D;
-
-    static qreal           Lo2Px(const QString& src,
-                                 const LayoutSettingsDialog& converter);
-
-    static qreal           Pg2Px(const QString& src,
-                                 const LayoutSettingsDialog& converter);
 
     static void            initOptions(VCommandLineOptions &options,
                                        QMap<QString, int> &optionsIndex);

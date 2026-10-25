@@ -65,7 +65,6 @@ PreferencesGraphicsViewPage::PreferencesGraphicsViewPage (QWidget *parent)
     ui->operationToolbar_CheckBox->setChecked(qApp->Seamly2DSettings()->getShowOpsToolBar());
     ui->pieceToolbar_CheckBox->setChecked(qApp->Seamly2DSettings()->getShowPieceToolBar());
     ui->detailsToolbar_CheckBox->setChecked(qApp->Seamly2DSettings()->getShowDetailsToolBar());
-    ui->layoutToolbar_CheckBox->setChecked(qApp->Seamly2DSettings()->getShowLayoutToolBar());
 
     ui->use_native_checkbox->setChecked(qApp->Seamly2DSettings()->useNativeDialogs());
     ui->useSecondMonitor_CheckBox->setChecked(qApp->Seamly2DSettings()->useSecondMonitor());
@@ -229,7 +228,6 @@ void PreferencesGraphicsViewPage::Apply()
     settings->setShowOpsToolBar(ui->operationToolbar_CheckBox->isChecked());
     settings->setShowPieceToolBar(ui->pieceToolbar_CheckBox->isChecked());
     settings->setShowDetailsToolBar(ui->detailsToolbar_CheckBox->isChecked());
-    settings->setShowLayoutToolBar(ui->layoutToolbar_CheckBox->isChecked());
 
     settings->setUseNativeDialogs(ui->use_native_checkbox->isChecked());
     settings->setUseSecondMonitor(ui->useSecondMonitor_CheckBox->isChecked());

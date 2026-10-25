@@ -79,7 +79,6 @@
         <file>toolicon/32x32/path@2x.png</file>
         <file>toolicon/32x32/circles_toolbox.png</file>
         <file>toolicon/32x32/patternpiece_toolbox.png</file>
-        <file>toolicon/32x32/layout_toolbox.png</file>
         <file>toolicon/32x32/details_toolbox.png</file>
         <file>toolicon/32x32/points_toolbox.png</file>
         <file>toolicon/32x32/spline_toolboxs.png</file>
@@ -94,8 +93,6 @@
         <file>toolicon/32x32/export.png</file>
         <file>toolicon/32x32/export@2x.png</file>
         <file>toolicon/32x32/operations_toolbox.png</file>
-        <file>toolicon/32x32/layout_settings.png</file>
-        <file>toolicon/32x32/layout_settings@2x.png</file>
         <file>toolicon/32x32/insert_nodes_icon.png</file>
         <file>toolicon/32x32/insert_nodes_icon@2x.png</file>
         <file>toolicon/32x32/point_basepoint_icon.png</file>
