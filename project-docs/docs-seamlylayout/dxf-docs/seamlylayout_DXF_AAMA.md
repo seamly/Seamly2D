@@ -33,6 +33,10 @@ Same in both: layer 1 boundary and system text, `Piece Name:`, `Quantity:`, `Mat
 - **R11 (AC1009).** User decision: ANSI/AAMA-292 compliance, so the file uses the DXF version the standard builds on. R11 and R12 share AC1009, so the file structure is the DXF-ASTM (R12) structure.
 - **Labels on layer 1.** AAMA has no annotation layer. The Seamly2D (`VDxfEngine::ExportAAMAText`) and Valentina AAMA writers also put label text on layer 1.
 - **Labels never repeat piece text.** A label line `<identifier>:...` (`Piece Name`, `Size`, `Size Name`, `Quantity`, `Rotation`, `Flip`, `Tilt`, `Fold`, `Material`, `Category`, `Annotation`, any case) or `#...` is not written. A label cannot override the piece text or add a grade rule identifier. Seamly2D issue FashionFreedom/Seamly2D#1780 asks for the same rule.
+- **Piece text comes from the piece data.** `Piece Name:`, `Size:`, `Quantity:` and `Material:` come from the piece `data-*` attributes. A hidden label changes none of them. Test: `aama_piece_text_comes_from_piece_data_not_label`.
+- **`Quantity:` is `R,L`.** User decision: the DXF-ASTM form, not a total. Even total N → `N/2,N/2`; odd N, or on the fold → `N,0`. A reader that wants a total adds R and L.
+- **`Size:` is in pattern units.** User decision: the `data-size` value as sent. It matches the `.rul` size list and the size labels. A millimetre multisize pattern writes `Size:500`, not `Size:50`.
+- **`Units:METRIC`.** D6673 allows `METRIC` or `ENGLISH` only. `Units:MM` is not a defined value.
 - **No `Category:`.** Category is AAMA piece text, but the handoff has no value for it. AccuMark uses the piece name for a blank category.
 - **`.rul` version line.** `ANSI/AAMA VERSION: 1.0.0` is the header keyword of AAMA rule files in the field (FILExt RUL survey).
 
