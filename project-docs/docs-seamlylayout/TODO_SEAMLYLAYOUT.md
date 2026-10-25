@@ -48,6 +48,15 @@ User approved (2026-10-25). DXF-AAMA only; DXF-ASTM and CLO3D keep their output.
 - [ ] Layout.104.5 Docs: `seamlylayout_DXF_AAMA.md` Decisions and McNeel table.
 - Not done (user decisions): `Piece Name:` stays full length; `Material:` stays the full name; no `Category:`; layer 5 keeps the grade reference line.
 
+### [ ] Task Layout.105 — Decide - rewrite or leave the untracked `AAMA-INTEROP.md`
+
+- `project-docs/docs-seamlylayout/AAMA-INTEROP.md` (untracked, user file) copies the upstream PR 1783 text. It describes the removed Seamly2D `vdxf` AAMA output.
+- Needs a side-by-side document review with the user: `AAMA-INTEROP.md` against `dxf-docs/seamlylayout_DXF_AAMA.md`.
+- Known differences: `Units: MM` (output: `Units:METRIC`); total quantity (output: `R,L`); size in cm (output: Layout.103 units); notch segments on layer 4 (output: notch points); `--gsize` exports (Seamly2D has none now).
+- [ ] Layout.105.1 Review both documents side by side with the user, section by section.
+- [ ] Layout.105.2 User decision: rewrite it for SeamlyLayout's DXF-AAMA, merge its useful parts into `seamlylayout_DXF_AAMA.md`, or leave it as reference.
+- [ ] Layout.105.3 Apply the decision; keep the `.github/AAMA-INTEROP.md` merge rule in `CLAUDE.md` consistent with it.
+
 ### [ ] Task Layout.101 — Implement - `SEAMLY_DATA_DIR` for SeamlyLayout
 
 - A coming `develop` merge adds `SEAMLY_DATA_DIR` to Seamly2D and SeamlyMe (`VCommonSettings::configureDataDirectory`).
