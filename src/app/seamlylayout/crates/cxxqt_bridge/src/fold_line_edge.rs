@@ -19,9 +19,14 @@
 //     keeps reading forward; only its position is mirrored.
 // The packer then puts the piece against the left bin edge (`Rect::with_left_edge`).
 //
-// Not pinned: a piece-set (Nested: its sizes are centred, so their fold lines
-// differ), a fold line that is not vertical, and an outline on both sides of
-// its fold line. The last two get a warning line.
+// The fold line is the first path of the piece's `fold_line` group
+// (`svg_dom::fold_line_d`): the fold line out to the cut line, not the arrow
+// line or the label inside the group. A Nested piece-set uses the fold line its
+// sizes share: `svg_dom::center_piece_sets` stacks them on their fold line start.
+//
+// Not pinned: a piece-set whose sizes do not share one fold line, a fold line
+// that is not vertical, and an outline on both sides of its fold line. Each
+// gets a warning line.
 
 use std::collections::HashMap;
 
@@ -56,13 +61,20 @@ pub(crate) fn plan_fold_line_edge(doc: &mut svg_dom::Document, trial_angles_deg:
     let mut mirrored = false;
     let groups = doc.root.children.iter_mut().filter_map(|n| n.as_mut_element()).filter(|e| e.name == "g");
     for (index, piece) in groups.enumerate() {
-        if svg_dom::is_piece_set(piece) {
-            continue; // Nested: the sizes do not share one fold line
-        } // if piece-set
-        let Some((a, b)) = fold_line_ends(piece) else {
-            continue; // not cut on the fold
-        }; // fold line
         let name = piece_name(piece);
+        let ends = if svg_dom::is_piece_set(piece) {
+            piece_set_fold_line_ends(piece) // Nested: the fold line the sizes share
+        } else {
+            Ok(fold_line_ends(piece)) // one piece
+        }; // if piece-set
+        let (a, b) = match ends {
+            Ok(Some(ends)) => ends, // cut on the fold
+            Ok(None) => continue,   // not cut on the fold
+            Err(reason) => {
+                plan.warnings.push(format!("{name}: {reason}"));
+                continue; // sizes apart
+            } // Err
+        }; // match ends
         let (dx, dy) = ((b.x - a.x).abs(), (b.y - a.y).abs());
         if dy < ON_EDGE_TOLERANCE_UU || dx > dy * VERTICAL_TOLERANCE {
             plan.warnings.push(format!("{name}: the fold line does not run along the grainline"));
@@ -114,29 +126,38 @@ pub(crate) fn pin_fold_line_pieces(pieces: &mut [PieceRect], plan: &FoldEdgePlan
     } // for each piece
 } // fn pin_fold_line_pieces
 
-// @brief True for a `fold_line` component group, by `data-type` or by id.
-fn is_fold_line(elem: &Element) -> bool {
-    elem.name == "g"
-        && (elem.attributes.get("data-type").is_some_and(|t| t == "fold_line")
-            || elem.attributes.get("id").is_some_and(|id| id.to_lowercase().starts_with("fold_line")))
-} // fn is_fold_line
-
-// @brief First and last point of the first path of the piece's fold line.
+// @brief First and last point of the piece's fold line (`svg_dom::fold_line_d`).
 fn fold_line_ends(piece: &Element) -> Option<(Point, Point)> {
-    let fold = piece.children.iter().filter_map(|n| n.as_element()).find(|e| is_fold_line(e))?;
-    let d = first_path_d(fold)?;
-    let path = Path::parse_path_attribute(d).ok()?;
+    let path = Path::parse_path_attribute(svg_dom::fold_line_d(piece)?).ok()?;
     let points: Vec<Point> = path.segments.iter().filter_map(segment_end).collect();
     Some((*points.first()?, *points.last()?))
 } // fn fold_line_ends
 
-// @brief `d` of the first `<path>` in `elem`'s subtree.
-fn first_path_d(elem: &Element) -> Option<&str> {
-    if elem.name == "path" {
-        return elem.attributes.get("d").map(String::as_str);
-    } // if path
-    elem.children.iter().filter_map(|n| n.as_element()).find_map(first_path_d)
-} // fn first_path_d
+// @brief Fold line of a Nested piece-set: the largest size's, when every size has one on the same line.
+// @details `svg_dom::center_piece_sets` puts the largest size first and stacks the sizes on their fold
+//          line start, so vertical fold lines of the sizes share one x.
+// @return Ok(None) when a size has no fold line; Err with the reason when the sizes' fold lines lie apart.
+fn piece_set_fold_line_ends(set: &Element) -> Result<Option<(Point, Point)>, &'static str> {
+    let mut first: Option<(Point, Point)> = None;
+    let mut apart = false;
+    for size in set.children.iter().filter_map(|n| n.as_element()).filter(|e| e.name == "g") {
+        let Some((a, b)) = fold_line_ends(size) else {
+            return Ok(None); // a size without a fold line: the set is not on the fold
+        }; // fold line
+        match first {
+            Some((fa, fb)) => {
+                // Compare the middle x of the two fold lines.
+                apart |= ((a.x + b.x) - (fa.x + fb.x)).abs() / 2.0 > ON_EDGE_TOLERANCE_UU;
+            } // Some: a later size
+            None => first = Some((a, b)), // the largest size
+        } // match first
+    } // for each size
+    if apart {
+        Err("the sizes do not share one fold line")
+    } else {
+        Ok(first)
+    } // if apart
+} // fn piece_set_fold_line_ends
 
 // @brief End point of a path segment; None for close.
 fn segment_end(segment: &PathSegment) -> Option<Point> {
@@ -313,16 +334,55 @@ mod tests {
         assert_eq!(plan.warnings, vec!["Back: the outline lies on both sides of the fold line".to_string()]);
     } // fold_line_off_the_edge_is_reported
 
-    // @brief A Nested piece-set is not pinned.
+    // @brief Back as a Nested piece-set of two sizes, stacked on their fold line start: each size's fold line
+    //        at x `fold_x`, from y 200 up to y `top`.
+    fn nested_svg(fold_x: [u32; 2]) -> String {
+        let size = |n: usize, top: u32| {
+            format!(r#"<g id="piece_Back_s{n}" data-type="piece" data-name="Back" data-on-fold="true">
+      <g data-type="cutline"><path d="M{x},{top} L{r},{top} L{r},200 L{x},200 Z"/></g>
+      <g id="fold_line_Back_s{n}" data-type="fold_line"><path d="M{x},200 L{x},{top}"/></g>
+    </g>"#, x = fold_x[n], r = fold_x[n] + 100)
+        }; // size
+        format!(r#"<svg xmlns="http://www.w3.org/2000/svg">
+  <g id="piece-set_Back" data-type="piece-set" data-name="Back">
+    {}
+    {}
+  </g>
+</svg>"#, size(0, 0), size(1, 50))
+    } // fn nested_svg
+
+    // @brief A Nested piece-set whose sizes share one fold line is planned as one piece; sizes apart are
+    //        reported and stay off the edge.
     #[test]
-    fn piece_set_is_not_pinned() {
-        let nested = svg("M0,190 L0,10")
-            .replace(r#"<g id="piece_Back""#, r#"<g id="piece-set_Back" data-type="piece-set"><g id="piece_Back""#)
-            .replace(r#"<g id="piece_Yoke""#, r#"</g><g id="piece_Yoke""#);
-        let mut d = svg_dom::Document::parse(&nested).expect("valid SVG");
+    fn piece_set_on_a_shared_fold_line_is_pinned() {
+        let mut shared = svg_dom::Document::parse(&nested_svg([0, 0])).expect("valid SVG");
+        let plan = plan_fold_line_edge(&mut shared, &[0, 180]);
+        assert_eq!(plan.angles, HashMap::from([(0, 0)]));
+        assert!(plan.warnings.is_empty());
+
+        let mut apart = svg_dom::Document::parse(&nested_svg([0, 30])).expect("valid SVG");
+        let plan = plan_fold_line_edge(&mut apart, &[0, 180]);
+        assert!(plan.angles.is_empty());
+        assert_eq!(plan.warnings, vec!["Back: the sizes do not share one fold line".to_string()]);
+    } // piece_set_on_a_shared_fold_line_is_pinned
+
+    // @brief The fold line group of a Seamly2D handoff holds the fold line, then the tagged arrow line and
+    //        label groups. The fold line, not the arrow line, decides the side.
+    #[test]
+    fn fold_line_group_with_arrow_and_label_reads_the_fold_line() {
+        let handoff = svg("M0,210 L0,-10").replace(
+            r#"<path d="M0,210 L0,-10"/></g>"#,
+            r#"<g><path d="M0,210 L0,-10"/></g>
+      <g id="fold_line_arrow_Back" data-type="fold_line_arrow"><path d="M2.5,140 L10,140 L10,60 L2.5,60"/></g>
+      <g id="fold_line_label_Back" data-type="fold_line_label"><text x="0" y="5" transform="matrix(0 1 -1 0 5 80)">Foldline</text></g></g>"#,
+        );
+        let mut d = svg_dom::Document::parse(&handoff).expect("valid SVG");
+        assert_eq!(fold_line_ends(d.root.children.iter().filter_map(|n| n.as_element()).next().expect("Back")),
+                   Some((Point::new(0.0, 210.0), Point::new(0.0, -10.0))));
         let plan = plan_fold_line_edge(&mut d, &[0, 180]);
-        assert_eq!(plan, FoldEdgePlan::default());
-    } // piece_set_is_not_pinned
+        assert_eq!(plan.angles, HashMap::from([(0, 0)]));
+        assert!(plan.warnings.is_empty());
+    } // fold_line_group_with_arrow_and_label_reads_the_fold_line
 
     // @brief Pinning sets the left-edge angle on the planned pieces only.
     #[test]
