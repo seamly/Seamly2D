@@ -54,14 +54,14 @@ SOURCES += \
     tst_vpointf.cpp \
     tst_readval.cpp \
     tst_vtranslatevars.cpp \
-    tst_vabstractpiece.cpp \
+    tst_abstractpiece.cpp \
     tst_vtoolmove.cpp \
     tst_svgtextitem.cpp \
     tst_svgcomponenttags.cpp \
     tst_seamlysuitepaths.cpp \
     tst_exportformatcombobox.cpp \
     tst_dataroot.cpp \
-    tst_vtextmanager.cpp
+    tst_labeltextmanager.cpp
 
 *msvc*:SOURCES += stable.cpp
 
@@ -87,14 +87,14 @@ HEADERS += \
     tst_vpointf.h \
     tst_readval.h \
     tst_vtranslatevars.h \
-    tst_vabstractpiece.h \
+    tst_abstractpiece.h \
     tst_vtoolmove.h \
     tst_svgtextitem.h \
     tst_svgcomponenttags.h \
     tst_seamlysuitepaths.h \
     tst_exportformatcombobox.h \
     tst_dataroot.h \
-    tst_vtextmanager.h
+    tst_labeltextmanager.h
 
 include(warnings.pri)
 

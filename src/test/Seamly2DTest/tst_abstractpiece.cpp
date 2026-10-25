@@ -23,7 +23,7 @@
 
  ************************************************************************
  **
- **  @file
+ **  @file   tst_abstractpiece.cpp
  **  @author Roman Telezhynskyi <dismine(at)gmail.com>
  **  @date   17 11, 2016
  **
@@ -49,7 +49,35 @@
  **
  *************************************************************************/
 
-#include "tst_vabstractpiece.h"
+/******************************************************************************
+ **  @file   tst_abstractpiece.cpp
+ **  @author slspencer
+ **
+ **  @brief
+ **  Unit tests for the seam allowance geometry of AbstractPiece
+ **
+ **  @copyright
+ **  Copyright (C) 2026 Seamly2D Project
+ **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
+ **
+ **  Seamly2D is free software: you can redistribute it and/or modify
+ **  it under the terms of the GNU General Public License as published by
+ **  the Free Software Foundation, either version 3 of the License, or
+ **  (at your option) any later version.
+ **
+ **  Seamly2D is distributed in the hope that it will be useful,
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ **  GNU General Public License for more details.
+ **
+ **  You should have received a copy of the GNU General Public License
+ **  along with Seamly2D.  If not, see <http://www.gnu.org/licenses/>.
+ **
+ **  SPDX-License-Identifier: GPL-3.0-or-later
+ **
+ *****************************************************************************/
+
+#include "tst_abstractpiece.h"
 #include "../vpatterndb/AbstractPiece.h"
 
 #include <QPointF>
@@ -59,12 +87,12 @@
 #include <QtTest>
 
 //---------------------------------------------------------------------------------------------------------------------
-TST_VAbstractPiece::TST_VAbstractPiece(QObject *parent)
+TST_AbstractPiece::TST_AbstractPiece(QObject *parent)
     : AbstractTest(parent)
 {}
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VAbstractPiece::EquidistantRemoveLoop_data()
+void TST_AbstractPiece::EquidistantRemoveLoop_data()
 {
     QTest::addColumn<QVector<SeamAllowancePoint>>("points");
     QTest::addColumn<qreal>("width");
@@ -120,7 +148,7 @@ void TST_VAbstractPiece::EquidistantRemoveLoop_data()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VAbstractPiece::EquidistantRemoveLoop() const
+void TST_AbstractPiece::EquidistantRemoveLoop() const
 {
     QFETCH(QVector<SeamAllowancePoint>, points);
     QFETCH(qreal, width);
@@ -133,7 +161,7 @@ void TST_VAbstractPiece::EquidistantRemoveLoop() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsCase1() const
+QVector<SeamAllowancePoint> TST_AbstractPiece::InputPointsCase1() const
 {
 
     QVector<SeamAllowancePoint> points;
@@ -567,7 +595,7 @@ QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsCase1() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> TST_VAbstractPiece::OutputPointsCase1() const
+QVector<QPointF> TST_AbstractPiece::OutputPointsCase1() const
 {
     QVector<QPointF> points;
 
@@ -657,7 +685,7 @@ QVector<QPointF> TST_VAbstractPiece::OutputPointsCase1() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsCase2() const
+QVector<SeamAllowancePoint> TST_AbstractPiece::InputPointsCase2() const
 {
 
     QVector<SeamAllowancePoint> points;
@@ -1026,7 +1054,7 @@ QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsCase2() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> TST_VAbstractPiece::OutputPointsCase2() const
+QVector<QPointF> TST_AbstractPiece::OutputPointsCase2() const
 {
     QVector<QPointF> points;
 
@@ -1090,7 +1118,7 @@ QVector<QPointF> TST_VAbstractPiece::OutputPointsCase2() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsCase3() const
+QVector<SeamAllowancePoint> TST_AbstractPiece::InputPointsCase3() const
 {
     QVector<SeamAllowancePoint> points;
 
@@ -1763,7 +1791,7 @@ QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsCase3() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> TST_VAbstractPiece::OutputPointsCase3() const
+QVector<QPointF> TST_AbstractPiece::OutputPointsCase3() const
 {
     QVector<QPointF> points;
 
@@ -1868,7 +1896,7 @@ QVector<QPointF> TST_VAbstractPiece::OutputPointsCase3() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VAbstractPiece::sumTrapezoids() const
+void TST_AbstractPiece::sumTrapezoids() const
 {
     // Case3 checks that the method 'sumTrapezoids' returns negative value for three clockwise allocated points
     // Case4 checks that the method 'sumTrapezoids' returns positive value for three counterclock-wise allocated points
@@ -1922,7 +1950,7 @@ QVector<QPointF> lineIntoCurve(qreal breakDegrees, qreal stepDegrees)
 } // namespace
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VAbstractPiece::TurnPointIndices_data() const
+void TST_AbstractPiece::TurnPointIndices_data() const
 {
     QTest::addColumn<QVector<QPointF>>("points");
     QTest::addColumn<QVector<QPointF>>("nodes");
@@ -1992,7 +2020,7 @@ void TST_VAbstractPiece::TurnPointIndices_data() const
  * @brief TurnPointIndices checks that only tangent breaks at node vertices, sharp corners
  * and open ends are turn points.
  */
-void TST_VAbstractPiece::TurnPointIndices() const
+void TST_AbstractPiece::TurnPointIndices() const
 {
     QFETCH(QVector<QPointF>, points);
     QFETCH(QVector<QPointF>, nodes);
@@ -2007,7 +2035,7 @@ void TST_VAbstractPiece::TurnPointIndices() const
  * @brief EquidistantReportsNodeVertices checks that the seam allowance corners built at node
  * points are reported, and curve interior points are not.
  */
-void TST_VAbstractPiece::EquidistantReportsNodeVertices() const
+void TST_AbstractPiece::EquidistantReportsNodeVertices() const
 {
     QVector<SeamAllowancePoint> points;
     points << SeamAllowancePoint(0, 0) << SeamAllowancePoint(100, 0) << SeamAllowancePoint(100, 100)
@@ -2034,7 +2062,7 @@ void TST_VAbstractPiece::EquidistantReportsNodeVertices() const
  * @brief NodeVertexIndices checks that only vertices on a node vertex are listed, and that a closed polyline does
  * not list the repeat of its first vertex.
  */
-void TST_VAbstractPiece::NodeVertexIndices() const
+void TST_AbstractPiece::NodeVertexIndices() const
 {
     // Square that repeats its first vertex, with a curve point on the top side.
     const QVector<QPointF> points{QPointF(0, 0), QPointF(50, 0.5), QPointF(100, 0), QPointF(100, 100),
@@ -2046,7 +2074,42 @@ void TST_VAbstractPiece::NodeVertexIndices() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VAbstractPiece::PathRemoveLoop_data() const
+/**
+ * @brief SeamAllowancePointWidths checks that a point without its own width uses the piece width.
+ */
+void TST_AbstractPiece::SeamAllowancePointWidths() const
+{
+    SeamAllowancePoint point(10, 20);
+    QCOMPARE(point.GetSABefore(), -1.0);
+    QCOMPARE(point.GetSAAfter(), -1.0);
+    QCOMPARE(point.GetSABefore(7.5), 7.5);
+    QCOMPARE(point.GetSAAfter(7.5), 7.5);
+    QVERIFY(point.GetAngleType() == PieceNodeAngle::ByLength);
+    QVERIFY(!point.isNode());
+    QCOMPARE(point.cornerIndex(), -1);
+    QVERIFY(!point.isCornerCutForced());
+
+    // A width of its own replaces the piece width; a negative width restores it.
+    point.SetSABefore(3);
+    point.SetSAAfter(0);
+    QCOMPARE(point.GetSABefore(7.5), 3.0);
+    QCOMPARE(point.GetSAAfter(7.5), 0.0);
+    point.SetSABefore(-4);
+    QCOMPARE(point.GetSABefore(), -1.0);
+    QCOMPARE(point.GetSABefore(7.5), 7.5);
+
+    // An edge's seam allowance line uses the width after its start and the width before its end.
+    SeamAllowancePoint start(0, 0);
+    start.SetSAAfter(2);
+    SeamAllowancePoint end(100, 0);
+    end.SetSABefore(4);
+    const QLineF parallel = AbstractPiece::createParallelLine(start, end, 7.5);
+    QCOMPARE(QLineF(start, parallel.p1()).length(), 2.0);
+    QCOMPARE(QLineF(end, parallel.p2()).length(), 4.0);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_AbstractPiece::PathRemoveLoop_data() const
 {
     QTest::addColumn<QVector<QPointF>>("path");
     QTest::addColumn<QVector<QPointF>>("expect");
@@ -2354,7 +2417,7 @@ void TST_VAbstractPiece::PathRemoveLoop_data() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VAbstractPiece::PathRemoveLoop() const
+void TST_AbstractPiece::PathRemoveLoop() const
 {
     QFETCH(QVector<QPointF>, path);
     QFETCH(QVector<QPointF>, expect);
@@ -2364,7 +2427,7 @@ void TST_VAbstractPiece::PathRemoveLoop() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VAbstractPiece::PathLoopsCase_data() const
+void TST_AbstractPiece::PathLoopsCase_data() const
 {
     QTest::addColumn<QVector<QPointF>>("path");
     QTest::addColumn<QVector<QPointF>>("expect");
@@ -2566,7 +2629,7 @@ void TST_VAbstractPiece::PathLoopsCase_data() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VAbstractPiece::PathLoopsCase() const
+void TST_AbstractPiece::PathLoopsCase() const
 {
     QFETCH(QVector<QPointF>, path);
     QFETCH(QVector<QPointF>, expect);
@@ -2576,7 +2639,7 @@ void TST_VAbstractPiece::PathLoopsCase() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VAbstractPiece::BrokenDetailEquidistant_data() const
+void TST_AbstractPiece::BrokenDetailEquidistant_data() const
 {
     QTest::addColumn<QVector<SeamAllowancePoint>>("points");
     QTest::addColumn<qreal>("width");
@@ -2859,7 +2922,7 @@ void TST_VAbstractPiece::BrokenDetailEquidistant_data() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VAbstractPiece::BrokenDetailEquidistant() const
+void TST_AbstractPiece::BrokenDetailEquidistant() const
 {
     QFETCH(QVector<SeamAllowancePoint>, points);
     QFETCH(qreal, width);
@@ -2872,7 +2935,7 @@ void TST_VAbstractPiece::BrokenDetailEquidistant() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VAbstractPiece::CorrectEquidistantPoints_data() const
+void TST_AbstractPiece::CorrectEquidistantPoints_data() const
 {
     // See file zigzag.sm2d
     QTest::addColumn<QVector<QPointF>>("points");
@@ -2949,7 +3012,7 @@ void TST_VAbstractPiece::CorrectEquidistantPoints_data() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VAbstractPiece::CorrectEquidistantPoints() const
+void TST_AbstractPiece::CorrectEquidistantPoints() const
 {
     QFETCH(QVector<QPointF>, points);
     QFETCH(QVector<QPointF>, expect);
@@ -2962,7 +3025,7 @@ void TST_VAbstractPiece::CorrectEquidistantPoints() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VAbstractPiece::TestCorrectEquidistantPoints_data()
+void TST_AbstractPiece::TestCorrectEquidistantPoints_data()
 {
     QTest::addColumn<QVector<QPointF>>("before");
     QTest::addColumn<QVector<QPointF>>("expect");
@@ -3128,7 +3191,7 @@ void TST_VAbstractPiece::TestCorrectEquidistantPoints_data()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VAbstractPiece::TestCorrectEquidistantPoints() const
+void TST_AbstractPiece::TestCorrectEquidistantPoints() const
 {
     QFETCH(QVector<QPointF>, before);
     QFETCH(QVector<QPointF>, expect);
@@ -3139,7 +3202,7 @@ void TST_VAbstractPiece::TestCorrectEquidistantPoints() const
 
 #ifndef Q_OS_WIN
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VAbstractPiece::PossibleInfiniteClearLoops_data() const
+void TST_AbstractPiece::PossibleInfiniteClearLoops_data() const
 {
     QTest::addColumn<QVector<QPointF>>("path");
     QTest::addColumn<QVector<QPointF>>("expect");
@@ -3271,7 +3334,7 @@ void TST_VAbstractPiece::PossibleInfiniteClearLoops_data() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VAbstractPiece::PossibleInfiniteClearLoops() const
+void TST_AbstractPiece::PossibleInfiniteClearLoops() const
 {
     QFETCH(QVector<QPointF>, path);
     QFETCH(QVector<QPointF>, expect);
@@ -3282,7 +3345,7 @@ void TST_VAbstractPiece::PossibleInfiniteClearLoops() const
 #endif //#ifndef Q_OS_WIN
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VAbstractPiece::Case3() const
+void TST_AbstractPiece::Case3() const
 {
     const QVector<QPointF> points = InputPointsCase3a(); // Input points.
 
@@ -3291,7 +3354,7 @@ void TST_VAbstractPiece::Case3() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VAbstractPiece::Case4() const
+void TST_AbstractPiece::Case4() const
 {
     const QVector<QPointF> points = InputPointsCase4a(); // Input points.
 
@@ -3300,7 +3363,7 @@ void TST_VAbstractPiece::Case4() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VAbstractPiece::Case5() const
+void TST_AbstractPiece::Case5() const
 {
     const QVector<QPointF> points = InputPointsCase5a(); // Input points.
 
@@ -3309,7 +3372,7 @@ void TST_VAbstractPiece::Case5() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsIssue298Case1() const
+QVector<SeamAllowancePoint> TST_AbstractPiece::InputPointsIssue298Case1() const
 {
     QVector<SeamAllowancePoint> points;
 
@@ -3383,7 +3446,7 @@ QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsIssue298Case1() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> TST_VAbstractPiece::OutputPointsIssue298Case1() const
+QVector<QPointF> TST_AbstractPiece::OutputPointsIssue298Case1() const
 {
     QVector<QPointF> points;
     points += QPointF(-52.3724798442221, -35.5907);
@@ -3426,7 +3489,7 @@ QVector<QPointF> TST_VAbstractPiece::OutputPointsIssue298Case1() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsIssue298Case2() const
+QVector<SeamAllowancePoint> TST_AbstractPiece::InputPointsIssue298Case2() const
 {
     QVector<SeamAllowancePoint> points;
 
@@ -3500,7 +3563,7 @@ QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsIssue298Case2() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> TST_VAbstractPiece::OutputPointsIssue298Case2() const
+QVector<QPointF> TST_AbstractPiece::OutputPointsIssue298Case2() const
 {
     QVector<QPointF> points;
 
@@ -3555,7 +3618,7 @@ QVector<QPointF> TST_VAbstractPiece::OutputPointsIssue298Case2() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsIssue548Case1() const
+QVector<SeamAllowancePoint> TST_AbstractPiece::InputPointsIssue548Case1() const
 {
     QVector<SeamAllowancePoint> points;
 
@@ -3570,7 +3633,7 @@ QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsIssue548Case1() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> TST_VAbstractPiece::OutputPointsIssue548Case1() const
+QVector<QPointF> TST_AbstractPiece::OutputPointsIssue548Case1() const
 {
     QVector<QPointF> points;
 
@@ -3587,7 +3650,7 @@ QVector<QPointF> TST_VAbstractPiece::OutputPointsIssue548Case1() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsIssue548Case2() const
+QVector<SeamAllowancePoint> TST_AbstractPiece::InputPointsIssue548Case2() const
 {
     QVector<SeamAllowancePoint> points;
     points << SeamAllowancePoint(99.86433649395013, 10.166060970128015);
@@ -3601,7 +3664,7 @@ QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsIssue548Case2() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> TST_VAbstractPiece::OutputPointsIssue548Case2() const
+QVector<QPointF> TST_AbstractPiece::OutputPointsIssue548Case2() const
 {
     QVector<QPointF> points;
     points << QPointF(75.35612582031402, -49.49247429729551);
@@ -3615,7 +3678,7 @@ QVector<QPointF> TST_VAbstractPiece::OutputPointsIssue548Case2() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsIssue548Case3() const
+QVector<SeamAllowancePoint> TST_AbstractPiece::InputPointsIssue548Case3() const
 {
     QVector<SeamAllowancePoint> points;
 
@@ -3630,7 +3693,7 @@ QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsIssue548Case3() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> TST_VAbstractPiece::OutputPointsIssue548Case3() const
+QVector<QPointF> TST_AbstractPiece::OutputPointsIssue548Case3() const
 {
     QVector<QPointF> points;
 
@@ -3645,7 +3708,7 @@ QVector<QPointF> TST_VAbstractPiece::OutputPointsIssue548Case3() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> TST_VAbstractPiece::InputPointsCase3a() const
+QVector<QPointF> TST_AbstractPiece::InputPointsCase3a() const
 {
     QVector<QPointF> points;
 
@@ -3657,7 +3720,7 @@ QVector<QPointF> TST_VAbstractPiece::InputPointsCase3a() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> TST_VAbstractPiece::InputPointsCase4a() const
+QVector<QPointF> TST_AbstractPiece::InputPointsCase4a() const
 {
     QVector<QPointF> points;
 
@@ -3669,7 +3732,7 @@ QVector<QPointF> TST_VAbstractPiece::InputPointsCase4a() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> TST_VAbstractPiece::InputPointsCase5a() const
+QVector<QPointF> TST_AbstractPiece::InputPointsCase5a() const
 {
     QVector<QPointF> points;
 
@@ -3679,7 +3742,7 @@ QVector<QPointF> TST_VAbstractPiece::InputPointsCase5a() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsIssue646() const
+QVector<SeamAllowancePoint> TST_AbstractPiece::InputPointsIssue646() const
 {
     QVector<SeamAllowancePoint> points;
 
@@ -4148,7 +4211,7 @@ QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsIssue646() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> TST_VAbstractPiece::OutputPointsIssue646() const
+QVector<QPointF> TST_AbstractPiece::OutputPointsIssue646() const
 {
     QVector<QPointF> points;
 

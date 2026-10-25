@@ -1,5 +1,5 @@
 /******************************************************************************
- **  @file   tst_vtextmanager.cpp
+ **  @file   tst_labeltextmanager.cpp
  **  @author slspencer
  **
  **  @brief
@@ -26,7 +26,7 @@
  **
  *****************************************************************************/
 
-#include "tst_vtextmanager.h"
+#include "tst_labeltextmanager.h"
 #include "../vpatterndb/LabelTextManager.h"
 
 #include <QtTest>
@@ -50,13 +50,13 @@ int lineWidth(const QFont &font, const TextLine &line, int size)
 } // namespace
 
 //---------------------------------------------------------------------------------------------------------------------
-TST_VTextManager::TST_VTextManager(QObject *parent)
+TST_LabelTextManager::TST_LabelTextManager(QObject *parent)
     : QObject(parent)
 {
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VTextManager::LargestFittingSize_data() const
+void TST_LabelTextManager::LargestFittingSize_data() const
 {
     QTest::addColumn<QString>("text");
     QTest::addColumn<int>("increment");
@@ -81,7 +81,7 @@ void TST_VTextManager::LargestFittingSize_data() const
  * The search starts from an estimate instead of stepping down from the size that is too wide. It must still
  * return the same size as that step-down search: the largest one that fits, or LabelTextManager::min_font_size.
  */
-void TST_VTextManager::LargestFittingSize() const
+void TST_LabelTextManager::LargestFittingSize() const
 {
     QFETCH(QString, text);
     QFETCH(int, increment);
