@@ -437,6 +437,16 @@ Retired code that `develop` still has:
 - `MainWindowsNoGUI::exportEPS`, `exportPS`, `convertPdfToPs` (pdftops), retired in `14e1d8723b`.
   `develop` restores them whenever it edits nearby lines. Delete them on each merge.
   Upstream keeps them until the endgame PR (user decision). Do not propose an early upstream PR.
+- `src/libs/vdxf/` and the console export mode (`--basename`, `--format`), removed by Task Dead.4.
+  SeamlyLayout writes DXF-AAMA (`seamlylayout_DXF_AAMA.md`). On the merge that brings
+  upstream PR 1783 (label-independent AAMA piece text):
+  - keep `src/libs/vdxf/` deleted;
+  - drop the `cutting_text` and `getPieceText()` changes in `vlayoutpiece.cpp` and `vlayoutpiece_p.h`: nothing reads them;
+  - drop the `aamaCuttingText` test in `tst_seamly2dcommandline.{h,cpp}`;
+  - drop `.github/validation/issue-1783/`: evidence for the removed exporter, with third-party PDFs;
+  - rewrite `.github/AAMA-INTEROP.md` to describe SeamlyLayout's DXF-AAMA;
+  - fix the `.github/README-AUTOMATION.md` example: Seamly2D has no `--basename` or `--format`;
+  - keep the `SEAMLY_DATA_DIR` code; SeamlyLayout follows in Task Layout.101.
 
 Enable `git config rerere.enabled true` so Git reuses recorded conflict resolutions.
 

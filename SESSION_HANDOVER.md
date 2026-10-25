@@ -2,6 +2,17 @@
 
 ## Current status
 
+### 2026-10-25 — DXF-AAMA piece text review (upstream PR 1783); merged into local `run-seamlyLayout`, not pushed
+
+- Upstream PR 1783 (open) makes the `vdxf` AAMA piece text independent of the label. SeamlyLayout DXF-AAMA already did this; no exporter code change.
+- User decisions: AAMA `Quantity:` stays `R,L` (not a total); `Size:` stays in pattern units (not cm); `Units:METRIC` stays.
+- New test `aama_piece_text_comes_from_piece_data_not_label` (`writer_astm_test.rs`): handoff SVG to DXF-AAMA, label hidden and label contradicting the piece data.
+- Docs: `seamlylayout_DXF_AAMA.md` Decisions; `SVG-DATA-ATTRIBUTES.md` `data-size` row; CLAUDE.md merge rules for PR 1783 under "Retired code"; new Task Layout.101 (`SEAMLY_DATA_DIR` in SeamlyLayout).
+- Verified: `cargo test --workspace` 622 passed. Not run: ctest, Qt suites, MSI (Rust test and docs only).
+- Open question for the user: untracked `project-docs/docs-seamlylayout/AAMA-INTEROP.md` copies the PR text, which describes the old `vdxf` output.
+- Work done in worktree `C:\Users\susan\Projects\s2d-aama-piece-text` (removed after the merge).
+- Uncommitted user files left untouched: `AGENTS.md`, `TODO_SEAMLYLAYOUT.md` (Layout.100), `AAMA-INTEROP.md`, `test-seamly-layout/foldline_arrowline.*`, `test-seamly-layout/layouts/*`.
+
 ### 2026-10-25 — Seamly2D.71 fold line arrow line, label and extended fold line; merged into local `run-seamlyLayout`, not pushed
 
 - Piece Properties Apply/OK rotates the main path to end with the fold line (`VPiece::endPathAtFoldLine`). The 0.7.7 conversion does the same for older files (`endMainPathAtFoldLineV0_7_7`); no schema change.

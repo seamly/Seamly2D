@@ -166,7 +166,7 @@ first child of each piece group when it places the piece into a layout sheet
 | `data-sizes` | `pattern` (multisize) | Every handed-off size, comma-separated, in pattern units (e.g. `34,36,38`). |
 | `data-base-size` | `pattern` (multisize) | Base size of the `.smms` file, in pattern units. |
 | `data-height` | `pattern` (multisize) | Height of every handed-off size, in pattern units: the `base` of the `.smms` `height` measurement. |
-| `data-size` | `piece` (multisize) | Size of this copy of the piece. Kept on placed pieces in the layout and its exports. DXF-ASTM `Size Name:` piece text. |
+| `data-size` | `piece` (multisize) | Size of this copy of the piece. Kept on placed pieces in the layout and its exports. DXF-ASTM `Size Name:`, DXF-AAMA `Size:` piece text, in pattern units. |
 | `data-set-number` | `piece` (multisize, SeamlyLayout only) | `data-type-number` of the piece-set the piece left. SeamlyLayout writes it when the Marker tab or a size tab dissolves the piece-sets, so the piece number survives in the layout and its exports. Not in the Seamly2D handoff. DXF-ASTM uses it to number pieces that share a name: `Detail (3)`. |
 | `data-name-assigned` | `piece`, `piece-set` (SeamlyLayout only) | `true` when SeamlyLayout assigned the `data-name`. A later import keeps that name. Not in the Seamly2D handoff. |
 | `data-split-of` | `piece` (SeamlyLayout only) | `id` of the piece this part was split from. SeamlyLayout writes it when the user chose "Split the pieces" for an individual pattern with a piece wider or longer than the media. Not in the Seamly2D handoff. |
