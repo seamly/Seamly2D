@@ -19,7 +19,9 @@
 //   - outline (`cutline`, else `seamline`) and `cut_path`: closed, with new
 //     edges on the cut lines;
 //   - `seamline` beside a cutline, `internal_path`, `grainline`, `fold_line`: open
-//     lines that end at the cut lines; a part the fold line misses has none;
+//     lines that end at the cut lines; a part the fold line misses has none. The
+//     fold line arrow line and label (`fold_line_arrow`, `fold_line_label`) go
+//     whole into the fold line group of the nearest part;
 //   - notches, labels and other groups: whole, on the nearest part;
 //   - a part without grainline gets a new vertical grainline when the piece had one;
 //   - a new `piece_label`: "<name> part i of n, joins j";
@@ -708,6 +710,34 @@ fn component_for_part(group: &Element, split: &[SplitPath], part: usize) -> Opti
     Some(el)
 } // fn component_for_part
 
+// @brief The fold line group of each part: its stretch of the fold line, clipped like
+// an open line, and the tagged arrow line and label groups whole, in the nearest part.
+// @return None when the fold line path cannot be clipped.
+fn fold_line_for_parts(group: &Element, cells: &[Cell], parts: &[Part]) -> Option<Vec<Option<Element>>> {
+    // Take the tagged parts out, so only the fold line path is clipped.
+    let mut fold_only = group.clone();
+    let mut tagged: Vec<Element> = Vec::new();
+    fold_only.children.retain(|node| match node {
+        XMLNode::Element(e) if e.attributes.contains_key("data-type") => {
+            tagged.push(e.clone());
+            false // a tagged part
+        } // tagged
+        _ => true, // the fold line and untagged content
+    }); // retain
+    let split = split_component(&fold_only, false, cells, parts)?;
+    let mut groups: Vec<Option<Element>> =
+        (0..parts.len()).map(|i| component_for_part(&fold_only, &split, i)).collect();
+
+    // Each tagged part goes back, after the fold line, into the group of its nearest part.
+    for part_group in tagged {
+        let nearest = element_anchor(&part_group).map_or(0, |p| nearest_part(parts, None, p));
+        if let Some(fold) = groups[nearest].as_mut() {
+            fold.children.push(XMLNode::Element(part_group));
+        } // if the nearest part holds fold line
+    } // for each tagged part
+    Some(groups)
+} // fn fold_line_for_parts
+
 // @brief The notch groups of each part; notches go whole to the nearest part.
 //
 // The per-notch attributes are filtered with their notches when they hold one
@@ -974,6 +1004,16 @@ fn divide_piece(piece: &Element, columns: usize, rows: usize, uu_per_px: f64) ->
             }
             continue;
         } // if notch
+        if data_type == "fold_line" {
+            if let Some(groups) = fold_line_for_parts(child, &cells, &parts) {
+                for (i, group) in groups.into_iter().enumerate() {
+                    if let Some(group) = group {
+                        part_children[i].push(group);
+                    } // if the part holds fold line
+                } // for each part
+                continue;
+            } // if clipped
+        } // if fold line
         if let Some(split) = closed.and_then(|closed| split_component(child, closed, &cells, &parts)) {
             for (i, list) in part_children.iter_mut().enumerate() {
                 if let Some(el) = component_for_part(child, &split, i) {
@@ -1331,6 +1371,30 @@ mod tests {
         } // for each part
         assert_eq!(stretches, vec!["M0,200 L0,0".to_string(), "M0,400 L0,200".to_string()]);
     } // fold_line_is_clipped_per_part
+
+    // @brief The fold line arrow line and label are not clipped: each goes whole into the fold line group
+    // of the part nearest to it, after that part's stretch of fold line.
+    #[test]
+    fn fold_line_arrow_and_label_go_whole_to_the_nearest_part() {
+        // Arrow line and label near the top of the fold line, in the top left part.
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-1" data-type="piece" data-name="Back" data-on-fold="true">
+            <g data-type="cutline"><path d="M0,0 L400,0 L400,400 L0,400 Z"/></g>
+            <g id="fold_line_Back" data-type="fold_line"><g><path d="M0,400 L0,0"/></g>
+              <g id="fold_line_arrow_Back" data-type="fold_line_arrow"><path d="M5,180 L20,180 L20,20 L5,20"/></g>
+              <g id="fold_line_label_Back" data-type="fold_line_label"><text x="10" y="100">Foldline</text></g></g></g></svg>"#;
+        let mut doc = Document::parse(svg).expect("parses");
+        assert_eq!(divide_oversized_pieces(&mut doc, &spec(250, 250, true))[0].parts, 4);
+
+        let mut holders = Vec::new();
+        for part in part_groups(&doc) {
+            let Some(fold) = component(part, "fold_line") else { continue };
+            let kinds: Vec<&str> = fold.children.iter().filter_map(|n| n.as_element()).map(|e| attr(e, "data-type")).collect();
+            holders.push((attr(part, "id").to_string(), kinds));
+        } // for each part
+        assert_eq!(holders.len(), 2, "{holders:?}");
+        assert!(holders.iter().any(|(_, kinds)| kinds == &vec!["", "fold_line_arrow", "fold_line_label"]), "{holders:?}");
+        assert!(holders.iter().any(|(_, kinds)| kinds == &vec![""]), "{holders:?}");
+    } // fold_line_arrow_and_label_go_whole_to_the_nearest_part
 
     // @brief Bounding box (min x, min y, max x, max y) of every path point of a part.
     fn part_bbox(part: &Element) -> (f64, f64, f64, f64) {
