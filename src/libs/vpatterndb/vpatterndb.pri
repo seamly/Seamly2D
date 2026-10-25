@@ -81,4 +81,5 @@ HEADERS += \
     $$PWD/measurements_def.h \
     $$PWD/pmsystems.h \
     $$PWD/AbstractPiece.h \
-    $$PWD/AbstractPieceData.h
+    $$PWD/AbstractPieceData.h \
+    $$PWD/SeamAllowancePoint.h

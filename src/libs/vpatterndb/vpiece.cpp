@@ -119,7 +119,7 @@ bool notchesPossible(const QVector<VPieceNode> &path)
 /**
  * @brief seamLineWidth returns the wider of a point's before and after widths, @p width when the point sets none.
  */
-qreal seamLineWidth(const VSAPoint &point, qreal width)
+qreal seamLineWidth(const SeamAllowancePoint &point, qreal width)
 {
     return qMax(point.GetSABefore(width), point.GetSAAfter(width));
 }
@@ -133,7 +133,7 @@ qreal seamLineWidth(const VSAPoint &point, qreal width)
  * Every point gets the width of the first point, spread by length to the width of the last point. Corner types
  * shape only the cut line.
  */
-void setSeamLineWidths(QVector<VSAPoint> &points, qreal width)
+void setSeamLineWidths(QVector<SeamAllowancePoint> &points, qreal width)
 {
     if (points.isEmpty())
     {
@@ -143,7 +143,7 @@ void setSeamLineWidths(QVector<VSAPoint> &points, qreal width)
     const qreal firstWidth = seamLineWidth(points.first(), width);
     const qreal lastWidth = seamLineWidth(points.last(), width);
     QVector<QPointF> polyline;
-    for (const VSAPoint &point : points)
+    for (const SeamAllowancePoint &point : points)
     {
         polyline.append(point);
     }
@@ -171,7 +171,7 @@ void setSeamLineWidths(QVector<VSAPoint> &points, qreal width)
  *
  * The new point is not a node. Its width is the mean of the edge end widths, so the offset edge stays straight.
  */
-QVector<VSAPoint> startAtLongestEdge(const QVector<VSAPoint> &points)
+QVector<SeamAllowancePoint> startAtLongestEdge(const QVector<SeamAllowancePoint> &points)
 {
     const int count = points.size();
     int longest = -1;
@@ -190,15 +190,15 @@ QVector<VSAPoint> startAtLongestEdge(const QVector<VSAPoint> &points)
         return points;
     }
 
-    const VSAPoint &first = points.at(longest);
-    const VSAPoint &second = points.at((longest + 1) % count);
-    VSAPoint middle((static_cast<QPointF>(first) + static_cast<QPointF>(second)) / 2.0);
+    const SeamAllowancePoint &first = points.at(longest);
+    const SeamAllowancePoint &second = points.at((longest + 1) % count);
+    SeamAllowancePoint middle((static_cast<QPointF>(first) + static_cast<QPointF>(second)) / 2.0);
     const qreal middleWidth = (first.GetSAAfter() + second.GetSABefore()) / 2.0;
     middle.SetSABefore(middleWidth);
     middle.SetSAAfter(middleWidth);
     middle.SetAngleType(PieceNodeAngle::ByLength);
 
-    QVector<VSAPoint> rotated;
+    QVector<SeamAllowancePoint> rotated;
     rotated.append(middle);
     for (int k = 1; k <= count; ++k)
     {
@@ -242,7 +242,7 @@ bool samePoint(const QPointF &a, const QPointF &b)
  * The offset of the fold line edge then lies on the fold line, so the seam line meets the fold line. A curve
  * end at a fold line node repeats the node point; the repeat gets the same width.
  */
-void setFoldLineWidths(QVector<VSAPoint> &points, const QPointF &foldStart, const QPointF &foldEnd)
+void setFoldLineWidths(QVector<SeamAllowancePoint> &points, const QPointF &foldStart, const QPointF &foldEnd)
 {
     const int count = points.size();
     for (int i = 0; i < count; ++i)
@@ -653,7 +653,7 @@ QVector<QPointF> VPiece::seamAllowancePoints(const VContainer *data, QVector<QPo
     const quint32 foldStartId = foldIndexes.isEmpty() ? NULL_ID : mainNodes.at(foldIndexes.at(0)).GetId();
     const quint32 foldEndId   = foldIndexes.isEmpty() ? NULL_ID : mainNodes.at(foldIndexes.at(1)).GetId();
 
-    QVector<VSAPoint> pointsEkv;
+    QVector<SeamAllowancePoint> pointsEkv;
     for (int i = 0; i< unitedPath.size(); ++i)
     {
         const VPieceNode &node = unitedPath.at(i);
@@ -684,7 +684,8 @@ QVector<QPointF> VPiece::seamAllowancePoints(const VContainer *data, QVector<QPo
                         insertingCSA = true;
 
                         const VPiecePath path = data->getPiecePath(records.at(recordIndex).path);
-                        QVector<VSAPoint> r = path.seamAllowancePoints(data, width, records.at(recordIndex).reverse);
+                        QVector<SeamAllowancePoint> r = path.seamAllowancePoints(data, width,
+                                                                                 records.at(recordIndex).reverse);
 
                         for (int j = 0; j < r.size(); ++j)
                         {
@@ -730,7 +731,7 @@ QVector<QPointF> VPiece::seamAllowancePoints(const VContainer *data, QVector<QPo
 
     // Number the node points in path order; every size of a piece numbers them the same way.
     int cornerCount = 0;
-    for (VSAPoint &point : pointsEkv)
+    for (SeamAllowancePoint &point : pointsEkv)
     {
         if (point.isNode())
         {
@@ -775,7 +776,7 @@ QVector<QPointF> VPiece::builtInSeamLinePoints(const VContainer *data, QVector<Q
     const qreal width = ToPixel(GetSAWidth(), *data->GetPatternUnit());
     const QVector<VPieceNode> nodes = GetPath().getNodes();
 
-    QVector<VSAPoint> points;
+    QVector<SeamAllowancePoint> points;
     for (int i = 0; i < nodes.size(); ++i)
     {
         const VPieceNode &node = nodes.at(i);
@@ -784,7 +785,7 @@ QVector<QPointF> VPiece::builtInSeamLinePoints(const VContainer *data, QVector<Q
             continue;
         }
 
-        QVector<VSAPoint> nodePoints;
+        QVector<SeamAllowancePoint> nodePoints;
         switch (node.GetTypeTool())
         {
             case (Tool::NodePoint):
@@ -892,7 +893,7 @@ QVector<QLineF> VPiece::createNotchLines(const VContainer *data, const QVector<Q
         {
             // Built in or not, the node keeps the widths it was given.
             qreal width = 0;
-            VSAPoint notchSAPoint;
+            SeamAllowancePoint notchSAPoint;
             if (hasSeamAllowance() && getNotchSAPoint(unitedPath, i, data, notchSAPoint))
             {
                 width = MaxLocalSA(notchSAPoint, ToPixel(GetSAWidth(), *data->GetPatternUnit()));
@@ -1371,17 +1372,18 @@ QVector<CustomSARecord> VPiece::FilterRecords(QVector<CustomSARecord> records) c
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<VSAPoint> VPiece::getNodeSAPoints(const QVector<VPieceNode> &path, int index, const VContainer *data) const
+QVector<SeamAllowancePoint> VPiece::getNodeSAPoints(const QVector<VPieceNode> &path, int index,
+                                                    const VContainer *data) const
 {
     SCASSERT(data != nullptr)
 
     if (index < 0 || index >= path.size())
     {
-        return QVector<VSAPoint>();
+        return QVector<SeamAllowancePoint>();
     }
 
     const VPieceNode &node = path.at(index);
-    QVector<VSAPoint> points;
+    QVector<SeamAllowancePoint> points;
 
     if (node.GetTypeTool() == Tool::NodePoint)
     {
@@ -1399,11 +1401,11 @@ QVector<VSAPoint> VPiece::getNodeSAPoints(const QVector<VPieceNode> &path, int i
 
 //---------------------------------------------------------------------------------------------------------------------
 bool VPiece::getNotchSAPoint(const QVector<VPieceNode> &path, int index, const VContainer *data,
-                             VSAPoint &point) const
+                             SeamAllowancePoint &point) const
 {
     SCASSERT(data != nullptr)
 
-    const QVector<VSAPoint> points = getNodeSAPoints(path, index, data);
+    const QVector<SeamAllowancePoint> points = getNodeSAPoints(path, index, data);
 
     if (points.isEmpty() || points.size() > 1)
     {
@@ -1415,12 +1417,13 @@ bool VPiece::getNotchSAPoint(const QVector<VPieceNode> &path, int index, const V
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-bool VPiece::getNotchPreviousSAPoints(const QVector<VPieceNode> &path, int index, const VSAPoint &notchSAPoint,
-                                      const VContainer *data, VSAPoint &point) const
+bool VPiece::getNotchPreviousSAPoints(const QVector<VPieceNode> &path, int index,
+                                      const SeamAllowancePoint &notchSAPoint,
+                                      const VContainer *data, SeamAllowancePoint &point) const
 {
     SCASSERT(data != nullptr)
 
-    const QVector<VSAPoint> points = getNodeSAPoints(path, index, data);
+    const QVector<SeamAllowancePoint> points = getNodeSAPoints(path, index, data);
 
     if (points.isEmpty())
     {
@@ -1431,7 +1434,7 @@ bool VPiece::getNotchPreviousSAPoints(const QVector<VPieceNode> &path, int index
     int nodeIndex = points.size()-1;
     do
     {
-        const VSAPoint previous = points.at(nodeIndex);
+        const SeamAllowancePoint previous = points.at(nodeIndex);
         if (notchSAPoint.toPoint() != previous.toPoint())
         {
             point = previous;
@@ -1448,12 +1451,12 @@ bool VPiece::getNotchPreviousSAPoints(const QVector<VPieceNode> &path, int index
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-int VPiece::getNextNotchSAPoints(const QVector<VPieceNode> &path, int index, const VSAPoint &notchSAPoint,
-                                 const VContainer *data, VSAPoint &point) const
+int VPiece::getNextNotchSAPoints(const QVector<VPieceNode> &path, int index, const SeamAllowancePoint &notchSAPoint,
+                                 const VContainer *data, SeamAllowancePoint &point) const
 {
     SCASSERT(data != nullptr)
 
-    const QVector<VSAPoint> points = getNodeSAPoints(path, index, data);
+    const QVector<SeamAllowancePoint> points = getNodeSAPoints(path, index, data);
 
     if (points.isEmpty())
     {
@@ -1464,7 +1467,7 @@ int VPiece::getNextNotchSAPoints(const QVector<VPieceNode> &path, int index, con
     int nodeIndex = 0;
     do
     {
-        const VSAPoint next = points.at(nodeIndex);
+        const SeamAllowancePoint next = points.at(nodeIndex);
         if (notchSAPoint.toPoint() != next.toPoint())
         {
             point = next;
@@ -1482,8 +1485,8 @@ int VPiece::getNextNotchSAPoints(const QVector<VPieceNode> &path, int index, con
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-bool VPiece::getSeamNotchSAPoint(const VSAPoint &previousSAPoint, const VSAPoint &notchSAPoint,
-                                    const VSAPoint &nextSAPoint, const VContainer *data, QPointF &point) const
+bool VPiece::getSeamNotchSAPoint(const SeamAllowancePoint &previousSAPoint, const SeamAllowancePoint &notchSAPoint,
+                                    const SeamAllowancePoint &nextSAPoint, const VContainer *data, QPointF &point) const
 {
     SCASSERT(data != nullptr)
 
@@ -1580,19 +1583,19 @@ QVector<QLineF> VPiece::createNotch(const QVector<VPieceNode> &path, int previou
         return QVector<QLineF>();
     }
 
-    VSAPoint notchSAPoint;
+    SeamAllowancePoint notchSAPoint;
     if (!getNotchSAPoint(path, notchIndex, data, notchSAPoint))
     {
         return QVector<QLineF>(); // Something wrong
     }
 
-    VSAPoint previousSAPoint;
+    SeamAllowancePoint previousSAPoint;
     if (!getNotchPreviousSAPoints(path, previousIndex, notchSAPoint, data, previousSAPoint))
     {
         return QVector<QLineF>(); // Something wrong
     }
 
-    VSAPoint nextSAPoint;
+    SeamAllowancePoint nextSAPoint;
     if (!getNextNotchSAPoints(path, nextIndex, notchSAPoint, data, nextSAPoint))
     {
         return QVector<QLineF>(); // Something wrong
@@ -1632,8 +1635,10 @@ QVector<QLineF> VPiece::createNotch(const QVector<VPieceNode> &path, int previou
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QLineF> VPiece::createSeamAllowanceNotch(const QVector<VPieceNode> &path, VSAPoint &previousSAPoint,
-                                                 const VSAPoint &notchSAPoint, VSAPoint &nextSAPoint,
+QVector<QLineF> VPiece::createSeamAllowanceNotch(const QVector<VPieceNode> &path,
+                                                 SeamAllowancePoint &previousSAPoint,
+                                                 const SeamAllowancePoint &notchSAPoint,
+                                                 SeamAllowancePoint &nextSAPoint,
                                                  const VContainer *data, int notchIndex,
                                                  const QVector<QPointF> &pathPoints) const
 {
@@ -1722,8 +1727,10 @@ QVector<QLineF> VPiece::createSeamAllowanceNotch(const QVector<VPieceNode> &path
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QLineF> VPiece::createBuiltInSaNotch(const QVector<VPieceNode> &path, const VSAPoint &previousSAPoint,
-                                             const VSAPoint &notchSAPoint, const VSAPoint &nextSAPoint,
+QVector<QLineF> VPiece::createBuiltInSaNotch(const QVector<VPieceNode> &path,
+                                             const SeamAllowancePoint &previousSAPoint,
+                                             const SeamAllowancePoint &notchSAPoint,
+                                             const SeamAllowancePoint &nextSAPoint,
                                              const VContainer *data, int notchIndex,
                                              const QVector<QPointF> &pathPoints) const
 {

@@ -59,6 +59,7 @@
 #include "../vmisc/diagnostic.h"
 #include "../vmisc/def.h"
 #include "../vgeometry/vgobject.h"
+#include "SeamAllowancePoint.h"
 
 // template <class T> class QVector;
 
@@ -67,153 +68,6 @@ class AbstractPieceData;
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_GCC("-Weffc++")
 QT_WARNING_DISABLE_GCC("-Wnon-virtual-dtor")
-
-/**
- * @brief The VSAPoint class seam allowance point
- */
-class VSAPoint : public QPointF
-{
-public:
-    constexpr VSAPoint();
-    constexpr VSAPoint(qreal xpos, qreal ypos);
-    constexpr explicit VSAPoint(const QPointF &p);
-
-    constexpr qreal GetSABefore() const;
-                     qreal GetSABefore(qreal width) const;
-                     void  SetSABefore(qreal value);
-
-    constexpr qreal GetSAAfter() const;
-                     qreal GetSAAfter(qreal width) const;
-                     void  SetSAAfter(qreal value);
-
-    constexpr PieceNodeAngle GetAngleType() const;
-                     void           SetAngleType(PieceNodeAngle value);
-
-    constexpr bool isNode() const;
-                     void setNode(bool value);
-
-    constexpr int  cornerIndex() const;
-                     void setCornerIndex(int value);
-
-    constexpr bool isCornerCutForced() const;
-                     void setCornerCutForced(bool value);
-
-private:
-    qreal          m_before;
-    qreal          m_after;
-    PieceNodeAngle m_angle;
-    bool           m_node; /// @brief true when the point is a piece node or a curve end, not a curve interior point
-    int            m_cornerIndex; /// @brief number of this node point among the node points of its path; -1 if none
-    bool           m_cornerCutForced; /// @brief cut a ByLength corner even when its miter is short enough to keep
-};
-
-Q_DECLARE_METATYPE(VSAPoint)
-Q_DECLARE_TYPEINFO(VSAPoint, Q_MOVABLE_TYPE);
-
-//---------------------------------------------------------------------------------------------------------------------
-constexpr inline VSAPoint::VSAPoint()
-    : QPointF(),
-      m_before(-1),
-      m_after(-1),
-      m_angle(PieceNodeAngle::ByLength),
-      m_node(false),
-      m_cornerIndex(-1),
-      m_cornerCutForced(false)
-{}
-
-//---------------------------------------------------------------------------------------------------------------------
-constexpr inline VSAPoint::VSAPoint(qreal xpos, qreal ypos)
-    : QPointF(xpos, ypos),
-      m_before(-1),
-      m_after(-1),
-      m_angle(PieceNodeAngle::ByLength),
-      m_node(false),
-      m_cornerIndex(-1),
-      m_cornerCutForced(false)
-{}
-
-//---------------------------------------------------------------------------------------------------------------------
-constexpr inline VSAPoint::VSAPoint(const QPointF &p)
-    : QPointF(p),
-      m_before(-1),
-      m_after(-1),
-      m_angle(PieceNodeAngle::ByLength),
-      m_node(false),
-      m_cornerIndex(-1),
-      m_cornerCutForced(false)
-{}
-
-//---------------------------------------------------------------------------------------------------------------------
-constexpr inline qreal VSAPoint::GetSABefore() const
-{
-    return m_before;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-inline void VSAPoint::SetSABefore(qreal value)
-{
-    value < 0 ? m_before = -1 : m_before = value;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-constexpr inline qreal VSAPoint::GetSAAfter() const
-{
-    return m_after;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-inline void VSAPoint::SetSAAfter(qreal value)
-{
-    value < 0 ? m_after = -1 : m_after = value;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-constexpr inline PieceNodeAngle VSAPoint::GetAngleType() const
-{
-    return m_angle;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-inline void VSAPoint::SetAngleType(PieceNodeAngle value)
-{
-    m_angle = value;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-constexpr inline bool VSAPoint::isNode() const
-{
-    return m_node;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-inline void VSAPoint::setNode(bool value)
-{
-    m_node = value;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-constexpr inline int VSAPoint::cornerIndex() const
-{
-    return m_cornerIndex;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-inline void VSAPoint::setCornerIndex(int value)
-{
-    m_cornerIndex = value;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-constexpr inline bool VSAPoint::isCornerCutForced() const
-{
-    return m_cornerCutForced;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-inline void VSAPoint::setCornerCutForced(bool value)
-{
-    m_cornerCutForced = value;
-}
 
 /**
  * @brief SeamAllowanceCorners lists the seam allowance corners that a ByLength angle cut short.
@@ -282,7 +136,7 @@ public:
     qreal GetMy() const;
     void  SetMy(qreal value);
 
-    static QVector<QPointF> Equidistant(const QVector<VSAPoint> &points, qreal width,
+    static QVector<QPointF> Equidistant(const QVector<SeamAllowancePoint> &points, qreal width,
                                         QVector<QPointF> *nodeVertices = nullptr, QVector<int> *cutCorners = nullptr);
     static QVector<int>     turnPointIndices(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices,
                                              bool closed);
@@ -295,10 +149,10 @@ public:
     static qreal            sumTrapezoids(const QVector<QPointF> &points);
     static bool             isClockwise(const QVector<QPointF> &points);
     static QVector<QPointF> CheckLoops(const QVector<QPointF> &points);
-    static QVector<QPointF> EkvPoint(const VSAPoint &p1Line1, const VSAPoint &p2Line1,
-                                     const VSAPoint &p1Line2, const VSAPoint &p2Line2, qreal width,
+    static QVector<QPointF> EkvPoint(const SeamAllowancePoint &p1Line1, const SeamAllowancePoint &p2Line1,
+                                     const SeamAllowancePoint &p1Line2, const SeamAllowancePoint &p2Line2, qreal width,
                                      bool *cut = nullptr);
-    static QLineF           createParallelLine(const VSAPoint &p1, const VSAPoint &p2, qreal width);
+    static QLineF           createParallelLine(const SeamAllowancePoint &p1, const SeamAllowancePoint &p2, qreal width);
     static QLineF           createParallelLine(const QPointF &p1, const QPointF &p2, qreal width);
 
     template <class T>
@@ -307,9 +161,10 @@ public:
 protected:
     template <class T>
     static QVector<T> RemoveDublicates(const QVector<T> &points, bool removeFirstAndLast = true);
-    static qreal      MaxLocalSA(const VSAPoint &p, qreal width);
+    static qreal      MaxLocalSA(const SeamAllowancePoint &p, qreal width);
     static bool       IsEkvPointOnLine(const QPointF &iPoint, const QPointF &prevPoint, const QPointF &nextPoint);
-    static bool       IsEkvPointOnLine(const VSAPoint &iPoint, const VSAPoint &prevPoint, const VSAPoint &nextPoint);
+    static bool       IsEkvPointOnLine(const SeamAllowancePoint &iPoint, const SeamAllowancePoint &prevPoint,
+                                       const SeamAllowancePoint &nextPoint);
 
 private:
     QSharedDataPointer<AbstractPieceData> d;

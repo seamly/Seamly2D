@@ -270,11 +270,11 @@ void AbstractPiece::SetSAWidth(qreal value)
 /**
  * @brief Equidistant builds the seam allowance polyline around the main path.
  * @param nodeVertices when not null, receives the seam allowance vertices built at node points
- *        (VSAPoint::isNode()), for turnPointIndices().
- * @param cutCorners when not null, receives VSAPoint::cornerIndex() of each node point whose ByLength corner
+ *        (SeamAllowancePoint::isNode()), for turnPointIndices().
+ * @param cutCorners when not null, receives SeamAllowancePoint::cornerIndex() of each node point whose ByLength corner
  *        was cut short, in path order.
  */
-QVector<QPointF> AbstractPiece::Equidistant(const QVector<VSAPoint> &points, qreal width,
+QVector<QPointF> AbstractPiece::Equidistant(const QVector<SeamAllowancePoint> &points, qreal width,
                                              QVector<QPointF> *nodeVertices, QVector<int> *cutCorners)
 {
     if (width < 0)
@@ -283,7 +283,7 @@ QVector<QPointF> AbstractPiece::Equidistant(const QVector<VSAPoint> &points, qre
         return QVector<QPointF>();
     }
 
-    QVector<VSAPoint> p = CorrectEquidistantPoints(points);
+    QVector<SeamAllowancePoint> p = CorrectEquidistantPoints(points);
     if ( p.size() < 3 )
     {
         qDebug() << "Not enough points for building the equidistant.";
@@ -296,7 +296,7 @@ QVector<QPointF> AbstractPiece::Equidistant(const QVector<VSAPoint> &points, qre
     }
 
     // Report a cut corner by the number the caller gave its node point.
-    const auto noteCut = [cutCorners](const VSAPoint &corner, bool cut)
+    const auto noteCut = [cutCorners](const SeamAllowancePoint &corner, bool cut)
     {
         if (cutCorners != nullptr && cut && corner.isNode() && corner.cornerIndex() >= 0)
         {
@@ -804,7 +804,7 @@ constexpr qreal AbstractPiece::PointPosition(const QPointF &p, const QLineF &lin
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-qreal AbstractPiece::MaxLocalSA(const VSAPoint &p, qreal width)
+qreal AbstractPiece::MaxLocalSA(const SeamAllowancePoint &p, qreal width)
 {
     qreal w1 = p.GetSAAfter();
     if (w1 < 0)
@@ -829,9 +829,9 @@ qreal AbstractPiece::MaxLocalSA(const VSAPoint &p, qreal width)
  * @param cut when not null, receives true when a ByLength corner was cut short.
  * @return seam allowance points.
  */
-QVector<QPointF> AbstractPiece::EkvPoint(const VSAPoint &p1Line1, const VSAPoint &p2Line1,
-                                          const VSAPoint &p1Line2, const VSAPoint &p2Line2, qreal width,
-                                          bool *cut)
+QVector<QPointF> AbstractPiece::EkvPoint(const SeamAllowancePoint &p1Line1, const SeamAllowancePoint &p2Line1,
+                                         const SeamAllowancePoint &p1Line2, const SeamAllowancePoint &p2Line2,
+                                         qreal width, bool *cut)
 {
     if (cut != nullptr)
     {
@@ -1214,7 +1214,7 @@ QVector<QPointF> AbstractPiece::AngleBySecondRightAngle(const QPointF &p2, const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QLineF AbstractPiece::createParallelLine(const VSAPoint &p1, const VSAPoint &p2, qreal width)
+QLineF AbstractPiece::createParallelLine(const SeamAllowancePoint &p1, const SeamAllowancePoint &p2, qreal width)
 {
     qreal w1 = p1.GetSAAfter();
     if (w1 < 0)
@@ -1433,7 +1433,8 @@ bool AbstractPiece::IsEkvPointOnLine(const QPointF &iPoint, const QPointF &prevP
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-bool AbstractPiece::IsEkvPointOnLine(const VSAPoint &iPoint, const VSAPoint &prevPoint, const VSAPoint &nextPoint)
+bool AbstractPiece::IsEkvPointOnLine(const SeamAllowancePoint &iPoint, const SeamAllowancePoint &prevPoint,
+                                     const SeamAllowancePoint &nextPoint)
 {
     // See bug #671
     const qreal tmpWidth = 10;
@@ -1468,24 +1469,4 @@ qreal AbstractPiece::GetMy() const
 void AbstractPiece::SetMy(qreal value)
 {
     d->m_my = value;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-qreal VSAPoint::GetSABefore(qreal width) const
-{
-    if (m_before < 0)
-    {
-        return width;
-    }
-    return m_before;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-qreal VSAPoint::GetSAAfter(qreal width) const
-{
-    if (m_after < 0)
-    {
-        return width;
-    }
-    return m_after;
 }

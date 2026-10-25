@@ -185,19 +185,20 @@ private:
     QVector<CustomSARecord>  GetValidRecords() const;
     QVector<CustomSARecord>  FilterRecords(QVector<CustomSARecord> records) const;
 
-    QVector<VSAPoint>        getNodeSAPoints(const QVector<VPieceNode> &path, int index,
-                                             const VContainer *data) const;
+    QVector<SeamAllowancePoint> getNodeSAPoints(const QVector<VPieceNode> &path, int index,
+                                                const VContainer *data) const;
 
     bool                     getNotchSAPoint(const QVector<VPieceNode> &path, int index,
-                                             const VContainer *data, VSAPoint &point) const;
+                                             const VContainer *data, SeamAllowancePoint &point) const;
     bool                     getNotchPreviousSAPoints(const QVector<VPieceNode> &path, int index,
-                                                      const VSAPoint &notchSAPoint,
-                                                      const VContainer *data, VSAPoint &point) const;
+                                                      const SeamAllowancePoint &notchSAPoint,
+                                                      const VContainer *data, SeamAllowancePoint &point) const;
     int                      getNextNotchSAPoints(const QVector<VPieceNode> &path, int index,
-                                                  const VSAPoint &notchSAPoint,
-                                                  const VContainer *data, VSAPoint &point) const;
-    bool                     getSeamNotchSAPoint(const VSAPoint &previousSAPoint, const VSAPoint &notchSAPoint,
-                                                 const VSAPoint &nextSAPoint, const VContainer *data,
+                                                  const SeamAllowancePoint &notchSAPoint,
+                                                  const VContainer *data, SeamAllowancePoint &point) const;
+    bool                     getSeamNotchSAPoint(const SeamAllowancePoint &previousSAPoint,
+                                                 const SeamAllowancePoint &notchSAPoint,
+                                                 const SeamAllowancePoint &nextSAPoint, const VContainer *data,
                                                  QPointF &point) const;
 
     bool                     isNotchVisible(const QVector<VPieceNode> &path, int notchIndex) const;
@@ -207,13 +208,17 @@ private:
                                          const QVector<QPointF> &pathPoints = QVector<QPointF>(),
                                          bool includeCutlineNotches = true) const;
 
-    QVector<QLineF>          createSeamAllowanceNotch(const QVector<VPieceNode> &path, VSAPoint &previousSAPoint,
-                                                      const VSAPoint &notchSAPoint, VSAPoint &nextSAPoint,
+    QVector<QLineF>          createSeamAllowanceNotch(const QVector<VPieceNode> &path,
+                                                      SeamAllowancePoint &previousSAPoint,
+                                                      const SeamAllowancePoint &notchSAPoint,
+                                                      SeamAllowancePoint &nextSAPoint,
                                                       const VContainer *data, int notchIndex,
                                                       const QVector<QPointF> &pathPoints = QVector<QPointF>()) const;
 
-    QVector<QLineF>          createBuiltInSaNotch(const QVector<VPieceNode> &path, const VSAPoint &previousSAPoint,
-                                                  const VSAPoint &notchSAPoint, const VSAPoint &nextSAPoint,
+    QVector<QLineF>          createBuiltInSaNotch(const QVector<VPieceNode> &path,
+                                                  const SeamAllowancePoint &previousSAPoint,
+                                                  const SeamAllowancePoint &notchSAPoint,
+                                                  const SeamAllowancePoint &nextSAPoint,
                                                   const VContainer *data, int notchIndex,
                                                   const QVector<QPointF> &pathPoints) const;
 

@@ -59,7 +59,7 @@
 #include "../vgeometry/vabstractcurve.h"
 
 class VPiecePathData;
-class VSAPoint;
+class SeamAllowancePoint;
 class VContainer;
 class QPainterPath;
 class VPointF;
@@ -119,7 +119,7 @@ public:
     QVector<QPointF>    PathPoints(const VContainer *data, const QVector<QPointF> &path = QVector<QPointF>()) const;
     QVector<VPointF>    PathNodePoints(const VContainer *data, bool showExcluded = true) const;
     QVector<QPointF>    pathNodeVertices(const VContainer *data) const;
-    QVector<VSAPoint>   seamAllowancePoints(const VContainer *data, qreal width, bool reverse) const;
+    QVector<SeamAllowancePoint> seamAllowancePoints(const VContainer *data, qreal width, bool reverse) const;
 
     QPainterPath        PainterPath(const VContainer *data, const QVector<QPointF> &cutPath) const;
 
@@ -135,8 +135,8 @@ public:
 
     VPiecePath          RemoveEdge(quint32 index) const;
 
-    VSAPoint            StartSegment(const VContainer *data, int i, bool reverse) const;
-    VSAPoint            EndSegment(const VContainer *data, int i, bool reverse) const;
+    SeamAllowancePoint  StartSegment(const VContainer *data, int i, bool reverse) const;
+    SeamAllowancePoint  EndSegment(const VContainer *data, int i, bool reverse) const;
 
     QPointF             NodePreviousPoint(const VContainer *data, int i) const;
     QPointF             NodeNextPoint(const VContainer *data, int i) const;
@@ -146,14 +146,17 @@ public:
     static int          FindInLoopNotExcludedUp(int start, const QVector<VPieceNode> &nodes);
     static int          FindInLoopNotExcludedDown(int start, const QVector<VPieceNode> &nodes);
 
-    static VSAPoint     StartSegment(const VContainer *data, const QVector<VPieceNode> &nodes, int i, bool reverse);
-    static VSAPoint     EndSegment(const VContainer *data, const QVector<VPieceNode> &nodes, int i, bool reverse);
+    static SeamAllowancePoint StartSegment(const VContainer *data, const QVector<VPieceNode> &nodes, int i,
+                                           bool reverse);
+    static SeamAllowancePoint EndSegment(const VContainer *data, const QVector<VPieceNode> &nodes, int i,
+                                         bool reverse);
 
-    static VSAPoint     PreparePointEkv(const VPieceNode &node, const VContainer *data);
+    static SeamAllowancePoint PreparePointEkv(const VPieceNode &node, const VContainer *data);
 
-    static QVector<VSAPoint> CurveSeamAllowanceSegment(const VContainer *data, const QVector<VPieceNode> &nodes,
-                                                       const QSharedPointer<VAbstractCurve> &curve,
-                                                       int i, bool reverse, qreal width);
+    static QVector<SeamAllowancePoint> CurveSeamAllowanceSegment(const VContainer *data,
+                                                                 const QVector<VPieceNode> &nodes,
+                                                                 const QSharedPointer<VAbstractCurve> &curve,
+                                                                 int i, bool reverse, qreal width);
 
     static QVector<QPointF>  curveNodeVertices(const QSharedPointer<VAbstractCurve> &curve,
                                                const QVector<QPointF> &segment);

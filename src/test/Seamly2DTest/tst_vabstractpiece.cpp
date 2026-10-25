@@ -66,7 +66,7 @@ TST_VAbstractPiece::TST_VAbstractPiece(QObject *parent)
 //---------------------------------------------------------------------------------------------------------------------
 void TST_VAbstractPiece::EquidistantRemoveLoop_data()
 {
-    QTest::addColumn<QVector<VSAPoint>>("points");
+    QTest::addColumn<QVector<SeamAllowancePoint>>("points");
     QTest::addColumn<qreal>("width");
     QTest::addColumn<QVector<QPointF>>("ekvOrig");
 
@@ -122,7 +122,7 @@ void TST_VAbstractPiece::EquidistantRemoveLoop_data()
 //---------------------------------------------------------------------------------------------------------------------
 void TST_VAbstractPiece::EquidistantRemoveLoop() const
 {
-    QFETCH(QVector<VSAPoint>, points);
+    QFETCH(QVector<SeamAllowancePoint>, points);
     QFETCH(qreal, width);
     QFETCH(QVector<QPointF>, ekvOrig);
 
@@ -133,432 +133,432 @@ void TST_VAbstractPiece::EquidistantRemoveLoop() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<VSAPoint> TST_VAbstractPiece::InputPointsCase1() const
+QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsCase1() const
 {
 
-    QVector<VSAPoint> points;
+    QVector<SeamAllowancePoint> points;
 
-    VSAPoint p = VSAPoint(30.0, 894.8030236220472);
+    SeamAllowancePoint p = SeamAllowancePoint(30.0, 894.8030236220472);
     p.SetSAAfter(0);
     p.SetSABefore(75.59055118110237);
     points.append(p);
 
-    p = VSAPoint(30.0, 39.999874015748034);
+    p = SeamAllowancePoint(30.0, 39.999874015748034);
     //////p.SetSAAfter(-1);
     p.SetSABefore(0);
     points.append(p);
 
-    p = VSAPoint(30.0, 39.999874015748034);
+    p = SeamAllowancePoint(30.0, 39.999874015748034);
     //////p.SetSAAfter(-1);
     p.SetSABefore(0);
     points.append(p);
 
-    p = VSAPoint(47.64159471849116, 39.94788491648882);
+    p = SeamAllowancePoint(47.64159471849116, 39.94788491648882);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(76.58589406160007, 39.22029871626823);
+    p = SeamAllowancePoint(76.58589406160007, 39.22029871626823);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(96.8510955083063, 38.214779786537555);
+    p = SeamAllowancePoint(96.8510955083063, 38.214779786537555);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(117.72526111352542, 36.63514697516433);
+    p = SeamAllowancePoint(117.72526111352542, 36.63514697516433);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(139.00155591749595, 34.36192982961571);
+    p = SeamAllowancePoint(139.00155591749595, 34.36192982961571);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(160.47314496045635, 31.27565789735886);
+    p = SeamAllowancePoint(160.47314496045635, 31.27565789735886);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(181.9331932826451, 27.25686072586095);
+    p = SeamAllowancePoint(181.9331932826451, 27.25686072586095);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(203.17486592430072, 22.18606786258914);
+    p = SeamAllowancePoint(203.17486592430072, 22.18606786258914);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(223.99132792566166, 15.943808855010598);
+    p = SeamAllowancePoint(223.99132792566166, 15.943808855010598);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(239.1756066691363, 10.378329140641144);
+    p = SeamAllowancePoint(239.1756066691363, 10.378329140641144);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(249.07102191481937, 6.266596479372291);
+    p = SeamAllowancePoint(249.07102191481937, 6.266596479372291);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(258.7437898355629, 1.7947951524770347);
+    p = SeamAllowancePoint(258.7437898355629, 1.7947951524770347);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(268.16805606139667, -3.0520086466112275);
+    p = SeamAllowancePoint(268.16805606139667, -3.0520086466112275);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(277.3179662223507, -8.2887487244591);
+    p = SeamAllowancePoint(277.3179662223507, -8.2887487244591);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(286.16766594845456, -13.93035888763319);
+    p = SeamAllowancePoint(286.16766594845456, -13.93035888763319);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(294.69130086973814, -19.991772942700095);
+    p = SeamAllowancePoint(294.69130086973814, -19.991772942700095);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(302.86301661623133, -26.48792469622643);
+    p = SeamAllowancePoint(302.86301661623133, -26.48792469622643);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(310.6569588179638, -33.433747954778795);
+    p = SeamAllowancePoint(310.6569588179638, -33.433747954778795);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(318.04727310496537, -40.84417652492378);
+    p = SeamAllowancePoint(318.04727310496537, -40.84417652492378);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(325.00810510726603, -48.73414421322801);
+    p = SeamAllowancePoint(325.00810510726603, -48.73414421322801);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(331.51360045489537, -57.118584826258086);
+    p = SeamAllowancePoint(331.51360045489537, -57.118584826258086);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(334.56692913385825, -61.522435695538036);
+    p = SeamAllowancePoint(334.56692913385825, -61.522435695538036);
     p.SetSAAfter(0);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(334.56692913385825, -61.522435695538036);
+    p = SeamAllowancePoint(334.56692913385825, -61.522435695538036);
     p.SetSAAfter(0);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(519.4465667350105, -36.01405338211436);
+    p = SeamAllowancePoint(519.4465667350105, -36.01405338211436);
     //////p.SetSAAfter(-1);
     p.SetSABefore(0);
     points.append(p);
 
-    p = VSAPoint(460.3937007874016, 342.36207874015753);
+    p = SeamAllowancePoint(460.3937007874016, 342.36207874015753);
     //////p.SetSAAfter(-1);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(620.5290071875437, -5.50631876178551);
+    p = SeamAllowancePoint(620.5290071875437, -5.50631876178551);
     p.SetSAAfter(0);
     //////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(944.2945933263424, 136.63905516701567);
+    p = SeamAllowancePoint(944.2945933263424, 136.63905516701567);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(0);
     points.append(p);
 
-    p = VSAPoint(944.2945933263424, 136.63905516701567);
+    p = SeamAllowancePoint(944.2945933263424, 136.63905516701567);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(0);
     points.append(p);
 
-    p = VSAPoint(937.525981220313, 150.5000566598672);
+    p = SeamAllowancePoint(937.525981220313, 150.5000566598672);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(924.7444201119979, 177.43472401968558);
+    p = SeamAllowancePoint(924.7444201119979, 177.43472401968558);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(912.8425448338431, 203.43742191080565);
+    p = SeamAllowancePoint(912.8425448338431, 203.43742191080565);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(901.7902332810357, 228.52240953585334);
+    p = SeamAllowancePoint(901.7902332810357, 228.52240953585334);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(891.5573633487625, 252.7039460974546);
+    p = SeamAllowancePoint(891.5573633487625, 252.7039460974546);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(882.1138129322104, 275.99629079823535);
+    p = SeamAllowancePoint(882.1138129322104, 275.99629079823535);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(869.2733175133695, 309.4054580978942);
+    p = SeamAllowancePoint(869.2733175133695, 309.4054580978942);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(854.7606685168345, 350.82610676604395);
+    p = SeamAllowancePoint(854.7606685168345, 350.82610676604395);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(842.8630996965477, 388.94665363817853);
+    p = SeamAllowancePoint(842.8630996965477, 388.94665363817853);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(833.3396342140044, 423.88117233530545);
+    p = SeamAllowancePoint(833.3396342140044, 423.88117233530545);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(825.9492952306994, 455.7437364784321);
+    p = SeamAllowancePoint(825.9492952306994, 455.7437364784321);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(820.4511059081283, 484.6484196885659);
+    p = SeamAllowancePoint(820.4511059081283, 484.6484196885659);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(816.6040894077858, 510.7092955867147);
+    p = SeamAllowancePoint(816.6040894077858, 510.7092955867147);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(814.1672688911672, 534.0404377938855);
+    p = SeamAllowancePoint(814.1672688911672, 534.0404377938855);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(812.8996675197675, 554.7559199310863);
+    p = SeamAllowancePoint(812.8996675197675, 554.7559199310863);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(812.5603084550817, 572.9698156193242);
+    p = SeamAllowancePoint(812.5603084550817, 572.9698156193242);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(812.9082148586052, 588.7961984796068);
+    p = SeamAllowancePoint(812.9082148586052, 588.7961984796068);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(814.1809574610598, 608.5715133604979);
+    p = SeamAllowancePoint(814.1809574610598, 608.5715133604979);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(815.1968503937007, 618.5825511811024);
+    p = SeamAllowancePoint(815.1968503937007, 618.5825511811024);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(815.1968503937007, 618.5825511811024);
+    p = SeamAllowancePoint(815.1968503937007, 618.5825511811024);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(815.7375399808675, 623.4475087782134);
+    p = SeamAllowancePoint(815.7375399808675, 623.4475087782134);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(817.2456173381056, 633.4974833757362);
+    p = SeamAllowancePoint(817.2456173381056, 633.4974833757362);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(819.2665464515061, 643.8914388413946);
+    p = SeamAllowancePoint(819.2665464515061, 643.8914388413946);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(821.8012316951542, 654.584830268716);
+    p = SeamAllowancePoint(821.8012316951542, 654.584830268716);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(824.8505774431355, 665.5331127512278);
+    p = SeamAllowancePoint(824.8505774431355, 665.5331127512278);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(828.4154880695357, 676.6917413824576);
+    p = SeamAllowancePoint(828.4154880695357, 676.6917413824576);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(832.4968679484402, 688.0161712559327);
+    p = SeamAllowancePoint(832.4968679484402, 688.0161712559327);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(837.0956214539344, 699.4618574651809);
+    p = SeamAllowancePoint(837.0956214539344, 699.4618574651809);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(842.212652960104, 710.9842551037295);
+    p = SeamAllowancePoint(842.212652960104, 710.9842551037295);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(847.8488668410344, 722.5388192651058);
+    p = SeamAllowancePoint(847.8488668410344, 722.5388192651058);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(854.0051674708111, 734.0810050428374);
+    p = SeamAllowancePoint(854.0051674708111, 734.0810050428374);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(860.6824592235198, 745.5662675304518);
+    p = SeamAllowancePoint(860.6824592235198, 745.5662675304518);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(867.8816464732456, 756.9500618214765);
+    p = SeamAllowancePoint(867.8816464732456, 756.9500618214765);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(875.6036335940746, 768.187843009439);
+    p = SeamAllowancePoint(875.6036335940746, 768.187843009439);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(883.8493249600917, 779.2350661878667);
+    p = SeamAllowancePoint(883.8493249600917, 779.2350661878667);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(892.6196249453828, 790.0471864502871);
+    p = SeamAllowancePoint(892.6196249453828, 790.0471864502871);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(901.9154379240335, 800.5796588902277);
+    p = SeamAllowancePoint(901.9154379240335, 800.5796588902277);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(911.7376682701291, 810.7879386012161);
+    p = SeamAllowancePoint(911.7376682701291, 810.7879386012161);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(922.0872203577552, 820.6274806767794);
+    p = SeamAllowancePoint(922.0872203577552, 820.6274806767794);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(932.9649985609971, 830.0537402104453);
+    p = SeamAllowancePoint(932.9649985609971, 830.0537402104453);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(944.3719072539405, 839.0221722957415);
+    p = SeamAllowancePoint(944.3719072539405, 839.0221722957415);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(956.3088508106711, 847.4882320261951);
+    p = SeamAllowancePoint(956.3088508106711, 847.4882320261951);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(968.776733605274, 855.4073744953336);
+    p = SeamAllowancePoint(968.776733605274, 855.4073744953336);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(981.7764600118351, 862.7350547966848);
+    p = SeamAllowancePoint(981.7764600118351, 862.7350547966848);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(995.3089344044396, 869.4267280237759);
+    p = SeamAllowancePoint(995.3089344044396, 869.4267280237759);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(1009.3750611571733, 875.4378492701345);
+    p = SeamAllowancePoint(1009.3750611571733, 875.4378492701345);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(1023.9757446441214, 880.7238736292878);
+    p = SeamAllowancePoint(1023.9757446441214, 880.7238736292878);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(1039.1118892393697, 885.2402561947638);
+    p = SeamAllowancePoint(1039.1118892393697, 885.2402561947638);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(1054.784399317004, 888.9424520600894);
+    p = SeamAllowancePoint(1054.784399317004, 888.9424520600894);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(1070.994179251109, 891.7859163187926);
+    p = SeamAllowancePoint(1070.994179251109, 891.7859163187926);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(1087.7421334157707, 893.7261040644007);
+    p = SeamAllowancePoint(1087.7421334157707, 893.7261040644007);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(1105.0291661850742, 894.7184703904409);
+    p = SeamAllowancePoint(1105.0291661850742, 894.7184703904409);
     p.SetSAAfter(188.97637795275591);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(1113.8976377952758, 894.8030236220472);
+    p = SeamAllowancePoint(1113.8976377952758, 894.8030236220472);
     p.SetSAAfter(0);
     p.SetSABefore(188.97637795275591);
     points.append(p);
 
-    p = VSAPoint(1113.8976377952758, 894.8030236220472);
+    p = SeamAllowancePoint(1113.8976377952758, 894.8030236220472);
     p.SetSAAfter(0);
     p.SetSABefore(188.97637795275591);
     points.append(p);
@@ -657,367 +657,367 @@ QVector<QPointF> TST_VAbstractPiece::OutputPointsCase1() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<VSAPoint> TST_VAbstractPiece::InputPointsCase2() const
+QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsCase2() const
 {
 
-    QVector<VSAPoint> points;
+    QVector<SeamAllowancePoint> points;
 
-    VSAPoint p = VSAPoint(30.0, 39.999874015748034);
+    SeamAllowancePoint p = SeamAllowancePoint(30.0, 39.999874015748034);
     ////p.SetSAAfter(-1);
     ////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(407.9527559055118, 39.999874015748034);
+    p = SeamAllowancePoint(407.9527559055118, 39.999874015748034);
     ////p.SetSAAfter(-1);
     ////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(407.9527559055118, 228.97625196850396);
+    p = SeamAllowancePoint(407.9527559055118, 228.97625196850396);
     ////p.SetSAAfter(-1);
     ////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(407.9527559055118, 228.97625196850396);
+    p = SeamAllowancePoint(407.9527559055118, 228.97625196850396);
     ////p.SetSAAfter(-1);
     ////p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(403.3769166670402, 231.4465511704684);
+    p = SeamAllowancePoint(403.3769166670402, 231.4465511704684);
     p.SetSAAfter(37.803178025111038);
     p.SetSABefore(37.803178025111038);
     points.append(p);
 
-    p = VSAPoint(394.1607984354165, 235.58132461572228);
+    p = SeamAllowancePoint(394.1607984354165, 235.58132461572228);
     p.SetSAAfter(37.818528535007879);
     p.SetSABefore(37.818528535007879);
     points.append(p);
 
-    p = VSAPoint(384.8923171505302, 238.7905285112787);
+    p = SeamAllowancePoint(384.8923171505302, 238.7905285112787);
     p.SetSAAfter(37.833434086432739);
     p.SetSABefore(37.833434086432739);
     points.append(p);
 
-    p = VSAPoint(375.59921131499664, 241.12018552459608);
+    p = SeamAllowancePoint(375.59921131499664, 241.12018552459608);
     p.SetSAAfter(37.847993627262561);
     p.SetSABefore(37.847993627262561);
     points.append(p);
 
-    p = VSAPoint(366.3092194314313, 242.61631832313287);
+    p = SeamAllowancePoint(366.3092194314313, 242.61631832313287);
     p.SetSAAfter(37.862293350550544);
     p.SetSABefore(37.862293350550544);
     points.append(p);
 
-    p = VSAPoint(357.0500800024495, 243.3249495743475);
+    p = SeamAllowancePoint(357.0500800024495, 243.3249495743475);
     p.SetSAAfter(37.876405426208798);
     p.SetSABefore(37.876405426208798);
     points.append(p);
 
-    p = VSAPoint(347.8495315306667, 243.2921019456984);
+    p = SeamAllowancePoint(347.8495315306667, 243.2921019456984);
     p.SetSAAfter(37.890387402651413);
     p.SetSABefore(37.890387402651413);
     points.append(p);
 
-    p = VSAPoint(338.73531251869827, 242.56379810464406);
+    p = SeamAllowancePoint(338.73531251869827, 242.56379810464406);
     p.SetSAAfter(37.904282247411182);
     p.SetSABefore(37.904282247411182);
     points.append(p);
 
-    p = VSAPoint(329.7351614691596, 241.18606071864286);
+    p = SeamAllowancePoint(329.7351614691596, 241.18606071864286);
     p.SetSAAfter(37.91811891950119);
     p.SetSABefore(37.91811891950119);
     points.append(p);
 
-    p = VSAPoint(320.876816884666, 239.20491245515328);
+    p = SeamAllowancePoint(320.876816884666, 239.20491245515328);
     p.SetSAAfter(37.931913327979281);
     p.SetSABefore(37.931913327979281);
     points.append(p);
 
-    p = VSAPoint(312.18801726783295, 236.6663759816338);
+    p = SeamAllowancePoint(312.18801726783295, 236.6663759816338);
     p.SetSAAfter(37.945669528152067);
     p.SetSABefore(37.945669528152067);
     points.append(p);
 
-    p = VSAPoint(303.6965011212758, 233.61647396554275);
+    p = SeamAllowancePoint(303.6965011212758, 233.61647396554275);
     p.SetSAAfter(37.959381027682795);
     p.SetSABefore(37.959381027682795);
     points.append(p);
 
-    p = VSAPoint(295.43000694760997, 230.10122907433865);
+    p = SeamAllowancePoint(295.43000694760997, 230.10122907433865);
     p.SetSAAfter(37.973032106608528);
     p.SetSABefore(37.973032106608528);
     points.append(p);
 
-    p = VSAPoint(287.41627324945074, 226.16666397547993);
+    p = SeamAllowancePoint(287.41627324945074, 226.16666397547993);
     p.SetSAAfter(37.986599088053786);
     p.SetSABefore(37.986599088053786);
     points.append(p);
 
-    p = VSAPoint(279.6830385294136, 221.85880133642502);
+    p = SeamAllowancePoint(279.6830385294136, 221.85880133642502);
     p.SetSAAfter(38.000051524725791);
     p.SetSABefore(38.000051524725791);
     points.append(p);
 
-    p = VSAPoint(272.2580412901139, 217.2236638246324);
+    p = SeamAllowancePoint(272.2580412901139, 217.2236638246324);
     p.SetSAAfter(38.013353288194111);
     p.SetSABefore(38.013353288194111);
     points.append(p);
 
-    p = VSAPoint(265.16902003416703, 212.3072741075605);
+    p = SeamAllowancePoint(265.16902003416703, 212.3072741075605);
     p.SetSAAfter(38.026463563868212);
     p.SetSABefore(38.026463563868212);
     points.append(p);
 
-    p = VSAPoint(258.44371326418843, 207.15565485266765);
+    p = SeamAllowancePoint(258.44371326418843, 207.15565485266765);
     p.SetSAAfter(38.03933776597485);
     p.SetSABefore(38.03933776597485);
     points.append(p);
 
-    p = VSAPoint(252.1098594827934, 201.81482872741242);
+    p = SeamAllowancePoint(252.1098594827934, 201.81482872741242);
     p.SetSAAfter(38.051928395587325);
     p.SetSABefore(38.051928395587325);
     points.append(p);
 
-    p = VSAPoint(246.19519719259745, 196.33081839925325);
+    p = SeamAllowancePoint(246.19519719259745, 196.33081839925325);
     p.SetSAAfter(38.064185872874937);
     p.SetSABefore(38.064185872874937);
     points.append(p);
 
-    p = VSAPoint(240.72746489621585, 190.74964653564848);
+    p = SeamAllowancePoint(240.72746489621585, 190.74964653564848);
     p.SetSAAfter(38.076059384395691);
     p.SetSABefore(38.076059384395691);
     points.append(p);
 
-    p = VSAPoint(235.73440109626404, 185.11733580405664);
+    p = SeamAllowancePoint(235.73440109626404, 185.11733580405664);
     p.SetSAAfter(38.087497800100167);
     p.SetSABefore(38.087497800100167);
     points.append(p);
 
-    p = VSAPoint(231.24374429535737, 179.47990887193612);
+    p = SeamAllowancePoint(231.24374429535737, 179.47990887193612);
     p.SetSAAfter(38.098450736467157);
     p.SetSABefore(38.098450736467157);
     points.append(p);
 
-    p = VSAPoint(227.2832329961113, 173.88338840674544);
+    p = SeamAllowancePoint(227.2832329961113, 173.88338840674544);
     p.SetSAAfter(38.108869877607624);
     p.SetSABefore(38.108869877607624);
     points.append(p);
 
-    p = VSAPoint(223.88060570114112, 168.37379707594295);
+    p = SeamAllowancePoint(223.88060570114112, 168.37379707594295);
     p.SetSAAfter(38.118710724548052);
     p.SetSABefore(38.118710724548052);
     points.append(p);
 
-    p = VSAPoint(221.06360091306237, 162.99715754698713);
+    p = SeamAllowancePoint(221.06360091306237, 162.99715754698713);
     p.SetSAAfter(38.127935039089436);
     p.SetSABefore(38.127935039089436);
     points.append(p);
 
-    p = VSAPoint(218.8599571344903, 157.79949248733644);
+    p = SeamAllowancePoint(218.8599571344903, 157.79949248733644);
     p.SetSAAfter(38.136514404353001);
     p.SetSABefore(38.136514404353001);
     points.append(p);
 
-    p = VSAPoint(217.2974128680403, 152.82682456444928);
+    p = SeamAllowancePoint(217.2974128680403, 152.82682456444928);
     p.SetSAAfter(38.144435562325597);
     p.SetSABefore(38.144435562325597);
     points.append(p);
 
-    p = VSAPoint(216.40370661632784, 148.12517644578412);
+    p = SeamAllowancePoint(216.40370661632784, 148.12517644578412);
     p.SetSAAfter(38.15170849722444);
     p.SetSABefore(38.15170849722444);
     points.append(p);
 
-    p = VSAPoint(216.20657688196826, 143.7405707987994);
+    p = SeamAllowancePoint(216.20657688196826, 143.7405707987994);
     p.SetSAAfter(38.158378424653918);
     p.SetSABefore(38.158378424653918);
     points.append(p);
 
-    p = VSAPoint(216.7337621675769, 139.71903029095353);
+    p = SeamAllowancePoint(216.7337621675769, 139.71903029095353);
     p.SetSAAfter(38.164542166418755);
     p.SetSABefore(38.164542166418755);
     points.append(p);
 
-    p = VSAPoint(218.01300097576927, 136.10657758970495);
+    p = SeamAllowancePoint(218.01300097576927, 136.10657758970495);
     p.SetSAAfter(38.17036598425517);
     p.SetSABefore(38.17036598425517);
     points.append(p);
 
-    p = VSAPoint(218.97637795275608, 134.48806299212646);
+    p = SeamAllowancePoint(218.97637795275608, 134.48806299212646);
     p.SetSAAfter(38.173228346456696);
     p.SetSABefore(38.173228346456696);
     points.append(p);
 
-    p = VSAPoint(218.97637795275608, 134.48806299212646);
+    p = SeamAllowancePoint(218.97637795275608, 134.48806299212646);
     p.SetSAAfter(38.173228346456696);
     p.SetSABefore(38.173228346456696);
     points.append(p);
 
-    p = VSAPoint(218.97637795275608, 134.48806299212646);
+    p = SeamAllowancePoint(218.97637795275608, 134.48806299212646);
     p.SetSAAfter(38.173228346456696);
     p.SetSABefore(38.173228346456696);
     points.append(p);
 
-    p = VSAPoint(217.1202289172026, 137.73030103616844);
+    p = SeamAllowancePoint(217.1202289172026, 137.73030103616844);
     p.SetSAAfter(38.167995197589178);
     p.SetSABefore(38.167995197589178);
     points.append(p);
 
-    p = VSAPoint(212.6973363405255, 143.4397404435662);
+    p = SeamAllowancePoint(212.6973363405255, 143.4397404435662);
     p.SetSAAfter(38.157878743288215);
     p.SetSABefore(38.157878743288215);
     points.append(p);
 
-    p = VSAPoint(207.48487786706698, 148.24866810991395);
+    p = SeamAllowancePoint(207.48487786706698, 148.24866810991395);
     p.SetSAAfter(38.147944713012919);
     p.SetSABefore(38.147944713012919);
     points.append(p);
 
-    p = VSAPoint(201.55301739671896, 152.18989767496004);
+    p = SeamAllowancePoint(201.55301739671896, 152.18989767496004);
     p.SetSAAfter(38.137968823998783);
     p.SetSABefore(38.137968823998783);
     points.append(p);
 
-    p = VSAPoint(194.9719188293733, 155.29624277845284);
+    p = SeamAllowancePoint(194.9719188293733, 155.29624277845284);
     p.SetSAAfter(38.127775030254007);
     p.SetSABefore(38.127775030254007);
     points.append(p);
 
-    p = VSAPoint(187.81174606492203, 157.6005170601407);
+    p = SeamAllowancePoint(187.81174606492203, 157.6005170601407);
     p.SetSAAfter(38.117238836985599);
     p.SetSABefore(38.117238836985599);
     points.append(p);
 
-    p = VSAPoint(180.14266300325704, 159.13553415977202);
+    p = SeamAllowancePoint(180.14266300325704, 159.13553415977202);
     p.SetSAAfter(38.106283289982827);
     p.SetSABefore(38.106283289982827);
     points.append(p);
 
-    p = VSAPoint(172.0348335442702, 159.93410771709506);
+    p = SeamAllowancePoint(172.0348335442702, 159.93410771709506);
     p.SetSAAfter(38.094871286509886);
     p.SetSABefore(38.094871286509886);
     points.append(p);
 
-    p = VSAPoint(163.55842158785353, 160.02905137185826);
+    p = SeamAllowancePoint(163.55842158785353, 160.02905137185826);
     p.SetSAAfter(38.082997200945435);
     p.SetSABefore(38.082997200945435);
     points.append(p);
 
-    p = VSAPoint(154.78359103389897, 159.4531787638099);
+    p = SeamAllowancePoint(154.78359103389897, 159.4531787638099);
     p.SetSAAfter(38.070679409075119);
     p.SetSABefore(38.070679409075119);
     points.append(p);
 
-    p = VSAPoint(145.78050578229832, 158.23930353269841);
+    p = SeamAllowancePoint(145.78050578229832, 158.23930353269841);
     p.SetSAAfter(38.057954219352141);
     p.SetSABefore(38.057954219352141);
     points.append(p);
 
-    p = VSAPoint(136.61932973294367, 156.42023931827214);
+    p = SeamAllowancePoint(136.61932973294367, 156.42023931827214);
     p.SetSAAfter(38.044871166362007);
     p.SetSABefore(38.044871166362007);
     points.append(p);
 
-    p = VSAPoint(127.37022678572683, 154.0287997602794);
+    p = SeamAllowancePoint(127.37022678572683, 154.0287997602794);
     p.SetSAAfter(38.031489421641503);
     p.SetSABefore(38.031489421641503);
     points.append(p);
 
-    p = VSAPoint(118.10336084053982, 151.09779849846862);
+    p = SeamAllowancePoint(118.10336084053982, 151.09779849846862);
     p.SetSAAfter(38.017875048227786);
     p.SetSABefore(38.017875048227786);
     points.append(p);
 
-    p = VSAPoint(108.88889579727454, 147.66004917258803);
+    p = SeamAllowancePoint(108.88889579727454, 147.66004917258803);
     p.SetSAAfter(38.00409885919936);
     p.SetSABefore(38.00409885919936);
     points.append(p);
 
-    p = VSAPoint(99.79699555582292, 143.7483654223861);
+    p = SeamAllowancePoint(99.79699555582292, 143.7483654223861);
     p.SetSAAfter(37.990234686678903);
     p.SetSABefore(37.990234686678903);
     points.append(p);
 
-    p = VSAPoint(90.8978240160769, 139.3955608876111);
+    p = SeamAllowancePoint(90.8978240160769, 139.3955608876111);
     p.SetSAAfter(37.976357907221328);
     p.SetSABefore(37.976357907221328);
     points.append(p);
 
-    p = VSAPoint(82.26154507792839, 134.63444920801146);
+    p = SeamAllowancePoint(82.26154507792839, 134.63444920801146);
     p.SetSAAfter(37.962544096747962);
     p.SetSABefore(37.962544096747962);
     points.append(p);
 
-    p = VSAPoint(73.95832264126932, 129.49784402333552);
+    p = SeamAllowancePoint(73.95832264126932, 129.49784402333552);
     p.SetSAAfter(37.94886770258455);
     p.SetSABefore(37.94886770258455);
     points.append(p);
 
-    p = VSAPoint(66.05832060599164, 124.01855897333157);
+    p = SeamAllowancePoint(66.05832060599164, 124.01855897333157);
     p.SetSAAfter(37.935400622146403);
     p.SetSABefore(37.935400622146403);
     points.append(p);
 
-    p = VSAPoint(58.63170287198729, 118.22940769774803);
+    p = SeamAllowancePoint(58.63170287198729, 118.22940769774803);
     p.SetSAAfter(37.922210567500777);
     p.SetSABefore(37.922210567500777);
     points.append(p);
 
-    p = VSAPoint(51.74863333914817, 112.16320383633325);
+    p = SeamAllowancePoint(51.74863333914817, 112.16320383633325);
     p.SetSAAfter(37.90935907207141);
     p.SetSABefore(37.90935907207141);
     points.append(p);
 
-    p = VSAPoint(45.47927590736623, 105.85276102883554);
+    p = SeamAllowancePoint(45.47927590736623, 105.85276102883554);
     p.SetSAAfter(37.896898960241472);
     p.SetSABefore(37.896898960241472);
     points.append(p);
 
-    p = VSAPoint(39.8937944765334, 99.33089291500332);
+    p = SeamAllowancePoint(39.8937944765334, 99.33089291500332);
     p.SetSAAfter(37.884871055952601);
     p.SetSABefore(37.884871055952601);
     points.append(p);
 
-    p = VSAPoint(35.062352946541615, 92.63041313458488);
+    p = SeamAllowancePoint(35.062352946541615, 92.63041313458488);
     p.SetSAAfter(37.873299866072891);
     p.SetSABefore(37.873299866072891);
     points.append(p);
 
-    p = VSAPoint(31.055115217282804, 85.78413532732864);
+    p = SeamAllowancePoint(31.055115217282804, 85.78413532732864);
     p.SetSAAfter(37.86218797621639);
     p.SetSABefore(37.86218797621639);
     points.append(p);
 
-    p = VSAPoint(27.94224518864889, 78.82487313298289);
+    p = SeamAllowancePoint(27.94224518864889, 78.82487313298289);
     p.SetSAAfter(37.851509027526909);
     p.SetSABefore(37.851509027526909);
     points.append(p);
 
-    p = VSAPoint(25.793906760531815, 71.78544019129603);
+    p = SeamAllowancePoint(25.793906760531815, 71.78544019129603);
     p.SetSAAfter(37.841199561247805);
     p.SetSABefore(37.841199561247805);
     points.append(p);
 
-    p = VSAPoint(24.68026383282351, 64.69865014201642);
+    p = SeamAllowancePoint(24.68026383282351, 64.69865014201642);
     p.SetSAAfter(37.831150915024352);
     p.SetSABefore(37.831150915024352);
     points.append(p);
 
-    p = VSAPoint(24.671480305415898, 57.597316624892386);
+    p = SeamAllowancePoint(24.671480305415898, 57.597316624892386);
     p.SetSAAfter(37.821203708860601);
     p.SetSABefore(37.821203708860601);
     points.append(p);
 
-    p = VSAPoint(25.837720078200917, 50.514253279672296);
+    p = SeamAllowancePoint(25.837720078200917, 50.514253279672296);
     p.SetSAAfter(37.811148513024627);
     p.SetSABefore(37.811148513024627);
     points.append(p);
 
-    p = VSAPoint(28.2491470510705, 43.48227374610451);
+    p = SeamAllowancePoint(28.2491470510705, 43.48227374610451);
     p.SetSAAfter(37.800735391906976);
     p.SetSABefore(37.800735391906976);
     points.append(p);
 
-    p = VSAPoint(30.0, 39.999874015748034);
+    p = SeamAllowancePoint(30.0, 39.999874015748034);
     ////p.SetSAAfter(-1);
     ////p.SetSABefore(-1);
     points.append(p);
@@ -1090,671 +1090,671 @@ QVector<QPointF> TST_VAbstractPiece::OutputPointsCase2() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<VSAPoint> TST_VAbstractPiece::InputPointsCase3() const
+QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsCase3() const
 {
-    QVector<VSAPoint> points;
+    QVector<SeamAllowancePoint> points;
 
-    VSAPoint p = VSAPoint(30.0, 39.999874015748034);
+    SeamAllowancePoint p = SeamAllowancePoint(30.0, 39.999874015748034);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(407.9527559055118, 39.999874015748034);
+    p = SeamAllowancePoint(407.9527559055118, 39.999874015748034);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(407.9527559055118, 228.97625196850396);
+    p = SeamAllowancePoint(407.9527559055118, 228.97625196850396);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(407.9527559055118, 228.97625196850396);
+    p = SeamAllowancePoint(407.9527559055118, 228.97625196850396);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(406.33770829042953, 232.38064611626584);
+    p = SeamAllowancePoint(406.33770829042953, 232.38064611626584);
     p.SetSAAfter(37.381380099110068);
     p.SetSABefore(37.381380099110068);
     points.append(p);
 
-    p = VSAPoint(402.870644734503, 238.5569810399819);
+    p = SeamAllowancePoint(402.870644734503, 238.5569810399819);
     p.SetSAAfter(36.603370955765051);
     p.SetSABefore(36.603370955765051);
     points.append(p);
 
-    p = VSAPoint(399.14591058639644, 243.99520937172397);
+    p = SeamAllowancePoint(399.14591058639644, 243.99520937172397);
     p.SetSAAfter(35.879339211886929);
     p.SetSABefore(35.879339211886929);
     points.append(p);
 
-    p = VSAPoint(395.19316295581496, 248.71848383837556);
+    p = SeamAllowancePoint(395.19316295581496, 248.71848383837556);
     p.SetSAAfter(35.202813177025682);
     p.SetSABefore(35.202813177025682);
     points.append(p);
 
-    p = VSAPoint(391.04205895246355, 252.7499571668203);
+    p = SeamAllowancePoint(391.04205895246355, 252.7499571668203);
     p.SetSAAfter(34.56719781657663);
     p.SetSABefore(34.56719781657663);
     points.append(p);
 
-    p = VSAPoint(386.72225568604733, 256.1127820839417);
+    p = SeamAllowancePoint(386.72225568604733, 256.1127820839417);
     p.SetSAAfter(33.965870279175178);
     p.SetSABefore(33.965870279175178);
     points.append(p);
 
-    p = VSAPoint(382.2634102662714, 258.8301113166233);
+    p = SeamAllowancePoint(382.2634102662714, 258.8301113166233);
     p.SetSAAfter(33.392312673818843);
     p.SetSABefore(33.392312673818843);
     points.append(p);
 
-    p = VSAPoint(377.6951798028408, 260.9250975917487);
+    p = SeamAllowancePoint(377.6951798028408, 260.9250975917487);
     p.SetSAAfter(32.840273714828662);
     p.SetSABefore(32.840273714828662);
     points.append(p);
 
-    p = VSAPoint(373.0472214054606, 262.4208936362013);
+    p = SeamAllowancePoint(373.0472214054606, 262.4208936362013);
     p.SetSAAfter(32.303940879158468);
     p.SetSABefore(32.303940879158468);
     points.append(p);
 
-    p = VSAPoint(368.34919218383584, 263.34065217686486);
+    p = SeamAllowancePoint(368.34919218383584, 263.34065217686486);
     p.SetSAAfter(31.778098176885351);
     p.SetSABefore(31.778098176885351);
     points.append(p);
 
-    p = VSAPoint(363.6307492476716, 263.7075259406228);
+    p = SeamAllowancePoint(363.6307492476716, 263.7075259406228);
     p.SetSAAfter(31.25824538248542);
     p.SetSABefore(31.25824538248542);
     points.append(p);
 
-    p = VSAPoint(358.921549706673, 263.5446676543588);
+    p = SeamAllowancePoint(358.921549706673, 263.5446676543588);
     p.SetSAAfter(30.740662987580134);
     p.SetSABefore(30.740662987580134);
     points.append(p);
 
-    p = VSAPoint(354.251250670545, 262.87523004495625);
+    p = SeamAllowancePoint(354.251250670545, 262.87523004495625);
     p.SetSAAfter(30.222419479548449);
     p.SetSABefore(30.222419479548449);
     points.append(p);
 
-    p = VSAPoint(349.6495092489928, 261.72236583929885);
+    p = SeamAllowancePoint(349.6495092489928, 261.72236583929885);
     p.SetSAAfter(29.701328542831337);
     p.SetSABefore(29.701328542831337);
     points.append(p);
 
-    p = VSAPoint(345.1459825517213, 260.1092277642701);
+    p = SeamAllowancePoint(345.1459825517213, 260.1092277642701);
     p.SetSAAfter(29.175869934623716);
     p.SetSABefore(29.175869934623716);
     points.append(p);
 
-    p = VSAPoint(340.7703276884358, 258.0589685467535);
+    p = SeamAllowancePoint(340.7703276884358, 258.0589685467535);
     p.SetSAAfter(28.645088729374258);
     p.SetSABefore(28.645088729374258);
     points.append(p);
 
-    p = VSAPoint(336.5522017688411, 255.59474091363262);
+    p = SeamAllowancePoint(336.5522017688411, 255.59474091363262);
     p.SetSAAfter(28.108485094878901);
     p.SetSABefore(28.108485094878901);
     points.append(p);
 
-    p = VSAPoint(332.52126190264244, 252.73969759179104);
+    p = SeamAllowancePoint(332.52126190264244, 252.73969759179104);
     p.SetSAAfter(27.565902911541084);
     p.SetSABefore(27.565902911541084);
     points.append(p);
 
-    p = VSAPoint(328.7071651995449, 249.51699130811238);
+    p = SeamAllowancePoint(328.7071651995449, 249.51699130811238);
     p.SetSAAfter(27.017421899167815);
     p.SetSABefore(27.017421899167815);
     points.append(p);
 
-    p = VSAPoint(325.1395687692534, 245.94977478948007);
+    p = SeamAllowancePoint(325.1395687692534, 245.94977478948007);
     p.SetSAAfter(26.463255170503039);
     p.SetSABefore(26.463255170503039);
     points.append(p);
 
-    p = VSAPoint(321.84812972147313, 242.06120076277773);
+    p = SeamAllowancePoint(321.84812972147313, 242.06120076277773);
     p.SetSAAfter(25.903652411137717);
     p.SetSABefore(25.903652411137717);
     points.append(p);
 
-    p = VSAPoint(318.86250516590917, 237.87442195488893);
+    p = SeamAllowancePoint(318.86250516590917, 237.87442195488893);
     p.SetSAAfter(25.338808050829666);
     p.SetSABefore(25.338808050829666);
     points.append(p);
 
-    p = VSAPoint(316.2123522122665, 233.4125910926972);
+    p = SeamAllowancePoint(316.2123522122665, 233.4125910926972);
     p.SetSAAfter(24.768773642603289);
     p.SetSABefore(24.768773642603289);
     points.append(p);
 
-    p = VSAPoint(313.9273279702502, 228.69886090308609);
+    p = SeamAllowancePoint(313.9273279702502, 228.69886090308609);
     p.SetSAAfter(24.19337403613525);
     p.SetSABefore(24.19337403613525);
     points.append(p);
 
-    p = VSAPoint(312.03708954956545, 223.75638411293914);
+    p = SeamAllowancePoint(312.03708954956545, 223.75638411293914);
     p.SetSAAfter(23.612127698143627);
     p.SetSABefore(23.612127698143627);
     points.append(p);
 
-    p = VSAPoint(310.57129405991714, 218.60831344913998);
+    p = SeamAllowancePoint(310.57129405991714, 218.60831344913998);
     p.SetSAAfter(23.024172586797707);
     p.SetSABefore(23.024172586797707);
     points.append(p);
 
-    p = VSAPoint(309.55959861101053, 213.27780163857204);
+    p = SeamAllowancePoint(309.55959861101053, 213.27780163857204);
     p.SetSAAfter(22.42820018785644);
     p.SetSABefore(22.42820018785644);
     points.append(p);
 
-    p = VSAPoint(309.03166031255046, 207.788001408119);
+    p = SeamAllowancePoint(309.03166031255046, 207.788001408119);
     p.SetSAAfter(21.822401444747854);
     p.SetSABefore(21.822401444747854);
     points.append(p);
 
-    p = VSAPoint(309.01713627424215, 202.1620654846643);
+    p = SeamAllowancePoint(309.01713627424215, 202.1620654846643);
     p.SetSAAfter(21.204429040574471);
     p.SetSABefore(21.204429040574471);
     points.append(p);
 
-    p = VSAPoint(309.5456836057906, 196.42314659509157);
+    p = SeamAllowancePoint(309.5456836057906, 196.42314659509157);
     p.SetSAAfter(20.57138043760828);
     p.SetSABefore(20.57138043760828);
     points.append(p);
 
-    p = VSAPoint(310.64695941690104, 190.59439746628436);
+    p = SeamAllowancePoint(310.64695941690104, 190.59439746628436);
     p.SetSAAfter(19.919804940549692);
     p.SetSABefore(19.919804940549692);
     points.append(p);
 
-    p = VSAPoint(312.35062081727835, 184.6989708251262);
+    p = SeamAllowancePoint(312.35062081727835, 184.6989708251262);
     p.SetSAAfter(19.24573577317911);
     p.SetSABefore(19.24573577317911);
     points.append(p);
 
-    p = VSAPoint(313.4645669291343, 181.73215748031558);
+    p = SeamAllowancePoint(313.4645669291343, 181.73215748031558);
     p.SetSAAfter(18.897637795275593);
     p.SetSABefore(18.897637795275593);
     points.append(p);
 
-    p = VSAPoint(313.4645669291343, 181.73215748031558);
+    p = SeamAllowancePoint(313.4645669291343, 181.73215748031558);
     p.SetSAAfter(18.897637795275593);
     p.SetSABefore(18.897637795275593);
     points.append(p);
 
-    p = VSAPoint(313.4645669291343, 181.73215748031558);
+    p = SeamAllowancePoint(313.4645669291343, 181.73215748031558);
     p.SetSAAfter(18.897637795275593);
     p.SetSABefore(18.897637795275593);
     points.append(p);
 
-    p = VSAPoint(313.4645669291343, 181.73215748031558);
+    p = SeamAllowancePoint(313.4645669291343, 181.73215748031558);
     p.SetSAAfter(18.897637795275593);
     p.SetSABefore(18.897637795275593);
     points.append(p);
 
-    p = VSAPoint(313.4645669291343, 181.73215748031558);
+    p = SeamAllowancePoint(313.4645669291343, 181.73215748031558);
     p.SetSAAfter(18.897637795275593);
     p.SetSABefore(18.897637795275593);
     points.append(p);
 
-    p = VSAPoint(313.4645669291343, 181.73215748031558);
+    p = SeamAllowancePoint(313.4645669291343, 181.73215748031558);
     p.SetSAAfter(18.897637795275593);
     p.SetSABefore(18.897637795275593);
     points.append(p);
 
-    p = VSAPoint(313.4645669291343, 181.73215748031558);
+    p = SeamAllowancePoint(313.4645669291343, 181.73215748031558);
     p.SetSAAfter(18.897637795275593);
     p.SetSABefore(18.897637795275593);
     points.append(p);
 
-    p = VSAPoint(315.0998723566189, 177.44976641127198);
+    p = SeamAllowancePoint(315.0998723566189, 177.44976641127198);
     p.SetSAAfter(19.446824166328746);
     p.SetSABefore(19.446824166328746);
     points.append(p);
 
-    p = VSAPoint(317.6731184586346, 169.45847196043132);
+    p = SeamAllowancePoint(317.6731184586346, 169.45847196043132);
     p.SetSAAfter(20.452631980165769);
     p.SetSABefore(20.452631980165769);
     points.append(p);
 
-    p = VSAPoint(319.4487651643931, 162.13409856250706);
+    p = SeamAllowancePoint(319.4487651643931, 162.13409856250706);
     p.SetSAAfter(21.355546141728666);
     p.SetSABefore(21.355546141728666);
     points.append(p);
 
-    p = VSAPoint(320.470410593102, 155.4530193599665);
+    p = SeamAllowancePoint(320.470410593102, 155.4530193599665);
     p.SetSAAfter(22.165276674578177);
     p.SetSABefore(22.165276674578177);
     points.append(p);
 
-    p = VSAPoint(320.78165286396893, 149.39160749527696);
+    p = SeamAllowancePoint(320.78165286396893, 149.39160749527696);
     p.SetSAAfter(22.892420458564697);
     p.SetSABefore(22.892420458564697);
     points.append(p);
 
-    p = VSAPoint(320.4260900962016, 143.92623611090573);
+    p = SeamAllowancePoint(320.4260900962016, 143.92623611090573);
     p.SetSAAfter(23.548583135932272);
     p.SetSABefore(23.548583135932272);
     points.append(p);
 
-    p = VSAPoint(319.44732040900783, 139.03327834932014);
+    p = SeamAllowancePoint(319.44732040900783, 139.03327834932014);
     p.SetSAAfter(24.146396878545747);
     p.SetSABefore(24.146396878545747);
     points.append(p);
 
-    p = VSAPoint(317.88894192159495, 134.68910735298743);
+    p = SeamAllowancePoint(317.88894192159495, 134.68910735298743);
     p.SetSAAfter(24.699324443869902);
     p.SetSABefore(24.699324443869902);
     points.append(p);
 
-    p = VSAPoint(315.79455275317093, 130.870096264375);
+    p = SeamAllowancePoint(315.79455275317093, 130.870096264375);
     p.SetSAAfter(25.221147659605332);
     p.SetSABefore(25.221147659605332);
     points.append(p);
 
-    p = VSAPoint(313.2077510229431, 127.55261822595011);
+    p = SeamAllowancePoint(313.2077510229431, 127.55261822595011);
     p.SetSAAfter(25.725143604791594);
     p.SetSABefore(25.725143604791594);
     points.append(p);
 
-    p = VSAPoint(310.1721348501194, 124.71304638018006);
+    p = SeamAllowancePoint(310.1721348501194, 124.71304638018006);
     p.SetSAAfter(26.223136485113741);
     p.SetSABefore(26.223136485113741);
     points.append(p);
 
-    p = VSAPoint(306.73130235390744, 122.32775386953216);
+    p = SeamAllowancePoint(306.73130235390744, 122.32775386953216);
     p.SetSAAfter(26.724730852906816);
     p.SetSABefore(26.724730852906816);
     points.append(p);
 
-    p = VSAPoint(302.9288516535148, 120.3731138364737);
+    p = SeamAllowancePoint(302.9288516535148, 120.3731138364737);
     p.SetSAAfter(27.236947738833074);
     p.SetSABefore(27.236947738833074);
     points.append(p);
 
-    p = VSAPoint(298.80838086814924, 118.82549942347202);
+    p = SeamAllowancePoint(298.80838086814924, 118.82549942347202);
     p.SetSAAfter(27.764271724915222);
     p.SetSABefore(27.764271724915222);
     points.append(p);
 
-    p = VSAPoint(294.41348811701835, 117.66128377299438);
+    p = SeamAllowancePoint(294.41348811701835, 117.66128377299438);
     p.SetSAAfter(28.308962477298437);
     p.SetSABefore(28.308962477298437);
     points.append(p);
 
-    p = VSAPoint(289.7877715193297, 116.85684002750813);
+    p = SeamAllowancePoint(289.7877715193297, 116.85684002750813);
     p.SetSAAfter(28.871463995346204);
     p.SetSABefore(28.871463995346204);
     points.append(p);
 
-    p = VSAPoint(282.5270013648352, 116.23547488513984);
+    p = SeamAllowancePoint(282.5270013648352, 116.23547488513984);
     p.SetSAAfter(29.744519639698659);
     p.SetSABefore(29.744519639698659);
     points.append(p);
 
-    p = VSAPoint(272.4138025206039, 116.50169653372318);
+    p = SeamAllowancePoint(272.4138025206039, 116.50169653372318);
     p.SetSAAfter(30.956550523683344);
     p.SetSABefore(30.956550523683344);
     points.append(p);
 
-    p = VSAPoint(262.16207443587984, 117.7817223666835);
+    p = SeamAllowancePoint(262.16207443587984, 117.7817223666835);
     p.SetSAAfter(32.194294958045219);
     p.SetSABefore(32.194294958045219);
     points.append(p);
 
-    p = VSAPoint(252.12060206432426, 119.88653752375922);
+    p = SeamAllowancePoint(252.12060206432426, 119.88653752375922);
     p.SetSAAfter(33.423457501774081);
     p.SetSABefore(33.423457501774081);
     points.append(p);
 
-    p = VSAPoint(242.63817035959835, 122.62712714468876);
+    p = SeamAllowancePoint(242.63817035959835, 122.62712714468876);
     p.SetSAAfter(34.605995611034089);
     p.SetSABefore(34.605995611034089);
     points.append(p);
 
-    p = VSAPoint(234.06356427536352, 125.81447636921058);
+    p = SeamAllowancePoint(234.06356427536352, 125.81447636921058);
     p.SetSAAfter(35.70195258686585);
     p.SetSABefore(35.70195258686585);
     points.append(p);
 
-    p = VSAPoint(226.74556876528095, 129.25957033706317);
+    p = SeamAllowancePoint(226.74556876528095, 129.25957033706317);
     p.SetSAAfter(36.670979260736637);
     p.SetSABefore(36.670979260736637);
     points.append(p);
 
-    p = VSAPoint(221.03296878301197, 132.77339418798488);
+    p = SeamAllowancePoint(221.03296878301197, 132.77339418798488);
     p.SetSAAfter(37.474483357433364);
     p.SetSABefore(37.474483357433364);
     points.append(p);
 
-    p = VSAPoint(218.97637795275608, 134.48806299212646);
+    p = SeamAllowancePoint(218.97637795275608, 134.48806299212646);
     p.SetSAAfter(37.795275590551185);
     p.SetSABefore(37.795275590551185);
     points.append(p);
 
-    p = VSAPoint(218.97637795275608, 134.48806299212646);
+    p = SeamAllowancePoint(218.97637795275608, 134.48806299212646);
     p.SetSAAfter(37.795275590551185);
     p.SetSABefore(37.795275590551185);
     points.append(p);
 
-    p = VSAPoint(218.97637795275608, 134.48806299212646);
+    p = SeamAllowancePoint(218.97637795275608, 134.48806299212646);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(218.97637795275608, 134.48806299212646);
+    p = SeamAllowancePoint(218.97637795275608, 134.48806299212646);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(218.97637795275608, 134.48806299212646);
+    p = SeamAllowancePoint(218.97637795275608, 134.48806299212646);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(218.97637795275608, 134.48806299212646);
+    p = SeamAllowancePoint(218.97637795275608, 134.48806299212646);
     p.SetSAAfter(37.795275590551185);
     p.SetSABefore(37.795275590551185);
     points.append(p);
 
-    p = VSAPoint(218.97637795275608, 134.48806299212646);
+    p = SeamAllowancePoint(218.97637795275608, 134.48806299212646);
     p.SetSAAfter(37.795275590551185);
     p.SetSABefore(37.795275590551185);
     points.append(p);
 
-    p = VSAPoint(214.11186185064025, 138.80795875858354);
+    p = SeamAllowancePoint(214.11186185064025, 138.80795875858354);
     p.SetSAAfter(36.653502722568419);
     p.SetSABefore(36.653502722568419);
     points.append(p);
 
-    p = VSAPoint(205.18536816471078, 146.02812964687715);
+    p = SeamAllowancePoint(205.18536816471078, 146.02812964687715);
     p.SetSAAfter(34.638570080274732);
     p.SetSABefore(34.638570080274732);
     points.append(p);
 
-    p = VSAPoint(197.17461091794695, 151.63888788459965);
+    p = SeamAllowancePoint(197.17461091794695, 151.63888788459965);
     p.SetSAAfter(32.922124316374287);
     p.SetSABefore(32.922124316374287);
     points.append(p);
 
-    p = VSAPoint(190.02702368501878, 155.74482471949955);
+    p = SeamAllowancePoint(190.02702368501878, 155.74482471949955);
     p.SetSAAfter(31.475467886854414);
     p.SetSABefore(31.475467886854414);
     points.append(p);
 
-    p = VSAPoint(183.69004004059613, 158.45053139932526);
+    p = SeamAllowancePoint(183.69004004059613, 158.45053139932526);
     p.SetSAAfter(30.266183845834068);
     p.SetSABefore(30.266183845834068);
     points.append(p);
 
-    p = VSAPoint(178.11109355934906, 159.86059917182507);
+    p = SeamAllowancePoint(178.11109355934906, 159.86059917182507);
     p.SetSAAfter(29.256280085066027);
     p.SetSABefore(29.256280085066027);
     points.append(p);
 
-    p = VSAPoint(173.23761781594754, 160.07961928474754);
+    p = SeamAllowancePoint(173.23761781594754, 160.07961928474754);
     p.SetSAAfter(28.400113855274189);
     p.SetSABefore(28.400113855274189);
     points.append(p);
 
-    p = VSAPoint(169.01704638506152, 159.21218298584108);
+    p = SeamAllowancePoint(169.01704638506152, 159.21218298584108);
     p.SetSAAfter(27.643914239586497);
     p.SetSABefore(27.643914239586497);
     points.append(p);
 
-    p = VSAPoint(165.396812841361, 157.36288152285397);
+    p = SeamAllowancePoint(165.396812841361, 157.36288152285397);
     p.SetSAAfter(26.930461655777069);
     p.SetSABefore(26.930461655777069);
     points.append(p);
 
-    p = VSAPoint(162.32435075951594, 154.63630614353477);
+    p = SeamAllowancePoint(162.32435075951594, 154.63630614353477);
     p.SetSAAfter(26.20953145720112);
     p.SetSABefore(26.20953145720112);
     points.append(p);
 
-    p = VSAPoint(159.7470937141963, 151.13704809563185);
+    p = SeamAllowancePoint(159.7470937141963, 151.13704809563185);
     p.SetSAAfter(25.44681460859611);
     p.SetSABefore(25.44681460859611);
     points.append(p);
 
-    p = VSAPoint(157.61247528007215, 146.96969862689363);
+    p = SeamAllowancePoint(157.61247528007215, 146.96969862689363);
     p.SetSAAfter(24.625073374270738);
     p.SetSABefore(24.625073374270738);
     points.append(p);
 
-    p = VSAPoint(155.86792903181333, 142.23884898506853);
+    p = SeamAllowancePoint(155.86792903181333, 142.23884898506853);
     p.SetSAAfter(23.740148635253075);
     p.SetSABefore(23.740148635253075);
     points.append(p);
 
-    p = VSAPoint(154.46088854408993, 137.049090417905);
+    p = SeamAllowancePoint(154.46088854408993, 137.049090417905);
     p.SetSAAfter(22.796456338245449);
     p.SetSABefore(22.796456338245449);
     points.append(p);
 
-    p = VSAPoint(152.84240084594785, 128.65747053734566);
+    p = SeamAllowancePoint(152.84240084594785, 128.65747053734566);
     p.SetSAAfter(21.296571460906105);
     p.SetSABefore(21.296571460906105);
     points.append(p);
 
-    p = VSAPoint(150.86615884353574, 110.74781740906135);
+    p = SeamAllowancePoint(150.86615884353574, 110.74781740906135);
     p.SetSAAfter(18.134320368513631);
     p.SetSABefore(18.134320368513631);
     points.append(p);
 
-    p = VSAPoint(149.37382105332603, 94.00159365355543);
+    p = SeamAllowancePoint(149.37382105332603, 94.00159365355543);
     p.SetSAAfter(15.183683963183684);
     p.SetSABefore(15.183683963183684);
     points.append(p);
 
-    p = VSAPoint(147.90386548781373, 84.77492816049366);
+    p = SeamAllowancePoint(147.90386548781373, 84.77492816049366);
     p.SetSAAfter(13.543967770207646);
     p.SetSABefore(13.543967770207646);
     points.append(p);
 
-    p = VSAPoint(146.22482573007983, 79.58685396281504);
+    p = SeamAllowancePoint(146.22482573007983, 79.58685396281504);
     p.SetSAAfter(12.586956110891197);
     p.SetSABefore(12.586956110891197);
     points.append(p);
 
-    p = VSAPoint(144.767673193039, 77.0483056159666);
+    p = SeamAllowancePoint(144.767673193039, 77.0483056159666);
     p.SetSAAfter(12.073257080584666);
     p.SetSABefore(12.073257080584666);
     points.append(p);
 
-    p = VSAPoint(142.9646628872432, 75.4105345645091);
+    p = SeamAllowancePoint(142.9646628872432, 75.4105345645091);
     p.SetSAAfter(11.645769545279848);
     p.SetSABefore(11.645769545279848);
     points.append(p);
 
-    p = VSAPoint(140.76322838736246, 74.77813205619103);
+    p = SeamAllowancePoint(140.76322838736246, 74.77813205619103);
     p.SetSAAfter(11.243788560650403);
     p.SetSABefore(11.243788560650403);
     points.append(p);
 
-    p = VSAPoint(138.11080326806675, 75.25568933876076);
+    p = SeamAllowancePoint(138.11080326806675, 75.25568933876076);
     p.SetSAAfter(10.77079881073082);
     p.SetSABefore(10.77079881073082);
     points.append(p);
 
-    p = VSAPoint(134.95482110402602, 76.94779765996674);
+    p = SeamAllowancePoint(134.95482110402602, 76.94779765996674);
     p.SetSAAfter(10.142330100270035);
     p.SetSABefore(10.142330100270035);
     points.append(p);
 
-    p = VSAPoint(131.24271546991025, 79.95904826755734);
+    p = SeamAllowancePoint(131.24271546991025, 79.95904826755734);
     p.SetSAAfter(9.3034514353721871);
     p.SetSABefore(9.3034514353721871);
     points.append(p);
 
-    p = VSAPoint(126.92191994038947, 84.39403240928104);
+    p = SeamAllowancePoint(126.92191994038947, 84.39403240928104);
     p.SetSAAfter(8.216780859744869);
     p.SetSABefore(8.216780859744869);
     points.append(p);
 
-    p = VSAPoint(124.4881889763782, 87.24396850393732);
+    p = SeamAllowancePoint(124.4881889763782, 87.24396850393732);
     p.SetSAAfter(7.559055118110237);
     p.SetSABefore(7.559055118110237);
     points.append(p);
 
-    p = VSAPoint(124.4881889763782, 87.24396850393732);
+    p = SeamAllowancePoint(124.4881889763782, 87.24396850393732);
     p.SetSAAfter(7.559055118110237);
     p.SetSABefore(7.559055118110237);
     points.append(p);
 
-    p = VSAPoint(124.4881889763782, 87.24396850393732);
+    p = SeamAllowancePoint(124.4881889763782, 87.24396850393732);
     //p.SetSAAfter(-1);
     p.SetSABefore(7.559055118110237);
     points.append(p);
 
-    p = VSAPoint(124.4881889763782, 87.24396850393732);
+    p = SeamAllowancePoint(124.4881889763782, 87.24396850393732);
     //p.SetSAAfter(-1);
     p.SetSABefore(7.559055118110237);
     points.append(p);
 
-    p = VSAPoint(124.4881889763782, 87.24396850393732);
+    p = SeamAllowancePoint(124.4881889763782, 87.24396850393732);
     //p.SetSAAfter(-1);
     p.SetSABefore(7.559055118110237);
     points.append(p);
 
-    p = VSAPoint(124.4881889763782, 87.24396850393732);
+    p = SeamAllowancePoint(124.4881889763782, 87.24396850393732);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(124.4881889763782, 87.24396850393732);
+    p = SeamAllowancePoint(124.4881889763782, 87.24396850393732);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(121.4053345233613, 90.85541892105327);
+    p = SeamAllowancePoint(121.4053345233613, 90.85541892105327);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(115.36650087404239, 97.1700051724747);
+    p = SeamAllowancePoint(115.36650087404239, 97.1700051724747);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(109.48439793077911, 102.44240810316538);
+    p = SeamAllowancePoint(109.48439793077911, 102.44240810316538);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(103.76400391356904, 106.72573235606063);
+    p = SeamAllowancePoint(103.76400391356904, 106.72573235606063);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(98.2102970424097, 110.0730825740958);
+    p = SeamAllowancePoint(98.2102970424097, 110.0730825740958);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(92.8282555372987, 112.53756340020624);
+    p = SeamAllowancePoint(92.8282555372987, 112.53756340020624);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(87.62285761823352, 114.17227947732721);
+    p = SeamAllowancePoint(87.62285761823352, 114.17227947732721);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(82.59908150521179, 115.03033544839411);
+    p = SeamAllowancePoint(82.59908150521179, 115.03033544839411);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(77.76190541823104, 115.16483595634224);
+    p = SeamAllowancePoint(77.76190541823104, 115.16483595634224);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(73.11630757728881, 114.62888564410696);
+    p = SeamAllowancePoint(73.11630757728881, 114.62888564410696);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(68.66726620238268, 113.47558915462355);
+    p = SeamAllowancePoint(68.66726620238268, 113.47558915462355);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(64.41975951351019, 111.7580511308274);
+    p = SeamAllowancePoint(64.41975951351019, 111.7580511308274);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(60.3787657306689, 109.52937621565376);
+    p = SeamAllowancePoint(60.3787657306689, 109.52937621565376);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(56.54926307385639, 106.84266905203805);
+    p = SeamAllowancePoint(56.54926307385639, 106.84266905203805);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(52.93622976307019, 103.75103428291555);
+    p = SeamAllowancePoint(52.93622976307019, 103.75103428291555);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(49.54464401830785, 100.30757655122164);
+    p = SeamAllowancePoint(49.54464401830785, 100.30757655122164);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(44.854132804201555, 94.62627097468447);
+    p = SeamAllowancePoint(44.854132804201555, 94.62627097468447);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(39.45938535079082, 86.2656734510919);
+    p = SeamAllowancePoint(39.45938535079082, 86.2656734510919);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(35.040036121431584, 77.45366765004954);
+    p = SeamAllowancePoint(35.040036121431584, 77.45366765004954);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(31.635910876104337, 68.61509071504);
+    p = SeamAllowancePoint(31.635910876104337, 68.61509071504);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(29.28683537478949, 60.17477978954592);
+    p = SeamAllowancePoint(29.28683537478949, 60.17477978954592);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(28.03263537746753, 52.55757201704999);
+    p = SeamAllowancePoint(28.03263537746753, 52.55757201704999);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(27.913136644118886, 46.188304541034846);
+    p = SeamAllowancePoint(27.913136644118886, 46.188304541034846);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(28.62975536807624, 42.54811226326452);
+    p = SeamAllowancePoint(28.62975536807624, 42.54811226326452);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(29.458368599363588, 40.697718569632514);
+    p = SeamAllowancePoint(29.458368599363588, 40.697718569632514);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
 
-    p = VSAPoint(30.0, 39.999874015748034);
+    p = SeamAllowancePoint(30.0, 39.999874015748034);
     //p.SetSAAfter(-1);
     //p.SetSABefore(-1);
     points.append(p);
@@ -2009,13 +2009,14 @@ void TST_VAbstractPiece::TurnPointIndices() const
  */
 void TST_VAbstractPiece::EquidistantReportsNodeVertices() const
 {
-    QVector<VSAPoint> points;
-    points << VSAPoint(0, 0) << VSAPoint(100, 0) << VSAPoint(100, 100) << VSAPoint(0, 100);
-    for (VSAPoint &p : points)
+    QVector<SeamAllowancePoint> points;
+    points << SeamAllowancePoint(0, 0) << SeamAllowancePoint(100, 0) << SeamAllowancePoint(100, 100)
+           << SeamAllowancePoint(0, 100);
+    for (SeamAllowancePoint &p : points)
     {
         p.setNode(true);
     }
-    VSAPoint interior(50, 100.5); // slight bow, so the point is not removed as "on line"
+    SeamAllowancePoint interior(50, 100.5); // slight bow, so the point is not removed as "on line"
     points.insert(3, interior);
 
     QVector<QPointF> nodeVertices;
@@ -2577,62 +2578,62 @@ void TST_VAbstractPiece::PathLoopsCase() const
 //---------------------------------------------------------------------------------------------------------------------
 void TST_VAbstractPiece::BrokenDetailEquidistant_data() const
 {
-    QTest::addColumn<QVector<VSAPoint>>("points");
+    QTest::addColumn<QVector<SeamAllowancePoint>>("points");
     QTest::addColumn<qreal>("width");
     QTest::addColumn<QVector<QPointF>>("ekvOrig");
 
     // For more details see the file "collection/bugs/GAVAUDAN Laure - corsage - figure 4.sm2d".
     // We will test only one detail. The second require too accurate data that we cannot get from debuger.
     // The test check an open equdistant of correct detail.
-    QVector<VSAPoint> points;// Input points.
+    QVector<SeamAllowancePoint> points;// Input points.
 
-    VSAPoint point = VSAPoint(787.5835464566929, 1701.3138897637796);
+    SeamAllowancePoint point = SeamAllowancePoint(787.5835464566929, 1701.3138897637796);
     point.SetSAAfter(-1);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(863.1740976377953, 1701.3138897637796);
+    point = SeamAllowancePoint(863.1740976377953, 1701.3138897637796);
     point.SetSAAfter(-1);
     point.SetSAAfter(-1);
     points.append(point);
 
-    points.append(VSAPoint(938.7646488188976, 1701.3138897637796));
-    points.append(VSAPoint(928.6149944255945, 1732.4440762118775));
-    points.append(VSAPoint(910.0209054382323, 1792.3369946802652));
-    points.append(VSAPoint(893.3643210561819, 1849.7845240486258));
-    points.append(VSAPoint(878.5243977752426, 1905.2261712206746));
-    points.append(VSAPoint(865.3802920912136, 1959.1014431001254));
-    points.append(VSAPoint(853.8111604998944, 2011.8498465906928));
-    points.append(VSAPoint(843.6961594970844, 2063.910888596092));
-    points.append(VSAPoint(834.9144455785826, 2115.7240760200366));
-    points.append(VSAPoint(827.3451752401882, 2167.7289157662426));
-    points.append(VSAPoint(820.8675049777007, 2220.364914738423));
-    points.append(VSAPoint(815.3605912869193, 2274.0715798402925));
-    points.append(VSAPoint(810.703590663643, 2329.2884179755656));
-    points.append(VSAPoint(806.7756596036716, 2386.454936047957));
-    points.append(VSAPoint(803.455954602804, 2446.0106409611817));
-    points.append(VSAPoint(800.6236321568394, 2508.395039618954));
-    points.append(VSAPoint(798.1578487615775, 2574.047638924988));
-    points.append(VSAPoint(797.0323653543306, 2608.4005039370077));
-    points.append(VSAPoint(929.3158299212598, 2608.4005039370077));
-    points.append(VSAPoint(927.9285659612306, 2548.9599884455793));
-    points.append(VSAPoint(925.157717598664, 2463.8329634071292));
-    points.append(VSAPoint(922.7222742526749, 2408.6782012856274));
-    points.append(VSAPoint(919.6220036804666, 2354.5469017384876));
-    points.append(VSAPoint(915.706969354324, 2301.1170261784787));
-    points.append(VSAPoint(910.8272347465313, 2248.066536018368));
-    points.append(VSAPoint(904.8328633293736, 2195.073392670922));
-    points.append(VSAPoint(897.5739185751353, 2141.8155575489095));
-    points.append(VSAPoint(888.9004639561011, 2087.9709920650976));
-    points.append(VSAPoint(878.6625629445558, 2033.2176576322527));
-    points.append(VSAPoint(866.7102790127839, 1977.233515663143));
-    points.append(VSAPoint(852.8936756330698, 1919.696527570536));
-    points.append(VSAPoint(837.0628162776984, 1860.284654767199));
-    points.append(VSAPoint(819.0677644189545, 1798.675858665899));
-    points.append(VSAPoint(798.7585835291225, 1734.548100679404));
-    points.append(VSAPoint(787.5835464566929, 1701.3138897637796));
+    points.append(SeamAllowancePoint(938.7646488188976, 1701.3138897637796));
+    points.append(SeamAllowancePoint(928.6149944255945, 1732.4440762118775));
+    points.append(SeamAllowancePoint(910.0209054382323, 1792.3369946802652));
+    points.append(SeamAllowancePoint(893.3643210561819, 1849.7845240486258));
+    points.append(SeamAllowancePoint(878.5243977752426, 1905.2261712206746));
+    points.append(SeamAllowancePoint(865.3802920912136, 1959.1014431001254));
+    points.append(SeamAllowancePoint(853.8111604998944, 2011.8498465906928));
+    points.append(SeamAllowancePoint(843.6961594970844, 2063.910888596092));
+    points.append(SeamAllowancePoint(834.9144455785826, 2115.7240760200366));
+    points.append(SeamAllowancePoint(827.3451752401882, 2167.7289157662426));
+    points.append(SeamAllowancePoint(820.8675049777007, 2220.364914738423));
+    points.append(SeamAllowancePoint(815.3605912869193, 2274.0715798402925));
+    points.append(SeamAllowancePoint(810.703590663643, 2329.2884179755656));
+    points.append(SeamAllowancePoint(806.7756596036716, 2386.454936047957));
+    points.append(SeamAllowancePoint(803.455954602804, 2446.0106409611817));
+    points.append(SeamAllowancePoint(800.6236321568394, 2508.395039618954));
+    points.append(SeamAllowancePoint(798.1578487615775, 2574.047638924988));
+    points.append(SeamAllowancePoint(797.0323653543306, 2608.4005039370077));
+    points.append(SeamAllowancePoint(929.3158299212598, 2608.4005039370077));
+    points.append(SeamAllowancePoint(927.9285659612306, 2548.9599884455793));
+    points.append(SeamAllowancePoint(925.157717598664, 2463.8329634071292));
+    points.append(SeamAllowancePoint(922.7222742526749, 2408.6782012856274));
+    points.append(SeamAllowancePoint(919.6220036804666, 2354.5469017384876));
+    points.append(SeamAllowancePoint(915.706969354324, 2301.1170261784787));
+    points.append(SeamAllowancePoint(910.8272347465313, 2248.066536018368));
+    points.append(SeamAllowancePoint(904.8328633293736, 2195.073392670922));
+    points.append(SeamAllowancePoint(897.5739185751353, 2141.8155575489095));
+    points.append(SeamAllowancePoint(888.9004639561011, 2087.9709920650976));
+    points.append(SeamAllowancePoint(878.6625629445558, 2033.2176576322527));
+    points.append(SeamAllowancePoint(866.7102790127839, 1977.233515663143));
+    points.append(SeamAllowancePoint(852.8936756330698, 1919.696527570536));
+    points.append(SeamAllowancePoint(837.0628162776984, 1860.284654767199));
+    points.append(SeamAllowancePoint(819.0677644189545, 1798.675858665899));
+    points.append(SeamAllowancePoint(798.7585835291225, 1734.548100679404));
+    points.append(SeamAllowancePoint(787.5835464566929, 1701.3138897637796));
 
-    point = VSAPoint(797.0323653543306, 2608.4005039370077);
+    point = SeamAllowancePoint(797.0323653543306, 2608.4005039370077);
     point.SetSAAfter(0);
     point.SetSABefore(-1);
     points.append(point);
@@ -2666,22 +2667,22 @@ void TST_VAbstractPiece::BrokenDetailEquidistant_data() const
 #endif
 
     points.clear();
-    point = VSAPoint(97.33089106412862, -223.03306117556497);
+    point = SeamAllowancePoint(97.33089106412862, -223.03306117556497);
     point.SetSAAfter(-1);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(990.7494050554426, 2.819093995045);
+    point = SeamAllowancePoint(990.7494050554426, 2.819093995045);
     point.SetSAAfter(-1);
     point.SetSABefore(-1);
     points.append(point);
 
-    point = VSAPoint(908.3966357321774, 379.5839357215547);
+    point = SeamAllowancePoint(908.3966357321774, 379.5839357215547);
     point.SetSAAfter(-1);
     point.SetSABefore(-1);
     points.append(point);
 
-    point = VSAPoint(-135.41154226686143, 697.6417881399819);
+    point = SeamAllowancePoint(-135.41154226686143, 697.6417881399819);
     point.SetSAAfter(0);
     point.SetSABefore(-1);
     points.append(point);
@@ -2698,64 +2699,64 @@ void TST_VAbstractPiece::BrokenDetailEquidistant_data() const
 
     points.clear();
 
-    point = VSAPoint(11565.008125001967, -71.44488549419934);
+    point = SeamAllowancePoint(11565.008125001967, -71.44488549419934);
     point.SetSAAfter(0);
     points.append(point);
 
-    point = VSAPoint(11774.053467225081, -3376.8303371353477);
+    point = SeamAllowancePoint(11774.053467225081, -3376.8303371353477);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(11774.053467225081, -3376.8303371353477);
+    point = SeamAllowancePoint(11774.053467225081, -3376.8303371353477);
     point.SetSABefore(0);
     points.append(point);
 
-    points.append(VSAPoint(11821.637653562488, -3457.444047544761));
-    points.append(VSAPoint(11916.506852253828, -3619.698047174161));
-    points.append(VSAPoint(12011.687139013728, -3784.3170132645946));
-    points.append(VSAPoint(12107.923065894336, -3952.559914581168));
-    points.append(VSAPoint(12205.959184947797, -4125.685719888987));
-    points.append(VSAPoint(12306.540048226263, -4304.953397953153));
-    points.append(VSAPoint(12410.410207781879, -4491.621917538776));
-    points.append(VSAPoint(12518.314215666796, -4686.950247410959));
-    points.append(VSAPoint(12630.996623933155, -4892.197356334806));
-    points.append(VSAPoint(12749.201984633113, -5108.622213075425));
-    points.append(VSAPoint(12937.571227539614, -5455.181123300274));
-    points.append(VSAPoint(13216.05428816687, -5970.204948863398));
-    points.append(VSAPoint(13530.031095467164, -6552.6012034655));
+    points.append(SeamAllowancePoint(11821.637653562488, -3457.444047544761));
+    points.append(SeamAllowancePoint(11916.506852253828, -3619.698047174161));
+    points.append(SeamAllowancePoint(12011.687139013728, -3784.3170132645946));
+    points.append(SeamAllowancePoint(12107.923065894336, -3952.559914581168));
+    points.append(SeamAllowancePoint(12205.959184947797, -4125.685719888987));
+    points.append(SeamAllowancePoint(12306.540048226263, -4304.953397953153));
+    points.append(SeamAllowancePoint(12410.410207781879, -4491.621917538776));
+    points.append(SeamAllowancePoint(12518.314215666796, -4686.950247410959));
+    points.append(SeamAllowancePoint(12630.996623933155, -4892.197356334806));
+    points.append(SeamAllowancePoint(12749.201984633113, -5108.622213075425));
+    points.append(SeamAllowancePoint(12937.571227539614, -5455.181123300274));
+    points.append(SeamAllowancePoint(13216.05428816687, -5970.204948863398));
+    points.append(SeamAllowancePoint(13530.031095467164, -6552.6012034655));
 
-    point = VSAPoint(13704.042216387523, -6875.648082494774);
+    point = SeamAllowancePoint(13704.042216387523, -6875.648082494774);
     point.SetSAAfter(0);
     points.append(point);
 
-    point = VSAPoint(13704.042216387523, -6875.648082494774);
+    point = SeamAllowancePoint(13704.042216387523, -6875.648082494774);
     point.SetSAAfter(0);
     points.append(point);
 
-    point = VSAPoint(13493.259591532773, -71.44488549420451);
+    point = SeamAllowancePoint(13493.259591532773, -71.44488549420451);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(13493.259591532773, -71.44488549420451);
+    point = SeamAllowancePoint(13493.259591532773, -71.44488549420451);
     point.SetSABefore(0);
     points.append(point);
 
-    points.append(VSAPoint(13458.265794168308, -72.45287893700785));
-    points.append(VSAPoint(13303.675181471457, -76.51882381889763));
-    points.append(VSAPoint(13154.908187746063, -79.90711122047243));
-    points.append(VSAPoint(13010.905973179135, -82.6177411417323));
-    points.append(VSAPoint(12870.60969795768, -84.65071358267716));
-    points.append(VSAPoint(12732.9605222687, -86.0060285433071));
-    points.append(VSAPoint(12596.899606299212, -86.68368602362204));
-    points.append(VSAPoint(12461.36811023622, -86.68368602362204));
-    points.append(VSAPoint(12325.307194266732, -86.0060285433071));
-    points.append(VSAPoint(12187.658018577757, -84.65071358267716));
-    points.append(VSAPoint(12047.361743356301, -82.6177411417323));
-    points.append(VSAPoint(11903.35952878937, -79.90711122047243));
-    points.append(VSAPoint(11754.592535063975, -76.51882381889763));
-    points.append(VSAPoint(11600.001922367124, -72.45287893700785));
+    points.append(SeamAllowancePoint(13458.265794168308, -72.45287893700785));
+    points.append(SeamAllowancePoint(13303.675181471457, -76.51882381889763));
+    points.append(SeamAllowancePoint(13154.908187746063, -79.90711122047243));
+    points.append(SeamAllowancePoint(13010.905973179135, -82.6177411417323));
+    points.append(SeamAllowancePoint(12870.60969795768, -84.65071358267716));
+    points.append(SeamAllowancePoint(12732.9605222687, -86.0060285433071));
+    points.append(SeamAllowancePoint(12596.899606299212, -86.68368602362204));
+    points.append(SeamAllowancePoint(12461.36811023622, -86.68368602362204));
+    points.append(SeamAllowancePoint(12325.307194266732, -86.0060285433071));
+    points.append(SeamAllowancePoint(12187.658018577757, -84.65071358267716));
+    points.append(SeamAllowancePoint(12047.361743356301, -82.6177411417323));
+    points.append(SeamAllowancePoint(11903.35952878937, -79.90711122047243));
+    points.append(SeamAllowancePoint(11754.592535063975, -76.51882381889763));
+    points.append(SeamAllowancePoint(11600.001922367124, -72.45287893700785));
 
-    point = VSAPoint(11565.008125001967, -71.44488549419934);
+    point = SeamAllowancePoint(11565.008125001967, -71.44488549419934);
     point.SetSAAfter(0);
     points.append(point);
 
@@ -2797,32 +2798,32 @@ void TST_VAbstractPiece::BrokenDetailEquidistant_data() const
     QTest::newRow("Issue #627.") << points << 56.692913385826778 << ekvOrig;
 
     points.clear();
-    points.append(VSAPoint(-3139.2651132139254, 2368.0698020087843));
-    points.append(VSAPoint(-3120.18086167807, 3642.1607394538896));
-    points.append(VSAPoint(-3800.4958223079916, 3642.1607394538896));
-    points.append(VSAPoint(-3838.2910978985424, 2357.1213693751492));
-    points.append(VSAPoint(-3838.2910978985424, 2357.1213693751492));
-    points.append(VSAPoint(-3842.1333590068875, 2294.1227800112047));
-    points.append(VSAPoint(-3847.641880263068, 2206.284811917889));
-    points.append(VSAPoint(-3852.504240762188, 2136.1966065393));
-    points.append(VSAPoint(-3858.4130229769607, 2058.523232892052));
-    points.append(VSAPoint(-3865.3928767793295, 1975.408848578495));
-    points.append(VSAPoint(-3873.4684520412366, 1888.9976112009829));
-    points.append(VSAPoint(-3882.664398634626, 1801.4336783618676));
-    points.append(VSAPoint(-3890.3477903485245, 1736.3753540292228));
-    points.append(VSAPoint(-3895.8091513987765, 1693.739013765668));
-    points.append(VSAPoint(-3901.5644708348673, 1652.020588288036));
-    points.append(VSAPoint(-3907.616829890789, 1611.4880972966203));
-    points.append(VSAPoint(-3913.9693098005355, 1572.4095604917156));
-    points.append(VSAPoint(-3920.6249917980986, 1535.0529975736154));
-    points.append(VSAPoint(-3927.5869571174717, 1499.6864282426134));
-    points.append(VSAPoint(-3934.8582869926468, 1466.5778721990046));
-    points.append(VSAPoint(-3942.4420626576175, 1435.9953491430822));
-    points.append(VSAPoint(-3950.341365346377, 1408.206878775141));
-    points.append(VSAPoint(-3958.559276292918, 1383.4804807954743));
-    points.append(VSAPoint(-3964.943774739856, 1367.2167450059815));
-    points.append(VSAPoint(-3969.294575063331, 1357.40136877638));
-    points.append(VSAPoint(-3971.5038697013774, 1352.8740677166752));
+    points.append(SeamAllowancePoint(-3139.2651132139254, 2368.0698020087843));
+    points.append(SeamAllowancePoint(-3120.18086167807, 3642.1607394538896));
+    points.append(SeamAllowancePoint(-3800.4958223079916, 3642.1607394538896));
+    points.append(SeamAllowancePoint(-3838.2910978985424, 2357.1213693751492));
+    points.append(SeamAllowancePoint(-3838.2910978985424, 2357.1213693751492));
+    points.append(SeamAllowancePoint(-3842.1333590068875, 2294.1227800112047));
+    points.append(SeamAllowancePoint(-3847.641880263068, 2206.284811917889));
+    points.append(SeamAllowancePoint(-3852.504240762188, 2136.1966065393));
+    points.append(SeamAllowancePoint(-3858.4130229769607, 2058.523232892052));
+    points.append(SeamAllowancePoint(-3865.3928767793295, 1975.408848578495));
+    points.append(SeamAllowancePoint(-3873.4684520412366, 1888.9976112009829));
+    points.append(SeamAllowancePoint(-3882.664398634626, 1801.4336783618676));
+    points.append(SeamAllowancePoint(-3890.3477903485245, 1736.3753540292228));
+    points.append(SeamAllowancePoint(-3895.8091513987765, 1693.739013765668));
+    points.append(SeamAllowancePoint(-3901.5644708348673, 1652.020588288036));
+    points.append(SeamAllowancePoint(-3907.616829890789, 1611.4880972966203));
+    points.append(SeamAllowancePoint(-3913.9693098005355, 1572.4095604917156));
+    points.append(SeamAllowancePoint(-3920.6249917980986, 1535.0529975736154));
+    points.append(SeamAllowancePoint(-3927.5869571174717, 1499.6864282426134));
+    points.append(SeamAllowancePoint(-3934.8582869926468, 1466.5778721990046));
+    points.append(SeamAllowancePoint(-3942.4420626576175, 1435.9953491430822));
+    points.append(SeamAllowancePoint(-3950.341365346377, 1408.206878775141));
+    points.append(SeamAllowancePoint(-3958.559276292918, 1383.4804807954743));
+    points.append(SeamAllowancePoint(-3964.943774739856, 1367.2167450059815));
+    points.append(SeamAllowancePoint(-3969.294575063331, 1357.40136877638));
+    points.append(SeamAllowancePoint(-3971.5038697013774, 1352.8740677166752));
 
     ekvOrig.clear();
     ekvOrig.append(QPointF(-3101.671677349305, 2354.311657146295));
@@ -2860,7 +2861,7 @@ void TST_VAbstractPiece::BrokenDetailEquidistant_data() const
 //---------------------------------------------------------------------------------------------------------------------
 void TST_VAbstractPiece::BrokenDetailEquidistant() const
 {
-    QFETCH(QVector<VSAPoint>, points);
+    QFETCH(QVector<SeamAllowancePoint>, points);
     QFETCH(qreal, width);
     QFETCH(QVector<QPointF>, ekvOrig);
 
@@ -2911,37 +2912,37 @@ void TST_VAbstractPiece::CorrectEquidistantPoints_data() const
     QTest::newRow("Clearing bad main path.") << points << expect << true;
 
     points.clear();
-    points.append(VSAPoint(1710.822186539242, -337.9528818897638));
-    points.append(VSAPoint(2241.0236220472443, -337.9528818897638));
-    points.append(VSAPoint(2241.0236220472443, -73.38595275590546));
-    points.append(VSAPoint(1756.74661444881, -77.4022977175182));
-    points.append(VSAPoint(1458.7808499813127, 33.04551440097044));
-    points.append(VSAPoint(1458.7808499813127, 33.04551440097044));
-    points.append(VSAPoint(1452.5774742317267, 17.66797799862358));
-    points.append(VSAPoint(1443.6033514625851, -2.685141373445197));
-    points.append(VSAPoint(1432.9463842425444, -25.199242282717215));
-    points.append(VSAPoint(1420.460146989685, -50.18887828170325));
-    points.append(VSAPoint(1405.9982141220862, -77.96860292291412));
-    points.append(VSAPoint(1389.4141600578282, -108.85296975886055));
-    points.append(VSAPoint(1360.549818901188, -161.20243176452524));
-    points.append(VSAPoint(1337.599051333226, -201.88618662356873));
-    points.append(VSAPoint(1337.599051333226, -201.88618662356873));
-    points.append(VSAPoint(1710.8221865392422, -337.95288188976184));
+    points.append(SeamAllowancePoint(1710.822186539242, -337.9528818897638));
+    points.append(SeamAllowancePoint(2241.0236220472443, -337.9528818897638));
+    points.append(SeamAllowancePoint(2241.0236220472443, -73.38595275590546));
+    points.append(SeamAllowancePoint(1756.74661444881, -77.4022977175182));
+    points.append(SeamAllowancePoint(1458.7808499813127, 33.04551440097044));
+    points.append(SeamAllowancePoint(1458.7808499813127, 33.04551440097044));
+    points.append(SeamAllowancePoint(1452.5774742317267, 17.66797799862358));
+    points.append(SeamAllowancePoint(1443.6033514625851, -2.685141373445197));
+    points.append(SeamAllowancePoint(1432.9463842425444, -25.199242282717215));
+    points.append(SeamAllowancePoint(1420.460146989685, -50.18887828170325));
+    points.append(SeamAllowancePoint(1405.9982141220862, -77.96860292291412));
+    points.append(SeamAllowancePoint(1389.4141600578282, -108.85296975886055));
+    points.append(SeamAllowancePoint(1360.549818901188, -161.20243176452524));
+    points.append(SeamAllowancePoint(1337.599051333226, -201.88618662356873));
+    points.append(SeamAllowancePoint(1337.599051333226, -201.88618662356873));
+    points.append(SeamAllowancePoint(1710.8221865392422, -337.95288188976184));
 
     expect.clear();
-    expect.append(VSAPoint(1710.822186539242, -337.9528818897638));
-    expect.append(VSAPoint(2241.0236220472443, -337.9528818897638));
-    expect.append(VSAPoint(2241.0236220472443, -73.38595275590546));
-    expect.append(VSAPoint(1756.74661444881, -77.4022977175182));
-    expect.append(VSAPoint(1458.7808499813127, 33.04551440097044));
-    expect.append(VSAPoint(1452.5774742317267, 17.66797799862358));
-    expect.append(VSAPoint(1443.6033514625851, -2.685141373445197));
-    expect.append(VSAPoint(1432.9463842425444, -25.199242282717215));
-    expect.append(VSAPoint(1420.460146989685, -50.18887828170325));
-    expect.append(VSAPoint(1405.9982141220862, -77.96860292291412));
-    expect.append(VSAPoint(1389.4141600578282, -108.85296975886055));
-    expect.append(VSAPoint(1360.549818901188, -161.20243176452524));
-    expect.append(VSAPoint(1337.599051333226, -201.88618662356873));
+    expect.append(SeamAllowancePoint(1710.822186539242, -337.9528818897638));
+    expect.append(SeamAllowancePoint(2241.0236220472443, -337.9528818897638));
+    expect.append(SeamAllowancePoint(2241.0236220472443, -73.38595275590546));
+    expect.append(SeamAllowancePoint(1756.74661444881, -77.4022977175182));
+    expect.append(SeamAllowancePoint(1458.7808499813127, 33.04551440097044));
+    expect.append(SeamAllowancePoint(1452.5774742317267, 17.66797799862358));
+    expect.append(SeamAllowancePoint(1443.6033514625851, -2.685141373445197));
+    expect.append(SeamAllowancePoint(1432.9463842425444, -25.199242282717215));
+    expect.append(SeamAllowancePoint(1420.460146989685, -50.18887828170325));
+    expect.append(SeamAllowancePoint(1405.9982141220862, -77.96860292291412));
+    expect.append(SeamAllowancePoint(1389.4141600578282, -108.85296975886055));
+    expect.append(SeamAllowancePoint(1360.549818901188, -161.20243176452524));
+    expect.append(SeamAllowancePoint(1337.599051333226, -201.88618662356873));
 
     // See the file "collection/bugs/Issue_#686.sm2d"
     QTest::newRow("Issue #686.") << points << expect << true;
@@ -3308,75 +3309,75 @@ void TST_VAbstractPiece::Case5() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<VSAPoint> TST_VAbstractPiece::InputPointsIssue298Case1() const
+QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsIssue298Case1() const
 {
-    QVector<VSAPoint> points;
+    QVector<SeamAllowancePoint> points;
 
-    points += VSAPoint(35, 39.9999);
-    points += VSAPoint(412.953, 39.9999);
-    points += VSAPoint(417.135, 417.929);
-    points += VSAPoint(417.135, 417.929);
-    points += VSAPoint(408.797, 405.589);
-    points += VSAPoint(390.909, 377.669);
-    points += VSAPoint(362.315, 330.86);
-    points += VSAPoint(323.075, 264.247);
-    points += VSAPoint(286.15, 201.448);
-    points += VSAPoint(262.477, 162.745);
-    points += VSAPoint(249.22, 142.455);
-    points += VSAPoint(241.092, 131.261);
-    points += VSAPoint(236.545, 125.75);
-    points += VSAPoint(232.808, 122.058);
-    points += VSAPoint(230.6, 120.629);
-    points += VSAPoint(229.393, 120.277);
-    points += VSAPoint(228.421, 120.456);
-    points += VSAPoint(227.69, 121.185);
-    points += VSAPoint(227.033, 123.272);
-    points += VSAPoint(227.112, 128.232);
-    points += VSAPoint(228.29, 135.699);
-    points += VSAPoint(230.625, 145.81);
-    points += VSAPoint(234.173, 158.703);
-    points += VSAPoint(241.73, 183.168);
-    points += VSAPoint(248.796, 204.144);
-    points += VSAPoint(248.796, 204.144);
-    points += VSAPoint(251.528, 212.406);
-    points += VSAPoint(255.482, 227.075);
-    points += VSAPoint(257.717, 239.591);
-    points += VSAPoint(258.279, 247.554);
-    points += VSAPoint(258.203, 252.278);
-    points += VSAPoint(257.756, 256.51);
-    points += VSAPoint(256.949, 260.264);
-    points += VSAPoint(255.795, 263.547);
-    points += VSAPoint(254.308, 266.372);
-    points += VSAPoint(252.501, 268.749);
-    points += VSAPoint(250.385, 270.688);
-    points += VSAPoint(247.974, 272.201);
-    points += VSAPoint(245.281, 273.296);
-    points += VSAPoint(242.319, 273.986);
-    points += VSAPoint(239.1, 274.28);
-    points += VSAPoint(233.846, 274.05);
-    points += VSAPoint(226.022, 272.393);
-    points += VSAPoint(217.402, 269.345);
-    points += VSAPoint(208.09, 264.991);
-    points += VSAPoint(198.186, 259.414);
-    points += VSAPoint(187.795, 252.7);
-    points += VSAPoint(177.019, 244.933);
-    points += VSAPoint(165.96, 236.197);
-    points += VSAPoint(154.721, 226.576);
-    points += VSAPoint(143.405, 216.157);
-    points += VSAPoint(132.113, 205.022);
-    points += VSAPoint(120.95, 193.257);
-    points += VSAPoint(110.017, 180.946);
-    points += VSAPoint(99.4167, 168.174);
-    points += VSAPoint(89.2522, 155.024);
-    points += VSAPoint(79.626, 141.582);
-    points += VSAPoint(70.6405, 127.933);
-    points += VSAPoint(62.3985, 114.16);
-    points += VSAPoint(55.0025, 100.348);
-    points += VSAPoint(48.5551, 86.5823);
-    points += VSAPoint(43.159, 72.9466);
-    points += VSAPoint(38.9167, 59.5258);
-    points += VSAPoint(35.9309, 46.4042);
-    points += VSAPoint(35, 39.9999);
+    points += SeamAllowancePoint(35, 39.9999);
+    points += SeamAllowancePoint(412.953, 39.9999);
+    points += SeamAllowancePoint(417.135, 417.929);
+    points += SeamAllowancePoint(417.135, 417.929);
+    points += SeamAllowancePoint(408.797, 405.589);
+    points += SeamAllowancePoint(390.909, 377.669);
+    points += SeamAllowancePoint(362.315, 330.86);
+    points += SeamAllowancePoint(323.075, 264.247);
+    points += SeamAllowancePoint(286.15, 201.448);
+    points += SeamAllowancePoint(262.477, 162.745);
+    points += SeamAllowancePoint(249.22, 142.455);
+    points += SeamAllowancePoint(241.092, 131.261);
+    points += SeamAllowancePoint(236.545, 125.75);
+    points += SeamAllowancePoint(232.808, 122.058);
+    points += SeamAllowancePoint(230.6, 120.629);
+    points += SeamAllowancePoint(229.393, 120.277);
+    points += SeamAllowancePoint(228.421, 120.456);
+    points += SeamAllowancePoint(227.69, 121.185);
+    points += SeamAllowancePoint(227.033, 123.272);
+    points += SeamAllowancePoint(227.112, 128.232);
+    points += SeamAllowancePoint(228.29, 135.699);
+    points += SeamAllowancePoint(230.625, 145.81);
+    points += SeamAllowancePoint(234.173, 158.703);
+    points += SeamAllowancePoint(241.73, 183.168);
+    points += SeamAllowancePoint(248.796, 204.144);
+    points += SeamAllowancePoint(248.796, 204.144);
+    points += SeamAllowancePoint(251.528, 212.406);
+    points += SeamAllowancePoint(255.482, 227.075);
+    points += SeamAllowancePoint(257.717, 239.591);
+    points += SeamAllowancePoint(258.279, 247.554);
+    points += SeamAllowancePoint(258.203, 252.278);
+    points += SeamAllowancePoint(257.756, 256.51);
+    points += SeamAllowancePoint(256.949, 260.264);
+    points += SeamAllowancePoint(255.795, 263.547);
+    points += SeamAllowancePoint(254.308, 266.372);
+    points += SeamAllowancePoint(252.501, 268.749);
+    points += SeamAllowancePoint(250.385, 270.688);
+    points += SeamAllowancePoint(247.974, 272.201);
+    points += SeamAllowancePoint(245.281, 273.296);
+    points += SeamAllowancePoint(242.319, 273.986);
+    points += SeamAllowancePoint(239.1, 274.28);
+    points += SeamAllowancePoint(233.846, 274.05);
+    points += SeamAllowancePoint(226.022, 272.393);
+    points += SeamAllowancePoint(217.402, 269.345);
+    points += SeamAllowancePoint(208.09, 264.991);
+    points += SeamAllowancePoint(198.186, 259.414);
+    points += SeamAllowancePoint(187.795, 252.7);
+    points += SeamAllowancePoint(177.019, 244.933);
+    points += SeamAllowancePoint(165.96, 236.197);
+    points += SeamAllowancePoint(154.721, 226.576);
+    points += SeamAllowancePoint(143.405, 216.157);
+    points += SeamAllowancePoint(132.113, 205.022);
+    points += SeamAllowancePoint(120.95, 193.257);
+    points += SeamAllowancePoint(110.017, 180.946);
+    points += SeamAllowancePoint(99.4167, 168.174);
+    points += SeamAllowancePoint(89.2522, 155.024);
+    points += SeamAllowancePoint(79.626, 141.582);
+    points += SeamAllowancePoint(70.6405, 127.933);
+    points += SeamAllowancePoint(62.3985, 114.16);
+    points += SeamAllowancePoint(55.0025, 100.348);
+    points += SeamAllowancePoint(48.5551, 86.5823);
+    points += SeamAllowancePoint(43.159, 72.9466);
+    points += SeamAllowancePoint(38.9167, 59.5258);
+    points += SeamAllowancePoint(35.9309, 46.4042);
+    points += SeamAllowancePoint(35, 39.9999);
 
     return points;
 }
@@ -3425,75 +3426,75 @@ QVector<QPointF> TST_VAbstractPiece::OutputPointsIssue298Case1() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<VSAPoint> TST_VAbstractPiece::InputPointsIssue298Case2() const
+QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsIssue298Case2() const
 {
-    QVector<VSAPoint> points;
+    QVector<SeamAllowancePoint> points;
 
-    points += VSAPoint(35, 39.9999);
-    points += VSAPoint(35, 39.9999);
-    points += VSAPoint(35.9309, 46.4042);
-    points += VSAPoint(38.9167, 59.5258);
-    points += VSAPoint(43.159, 72.9466);
-    points += VSAPoint(48.5551, 86.5823);
-    points += VSAPoint(55.0025, 100.348);
-    points += VSAPoint(62.3985, 114.16);
-    points += VSAPoint(70.6405, 127.933);
-    points += VSAPoint(79.626, 141.582);
-    points += VSAPoint(89.2522, 155.024);
-    points += VSAPoint(99.4167, 168.174);
-    points += VSAPoint(110.017, 180.946);
-    points += VSAPoint(120.95, 193.257);
-    points += VSAPoint(132.113, 205.022);
-    points += VSAPoint(143.405, 216.157);
-    points += VSAPoint(154.721, 226.576);
-    points += VSAPoint(165.96, 236.197);
-    points += VSAPoint(177.019, 244.933);
-    points += VSAPoint(187.795, 252.7);
-    points += VSAPoint(198.186, 259.414);
-    points += VSAPoint(208.09, 264.991);
-    points += VSAPoint(217.402, 269.345);
-    points += VSAPoint(226.022, 272.393);
-    points += VSAPoint(233.846, 274.05);
-    points += VSAPoint(239.1, 274.28);
-    points += VSAPoint(242.319, 273.986);
-    points += VSAPoint(245.281, 273.296);
-    points += VSAPoint(247.974, 272.201);
-    points += VSAPoint(250.385, 270.688);
-    points += VSAPoint(252.501, 268.749);
-    points += VSAPoint(254.308, 266.372);
-    points += VSAPoint(255.795, 263.547);
-    points += VSAPoint(256.949, 260.264);
-    points += VSAPoint(257.756, 256.51);
-    points += VSAPoint(258.203, 252.278);
-    points += VSAPoint(258.279, 247.554);
-    points += VSAPoint(257.717, 239.591);
-    points += VSAPoint(255.482, 227.075);
-    points += VSAPoint(251.528, 212.406);
-    points += VSAPoint(248.796, 204.144);
-    points += VSAPoint(248.796, 204.144);
-    points += VSAPoint(241.73, 183.168);
-    points += VSAPoint(234.173, 158.703);
-    points += VSAPoint(230.625, 145.81);
-    points += VSAPoint(228.29, 135.699);
-    points += VSAPoint(227.112, 128.232);
-    points += VSAPoint(227.033, 123.272);
-    points += VSAPoint(227.69, 121.185);
-    points += VSAPoint(228.421, 120.456);
-    points += VSAPoint(229.393, 120.277);
-    points += VSAPoint(230.6, 120.629);
-    points += VSAPoint(232.808, 122.058);
-    points += VSAPoint(236.545, 125.75);
-    points += VSAPoint(241.092, 131.261);
-    points += VSAPoint(249.22, 142.455);
-    points += VSAPoint(262.477, 162.745);
-    points += VSAPoint(286.15, 201.448);
-    points += VSAPoint(323.075, 264.247);
-    points += VSAPoint(362.315, 330.86);
-    points += VSAPoint(390.909, 377.669);
-    points += VSAPoint(408.797, 405.589);
-    points += VSAPoint(417.135, 417.929);
-    points += VSAPoint(417.135, 417.929);
-    points += VSAPoint(35, 417.953);
+    points += SeamAllowancePoint(35, 39.9999);
+    points += SeamAllowancePoint(35, 39.9999);
+    points += SeamAllowancePoint(35.9309, 46.4042);
+    points += SeamAllowancePoint(38.9167, 59.5258);
+    points += SeamAllowancePoint(43.159, 72.9466);
+    points += SeamAllowancePoint(48.5551, 86.5823);
+    points += SeamAllowancePoint(55.0025, 100.348);
+    points += SeamAllowancePoint(62.3985, 114.16);
+    points += SeamAllowancePoint(70.6405, 127.933);
+    points += SeamAllowancePoint(79.626, 141.582);
+    points += SeamAllowancePoint(89.2522, 155.024);
+    points += SeamAllowancePoint(99.4167, 168.174);
+    points += SeamAllowancePoint(110.017, 180.946);
+    points += SeamAllowancePoint(120.95, 193.257);
+    points += SeamAllowancePoint(132.113, 205.022);
+    points += SeamAllowancePoint(143.405, 216.157);
+    points += SeamAllowancePoint(154.721, 226.576);
+    points += SeamAllowancePoint(165.96, 236.197);
+    points += SeamAllowancePoint(177.019, 244.933);
+    points += SeamAllowancePoint(187.795, 252.7);
+    points += SeamAllowancePoint(198.186, 259.414);
+    points += SeamAllowancePoint(208.09, 264.991);
+    points += SeamAllowancePoint(217.402, 269.345);
+    points += SeamAllowancePoint(226.022, 272.393);
+    points += SeamAllowancePoint(233.846, 274.05);
+    points += SeamAllowancePoint(239.1, 274.28);
+    points += SeamAllowancePoint(242.319, 273.986);
+    points += SeamAllowancePoint(245.281, 273.296);
+    points += SeamAllowancePoint(247.974, 272.201);
+    points += SeamAllowancePoint(250.385, 270.688);
+    points += SeamAllowancePoint(252.501, 268.749);
+    points += SeamAllowancePoint(254.308, 266.372);
+    points += SeamAllowancePoint(255.795, 263.547);
+    points += SeamAllowancePoint(256.949, 260.264);
+    points += SeamAllowancePoint(257.756, 256.51);
+    points += SeamAllowancePoint(258.203, 252.278);
+    points += SeamAllowancePoint(258.279, 247.554);
+    points += SeamAllowancePoint(257.717, 239.591);
+    points += SeamAllowancePoint(255.482, 227.075);
+    points += SeamAllowancePoint(251.528, 212.406);
+    points += SeamAllowancePoint(248.796, 204.144);
+    points += SeamAllowancePoint(248.796, 204.144);
+    points += SeamAllowancePoint(241.73, 183.168);
+    points += SeamAllowancePoint(234.173, 158.703);
+    points += SeamAllowancePoint(230.625, 145.81);
+    points += SeamAllowancePoint(228.29, 135.699);
+    points += SeamAllowancePoint(227.112, 128.232);
+    points += SeamAllowancePoint(227.033, 123.272);
+    points += SeamAllowancePoint(227.69, 121.185);
+    points += SeamAllowancePoint(228.421, 120.456);
+    points += SeamAllowancePoint(229.393, 120.277);
+    points += SeamAllowancePoint(230.6, 120.629);
+    points += SeamAllowancePoint(232.808, 122.058);
+    points += SeamAllowancePoint(236.545, 125.75);
+    points += SeamAllowancePoint(241.092, 131.261);
+    points += SeamAllowancePoint(249.22, 142.455);
+    points += SeamAllowancePoint(262.477, 162.745);
+    points += SeamAllowancePoint(286.15, 201.448);
+    points += SeamAllowancePoint(323.075, 264.247);
+    points += SeamAllowancePoint(362.315, 330.86);
+    points += SeamAllowancePoint(390.909, 377.669);
+    points += SeamAllowancePoint(408.797, 405.589);
+    points += SeamAllowancePoint(417.135, 417.929);
+    points += SeamAllowancePoint(417.135, 417.929);
+    points += SeamAllowancePoint(35, 417.953);
 
     return points;
 }
@@ -3554,16 +3555,16 @@ QVector<QPointF> TST_VAbstractPiece::OutputPointsIssue298Case2() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<VSAPoint> TST_VAbstractPiece::InputPointsIssue548Case1() const
+QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsIssue548Case1() const
 {
-    QVector<VSAPoint> points;
+    QVector<SeamAllowancePoint> points;
 
-    points += VSAPoint(236.97989607468364, 65.89325192030674);
-    points += VSAPoint(198.93409106041895, 172.04876297154925);
-    points += VSAPoint(260.32251114299453, 75.38027418944861);
-    points += VSAPoint(324.54110236213444, 101.48031496062993);
-    points += VSAPoint(29.858267716535437, 300.85039370078744);
-    points += VSAPoint(99.86433649395013, 10.166060970128015);
+    points += SeamAllowancePoint(236.97989607468364, 65.89325192030674);
+    points += SeamAllowancePoint(198.93409106041895, 172.04876297154925);
+    points += SeamAllowancePoint(260.32251114299453, 75.38027418944861);
+    points += SeamAllowancePoint(324.54110236213444, 101.48031496062993);
+    points += SeamAllowancePoint(29.858267716535437, 300.85039370078744);
+    points += SeamAllowancePoint(99.86433649395013, 10.166060970128015);
 
     return points;
 }
@@ -3586,15 +3587,15 @@ QVector<QPointF> TST_VAbstractPiece::OutputPointsIssue548Case1() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<VSAPoint> TST_VAbstractPiece::InputPointsIssue548Case2() const
+QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsIssue548Case2() const
 {
-    QVector<VSAPoint> points;
-    points << VSAPoint(99.86433649395013, 10.166060970128015);
-    points << VSAPoint(176.0178302829931, 57.36978169486653);
-    points << VSAPoint(115.46606095399079, 156.67924434657942);
-    points << VSAPoint(197.43414263641347, 70.64467660756823);
-    points << VSAPoint(247.18110236220474, 101.48031496062993);
-    points << VSAPoint(29.858267716535437, 300.85039370078744);
+    QVector<SeamAllowancePoint> points;
+    points << SeamAllowancePoint(99.86433649395013, 10.166060970128015);
+    points << SeamAllowancePoint(176.0178302829931, 57.36978169486653);
+    points << SeamAllowancePoint(115.46606095399079, 156.67924434657942);
+    points << SeamAllowancePoint(197.43414263641347, 70.64467660756823);
+    points << SeamAllowancePoint(247.18110236220474, 101.48031496062993);
+    points << SeamAllowancePoint(29.858267716535437, 300.85039370078744);
 
     return points;
 }
@@ -3614,16 +3615,16 @@ QVector<QPointF> TST_VAbstractPiece::OutputPointsIssue548Case2() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<VSAPoint> TST_VAbstractPiece::InputPointsIssue548Case3() const
+QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsIssue548Case3() const
 {
-    QVector<VSAPoint> points;
+    QVector<SeamAllowancePoint> points;
 
-    points += VSAPoint(99.86433649395013, 10.166060970128015);
-    points += VSAPoint(176.0178302829931, 57.36978169486653);
-    points += VSAPoint(115.46606095399079, 156.67924434657942);
-    points += VSAPoint(197.43414263641347, 70.64467660756823);
-    points += VSAPoint(247.18110236220474, 101.48031496062993);
-    points += VSAPoint(29.858267716535437, 300.85039370078744);
+    points += SeamAllowancePoint(99.86433649395013, 10.166060970128015);
+    points += SeamAllowancePoint(176.0178302829931, 57.36978169486653);
+    points += SeamAllowancePoint(115.46606095399079, 156.67924434657942);
+    points += SeamAllowancePoint(197.43414263641347, 70.64467660756823);
+    points += SeamAllowancePoint(247.18110236220474, 101.48031496062993);
+    points += SeamAllowancePoint(29.858267716535437, 300.85039370078744);
 
     return points;
 }
@@ -3678,470 +3679,470 @@ QVector<QPointF> TST_VAbstractPiece::InputPointsCase5a() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<VSAPoint> TST_VAbstractPiece::InputPointsIssue646() const
+QVector<SeamAllowancePoint> TST_VAbstractPiece::InputPointsIssue646() const
 {
-    QVector<VSAPoint> points;
+    QVector<SeamAllowancePoint> points;
 
-    points += VSAPoint(1352.8346456692914, 1173.8581417322835);
+    points += SeamAllowancePoint(1352.8346456692914, 1173.8581417322835);
 
-    VSAPoint point = VSAPoint(1352.8346456692914, 1362.8345196850394);
+    SeamAllowancePoint point = SeamAllowancePoint(1352.8346456692914, 1362.8345196850394);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1352.8346456692914, 1362.8345196850394);
+    point = SeamAllowancePoint(1352.8346456692914, 1362.8345196850394);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1351.7927746622177, 1365.3174895470343);
+    point = SeamAllowancePoint(1351.7927746622177, 1365.3174895470343);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1349.2904293989368, 1370.0604466887874);
+    point = SeamAllowancePoint(1349.2904293989368, 1370.0604466887874);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1346.2962576995217, 1374.5430452326066);
+    point = SeamAllowancePoint(1346.2962576995217, 1374.5430452326066);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1342.8219234115563, 1378.7733079571037);
+    point = SeamAllowancePoint(1342.8219234115563, 1378.7733079571037);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1338.8790903826243, 1382.7592576408904);
+    point = SeamAllowancePoint(1338.8790903826243, 1382.7592576408904);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1334.4794224603097, 1386.5089170625781);
+    point = SeamAllowancePoint(1334.4794224603097, 1386.5089170625781);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1329.6345834921963, 1390.0303090007792);
+    point = SeamAllowancePoint(1329.6345834921963, 1390.0303090007792);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1324.356237325868, 1393.3314562341047);
+    point = SeamAllowancePoint(1324.356237325868, 1393.3314562341047);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1315.7019501937195, 1397.9127915604581);
+    point = SeamAllowancePoint(1315.7019501937195, 1397.9127915604581);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1302.6841808427803, 1403.289891141198);
+    point = SeamAllowancePoint(1302.6841808427803, 1403.289891141198);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1288.142331955491, 1407.930421917447);
+    point = SeamAllowancePoint(1288.142331955491, 1407.930421917447);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1272.169714312523, 1411.8985661180982);
+    point = SeamAllowancePoint(1272.169714312523, 1411.8985661180982);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1254.8596386945478, 1415.2585059720464);
+    point = SeamAllowancePoint(1254.8596386945478, 1415.2585059720464);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1236.3054158822356, 1418.074423708184);
+    point = SeamAllowancePoint(1236.3054158822356, 1418.074423708184);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1216.6003566562576, 1420.4105015554055);
+    point = SeamAllowancePoint(1216.6003566562576, 1420.4105015554055);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1195.8377717972853, 1422.3309217426045);
+    point = SeamAllowancePoint(1195.8377717972853, 1422.3309217426045);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1163.0181823648445, 1424.6044927975377);
+    point = SeamAllowancePoint(1163.0181823648445, 1424.6044927975377);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1116.2675882169847, 1426.7215739585208);
+    point = SeamAllowancePoint(1116.2675882169847, 1426.7215739585208);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(1041.771617936041, 1429.0735145188771);
+    point = SeamAllowancePoint(1041.771617936041, 1429.0735145188771);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(963.6986998754783, 1432.082545646023);
+    point = SeamAllowancePoint(963.6986998754783, 1432.082545646023);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(924.3395298428601, 1434.378255703845);
+    point = SeamAllowancePoint(924.3395298428601, 1434.378255703845);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(898.1648782802928, 1436.3169978244687);
+    point = SeamAllowancePoint(898.1648782802928, 1436.3169978244687);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(872.1457412334543, 1438.6744512606858);
+    point = SeamAllowancePoint(872.1457412334543, 1438.6744512606858);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(846.3754294830155, 1441.5147982413903);
+    point = SeamAllowancePoint(846.3754294830155, 1441.5147982413903);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(820.9472538096477, 1444.9022209954755);
+    point = SeamAllowancePoint(820.9472538096477, 1444.9022209954755);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(795.9545249940218, 1448.9009017518354);
+    point = SeamAllowancePoint(795.9545249940218, 1448.9009017518354);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(771.4905538168089, 1453.5750227393632);
+    point = SeamAllowancePoint(771.4905538168089, 1453.5750227393632);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(747.6486510586797, 1458.9887661869527);
+    point = SeamAllowancePoint(747.6486510586797, 1458.9887661869527);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(724.5221275003055, 1465.2063143234973);
+    point = SeamAllowancePoint(724.5221275003055, 1465.2063143234973);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(702.2042939223572, 1472.2918493778907);
+    point = SeamAllowancePoint(702.2042939223572, 1472.2918493778907);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(691.4173228346457, 1476.2203464566928);
+    point = SeamAllowancePoint(691.4173228346457, 1476.2203464566928);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(691.4173228346457, 1476.2203464566928);
+    point = SeamAllowancePoint(691.4173228346457, 1476.2203464566928);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(691.4173228346457, 1476.2203464566928);
+    point = SeamAllowancePoint(691.4173228346457, 1476.2203464566928);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(691.4173228346457, 1476.2203464566928);
+    point = SeamAllowancePoint(691.4173228346457, 1476.2203464566928);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(691.4173228346457, 1476.2203464566928);
+    point = SeamAllowancePoint(691.4173228346457, 1476.2203464566928);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(691.4173228346457, 1476.2203464566928);
+    point = SeamAllowancePoint(691.4173228346457, 1476.2203464566928);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(691.4173228346457, 1476.2203464566928);
+    point = SeamAllowancePoint(691.4173228346457, 1476.2203464566928);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(682.8822388593928, 1479.3575289855721);
+    point = SeamAllowancePoint(682.8822388593928, 1479.3575289855721);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(665.6479146239083, 1485.1110371155814);
+    point = SeamAllowancePoint(665.6479146239083, 1485.1110371155814);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(648.2139215316024, 1490.2399559097548);
+    point = SeamAllowancePoint(648.2139215316024, 1490.2399559097548);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(630.5772803437565, 1494.74477312083);
+    point = SeamAllowancePoint(630.5772803437565, 1494.74477312083);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(612.7350118216522, 1498.6259765015448);
+    point = SeamAllowancePoint(612.7350118216522, 1498.6259765015448);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(594.6841367265706, 1501.884053804636);
+    point = SeamAllowancePoint(594.6841367265706, 1501.884053804636);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(576.4216758197934, 1504.5194927828425);
+    point = SeamAllowancePoint(576.4216758197934, 1504.5194927828425);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(557.9446498626021, 1506.5327811889006);
+    point = SeamAllowancePoint(557.9446498626021, 1506.5327811889006);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(539.2500796162778, 1507.9244067755485);
+    point = SeamAllowancePoint(539.2500796162778, 1507.9244067755485);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(520.334985842102, 1508.6948572955234);
+    point = SeamAllowancePoint(520.334985842102, 1508.6948572955234);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(501.1963893013563, 1508.844620501563);
+    point = SeamAllowancePoint(501.1963893013563, 1508.844620501563);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(481.8313107553219, 1508.3741841464052);
+    point = SeamAllowancePoint(481.8313107553219, 1508.3741841464052);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(462.23677096528036, 1507.2840359827874);
+    point = SeamAllowancePoint(462.23677096528036, 1507.2840359827874);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(442.40979069251296, 1505.5746637634468);
+    point = SeamAllowancePoint(442.40979069251296, 1505.5746637634468);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(422.3473906983012, 1503.2465552411209);
+    point = SeamAllowancePoint(422.3473906983012, 1503.2465552411209);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(402.0465917439264, 1500.300198168548);
+    point = SeamAllowancePoint(402.0465917439264, 1500.300198168548);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(381.50441459067014, 1496.7360802984645);
+    point = SeamAllowancePoint(381.50441459067014, 1496.7360802984645);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(360.7178799998137, 1492.554689383609);
+    point = SeamAllowancePoint(360.7178799998137, 1492.554689383609);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(339.6840087326385, 1487.7565131767187);
+    point = SeamAllowancePoint(339.6840087326385, 1487.7565131767187);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(318.399821550426, 1482.3420394305313);
+    point = SeamAllowancePoint(318.399821550426, 1482.3420394305313);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(296.8623392144576, 1476.3117558977842);
+    point = SeamAllowancePoint(296.8623392144576, 1476.3117558977842);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(275.06858248601475, 1469.6661503312146);
+    point = SeamAllowancePoint(275.06858248601475, 1469.6661503312146);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(253.01557212637874, 1462.4057104835604);
+    point = SeamAllowancePoint(253.01557212637874, 1462.4057104835604);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(230.70032889683108, 1454.530924107559);
+    point = SeamAllowancePoint(230.70032889683108, 1454.530924107559);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(208.11987355865324, 1446.0422789559484);
+    point = SeamAllowancePoint(208.11987355865324, 1446.0422789559484);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(185.27122687312647, 1436.9402627814657);
+    point = SeamAllowancePoint(185.27122687312647, 1436.9402627814657);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(162.15140960153235, 1427.2253633368487);
+    point = SeamAllowancePoint(162.15140960153235, 1427.2253633368487);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(138.7574425051522, 1416.8980683748348);
+    point = SeamAllowancePoint(138.7574425051522, 1416.8980683748348);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(115.08634634526746, 1405.9588656481617);
+    point = SeamAllowancePoint(115.08634634526746, 1405.9588656481617);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(91.13514188315949, 1394.4082429095668);
+    point = SeamAllowancePoint(91.13514188315949, 1394.4082429095668);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(66.90084988010975, 1382.2466879117876);
+    point = SeamAllowancePoint(66.90084988010975, 1382.2466879117876);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(42.38049109739966, 1369.4746884075616);
+    point = SeamAllowancePoint(42.38049109739966, 1369.4746884075616);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(30.0, 1362.8345196850394);
+    point = SeamAllowancePoint(30.0, 1362.8345196850394);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    point = VSAPoint(30.0, 1362.8345196850394);
+    point = SeamAllowancePoint(30.0, 1362.8345196850394);
     point.SetSAAfter(0);
     point.SetSABefore(0);
     points.append(point);
 
-    points += VSAPoint(30.0, 1173.8581417322835);
-    points += VSAPoint(30.0, 39.999874015748034);
-    points += VSAPoint(30.0, 39.999874015748034);
-    points += VSAPoint(31.836416744798022, 50.53779899603764);
-    points += VSAPoint(35.952598805592906, 71.21252386912929);
-    points += VSAPoint(40.586864315463195, 91.4101105071633);
-    points += VSAPoint(45.72373012289418, 111.13523876561466);
-    points += VSAPoint(51.347713076371164, 130.39258849995826);
-    points += VSAPoint(57.44333002437946, 149.186839565669);
-    points += VSAPoint(63.995097815404385, 167.52267181822185);
-    points += VSAPoint(70.98753329793121, 185.40476511309168);
-    points += VSAPoint(78.4051533204453, 202.83779930575355);
-    points += VSAPoint(86.23247473143188, 219.82645425168224);
-    points += VSAPoint(94.4540143793763, 236.37540980635274);
-    points += VSAPoint(103.05428911276391, 252.48934582523998);
-    points += VSAPoint(112.01781578007993, 268.17294216381885);
-    points += VSAPoint(121.32911122980973, 283.43087867756435);
-    points += VSAPoint(130.97269231043856, 298.2678352219515);
-    points += VSAPoint(140.93307587045177, 312.688491652455);
-    points += VSAPoint(151.19477875833468, 326.69752782454987);
-    points += VSAPoint(161.74231782257255, 340.2996235937111);
-    points += VSAPoint(172.5602099116507, 353.4994588154136);
-    points += VSAPoint(183.63297187405442, 366.30171334513216);
-    points += VSAPoint(194.94512055826902, 378.7110670383419);
-    points += VSAPoint(206.4811728127799, 390.7321997505177);
-    points += VSAPoint(218.22564548607224, 402.3697913371344);
-    points += VSAPoint(230.1630554266314, 413.62852165366695);
-    points += VSAPoint(242.27791948294265, 424.51307055559033);
-    points += VSAPoint(254.55475450349132, 435.02811789837943);
-    points += VSAPoint(273.2244253126398, 450.16283591309366);
-    points += VSAPoint(298.5641233209854, 469.0320795095655);
-    points += VSAPoint(324.2730084590162, 486.5075542680491);
-    points += VSAPoint(350.2272155146146, 502.6266990323438);
-    points += VSAPoint(376.30287927566314, 517.426952646249);
-    points += VSAPoint(402.37613453004406, 530.9457539535642);
-    points += VSAPoint(428.3231160656401, 543.220541798089);
-    points += VSAPoint(454.0199586703335, 554.2887550236223);
-    points += VSAPoint(479.34279713200675, 564.1878324739641);
-    points += VSAPoint(504.1677662385423, 572.9552129929135);
-    points += VSAPoint(528.3710007778225, 580.62833542427);
-    points += VSAPoint(551.8286355377302, 587.2446386118332);
-    points += VSAPoint(574.4168053061474, 592.8415613994023);
-    points += VSAPoint(596.0116448709566, 597.4565426307768);
-    points += VSAPoint(616.4892890200404, 601.127021149756);
-    points += VSAPoint(635.725872541281, 603.8904358001398);
-    points += VSAPoint(653.5975302225612, 605.7842254257271);
-    points += VSAPoint(669.9803968517632, 606.8458288703175);
-    points += VSAPoint(684.7506072167696, 607.1126849777106);
-    points += VSAPoint(691.417322834647, 606.9290078739997);
-    points += VSAPoint(691.417322834647, 606.9290078739997);
-    points += VSAPoint(691.417322834647, 606.9290078739997);
-    points += VSAPoint(691.417322834647, 606.9290078739997);
-    points += VSAPoint(691.417322834647, 606.9290078739997);
-    points += VSAPoint(691.417322834647, 606.9290078739997);
-    points += VSAPoint(691.417322834647, 606.9290078739997);
-    points += VSAPoint(698.4117938885747, 606.70357708988);
-    points += VSAPoint(712.3872092557954, 606.6270580415836);
-    points += VSAPoint(726.3421370199347, 606.9929810221732);
-    points += VSAPoint(740.2718488317498, 607.7938249260419);
-    points += VSAPoint(754.1716163419968, 609.0220686475833);
-    points += VSAPoint(768.0367112014326, 610.6701910811905);
-    points += VSAPoint(781.8624050608131, 612.7306711212568);
-    points += VSAPoint(795.6439695708956, 615.1959876621759);
-    points += VSAPoint(809.3766763824362, 618.0586195983409);
-    points += VSAPoint(823.0557971461919, 621.3110458241451);
-    points += VSAPoint(843.4718370533695, 626.8577230967079);
-    points += VSAPoint(870.4518221032482, 635.6110880188724);
-    points += VSAPoint(897.1323526756041, 645.7882501986742);
-    points += VSAPoint(923.4756019764898, 657.3290407912602);
-    points += VSAPoint(949.4437432119576, 670.1732909517772);
-    points += VSAPoint(974.99894958806, 684.2608318353717);
-    points += VSAPoint(1000.1033943108496, 699.5314945971908);
-    points += VSAPoint(1024.7192505863786, 715.9251103923807);
-    points += VSAPoint(1048.8086916206998, 733.381510376089);
-    points += VSAPoint(1072.333890619865, 751.8405257034619);
-    points += VSAPoint(1095.257020789927, 771.2419875296464);
-    points += VSAPoint(1117.5402553369386, 791.5257270097889);
-    points += VSAPoint(1139.1457674669518, 812.6315752990365);
-    points += VSAPoint(1160.0357303860196, 834.499363552536);
-    points += VSAPoint(1180.1723173001938, 857.0689229254342);
-    points += VSAPoint(1199.517701415527, 880.2800845728775);
-    points += VSAPoint(1218.0340559380716, 904.072679650013);
-    points += VSAPoint(1235.6835540738803, 928.3865393119875);
-    points += VSAPoint(1252.4283690290056, 953.1614947139476);
-    points += VSAPoint(1268.2306740094996, 978.33737701104);
-    points += VSAPoint(1283.0526422214152, 1003.8540173584115);
-    points += VSAPoint(1296.8564468708046, 1029.651246911209);
-    points += VSAPoint(1309.60426116372, 1055.6688968245794);
-    points += VSAPoint(1321.258258306214, 1081.846798253669);
-    points += VSAPoint(1331.780611504339, 1108.1247823536248);
-    points += VSAPoint(1341.1334939641479, 1134.4426802795938);
-    points += VSAPoint(1349.2790788916927, 1160.7403231867224);
-    points += VSAPoint(1352.8346456692914, 1173.8581417322835);
+    points += SeamAllowancePoint(30.0, 1173.8581417322835);
+    points += SeamAllowancePoint(30.0, 39.999874015748034);
+    points += SeamAllowancePoint(30.0, 39.999874015748034);
+    points += SeamAllowancePoint(31.836416744798022, 50.53779899603764);
+    points += SeamAllowancePoint(35.952598805592906, 71.21252386912929);
+    points += SeamAllowancePoint(40.586864315463195, 91.4101105071633);
+    points += SeamAllowancePoint(45.72373012289418, 111.13523876561466);
+    points += SeamAllowancePoint(51.347713076371164, 130.39258849995826);
+    points += SeamAllowancePoint(57.44333002437946, 149.186839565669);
+    points += SeamAllowancePoint(63.995097815404385, 167.52267181822185);
+    points += SeamAllowancePoint(70.98753329793121, 185.40476511309168);
+    points += SeamAllowancePoint(78.4051533204453, 202.83779930575355);
+    points += SeamAllowancePoint(86.23247473143188, 219.82645425168224);
+    points += SeamAllowancePoint(94.4540143793763, 236.37540980635274);
+    points += SeamAllowancePoint(103.05428911276391, 252.48934582523998);
+    points += SeamAllowancePoint(112.01781578007993, 268.17294216381885);
+    points += SeamAllowancePoint(121.32911122980973, 283.43087867756435);
+    points += SeamAllowancePoint(130.97269231043856, 298.2678352219515);
+    points += SeamAllowancePoint(140.93307587045177, 312.688491652455);
+    points += SeamAllowancePoint(151.19477875833468, 326.69752782454987);
+    points += SeamAllowancePoint(161.74231782257255, 340.2996235937111);
+    points += SeamAllowancePoint(172.5602099116507, 353.4994588154136);
+    points += SeamAllowancePoint(183.63297187405442, 366.30171334513216);
+    points += SeamAllowancePoint(194.94512055826902, 378.7110670383419);
+    points += SeamAllowancePoint(206.4811728127799, 390.7321997505177);
+    points += SeamAllowancePoint(218.22564548607224, 402.3697913371344);
+    points += SeamAllowancePoint(230.1630554266314, 413.62852165366695);
+    points += SeamAllowancePoint(242.27791948294265, 424.51307055559033);
+    points += SeamAllowancePoint(254.55475450349132, 435.02811789837943);
+    points += SeamAllowancePoint(273.2244253126398, 450.16283591309366);
+    points += SeamAllowancePoint(298.5641233209854, 469.0320795095655);
+    points += SeamAllowancePoint(324.2730084590162, 486.5075542680491);
+    points += SeamAllowancePoint(350.2272155146146, 502.6266990323438);
+    points += SeamAllowancePoint(376.30287927566314, 517.426952646249);
+    points += SeamAllowancePoint(402.37613453004406, 530.9457539535642);
+    points += SeamAllowancePoint(428.3231160656401, 543.220541798089);
+    points += SeamAllowancePoint(454.0199586703335, 554.2887550236223);
+    points += SeamAllowancePoint(479.34279713200675, 564.1878324739641);
+    points += SeamAllowancePoint(504.1677662385423, 572.9552129929135);
+    points += SeamAllowancePoint(528.3710007778225, 580.62833542427);
+    points += SeamAllowancePoint(551.8286355377302, 587.2446386118332);
+    points += SeamAllowancePoint(574.4168053061474, 592.8415613994023);
+    points += SeamAllowancePoint(596.0116448709566, 597.4565426307768);
+    points += SeamAllowancePoint(616.4892890200404, 601.127021149756);
+    points += SeamAllowancePoint(635.725872541281, 603.8904358001398);
+    points += SeamAllowancePoint(653.5975302225612, 605.7842254257271);
+    points += SeamAllowancePoint(669.9803968517632, 606.8458288703175);
+    points += SeamAllowancePoint(684.7506072167696, 607.1126849777106);
+    points += SeamAllowancePoint(691.417322834647, 606.9290078739997);
+    points += SeamAllowancePoint(691.417322834647, 606.9290078739997);
+    points += SeamAllowancePoint(691.417322834647, 606.9290078739997);
+    points += SeamAllowancePoint(691.417322834647, 606.9290078739997);
+    points += SeamAllowancePoint(691.417322834647, 606.9290078739997);
+    points += SeamAllowancePoint(691.417322834647, 606.9290078739997);
+    points += SeamAllowancePoint(691.417322834647, 606.9290078739997);
+    points += SeamAllowancePoint(698.4117938885747, 606.70357708988);
+    points += SeamAllowancePoint(712.3872092557954, 606.6270580415836);
+    points += SeamAllowancePoint(726.3421370199347, 606.9929810221732);
+    points += SeamAllowancePoint(740.2718488317498, 607.7938249260419);
+    points += SeamAllowancePoint(754.1716163419968, 609.0220686475833);
+    points += SeamAllowancePoint(768.0367112014326, 610.6701910811905);
+    points += SeamAllowancePoint(781.8624050608131, 612.7306711212568);
+    points += SeamAllowancePoint(795.6439695708956, 615.1959876621759);
+    points += SeamAllowancePoint(809.3766763824362, 618.0586195983409);
+    points += SeamAllowancePoint(823.0557971461919, 621.3110458241451);
+    points += SeamAllowancePoint(843.4718370533695, 626.8577230967079);
+    points += SeamAllowancePoint(870.4518221032482, 635.6110880188724);
+    points += SeamAllowancePoint(897.1323526756041, 645.7882501986742);
+    points += SeamAllowancePoint(923.4756019764898, 657.3290407912602);
+    points += SeamAllowancePoint(949.4437432119576, 670.1732909517772);
+    points += SeamAllowancePoint(974.99894958806, 684.2608318353717);
+    points += SeamAllowancePoint(1000.1033943108496, 699.5314945971908);
+    points += SeamAllowancePoint(1024.7192505863786, 715.9251103923807);
+    points += SeamAllowancePoint(1048.8086916206998, 733.381510376089);
+    points += SeamAllowancePoint(1072.333890619865, 751.8405257034619);
+    points += SeamAllowancePoint(1095.257020789927, 771.2419875296464);
+    points += SeamAllowancePoint(1117.5402553369386, 791.5257270097889);
+    points += SeamAllowancePoint(1139.1457674669518, 812.6315752990365);
+    points += SeamAllowancePoint(1160.0357303860196, 834.499363552536);
+    points += SeamAllowancePoint(1180.1723173001938, 857.0689229254342);
+    points += SeamAllowancePoint(1199.517701415527, 880.2800845728775);
+    points += SeamAllowancePoint(1218.0340559380716, 904.072679650013);
+    points += SeamAllowancePoint(1235.6835540738803, 928.3865393119875);
+    points += SeamAllowancePoint(1252.4283690290056, 953.1614947139476);
+    points += SeamAllowancePoint(1268.2306740094996, 978.33737701104);
+    points += SeamAllowancePoint(1283.0526422214152, 1003.8540173584115);
+    points += SeamAllowancePoint(1296.8564468708046, 1029.651246911209);
+    points += SeamAllowancePoint(1309.60426116372, 1055.6688968245794);
+    points += SeamAllowancePoint(1321.258258306214, 1081.846798253669);
+    points += SeamAllowancePoint(1331.780611504339, 1108.1247823536248);
+    points += SeamAllowancePoint(1341.1334939641479, 1134.4426802795938);
+    points += SeamAllowancePoint(1349.2790788916927, 1160.7403231867224);
+    points += SeamAllowancePoint(1352.8346456692914, 1173.8581417322835);
 
     return points;
 }

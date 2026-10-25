@@ -538,12 +538,12 @@ QVector<QPointF> correctPosition (const QRectF &parentBoundingRect, QVector<QPoi
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<VSAPoint> prepareAllowance (const QVector<QPointF> &points)
+QVector<SeamAllowancePoint> prepareAllowance (const QVector<QPointF> &points)
 {
-    QVector<VSAPoint> allowancePoints;
+    QVector<SeamAllowancePoint> allowancePoints;
     for(int i = 0; i < points.size(); ++i)
     {
-        allowancePoints.append(VSAPoint(points.at(i)));
+        allowancePoints.append(SeamAllowancePoint(points.at(i)));
     }
     return allowancePoints;
 }

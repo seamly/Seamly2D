@@ -54,7 +54,7 @@
 
 #include "../vtest/abstracttest.h"
 
-class VSAPoint;
+class SeamAllowancePoint;
 
 class TST_VAbstractPiece : public AbstractTest
 {
@@ -86,39 +86,39 @@ private slots:
 #endif
 
 private:
-    QVector<VSAPoint> InputPointsCase1() const;
+    QVector<SeamAllowancePoint> InputPointsCase1() const;
     QVector<QPointF>  OutputPointsCase1() const;
 
-    QVector<VSAPoint> InputPointsCase2() const;
+    QVector<SeamAllowancePoint> InputPointsCase2() const;
     QVector<QPointF>  OutputPointsCase2() const;
 
-    QVector<VSAPoint> InputPointsCase3() const;
+    QVector<SeamAllowancePoint> InputPointsCase3() const;
     QVector<QPointF>  OutputPointsCase3() const;
 
     void Case3() const;
     void Case4() const;
     void Case5() const;
 
-    QVector<VSAPoint> InputPointsIssue298Case1() const;
+    QVector<SeamAllowancePoint> InputPointsIssue298Case1() const;
     QVector<QPointF> OutputPointsIssue298Case1() const;
 
-    QVector<VSAPoint> InputPointsIssue298Case2() const;
+    QVector<SeamAllowancePoint> InputPointsIssue298Case2() const;
     QVector<QPointF> OutputPointsIssue298Case2() const;
 
-    QVector<VSAPoint> InputPointsIssue548Case1() const;
+    QVector<SeamAllowancePoint> InputPointsIssue548Case1() const;
     QVector<QPointF> OutputPointsIssue548Case1() const;
 
-    QVector<VSAPoint> InputPointsIssue548Case2() const;
+    QVector<SeamAllowancePoint> InputPointsIssue548Case2() const;
     QVector<QPointF> OutputPointsIssue548Case2() const;
 
-    QVector<VSAPoint> InputPointsIssue548Case3() const;
+    QVector<SeamAllowancePoint> InputPointsIssue548Case3() const;
     QVector<QPointF> OutputPointsIssue548Case3() const;
 
     QVector<QPointF> InputPointsCase3a() const;
     QVector<QPointF> InputPointsCase4a() const;
     QVector<QPointF> InputPointsCase5a() const;
 
-    QVector<VSAPoint> InputPointsIssue646() const;
+    QVector<SeamAllowancePoint> InputPointsIssue646() const;
     QVector<QPointF>  OutputPointsIssue646() const;
 };
 
