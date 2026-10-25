@@ -32,6 +32,7 @@ MALE_SHIRT
 | Layout.97.5 | 24 | S2D > male_shirt, jacket2 > Piece Properties: On fold check box, no fold position | ?
 | Layout.98.6 | 24 | S2D > male_shirt > Piece Properties: Flip radio buttons, Flip submenu | ?
 | Seamly2D.11.9 | 27 | S2D > male_shirt > Built-in seam line in Piece mode, at a fold line | ?
+| Dead.4.1.5, Dead.4.2 | 28 | S2D > jacket2, male_shirt > Old layout, print, console export and Export Pieces removed | ?
 
 | Layout.83.4 | 15 | SL > male_shirt > Nested legend squares | ?
 | Layout.82.3 | 16 | SL > male_shirt > Nested size colors: dark and pastel | ?
@@ -446,4 +447,19 @@ Needs the next MSI. Do not save the pattern changes.
 - [ ] Piece tool: draw a new piece with Built in checked. The preview shows the seam line inside the path; changing the width moves it.
 - [ ] Press Layout. SeamlyLayout shows the cut line, the open seam line and the fold line.
 - [ ] SeamlyLayout Export > DXF > DXF-ASTM (R13). Layer 1 is the cut line. Layer 14 is the seam line, open; its ends lie on the layer 6 mirror line.
-- [ ] Seamly2D Piece mode > Export Pieces As, a DXF AAMA format. Layer 8 is the seam line, not a copy of the layer 1 outline.
+- Removed step: Seamly2D Export Pieces As DXF AAMA. Dead.4.2 deleted Export Pieces and `vdxf`; SeamlyLayout writes DXF-AAMA.
+
+## 28. Old Seamly2D layout, print, console export and Export Pieces removed
+
+Needs the next MSI.
+
+- [ ] File menu: no Print, no Preview, no Export As.
+- [ ] Tools menu: no Layout submenu. Toolbox toolbar: no Layout Tools button.
+- [ ] View > Toolbars: no Layout ToolBar. View menu: no Layout Pages dock.
+- [ ] Preferences > Graphics: no "Layout" toolbar check box.
+- [ ] jacket2: press Layout. SeamlyLayout opens with every size, as before. Close SeamlyLayout: Seamly2D returns to the mode it came from.
+- [ ] Draft mode: open the Curves toolbox page, press Layout, close SeamlyLayout: the Curves page is still open.
+- [ ] male_shirt: Piece mode has no Export Pieces: no toolbox button, no Details menu item, no Details toolbar action.
+- [ ] Help > Shortcuts: no Export Pieces, New Layout or Export Layout. "Tools" lists Last Tool.
+- [ ] Draft mode > Export Draft Blocks As: the dialog offers SVG, PDF, PNG, JPG, BMP, TIF and PPM only, and has no "Binary form", "Text as paths" or size list. SVG, PDF and PNG export.
+- [ ] `seamly2d --help > help.txt`: `help.txt` lists no `--basename`. `seamly2d --test <pattern>` loads the pattern and quits.

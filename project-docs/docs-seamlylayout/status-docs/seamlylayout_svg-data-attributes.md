@@ -8,9 +8,8 @@
 ## When tagged SVGs are produced
 
 1. **Layout Mode handoff** — clicking Layout Mode in Seamly2D builds the tagged pieces SVG in memory, launches SeamlyLayout with `--svg-stdin`, and writes that document to the new process's standard input. No file is written.
-2. **Manual piece exports** — Piece mode → Export Pieces → SVG carries the same attributes (with or without "text as paths").
 
-Whole-scene exports (draft blocks) keep the legacy untagged single-group structure; only piece-based exports are tagged.
+Seamly2D writes no other tagged SVG. Export Draft Blocks writes the legacy untagged single-group structure. SeamlyLayout makes every piece and layout export; Export Pieces was removed (Task Dead.4.2).
 
 ## Launch contract (Task 49, revised by Seamly2D.5)
 
@@ -79,7 +78,7 @@ All ids are unique and XML-valid by construction. **Breaking change vs. pre-cont
 - No empty `<g>` elements and no spurious `M0,0` / empty-`d` paths (Qt generator artifacts are stripped).
 - Components that paint nothing (e.g. a piece without notches or internal paths) are simply absent — consumers must not assume every type exists in every piece.
 - Component geometry is emitted in the merged document's single coordinate space (the flat-arranged paper; `viewBox` in scene units at the generator resolution). No transforms are introduced beyond what Qt's SVG generator emits inside the groups.
-- Label groups contain real `<text>` elements when "text as paths" is off (label lines are rendered by `SvgTextItem`, `src/libs/vlayout/svg_text_item.cpp`, which paints through `QPainter::drawText()` so Qt's SVG engine emits `<text>` with the label's `font-family`, `font-size`, `font-weight`/`font-style` and fill color), and `<path>` glyph outlines when on (`--text2paths` / "text as paths"); the Layout Mode handoff always keeps real text.
+- Label groups contain real `<text>` elements (label lines are rendered by `SvgTextItem`, `src/libs/vlayout/svg_text_item.cpp`, which paints through `QPainter::drawText()` so Qt's SVG engine emits `<text>` with the label's `font-family`, `font-size`, `font-weight`/`font-style` and fill color). The handoff never sends glyph outlines.
 
 ## Semantics / notes
 
@@ -106,4 +105,4 @@ group structure are the same in every mode. Code: `crates/svg_label_text/`.
 
 - `label_text` is new and export-only. Seamly2D never writes it. It sits inside a label group and keeps the text's `id` and `transform`.
 - `data-text` holds the label string, so machines can still read it.
-- Labels that are already paths (`--text2paths`) disable all three modes. The menu then offers "As supplied", which exports the layout unchanged.
+- Labels that are already paths (an SVG from the removed Seamly2D Export Pieces "text as paths") disable all three modes. The menu then offers "As supplied", which exports the layout unchanged.

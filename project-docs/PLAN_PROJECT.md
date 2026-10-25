@@ -1,5 +1,7 @@
 # Tagged SVG Handoff to SeamlyLayout
 
+> Status: history. Task Dead.4 (`project-docs/docs-seamlylayout/TODO_REMOVE_DEAD_LAYOUT_CODE.md`) removed Export Pieces, File > Export As, the built-in layout and printing. File and line references below describe the code before that task.
+
 ## Context
 
 Seamly2D's built-in layout engine is being replaced by **SeamlyLayout**, a separate Rust/Qt6/C++ desktop app. The new workflow: the user clicks **Layout Mode** exactly as today, but instead of the built-in layout settings/nesting engine, Seamly2D auto-generates an SVG containing all pattern pieces and their internal objects — every element tagged with `data-*` attributes (per `project-docs/NEW-ATTRIBUTES.csv`) so SeamlyLayout's algorithm can identify and consume them — and opens SeamlyLayout with that file. Inside SeamlyLayout the user enters layout settings, generates the layout, optionally does manual adjustment, saves, views, and prints. The return leg (Seamly2D reading layouts back) is out of scope; viewing/printing live in SeamlyLayout.
@@ -90,7 +92,7 @@ Keep the existing guards (zero pieces / zero in-layout pieces, 3993–4020) and 
 2. Launch SeamlyLayout detached, following the SeamlyMe pattern: `QProcess::startDetached(seamlyLayoutPath, {svgPath}, workingDir)`. Add `seamlyLayoutFilePath()` to the application class (`src/app/seamly2d/core/application_2d.*`, mirroring `seamlyMeFilePath()`) plus a preferences entry for the executable path.
 3. If the executable isn't found or generation fails: message box explaining the problem; stay in the prior mode.
 
-- The built-in layout UI (`layoutPages_DockWidget`, layout settings dialog, `VLayoutGenerator` pipeline, in-app layout print/preview actions) is no longer triggered from Layout Mode but its code stays in place; physical removal is a follow-on cleanup once SeamlyLayout is fully adopted. Command-line export (`DoExport`) is untouched.
+- The built-in layout UI (`layoutPages_DockWidget`, layout settings dialog, `VLayoutGenerator` pipeline, in-app layout print/preview actions) and the command-line export (`DoExport`) are removed: Task Dead.4.1, `project-docs/docs-seamlylayout/TODO_REMOVE_DEAD_LAYOUT_CODE.md`.
 
 ## Resulting SVG shape
 
