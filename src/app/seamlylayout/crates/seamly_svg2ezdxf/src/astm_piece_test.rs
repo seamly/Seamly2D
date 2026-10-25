@@ -630,6 +630,29 @@ mod tests {
         assert!(((m1.y - m2.y).abs() - 480.0 * MM_PER_PX).abs() < 1e-6, "the cut line edge, not the shorter fold line");
     }
 
+    // @brief A Seamly2D fold line group also holds the arrow line and the "Foldline" label, as tagged groups.
+    // The mirror line is the fold line path, whatever the group order; the label is not piece text.
+    #[test]
+    fn fold_line_arrow_and_label_are_not_the_mirror_line() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="960" height="960" viewBox="0 0 960 960">
+          <g id="piece_Back" data-type="piece" data-name="Back" data-on-fold="true">
+            <g data-type="cutline"><path d="M 96,0 L 96,480 L 0,480 L 0,0 Z"/></g>
+            <g id="fold_line_Back" data-type="fold_line">
+              <g id="fold_line_arrow_Back" data-type="fold_line_arrow"><path d="M 3,360 L 12,360 L 12,120 L 3,120"/></g>
+              <g><path d="M 0,480 L 0,0"/></g>
+              <g id="fold_line_label_Back" data-type="fold_line_label"><text x="0" y="4">Foldline</text></g>
+            </g>
+          </g>
+        </svg>"#;
+        let doc = Document::parse(svg).expect("fixture parses");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        let back = &drawing.blocks[0];
+        let (f1, f2) = back.mirror_line.expect("mirror line from the fold line");
+        assert!(f1.x.abs() < 1e-9 && f2.x.abs() < 1e-9, "the fold line, not the arrow line");
+        assert!(((f1.y - f2.y).abs() - 480.0 * MM_PER_PX).abs() < 1e-6, "the whole fold line");
+        assert!(back.annotations.iter().all(|a| a.text != "Foldline"), "the label is not piece text");
+    }
+
     // @brief A built-in seam allowance with a fold line: Seamly2D sends the seam line open, both ends on the
     // fold line. It stays an open sew line that ends on the mirror line; the cut line is the boundary.
     #[test]

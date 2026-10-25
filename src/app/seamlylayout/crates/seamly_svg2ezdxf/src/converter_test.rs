@@ -129,6 +129,26 @@ mod tests {
         assert_eq!(layers, vec!["1", "4", "11", "8", "15"]);
     }
 
+    // @brief The fold line goes on the mirror line layer; its arrow line is an internal line, its label text.
+    #[test]
+    fn fold_line_arrow_and_label_layers() {
+        let svg = r#"
+            <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+                <g id="Back">
+                    <g data-type="fold_line">
+                        <line x1="0" y1="0" x2="0" y2="90"/>
+                        <g data-type="fold_line_arrow"><line x1="5" y1="20" x2="5" y2="70"/></g>
+                        <g data-type="fold_line_label"><text x="3" y="40">Foldline</text></g>
+                    </g>
+                </g>
+            </svg>
+        "#;
+        let doc = Document::parse(svg).expect("Failed to parse SVG");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("Failed to convert");
+        let layers: Vec<&str> = drawing.blocks[0].entities.iter().map(|e| e.layer()).collect();
+        assert_eq!(layers, vec!["6", "8", "15"]);
+    }
+
     // @brief Test coordinate transformation (Y-axis inversion).
     #[test]
     fn test_coordinate_transformation() {
