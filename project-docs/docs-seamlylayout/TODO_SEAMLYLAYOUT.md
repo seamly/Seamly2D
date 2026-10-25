@@ -4,6 +4,17 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Implement
 
+### [ ] Task Layout.101 — Implement - `SEAMLY_DATA_DIR` for SeamlyLayout
+
+- A coming `develop` merge adds `SEAMLY_DATA_DIR` to Seamly2D and SeamlyMe (`VCommonSettings::configureDataDirectory`).
+- When it is set, they keep settings in `<dir>/settings/` and logs in `<dir>/logs/seamly2d/`. A relative path exits 78; an unwritable one exits 73.
+- SeamlyLayout ignores it: settings (`PreferencesModel.cpp`) and logs (`Logger.cpp`) stay in `AppConfigLocation`.
+- SeamlyLayout inherits the variable from Seamly2D's `--svg-stdin` launch, so one variable can isolate the whole suite.
+- [ ] Layout.101.1 Decide the SeamlyLayout folders, e.g. `<dir>/settings/` and `<dir>/logs/seamlylayout/`.
+- [ ] Layout.101.2 Read and check the variable before `QApplication`, with the same exit codes.
+- [ ] Layout.101.3 Tests: valid, empty, relative, and unwritable directory.
+- Starts after the `develop` merge that brings `configureDataDirectory`.
+
 ## VERIFY
 
 ### [ ] Task Layout.6 — Verify - DXF-ASTM grading
