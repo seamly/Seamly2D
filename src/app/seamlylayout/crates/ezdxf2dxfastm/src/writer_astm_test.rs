@@ -651,6 +651,47 @@ mod tests {
         drawing
     }
 
+    // @brief Handoff of one multisize piece; `{label}` is its `piece_label` group, or nothing for a hidden label.
+    const AAMA_HANDOFF: &str = r#"
+        <svg viewBox="0 0 960 960" width="254mm" height="254mm" xmlns="http://www.w3.org/2000/svg">
+          <g id="pattern-1" data-type="pattern" data-name="Skirt">
+            <g id="piece_Front_s36" data-type="piece" data-name="Front" data-size="36" data-quantity="2" data-material="Lining">
+              <g data-type="cutline"><path d="M 0,0 L 960,0 L 960,960 L 0,960 Z"/></g>
+              <g data-type="grainline"><path d="M 480,800 L 470,780 L 490,780 L 480,800 L 480,200"/></g>
+              {label}
+            </g>
+          </g>
+        </svg>"#;
+
+    // @brief Label lines that contradict the piece data, then two lines that do not.
+    const AAMA_CONFLICTING_LABEL: &str = r#"
+              <g data-type="piece_label">
+                <g transform="matrix(1,0,0,1,300,400)"><text font-size="24" x="0" y="0">Piece Name: Back</text></g>
+                <g transform="matrix(1,0,0,1,300,440)"><text font-size="24" x="0" y="0">Quantity: 9</text></g>
+                <g transform="matrix(1,0,0,1,300,480)"><text font-size="24" x="0" y="0">size : 99</text></g>
+                <g transform="matrix(1,0,0,1,300,520)"><text font-size="24" x="0" y="0">Material: Cotton</text></g>
+                <g transform="matrix(1,0,0,1,300,560)"><text font-size="24" x="0" y="0">Cut 2 of Fabric</text></g>
+                <g transform="matrix(1,0,0,1,300,600)"><text font-size="24" x="0" y="0">Note: fold</text></g>
+              </g>"#;
+
+    // @brief DXF-AAMA piece text comes from the piece data whether the label is hidden or shown:
+    //        each field once, with the piece's value. Other label lines stay on layer 1.
+    #[test]
+    fn aama_piece_text_comes_from_piece_data_not_label() {
+        let piece_text = ["Piece Name:Front", "Size:36", "Quantity:1,1", "Material:Lining"];
+        let cases = [("hidden", "", vec![]), ("shown", AAMA_CONFLICTING_LABEL, vec!["Cut 2 of Fabric", "Note: fold"])];
+        for (case, label, kept) in cases {
+            let doc = svg_dom::Document::parse(&AAMA_HANDOFF.replace("{label}", label)).expect("fixture parses");
+            let options = SvgToEzdxfOptions { dxf_version: DxfVersion::R11, ..SvgToEzdxfOptions::default() };
+            let drawing = svg_to_ezdxf(&doc, &options).expect("converts");
+            let dxf = parse_dxf(&export_to_string(&drawing, &format!("aama_piece_text_{case}"), &aama_options()));
+            let texts: Vec<&str> =
+                dxf.blocks[0].1.iter().filter(|e| e.kind == "TEXT" && e.layer() == "1").map(|e| e.get(1).unwrap()).collect();
+            let expected: Vec<&str> = piece_text.into_iter().chain(kept).collect();
+            assert_eq!(texts, expected, "{case} label");
+        } // for each case
+    }
+
     // @brief A graded DXF-AAMA export keeps layer 5 and the `# n` texts, and its rule file names ANSI/AAMA.
     #[test]
     fn aama_graded_export_writes_rule_ids_and_aama_rule_file() {
