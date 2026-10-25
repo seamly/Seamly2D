@@ -2,6 +2,18 @@
 
 ## Current status
 
+### 2026-10-25 — DXF units and McNeel AAMA items approved, not started
+
+- Next session: implement Task Layout.103 (DXF units), then Layout.104 (DXF-AAMA piece text), then Layout.100 (remove DXF-ASTM R12). Full specs and decisions are in `TODO_SEAMLYLAYOUT.md`.
+- Layout.103: pattern unit decides the units. mm → `METRIC`, sizes unchanged; cm → `METRIC`, sizes ×10; inch → `ENGLISH`, sizes unchanged, every length in inches with 4 decimals. Needs new handoff attribute `data-units` (Seamly2D `SvgGenerator`), so it touches Seamly2D C++ and the contract.
+- Layout.104: `Annotation:` from `data-annotation`; block name `<piece name>_<size>`; `Creation Time:` `HH:MM:SS`. DXF-AAMA only.
+- Layout.100: keep the AC1009 writer, which DXF-AAMA (R11) uses.
+- Layout.102 (CLO3D layers) and Layout.101 (`SEAMLY_DATA_DIR`) are filed, not approved for work.
+- Committed today: `seamlylayout_DXF_AAMA.md` "McNeel guide" (piece text and layers 0–19 compared with the output).
+- Open question for the user: untracked `project-docs/docs-seamlylayout/AAMA-INTEROP.md` copies the upstream PR text about the old `vdxf` output; rewrite or leave.
+- Work method: peer sessions share the main tree. Use a worktree from `run-seamlyLayout`, merge with `merge-tree` + `commit-tree` + `update-ref`, then sync the main tree paths and tell the peers.
+- Uncommitted user files left untouched: `AGENTS.md`, `AAMA-INTEROP.md`, `test-seamly-layout/foldline_arrowline.*`, `test-seamly-layout/layouts/*`. `TODO_SEAMLYLAYOUT.md` Layout.100 is now committed (user asked for the task).
+
 ### 2026-10-25 — Dead.4.3: `AbstractPiece`, `SeamAllowancePoint`, `LabelTextManager` in `vpatterndb`; merged into local `run-seamlyLayout`, not pushed
 
 - Moved from vlayout and renamed: `VAbstractPiece` → `AbstractPiece` (+ `AbstractPieceData.h`), `VSAPoint` → `SeamAllowancePoint` (own header), `VTextManager` → `LabelTextManager`. vpatterndb includes no vlayout header now.

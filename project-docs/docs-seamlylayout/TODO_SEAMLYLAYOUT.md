@@ -4,6 +4,50 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Implement
 
+### [ ] Task Layout.100 — Implement - Remove the DXF-ASTM (R12) export code and menu option
+
+- User decision: remove the DXF-ASTM (R12) export option - it isn't used often. We only need DXF-ASTM (R13) and DXF-AAMA options. DXF-ASTM (CLO3D) remains disabled.
+- Keep the AC1009 writer: DXF-AAMA (R11) is the same file structure (`DxfVersion::R11`, `export_dxf_astm`). R13 is rewritten from it (`upgrade_to_r13`).
+- [ ] Layout.100.1 `ExportMenu.qml`: remove the "DXF-ASTM (R12)" item and `exportDxfAstmR12Requested`; `TopMenuBar.qml` and `Main.qml` handlers.
+- [ ] Layout.100.2 `Main.qml`: `pendingDxfVersion` defaults and the View menu "DXF-ASTM" item (`requestDxfExport(false, "R12")`) move to R13.
+- [ ] Layout.100.3 `cxxqt_bridge` `export_dxf` (`lib.rs`, `exports.rs`): drop the `"R12"` choice; R11 (AAMA) and R13 stay.
+- [ ] Layout.100.4 `DxfVersion::R12`: remove, or keep only as the internal AC1009 base of R11; update tests that export R12 (`writer_test.rs`, `writer_astm_test.rs`, `writer_r13_test.rs`, `exports.rs`).
+- [ ] Layout.100.5 File name segment `R12` (`Main.qml` `chooseDxfPath`) and docs (`seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, `TODO_DXF.md`, `AGENT_CHECKLIST.md`).
+- [ ] Layout.100.6 User check: the DXF submenu shows R13, CLO3D and AAMA only.
+
+### [ ] Task Layout.103 — Implement - DXF units: `METRIC` in mm, `ENGLISH` in inches
+
+User approved (2026-10-25). The pattern unit decides the file units:
+
+| Pattern unit | `Units:` | Size values | Lengths |
+|---|---|---|---|
+| mm | `METRIC` | Unchanged | mm, 2 decimals (as now) |
+| cm | `METRIC` | Multiplied by 10 (50 → 500) | mm, 2 decimals (as now) |
+| inch | `ENGLISH` | Unchanged | inches, 4 decimals |
+
+- `.smms` files cannot be in inches (SeamlyMe offers inches for `.smis` only), so `ENGLISH` comes from an inch pattern with individual measurements (`data-sample-size`).
+- Size values: `Size:` / `Size Name:`, `Sample Size:`, `.rul` size list and sample size, the "Size N" label text in the DXF.
+- The screen, tabs, file names and legend keep pattern units.
+- A handoff without `data-units` writes `METRIC` with no conversion.
+- [ ] Layout.103.1 Seamly2D: `SvgGenerator` writes `data-units` (`mm`, `cm`, `inch`, the pattern unit) on the pattern group; caller `MainWindowsNoGUI`. Qt test in `tst_svgcomponenttags.cpp`.
+- [ ] Layout.103.2 `SVG-DATA-ATTRIBUTES.md`: add `data-units`; size rows name the DXF conversion.
+- [ ] Layout.103.3 `seamly_svg2ezdxf`: read `data-units` into `Drawing`; convert cm size values to mm.
+- [ ] Layout.103.4 `ezdxf2dxfastm`: `ENGLISH` writes every length in inches with 4 decimals: coordinates, text heights, notch depth and width, `Curve Tolerance:`, `.rul` grade steps. `Units:ENGLISH`.
+- [ ] Layout.103.5 Rust tests: mm, cm and inch handoffs; `.rul`; R11, R12 and R13 (R12 until Layout.100).
+- [ ] Layout.103.6 Docs: `seamlylayout_DXF_AAMA.md` (Decisions, McNeel table `Size:` row), `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
+- [ ] Layout.103.7 Verify: `cargo test --workspace`; Qt test via the scratch test harness; MSI only when the user asks.
+
+### [ ] Task Layout.104 — Implement - DXF-AAMA piece text from the McNeel guide
+
+User approved (2026-10-25). DXF-AAMA only; DXF-ASTM and CLO3D keep their output. Guide: `dxf-docs/seamlylayout_DXF_AAMA.md`, "McNeel guide".
+
+- [ ] Layout.104.1 `Annotation:` piece text from the piece `data-annotation` (omitted when absent). Converter field on `Block`; writer line after `Size:`.
+- [ ] Layout.104.2 Block name `<piece name>_<size>` (e.g. `Front_36`); individual pattern `<piece name>`. ASCII letters, digits, `_` and `-` only; use the numbered name when pieces share one; fall back to the svg id. ASTM and CLO3D keep `<svg id>_M`.
+- [ ] Layout.104.3 `Creation Time:` as `HH:MM:SS` in DXF-AAMA; DXF-ASTM keeps `hh-mm`. Check the `.rul` header time too.
+- [ ] Layout.104.4 Tests in `writer_astm_test.rs` (`aama_*`).
+- [ ] Layout.104.5 Docs: `seamlylayout_DXF_AAMA.md` Decisions and McNeel table.
+- Not done (user decisions): `Piece Name:` stays full length; `Material:` stays the full name; no `Category:`; layer 5 keeps the grade reference line.
+
 ### [ ] Task Layout.101 — Implement - `SEAMLY_DATA_DIR` for SeamlyLayout
 
 - A coming `develop` merge adds `SEAMLY_DATA_DIR` to Seamly2D and SeamlyMe (`VCommonSettings::configureDataDirectory`).
