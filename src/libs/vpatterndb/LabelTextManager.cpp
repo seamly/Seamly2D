@@ -62,7 +62,7 @@
 #include "../vmisc/vabstractapplication.h"
 #include "../vmisc/vmath.h"
 #include "../vpatterndb/vcontainer.h"
-#include "vtextmanager.h"
+#include "LabelTextManager.h"
 
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief TextLine::TextLine default constructor
@@ -75,7 +75,7 @@ TextLine::TextLine()
     , m_eAlign(Qt::AlignCenter)
 {}
 
-QList<TextLine> VTextManager::m_patternLabelLines = QList<TextLine>();
+QList<TextLine> LabelTextManager::m_patternLabelLines = QList<TextLine>();
 
 namespace
 {
@@ -197,21 +197,21 @@ QList<TextLine> PrepareLines(const QVector<VLabelTemplateLine> &lines)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/// @brief VTextManager::VTextManager constructor
+/// @brief LabelTextManager::LabelTextManager constructor
 //---------------------------------------------------------------------------------------------------------------------
-VTextManager::VTextManager()
+LabelTextManager::LabelTextManager()
      : m_font()
      , m_liLines()
 {}
 
 //---------------------------------------------------------------------------------------------------------------------
-VTextManager::VTextManager(const VTextManager &text)
+LabelTextManager::LabelTextManager(const LabelTextManager &text)
     : m_font(text.GetFont())
     , m_liLines(text.GetAllSourceLines())
 {}
 
 //---------------------------------------------------------------------------------------------------------------------
-VTextManager &VTextManager::operator=(const VTextManager &text)
+LabelTextManager &LabelTextManager::operator=(const LabelTextManager &text)
 {
     if ( &text == this )
     {
@@ -226,7 +226,7 @@ VTextManager &VTextManager::operator=(const VTextManager &text)
 // @brief GetSpacing returns the vertical spacing between the lines
 // @return spacing
 //---------------------------------------------------------------------------------------------------------------------
-int VTextManager::GetSpacing() const
+int LabelTextManager::GetSpacing() const
 {
     return 0;
 }
@@ -235,7 +235,7 @@ int VTextManager::GetSpacing() const
 // @brief SetFont set the text base font
 // @param font text base font
 //---------------------------------------------------------------------------------------------------------------------
-void VTextManager::setFont(const QFont& font)
+void LabelTextManager::setFont(const QFont& font)
 {
     m_font = font;
 }
@@ -244,7 +244,7 @@ void VTextManager::setFont(const QFont& font)
 // @brief GetFont returns the text base font
 // @return text base font
 //---------------------------------------------------------------------------------------------------------------------
-const QFont& VTextManager::GetFont() const
+const QFont& LabelTextManager::GetFont() const
 {
     return m_font;
 }
@@ -253,32 +253,32 @@ const QFont& VTextManager::GetFont() const
 // @brief SetFontSize sets the font size
 // @param iFS font size in pixels
 //---------------------------------------------------------------------------------------------------------------------
-void VTextManager::SetFontSize(int iFS)
+void LabelTextManager::SetFontSize(int iFS)
 {
     iFS < MIN_FONT_SIZE ? m_font.setPixelSize(MIN_FONT_SIZE) : m_font.setPixelSize(iFS);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QList<TextLine> VTextManager::GetAllSourceLines() const
+QList<TextLine> LabelTextManager::GetAllSourceLines() const
 {
     return m_liLines;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-// @brief VTextManager::GetSourceLinesCount returns the number of input text lines
+// @brief LabelTextManager::GetSourceLinesCount returns the number of input text lines
 // @return number of text lines that were added to the list by calling AddLine
 //---------------------------------------------------------------------------------------------------------------------
-int VTextManager::GetSourceLinesCount() const
+int LabelTextManager::GetSourceLinesCount() const
 {
     return m_liLines.count();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-// @brief VTextManager::GetSourceLine returns the reference to i-th text line
+// @brief LabelTextManager::GetSourceLine returns the reference to i-th text line
 // @param i index of the requested line
 // @return reference to the requested TextLine object
 //---------------------------------------------------------------------------------------------------------------------
-const TextLine& VTextManager::GetSourceLine(int i) const
+const TextLine& LabelTextManager::GetSourceLine(int i) const
 {
     Q_ASSERT(i >= 0);
     Q_ASSERT(i < m_liLines.count());
@@ -286,12 +286,12 @@ const TextLine& VTextManager::GetSourceLine(int i) const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-// @brief VTextManager::FitFontSize sets the font size just big enough, so that the text fits into rectangle of
+// @brief LabelTextManager::FitFontSize sets the font size just big enough, so that the text fits into rectangle of
 // size (fW, fH)
 // @param fW rectangle width
 // @param fH rectangle height
 //---------------------------------------------------------------------------------------------------------------------
-void VTextManager::FitFontSize(qreal fW, qreal fH)
+void LabelTextManager::FitFontSize(qreal fW, qreal fH)
 {
     // Every pixel size loads its own font engine, which is slow. A multisize layout fits the same lines into
     // the same box once for each size, so the result of each fit is kept. The fit sets every pixel size it
@@ -363,7 +363,7 @@ void VTextManager::FitFontSize(qreal fW, qreal fH)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-// @brief VTextManager::largestFittingSize returns the largest base font size below tooWideSize at which line fits
+// @brief LabelTextManager::largestFittingSize returns the largest base font size below tooWideSize at which line fits
 // into width.
 // @param font font family and style; the line sets bold, italic and its own size increment
 // @param tooWideSize base font size at which the line is wider than width
@@ -371,8 +371,8 @@ void VTextManager::FitFontSize(qreal fW, qreal fH)
 // @param width available width in pixels
 // @return MIN_FONT_SIZE when no larger size fits
 //---------------------------------------------------------------------------------------------------------------------
-int VTextManager::largestFittingSize(const QFont &font, const TextLine &line, int tooWideSize, int tooWideWidth,
-                                     qreal width)
+int LabelTextManager::largestFittingSize(const QFont &font, const TextLine &line, int tooWideSize, int tooWideWidth,
+                                         qreal width)
 {
     QFont fnt = font;
     fnt.setBold(line.bold);
@@ -405,11 +405,11 @@ int VTextManager::largestFittingSize(const QFont &font, const TextLine &line, in
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-// @brief VTextManager::Update updates the text lines with detail data
+// @brief LabelTextManager::Update updates the text lines with detail data
 // @param qsName detail name
 // @param data reference to the detail data
 //---------------------------------------------------------------------------------------------------------------------
-void VTextManager::Update(const QString& qsName, const VPieceLabelData& data)
+void LabelTextManager::Update(const QString& qsName, const VPieceLabelData& data)
 {
     m_liLines.clear();
 
@@ -427,10 +427,10 @@ void VTextManager::Update(const QString& qsName, const VPieceLabelData& data)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-// @brief VTextManager::Update updates the text lines with pattern info
+// @brief LabelTextManager::Update updates the text lines with pattern info
 // @param pDoc pointer to the abstract pattern object
 //---------------------------------------------------------------------------------------------------------------------
-void VTextManager::Update(VAbstractPattern *pDoc)
+void LabelTextManager::Update(VAbstractPattern *pDoc)
 {
     m_liLines.clear();
 

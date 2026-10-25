@@ -75,7 +75,7 @@ class VLayoutPieceData;
 class VLayoutPiecePath;
 class QGraphicsItem;
 class QGraphicsPathItem;
-class VTextManager;
+class LabelTextManager;
 
 class VLayoutPiece :public AbstractPiece
 {
@@ -215,7 +215,7 @@ private:
     void                                 createInternalPathItem(int i, QGraphicsItem *parent) const;
     void                                 createCutoutPathItem(int i, QGraphicsItem *parent) const;
     void                                 createLabelItem(QGraphicsItem *parent, const QVector<QPointF> &labelShape,
-                                                         const VTextManager &tm, const QString &type,
+                                                         const LabelTextManager &tm, const QString &type,
                                                          bool textAsPaths) const;
     void                                 createGrainlineItem(QGraphicsItem *parent, bool textAsPaths) const;
     void                                 createFoldLineItem(QGraphicsItem* parent, bool text_as_paths) const;

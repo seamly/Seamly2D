@@ -26,8 +26,8 @@
  **
  *************************************************************************/
 
-#ifndef VTEXTMANAGER_H
-#define VTEXTMANAGER_H
+#ifndef LABELTEXTMANAGER_H
+#define LABELTEXTMANAGER_H
 
 #include <QDate>
 #include <QFont>
@@ -59,18 +59,18 @@ struct TextLine
 };
 
 /**
- * @brief The VTextManager class this class is used to determine whether a collection of
+ * @brief The LabelTextManager class this class is used to determine whether a collection of
  * text lines can fit into specified bounding box and with what font size
  */
-class VTextManager
+class LabelTextManager
 {
-    Q_DECLARE_TR_FUNCTIONS(VTextManager)
+    Q_DECLARE_TR_FUNCTIONS(LabelTextManager)
 public:
-    VTextManager();
-    virtual ~VTextManager() = default;
+    LabelTextManager();
+    virtual ~LabelTextManager() = default;
 
-    VTextManager(const VTextManager &text);
-    VTextManager &operator=(const VTextManager &text);
+    LabelTextManager(const LabelTextManager &text);
+    LabelTextManager &operator=(const LabelTextManager &text);
 
     virtual int GetSpacing() const;
 
@@ -96,4 +96,4 @@ private:
     static QList<TextLine> m_patternLabelLines;
 };
 
-#endif // VTEXTMANAGER_H
+#endif // LABELTEXTMANAGER_H

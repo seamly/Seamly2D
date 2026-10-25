@@ -67,7 +67,7 @@
 #include "../vpatterndb/AbstractPiece.h"
 #include "vlayoutpiecepath.h"
 
-#include "vtextmanager.h"
+#include "../vpatterndb/LabelTextManager.h"
 
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_GCC("-Weffc++")
@@ -176,8 +176,8 @@ public:
     QVector<QPointF>           patternInfo;        /// @brief patternInfo pattern info rectangle
     QVector<QPointF>           grainlinePoints;    /// @brief grainlineInfo line
     QVector<QPointF>           grainAxis;          /// @brief grain direction, bottom to top; set even when the grainline is hidden
-    VTextManager               m_tmPiece;          /// @brief m_tmPiece text manager for laying out piece info
-    VTextManager               m_tmPattern;        /// @brief m_tmPattern text manager for laying out pattern info */
+    LabelTextManager           m_tmPiece;          /// @brief m_tmPiece text manager for laying out piece info
+    LabelTextManager           m_tmPattern;        /// @brief m_tmPattern text manager for laying out pattern info */
     QString                    m_pieceLetter;      /// @brief m_pieceLetter piece letter, exported as the SVG data-letter attribute
     int                        m_quantity;         /// @brief cut count, exported as the SVG data-quantity attribute
     bool                       m_onFold;           /// @brief cut on the fold, exported as the SVG data-on-fold attribute

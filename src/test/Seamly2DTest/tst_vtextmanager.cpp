@@ -3,7 +3,7 @@
  **  @author slspencer
  **
  **  @brief
- **  Unit tests for the label font fit of VTextManager
+ **  Unit tests for the label font fit of LabelTextManager
  **
  **  @copyright
  **  Copyright (C) 2026 Seamly2D Project
@@ -27,7 +27,7 @@
  *****************************************************************************/
 
 #include "tst_vtextmanager.h"
-#include "../vlayout/vtextmanager.h"
+#include "../vpatterndb/LabelTextManager.h"
 
 #include <QtTest>
 #include <QFont>
@@ -99,7 +99,7 @@ void TST_VTextManager::LargestFittingSize() const
     const int tooWideWidth = lineWidth(font, line, tooWideSize);
     QVERIFY2(tooWideWidth > width, "The row must start at a size that is too wide.");
 
-    const int size = VTextManager::largestFittingSize(font, line, tooWideSize, tooWideWidth, width);
+    const int size = LabelTextManager::largestFittingSize(font, line, tooWideSize, tooWideWidth, width);
 
     QVERIFY(size >= MIN_FONT_SIZE);
     QVERIFY(size <= qMax(MIN_FONT_SIZE, tooWideSize - 1));

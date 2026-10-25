@@ -3,7 +3,7 @@
  **  @author slspencer
  **
  **  @brief
- **  Unit tests for the label font fit of VTextManager
+ **  Unit tests for the label font fit of LabelTextManager
  **
  **  @copyright
  **  Copyright (C) 2026 Seamly2D Project

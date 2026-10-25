@@ -81,7 +81,7 @@
 #include "../vgeometry/vpointf.h"
 #include "vlayoutdef.h"
 #include "vlayoutpiece_p.h"
-#include "vtextmanager.h"
+#include "../vpatterndb/LabelTextManager.h"
 #include "vgraphicsfillitem.h"
 #include "svg_text_item.h"
 
@@ -566,7 +566,7 @@ QPointF rotatePoint (const QPointF &ptCenter, const QPointF& pt, qreal rotationA
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QStringList getLabelText (const QVector<QPointF> &labelShape, const VTextManager &tm)
+QStringList getLabelText (const QVector<QPointF> &labelShape, const LabelTextManager &tm)
 {
     QStringList text;
     if (labelShape.count() > 2)
@@ -1844,7 +1844,7 @@ QGraphicsItem *VLayoutPiece::GetItem(bool textAsPaths) const
  * @param textAsPaths true to convert the text into vector paths.
  */
 void VLayoutPiece::createLabelItem(QGraphicsItem *parent, const QVector<QPointF> &labelShape,
-                                      const VTextManager &tm, const QString &type, bool textAsPaths) const
+                                      const LabelTextManager &tm, const QString &type, bool textAsPaths) const
 {
     SCASSERT(parent != nullptr)
     QColor color = QColor(qApp->Settings()->getDefaultLabelColor());

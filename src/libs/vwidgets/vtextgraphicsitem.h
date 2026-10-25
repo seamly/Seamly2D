@@ -63,7 +63,7 @@
 #include <QtGlobal>
 
 #include "vpieceitem.h"
-#include "../vlayout/vtextmanager.h"
+#include "../vpatterndb/LabelTextManager.h"
 
 //---------------------------------------------------------------------------------------------------------------------
 // @brief The VTextGraphicsItem class. This class implements text graphics item,
@@ -114,7 +114,7 @@ private:
     double       m_rotation;
     double       m_angle;
     QRectF       m_rectResize;
-    VTextManager m_textMananger;
+    LabelTextManager m_textMananger;
 
     void allUserModifications(const QPointF &pos);
     void userRotateAndMove();

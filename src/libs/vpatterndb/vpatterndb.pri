@@ -29,7 +29,8 @@ SOURCES += \
     $$PWD/floatItemData/vabstractfloatitemdata.cpp \
     $$PWD/measurements_def.cpp \
     $$PWD/pmsystems.cpp \
-    $$PWD/AbstractPiece.cpp
+    $$PWD/AbstractPiece.cpp \
+    $$PWD/LabelTextManager.cpp
 
 *msvc*:SOURCES += $$PWD/stable.cpp
 
@@ -82,4 +83,5 @@ HEADERS += \
     $$PWD/pmsystems.h \
     $$PWD/AbstractPiece.h \
     $$PWD/AbstractPieceData.h \
-    $$PWD/SeamAllowancePoint.h
+    $$PWD/SeamAllowancePoint.h \
+    $$PWD/LabelTextManager.h
