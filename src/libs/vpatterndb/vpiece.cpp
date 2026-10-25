@@ -518,6 +518,113 @@ QLineF VPiece::foldLine(const VContainer *data) const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief endPathAtFoldLine rotates a main path so that it ends with its fold line.
+ * @param nodes main path nodes.
+ * @return the nodes after the fold line end node moved to the top, in their order; @p nodes when the path has no
+ *         valid fold line.
+ *
+ * The path stays the same closed outline. Its last edge is then the fold line, so the cut line ends with the fold
+ * line too.
+ */
+QVector<VPieceNode> VPiece::endPathAtFoldLine(const QVector<VPieceNode>& nodes)
+{
+    QVector<VPieceNode> rotated = nodes;
+    const QVector<int> fold_indexes = foldLineNodeIndexes(nodes);
+    if (!fold_indexes.isEmpty())
+    {
+        // Nodes after the fold line end node go first; the fold line end node goes last.
+        const int end_index = fold_indexes.at(1);
+        rotated = nodes.mid(end_index + 1) + nodes.mid(0, end_index + 1);
+    }
+    return rotated;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief foldLineOnCutLine extends the fold line to the cut line.
+ * @param cut_line closed seam allowance polyline; the first point may repeat at the end.
+ * @param fold fold line from its start node to its end node.
+ * @return the fold line from where its start side meets the cut line to where its end side meets the cut line;
+ *         @p fold when no cut line edge lies on the fold line.
+ *
+ * The fold line has no seam allowance, so the cut line runs along it and past both nodes. Of the runs of cut line
+ * edges on the fold line, the one that covers most of the fold line holds the new ends. The result is never shorter
+ * than @p fold.
+ */
+QLineF VPiece::foldLineOnCutLine(const QVector<QPointF>& cut_line, const QLineF& fold)
+{
+    QVector<QPointF> ring = cut_line;
+    if (ring.size() > 1 && samePoint(ring.first(), ring.last()))
+    {
+        ring.removeLast();
+    }
+    const int count = ring.size();
+    const qreal length = fold.length();
+
+    // Edge i runs from vertex i to vertex i + 1. A run starts after an edge off the fold line, so that no run
+    // wraps past the search start.
+    QVector<bool> on_fold(count, false);
+    int first_off = -1;
+    for (int i = 0; count >= 3 && length > 0 && i < count; ++i)
+    {
+        on_fold[i] = VGObject::IsPointOnLineviaPDP(ring.at(i), fold.p1(), fold.p2())
+                     && VGObject::IsPointOnLineviaPDP(ring.at((i + 1) % count), fold.p1(), fold.p2());
+        if (!on_fold.at(i) && first_off < 0)
+        {
+            first_off = i;
+        }
+    }
+
+    // Distance of a point along the fold line, from its start node.
+    const QPointF direction = length > 0 ? (fold.p2() - fold.p1()) / length : QPointF();
+    const auto along = [&fold, &direction](const QPointF& point)
+    {
+        return QPointF::dotProduct(point - fold.p1(), direction);
+    };
+
+    // Each run spans [run_first, run_last] along the fold line; the best run overlaps the fold line most.
+    qreal best_overlap = 0;
+    qreal best_first = 0;
+    qreal best_last = length;
+    bool in_run = false;
+    qreal run_first = 0;
+    qreal run_last = 0;
+    for (int k = 1; first_off >= 0 && k <= count; ++k)
+    {
+        const int i = (first_off + k) % count;
+        if (on_fold.at(i))
+        {
+            const qreal from = along(ring.at(i));
+            const qreal to   = along(ring.at((i + 1) % count));
+            run_first = in_run ? qMin(run_first, qMin(from, to)) : qMin(from, to);
+            run_last  = in_run ? qMax(run_last, qMax(from, to)) : qMax(from, to);
+            in_run = true;
+        }
+        else
+        {
+            // An edge off the fold line ends the run before it.
+            const qreal overlap = qMin(run_last, length) - qMax(run_first, qreal(0));
+            if (in_run && overlap > best_overlap)
+            {
+                best_overlap = overlap;
+                best_first = run_first;
+                best_last = run_last;
+            }
+            in_run = false;
+        }
+    }
+
+    QLineF extended = fold;
+    if (best_overlap > 0)
+    {
+        extended = QLineF(fold.p1() + direction * qMin(best_first, qreal(0)),
+                          fold.p1() + direction * qMax(best_last, length));
+    }
+    return extended;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief seamAllowancePoints builds the seam allowance (cut line) polyline.
  * @param nodeVertices when not null, receives the returned vertices that can break the tangent.
  * @param corners when not null, receives the node point count and the ByLength corners cut short.
