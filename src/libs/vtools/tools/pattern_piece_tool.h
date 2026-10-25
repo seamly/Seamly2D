@@ -54,6 +54,7 @@
 #include <qcompilerdetection.h>
 #include <QObject>
 #include <QGraphicsPathItem>
+#include <QGraphicsSimpleTextItem>
 
 #include "vinteractivetool.h"
 
@@ -191,12 +192,16 @@ private:
     VGrainlineItem         *m_grainLine;
     QGraphicsPathItem      *m_notches;
     QGraphicsPathItem      *m_foldLine;
+    QGraphicsPathItem*       m_fold_line_arrow;       ///< Arrow line that points at the fold line.
+    QGraphicsPathItem*       m_fold_line_arrow_heads; ///< Filled arrow heads of m_fold_line_arrow.
+    QGraphicsSimpleTextItem* m_fold_line_label;       ///< "Foldline" text between the fold line and its arrow line.
 
                            PatternPieceTool(VAbstractPattern *doc, VContainer *data, const quint32 &id,
                                               const Source &typeCreation, VMainGraphicsScene *scene,
                                               const QString &blockName, QGraphicsItem * parent = nullptr);
 
     void                  updateExcludeState();
+    void                  refreshFoldLine(const VPiece& piece, const QVector<QPointF>& seam_allowance_points);
     void                  updateInternalPaths();
 
     VPieceItem::MoveTypes findLabelGeometry(const VPatternLabelData &labelData, qreal &rotationAngle, qreal &labelWidth,
