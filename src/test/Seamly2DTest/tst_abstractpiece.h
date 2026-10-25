@@ -23,7 +23,7 @@
 
  ************************************************************************
  **
- **  @file
+ **  @file   tst_abstractpiece.h
  **  @author Roman Telezhynskyi <dismine(at)gmail.com>
  **  @date   17 11, 2016
  **
@@ -49,18 +49,49 @@
  **
  *************************************************************************/
 
-#ifndef TST_VABSTRACTPIECE_H
-#define TST_VABSTRACTPIECE_H
+/******************************************************************************
+ **  @file   tst_abstractpiece.h
+ **  @author slspencer
+ **
+ **  @brief
+ **  Unit tests for the seam allowance geometry of AbstractPiece
+ **
+ **  @copyright
+ **  Copyright (C) 2026 Seamly2D Project
+ **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
+ **
+ **  Seamly2D is free software: you can redistribute it and/or modify
+ **  it under the terms of the GNU General Public License as published by
+ **  the Free Software Foundation, either version 3 of the License, or
+ **  (at your option) any later version.
+ **
+ **  Seamly2D is distributed in the hope that it will be useful,
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ **  GNU General Public License for more details.
+ **
+ **  You should have received a copy of the GNU General Public License
+ **  along with Seamly2D.  If not, see <http://www.gnu.org/licenses/>.
+ **
+ **  SPDX-License-Identifier: GPL-3.0-or-later
+ **
+ *****************************************************************************/
+
+#ifndef TST_ABSTRACTPIECE_H
+#define TST_ABSTRACTPIECE_H
 
 #include "../vtest/abstracttest.h"
 
-class VSAPoint;
+class SeamAllowancePoint;
 
-class TST_VAbstractPiece : public AbstractTest
+/**
+ * @brief TST_AbstractPiece unit tests for the seam allowance geometry of AbstractPiece and SeamAllowancePoint.
+ */
+class TST_AbstractPiece : public AbstractTest
 {
     Q_OBJECT
 public:
-    explicit TST_VAbstractPiece(QObject *parent = nullptr);
+    explicit TST_AbstractPiece(QObject *parent = nullptr);
 
 private slots:
     void EquidistantRemoveLoop_data();
@@ -80,46 +111,47 @@ private slots:
     void TurnPointIndices() const;
     void EquidistantReportsNodeVertices() const;
     void NodeVertexIndices() const;
+    void SeamAllowancePointWidths() const;
 #ifndef Q_OS_WIN // Disabled due to "undefined behavior" problem
     void PossibleInfiniteClearLoops_data() const;
     void PossibleInfiniteClearLoops() const;
 #endif
 
 private:
-    QVector<VSAPoint> InputPointsCase1() const;
+    QVector<SeamAllowancePoint> InputPointsCase1() const;
     QVector<QPointF>  OutputPointsCase1() const;
 
-    QVector<VSAPoint> InputPointsCase2() const;
+    QVector<SeamAllowancePoint> InputPointsCase2() const;
     QVector<QPointF>  OutputPointsCase2() const;
 
-    QVector<VSAPoint> InputPointsCase3() const;
+    QVector<SeamAllowancePoint> InputPointsCase3() const;
     QVector<QPointF>  OutputPointsCase3() const;
 
     void Case3() const;
     void Case4() const;
     void Case5() const;
 
-    QVector<VSAPoint> InputPointsIssue298Case1() const;
+    QVector<SeamAllowancePoint> InputPointsIssue298Case1() const;
     QVector<QPointF> OutputPointsIssue298Case1() const;
 
-    QVector<VSAPoint> InputPointsIssue298Case2() const;
+    QVector<SeamAllowancePoint> InputPointsIssue298Case2() const;
     QVector<QPointF> OutputPointsIssue298Case2() const;
 
-    QVector<VSAPoint> InputPointsIssue548Case1() const;
+    QVector<SeamAllowancePoint> InputPointsIssue548Case1() const;
     QVector<QPointF> OutputPointsIssue548Case1() const;
 
-    QVector<VSAPoint> InputPointsIssue548Case2() const;
+    QVector<SeamAllowancePoint> InputPointsIssue548Case2() const;
     QVector<QPointF> OutputPointsIssue548Case2() const;
 
-    QVector<VSAPoint> InputPointsIssue548Case3() const;
+    QVector<SeamAllowancePoint> InputPointsIssue548Case3() const;
     QVector<QPointF> OutputPointsIssue548Case3() const;
 
     QVector<QPointF> InputPointsCase3a() const;
     QVector<QPointF> InputPointsCase4a() const;
     QVector<QPointF> InputPointsCase5a() const;
 
-    QVector<VSAPoint> InputPointsIssue646() const;
+    QVector<SeamAllowancePoint> InputPointsIssue646() const;
     QVector<QPointF>  OutputPointsIssue646() const;
 };
 
-#endif // TST_VABSTRACTPIECE_H
+#endif // TST_ABSTRACTPIECE_H

@@ -480,3 +480,13 @@ Needs the next MSI. jacket2 Back has a fold line. Do not save the pattern change
 - [ ] Settings: "Place fold lines on the left edge", Fabric Folded. Create Layout. Size 220 tab: Back's fold line lies on the left edge.
 - [ ] Nested tab: Back's sizes stack on the start of their fold lines; the fold lines lie on top of each other, on the left edge.
 - [ ] Base Size tab, Export > DXF > DXF-ASTM (R13): the Back block layer 6 line is its first two layer 1 vertices. No "Foldline" text in the Back piece text.
+
+## 30. Seam allowances and labels after the AbstractPiece and LabelTextManager move
+
+Needs the next MSI. Nothing should look different from the previous MSI.
+
+- [ ] male_shirt and jacket2, Piece mode: every seam allowance, corner and notch is where it was. Built-in seam lines and fold lines too.
+- [ ] Piece Properties > Seam Allowance: change a node's angle type to each of the six types. The corner follows, as before.
+- [ ] Piece labels and the pattern label: same text, same font size. Resize a label: the text refits.
+- [ ] Piece Properties: the Material list shows Fabric, Lining, Interfacing, Interlining; a new piece gets Fabric.
+- [ ] Press Layout. SeamlyLayout opens with every size; turn points and seam allowances as before.

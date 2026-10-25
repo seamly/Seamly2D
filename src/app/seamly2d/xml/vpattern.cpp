@@ -886,7 +886,7 @@ void VPattern::parsePieceElement(QDomElement &domElement, const Document &parse)
         piece.setInLayout(getParameterBool(domElement, AttrInLayout, trueStr));
         piece.SetUnited(getParameterBool(domElement, PatternPieceTool::AttrUnited, falseStr));
         piece.setMaterial(GetParametrString(domElement, PatternPieceTool::AttrMaterial,
-                                            VAbstractPiece::defaultMaterial()));
+                                            AbstractPiece::defaultMaterial()));
 
         const QString width = GetParametrString(domElement, AttrWidth, "0.0");
         QString w = width;//need for saving fixed formula;

@@ -4,10 +4,7 @@
 HEADERS += \
     $$PWD/stable.h \
     $$PWD/vlayoutdef.h \
-    $$PWD/vtextmanager.h \
     $$PWD/vgraphicsfillitem.h \
-    $$PWD/vabstractpiece.h \
-    $$PWD/vabstractpiece_p.h \
     $$PWD/vlayoutpiece.h \
     $$PWD/vlayoutpiece_p.h \
     $$PWD/vlayoutpiecepath.h \
@@ -15,9 +12,7 @@ HEADERS += \
     $$PWD/svg_text_item.h
 
 SOURCES += \
-    $$PWD/vtextmanager.cpp \
     $$PWD/vgraphicsfillitem.cpp \
-    $$PWD/vabstractpiece.cpp \
     $$PWD/vlayoutpiece.cpp \
     $$PWD/vlayoutpiecepath.cpp \
     $$PWD/svg_text_item.cpp

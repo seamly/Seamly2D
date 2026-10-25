@@ -8,7 +8,7 @@
 message("Entering vpatterndb.pro")
 include(../../../common.pri)
 
-QT += widgets printsupport
+QT += widgets printsupport xml
 
 # Name of the library
 TARGET = vpatterndb

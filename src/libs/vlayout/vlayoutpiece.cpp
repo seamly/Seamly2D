@@ -81,7 +81,7 @@
 #include "../vgeometry/vpointf.h"
 #include "vlayoutdef.h"
 #include "vlayoutpiece_p.h"
-#include "vtextmanager.h"
+#include "../vpatterndb/LabelTextManager.h"
 #include "vgraphicsfillitem.h"
 #include "svg_text_item.h"
 
@@ -276,7 +276,7 @@ QVector<QVector<int>> unifyNodeTurnPoints(const QVector<SizeLine> &lines, bool c
                 added.append(line.nodeIndices.at((k + offsets.at(s)) % nodeCount));
             }
         }
-        turns.append(VAbstractPiece::addTurnPoints(line.points, line.turnPoints.value(), added, closed));
+        turns.append(AbstractPiece::addTurnPoints(line.points, line.turnPoints.value(), added, closed));
     }
     return turns;
 }
@@ -538,12 +538,12 @@ QVector<QPointF> correctPosition (const QRectF &parentBoundingRect, QVector<QPoi
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<VSAPoint> prepareAllowance (const QVector<QPointF> &points)
+QVector<SeamAllowancePoint> prepareAllowance (const QVector<QPointF> &points)
 {
-    QVector<VSAPoint> allowancePoints;
+    QVector<SeamAllowancePoint> allowancePoints;
     for(int i = 0; i < points.size(); ++i)
     {
-        allowancePoints.append(VSAPoint(points.at(i)));
+        allowancePoints.append(SeamAllowancePoint(points.at(i)));
     }
     return allowancePoints;
 }
@@ -566,14 +566,14 @@ QPointF rotatePoint (const QPointF &ptCenter, const QPointF& pt, qreal rotationA
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QStringList getLabelText (const QVector<QPointF> &labelShape, const VTextManager &tm)
+QStringList getLabelText (const QVector<QPointF> &labelShape, const LabelTextManager &tm)
 {
     QStringList text;
     if (labelShape.count() > 2)
     {
         for (int i = 0; i < tm.GetSourceLinesCount(); ++i)
         {
-            text.append(tm.GetSourceLine(i).m_text);
+            text.append(tm.GetSourceLine(i).text);
         }
     }
     return text;
@@ -587,17 +587,17 @@ VLayoutPiece &VLayoutPiece::operator=(VLayoutPiece &&piece) noexcept { Swap(piec
 #endif
 
 void VLayoutPiece::Swap(VLayoutPiece &piece) noexcept
-{ VAbstractPiece::Swap(piece); std::swap(d, piece.d); }
+{ AbstractPiece::Swap(piece); std::swap(d, piece.d); }
 
 //---------------------------------------------------------------------------------------------------------------------
 VLayoutPiece::VLayoutPiece()
-    : VAbstractPiece()
+    : AbstractPiece()
     , d(new VLayoutPieceData)
 {}
 
 //---------------------------------------------------------------------------------------------------------------------
 VLayoutPiece::VLayoutPiece(const VLayoutPiece &piece)
-    : VAbstractPiece(piece)
+    : AbstractPiece(piece)
     , d(piece.d)
 {}
 
@@ -608,7 +608,7 @@ VLayoutPiece &VLayoutPiece::operator=(const VLayoutPiece &piece)
     {
         return *this;
     }
-    VAbstractPiece::operator=(piece);
+    AbstractPiece::operator=(piece);
     d = piece.d;
     return *this;
 }
@@ -1844,7 +1844,7 @@ QGraphicsItem *VLayoutPiece::GetItem(bool textAsPaths) const
  * @param textAsPaths true to convert the text into vector paths.
  */
 void VLayoutPiece::createLabelItem(QGraphicsItem *parent, const QVector<QPointF> &labelShape,
-                                      const VTextManager &tm, const QString &type, bool textAsPaths) const
+                                      const LabelTextManager &tm, const QString &type, bool textAsPaths) const
 {
     SCASSERT(parent != nullptr)
     QColor color = QColor(qApp->Settings()->getDefaultLabelColor());
@@ -1866,7 +1866,7 @@ void VLayoutPiece::createLabelItem(QGraphicsItem *parent, const QVector<QPointF>
         {
             const TextLine& tl = tm.GetSourceLine(i);
             QFont fnt = tm.GetFont();
-            fnt.setPixelSize(tm.GetFont().pixelSize() + tl.m_iFontSize);
+            fnt.setPixelSize(tm.GetFont().pixelSize() + tl.font_size_increment);
             fnt.setBold(tl.bold);
             fnt.setItalic(tl.italic);
 
@@ -1882,16 +1882,16 @@ void VLayoutPiece::createLabelItem(QGraphicsItem *parent, const QVector<QPointF>
                 break;
             }
 
-            QString qsText = tl.m_text;
+            QString qsText = tl.text;
             if (fm.horizontalAdvance(qsText) > dW)
             {
                 qsText = fm.elidedText(qsText, Qt::ElideMiddle, static_cast<int>(dW));
             }
-            if ((tl.m_eAlign & Qt::AlignLeft) > 0)
+            if ((tl.alignment & Qt::AlignLeft) > 0)
             {
                 dX = 0;
             }
-            else if ((tl.m_eAlign & Qt::AlignHCenter) > 0)
+            else if ((tl.alignment & Qt::AlignHCenter) > 0)
             {
                 dX = (dW - fm.horizontalAdvance(qsText))/2;
             }

@@ -55,7 +55,7 @@
 #include "../vgeometry/vabstractcubicbezierpath.h"
 #include "../vgeometry/vspline.h"
 #include "../vgeometry/vsplinepoint.h"
-#include "../vlayout/vabstractpiece.h"
+#include "AbstractPiece.h"
 #include "../vmisc/vabstractapplication.h"
 #include "../ifc/exception/vexceptionobjecterror.h"
 
@@ -66,15 +66,15 @@
 namespace
 {
 //---------------------------------------------------------------------------------------------------------------------
-VSAPoint CurvePoint(VSAPoint candidate, const VContainer *data, const VPieceNode &node,
-                    const QVector<QPointF> &curvePoints)
+SeamAllowancePoint CurvePoint(SeamAllowancePoint candidate, const VContainer *data, const VPieceNode &node,
+                              const QVector<QPointF> &curvePoints)
 {
     if (node.GetTypeTool() == Tool::NodePoint)
     {
         const QPointF p = static_cast<QPointF>(*data->GeometricObject<VPointF>(node.GetId()));
         if (VAbstractCurve::isPointOnCurve(curvePoints, p))
         {
-            candidate = VSAPoint(p);
+            candidate = SeamAllowancePoint(p);
             candidate.SetSAAfter(node.GetSAAfter(data, *data->GetPatternUnit()));
             candidate.SetSABefore(node.GetSABefore(data, *data->GetPatternUnit()));
             candidate.SetAngleType(node.GetAngleType());
@@ -84,8 +84,8 @@ VSAPoint CurvePoint(VSAPoint candidate, const VContainer *data, const VPieceNode
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-VSAPoint CurveStartPoint(VSAPoint candidate, const VContainer *data, const VPieceNode &node,
-                         const QVector<QPointF> &curvePoints)
+SeamAllowancePoint CurveStartPoint(SeamAllowancePoint candidate, const VContainer *data, const VPieceNode &node,
+                                   const QVector<QPointF> &curvePoints)
 {
     if (node.GetTypeTool() == Tool::NodePoint)
     {
@@ -103,7 +103,7 @@ VSAPoint CurveStartPoint(VSAPoint candidate, const VContainer *data, const VPiec
             node.GetReverse() ? end = points.first() : end = points.last();
             if (VAbstractCurve::isPointOnCurve(curvePoints, end))
             {
-                candidate = VSAPoint(end);
+                candidate = SeamAllowancePoint(end);
             }
         }
     }
@@ -111,8 +111,8 @@ VSAPoint CurveStartPoint(VSAPoint candidate, const VContainer *data, const VPiec
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-VSAPoint CurveEndPoint(VSAPoint candidate, const VContainer *data, const VPieceNode &node,
-                       const QVector<QPointF> &curvePoints)
+SeamAllowancePoint CurveEndPoint(SeamAllowancePoint candidate, const VContainer *data, const VPieceNode &node,
+                                 const QVector<QPointF> &curvePoints)
 {
     if (node.GetTypeTool() == Tool::NodePoint)
     {
@@ -130,7 +130,7 @@ VSAPoint CurveEndPoint(VSAPoint candidate, const VContainer *data, const VPieceN
             node.GetReverse() ? begin = points.last() : begin = points.first();
             if (VAbstractCurve::isPointOnCurve(curvePoints, begin))
             {
-                candidate = VSAPoint(begin);
+                candidate = SeamAllowancePoint(begin);
             }
         }
     }
@@ -532,7 +532,7 @@ QVector<QPointF> VPiecePath::PathPoints(const VContainer *data, const QVector<QP
 /**
  * @brief pathNodeVertices returns the PathPoints() vertices that can break the tangent.
  * @details Node vertices are point nodes, curve segment ends, and spline end nodes. All
- *          other PathPoints() vertices are curve interior points. See VAbstractPiece::turnPointIndices().
+ *          other PathPoints() vertices are curve interior points. See AbstractPiece::turnPointIndices().
  */
 QVector<QPointF> VPiecePath::pathNodeVertices(const VContainer *data) const
 {
@@ -642,11 +642,11 @@ QVector<VPointF> VPiecePath::PathNodePoints(const VContainer *data, bool showExc
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<VSAPoint> VPiecePath::seamAllowancePoints(const VContainer *data, qreal width, bool reverse) const
+QVector<SeamAllowancePoint> VPiecePath::seamAllowancePoints(const VContainer *data, qreal width, bool reverse) const
 {
     SCASSERT(data != nullptr);
 
-    QVector<VSAPoint> pointsEkv;
+    QVector<SeamAllowancePoint> pointsEkv;
     for (int i = 0; i< d->m_nodes.size(); ++i)
     {
         const VPieceNode &node = d->m_nodes.at(i);
@@ -696,11 +696,12 @@ QPainterPath VPiecePath::PainterPath(const VContainer *data, const QVector<QPoin
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-VSAPoint VPiecePath::StartSegment(const VContainer *data, const QVector<VPieceNode> &nodes, int i, bool reverse)
+SeamAllowancePoint VPiecePath::StartSegment(const VContainer *data, const QVector<VPieceNode> &nodes, int i,
+                                            bool reverse)
 {
     if (i < 0 || i > nodes.size()-1)
     {
-        return VSAPoint();
+        return SeamAllowancePoint();
     }
 
     const QSharedPointer<VAbstractCurve> curve = data->GeometricObject<VAbstractCurve>(nodes.at(i).GetId());
@@ -708,11 +709,11 @@ VSAPoint VPiecePath::StartSegment(const VContainer *data, const QVector<VPieceNo
     const QVector<QPointF> points = curve->getPoints();
     if (points.isEmpty())
     {
-        return VSAPoint();
+        return SeamAllowancePoint();
     }
 
-    VSAPoint begin;
-    reverse ? begin = VSAPoint(points.last()) : begin = VSAPoint(points.first());
+    SeamAllowancePoint begin;
+    reverse ? begin = SeamAllowancePoint(points.last()) : begin = SeamAllowancePoint(points.first());
 
     if (nodes.size() > 1)
     {
@@ -727,11 +728,11 @@ VSAPoint VPiecePath::StartSegment(const VContainer *data, const QVector<VPieceNo
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-VSAPoint VPiecePath::EndSegment(const VContainer *data, const QVector<VPieceNode> &nodes, int i, bool reverse)
+SeamAllowancePoint VPiecePath::EndSegment(const VContainer *data, const QVector<VPieceNode> &nodes, int i, bool reverse)
 {
     if (i < 0 || i > nodes.size()-1)
     {
-        return VSAPoint();
+        return SeamAllowancePoint();
     }
 
     const QSharedPointer<VAbstractCurve> curve = data->GeometricObject<VAbstractCurve>(nodes.at(i).GetId());
@@ -739,11 +740,11 @@ VSAPoint VPiecePath::EndSegment(const VContainer *data, const QVector<VPieceNode
     const QVector<QPointF> points = curve->getPoints();
     if (points.isEmpty())
     {
-        return VSAPoint();
+        return SeamAllowancePoint();
     }
 
-    VSAPoint end;
-    reverse ? end = VSAPoint(points.first()) : end = VSAPoint(points.last());
+    SeamAllowancePoint end;
+    reverse ? end = SeamAllowancePoint(points.first()) : end = SeamAllowancePoint(points.last());
 
     if (nodes.size() > 2)
     {
@@ -960,13 +961,13 @@ VPiecePath VPiecePath::RemoveEdge(quint32 index) const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-VSAPoint VPiecePath::StartSegment(const VContainer *data, int i, bool reverse) const
+SeamAllowancePoint VPiecePath::StartSegment(const VContainer *data, int i, bool reverse) const
 {
     return StartSegment(data, d->m_nodes, i, reverse);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-VSAPoint VPiecePath::EndSegment(const VContainer *data, int i, bool reverse) const
+SeamAllowancePoint VPiecePath::EndSegment(const VContainer *data, int i, bool reverse) const
 {
     return EndSegment(data, d->m_nodes, i, reverse);
 }
@@ -1003,8 +1004,8 @@ QPointF VPiecePath::NodePreviousPoint(const VContainer *data, int i) const
             {
                 const QSharedPointer<VAbstractCurve> curve = data->GeometricObject<VAbstractCurve>(node.GetId());
 
-                const VSAPoint begin = StartSegment(data, d->m_nodes, index, node.GetReverse());
-                const VSAPoint end = EndSegment(data, d->m_nodes, index, node.GetReverse());
+                const SeamAllowancePoint begin = StartSegment(data, d->m_nodes, index, node.GetReverse());
+                const SeamAllowancePoint end = EndSegment(data, d->m_nodes, index, node.GetReverse());
 
                 const QVector<QPointF> points = curveSegmentPoints(curve, begin, end, node.GetReverse());
                 if (points.size() > 1)
@@ -1055,8 +1056,8 @@ QPointF VPiecePath::NodeNextPoint(const VContainer *data, int i) const
             {
                 const QSharedPointer<VAbstractCurve> curve = data->GeometricObject<VAbstractCurve>(node.GetId());
 
-                const VSAPoint begin = StartSegment(data, d->m_nodes, index, node.GetReverse());
-                const VSAPoint end = EndSegment(data, d->m_nodes, index, node.GetReverse());
+                const SeamAllowancePoint begin = StartSegment(data, d->m_nodes, index, node.GetReverse());
+                const SeamAllowancePoint end = EndSegment(data, d->m_nodes, index, node.GetReverse());
 
                 const QVector<QPointF> points = curveSegmentPoints(curve, begin, end, node.GetReverse());
                 if (points.size() > 1)
@@ -1161,12 +1162,12 @@ int VPiecePath::FindInLoopNotExcludedDown(int start, const QVector<VPieceNode> &
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-VSAPoint VPiecePath::PreparePointEkv(const VPieceNode &node, const VContainer *data)
+SeamAllowancePoint VPiecePath::PreparePointEkv(const VPieceNode &node, const VContainer *data)
 {
     SCASSERT(data !=nullptr)
 
     const QSharedPointer<VPointF> point = data->GeometricObject<VPointF>(node.GetId());
-    VSAPoint p(point->toQPointF());
+    SeamAllowancePoint p(point->toQPointF());
 
     p.SetSAAfter(node.GetSAAfter(data, *data->GetPatternUnit()));
     p.SetSABefore(node.GetSABefore(data, *data->GetPatternUnit()));
@@ -1177,14 +1178,15 @@ VSAPoint VPiecePath::PreparePointEkv(const VPieceNode &node, const VContainer *d
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<VSAPoint> VPiecePath::CurveSeamAllowanceSegment(const VContainer *data, const QVector<VPieceNode> &nodes,
-                                                        const QSharedPointer<VAbstractCurve> &curve, int i,
-                                                        bool reverse, qreal width)
+QVector<SeamAllowancePoint> VPiecePath::CurveSeamAllowanceSegment(const VContainer *data,
+                                                                  const QVector<VPieceNode> &nodes,
+                                                                  const QSharedPointer<VAbstractCurve> &curve, int i,
+                                                                  bool reverse, qreal width)
 {
-    QVector<VSAPoint> pointsEkv;
+    QVector<SeamAllowancePoint> pointsEkv;
 
-    const VSAPoint begin = StartSegment(data, nodes, i, reverse);
-    const VSAPoint end = EndSegment(data, nodes, i, reverse);
+    const SeamAllowancePoint begin = StartSegment(data, nodes, i, reverse);
+    const SeamAllowancePoint end = EndSegment(data, nodes, i, reverse);
 
     const QVector<QPointF> points = curveSegmentPoints(curve, begin, end, reverse);
     if (points.isEmpty())
@@ -1198,7 +1200,7 @@ QVector<VSAPoint> VPiecePath::CurveSeamAllowanceSegment(const VContainer *data, 
     {// no local widths
         for(int i = 0; i < points.size(); ++i)
         {
-            VSAPoint p(points.at(i));
+            SeamAllowancePoint p(points.at(i));
             if (i == 0)
             { // first point
                 p.SetSAAfter(begin.GetSAAfter());
@@ -1229,7 +1231,7 @@ QVector<VSAPoint> VPiecePath::CurveSeamAllowanceSegment(const VContainer *data, 
         const qreal wDiff = w2 - w1;// Difference between to local widths
         const qreal fullLength = VAbstractCurve::PathLength(points);
 
-        VSAPoint p(points.at(0));//First point in the list
+        SeamAllowancePoint p(points.at(0));//First point in the list
         p.SetSAAfter(begin.GetSAAfter());
         p.SetSABefore(begin.GetSABefore());
         p.SetAngleType(begin.GetAngleType());
@@ -1239,7 +1241,7 @@ QVector<VSAPoint> VPiecePath::CurveSeamAllowanceSegment(const VContainer *data, 
 
         for(int i = 1; i < points.size(); ++i)
         {
-            p = VSAPoint(points.at(i));
+            p = SeamAllowancePoint(points.at(i));
 
             if (i == points.size() - 1)
             {// last point

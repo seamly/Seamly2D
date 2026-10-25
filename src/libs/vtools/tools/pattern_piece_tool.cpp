@@ -2257,7 +2257,7 @@ bool PatternPieceTool::PrepareLabelData(const VPatternLabelData &labelData, VTex
     QFont fnt = qApp->Settings()->getLabelFont();
     {
         const int iFS = labelData.getFontSize();
-        iFS < MIN_FONT_SIZE ? fnt.setPixelSize(MIN_FONT_SIZE) : fnt.setPixelSize(iFS);
+        fnt.setPixelSize(iFS < LabelTextManager::min_font_size ? LabelTextManager::min_font_size : iFS);
     }
     labelItem->setFont(fnt);
     labelItem->setSize(ToPixel(labelWidth, *VDataTool::data.GetPatternUnit()),

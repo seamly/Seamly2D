@@ -1,9 +1,9 @@
 /******************************************************************************
- **  @file   tst_vtextmanager.h
+ **  @file   tst_labeltextmanager.h
  **  @author slspencer
  **
  **  @brief
- **  Unit tests for the label font fit of VTextManager
+ **  Unit tests for the label font fit of LabelTextManager
  **
  **  @copyright
  **  Copyright (C) 2026 Seamly2D Project
@@ -26,24 +26,24 @@
  **
  *****************************************************************************/
 
-#ifndef TST_VTEXTMANAGER_H
-#define TST_VTEXTMANAGER_H
+#ifndef TST_LABELTEXTMANAGER_H
+#define TST_LABELTEXTMANAGER_H
 
 #include <QObject>
 
 /**
- * @brief TST_VTextManager unit tests for the label font size search.
+ * @brief TST_LabelTextManager unit tests for the label font size search.
  */
-class TST_VTextManager : public QObject
+class TST_LabelTextManager : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit TST_VTextManager(QObject *parent = nullptr);
+    explicit TST_LabelTextManager(QObject *parent = nullptr);
 
 private slots:
     void LargestFittingSize_data() const;
     void LargestFittingSize() const;
 };
 
-#endif // TST_VTEXTMANAGER_H
+#endif // TST_LABELTEXTMANAGER_H

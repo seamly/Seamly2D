@@ -11984,7 +11984,7 @@ load in SeamlyME as usual.
     </message>
 </context>
 <context>
-    <name>VAbstractPieceData</name>
+    <name>AbstractPieceData</name>
     <message>
         <source>Piece</source>
         <translation>Κομμάτι</translation>

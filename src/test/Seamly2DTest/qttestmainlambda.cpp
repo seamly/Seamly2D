@@ -53,7 +53,7 @@
 #include <QDir>
 #include <QtTest>
 
-#include "tst_vabstractpiece.h"
+#include "tst_abstractpiece.h"
 #include "tst_vspline.h"
 #include "tst_nameregexp.h"
 #include "tst_vlayoutdetail.h"
@@ -80,7 +80,7 @@
 #include "tst_exportformatcombobox.h"
 #include "tst_dataroot.h"
 #include "tst_vtoolmove.h"
-#include "tst_vtextmanager.h"
+#include "tst_labeltextmanager.h"
 
 #include "../vmisc/def.h"
 #include "../qmuparser/qmudef.h"
@@ -211,7 +211,7 @@ int main(int argc, char** argv)
 
     ASSERT_TEST(new TST_FindPoint());
     ASSERT_TEST(new TST_VPiece());
-    ASSERT_TEST(new TST_VAbstractPiece());
+    ASSERT_TEST(new TST_AbstractPiece());
     ASSERT_TEST(new TST_VSpline());
     ASSERT_TEST(new TST_VSplinePath());
     ASSERT_TEST(new TST_NameRegExp());
@@ -236,7 +236,7 @@ int main(int argc, char** argv)
     ASSERT_TEST(new TST_ExportFormatCombobox());
     ASSERT_TEST(new TST_DataRoot());
     ASSERT_TEST(new TST_VToolMove());
-    ASSERT_TEST(new TST_VTextManager());
+    ASSERT_TEST(new TST_LabelTextManager());
 
     return status;
 }

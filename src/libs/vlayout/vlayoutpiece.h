@@ -69,15 +69,15 @@
 #include "../vpatterndb/floatItemData/vpiecelabeldata.h"
 #include "../vpatterndb/FoldLineGraphic.h"
 #include "../vpatterndb/vcontainer.h"
-#include "vabstractpiece.h"
+#include "../vpatterndb/AbstractPiece.h"
 
 class VLayoutPieceData;
 class VLayoutPiecePath;
 class QGraphicsItem;
 class QGraphicsPathItem;
-class VTextManager;
+class LabelTextManager;
 
-class VLayoutPiece :public VAbstractPiece
+class VLayoutPiece :public AbstractPiece
 {
     Q_DECLARE_TR_FUNCTIONS(VLayoutPiece)
 public:
@@ -215,7 +215,7 @@ private:
     void                                 createInternalPathItem(int i, QGraphicsItem *parent) const;
     void                                 createCutoutPathItem(int i, QGraphicsItem *parent) const;
     void                                 createLabelItem(QGraphicsItem *parent, const QVector<QPointF> &labelShape,
-                                                         const VTextManager &tm, const QString &type,
+                                                         const LabelTextManager &tm, const QString &type,
                                                          bool textAsPaths) const;
     void                                 createGrainlineItem(QGraphicsItem *parent, bool textAsPaths) const;
     void                                 createFoldLineItem(QGraphicsItem* parent, bool text_as_paths) const;

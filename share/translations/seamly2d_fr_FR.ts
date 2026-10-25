@@ -12011,7 +12011,7 @@ charger dans SeamlyME comme d&apos;habitude.
     </message>
 </context>
 <context>
-    <name>VAbstractPieceData</name>
+    <name>AbstractPieceData</name>
     <message>
         <source>Piece</source>
         <translation>Pièce</translation>

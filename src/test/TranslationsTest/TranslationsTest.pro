@@ -54,7 +54,7 @@ DEFINES += TS_DIR=\\\"$${PWD}/../../../share/translations\\\"
 
 include(warnings.pri)
 
-#VPatternDB static library (depend on vgeometry, vmisc, VLayout)
+#VPatternDB static library (depend on vgeometry, vmisc, ifc)
 unix|win32: LIBS += -L$$OUT_PWD/../../libs/vpatterndb/$${DESTDIR} -lvpatterndb
 
 INCLUDEPATH += $$PWD/../../libs/vpatterndb

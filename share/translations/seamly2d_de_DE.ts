@@ -11966,7 +11966,7 @@ wie gewohnt in SeamlyME laden können.
     </message>
 </context>
 <context>
-    <name>VAbstractPieceData</name>
+    <name>AbstractPieceData</name>
     <message>
         <source>Piece</source>
         <translation>Stück</translation>
