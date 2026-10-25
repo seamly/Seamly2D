@@ -94,11 +94,17 @@ fn labels_then_marks_then_cut_lines() {
 
 #[test]
 fn every_mark_type_uses_the_mark_pen() {
-    for data_type in ["seamline", "internal_path", "grainline", "notch"] {
+    for data_type in ["seamline", "internal_path", "grainline", "notch", "fold_line_arrow"] {
         let program = plot(&page(&typed_path(data_type, "M0 0 L10 0")));
         assert!(program.contains("SP2;"), "{data_type}: {program}");
     } // for data_type
 } // every_mark_type_uses_the_mark_pen
+
+#[test]
+fn fold_line_label_uses_the_label_pen() {
+    let program = plot(&page(&typed_path("fold_line_label", "M0 0 L10 0")));
+    assert!(program.contains("SP3;"), "{program}");
+} // fold_line_label_uses_the_label_pen
 
 #[test]
 fn cut_path_uses_the_cut_pen() {

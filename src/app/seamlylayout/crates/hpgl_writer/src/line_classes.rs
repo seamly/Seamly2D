@@ -52,10 +52,13 @@ impl LineClass {
 fn class_from_data_type(data_type: &str) -> Option<LineClass> {
     match data_type {
         "cutline" | "cut_path" => Some(LineClass::Cut), // cutter lines
-        "seamline" | "internal_path" | "grainline" | "notch" | "tuck" | "drill" | "hole" | "scale_grid" => {
+        "seamline" | "internal_path" | "grainline" | "notch" | "tuck" | "drill" | "hole" | "scale_grid"
+        | "fold_line_arrow" => {
             Some(LineClass::Mark) // drawn on the piece
         } // marks
-        "piece_label" | "pattern_label" | "size_label" | "label_text" | "size_legend" => Some(LineClass::Label), // text
+        "piece_label" | "pattern_label" | "size_label" | "label_text" | "size_legend" | "fold_line_label" => {
+            Some(LineClass::Label) // text
+        } // labels
         _ => None, // pattern, piece, and unknown types inherit
     } // match data_type
 } // fn class_from_data_type

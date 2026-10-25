@@ -112,6 +112,15 @@ fn size_legend_text_is_label_text() {
 } // size_legend_text_is_label_text
 
 #[test]
+fn fold_line_label_text_is_label_text() {
+    let mut doc = svg_dom::Document::parse(
+        r#"<svg xmlns="http://www.w3.org/2000/svg"><g data-type="fold_line"><path d="M0 0 L0 90"/><g data-type="fold_line_label"><text x="3" y="40">Foldline</text></g></g></svg>"#,
+    )
+    .unwrap();
+    assert_eq!(label_texts(&mut doc), 1);
+} // fold_line_label_text_is_label_text
+
+#[test]
 fn mode_names_round_trip() {
     for mode in [SvgTextMode::DesignerFont, SvgTextMode::SingleLineFont, SvgTextMode::HersheyStrokes] {
         assert_eq!(SvgTextMode::from_name(mode.name()), Some(mode));
