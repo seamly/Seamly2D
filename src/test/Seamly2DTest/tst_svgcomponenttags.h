@@ -80,6 +80,7 @@ private slots:
     void PieceCarriesQuantityAndFold() const;
     void PieceCarriesPieceProperties() const;
     void FoldLineSendsFoldLineGroup() const;
+    void FoldLineGroupHoldsArrowAndLabel() const;
     void PiecesOfEachMaterialShareAPatternGroup() const;
     void OneMaterialKeepsOnePatternGroup() const;
     void BuiltInPieceSendsCutlineAndSeamline() const;

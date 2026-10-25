@@ -53,6 +53,7 @@
 #include "../vpatterndb/vpiecenode.h"
 #include "../vpatterndb/vpiecepath.h"
 #include "../vpatterndb/PieceMirrorPath.h"
+#include "../vpatterndb/FoldLineGraphic.h"
 #include "../vpatterndb/floatItemData/vgrainlinedata.h"
 #include "../vpatterndb/floatItemData/vpatternlabeldata.h"
 #include "../vpatterndb/floatItemData/vpiecelabeldata.h"
@@ -71,8 +72,10 @@
 
 #include <QtTest>
 #include <QFile>
+#include <QFontMetricsF>
 #include <QPolygonF>
 #include <QTemporaryDir>
+#include <QTransform>
 #include <QDomDocument>
 
 #include <limits>
@@ -1255,9 +1258,29 @@ void TST_VPiece::LayoutPieceTakesFoldLine() const
     QVERIFY(piece.hasFoldLine());
     QCOMPARE(piece.foldLine(data.data()), QLineF(QPointF(400, 400), QPointF(0, 400)));
 
+    // A sent cut line runs past both fold line nodes by the seam allowance width; without it the fold line stays.
+    const qreal width = ToPixel(notchTestSAWidth, unit);
+    const bool saved_show_seam_allowances = qApp->Settings()->showSeamAllowances();
+    qApp->Settings()->setShowSeamAllowances(true);
     const VLayoutPiece layoutPiece = VLayoutPiece::Create(piece, data.data());
+    qApp->Settings()->setShowSeamAllowances(false);
+    const VLayoutPiece hidden_cut_line = VLayoutPiece::Create(piece, data.data());
+    qApp->Settings()->setShowSeamAllowances(saved_show_seam_allowances);
+
     QVERIFY(layoutPiece.isOnFold());
-    QCOMPARE(layoutPiece.getFoldLine(), QVector<QPointF>({QPointF(400, 400), QPointF(0, 400)}));
+    const QVector<QPointF> sent = layoutPiece.getFoldLine();
+    QCOMPARE(sent.size(), 2);
+    QVERIFY2(QLineF(sent.at(0), QPointF(400 + width, 400)).length() < 0.01,
+             qPrintable(QString::number(sent.at(0).x())));
+    QVERIFY2(QLineF(sent.at(1), QPointF(-width, 400)).length() < 0.01,
+             qPrintable(QString::number(sent.at(1).x())));
+    QCOMPARE(hidden_cut_line.getFoldLine(), QVector<QPointF>({QPointF(400, 400), QPointF(0, 400)}));
+
+    // The arrow line and label come from the fold line between its nodes, inside the piece.
+    const pattern_piece::FoldLineGraphic graphic = layoutPiece.getFoldLineGraphic();
+    QVERIFY(!graphic.isNull());
+    QCOMPARE(graphic.foldLine(), QLineF(QPointF(400, 400), QPointF(0, 400)));
+    QVERIFY(graphic.labelCenter().y() < 400);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -2437,4 +2460,429 @@ void TST_VPiece::SnapNodeVerticesRestoresErasedNode() const
     const QVector<QPointF> closedSnap = VAbstractPiece::snapNodeVertices(loop, nodes, true);
     QCOMPARE(closedSnap.first(), QPointF(0, 0));
     QCOMPARE(closedSnap.last(), QPointF(0, 0));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+namespace
+{
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief samePoints tells whether two point lists match point by point within 0.01.
+ */
+bool samePoints(const QVector<QPointF>& actual, const QVector<QPointF>& expected)
+{
+    bool same = actual.size() == expected.size();
+    for (int i = 0; same && i < actual.size(); ++i)
+    {
+        same = QLineF(actual.at(i), expected.at(i)).length() < 0.01;
+    }
+    return same;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief pointsText writes a point list for a failure message.
+ */
+QString pointsText(const QVector<QPointF>& points)
+{
+    QStringList parts;
+    for (const QPointF& point : points)
+    {
+        parts.append(QStringLiteral("(%1, %2)").arg(point.x()).arg(point.y()));
+    }
+    return parts.join(QLatin1Char(' '));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief squareFoldPiece is the square piece of squareSlitPiece() with a fold line on two of its main path nodes.
+ * @param fold_nodes main path indexes of the two fold line nodes.
+ */
+VPiece squareFoldPiece(VContainer* data, const QVector<int>& fold_nodes)
+{
+    VPiece piece = squareSlitPiece(data, false, QString());
+    QVector<VPieceNode> nodes = piece.GetPath().getNodes();
+    for (int index : fold_nodes)
+    {
+        nodes[index].setFoldLine(true);
+    }
+    piece.GetPath().setNodes(nodes);
+    return piece;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief writeFoldPattern writes a 0.7.6 pattern file with one piece of five point nodes.
+ * @param fold_nodes   node indexes with foldLine="true".
+ * @param excluded     node indexes with excluded="true".
+ * @return true when the file was written.
+ */
+bool writeFoldPattern(const QString& path, const QVector<int>& fold_nodes, const QVector<int>& excluded)
+{
+    QString points;
+    QString nodes;
+    for (int i = 0; i < 5; ++i)
+    {
+        points += QStringLiteral("            <point id=\"%1\" mx=\"0.1\" my=\"0.2\" name=\"A%1\" type=\"single\" "
+                                 "x=\"%2\" y=\"%3\"/>\n").arg(i + 1).arg(i * 10).arg(i % 2 * 10);
+        nodes += QStringLiteral("                    <node idObject=\"%1\" type=\"NodePoint\"%2%3/>\n")
+                     .arg(i + 1)
+                     .arg(fold_nodes.contains(i) ? QStringLiteral(" foldLine=\"true\"") : QString())
+                     .arg(excluded.contains(i) ? QStringLiteral(" excluded=\"true\"") : QString());
+    }
+
+    const QString content = QStringLiteral(R"(<?xml version="1.0" encoding="UTF-8"?>
+<pattern readOnly="true">
+    <version>0.7.6</version>
+    <unit>cm</unit>
+    <description/>
+    <notes/>
+    <measurements/>
+    <variables/>
+    <draftBlock name="Block 1">
+        <calculation>
+%1        </calculation>
+        <modeling/>
+        <pieces>
+            <piece id="6" name="Back">
+                <data letter="A"/>
+                <nodes>
+%2                </nodes>
+            </piece>
+        </pieces>
+    </draftBlock>
+</pattern>
+)").arg(points, nodes);
+
+    QFile file(path);
+    bool written = false;
+    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    {
+        written = file.write(content.toUtf8()) > 0;
+    }
+    return written;
+}
+} // namespace
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::EndPathAtFoldLine_data() const
+{
+    QTest::addColumn<QVector<int>>("foldNodes");
+    QTest::addColumn<QVector<int>>("excludedNodes");
+    QTest::addColumn<int>("curveNode");
+    QTest::addColumn<QVector<quint32>>("expected");
+
+    QTest::newRow("no fold line")       << QVector<int>() << QVector<int>() << -1
+                                        << QVector<quint32>{1, 2, 3, 4, 5};
+    QTest::newRow("middle")             << QVector<int>{1, 2} << QVector<int>() << -1
+                                        << QVector<quint32>{4, 5, 1, 2, 3};
+    QTest::newRow("closing segment")    << QVector<int>{0, 4} << QVector<int>() << -1
+                                        << QVector<quint32>{2, 3, 4, 5, 1};
+    QTest::newRow("at the end")         << QVector<int>{3, 4} << QVector<int>() << -1
+                                        << QVector<quint32>{1, 2, 3, 4, 5};
+    QTest::newRow("across excluded")    << QVector<int>{1, 3} << QVector<int>{2} << -1
+                                        << QVector<quint32>{5, 1, 2, 3, 4};
+    QTest::newRow("excluded after end") << QVector<int>{1, 2} << QVector<int>{3} << -1
+                                        << QVector<quint32>{4, 5, 1, 2, 3};
+    QTest::newRow("curve node")         << QVector<int>{1, 2} << QVector<int>() << 2
+                                        << QVector<quint32>{1, 2, 3, 4, 5};
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief EndPathAtFoldLine checks that a main path with a fold line is rotated to end with it, node order kept,
+ * and that a path without a valid fold line stays as it is.
+ */
+void TST_VPiece::EndPathAtFoldLine() const
+{
+    QFETCH(QVector<int>, foldNodes);
+    QFETCH(QVector<int>, excludedNodes);
+    QFETCH(int, curveNode);
+    QFETCH(QVector<quint32>, expected);
+
+    QVector<VPieceNode> nodes;
+    for (int i = 0; i < 5; ++i)
+    {
+        VPieceNode node(static_cast<quint32>(i + 1), i == curveNode ? Tool::NodeSpline : Tool::NodePoint);
+        node.setFoldLine(foldNodes.contains(i));
+        node.SetExcluded(excludedNodes.contains(i));
+        nodes.append(node);
+    }
+
+    const QVector<VPieceNode> rotated = VPiece::endPathAtFoldLine(nodes);
+    QVector<quint32> ids;
+    for (const VPieceNode& node : rotated)
+    {
+        ids.append(node.GetId());
+    }
+    QCOMPARE(ids, expected);
+
+    // A valid fold line keeps its direction and ends the path.
+    const QVector<int> before = VPiece::foldLineNodeIndexes(nodes);
+    const QVector<int> after = VPiece::foldLineNodeIndexes(rotated);
+    QCOMPARE(after.isEmpty(), before.isEmpty());
+    if (!after.isEmpty())
+    {
+        QCOMPARE(after.at(1), rotated.size() - 1);
+        QCOMPARE(rotated.at(after.at(0)).GetId(), nodes.at(before.at(0)).GetId());
+        QCOMPARE(rotated.at(after.at(1)).GetId(), nodes.at(before.at(1)).GetId());
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::FoldLineOnCutLine_data() const
+{
+    QTest::addColumn<QVector<int>>("foldNodes");
+    QTest::addColumn<QLineF>("expected");
+
+    // Square A1 (0, 0), A2 (200, 0), A3 (400, 0), A4 (400, 400), A5 (0, 400); seam allowance width w. The cut
+    // line runs along the fold line and w past each fold line node.
+    const qreal w = ToPixel(notchTestSAWidth, Unit::Mm);
+    QTest::newRow("left edge, closing segment") << QVector<int>{0, 4}
+                                                << QLineF(QPointF(0, 400 + w), QPointF(0, -w));
+    QTest::newRow("bottom edge")                << QVector<int>{3, 4}
+                                                << QLineF(QPointF(400 + w, 400), QPointF(-w, 400));
+    QTest::newRow("right edge")                 << QVector<int>{2, 3}
+                                                << QLineF(QPointF(400, -w), QPointF(400, 400 + w));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief FoldLineOnCutLine checks that the fold line extends, in its own direction, to where the cut line meets it.
+ */
+void TST_VPiece::FoldLineOnCutLine() const
+{
+    QFETCH(QVector<int>, foldNodes);
+    QFETCH(QLineF, expected);
+
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    const VPiece piece = squareFoldPiece(data.data(), foldNodes);
+    const QLineF fold = piece.foldLine(data.data());
+    const QLineF extended = VPiece::foldLineOnCutLine(piece.seamAllowancePoints(data.data()), fold);
+
+    const QString text = QStringLiteral("(%1, %2) (%3, %4)").arg(extended.x1()).arg(extended.y1())
+                                                             .arg(extended.x2()).arg(extended.y2());
+    QVERIFY2(QLineF(extended.p1(), expected.p1()).length() < 0.01, qPrintable(text));
+    QVERIFY2(QLineF(extended.p2(), expected.p2()).length() < 0.01, qPrintable(text));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief FoldLineOnCutLineKeepsFoldLineWithoutRun checks that the fold line stays as it is without a cut line, or
+ * when no cut line edge lies on it.
+ */
+void TST_VPiece::FoldLineOnCutLineKeepsFoldLineWithoutRun() const
+{
+    const QLineF fold(QPointF(0, 400), QPointF(0, 0));
+    QCOMPARE(VPiece::foldLineOnCutLine(QVector<QPointF>(), fold), fold);
+
+    const QVector<QPointF> offset{QPointF(-10, -10), QPointF(410, -10), QPointF(410, 410), QPointF(-10, 410)};
+    QCOMPARE(VPiece::foldLineOnCutLine(offset, fold), fold);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief CutLineEndsWithFoldLine checks that a main path that ends with its fold line gives a cut line that ends
+ * with the extended fold line.
+ */
+void TST_VPiece::CutLineEndsWithFoldLine() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    // Fold line on the right edge, A3 to A4; the rotated path is A5, A1, A2, A3, A4.
+    VPiece piece = squareFoldPiece(data.data(), QVector<int>{2, 3});
+    piece.GetPath().setNodes(VPiece::endPathAtFoldLine(piece.GetPath().getNodes()));
+    QCOMPARE(piece.GetPath().getNodes().last().GetId(), quint32(4));
+
+    QVector<QPointF> cut_line = piece.seamAllowancePoints(data.data());
+    if (cut_line.size() > 1 && cut_line.first() == cut_line.last())
+    {
+        cut_line.removeLast();
+    }
+    QVERIFY(cut_line.size() >= 4);
+
+    const QLineF extended = VPiece::foldLineOnCutLine(cut_line, piece.foldLine(data.data()));
+    const QVector<QPointF> last_two{cut_line.at(cut_line.size() - 2), cut_line.last()};
+    QVERIFY2(samePoints(last_two, QVector<QPointF>{extended.p1(), extended.p2()}), qPrintable(pointsText(cut_line)));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::FoldLineGraphicPlacesArrowAndLabel_data() const
+{
+    QTest::addColumn<QLineF>("fold");
+    QTest::addColumn<QVector<QPointF>>("outline");
+    QTest::addColumn<QVector<QPointF>>("arrowLine");
+    QTest::addColumn<QPointF>("labelCenter");
+    QTest::addColumn<qreal>("labelAngle");
+
+    // Fold line 400 long: arrow line 200 long, bends 20, straight part 160, arrow heads 5 long.
+    const QVector<QPointF> square{QPointF(0, 0), QPointF(200, 0), QPointF(400, 0), QPointF(400, 400),
+                                  QPointF(0, 400)};
+    QTest::newRow("left edge, clockwise on screen")
+        << QLineF(QPointF(0, 400), QPointF(0, 0)) << square
+        << QVector<QPointF>{QPointF(5, 280), QPointF(20, 280), QPointF(20, 120), QPointF(5, 120)}
+        << QPointF(10, 200) << qreal(90);
+
+    const QVector<QPointF> reversed{QPointF(0, 0), QPointF(0, 400), QPointF(400, 400), QPointF(400, 0),
+                                    QPointF(200, 0)};
+    QTest::newRow("left edge, counterclockwise on screen")
+        << QLineF(QPointF(0, 0), QPointF(0, 400)) << reversed
+        << QVector<QPointF>{QPointF(5, 120), QPointF(20, 120), QPointF(20, 280), QPointF(5, 280)}
+        << QPointF(10, 200) << qreal(90);
+
+    QTest::newRow("top edge")
+        << QLineF(QPointF(0, 0), QPointF(400, 0)) << square
+        << QVector<QPointF>{QPointF(120, 5), QPointF(120, 20), QPointF(280, 20), QPointF(280, 5)}
+        << QPointF(200, 10) << qreal(0);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief FoldLineGraphicPlacesArrowAndLabel checks the arrow line inside the piece, its heads on the fold line, and
+ * the label between the fold line and the arrow line.
+ */
+void TST_VPiece::FoldLineGraphicPlacesArrowAndLabel() const
+{
+    QFETCH(QLineF, fold);
+    QFETCH(QVector<QPointF>, outline);
+    QFETCH(QVector<QPointF>, arrowLine);
+    QFETCH(QPointF, labelCenter);
+    QFETCH(qreal, labelAngle);
+
+    const pattern_piece::FoldLineGraphic graphic(fold, outline);
+    QVERIFY(!graphic.isNull());
+    QVERIFY2(samePoints(graphic.arrowLine(), arrowLine), qPrintable(pointsText(graphic.arrowLine())));
+    QVERIFY(QLineF(graphic.labelCenter(), labelCenter).length() < 0.01);
+    QCOMPARE(graphic.labelAngle(), labelAngle);
+    QCOMPARE(graphic.labelRoom(), qreal(20));
+    QCOMPARE(graphic.labelLength(), qreal(160));
+
+    // Each head tip touches the fold line, where its bend points.
+    const QVector<QPointF> start_head = graphic.startArrowHead();
+    const QVector<QPointF> end_head = graphic.endArrowHead();
+    QCOMPARE(start_head.size(), 3);
+    QCOMPARE(end_head.size(), 3);
+    QVERIFY(VGObject::IsPointOnLineviaPDP(start_head.first(), fold.p1(), fold.p2()));
+    QVERIFY(VGObject::IsPointOnLineviaPDP(end_head.first(), fold.p1(), fold.p2()));
+    QVERIFY(QLineF(start_head.first(), arrowLine.first()).length() < 5.01);
+    QVERIFY(QLineF(end_head.first(), arrowLine.last()).length() < 5.01);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief FoldLineGraphicNeedsFoldLineAndOutline checks that a null fold line or an outline without area gives a
+ * null graphic.
+ */
+void TST_VPiece::FoldLineGraphicNeedsFoldLineAndOutline() const
+{
+    const QVector<QPointF> square{QPointF(0, 0), QPointF(400, 0), QPointF(400, 400), QPointF(0, 400)};
+    QVERIFY(pattern_piece::FoldLineGraphic().isNull());
+    QVERIFY(pattern_piece::FoldLineGraphic(QLineF(), square).isNull());
+    QVERIFY(pattern_piece::FoldLineGraphic(QLineF(QPointF(0, 400), QPointF(0, 0)), square.mid(0, 2)).isNull());
+    QVERIFY(pattern_piece::FoldLineGraphic(QLineF(QPointF(0, 400), QPointF(0, 0)), square).arrowLine().size() == 4);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief FoldLineGraphicMapsUpright checks that a moved, turned or mirrored graphic keeps its label reading upright.
+ */
+void TST_VPiece::FoldLineGraphicMapsUpright() const
+{
+    const QVector<QPointF> square{QPointF(0, 0), QPointF(200, 0), QPointF(400, 0), QPointF(400, 400),
+                                  QPointF(0, 400)};
+    const pattern_piece::FoldLineGraphic graphic(QLineF(QPointF(0, 400), QPointF(0, 0)), square);
+
+    const pattern_piece::FoldLineGraphic moved = graphic.mapped(QTransform::fromTranslate(100, 50));
+    QVERIFY(QLineF(moved.labelCenter(), QPointF(110, 250)).length() < 0.01);
+    QCOMPARE(moved.labelAngle(), qreal(90));
+    QCOMPARE(moved.labelRoom(), graphic.labelRoom());
+
+    QTransform turn;
+    turn.rotate(90);
+    const pattern_piece::FoldLineGraphic turned = graphic.mapped(turn);
+    QVERIFY(qAbs(turned.labelAngle()) < 0.01);
+
+    const pattern_piece::FoldLineGraphic mirrored = graphic.mapped(QTransform(-1, 0, 0, 1, 0, 0));
+    QVERIFY(QLineF(mirrored.labelCenter(), QPointF(-10, 200)).length() < 0.01);
+    QCOMPARE(mirrored.labelAngle(), qreal(90));
+
+    QVERIFY(pattern_piece::FoldLineGraphic().mapped(turn).isNull());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief FoldLineLabelFitsRoom checks the label font size and that the text box is centered on the label center.
+ */
+void TST_VPiece::FoldLineLabelFitsRoom() const
+{
+    const QVector<QPointF> square{QPointF(0, 0), QPointF(200, 0), QPointF(400, 0), QPointF(400, 400),
+                                  QPointF(0, 400)};
+    const pattern_piece::FoldLineGraphic graphic(QLineF(QPointF(0, 400), QPointF(0, 0)), square);
+
+    // Half the 20 room, and narrower than 80% of the 160 straight part.
+    const QFont font = graphic.labelFont(QFont());
+    QCOMPARE(font.pixelSize(), 10);
+    QVERIFY(QFontMetricsF(font).horizontalAdvance(pattern_piece::FoldLineGraphic::labelText()) <= 128);
+
+    const QSizeF text_size(40, 12);
+    const QPointF box_center = graphic.labelTransform(text_size).map(QPointF(20, 6));
+    QVERIFY(QLineF(box_center, graphic.labelCenter()).length() < 0.01);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::ConverterEndsMainPathAtFoldLine_data() const
+{
+    QTest::addColumn<QVector<int>>("foldNodes");
+    QTest::addColumn<QVector<int>>("excludedNodes");
+    QTest::addColumn<QStringList>("expected");
+
+    QTest::newRow("no fold line")      << QVector<int>() << QVector<int>()
+                                       << QStringList{"1", "2", "3", "4", "5"};
+    QTest::newRow("middle")            << QVector<int>{1, 2} << QVector<int>()
+                                       << QStringList{"4", "5", "1", "2", "3"};
+    QTest::newRow("closing segment")   << QVector<int>{0, 4} << QVector<int>()
+                                       << QStringList{"2", "3", "4", "5", "1"};
+    QTest::newRow("across excluded")   << QVector<int>{1, 3} << QVector<int>{2}
+                                       << QStringList{"5", "1", "2", "3", "4"};
+    QTest::newRow("not neighbours")    << QVector<int>{0, 2} << QVector<int>()
+                                       << QStringList{"1", "2", "3", "4", "5"};
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief ConverterEndsMainPathAtFoldLine checks that a 0.7.6 file converts to a main path that ends with its fold
+ * line, like Piece Properties does on Apply and OK.
+ */
+void TST_VPiece::ConverterEndsMainPathAtFoldLine() const
+{
+    QFETCH(QVector<int>, foldNodes);
+    QFETCH(QVector<int>, excludedNodes);
+    QFETCH(QStringList, expected);
+
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString path = dir.filePath(QStringLiteral("fold_order.sm2d"));
+    QVERIFY(writeFoldPattern(path, foldNodes, excludedNodes));
+
+    try
+    {
+        const QDomElement nodes = convertedElement(path, QStringLiteral("nodes"));
+        QVERIFY(!nodes.isNull());
+        QStringList ids;
+        for (QDomElement node = nodes.firstChildElement(QStringLiteral("node")); !node.isNull();
+             node = node.nextSiblingElement(QStringLiteral("node")))
+        {
+            ids.append(node.attribute(QStringLiteral("idObject")));
+        }
+        QCOMPARE(ids, expected);
+    }
+    catch (VException& error)
+    {
+        QFAIL(qUtf8Printable(error.ErrorMessage()));
+    }
 }
