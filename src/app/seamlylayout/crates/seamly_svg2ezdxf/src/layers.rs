@@ -11,11 +11,11 @@
 //! | 4, 80, 81, 83 | Notches | `notch` |
 //! | 6     | Mirror line | `fold_line` |
 //! | 7     | Grainline | `grainline` |
-//! | 8     | Internal lines (also the default) | `internal_path` |
+//! | 8     | Internal lines (also the default) | `internal_path`, `fold_line_arrow` |
 //! | 11    | Internal cutouts | `cut_path` |
 //! | 13    | Drill holes | id hint only |
 //! | 14    | Sew lines | `seamline` |
-//! | 15    | Annotation text | `piece_label`, `pattern_label`, `size_label`, `<text>` |
+//! | 15    | Annotation text | `piece_label`, `pattern_label`, `size_label`, `fold_line_label`, `<text>` |
 //! | 84–87 | Quality validation curves | generated from contours |
 
 /// @brief Component kinds of a pattern piece, as tagged by Seamly2D.
@@ -62,9 +62,9 @@ pub fn piece_component(element: &xmltree::Element) -> Option<PieceComponent> {
             "notch" => Some(PieceComponent::Notch),
             "grainline" => Some(PieceComponent::Grainline),
             "fold_line" => Some(PieceComponent::FoldLine),
-            "internal_path" => Some(PieceComponent::InternalPath),
+            "internal_path" | "fold_line_arrow" => Some(PieceComponent::InternalPath),
             "cut_path" => Some(PieceComponent::CutPath),
-            "piece_label" | "pattern_label" | "size_label" => Some(PieceComponent::Label),
+            "piece_label" | "pattern_label" | "size_label" | "fold_line_label" => Some(PieceComponent::Label),
             _ => None,
         }; // match data-type
     } // if data-type

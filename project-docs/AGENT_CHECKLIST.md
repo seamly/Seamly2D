@@ -334,7 +334,7 @@ Needs the next MSI. jacket2 Back has a fold line.
 - [ ] Media Fabric, Fabric Width 60 in, Fabric Folded. Check the option. Layout Mode Along Grainline. Submit. Create Layout.
 - [ ] Size 220 tab: Back lies with its dashed fold line on the left media edge. No margin left of it.
 - [ ] Marker tab: every size of Back touches the left edge.
-- [ ] Nested tab: Back is not moved to the edge (expected).
+- [ ] Nested tab: the Back sizes stack on their fold line; the stack lies with the fold line on the left edge.
 - [ ] Adjust Mode: drag Back. The fold line moves with it. Apply.
 - [ ] Layout Mode With Nap, Pieces point Up. Create Layout. Size 220 tab: Back on the left edge. Its labels read forward, not mirrored.
 - [ ] Uncheck the option. Create Layout: Back leaves the edge; the left margin is back.
@@ -426,7 +426,7 @@ Needs the next MSI. jacket2 handoff: Fabric and Lining. Settings from section 1.
 
 Needs the next MSI. jacket2 handoff (grainlines and labels shown).
 
-- [ ] Import: one warning names "Back: pattern label past the cut line in sizes 220, 240, 260, 280".
+- [ ] Import: one warning names "Back: piece label past the cut line in sizes 220" (Back's sizes stack on their fold line start).
 - [ ] Nested tab, Fabric: each piece shows one grainline stack and one label stack; the sizes' copies lie exactly on top of each other.
 - [ ] Size 220 and Size 720 tabs: each piece's grainline and labels sit in the same place inside the piece as on the Base Size 500 tab.
 - [ ] Lining, Nested tab: Detail 4's grainline, piece label and pattern label each stack as one.
@@ -463,3 +463,20 @@ Needs the next MSI.
 - [ ] Help > Shortcuts: no Export Pieces, New Layout or Export Layout. "Tools" lists Last Tool.
 - [ ] Draft mode > Export Draft Blocks As: the dialog offers SVG, PDF, PNG, JPG, BMP, TIF and PPM only, and has no "Binary form", "Text as paths" or size list. SVG, PDF and PNG export.
 - [ ] `seamly2d --help > help.txt`: `help.txt` lists no `--basename`. `seamly2d --test <pattern>` loads the pattern and quits.
+
+## 29. jacket2: fold line arrow line, label and extended fold line
+
+Needs the next MSI. jacket2 Back has a fold line. Do not save the pattern changes.
+
+- [ ] Open jacket2. Piece mode, Back > Piece Properties > Path: the list ends with the two fold line nodes.
+- [ ] Back on the canvas:
+  - [ ] An arrow line inside the piece beside the fold line: half its length, centered, both ends bent toward it, arrow heads touching it.
+  - [ ] "Foldline" between the fold line and the arrow line, reading along the fold line.
+  - [ ] Arrow line, heads and text in the Preferences fold line color and line type. Change the fold line color: they follow.
+  - [ ] The dashed fold line reaches the cut line at both ends. No seam allowance along the fold line.
+  - [ ] View > Seam Allowance off: the fold line ends at its two nodes.
+- [ ] Another piece: mark two neighbouring nodes in the middle of the path Fold Line. Apply: the rows below the second fold line node move to the top. OK: the arrow line and label show.
+- [ ] Press Layout. SeamlyLayout shows Back's arrow line and label. `capture_handoff_*.bat`: each `fold_line_Back_*` group holds the fold line path, then `fold_line_arrow_*`, then `fold_line_label_*` with a `<text>`.
+- [ ] Settings: "Place fold lines on the left edge", Fabric Folded. Create Layout. Size 220 tab: Back's fold line lies on the left edge.
+- [ ] Nested tab: Back's sizes stack on the start of their fold lines; the fold lines lie on top of each other, on the left edge.
+- [ ] Base Size tab, Export > DXF > DXF-ASTM (R13): the Back block layer 6 line is its first two layer 1 vertices. No "Foldline" text in the Back piece text.

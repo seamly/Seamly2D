@@ -72,7 +72,7 @@
   >> Each piece with a fold line lies with its fold line on the left content edge.
   >> media='fabric': marginLeft=0; the left edge is the fold.
   >> media='paper': marginLeft is kept; the fold line lies on the left content edge.
-  >> Not for a Nested piece-set: its sizes are centred, so their fold lines differ.
+  >> A Nested piece-set: its sizes stack on their fold line start, so the stack goes on the edge when the sizes share one fold line; else a warning.
 # Save/Load Settings
 - settingSavepath -- opens a file-save dialog in the /settings directorywhen the user clicks the 'Save Settings' button, saves parameters to a file, can be a relative filepath, extension must be '.settings'.
 - settingOpenpath -- opens a file-open dialog in the /settings directory when the user clicks the 'Load Settigs' button, loads parameters from a file, can be a relative filepath, extension must be '.settings'.

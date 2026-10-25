@@ -2,6 +2,23 @@
 
 ## Current status
 
+### 2026-10-25 — Seamly2D.71 fold line arrow line, label and extended fold line; merged into local `run-seamlyLayout`, not pushed
+
+- Piece Properties Apply/OK rotates the main path to end with the fold line (`VPiece::endPathAtFoldLine`). The 0.7.7 conversion does the same for older files (`endMainPathAtFoldLineV0_7_7`); no schema change.
+- New `pattern_piece::FoldLineGraphic` (`src/libs/vpatterndb/FoldLineGraphic.{h,cpp}`): arrow line 50% of the fold line, 10% bends at each end, heads touch the fold line; "Foldline" label between the lines. Piece mode draws both (`PatternPieceTool::refreshFoldLine`).
+- Extended fold line: `VPiece::foldLineOnCutLine`, drawn and sent while the cut line shows.
+- Handoff: `fold_line` group = fold line path, then `fold_line_arrow` and `fold_line_label` groups. `SvgGenerator` renders tagged child items as nested tagged groups.
+- SeamlyLayout: `svg_dom::fold_line_d`; Nested sizes with a fold line stack on its start (`center_piece_sets`, `annotation_alignment`); a piece-set sharing one fold line goes on the left edge; `piece_divider` splits the fold path only; DXF layer 8/15, HPGL, text modes.
+- Decisions to confirm: ids `fold_line_arrow_<name>`, `fold_line_label_<name>` (scheme), not `<name>_foldline`; conversion in 0.7.7, not 0.7.8; Nested piece-sets now go on the left edge.
+- Changed expectation: jacket2 import warning is now "Back: piece label past the cut line in sizes 220" (`AGENT_CHECKLIST.md` §26 updated).
+- Risk: a custom seam allowance that starts at the fold line end node wraps after the rotation and is dropped.
+- Code style: new code follows `README-CODE-STYLES.md` and the `AGENTS.md` note (snake_case, `Type*`, one exit, briefs, namespace, GPL link).
+- Verified: scratch harness `TST_VPiece` 128, `TST_SvgComponentTags` 49 passed; `cargo test --workspace` 621 passed; `cl /Zs` clean. Not run: Qt suites (next MSI, ask first), ctest (no QML or C++ frontend change), GUI.
+- User check: `AGENT_CHECKLIST.md` §29; §21 Nested step changed.
+- Port note added to Dead.4.4 (`layout_handoff` must write the nested fold line parts).
+- Scratch tools (session scratchpad `18654feb-…`): `harness/make_build.py` (two suites, changed lib sources rebuilt), `make_zs.py`.
+- Uncommitted user files left untouched: `AGENTS.md`, `TODO_SEAMLYLAYOUT.md` (Layout.100), `test-seamly-layout/foldline_arrowline.*`, `test-seamly-layout/layouts/*`.
+
 ### 2026-10-24 — Dead.4.1 and Dead.4.2: old Seamly2D layout, print, console export, Export Pieces, `vdxf`, `vobj` removed; merged into local `run-seamlyLayout`, not pushed
 
 - Plan: Task Dead.4 in `project-docs/docs-seamlylayout/TODO_REMOVE_DEAD_LAYOUT_CODE.md` replaces `src/libs/vlayout` in five steps. Dead.4.1 and Dead.4.2 are done; their MSI + user check (`AGENT_CHECKLIST.md` §28) is open.

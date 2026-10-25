@@ -725,18 +725,59 @@ pub fn is_piece_set(elem: &Element) -> bool {
     matches!(elem.attributes.get("data-type"), Some(value) if value == "piece-set")
 } // fn is_piece_set
 
+/// @brief `d` of a piece's fold line: the first `<path>` of its `fold_line` group.
+/// @details The group is found by `data-type`, or by an id that starts with `fold_line`. Paths inside a
+///          child group with its own `data-type` (the `fold_line_arrow` and `fold_line_label` groups) are
+///          not the fold line and are skipped.
+/// @param piece  Piece `<g>`.
+/// @return `None` when the piece has no fold line.
+pub fn fold_line_d(piece: &Element) -> Option<&str> {
+    let is_fold_line = |e: &Element| {
+        e.name == "g"
+            && (e.attributes.get("data-type").is_some_and(|t| t == "fold_line")
+                || e.attributes.get("id").is_some_and(|id| id.to_lowercase().starts_with("fold_line")))
+    }; // is_fold_line
+    let fold = piece.children.iter().filter_map(|n| n.as_element()).find(|e| is_fold_line(e))?;
+    own_first_path_d(fold)
+} // fn fold_line_d
+
+/// @brief `d` of the first `<path>` in `elem`'s subtree, outside child groups with their own `data-type`.
+fn own_first_path_d(elem: &Element) -> Option<&str> {
+    if elem.name == "path" {
+        return elem.attributes.get("d").map(String::as_str); // the path itself
+    } // if path
+    elem.children
+        .iter()
+        .filter_map(|n| n.as_element())
+        .filter(|e| !e.attributes.contains_key("data-type")) // a tagged part is not the fold line
+        .find_map(own_first_path_d)
+} // fn own_first_path_d
+
+/// @brief First point of a piece's fold line (`fold_line_d`).
+/// @return `None` when the piece has no fold line, or its path does not start with a move.
+fn fold_line_start(piece: &Element) -> Option<(f32, f32)> {
+    let path = Path::parse_path_attribute(fold_line_d(piece)?).ok()?;
+    match path.segments.first()? {
+        PathSegment::MoveTo(p) => Some((p.x, p.y)), // the fold line start node
+        _ => None,                                  // no start point
+    } // match first segment
+} // fn fold_line_start
+
 // ---------------------------------------------------------------------------
 // Public API — center_piece_sets
 // ---------------------------------------------------------------------------
 
-/// @brief Stack the sizes of each top-level piece-set on the largest size's centre.
+/// @brief Stack the sizes of each top-level piece-set on the largest size.
 /// @details For each direct `data-type="piece-set"` child of `doc.root`:
 ///          1. Measures the bounding box of each member `<g>`.
 ///          2. Reorders the members largest area first, so the smallest size is
 ///             drawn last (on top) and the outline search finds the largest
 ///             size's outline first.
 ///          3. Prepends `translate(dx,dy)` to every other member so its
-///             bounding-box centre matches the largest member's centre.
+///             stack point matches the largest member's stack point. When every
+///             size has a fold line, the stack point is the fold line start
+///             (`fold_line_start`), so the fold lines line up. Otherwise it is the
+///             bounding-box centre.
 ///          Call after the grainlines are vertical and flattened; call
 ///          `flatten_dom` afterwards to bake the translations.
 /// @param doc  SVG document to update in place.
@@ -758,26 +799,35 @@ pub fn center_piece_sets(doc: &mut Document) -> usize {
         // Split the children: measurable member groups, and everything else.
         // Members without geometry sort last and do not move.
         let children = std::mem::take(&mut set.children);
-        let mut members: Vec<(f32, Option<(f32, f32)>, XMLNode)> = Vec::new();
+        let mut members: Vec<(f32, Option<(f32, f32)>, Option<(f32, f32)>, XMLNode)> = Vec::new();
         let mut others: Vec<XMLNode> = Vec::new();
         for node in children {
             let measured = match &node {
-                XMLNode::Element(e) if e.name == "g" => Some(outline_area_centre(e)),
+                XMLNode::Element(e) if e.name == "g" => Some((outline_area_centre(e), fold_line_start(e))),
                 _ => None, // text, comments, non-group elements stay in front
             }; // match node
             match measured {
-                Some(Some((area, centre))) => members.push((area, Some(centre), node)),
-                Some(None) => members.push((-1.0, None, node)),
+                Some((Some((area, centre)), fold)) => members.push((area, Some(centre), fold, node)),
+                Some((None, _)) => members.push((-1.0, None, None, node)),
                 None => others.push(node),
             } // match measured
         } // for node
 
         // Largest area first; the stable sort keeps equal-area members in size order.
         members.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
-        let anchor = members.first().and_then(|m| m.1);
 
-        for (_, centre, mut node) in members {
-            if let (Some((ax, ay)), Some((cx, cy)), XMLNode::Element(ref mut e)) = (anchor, centre, &mut node) {
+        // Stack point of each member: the fold line start when every measurable size has a fold line, so
+        // the fold lines line up; else the outline centre.
+        let on_fold = members.iter().filter(|m| m.1.is_some()).all(|m| m.2.is_some());
+        let stack_point = |m: &(f32, Option<(f32, f32)>, Option<(f32, f32)>, XMLNode)| {
+            if on_fold { m.2 } else { m.1 }
+        }; // stack_point
+        let anchor = members.first().and_then(stack_point);
+
+        for member in members {
+            let point = stack_point(&member);
+            let mut node = member.3;
+            if let (Some((ax, ay)), Some((cx, cy)), XMLNode::Element(ref mut e)) = (anchor, point, &mut node) {
                 let dx = ax - cx;
                 let dy = ay - cy;
                 if dx.abs() > TOLERANCE || dy.abs() > TOLERANCE {
@@ -1881,6 +1931,58 @@ mod tests {
         let (_, (cx, cy)) = bbox_area_centre(small).expect("small size has geometry");
         assert!((cx - 120.0).abs() < 1e-3 && (cy - 120.0).abs() < 1e-3, "small size centre ({cx},{cy})");
     } // center_piece_sets_stacks_on_largest
+
+    // @brief Two sizes of a piece cut on the fold. Each fold line group holds a tagged arrow line group
+    //        ahead of the fold line, so the stack point must skip it.
+    const FOLD_PIECE_SET: &str = r#"<svg width="400" height="400">
+  <g id="piece-set_Back" data-type="piece-set" data-name="Back">
+    <g id="piece_Back_s34" data-type="piece" data-size="34">
+      <g data-type="cutline"><path d="M 0,0 L 30,0 L 30,60 L 0,60 Z"/></g>
+      <g id="fold_line_Back_s34" data-type="fold_line">
+        <g data-type="fold_line_arrow"><path d="M 2,40 L 5,40 L 5,20 L 2,20"/></g>
+        <path d="M 0,60 L 0,0"/>
+      </g>
+    </g>
+    <g id="piece_Back_s36" data-type="piece" data-size="36">
+      <g data-type="cutline"><path d="M 100,100 L 140,100 L 140,180 L 100,180 Z"/></g>
+      <g id="fold_line_Back_s36" data-type="fold_line"><path d="M 100,180 L 100,100"/></g>
+    </g>
+  </g>
+</svg>"#;
+
+    // @brief Sizes that all have a fold line stack on its start point, not on the outline centre: the
+    //        small size moves from fold start (0,60) to (100,180).
+    #[test]
+    fn center_piece_sets_stacks_fold_lines_on_their_start() {
+        let mut doc = Document::parse(FOLD_PIECE_SET).unwrap();
+        assert_eq!(center_piece_sets(&mut doc), 1);
+
+        assert_eq!(piece_set_member_ids(&doc), vec!["piece_Back_s36", "piece_Back_s34"]);
+        assert!(doc.get_attr_by_id("piece_Back_s36", "transform").is_none(), "the largest size must not move");
+        assert_eq!(doc.get_attr_by_id("piece_Back_s34", "transform"), Some("translate(100,120)"));
+    } // center_piece_sets_stacks_fold_lines_on_their_start
+
+    // @brief A size without a fold line puts the whole set back on the outline centre.
+    #[test]
+    fn center_piece_sets_centres_when_a_size_has_no_fold_line() {
+        let mixed = FOLD_PIECE_SET.replace(
+            r#"<g id="fold_line_Back_s36" data-type="fold_line"><path d="M 100,180 L 100,100"/></g>"#,
+            "",
+        );
+        let mut doc = Document::parse(&mixed).unwrap();
+        center_piece_sets(&mut doc);
+        assert_eq!(doc.get_attr_by_id("piece_Back_s34", "transform"), Some("translate(105,110)"));
+    } // center_piece_sets_centres_when_a_size_has_no_fold_line
+
+    // @brief fold_line_d reads the fold line, not a tagged part inside its group.
+    #[test]
+    fn fold_line_d_skips_tagged_parts() {
+        let doc = Document::parse(FOLD_PIECE_SET).unwrap();
+        let set = doc.root.children.iter().find_map(|n| n.as_element()).expect("piece-set");
+        let small = set.children.iter().find_map(|n| n.as_element()).expect("size 34");
+        assert_eq!(fold_line_d(small), Some("M 0,60 L 0,0"));
+        assert_eq!(fold_line_d(set), None, "a piece-set has no fold line group of its own");
+    } // fold_line_d_skips_tagged_parts
 
     // @brief center_piece_sets leaves ordinary pieces alone.
     #[test]

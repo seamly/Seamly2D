@@ -62,6 +62,7 @@
 #include "../vpatterndb/floatItemData/vpiecelabeldata.h"
 #include "../vpatterndb/floatItemData/vpatternlabeldata.h"
 #include "../vpatterndb/floatItemData/vgrainlinedata.h"
+#include "../vpatterndb/FoldLineGraphic.h"
 #include "../vmisc/diagnostic.h"
 #include "vabstractpiece.h"
 #include "vlayoutpiecepath.h"
@@ -107,7 +108,8 @@ public:
           m_quantity(1),
           m_onFold(false),
           m_pieceProperties(),
-          m_foldLine()
+          m_foldLine(),
+          m_fold_line_graphic()
     {}
 
     VLayoutPieceData(const VLayoutPieceData &piece)
@@ -143,7 +145,8 @@ public:
           m_quantity(piece.m_quantity),
           m_onFold(piece.m_onFold),
           m_pieceProperties(piece.m_pieceProperties),
-          m_foldLine(piece.m_foldLine)
+          m_foldLine(piece.m_foldLine),
+          m_fold_line_graphic(piece.m_fold_line_graphic)
     {}
 
     ~VLayoutPieceData() {}
@@ -181,6 +184,7 @@ public:
     VPieceLabelData            m_pieceProperties;  /// @brief Piece Properties, the source of the rotation, tilt,
                                                    ///        orientation and annotation attributes
     QVector<QPointF>           m_foldLine;         /// @brief fold line start and end points; empty when the piece has none
+    pattern_piece::FoldLineGraphic m_fold_line_graphic; ///< Fold line arrow line and label, in piece coordinates.
 
 private:
     VLayoutPieceData &operator=(const VLayoutPieceData &) Q_DECL_EQ_DELETE;

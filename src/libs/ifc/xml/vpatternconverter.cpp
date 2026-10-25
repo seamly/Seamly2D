@@ -167,6 +167,9 @@ static const QString strNone                      = QStringLiteral("None");
 static const QString strTilt                      = QStringLiteral("tilt");
 static const QString strTiltDegrees               = QStringLiteral("tiltDegrees");
 static const QString strFoldPosition              = QStringLiteral("foldPosition");
+static const QString strFoldLine                  = QStringLiteral("foldLine");
+static const QString strExcluded                  = QStringLiteral("excluded");
+static const QString strNodePoint                 = QStringLiteral("NodePoint");
 static const QString strInLayout                  = QStringLiteral("inLayout");
 static const QString strSeamAllowance             = QStringLiteral("seamAllowance");
 static const QString strNodeType                  = QStringLiteral("nodeType");
@@ -1496,7 +1499,7 @@ void VPatternConverter::toVersion0_7_6()
 /// @brief Version 0.7.7 limits the piece label data attribute "rotationWay" to None, 1-Way, 2-Way, 4-Way and Any,
 ///        splits "tilt" into a direction (None, CCW, CW) and the attribute "tiltDegrees" (0 to 90), and drops
 ///        "foldPosition": the boolean "onFold" is the only fold property. The piece attribute "flip" (None,
-///        Horizontal, Vertical, Both) replaces "forbidFlipping".
+///        Horizontal, Vertical, Both) replaces "forbidFlipping". A main path with a fold line ends with it.
 void VPatternConverter::toVersion0_7_7()
 {
     // Delete when the minimal supported version is 0.7.7.
@@ -1506,6 +1509,7 @@ void VPatternConverter::toVersion0_7_7()
     tiltToV0_7_7();
     removeFoldPositionV0_7_7();
     removeForbidFlippingV0_7_7();
+    endMainPathAtFoldLineV0_7_7();
     setVersion(QStringLiteral("0.7.7"));
     Save();
 }
@@ -1598,6 +1602,75 @@ void VPatternConverter::removeForbidFlippingV0_7_7()
     for (int i = 0; i < pieceList.size(); ++i)
     {
         pieceList.at(i).toElement().removeAttribute(strForbidFlipping);
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Rotates the main path of each piece with a fold line so that the path ends with the fold line.
+///
+/// The fold line joins the two main path nodes with "foldLine" set. Both are point nodes, and they are neighbours
+/// when excluded nodes are left out; the last and the first node count as neighbours. The nodes after the fold line
+/// end node move to the top, in their order. The outline stays the same. The piece dialog makes the same rotation
+/// on Apply and OK (VPiece::endPathAtFoldLine()).
+void VPatternConverter::endMainPathAtFoldLineV0_7_7()
+{
+    // Delete when the minimal supported version is 0.7.7.
+    Q_STATIC_ASSERT_X(VPatternConverter::PatternMinVer < CONVERTER_VERSION_CHECK(0, 7, 7),
+                      "Time to refactor the code.");
+
+    const auto is_set = [](const QDomElement& node, const QString& attribute)
+    {
+        const QString value = node.attribute(attribute);
+        return value == trueStr || value == QLatin1String("1");
+    };
+
+    const QDomNodeList piece_list = elementsByTagName(strPiece);
+    for (int i = 0; i < piece_list.size(); ++i)
+    {
+        QDomElement nodes = piece_list.at(i).firstChildElement(strNodes);
+
+        // Main path nodes, and the positions among them of the nodes the outline uses.
+        QVector<QDomElement> elements;
+        QVector<int> active;
+        for (QDomElement node = nodes.firstChildElement(strNode); !node.isNull();
+             node = node.nextSiblingElement(strNode))
+        {
+            if (!is_set(node, strExcluded))
+            {
+                active.append(elements.size());
+            }
+            elements.append(node);
+        }
+
+        // Positions in "active" of the fold line nodes; both must be point nodes.
+        QVector<int> fold;
+        bool points = true;
+        for (int k = 0; k < active.size(); ++k)
+        {
+            const QDomElement& node = elements.at(active.at(k));
+            if (is_set(node, strFoldLine))
+            {
+                fold.append(k);
+                points = points && node.attribute(strType) == strNodePoint;
+            }
+        }
+
+        // Element index of the fold line end node: the second fold node, or the first one for the closing segment.
+        int end = -1;
+        if (fold.size() == 2 && points && fold.at(1) == fold.at(0) + 1)
+        {
+            end = active.at(fold.at(1));
+        }
+        else if (fold.size() == 2 && points && fold.at(0) == 0 && fold.at(1) == active.size() - 1)
+        {
+            end = active.at(fold.at(0));
+        }
+
+        // Move the last node to the top until the fold line end node is last.
+        for (int k = end + 1; end >= 0 && k < elements.size(); ++k)
+        {
+            nodes.insertBefore(nodes.lastChildElement(strNode), nodes.firstChildElement(strNode));
+        }
     }
 }
 

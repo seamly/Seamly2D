@@ -110,8 +110,10 @@ public:
     QVector<VPointF>         mainPathNodePoints(const VContainer *data, bool showExcluded = false) const;
     QVector<QPointF>         mainPathNodeVertices(const VContainer *data) const;
     static QVector<int>      foldLineNodeIndexes(const QVector<VPieceNode> &nodes);
+    static QVector<VPieceNode> endPathAtFoldLine(const QVector<VPieceNode>& nodes);
     bool                     hasFoldLine() const;
     QLineF                   foldLine(const VContainer *data) const;
+    static QLineF            foldLineOnCutLine(const QVector<QPointF>& cut_line, const QLineF& fold);
     QVector<QPointF>         seamAllowancePoints(const VContainer *data,
                                                  QVector<QPointF> *nodeVertices = nullptr,
                                                  SeamAllowanceCorners *corners = nullptr) const;

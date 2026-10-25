@@ -2,6 +2,44 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Completed subtasks from Task Seamly2D.71 — Piece mode fold line: arrow line, label and extended fold line
+
+Open in `TODO_SEAMLY2D.md`: Seamly2D.71.9 (Qt suites, next MSI), Seamly2D.71.10 (user check).
+
+- [x] Seamly2D.71.1 Rearrange the main path nodes
+  - Apply and OK rotate the main path so it ends with the fold line start and end nodes. The rows below the fold line end node move to the top, in their order (`PatternPieceDialog::SaveData()`, `VPiece::endPathAtFoldLine()`)
+  - The cut line then ends with the extended fold line
+  - Risk: a custom seam allowance that starts at the fold line end node wraps past the path end after the rotation; `VPiece::GetValidRecords()` drops it
+- [x] Seamly2D.71.2 Fold line arrow line: `pattern_piece::FoldLineGraphic` (`src/libs/vpatterndb/FoldLineGraphic.{h,cpp}`)
+  - Half the fold line length, parallel to it, centered between its nodes. The first and last tenth bend 90 degrees toward the fold line; filled arrow heads touch it
+  - Inside the piece: the main path turn direction gives the side
+  - Preferences fold line style (color, line type, weight). Always shown with a fold line; no check box
+  - Piece mode: `PatternPieceTool::refreshFoldLine()`. Handoff: `fold_line_arrow` group inside `fold_line`
+- [x] Seamly2D.71.3 Fold line label "Foldline"
+  - Reads along the fold line (90 degrees for a vertical one). Centered between the fold line and the arrow line, and between the arrow line ends
+  - Text height: half the room between the two lines. Fold line color, Preferences label font
+  - Handoff: `fold_line_label` group inside `fold_line`, one `<text>` element
+  - Decision taken: the ids follow the `<type>_<pieceName>` scheme: `fold_line_Back`, `fold_line_arrow_Back`, `fold_line_label_Back`, not `Back_foldline` and `Back_foldline_label`
+- [x] Seamly2D.71.4 No seam allowance on the fold line
+  - Kept: the fold line edge offsets by 0 (`VPiece::seamAllowancePoints()`), whatever the node widths. The cut line runs along the fold line and past both nodes
+  - Tests: `TST_VPiece::FoldLineHasNoSeamAllowance`, `CutLineEndsWithFoldLine`
+- [x] Seamly2D.71.5 Extended fold line
+  - `VPiece::foldLineOnCutLine()`: the fold line from where the cut line meets its start side to where it meets its end side
+  - Piece mode draws it while the cut line shows. The handoff `fold_line` path carries it when a `cutline` is sent
+  - SeamlyLayout reads the first path outside the tagged parts (`svg_dom::fold_line_d`) in `fold_line_edge.rs`. The DXF mirror line ignores the arrow line (`converter.rs`)
+- [x] Seamly2D.71.6 SeamlyLayout Nested: sizes with a fold line stack on its first point (`svg_dom::center_piece_sets`)
+  - Import: each size's grainline and labels take the base size's offset from the same stack point (`annotation_alignment.rs`), so they still stack
+  - A piece-set whose sizes share one fold line goes on the left edge like a piece (`fold_line_edge.rs`). Sizes apart: warning
+  - `piece_divider` splits only the fold line path; the arrow line and label go whole to the nearest part
+  - DXF: arrow line layer 8, label layer 15; DXF-ASTM writes neither. HPGL: arrow line a mark, label a label. Text modes rewrite the label (`svg_label_text`)
+- [x] Seamly2D.71.7 Tests
+  - Qt `TST_VPiece`: `EndPathAtFoldLine` (7 rows), `FoldLineOnCutLine` (3 rows), `FoldLineOnCutLineKeepsFoldLineWithoutRun`, `CutLineEndsWithFoldLine`, `FoldLineGraphicPlacesArrowAndLabel` (3 rows), `FoldLineGraphicNeedsFoldLineAndOutline`, `FoldLineGraphicMapsUpright`, `FoldLineLabelFitsRoom`, `ConverterEndsMainPathAtFoldLine` (5 rows); `LayoutPieceTakesFoldLine` checks the extended fold line
+  - Qt `TST_SvgComponentTags`: `FoldLineGroupHoldsArrowAndLabel`; `FoldLineSendsFoldLineGroup` updated
+  - Rust (`cargo test --workspace` 621 passed): `jacket2_nested_stacks_each_piece_set_annotations` expects "Back: piece label past the cut line in sizes 220"; `center_piece_sets_stacks_fold_lines_on_their_start`, `center_piece_sets_centres_when_a_size_has_no_fold_line`, `fold_line_d_skips_tagged_parts`, `piece_set_on_a_shared_fold_line_is_pinned`, `fold_line_group_with_arrow_and_label_reads_the_fold_line`, `fold_line_arrow_and_label_go_whole_to_the_nearest_part`, `fold_line_arrow_and_label_are_not_the_mirror_line`, `fold_line_arrow_and_label_layers`, `fold_line_label_uses_the_label_pen`, `fold_line_label_text_is_label_text`
+- [x] Seamly2D.71.8 Schema: no change. The format 0.7.7 conversion rotates older main paths to end with the fold line (`VPatternConverter::endMainPathAtFoldLineV0_7_7()`)
+  - Decision taken: in the 0.7.7 step, not a new 0.7.8. No MSI writes 0.7.7 yet: the next MSI is the first with it
+- Docs: `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`, `seamlylayout_SETTINGS_WORKFLOW.md`; `AGENT_CHECKLIST.md` §21 Nested step
+
 ## Completed subtasks from Task Seamly2D.11 — Built-in seam allowance: calculation, display and export
 
 Open in `TODO_SEAMLY2D.md`: Seamly2D.11.8 (Qt suites, next MSI), Seamly2D.11.9 (user check).

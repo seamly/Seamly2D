@@ -4,8 +4,8 @@
 
 mod transforms;
 pub use transforms::{
-    center_piece_sets, flatten_dom, has_grain_direction, is_piece_set, parse_svg_transform, serialize_path,
-    translate_dom, verticalize_dom,
+    center_piece_sets, flatten_dom, fold_line_d, has_grain_direction, is_piece_set, parse_svg_transform,
+    serialize_path, translate_dom, verticalize_dom,
 };
 
 use std::io::Cursor;

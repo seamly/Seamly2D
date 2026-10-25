@@ -38,6 +38,7 @@
 #include "../vlayout/vlayoutpiecepath.h"
 #include "../vpatterndb/floatItemData/vgrainlinedata.h"
 #include "../vpatterndb/floatItemData/vpiecelabeldata.h"
+#include "../vpatterndb/FoldLineGraphic.h"
 #include "../vpatterndb/vcontainer.h"
 
 #include <QtTest>
@@ -1081,8 +1082,8 @@ void TST_SvgComponentTags::PieceCarriesPieceProperties() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief FoldLineSendsFoldLineGroup checks that a fold line becomes one fold_line group with one two point path, and
- * that a piece without one sends none.
+ * @brief FoldLineSendsFoldLineGroup checks that a fold line becomes one fold_line group whose first path is the two
+ * point fold line, and that a piece without one sends none.
  */
 void TST_SvgComponentTags::FoldLineSendsFoldLineGroup() const
 {
@@ -1091,16 +1092,70 @@ void TST_SvgComponentTags::FoldLineSendsFoldLineGroup() const
     folded.setFoldLine(QVector<QPointF>{QPointF(10, 190), QPointF(10, 10)});
     const QDomDocument doc = exportPieceSvg(folded);
 
-    const QVector<QDomElement> foldLines = groupsOfType(doc, QStringLiteral("fold_line"));
-    QCOMPARE(foldLines.size(), 1);
-    QCOMPARE(subpathCount(foldLines.at(0)), 1);
-    QCOMPARE(foldLines.at(0).attribute(QStringLiteral("id")), QStringLiteral("fold_line_Collar"));
-    const QRectF bounds = pathBounds(foldLines.at(0));
+    const QVector<QDomElement> fold_lines = groupsOfType(doc, QStringLiteral("fold_line"));
+    QCOMPARE(fold_lines.size(), 1);
+    QCOMPARE(subpathCount(fold_lines.at(0)), 1);
+    QCOMPARE(fold_lines.at(0).attribute(QStringLiteral("id")), QStringLiteral("fold_line_Collar"));
+    const QRectF bounds = pathBounds(fold_lines.at(0));
     QVERIFY2(bounds.width() < 0.01 && qAbs(bounds.height() - 180) < 0.01,
              qPrintable(QStringLiteral("%1 x %2").arg(bounds.width()).arg(bounds.height())));
 
+    // Without a graphic the group holds the fold line only.
+    QVERIFY(groupsOfType(doc, QStringLiteral("fold_line_arrow")).isEmpty());
+    QVERIFY(groupsOfType(doc, QStringLiteral("fold_line_label")).isEmpty());
+
     const QDomDocument plain = exportPieceSvg(makeTestPiece(QStringLiteral("Back")));
     QVERIFY(groupsOfType(plain, QStringLiteral("fold_line")).isEmpty());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief FoldLineGroupHoldsArrowAndLabel checks the fold_line group order: the fold line path first, then the
+ * tagged arrow line group, then the tagged label group with a real "Foldline" text element.
+ */
+void TST_SvgComponentTags::FoldLineGroupHoldsArrowAndLabel() const
+{
+    // The fold line is the left side of the 180 square, from its bottom to its top node.
+    const QLineF fold(QPointF(10, 190), QPointF(10, 10));
+    VLayoutPiece folded = makeTestPiece(QStringLiteral("Collar"));
+    folded.setOnFold(true);
+    folded.setFoldLine(QVector<QPointF>{fold.p1(), fold.p2()});
+    folded.setFoldLineGraphic(pattern_piece::FoldLineGraphic(fold, squarePoints(10, 10, 180)));
+    const QDomDocument doc = exportItemSvg(folded.GetItem(false));
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+
+    const QVector<QDomElement> fold_lines = groupsOfType(doc, QStringLiteral("fold_line"));
+    QCOMPARE(fold_lines.size(), 1);
+    const QVector<QDomElement> arrows = groupsOfType(doc, QStringLiteral("fold_line_arrow"));
+    const QVector<QDomElement> labels = groupsOfType(doc, QStringLiteral("fold_line_label"));
+    QCOMPARE(arrows.size(), 1);
+    QCOMPARE(labels.size(), 1);
+
+    // Both parts sit inside the fold_line group and name the piece.
+    QVERIFY(arrows.at(0).parentNode().toElement() == fold_lines.at(0));
+    QVERIFY(labels.at(0).parentNode().toElement() == fold_lines.at(0));
+    QCOMPARE(arrows.at(0).attribute(QStringLiteral("id")), QStringLiteral("fold_line_arrow_Collar"));
+    QCOMPARE(labels.at(0).attribute(QStringLiteral("id")), QStringLiteral("fold_line_label_Collar"));
+    QCOMPARE(arrows.at(0).attribute(QStringLiteral("data-parent")), QStringLiteral("Collar"));
+    QCOMPARE(labels.at(0).attribute(QStringLiteral("data-parent")), QStringLiteral("Collar"));
+
+    // The first path of the group is the fold line, a two point path, ahead of the arrow line and its heads.
+    const QDomElement first_path = fold_lines.at(0).elementsByTagName(QStringLiteral("path")).at(0).toElement();
+    const QString first_d = first_path.attribute(QStringLiteral("d"));
+    QCOMPARE(first_d.count(QLatin1Char('M')) + first_d.count(QLatin1Char('L')), 2);
+    const QDomNodeList children = fold_lines.at(0).childNodes();
+    QVERIFY(children.at(children.size() - 2).toElement() == arrows.at(0));
+    QVERIFY(children.at(children.size() - 1).toElement() == labels.at(0));
+
+    // Arrow line (one subpath) and two closed arrow heads, inside the piece, right of the fold line.
+    QCOMPARE(subpathCount(arrows.at(0)), 3);
+    const QRectF arrow_bounds = pathBounds(arrows.at(0));
+    QVERIFY2(arrow_bounds.left() > 9.99 && arrow_bounds.right() < 19.01,
+             qPrintable(QStringLiteral("%1 to %2").arg(arrow_bounds.left()).arg(arrow_bounds.right())));
+
+    const QDomNodeList texts = labels.at(0).elementsByTagName(QStringLiteral("text"));
+    QCOMPARE(texts.size(), 1);
+    QCOMPARE(texts.at(0).toElement().text().trimmed(), pattern_piece::FoldLineGraphic::labelText());
 }
 
 //---------------------------------------------------------------------------------------------------------------------

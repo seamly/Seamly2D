@@ -67,6 +67,7 @@
 #include "../ifc/xml/vabstractpattern.h"
 #include "../vpatterndb/floatItemData/vpatternlabeldata.h"
 #include "../vpatterndb/floatItemData/vpiecelabeldata.h"
+#include "../vpatterndb/FoldLineGraphic.h"
 #include "../vpatterndb/vcontainer.h"
 #include "vabstractpiece.h"
 
@@ -146,6 +147,8 @@ public:
     void                      setPieceProperties(const VPieceLabelData &properties);
     QVector<QPointF>          getFoldLine() const;
     void                      setFoldLine(const QVector<QPointF> &points);
+    pattern_piece::FoldLineGraphic getFoldLineGraphic() const;
+    void                      setFoldLineGraphic(const pattern_piece::FoldLineGraphic& graphic);
 
     QPointF                   getPieceTextPosition() const;
     QStringList               getPieceText() const;
@@ -215,7 +218,12 @@ private:
                                                          const VTextManager &tm, const QString &type,
                                                          bool textAsPaths) const;
     void                                 createGrainlineItem(QGraphicsItem *parent, bool textAsPaths) const;
-    void                                 createFoldLineItem(QGraphicsItem *parent) const;
+    void                                 createFoldLineItem(QGraphicsItem* parent, bool text_as_paths) const;
+    void                                 createFoldLineArrowItem(QGraphicsItem* parent,
+                                                                 const pattern_piece::FoldLineGraphic& graphic) const;
+    void                                 createFoldLineLabelItem(QGraphicsItem* parent,
+                                                                 const pattern_piece::FoldLineGraphic& graphic,
+                                                                 bool text_as_paths) const;
 
     template <class T>
     QVector<T>                           Map(const QVector<T> &points) const;

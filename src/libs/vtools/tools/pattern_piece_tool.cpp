@@ -65,6 +65,7 @@
 #include "../vgeometry/vpointf.h"
 #include "../vgeometry/vspline.h"
 #include "../vgeometry/vsplinepath.h"
+#include "../vpatterndb/FoldLineGraphic.h"
 #include "../vpatterndb/vpiecenode.h"
 #include "../vpatterndb/vpiecepath.h"
 #include "../vpatterndb/calculator.h"
@@ -92,6 +93,7 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QPainterPathStroker>
+#include <QPolygonF>
 
 // Current version of seam allowance tag need for backward compatibility
 const quint8 PatternPieceTool::pieceVersion = 2;
@@ -929,6 +931,13 @@ void PatternPieceTool::paint(QPainter *painter, const QStyleOptionGraphicsItem *
     m_foldLine->setPen(QPen(color, scaleWidth(lineWeight, sceneScale(scene())),
                             lineTypeToPenStyle(lineType), Qt::FlatCap, Qt::RoundJoin));
 
+    // The fold line arrow takes the fold line style; its heads and its label are filled with the fold line color.
+    m_fold_line_arrow->setPen(QPen(color, scaleWidth(lineWeight, sceneScale(scene())),
+                                   lineTypeToPenStyle(lineType), Qt::FlatCap, Qt::MiterJoin));
+    m_fold_line_arrow_heads->setPen(Qt::NoPen);
+    m_fold_line_arrow_heads->setBrush(QBrush(color));
+    m_fold_line_label->setBrush(QBrush(color));
+
 
     if ((m_dataLabel->isIdle() == false
             || m_patternInfo->isIdle() == false
@@ -1445,6 +1454,9 @@ PatternPieceTool::PatternPieceTool(VAbstractPattern *doc, VContainer *data, cons
     , m_grainLine(new VGrainlineItem(this))
     , m_notches(new QGraphicsPathItem(this))
     , m_foldLine(new QGraphicsPathItem(this))
+    , m_fold_line_arrow(new QGraphicsPathItem(this))
+    , m_fold_line_arrow_heads(new QGraphicsPathItem(this))
+    , m_fold_line_label(new QGraphicsSimpleTextItem(this))
 {
     VPiece piece = data->GetPiece(id);
     initializeNodes(piece, scene);
@@ -1622,20 +1634,58 @@ void PatternPieceTool::RefreshGeometry()
 
     m_notches->setPath(piece.getNotchesPath(this->getData(), seamAllowancePoints));
 
-    // The fold line is drawn over the outline segment it marks; the outline stays closed for the cut line.
-    QPainterPath foldPath;
-    const QLineF fold = piece.foldLine(this->getData());
-    if (!fold.isNull())
-    {
-        foldPath.moveTo(fold.p1());
-        foldPath.lineTo(fold.p2());
-    }
-    m_foldLine->setPath(foldPath);
+    refreshFoldLine(piece, seamAllowancePoints);
 
     updatePieceDetails();
 
     this->setPos(piece.GetMx(), piece.GetMy());
     this->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief refreshFoldLine draws the fold line, its arrow line and its label.
+ * @param piece piece of this tool.
+ * @param seam_allowance_points cut line of the piece; empty when the piece has no seam allowance or a built-in one.
+ *
+ * The fold line is drawn over the outline segment it marks; the outline stays closed for the cut line. A shown cut
+ * line runs along the fold line past both nodes, so the fold line is drawn out to the cut line.
+ */
+void PatternPieceTool::refreshFoldLine(const VPiece& piece, const QVector<QPointF>& seam_allowance_points)
+{
+    QPainterPath fold_path;
+    QPainterPath arrow_path;
+    QPainterPath arrow_heads_path;
+    const QLineF fold = piece.foldLine(this->getData());
+    const pattern_piece::FoldLineGraphic graphic(fold, piece.mainPathPoints(this->getData()));
+
+    // The fold line, out to the cut line when the cut line is shown.
+    if (!fold.isNull())
+    {
+        const bool cut_line_shown = qApp->Settings()->showSeamAllowances() && !seam_allowance_points.isEmpty();
+        const QLineF drawn_fold = cut_line_shown ? VPiece::foldLineOnCutLine(seam_allowance_points, fold) : fold;
+        fold_path.moveTo(drawn_fold.p1());
+        fold_path.lineTo(drawn_fold.p2());
+    }
+
+    // Arrow line from head base to head base; each head is a closed triangle. The label goes between the
+    // fold line and the arrow line.
+    if (!graphic.isNull())
+    {
+        arrow_path.addPolygon(QPolygonF(graphic.arrowLine()));
+        arrow_heads_path.addPolygon(QPolygonF(graphic.startArrowHead()));
+        arrow_heads_path.closeSubpath();
+        arrow_heads_path.addPolygon(QPolygonF(graphic.endArrowHead()));
+        arrow_heads_path.closeSubpath();
+
+        m_fold_line_label->setText(pattern_piece::FoldLineGraphic::labelText());
+        m_fold_line_label->setFont(graphic.labelFont(qApp->Settings()->getLabelFont()));
+        m_fold_line_label->setTransform(graphic.labelTransform(m_fold_line_label->boundingRect().size()));
+    }
+    m_foldLine->setPath(fold_path);
+    m_fold_line_arrow->setPath(arrow_path);
+    m_fold_line_arrow_heads->setPath(arrow_heads_path);
+    m_fold_line_label->setVisible(!graphic.isNull());
 }
 
 //---------------------------------------------------------------------------------------------------------------------

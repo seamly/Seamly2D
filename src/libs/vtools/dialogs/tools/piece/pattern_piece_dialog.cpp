@@ -549,8 +549,32 @@ void PatternPieceDialog::ShowDialog(bool click)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief SaveData runs before Apply and OK hand the piece to the tool.
+ *
+ * A main path with a fold line is rotated to end with the fold line: the rows below the fold line end node move to
+ * the top, in their order.
+ */
 void PatternPieceDialog::SaveData()
-{}
+{
+    const QVector<VPieceNode> nodes = GetListInternals<VPieceNode>(ui->mainPath_ListWidget);
+    const QVector<int> fold_indexes = VPiece::foldLineNodeIndexes(nodes);
+
+    // Rows below the fold line end node; none when there is no fold line or it ends the path already.
+    const int moved = fold_indexes.isEmpty() ? 0 : nodes.size() - 1 - fold_indexes.at(1);
+    if (moved > 0)
+    {
+        // Take each of those rows from the bottom and put it on the top.
+        ui->mainPath_ListWidget->blockSignals(true);
+        for (int i = 0; i < moved; ++i)
+        {
+            QListWidgetItem* item = ui->mainPath_ListWidget->takeItem(ui->mainPath_ListWidget->count() - 1);
+            ui->mainPath_ListWidget->insertItem(0, item);
+        }
+        ui->mainPath_ListWidget->blockSignals(false);
+        nodeListChanged();
+    }
+}
 
 //---------------------------------------------------------------------------------------------------------------------
 void PatternPieceDialog::CheckState()

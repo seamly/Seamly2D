@@ -712,8 +712,15 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
             } // Grainline
             PieceComponent::FoldLine => {
                 if block.mirror_line.is_none() {
-                    // The fold line runs from its start node to its end node.
-                    block.mirror_line = lines().into_iter().next().filter(|(p, _)| p.len() >= 2).map(|(p, _)| (p[0], p[p.len() - 1]));
+                    // The fold line runs from its start node to its end node. Its arrow line and label
+                    // are tagged groups inside the fold line group; they are not the mirror line.
+                    let mut fold_only = element.clone();
+                    fold_only.children.retain(|c| !matches!(c, XMLNode::Element(e) if e.attributes.contains_key("data-type")));
+                    block.mirror_line = element_polylines(&fold_only, options, svg_height)
+                        .into_iter()
+                        .next()
+                        .filter(|(p, _)| p.len() >= 2)
+                        .map(|(p, _)| (p[0], p[p.len() - 1]));
                 } // if first fold line
             } // FoldLine
             PieceComponent::Label => collect_annotations(element, options, svg_height, &mut block.annotations),
