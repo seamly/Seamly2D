@@ -111,35 +111,6 @@ QVector<std::pair<QString, LayoutExportFormat>> ExportFormatCombobox::initFormat
     InitFormat(LayoutExportFormat::BMP);
     InitFormat(LayoutExportFormat::TIF);
     InitFormat(LayoutExportFormat::PPM);
-    InitFormat(LayoutExportFormat::OBJ);
-    InitFormat(LayoutExportFormat::DXF_AC1006_Flat);
-    InitFormat(LayoutExportFormat::DXF_AC1009_Flat);
-    InitFormat(LayoutExportFormat::DXF_AC1012_Flat);
-    InitFormat(LayoutExportFormat::DXF_AC1014_Flat);
-    InitFormat(LayoutExportFormat::DXF_AC1015_Flat);
-    InitFormat(LayoutExportFormat::DXF_AC1018_Flat);
-    InitFormat(LayoutExportFormat::DXF_AC1021_Flat);
-    InitFormat(LayoutExportFormat::DXF_AC1024_Flat);
-    InitFormat(LayoutExportFormat::DXF_AC1027_Flat);
-    InitFormat(LayoutExportFormat::DXF_AC1006_AAMA);
-    InitFormat(LayoutExportFormat::DXF_AC1009_AAMA);
-    InitFormat(LayoutExportFormat::DXF_AC1012_AAMA);
-    InitFormat(LayoutExportFormat::DXF_AC1014_AAMA);
-    InitFormat(LayoutExportFormat::DXF_AC1015_AAMA);
-    InitFormat(LayoutExportFormat::DXF_AC1018_AAMA);
-    InitFormat(LayoutExportFormat::DXF_AC1021_AAMA);
-    InitFormat(LayoutExportFormat::DXF_AC1024_AAMA);
-    InitFormat(LayoutExportFormat::DXF_AC1027_AAMA);
-    // We will support them anyway
-//    InitFormat(LayoutExportFormat::DXF_AC1006_ASTM);
-//    InitFormat(LayoutExportFormat::DXF_AC1009_ASTM);
-//    InitFormat(LayoutExportFormat::DXF_AC1012_ASTM);
-//    InitFormat(LayoutExportFormat::DXF_AC1014_ASTM);
-//    InitFormat(LayoutExportFormat::DXF_AC1015_ASTM);
-//    InitFormat(LayoutExportFormat::DXF_AC1018_ASTM);
-//    InitFormat(LayoutExportFormat::DXF_AC1021_ASTM);
-//    InitFormat(LayoutExportFormat::DXF_AC1024_ASTM);
-//    InitFormat(LayoutExportFormat::DXF_AC1027_ASTM);
 
     return list;
 }
@@ -147,8 +118,6 @@ QVector<std::pair<QString, LayoutExportFormat>> ExportFormatCombobox::initFormat
 //---------------------------------------------------------------------------------------------------------------------
 QString ExportFormatCombobox::exportFormatDescription(LayoutExportFormat format)
 {
-    const QString dxfSuffix = QStringLiteral("(*.dxf)");
-    const QString dxfFlatFilesStr = tr("(flat) files");
     const QString filesStr = tr("files");
 
     switch(format)
@@ -167,62 +136,6 @@ QString ExportFormatCombobox::exportFormatDescription(LayoutExportFormat format)
             return QString("TIF %1 (*.tif)").arg(filesStr);
         case LayoutExportFormat::PPM:
             return QString("PPM %1 (*.ppm)").arg(filesStr);
-        case LayoutExportFormat::OBJ:
-            return "Wavefront OBJ (*.obj)";
-        case LayoutExportFormat::DXF_AC1006_Flat:
-            return QString("AutoCAD DXF R10 %1 %2").arg(dxfFlatFilesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1009_Flat:
-            return QString("AutoCAD DXF R11/12 %1 %2").arg(dxfFlatFilesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1012_Flat:
-            return QString("AutoCAD DXF R13 %1 %2").arg(dxfFlatFilesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1014_Flat:
-            return QString("AutoCAD DXF R14 %1 %2").arg(dxfFlatFilesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1015_Flat:
-            return QString("AutoCAD DXF 2000 %1 %2").arg(dxfFlatFilesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1018_Flat:
-            return QString("AutoCAD DXF 2004 %1 %2").arg(dxfFlatFilesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1021_Flat:
-            return QString("AutoCAD DXF 2007 %1 %2").arg(dxfFlatFilesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1024_Flat:
-            return QString("AutoCAD DXF 2010 %1 %2").arg(dxfFlatFilesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1027_Flat:
-            return QString("AutoCAD DXF 2013 %1 %2").arg(dxfFlatFilesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1006_AAMA:
-            return QString("AutoCAD DXF R10 AAMA %1 %2").arg(filesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1009_AAMA:
-            return QString("AutoCAD DXF R11/12 AAMA %1 %2").arg(filesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1012_AAMA:
-            return QString("AutoCAD DXF R13 AAMA %1 %2").arg(filesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1014_AAMA:
-            return QString("AutoCAD DXF R14 AAMA %1 %2").arg(filesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1015_AAMA:
-            return QString("AutoCAD DXF 2000 AAMA %1 %2").arg(filesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1018_AAMA:
-            return QString("AutoCAD DXF 2004 AAMA %1 %2").arg(filesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1021_AAMA:
-            return QString("AutoCAD DXF 2007 AAMA %1 %2").arg(filesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1024_AAMA:
-            return QString("AutoCAD DXF 2010 AAMA %1 %2").arg(filesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1027_AAMA:
-            return QString("AutoCAD DXF 2013 AAMA %1 %2").arg(filesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1006_ASTM:
-            return QString("AutoCAD DXF R10 ASTM %1 %2").arg(filesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1009_ASTM:
-            return QString("AutoCAD DXF R11/12 ASTM %1 %2").arg(filesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1012_ASTM:
-            return QString("AutoCAD DXF R13 ASTM %1 %2").arg(filesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1014_ASTM:
-            return QString("AutoCAD DXF R14 ASTM %1 %2").arg(filesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1015_ASTM:
-            return QString("AutoCAD DXF 2000 ASTM %1 %2").arg(filesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1018_ASTM:
-            return QString("AutoCAD DXF 2004 ASTM %1 %2").arg(filesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1021_ASTM:
-            return QString("AutoCAD DXF 2007 ASTM %1 %2").arg(filesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1024_ASTM:
-            return QString("AutoCAD DXF 2010 ASTM %1 %2").arg(filesStr, dxfSuffix);
-        case LayoutExportFormat::DXF_AC1027_ASTM:
-            return QString("AutoCAD DXF 2013 ASTM %1 %2").arg(filesStr, dxfSuffix);
         default:
             return QString();
     }

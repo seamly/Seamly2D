@@ -70,12 +70,10 @@
 const QString fileNameRegExp = QStringLiteral("^[\\p{L}\\p{Nd}\\-. _]+$");
 
 //---------------------------------------------------------------------------------------------------------------------
-ExportLayoutDialog::ExportLayoutDialog(int count, Draw mode, const QString &fileName, QWidget *parent)
+ExportLayoutDialog::ExportLayoutDialog(const QString &fileName, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::ExportLayoutDialog)
-    , m_count(count)
     , m_isInitialized(false)
-    , m_mode(mode)
     , m_saveButton(nullptr)
     , m_foreGroundColor()
 {
@@ -116,48 +114,7 @@ ExportLayoutDialog::ExportLayoutDialog(int count, Draw mode, const QString &file
         }
     }
 
-    if (m_mode == Draw::Calculation)
-    {
-        removeFormatFromList(LayoutExportFormat::DXF_AC1006_Flat);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1009_Flat);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1012_Flat);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1014_Flat);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1015_Flat);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1018_Flat);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1021_Flat);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1024_Flat);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1027_Flat);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1006_AAMA);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1009_AAMA);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1012_AAMA);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1014_AAMA);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1015_AAMA);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1018_AAMA);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1021_AAMA);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1024_AAMA);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1027_AAMA);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1006_ASTM);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1009_ASTM);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1012_ASTM);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1014_ASTM);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1015_ASTM);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1018_ASTM);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1021_ASTM);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1024_ASTM);
-        removeFormatFromList(LayoutExportFormat::DXF_AC1027_ASTM);
-
-        ui->binaryDXF_CheckBox->hide();
-    }
-#ifdef V_NO_ASSERT // Temporarily unavailable
-    removeFormatFromList(LayoutExportFormat::OBJ);
-#endif
-
     connect(m_saveButton, &QPushButton::clicked, this, &ExportLayoutDialog::save);
-    connect(ui->filename_LineEdit, &QLineEdit::textChanged, this, &ExportLayoutDialog::showExportFiles);
-    connect(ui->format_ComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-            this, &ExportLayoutDialog::showExportFiles);
-    connect(ui->format_ComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-            this, &ExportLayoutDialog::enableBinaryDXFFormatCheckbox);
     connect(ui->browse_PushButton, &QPushButton::clicked, this, [this]()
     {
         const QString dirPath = qApp->Seamly2DSettings()->getLayoutPath();
@@ -195,129 +152,10 @@ ExportLayoutDialog::ExportLayoutDialog(int count, Draw mode, const QString &file
 
     ui->path_LineEdit->setText(qApp->Seamly2DSettings()->getLayoutPath());
 
-    // Size selection group box: hidden by default, shown when setAvailableSizes() is called
-    ui->sizeSelection_GroupBox->setVisible(false);
-
-    connect(ui->selectAll_CheckBox, &QCheckBox::toggled, [=](bool checked)
-    {
-        if (checked)
-        {
-            selectAllSizes();
-        }
-        else
-        {
-            deselectAllSizes();
-        }
-    });
-
     readSettings();
-    showExportFiles(); //Show example for current format.
-    enableBinaryDXFFormatCheckbox();
 
     adjustSize();
     setFixedHeight(this->height());
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-bool ExportLayoutDialog::isBinaryDXFFormat() const
-{
-    switch(format())
-    {
-        case LayoutExportFormat::DXF_AC1006_Flat:
-        case LayoutExportFormat::DXF_AC1009_Flat:
-        case LayoutExportFormat::DXF_AC1012_Flat:
-        case LayoutExportFormat::DXF_AC1014_Flat:
-        case LayoutExportFormat::DXF_AC1015_Flat:
-        case LayoutExportFormat::DXF_AC1018_Flat:
-        case LayoutExportFormat::DXF_AC1021_Flat:
-        case LayoutExportFormat::DXF_AC1024_Flat:
-        case LayoutExportFormat::DXF_AC1027_Flat:
-        case LayoutExportFormat::DXF_AC1006_AAMA:
-        case LayoutExportFormat::DXF_AC1009_AAMA:
-        case LayoutExportFormat::DXF_AC1012_AAMA:
-        case LayoutExportFormat::DXF_AC1014_AAMA:
-        case LayoutExportFormat::DXF_AC1015_AAMA:
-        case LayoutExportFormat::DXF_AC1018_AAMA:
-        case LayoutExportFormat::DXF_AC1021_AAMA:
-        case LayoutExportFormat::DXF_AC1024_AAMA:
-        case LayoutExportFormat::DXF_AC1027_AAMA:
-        case LayoutExportFormat::DXF_AC1006_ASTM:
-        case LayoutExportFormat::DXF_AC1009_ASTM:
-        case LayoutExportFormat::DXF_AC1012_ASTM:
-        case LayoutExportFormat::DXF_AC1014_ASTM:
-        case LayoutExportFormat::DXF_AC1015_ASTM:
-        case LayoutExportFormat::DXF_AC1018_ASTM:
-        case LayoutExportFormat::DXF_AC1021_ASTM:
-        case LayoutExportFormat::DXF_AC1024_ASTM:
-        case LayoutExportFormat::DXF_AC1027_ASTM:
-            return ui->binaryDXF_CheckBox->isChecked();
-        case LayoutExportFormat::SVG:
-        case LayoutExportFormat::PDF:
-        case LayoutExportFormat::PNG:
-        case LayoutExportFormat::JPG:
-        case LayoutExportFormat::BMP:
-        case LayoutExportFormat::PPM:
-        case LayoutExportFormat::OBJ:
-        case LayoutExportFormat::TIF:
-        default:
-            return false;
-    }
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void ExportLayoutDialog::enableBinaryDXFFormatCheckbox()
-{
-    const LayoutExportFormat currentFormat = format();
-
-    switch(currentFormat)
-    {
-    case LayoutExportFormat::DXF_AC1006_Flat:
-    case LayoutExportFormat::DXF_AC1009_Flat:
-    case LayoutExportFormat::DXF_AC1012_Flat:
-    case LayoutExportFormat::DXF_AC1014_Flat:
-    case LayoutExportFormat::DXF_AC1015_Flat:
-    case LayoutExportFormat::DXF_AC1018_Flat:
-    case LayoutExportFormat::DXF_AC1021_Flat:
-    case LayoutExportFormat::DXF_AC1024_Flat:
-    case LayoutExportFormat::DXF_AC1027_Flat:
-    case LayoutExportFormat::DXF_AC1006_AAMA:
-    case LayoutExportFormat::DXF_AC1009_AAMA:
-    case LayoutExportFormat::DXF_AC1012_AAMA:
-    case LayoutExportFormat::DXF_AC1014_AAMA:
-    case LayoutExportFormat::DXF_AC1015_AAMA:
-    case LayoutExportFormat::DXF_AC1018_AAMA:
-    case LayoutExportFormat::DXF_AC1021_AAMA:
-    case LayoutExportFormat::DXF_AC1024_AAMA:
-    case LayoutExportFormat::DXF_AC1027_AAMA:
-    case LayoutExportFormat::DXF_AC1006_ASTM:
-    case LayoutExportFormat::DXF_AC1009_ASTM:
-    case LayoutExportFormat::DXF_AC1012_ASTM:
-    case LayoutExportFormat::DXF_AC1014_ASTM:
-    case LayoutExportFormat::DXF_AC1015_ASTM:
-    case LayoutExportFormat::DXF_AC1018_ASTM:
-    case LayoutExportFormat::DXF_AC1021_ASTM:
-    case LayoutExportFormat::DXF_AC1024_ASTM:
-    case LayoutExportFormat::DXF_AC1027_ASTM:
-        ui->binaryDXF_CheckBox->setEnabled(true);
-        break;
-    case LayoutExportFormat::PNG:
-    case LayoutExportFormat::JPG:
-    case LayoutExportFormat::PDF:
-    case LayoutExportFormat::SVG:
-    case LayoutExportFormat::BMP:
-    case LayoutExportFormat::PPM:
-    case LayoutExportFormat::OBJ:
-    case LayoutExportFormat::TIF:
-    default:
-        ui->binaryDXF_CheckBox->setEnabled(false);
-        break;
-    }
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-Draw ExportLayoutDialog::mode() const
-{
-    return m_mode;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -337,38 +175,8 @@ QString ExportLayoutDialog::exportFormatSuffix(LayoutExportFormat format)
             return ".bmp";
         case LayoutExportFormat::PPM:
             return ".ppm";
-        case LayoutExportFormat::OBJ:
-            return ".obj";
         case LayoutExportFormat::TIF:
             return ".tif";
-        case LayoutExportFormat::DXF_AC1006_Flat:
-        case LayoutExportFormat::DXF_AC1009_Flat:
-        case LayoutExportFormat::DXF_AC1012_Flat:
-        case LayoutExportFormat::DXF_AC1014_Flat:
-        case LayoutExportFormat::DXF_AC1015_Flat:
-        case LayoutExportFormat::DXF_AC1018_Flat:
-        case LayoutExportFormat::DXF_AC1021_Flat:
-        case LayoutExportFormat::DXF_AC1024_Flat:
-        case LayoutExportFormat::DXF_AC1027_Flat:
-        case LayoutExportFormat::DXF_AC1006_AAMA:
-        case LayoutExportFormat::DXF_AC1009_AAMA:
-        case LayoutExportFormat::DXF_AC1012_AAMA:
-        case LayoutExportFormat::DXF_AC1014_AAMA:
-        case LayoutExportFormat::DXF_AC1015_AAMA:
-        case LayoutExportFormat::DXF_AC1018_AAMA:
-        case LayoutExportFormat::DXF_AC1021_AAMA:
-        case LayoutExportFormat::DXF_AC1024_AAMA:
-        case LayoutExportFormat::DXF_AC1027_AAMA:
-        case LayoutExportFormat::DXF_AC1006_ASTM:
-        case LayoutExportFormat::DXF_AC1009_ASTM:
-        case LayoutExportFormat::DXF_AC1012_ASTM:
-        case LayoutExportFormat::DXF_AC1014_ASTM:
-        case LayoutExportFormat::DXF_AC1015_ASTM:
-        case LayoutExportFormat::DXF_AC1018_ASTM:
-        case LayoutExportFormat::DXF_AC1021_ASTM:
-        case LayoutExportFormat::DXF_AC1024_ASTM:
-        case LayoutExportFormat::DXF_AC1027_ASTM:
-            return ".dxf";
         default:
             return QString();
     }
@@ -413,44 +221,25 @@ QString ExportLayoutDialog::formatText() const
 //---------------------------------------------------------------------------------------------------------------------
 void ExportLayoutDialog::save()
 {
-        QString text = tr("%1 already exists.").arg(fileName() + exportFormatSuffix(format()));
-        QString infoText = QStringLiteral("Do you want to replace it?");
+    const QString name = QString("%1/%2%3")
+    .arg(path())                        //1
+    .arg(fileName())                    //2
+    .arg(exportFormatSuffix(format())); //3
 
-        if (ui->exportFiles_ListWidget->count() > 1)
-        {
-            text     = tr("%1 files with basename %2 already exist.")
-                          .arg(ui->exportFiles_ListWidget->count())
-                          .arg(fileName());
-            infoText = tr("Do you want to replace them?");
-        }
-
-    for (int i=0; i < m_count; ++i)
+    if (QFile::exists(name))
     {
-        const QString name = QString("%1/%2%3")
-        .arg(path())                        //1
-        .arg(fileName())                    //2
-        .arg(exportFormatSuffix(format())); //3
+        QMessageBox messageBox(this);
+        messageBox.setWindowTitle(tr("Confirm Export"));
+        messageBox.setIcon(QMessageBox::Question);
+        messageBox.setText(tr("%1 already exists.").arg(fileName() + exportFormatSuffix(format())));
+        messageBox.setInformativeText(QStringLiteral("Do you want to replace it?"));
+        messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        messageBox.setDefaultButton(QMessageBox::Yes);
 
-        if (QFile::exists(name))
+        if (messageBox.exec() == QMessageBox::No)
         {
-            QMessageBox messageBox(this);
-            messageBox.setWindowTitle(tr("Confirm Export"));
-            messageBox.setIcon(QMessageBox::Question);
-            messageBox.setText(text);
-            messageBox.setInformativeText(infoText);
-            messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-            messageBox.setDefaultButton(QMessageBox::Yes);
-            int result = messageBox.exec();
-
-            if (result == QMessageBox::No)
-            {
-                reject();
-                return;
-            }
-            else
-            {
-                break;
-            }
+            reject();
+            return;
         }
     }
     writeSettings();
@@ -479,23 +268,6 @@ void ExportLayoutDialog::pathChanged(const QString &text)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief showExportFiles hides the list of export files: a piece or draft block export writes one file.
- */
-void ExportLayoutDialog::showExportFiles()
-{
-    ui->exportFiles_ListWidget->clear();
-    ui->export_Frame->hide();
-    adjustSize();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-bool ExportLayoutDialog::isTextAsPaths() const
-{
-    return ui->textAsPaths_Checkbox->isChecked();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
 void ExportLayoutDialog::showEvent(QShowEvent *event)
 {
     QDialog::showEvent( event );
@@ -510,17 +282,6 @@ void ExportLayoutDialog::showEvent(QShowEvent *event)
     }
 
     m_isInitialized = true;//first show windows are held
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void ExportLayoutDialog::removeFormatFromList(LayoutExportFormat format)
-{
-    const int index = ui->format_ComboBox->findData(static_cast<int>(format));
-    if (index != -1)
-    {
-        ui->format_ComboBox->removeItem(index);
-        ui->format_ComboBox->setCurrentToDefault();
-    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -550,108 +311,15 @@ void ExportLayoutDialog::writeSettings() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-//  @brief modeString()
-//  @return Returns a string that is the mode type
-//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief modeString returns the file name suffix of a draft block export, empty when the user turned it off.
+ */
 QString ExportLayoutDialog::modeString() const
 {
     QString modeStr = QStringLiteral("");
     if (qApp->Seamly2DSettings()->useModeType())
     {
-        switch (m_mode)
-        {
-            case Draw::Calculation:
-            {
-                modeStr = QStringLiteral("_block");
-                break;
-            }
-            case Draw::Modeling:
-            {
-                modeStr = QStringLiteral("_pieces");
-                break;
-            }
-            default:
-            {
-                modeStr = QStringLiteral("_layout");
-                break;
-            }
-        }
+        modeStr = QStringLiteral("_block");
     }
     return modeStr;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void ExportLayoutDialog::setAvailableSizes(const QStringList &sizes)
-{
-    ui->sizes_ListWidget->clear();
-
-    if (sizes.isEmpty())
-    {
-        ui->sizeSelection_GroupBox->setVisible(false);
-        setMinimumHeight(380);
-        adjustSize();
-        return;
-    }
-
-    ui->sizeSelection_GroupBox->setVisible(true);
-    setMinimumHeight(470);
-    adjustSize();
-    setMinimumHeight(400);
-
-    for (const QString &size : sizes)
-    {
-        QListWidgetItem *item = new QListWidgetItem(size + QString(" "));
-        SCASSERT(item != nullptr)
-        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-        item->setCheckState(Qt::Unchecked);
-        ui->sizes_ListWidget->addItem(item);
-    }
-
-    // Reconnect to update file preview when sizes change
-    connect(ui->sizes_ListWidget, &QListWidget::itemChanged, this, &ExportLayoutDialog::showExportFiles);
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-QStringList ExportLayoutDialog::selectedSizes() const
-{
-    QStringList sizes;
-    for (int i = 0; i < ui->sizes_ListWidget->count(); ++i)
-    {
-        QListWidgetItem *item = ui->sizes_ListWidget->item(i);
-        if (item->checkState() == Qt::Checked)
-        {
-            sizes.append(item->text());
-        }
-    }
-    return sizes;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-bool ExportLayoutDialog::isBatchExport() const
-{
-    return !selectedSizes().isEmpty();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void ExportLayoutDialog::selectAllSizes()
-{
-    ui->sizes_ListWidget->blockSignals(true);
-    for (int i = 0; i < ui->sizes_ListWidget->count(); ++i)
-    {
-        ui->sizes_ListWidget->item(i)->setCheckState(Qt::Checked);
-    }
-    ui->sizes_ListWidget->blockSignals(false);
-    showExportFiles();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void ExportLayoutDialog::deselectAllSizes()
-{
-    ui->sizes_ListWidget->blockSignals(true);
-    for (int i = 0; i < ui->sizes_ListWidget->count(); ++i)
-    {
-        ui->sizes_ListWidget->item(i)->setCheckState(Qt::Unchecked);
-    }
-    ui->sizes_ListWidget->blockSignals(false);
-    showExportFiles();
 }

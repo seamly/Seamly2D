@@ -97,6 +97,11 @@ enum class Position : char
     Center
 };
 
+/**
+ * @brief Export formats of Export Draft Blocks: SVG, PDF, PNG, JPG, BMP, PPM and TIF.
+ *
+ * The other values are not exported. They keep their numbers so a stored format number keeps its meaning.
+ */
 enum class LayoutExportFormat : char
 {
     SVG = 0,

@@ -7497,7 +7497,7 @@ void MainWindow::exportDraftBlocksAs()
     draftScene->setOriginsVisible(false);
 
     //Open a file dialog to save export
-    ExportLayoutDialog dialog(1, Draw::Calculation, FileName(), this);
+    ExportLayoutDialog dialog(FileName(), this);
     dialog.setWindowTitle("Export Draft Blocks");
 
     if (dialog.exec() == QDialog::Accepted)
@@ -7550,34 +7550,6 @@ void MainWindow::exportDraftBlocksAs()
                     exportPDF(filename, paper, draftScene, true, margins);
                     break;
                 }
-            case LayoutExportFormat::OBJ:
-            case LayoutExportFormat::DXF_AC1006_Flat:
-            case LayoutExportFormat::DXF_AC1009_Flat:
-            case LayoutExportFormat::DXF_AC1012_Flat:
-            case LayoutExportFormat::DXF_AC1014_Flat:
-            case LayoutExportFormat::DXF_AC1015_Flat:
-            case LayoutExportFormat::DXF_AC1018_Flat:
-            case LayoutExportFormat::DXF_AC1021_Flat:
-            case LayoutExportFormat::DXF_AC1024_Flat:
-            case LayoutExportFormat::DXF_AC1027_Flat:
-            case LayoutExportFormat::DXF_AC1006_AAMA:
-            case LayoutExportFormat::DXF_AC1009_AAMA:
-            case LayoutExportFormat::DXF_AC1012_AAMA:
-            case LayoutExportFormat::DXF_AC1014_AAMA:
-            case LayoutExportFormat::DXF_AC1015_AAMA:
-            case LayoutExportFormat::DXF_AC1018_AAMA:
-            case LayoutExportFormat::DXF_AC1021_AAMA:
-            case LayoutExportFormat::DXF_AC1024_AAMA:
-            case LayoutExportFormat::DXF_AC1027_AAMA:
-            case LayoutExportFormat::DXF_AC1006_ASTM:
-            case LayoutExportFormat::DXF_AC1009_ASTM:
-            case LayoutExportFormat::DXF_AC1012_ASTM:
-            case LayoutExportFormat::DXF_AC1014_ASTM:
-            case LayoutExportFormat::DXF_AC1015_ASTM:
-            case LayoutExportFormat::DXF_AC1018_ASTM:
-            case LayoutExportFormat::DXF_AC1021_ASTM:
-            case LayoutExportFormat::DXF_AC1024_ASTM:
-            case LayoutExportFormat::DXF_AC1027_ASTM:
             default:
                 break;
         }

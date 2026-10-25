@@ -64,14 +64,12 @@ namespace Ui
     class ExportLayoutDialog;
 }
 
-
 class ExportLayoutDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit                ExportLayoutDialog(int count, Draw mode, const QString &fileName = QString(),
-                                           QWidget *parent = nullptr);
+    explicit                ExportLayoutDialog(const QString &fileName, QWidget *parent = nullptr);
 
     virtual                ~ExportLayoutDialog();
 
@@ -84,18 +82,7 @@ public:
     LayoutExportFormat      format() const;
     QString                 formatText() const;
 
-    bool                    isBinaryDXFFormat() const;
-    void                    enableBinaryDXFFormatCheckbox();
-
-    Draw                    mode() const;
-
     static QString          exportFormatSuffix(LayoutExportFormat format);
-
-    bool                    isTextAsPaths() const;
-
-    void                    setAvailableSizes(const QStringList &sizes);
-    QStringList             selectedSizes() const;
-    bool                    isBatchExport() const;
 
 protected:
     virtual void            showEvent(QShowEvent *event) override;
@@ -103,20 +90,13 @@ protected:
 private slots:
     void                    save();
     void                    pathChanged(const QString &text);
-    void                    showExportFiles();
-    void                    selectAllSizes();
-    void                    deselectAllSizes();
 
 private:
     Q_DISABLE_COPY(ExportLayoutDialog)
     Ui::ExportLayoutDialog *ui;
-    int                     m_count;
     bool                    m_isInitialized;
-    Draw                    m_mode;
     QPushButton            *m_saveButton;
     QColor                  m_foreGroundColor;
-
-    void                    removeFormatFromList(LayoutExportFormat format);
 
     void                    readSettings();
     void                    writeSettings() const;

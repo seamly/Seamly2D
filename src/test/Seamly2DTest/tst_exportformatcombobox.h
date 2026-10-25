@@ -32,10 +32,9 @@
 #include <QObject>
 
 /**
- * @brief TST_ExportFormatCombobox tests the format list shared by the export
- * dialogs and the command line help.
+ * @brief TST_ExportFormatCombobox tests the format list of the draft block export dialog.
  *
- * PS, EPS and tiled PDF are exported by SeamlyLayout only; Seamly2D offers none of them.
+ * SeamlyLayout makes PS, EPS, tiled PDF, DXF and every piece export; Seamly2D offers none of them.
  */
 class TST_ExportFormatCombobox : public QObject
 {
@@ -47,6 +46,7 @@ private slots:
     void offersPdfAndSvg();
     void offersNoPostScript();
     void offersNoTiledPdf();
+    void offersNoDxfOrObj();
     void keepsFormatNumbers();
 
 private:
