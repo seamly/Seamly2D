@@ -199,6 +199,7 @@ private:
     void          tiltToV0_7_7();
     void          removeFoldPositionV0_7_7();
     void          removeForbidFlippingV0_7_7();
+    void          endMainPathAtFoldLineV0_7_7();
     void          renameAttribute(QDomElement &element, const QString &oldName,
                                   const QString &newName, const QString &value) const;
 };
