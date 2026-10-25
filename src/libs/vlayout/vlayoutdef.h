@@ -70,7 +70,8 @@ namespace PieceItemData
     enum Key : int
     {
         ObjectName  = 0, /**< Piece name on the root item (legacy convention, kept for the SVG group id). */
-        ItemType    = 1, /**< SVG data-type string: seamline|cutline|notch|internal_path|cut_path|fold_line|grainline|piece_label|pattern_label. */
+        ItemType    = 1, /**< SVG data-type string: seamline|cutline|notch|internal_path|cut_path|fold_line|grainline|
+                              piece_label|pattern_label; fold_line_arrow|fold_line_label on a child of fold_line. */
         PieceLetter = 2, /**< Piece letter, exported as the data-letter attribute when set. */
         GrainlineAngle = 3, /**< Grain direction in degrees (QLineF::angle()), exported as data-grainline-angle. */
         TurnPoints  = 4, /**< Turn point vertex indices of the item's path, space separated, exported as

@@ -54,6 +54,7 @@
 #include <QFlags>
 #include <QFont>
 #include <QFontMetrics>
+#include <QFontMetricsF>
 #include <QGraphicsPathItem>
 #include <QList>
 #include <QTransform>
@@ -61,6 +62,7 @@
 #include <QPainterPath>
 #include <QPoint>
 #include <QPolygonF>
+#include <QSizeF>
 #include <QTransform>
 #include <Qt>
 #include <QtDebug>
@@ -651,12 +653,16 @@ VLayoutPiece VLayoutPiece::Create(const VPiece &piece, const VContainer *pattern
     // Keep the piece letter, cut count and fold flag for the SVG exporter's data-* attributes.
     layoutPiece.setPieceLetter(piece.GetPatternPieceData().GetLetter());
     layoutPiece.setQuantity(piece.GetPatternPieceData().GetQuantity());
-    // A fold line puts the piece on the fold, whatever the label data says.
+    // A fold line puts the piece on the fold, whatever the label data says. A sent cut line runs along the fold line
+    // past both nodes, so the fold line is sent out to the cut line.
     const QLineF foldLine = piece.foldLine(pattern);
     layoutPiece.setOnFold(piece.GetPatternPieceData().IsOnFold() || !foldLine.isNull());
     if (!foldLine.isNull())
     {
-        layoutPiece.setFoldLine(QVector<QPointF>{foldLine.p1(), foldLine.p2()});
+        const bool cut_line_sent = qApp->Settings()->showSeamAllowances() && !seamAllowance.isEmpty();
+        const QLineF sent_fold_line = cut_line_sent ? VPiece::foldLineOnCutLine(seamAllowance, foldLine) : foldLine;
+        layoutPiece.setFoldLine(QVector<QPointF>{sent_fold_line.p1(), sent_fold_line.p2()});
+        layoutPiece.setFoldLineGraphic(pattern_piece::FoldLineGraphic(foldLine, piece.mainPathPoints(pattern)));
     }
     layoutPiece.setMaterial(piece.getMaterial());
     layoutPiece.setPieceProperties(piece.GetPatternPieceData());
@@ -793,6 +799,26 @@ QVector<QPointF> VLayoutPiece::getFoldLine() const
 void VLayoutPiece::setFoldLine(const QVector<QPointF> &points)
 {
     d->m_foldLine = points;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief getFoldLineGraphic returns the fold line arrow line and label in layout coordinates.
+ * @return a null graphic when the piece has no fold line.
+ */
+pattern_piece::FoldLineGraphic VLayoutPiece::getFoldLineGraphic() const
+{
+    return d->m_fold_line_graphic.mapped(d->transform);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setFoldLineGraphic stores the fold line arrow line and label for the exports.
+ * @param graphic graphic in piece coordinates, made from VPiece::foldLine().
+ */
+void VLayoutPiece::setFoldLineGraphic(const pattern_piece::FoldLineGraphic& graphic)
+{
+    d->m_fold_line_graphic = graphic;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -1777,7 +1803,7 @@ QGraphicsItem *VLayoutPiece::GetItem(bool textAsPaths) const
     createSeamlineItem(item);
     createAllowanceItem(item);
     createNotchesItem(item);
-    createFoldLineItem(item);
+    createFoldLineItem(item, textAsPaths);
 
     for (int i = 0; i < d->m_internalPaths.count(); ++i)
     {
@@ -1931,30 +1957,117 @@ void VLayoutPiece::createLabelItem(QGraphicsItem *parent, const QVector<QPointF>
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief createFoldLineItem creates the fold line child item of the piece, a two point path.
- * @param parent piece root item the fold line item is added to.
+ * @brief createFoldLineItem creates the fold line child item of the piece.
+ *
+ * An invisible group item tagged "fold_line" holds, in this order: the fold line, a two point path; the arrow line
+ * group tagged "fold_line_arrow"; the label group tagged "fold_line_label". The fold line comes first, because
+ * readers take the first path of the group as the fold line. A piece without a fold line gets no item.
+ *
+ * @param parent        piece root item the fold line item is added to.
+ * @param text_as_paths true when the export renders text as vector paths.
  */
-void VLayoutPiece::createFoldLineItem(QGraphicsItem *parent) const
+void VLayoutPiece::createFoldLineItem(QGraphicsItem* parent, bool text_as_paths) const
 {
     SCASSERT(parent != nullptr)
     const QVector<QPointF> points = getFoldLine();
-    if (points.size() != 2)
+    const pattern_piece::FoldLineGraphic graphic = getFoldLineGraphic();
+
+    const QColor  color       = QColor(qApp->Settings()->getDefaultFoldLineColor());
+    const QString line_type   = qApp->Settings()->getDefaultFoldLineLinetype();
+    const qreal   line_weight = ToPixel(qApp->Settings()->getDefaultFoldLineLineweight(), Unit::Mm);
+
+    if (points.size() == 2)
     {
-        return;
+        // Group item: it draws nothing itself.
+        QGraphicsPathItem* group = new QGraphicsPathItem(parent);
+        group->setData(PieceItemData::ItemType, QStringLiteral("fold_line"));
+
+        QPainterPath fold_path;
+        fold_path.moveTo(points.at(0));
+        fold_path.lineTo(points.at(1));
+        QGraphicsPathItem* fold = new QGraphicsPathItem(group);
+        fold->setPath(fold_path);
+        fold->setPen(QPen(color, line_weight, lineTypeToPenStyle(line_type), Qt::FlatCap, Qt::RoundJoin));
+
+        if (!graphic.isNull())
+        {
+            createFoldLineArrowItem(group, graphic);
+            createFoldLineLabelItem(group, graphic, text_as_paths);
+        }
     }
+}
 
-    QPainterPath path;
-    path.moveTo(points.at(0));
-    path.lineTo(points.at(1));
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief createFoldLineArrowItem creates the fold line arrow line, in the fold line style, with filled arrow heads.
+ * @param parent  fold line group item; the arrow item is tagged "fold_line_arrow".
+ * @param graphic fold line graphic in layout coordinates.
+ */
+void VLayoutPiece::createFoldLineArrowItem(QGraphicsItem* parent, const pattern_piece::FoldLineGraphic& graphic) const
+{
+    const QColor  color       = QColor(qApp->Settings()->getDefaultFoldLineColor());
+    const QString line_type   = qApp->Settings()->getDefaultFoldLineLinetype();
+    const qreal   line_weight = ToPixel(qApp->Settings()->getDefaultFoldLineLineweight(), Unit::Mm);
 
-    const QColor color      = QColor(qApp->Settings()->getDefaultFoldLineColor());
-    const QString lineType  = qApp->Settings()->getDefaultFoldLineLinetype();
-    const qreal  lineWeight = ToPixel(qApp->Settings()->getDefaultFoldLineLineweight(), Unit::Mm);
+    QGraphicsPathItem* arrow = new QGraphicsPathItem(parent);
+    arrow->setData(PieceItemData::ItemType, QStringLiteral("fold_line_arrow"));
 
-    QGraphicsPathItem *item = new QGraphicsPathItem(parent);
-    item->setData(PieceItemData::ItemType, QStringLiteral("fold_line"));
-    item->setPath(path);
-    item->setPen(QPen(color, lineWeight, lineTypeToPenStyle(lineType), Qt::FlatCap, Qt::RoundJoin));
+    // Arrow line from head base to head base.
+    QPainterPath line_path;
+    line_path.addPolygon(QPolygonF(graphic.arrowLine()));
+    QGraphicsPathItem* line = new QGraphicsPathItem(arrow);
+    line->setPath(line_path);
+    line->setPen(QPen(color, line_weight, lineTypeToPenStyle(line_type), Qt::FlatCap, Qt::MiterJoin));
+
+    // Each head is a closed triangle, filled with the fold line color.
+    QPainterPath heads_path;
+    heads_path.addPolygon(QPolygonF(graphic.startArrowHead()));
+    heads_path.closeSubpath();
+    heads_path.addPolygon(QPolygonF(graphic.endArrowHead()));
+    heads_path.closeSubpath();
+    QGraphicsPathItem* heads = new QGraphicsPathItem(arrow);
+    heads->setPath(heads_path);
+    heads->setPen(Qt::NoPen);
+    heads->setBrush(QBrush(color));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief createFoldLineLabelItem creates the "Foldline" label, centered between the fold line and the arrow line.
+ * @param parent        fold line group item; the label item is tagged "fold_line_label".
+ * @param graphic       fold line graphic in layout coordinates.
+ * @param text_as_paths true for glyph outlines, false for a text item that exports as a real <text> element.
+ */
+void VLayoutPiece::createFoldLineLabelItem(QGraphicsItem* parent, const pattern_piece::FoldLineGraphic& graphic,
+                                           bool text_as_paths) const
+{
+    const QColor  color = QColor(qApp->Settings()->getDefaultFoldLineColor());
+    const QFont   font  = graphic.labelFont(qApp->Settings()->getLabelFont());
+    const QString text  = pattern_piece::FoldLineGraphic::labelText();
+
+    QGraphicsPathItem* label = new QGraphicsPathItem(parent);
+    label->setData(PieceItemData::ItemType, QStringLiteral("fold_line_label"));
+
+    if (text_as_paths)
+    {
+        // Glyph outlines with their top left corner at (0, 0), like the text item below.
+        const QFontMetricsF metrics(font);
+        QPainterPath text_path;
+        text_path.addText(0, metrics.ascent(), font, text);
+        QGraphicsPathItem* outline = new QGraphicsPathItem(label);
+        outline->setPath(text_path);
+        outline->setPen(Qt::NoPen);
+        outline->setBrush(QBrush(color));
+        outline->setTransform(graphic.labelTransform(QSizeF(metrics.horizontalAdvance(text), metrics.height())));
+    }
+    else
+    {
+        SvgTextItem* line = new SvgTextItem(label);
+        line->setFont(font);
+        line->setText(text);
+        line->setBrush(QBrush(color));
+        line->setTransform(graphic.labelTransform(line->boundingRect().size()));
+    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------

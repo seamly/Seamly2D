@@ -454,16 +454,12 @@ QDomDocument SvgGenerator::renderSceneToDom(QGraphicsScene *scene)
 /// @details Qt's QSvgGenerator creates <g> elements from painter state changes, not from
 ///          graphics items, so a single render of the whole piece cannot be mapped back to
 ///          its components. Instead each direct child of the piece root (seamline, cutline,
-///          notches, internal paths, labels, grainline) is rendered in its own pass with
+///          notches, internal paths, labels, grainline, fold line) is rendered in its own pass with
 ///          every sibling hidden. Each pass therefore produces exactly one <g> that belongs
-///          to one known component, which is tagged with the SVG data-* attributes:
-///          data-type, data-type-number (per-type counter within the piece), data-parent
-///          (the piece name), data-turn-points (path components only), data-notch-segments,
-///          data-seam-allowances and data-notch-type (notch component only) and a name-based
-///          id ("<type>_<pieceName>", or "<type>_<n>_<pieceName>" for types that can repeat per piece). A piece
-///          with no usable name falls back to the legacy "<pieceId>-<type>-<n>" id, and a
-///          name-based id colliding with one already emitted (piece names aren't
-///          guaranteed unique) is disambiguated with the piece's data-type-number.
+///          to one known component, which is tagged with the SVG data-* attributes (see
+///          tagComponentGroup()). A child of a component that carries its own data-type (the
+///          fold line arrow and label) is a part: it is rendered in its own pass too, and its
+///          tagged group goes inside the component group, after what the component draws itself.
 /// @param scene       scene containing (only) this piece's item tree.
 /// @param item        piece root item whose children are the components.
 /// @param piece_doc   DOM document of the piece; receives the component groups.
@@ -484,93 +480,152 @@ void SvgGenerator::addComponentGroups(QGraphicsScene *scene, QGraphicsItem *item
             components.at(j)->setVisible(i == j);
         }
 
-        QDomDocument component_doc = renderSceneToDom(scene);
-        if (component_doc.isNull())
+        // Children with their own data-type are parts: render the component without them first.
+        const QList<QGraphicsItem*> children = components.at(i)->childItems();
+        QList<QGraphicsItem*> parts;
+        for (QGraphicsItem* child : children)
         {
-            continue;
+            if (!child->data(PieceItemData::ItemType).toString().isEmpty())
+            {
+                parts.append(child);
+                child->setVisible(false);
+            }
         }
 
-        QDomNodeList groups = component_doc.documentElement().elementsByTagName("g");
-        if (groups.isEmpty())
+        QDomElement component_group = renderGroup(scene, piece_doc);
+        if (!component_group.isNull())
         {
-            continue;
-        }
+            tagComponentGroup(component_group, components.at(i), type_counters, piece_group, piece_id);
 
-        QDomElement component_group = groups.at(0).toElement();
-        cleanSvg(component_group);
-        if (component_group.childNodes().isEmpty())
-        {
-            // Component painted nothing (e.g. a piece without notches) — skip it.
-            continue;
+            // Each part alone: every other child of the component hidden.
+            for (QGraphicsItem* part : parts)
+            {
+                for (QGraphicsItem* child : children)
+                {
+                    child->setVisible(child == part);
+                }
+                QDomElement part_group = renderGroup(scene, piece_doc);
+                if (!part_group.isNull())
+                {
+                    tagComponentGroup(part_group, part, type_counters, piece_group, piece_id);
+                    component_group.appendChild(part_group);
+                }
+            }
+            piece_group.appendChild(component_group);
         }
+        // A component that painted nothing (e.g. a piece without notches) gets no group.
 
-        // Tag the group so downstream tools (SeamlyLayout) can identify the component.
-        QString type = components.at(i)->data(PieceItemData::ItemType).toString();
-        if (type.isEmpty())
+        for (QGraphicsItem* child : children)
         {
-            type = QStringLiteral("unknown");
+            child->setVisible(true);
         }
-        const int type_number = ++type_counters[type];
-
-        // Name-based id (e.g. "grainline_Sleeve") when the piece has a usable
-        // name; falls back to the legacy numeric id, which is unique by
-        // construction, when it does not. A name-based id that collides with
-        // one already emitted (piece names aren't guaranteed unique — see
-        // data-letter) is disambiguated with the piece's own data-type-number.
-        const QString piece_name = piece_group.attribute(QStringLiteral("data-name"));
-        const QString sanitized_name = sanitizeForId(piece_name);
-        QString component_id = sanitized_name.isEmpty()
-            ? QString("%1-%2-%3").arg(piece_id, type).arg(type_number)
-            : (componentIdIsNumbered(type)
-                   ? QString("%1_%2_%3").arg(type).arg(type_number).arg(sanitized_name)
-                   : QString("%1_%2").arg(type, sanitized_name));
-        // The same piece repeats once per size in a multisize export.
-        const QString size = piece_group.attribute(QStringLiteral("data-size"));
-        if (!size.isEmpty())
-        {
-            component_id += sizeIdSuffix(size);
-        }
-        if (m_used_ids.contains(component_id))
-        {
-            component_id += QLatin1Char('-') + piece_group.attribute(QStringLiteral("data-type-number"));
-        }
-        m_used_ids.insert(component_id);
-
-        component_group.setAttribute("id", component_id);
-        component_group.setAttribute("data-type", type);
-        component_group.setAttribute("data-type-number", QString::number(type_number));
-        component_group.setAttribute("data-parent", piece_name.isEmpty() ? piece_id : piece_name);
-        // Turn point vertex indices of the component's path. An empty value is valid:
-        // a smooth closed loop has no turn points.
-        const QVariant turn_points = components.at(i)->data(PieceItemData::TurnPoints);
-        if (turn_points.isValid())
-        {
-            component_group.setAttribute("data-turn-points", turn_points.toString());
-        }
-        // Notch line counts, seam allowance widths and notch types, one per notch.
-        const QVariant notch_segments = components.at(i)->data(PieceItemData::NotchSegments);
-        if (notch_segments.isValid())
-        {
-            component_group.setAttribute("data-notch-segments", notch_segments.toString());
-        }
-        const QVariant seam_allowances = components.at(i)->data(PieceItemData::SeamAllowances);
-        if (seam_allowances.isValid())
-        {
-            component_group.setAttribute("data-seam-allowances", seam_allowances.toString());
-        }
-        const QVariant notch_types = components.at(i)->data(PieceItemData::NotchTypes);
-        if (notch_types.isValid())
-        {
-            component_group.setAttribute("data-notch-type", notch_types.toString());
-        }
-
-        piece_group.appendChild(piece_doc.importNode(component_group, true));
     }
 
     // Restore visibility so later exports (PDF, DXF, previews) see the whole piece.
     for (int j = 0; j < components.size(); ++j)
     {
         components.at(j)->setVisible(true);
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Render the visible items of a scene into one cleaned group of the piece document.
+/// @param scene     scene to render.
+/// @param piece_doc DOM document of the piece; owns the returned group.
+/// @return the group, not yet appended anywhere; a null element when nothing was painted.
+//---------------------------------------------------------------------------------------------------------------------
+QDomElement SvgGenerator::renderGroup(QGraphicsScene* scene, QDomDocument& piece_doc)
+{
+    QDomElement result;
+    QDomDocument component_doc = renderSceneToDom(scene);
+    const QDomNodeList groups = component_doc.isNull() ? QDomNodeList()
+                                                       : component_doc.documentElement().elementsByTagName("g");
+    if (!groups.isEmpty())
+    {
+        QDomElement group = groups.at(0).toElement();
+        cleanSvg(group);
+        if (!group.childNodes().isEmpty())
+        {
+            result = piece_doc.importNode(group, true).toElement();
+        }
+    }
+    return result;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Tag a rendered component group so downstream tools (SeamlyLayout) can identify the component.
+/// @details Sets data-type, data-type-number (per-type counter within the piece), data-parent (the piece
+///          name), data-turn-points (path components only), data-notch-segments, data-seam-allowances and
+///          data-notch-type (notch component only) and a name-based id ("<type>_<pieceName>", or
+///          "<type>_<n>_<pieceName>" for types that can repeat per piece). A piece with no usable name falls
+///          back to the legacy "<pieceId>-<type>-<n>" id, and a name-based id colliding with one already
+///          emitted (piece names aren't guaranteed unique) is disambiguated with the piece's data-type-number.
+/// @param group         rendered group of the component.
+/// @param component     graphics item of the component; its PieceItemData values become attributes.
+/// @param type_counters per data-type counter within the piece; the component's type is counted.
+/// @param piece_group   piece <g> element; gives the piece name and size.
+/// @param piece_id      SVG id of the piece group; the id/data-parent fallback when the piece has no name.
+//---------------------------------------------------------------------------------------------------------------------
+void SvgGenerator::tagComponentGroup(QDomElement& group, QGraphicsItem* component, QHash<QString, int>& type_counters,
+                                     const QDomElement& piece_group, const QString& piece_id)
+{
+    QString type = component->data(PieceItemData::ItemType).toString();
+    if (type.isEmpty())
+    {
+        type = QStringLiteral("unknown");
+    }
+    const int type_number = ++type_counters[type];
+
+    // Name-based id (e.g. "grainline_Sleeve") when the piece has a usable
+    // name; falls back to the legacy numeric id, which is unique by
+    // construction, when it does not. A name-based id that collides with
+    // one already emitted (piece names aren't guaranteed unique — see
+    // data-letter) is disambiguated with the piece's own data-type-number.
+    const QString piece_name = piece_group.attribute(QStringLiteral("data-name"));
+    const QString sanitized_name = sanitizeForId(piece_name);
+    QString component_id = sanitized_name.isEmpty()
+        ? QString("%1-%2-%3").arg(piece_id, type).arg(type_number)
+        : (componentIdIsNumbered(type)
+               ? QString("%1_%2_%3").arg(type).arg(type_number).arg(sanitized_name)
+               : QString("%1_%2").arg(type, sanitized_name));
+    // The same piece repeats once per size in a multisize export.
+    const QString size = piece_group.attribute(QStringLiteral("data-size"));
+    if (!size.isEmpty())
+    {
+        component_id += sizeIdSuffix(size);
+    }
+    if (m_used_ids.contains(component_id))
+    {
+        component_id += QLatin1Char('-') + piece_group.attribute(QStringLiteral("data-type-number"));
+    }
+    m_used_ids.insert(component_id);
+
+    group.setAttribute("id", component_id);
+    group.setAttribute("data-type", type);
+    group.setAttribute("data-type-number", QString::number(type_number));
+    group.setAttribute("data-parent", piece_name.isEmpty() ? piece_id : piece_name);
+    // Turn point vertex indices of the component's path. An empty value is valid:
+    // a smooth closed loop has no turn points.
+    const QVariant turn_points = component->data(PieceItemData::TurnPoints);
+    if (turn_points.isValid())
+    {
+        group.setAttribute("data-turn-points", turn_points.toString());
+    }
+    // Notch line counts, seam allowance widths and notch types, one per notch.
+    const QVariant notch_segments = component->data(PieceItemData::NotchSegments);
+    if (notch_segments.isValid())
+    {
+        group.setAttribute("data-notch-segments", notch_segments.toString());
+    }
+    const QVariant seam_allowances = component->data(PieceItemData::SeamAllowances);
+    if (seam_allowances.isValid())
+    {
+        group.setAttribute("data-seam-allowances", seam_allowances.toString());
+    }
+    const QVariant notch_types = component->data(PieceItemData::NotchTypes);
+    if (notch_types.isValid())
+    {
+        group.setAttribute("data-notch-type", notch_types.toString());
     }
 }
 

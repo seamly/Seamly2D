@@ -31,6 +31,7 @@
 
 #include <QDomDocument>
 #include <QGraphicsScene>
+#include <QHash>
 #include <QSet>
 #include <QStringList>
 
@@ -52,6 +53,10 @@ private:
     QDomDocument        renderSceneToDom(QGraphicsScene *scene);
     void                addComponentGroups(QGraphicsScene *scene, QGraphicsItem *item, QDomDocument &piece_doc,
                                            QDomElement &piece_group, const QString &piece_id);
+    QDomElement         renderGroup(QGraphicsScene* scene, QDomDocument& piece_doc);
+    void                tagComponentGroup(QDomElement& group, QGraphicsItem* component,
+                                          QHash<QString, int>& type_counters, const QDomElement& piece_group,
+                                          const QString& piece_id);
     QDomDocument        mergeSvgDoms();
 
     void                removeEmptyGroups(QDomElement &main_group);
