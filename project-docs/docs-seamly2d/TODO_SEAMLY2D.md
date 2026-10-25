@@ -25,30 +25,10 @@ Currently, if foldline is enabled for a piece, the main path should end with the
 
 Fix this by reorganizing the main path nodes and creating the foldline's arrowedline and text label. There are four items related to foldline: foldline group, foldline path, foldline arrowline, and foldline text label -- the foldline group contains the foldline path, the foldline arrowline, and the foldine text label.
 
-- [ ] Rearrange the main path nodes - When the user selects two adjacent nodes in the main path, then clicks 'Apply' or 'OK', rotate any main path nodes from below the second foldline node to the top of the main path, maintaining node order, so that the main path ends with the two foldline nodes.
-- [ ] Generate a foldline group with id="<piecename>_foldline" in the piece group that defines the foldline graphic line (simliar to grainline):
-  - length is 50% the distance between the foldline nodes
-  - parallel to the foldline nodes
-  - centered vertically between the foldline nodes
-  - the top and bottom 10% of the line bends 90 degrees to point towards the foldline
-  - uses the Application Preferences > Foldline style
-  - an example of a foldline graphic arrowline is here (not to scale, in red, etc.): test-seamly-layout\foldline_arrowline.png, test-seamly-layout\foldline_arrowline.svg
-  - if a foldline is defined then the foldline graphic is visible; there is no checkbox in Piece Properties for foldline graphic visibility
-- [ ] Generate a foldline label group, similar to pattern label and piece label, with id="<piecename_foldline_label>:
-  - text is 'Foldline'
-  - text is rotated 90 degrees
-  - text is centered horizontally between the foldline and the <piecename>_foldline's arrowed line
-  - text is centered vertically between the lowest y-value and highet y-value of the <piecename>_foldline's path
-  - if a foldline is defined then the foldline label is visible; there is no checkbox in Piece Properties for foldline label visibility
-- [ ] Do not generate a seam allowance between the foldline nodes, so that the cutline and seamline end at the first foldline node
-- [ ] when a cutline is generated:
-  - [ ] the foldline segment (not the foldline's arrowline) should be extended with two new nodes, one at each end of the foldline, to intersect the folline with the cutline
-  - [ ] Export the two extended nodes as the foldline nodes piece export files.
-  - [ ] Update SeamlyLayout layout processing to utilize the extended foldline to place patterns along the media left content rect edge when 'on fold' is checked.
-- [ ] in SeamlyLayout, multisize, nested layouts --> nest pieces that have a foldline so that their first foldline nodes are aligned on top of each other; do not nest them using their boundary box center point.
-- [ ] Create test
-- [ ] Update Schema with conversion from previous version
-- [ ] Verify (User)
+Rotation, arrow line, label, extended fold line, SeamlyLayout fold placement and nesting, tests and conversion are done: `TODO_COMPLETED.md`, "Completed subtasks from Task Seamly2D.71". Open:
+
+- [ ] Seamly2D.71.9 Next MSI: Qt suites (`nmake check` in `local_build_msi.ps1`). A scratch harness passed `TST_VPiece` and `TST_SvgComponentTags` with the changed sources.
+- [ ] Seamly2D.71.10 Verify (User): `AGENT_CHECKLIST.md` §29.
 
 ## Not required for SeamlyLayout release
 

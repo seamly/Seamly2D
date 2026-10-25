@@ -48,7 +48,8 @@ Steps, in order:
   - [ ] Dead.4.2.4 MSI build and user check, `AGENT_CHECKLIST.md` §28 (with Dead.4.1.5)
 - [ ] Dead.4.3 Move `VAbstractPiece` → `AbstractPiece` and `VTextManager` → `LabelTextManager` into `vpatterndb`; restyle; port their tests
 - [ ] Dead.4.4 Write `layout_handoff`: `HandoffDocument`, `HandoffPiece`, `HandoffLabel`, `handoff_turn_points`, `handoff_ids`
-  - Port `TST_SvgComponentTags`, `BuiltInPieceWithFoldLineSendsOpenSeamline` included
+  - Port `TST_SvgComponentTags`, `BuiltInPieceWithFoldLineSendsOpenSeamline` and `FoldLineGroupHoldsArrowAndLabel` included
+  - Port the `fold_line` group: fold line path out to the cut line, then the `fold_line_arrow` and `fold_line_label` parts (`VLayoutPiece::createFoldLineItem()`, nested parts in `SvgGenerator::addComponentGroups()`)
   - Compare with the old writer on the 8 sample patterns and the 13 CollectionTest patterns: same tagged tree, attributes, points (0.01 px after transforms) and label text
   - Switch `MainWindow` to the new writer only after a clean compare
   - New jacket2 handoff capture: `cargo test --workspace`, DXF-ASTM compare
