@@ -7,10 +7,11 @@
 //
 // A piece-set holds one piece per size. At import the grainline, piece label and
 // pattern label of each size move to the place the base size has them, measured
-// from the centre of the piece outline's bounding box.  The Nested tab centres the
-// sizes of a piece-set on the same outline centre (`svg_dom::center_piece_sets`),
-// so their grainlines and labels stack exactly; every other tab shows them in the
-// same place in each size.
+// from the stack point: the start of the fold line when every size has one, else
+// the centre of the piece outline's bounding box.  The Nested tab stacks the sizes
+// of a piece-set on the same point (`svg_dom::center_piece_sets`), so their
+// grainlines and labels stack exactly; every other tab shows them in the same place
+// in each size.
 //
 // Seamly2D sends no group for a hidden grainline or label, so nothing moves for it.
 // A moved grainline or label that leaves the cut line of a smaller size is reported.
@@ -65,14 +66,20 @@ pub(crate) fn align_size_annotations(doc: &mut svg_dom::Document) -> AlignmentRe
 
 // @brief Align the sizes of one piece-set on its base size piece.
 fn align_piece_set(set: &mut Element, base_size: &str, report: &mut AlignmentReport) {
-    // Offset of each annotation of the base size from its outline centre.
+    // Stack point of a size: its fold line start when every size has a fold line, else its outline centre.
+    let on_fold = set.children.iter().filter_map(|n| n.as_element())
+        .filter(|e| is_type(e, "piece"))
+        .all(|piece| fold_line_start(piece).is_some());
+    let stack_point = |piece: &Element| if on_fold { fold_line_start(piece) } else { outline_centre(piece) };
+
+    // Offset of each annotation of the base size from its stack point.
     let base_offsets: Vec<(&str, &str, Point)> = {
         let Some(base) = set.children.iter().filter_map(|n| n.as_element())
             .find(|e| is_type(e, "piece") && e.attributes.get("data-size").is_some_and(|s| s == base_size))
         else {
             return; // the base size is not handed off
         }; // base piece
-        let Some(centre) = outline_centre(base) else {
+        let Some(centre) = stack_point(base) else {
             return; // no outline to measure from
         }; // centre
         ANNOTATION_TYPES.iter()
@@ -92,7 +99,7 @@ fn align_piece_set(set: &mut Element, base_size: &str, report: &mut AlignmentRep
     // Sizes whose moved annotation leaves the cut line, per annotation name.
     let mut outside: Vec<(&str, Vec<String>)> = Vec::new();
     for piece in set.children.iter_mut().filter_map(|n| n.as_mut_element()).filter(|e| is_type(e, "piece")) {
-        let Some(centre) = outline_centre(piece) else {
+        let Some(centre) = stack_point(piece) else {
             continue; // no outline to measure from
         }; // centre
         let outline = cut_outline(piece);
@@ -157,6 +164,29 @@ fn outline_centre(piece: &Element) -> Option<Point> {
     } // for each outline group
     bbox_centre(&points)
 } // fn outline_centre
+
+// @brief Start of the fold line, in the piece frame: the first point of the first path of the `fold_line`
+//        group, outside its tagged arrow line and label groups. `svg_dom::fold_line_d` reads the same path.
+// @return None when the piece has no fold line.
+fn fold_line_start(piece: &Element) -> Option<Point> {
+    own_path_start(child_of_type(piece, "fold_line")?, Matrix2D::IDENTITY)
+} // fn fold_line_start
+
+// @brief First point of the first `<path>` in `elem`'s subtree, outside child groups with their own
+//        `data-type`, with the transforms down to it applied.
+fn own_path_start(elem: &Element, parent: Matrix2D) -> Option<Point> {
+    let matrix = parent.mul(&own_transform(elem));
+    if elem.name == "path" {
+        let path = Path::parse_path_attribute(elem.attributes.get("d")?).ok()?;
+        return match path.segments.first()? {
+            PathSegment::MoveTo(p) => Some(matrix.apply_to_point(*p)), // the fold line start node
+            _ => None,                                                 // no start point
+        }; // match first segment
+    } // if path
+    elem.children.iter().filter_map(|n| n.as_element())
+        .filter(|c| !c.attributes.contains_key("data-type")) // a tagged part is not the fold line
+        .find_map(|c| own_path_start(c, matrix))
+} // fn own_path_start
 
 // @brief The cut line (else seam line) as a polygon of segment end points, in the piece frame.
 fn cut_outline(piece: &Element) -> Vec<Point> {
