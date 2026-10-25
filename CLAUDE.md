@@ -1,682 +1,198 @@
 # CLAUDE.md
 
+<!-- This file loads on every request; keep it under ~12 KB. Area rules live in
+.claude/rules/*.md (path-scoped) and procedures in .claude/skills/. Block HTML
+comments like this one are stripped from Claude's context. -->
+
+## Context Budget
+
+Every request re-sends the whole conversation. A long session costs more per turn.
+
+- Large file (over ~500 lines): Grep for the section, then Read with `offset` and `limit`.
+- Never Read whole: `TODO_COMPLETED.md`, `SESSION_HANDOVER_ARCHIVE.md`, `TODO_SEAMLYLAYOUT.md`, `SVG-DATA-ATTRIBUTES.md`, `README-BUILDS.md`.
+- Append to `TODO_COMPLETED.md` with Bash (`cat >>`). Do not Read it first.
+- Never Read SVG, DXF, or export files in `test-seamly-layout/`. Use grep, `head`, or a script that prints a summary.
+- PDF reports: Read with `pages`, or extract text with a script.
+- Screenshots: Read one only when its pixels answer the question.
+- Build and test output: write it to a scratchpad log. Read the tail and the error lines.
+- Batch independent reads and greps into one tool call.
+- Broad search (many files, location unknown): use the `Explore` agent. It returns only the result.
+- A task with phases (plan, implement, verify): after each phase, update `SESSION_HANDOVER.md`. Then tell Sue it is a good point to `/compact`.
+
 ## Contributing
 
-- create a feature branch for each task
-- Maximize number of commits per task; commit each small unit improvement to the feature branch
-- don't push commits to origin --> the developer will push commits to origin
-- Don't mention yourself (Claude, AI contributor, agents, etc.) in commits, inline comments, or doxygen-compatible briefs, or .md files
-- Don't mention task names or dates in commits, inline comments, or doxygen-compatible briefs.
-- When task updates are complete except for test & verification, merge feature branch into run-seamlyLayout
+- Create `task-<short-name>` from `run-seamlyLayout` for each task.
+- Commit each small unit improvement to the task branch.
+- Do not push. Sue pushes `run-seamlyLayout` to `origin`.
+- Do not mention Claude, AI, or agents in commits, comments, Doxygen briefs, or `.md` files.
+- Do not put task names, task numbers, TODO items, or dates in commits, comments, or Doxygen briefs. They are ephemeral.
 
-## Naming
+## Completion Reports
 
-## Environment Rules for MSVC Compilation
-
-- The active shell environment is PowerShell running on Windows x64.
-- Do not execute `cl.exe` directly, as it requires the Visual Studio toolchain paths.
-- To compile C++ code safely without environment drops, always wrap the command inside `cmd.exe` to trigger the Visual Studio Community 2022 setup script first.
-
-### Example Compilation Command
-
-```powershell
-cmd.exe /c "`"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat`" && cl /EHsc main.cpp"
-```
-
-### Example build command for seamly2d, seamlyme, and seamlylayout to use during testing
-
-when building after task completion, use this command to enable the developer to install and run tests 
-
-```powershell
-./packaging/windows/local_build_msi.ps1
-```
-
-## Communication Style
-
-These rules apply to all responses and generated documentation unless the user explicitly requests detail. The user has dyslexia and autism, so communication style should be terse.
-
-**Priority:*- Produce terse, minimized output while preserving required information and correctness.
-
-- Start with the result. Do not add an introduction or conclusion.
-- Do not use pleasantries, filler, transition prose, or meta-commentary.
-- Do not restate the request.
-- Do not narrate routine actions.
-- State each fact once.
-- Use short, active-voice sentences.
-- Put one idea in each sentence.
-- Put each sentence in bulleted format when possible.
-- Use ASD-STE100 principles, adapted for software development.
-- Keep instructions to 20 words or fewer.
-- Keep descriptive sentences to 25 words or fewer.
-- Use the same term for the same concept.
-- Keep necessary articles and grammar.
-- Prefer bullets for three or more independent items.
-- Add rationale, examples, background, or detailed explanation only when:
-
-  - the user requests it;
-  - it explains a failure;
-  - it is necessary for a decision;
-  - omitting it creates a technical or safety risk.
-
-### Completion Reports
-
-After making changes, report only:
+The global `~/.claude/CLAUDE.md` sets the writing style. After changes, report only:
 
 1. What changed.
 2. Verification status.
 3. Required user decisions or actions.
 
-Do not summarize work already evident from the report.
+## Code Documentation
 
-### Code Documentation
+Document intent, contracts, constraints, and non-obvious behavior. Do not document what the code shows.
 
-Document intent, contracts, constraints, and non-obvious behavior.
-
-Do not document behavior that is obvious from the code.
-PROHIBIT referencing tasks and todo steps in the code comments.
-PROHIBIT saving dates in the code comments.
-
-- Keep `@brief` to one sentence.
-- Add `@param` only when the parameter meaning or constraints require explanation.
-- Add `@return` only when the return semantics require explanation.
-- Add inline comments only for non-obvious logic, invariants, workarounds, or constraints.
-- Keep code briefs and comments terse and minimized.
-- REPEATED INSTRUCTION BECAUSE THIS IS SO IMPORTANT --> PROHIBIT referencing task numbers, TODO items, dates, etc. as they are ephemeral information.
-- Do not narrate control flow line by line.
-- Prefer clearer code over explanatory comments.
+- `@brief`: one sentence.
+- `@param` / `@return`: only when the meaning or a constraint needs it.
+- Inline comments: only non-obvious logic, invariants, workarounds, or constraints. SeamlyLayout adds its own rule.
+- Do not narrate control flow line by line. Prefer clearer code over explanatory comments.
 
 ## Seamly Apps
 
 All apps use Qt 6.11.1.
 
-### Seamly2D
+| App | Path | Purpose | Code / GUI | License |
+|---|---|---|---|---|
+| Seamly2D | `src/app/seamly2d/` | Parent pattern-drafting app | C++, Qt Widgets; qmake | `GPL-3.0-or-later` |
+| SeamlyMe | `src/app/seamlyme/` | `.smis` individual and `.smms` multisize measurement files | C++, Qt Widgets; qmake | `GPL-3.0-or-later` |
+| SeamlyLayout | `src/app/seamlylayout/` | Layouts of Seamly2D pieces for cutting and downstream software | Rust core in `crates/`, CXX-Qt 0.7.3 bridge, QML + Qt Widgets; CMake + Cargo | `MIT` |
 
-- Path: `src/app/seamly2d/`
-- Purpose: Parent pattern-drafting application.
-- Code: C++.
-- GUI: Qt 6.11 / QtWidgets.
-- Build: qmake / make / make install.
-- File header (new files only):
-
-  - Author: `slspencer`
-  - Copyright: `2026 Seamly2D Project`
-  - License: `GPL-3.0-or-later`
-
-### SeamlyLayout
-
-- Path: `src/app/seamlylayout/`
-- Purpose: Creates layouts of Seamly2D pattern pieces for cutting and downstream software.
-- Code: Rust converted to C++ with `cxx-qt`.
-- GUI: Qt 6.11 / QML / QtWidgets.
-- Build: local - `packaging\windows\local_build_msi.ps1`; GitHub - ci.yml
-- Platform support: Windows 11, Linux (all flavors), macOS (latest 3 versions).
-- Architecture:
-
-  - Frontend: Qt 6.11 QML and QtWidgets.
-  - Core: Rust crates under `crates/`.
-  - Bridge: CXX-Qt 0.7.3 generates the C++ glue from Rust.
-  - License split: see [seamlylayout_licensing.mdc](.claude/rules/seamlylayout_licensing.mdc).
-
-- Detailed rules: see "SeamlyLayout Rules" below.
-- File header:
-
-  - Author: `slspencer`
-  - Copyright: `2026 Seamly2D Project`
-  - License: `MIT`
-
-### SeamlyMe
-
-- Path: `src/app/seamlyme/`
-- Purpose: Creates `.smis` individual and `.smms` multisize measurement files for Seamly2D.
-- Code: C++.
-- GUI: Qt 6.11 / QtWidgets.
-- Build: qmake / make / make install.
-- File header (new files only):
-
-  - Author: `slspencer`
-  - Copyright: `2026 Seamly2D Project`
-  - License: `GPL-3.0-or-later`
-
-## SeamlyLayout Rules
-
-Merged from SeamlyLayout's own former `CLAUDE.md` and `.claude/rules/` (2026-09-21).
-
-### General Rules
-
-- Read the `.md`, `.txt`, and `.rtf` files in `project-docs/seamlylayout-docs/` regularly.
-- Update docs to reflect code changes.
-- Use "flatten" only for baking in transforms. Use "interpolation" for converting curves to polylines.
-- Always use absolute file paths, never relative paths. Resolve via `QFileInfo::absoluteFilePath()` (C++) or `std::path::Path::canonicalize()` (Rust).
-- UI work must consult `crates/cxxqt_bridge/` and `qt_frontend/`. The active UI is QML in `qt_frontend/qml/`, with the Rust↔Qt bridge in `crates/cxxqt_bridge/`.
-- When making code changes, search and update files with `.rs`, `.cpp`, `.cxx.cpp`, `.h`, and `.qml` extensions.
-- When making text updates, search and update files with `.md` and `.txt` extensions.
-- Ignore markdown linting errors (MD001, MD004, MD013, etc.) in SeamlyLayout docs — they are editor diagnostic noise, not blocking issues.
-- Move as much application functionality as possible into `.rs` files.
-- Add Doxygen briefs to all functions, methods, wrappers, controllers.
-- Add inline comments to all new code to describe workflow, control flow, and data flow, so an intermediate-level programmer can follow it.
-
-### Shell Commands Policy
-
-The following Bash and PowerShell commands are pre-allowed in `.claude/settings.json` and run without permission prompts:
-
-**Bash (Git Bash / POSIX):**
-
-- File discovery: `ls *`, `ls`, `find *`
-- Navigation: `cd *`, `pwd`, `chdir *`
-- File ops: `cp *`, `mv *`, `rm *`, `cat *`, `mkdir *`
-- Inspection: `grep *`, `which *`, `where *`, `type *`, `env`, `env *`, `date`, `set`, `set *`, `whoami`, `hostname`
-- Scripting: `echo *`, `PATH=*`
-- Version control: `git *`, `gh *`
-
-**PowerShell:**
-
-- File discovery: `ls *`, `find *`, `dir *`
-- Navigation: `cd *`, `pwd`
-- File ops: `cp *`, `copy *`, `mv *`, `rm *`, `cat *`, `mkdir *`
-- Inspection: `where *`, `date`, `whoami`, `hostname`
-- Scripting: `echo *`, `$env:*`, `$*`
-- Version control: `git *`, `gh *`
-
-### Regex Policy
-
-- Do not introduce new regex in SeamlyLayout code. Use proper parsing libraries instead.
-- Existing regex in Rust code is acceptable.
-- SVG processing must use `xmltree`/`svg_dom`, never regex, for SVG manipulation.
-
-### Detailed Rule Files
-
-Rule files live in the project-level `.claude/rules/`, prefixed `seamlylayout_`:
-
-- [seamlylayout-architecture.mdc](.claude/rules/seamlylayout-architecture.mdc) — Cross-module design, frontend/core/bridge boundaries
-- [seamlylayout_dependencies.mdc](.claude/rules/seamlylayout_dependencies.mdc) — Crate versions, workspace structure, Qt modules
-- [seamlylayout_ffi-bridge.mdc](.claude/rules/seamlylayout_ffi-bridge.mdc) — `extern "C"` conventions, memory ownership, error codes
-- [seamlylayout_licensing.mdc](.claude/rules/seamlylayout_licensing.mdc) — License requirements: Qt LGPL-3.0, Rust MIT
-- [seamlylayout_qt-style.mdc](.claude/rules/seamlylayout_qt-style.mdc) — C++/QML coding conventions and file headers
-- [seamlylayout_rust-style.mdc](.claude/rules/seamlylayout_rust-style.mdc) — Rust coding conventions and file headers
-- [seamlylayout_svg-processing.mdc](.claude/rules/seamlylayout_svg-processing.mdc) — SVG/DOM manipulation guidelines
-- [seamlylayout_testing.mdc](.claude/rules/seamlylayout_testing.mdc) — Testing frameworks and commands
-- [seamlylayout_guidelines_export_dxf.mdc](.claude/rules/seamlylayout_guidelines_export_dxf.mdc) — DXF export pipeline
-- [seamlylayout_guidelines_layout.mdc](.claude/rules/seamlylayout_guidelines_layout.mdc) — Layout processing pipeline
-- [seamlylayout_guidelines_settings.mdc](.claude/rules/seamlylayout_guidelines_settings.mdc) — Settings workflow and defaults
-- [seamlylayout_guidelines_tiling.mdc](.claude/rules/seamlylayout_guidelines_tiling.mdc) — Tiling calculation and reduction
-
-`branding.mdc` was referenced by the old files but never existed. No branding rule file exists yet.
-
-### Command Line — Seamly2D Handoff Contract (Task 49)
-
-Seamly2D's Layout Mode builds the tagged pieces SVG in memory, launches SeamlyLayout with `--svg-stdin`, then writes the document to the new process's standard input and closes the channel. **No file is written** — the earlier `<pattern>.pieces.svg` handoff is gone. The contract is implemented in `qt_frontend/src/StartupOptions.{h,cpp}` and pinned by `src/test/SeamlyLayoutTest/StartupOptionsTests.cpp`; the producing half lives in `src/libs/vmisc/seamly_suite_paths.cpp` and is pinned by `TST_SeamlySuitePaths`. **Change one side and you must change the other** — see `project-docs/SVG-DATA-ATTRIBUTES.md` for the full statement.
-
-| Invocation | Behaviour |
-| ---------- | --------- |
-| `SeamlyLayout` | Empty canvas — the double-clicked-icon case |
-| `SeamlyLayout --svg-stdin [--document-name <name>]` | The Seamly2D handoff: reads the SVG document from standard input (`Main.qml`'s `openSvgDocument()` → `AppController::importSvgDocument`) |
-| `SeamlyLayout <file.svg>` | Opens that file through the same path as the **Import SVG** button (`Main.qml`'s `openSvgFile()` → `AppController::importSvg`) |
-| `SeamlyLayout -h` / `--help`, `-v` / `--version` | Text in a dialog (no console on Windows: this is a WIN32-subsystem binary), exit 0 |
-| `--svg-stdin` plus a file, empty or non-SVG standard input, two or more files, unknown option, missing / unreadable / non-`.svg` file | Error dialog naming the problem, then an empty canvas — never a silent no-op |
-
-- **Standard input is read only for `--svg-stdin`.** `seamlyLayout_main.mm` opens stdin on every launch, so reading it unasked would hang a shell or icon launch waiting for input that never comes.
-- **Both transports end in the same import.** `import_svg` (a path) and `import_svg_document` (a string) share `reset_import_state()` and `finish_import()` in `crates/cxxqt_bridge/src/lib.rs`, so the canvas cannot behave differently depending on where the SVG came from.
-- **Absolute paths only** — a relative positional argument is resolved with `QFileInfo::absoluteFilePath()` at parse time, because a launched process inherits SeamlyLayout's own working directory, not the user's.
-- **No single-instance handling** — each launch is its own process and window. One document per process; there are no tabs, which is also why a second positional argument is rejected rather than queued. Seamly2D itself starts at most one SeamlyLayout per Seamly2D window (`MainWindow::isSeamlyLayoutRunning`).
-- **Window in front (Windows)** — Seamly2D calls `AllowSetForegroundWindow` for the new process (`src/app/seamly2d/core/windows_foreground_window.cpp`), and `seamlyLayout_main.mm` raises its window before the import. Without both, SeamlyLayout opens behind Seamly2D.
-- **Untagged SVGs are opened, not refused.** Every top-level `<g>` with geometry is treated as a piece, so an ordinary drawing still lays out. When the document carries no `data-type="piece"` group, `finish_import` emits `import_warning` and QML shows a non-blocking popup (`piece_extractor::count_tagged_pieces` does the counting).
-- **A tagged handoff is read from its `data-type="piece"` groups, and only those** (Task 59). The handoff nests the pieces inside one `<g data-type="pattern">` per material (`data-material`: Fabric, Lining, ...). `material_split::split_by_material` gives each material its own document at import, so each document holds one pattern group. Every stage of the layout pipeline — `svg_dom::verticalize_dom`, `svg_dom::translate_dom`, `piece_extractor`, `layout_assembler`, `oversized`, `remaining`, `sheets` — assumes a piece is a **direct `<g>` child of the SVG root**. `piece_extractor::hoist_tagged_pieces` re-parents the tagged pieces to the root once, composing any wrapper `transform` onto each, and the rest of the pipeline is unchanged. **Call it from any new pre-processing entry point** (today: `layout_utils::do_process_layout` and `sheets::build_sheet_export_inputs`) — without it the packer receives the whole pattern as one sheet-sized object.
-- **`id` is identity, `data-name` is what a user reads.** `PieceRect::label()` resolves `data-name` → `data-letter` → `id`; use it for warnings, error text and the Adjust overlay, never for element lookup.
-- Dispatch happens from `seamlyLayout_main.mm` on a `QTimer::singleShot(0, …)`, **after** the event loop starts — the QML window and its WebEngine canvases must exist before an SVG can be pushed into them.
+- File header for every new or modified file: Author `slspencer`, Copyright `2026 Seamly2D Project`, license from the table.
+- SeamlyLayout platforms: Windows 11, Linux (all flavors), macOS (latest 3 versions).
+- SeamlyLayout license split: `.claude/rules/seamlylayout_licensing.mdc`.
+- `.claude/rules/seamlylayout.md` loads when you touch SeamlyLayout files.
+- `.claude/rules/seamlylayout-handoff.md` (the Seamly2D → SeamlyLayout `--svg-stdin` contract) loads when you touch either side of it.
 
 ## Build Rules
 
-All three applications build against **Qt 6.11.1**.
+### MSVC
 
-### CI
+- The shell is PowerShell on Windows x64.
+- Do not run `cl.exe` directly. Run it inside `cmd.exe` after `vcvars64.bat`:
 
-- Use Qt 6.11.1 with MSVC 2022.
-- for building on github, `ci.yml` builds all three apps, across all three platforms (Windows, Linux, MacOS). Sets the Qt release in its `QT_VERSION`.
-- for local testing, .\packaging\windows\local_build_msi.ps1 builds a windows 11 x64 MSI file.
-- `version.sh` is required for ci.yml and local_build_msi.ps1 to create the version used in both github and local build pipelines.
-
+```powershell
+cmd.exe /c "`"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat`" && cl /EHsc main.cpp"
+```
 
 ### Local Windows Build
 
-**`packaging\windows\local_build_msi.ps1` is the build.*- Use it for every
-local Windows build. `src\app\seamlylayout\build.ps1`, `qd.ps1`, `qr.ps1`,
-`run_debug.ps1` and `run_release.ps1` are removed (user decision,
-2026-09-02): they built SeamlyLayout alone, which is not what the
-install-and-test loop needs.
+- `packaging\windows\local_build_msi.ps1` is the build. Use it for every local Windows build.
+- Ask Sue before you start it. She batches several tasks per build.
+- It builds the three apps (release), runs `nmake check` (4 Qt suites), `ctest --preset release`, and `cargo test --workspace`, then packages the x64 MSI (`smsi.ps1`, `wix build`).
+- A failing suite stops the build. It mirrors `ci.yml`'s `windows-test` and `windows-msi` (x64) jobs.
+- `-SkipTests`: `CONFIG+=noTests`, no tests. Only for a packaging-only change.
+- `-SkipValidation`: skips the `wix msi validate` ICE pass.
+- Output is a local dev build. Releases go through `gh workflow run ci.yml`.
+- No arm64 MSI script exists yet.
+- `src\app\seamlylayout\build.ps1`, `qd.ps1`, `qr.ps1`, `run_debug.ps1`, `run_release.ps1` are removed (user decision): they built SeamlyLayout alone.
+- Needs VS 18 Community, Rust on PATH, and a Qt 6.11.1 `msvc2022_64` kit with `qtwebengine`, `qtwebchannel`, `qtpositioning`, `qtserialport`, `WebEngineView`, `QtWebEngineQuick`, `Qt6WebEngineCore`.
+- Shadow builds go in `build/` (gitignored).
 
-It builds Seamly2D, SeamlyMe and SeamlyLayout release binaries, runs the Qt and
-Rust unit tests, then packages the Windows **x64*- MSI via `smsi.ps1`:
+### Linux and macOS
 
-- `qmake Seamly.pro -r -config release` + `nmake` for Seamly2D/SeamlyMe **and**
-  the four Qt test suites;
-- `nmake check` — Seamly2DTest, CollectionTest, ParserTest, TranslationsTest.
-  A failing suite stops the build, so a broken test never reaches an MSI;
-- CMake + Ninja + Cargo for SeamlyLayout;
-- `ctest --preset release` — the SeamlyLayout Qt suites, from the release build;
-- `cargo test --workspace` — the SeamlyLayout Rust crates;
-- `smsi.ps1` to stage and `wix build`.
+- Linux: `packaging/linux/local_build_appimage.sh`. macOS: `packaging/macos/local_build_dmg.sh` (unsigned, not notarized).
+- Both build the three apps, run the Qt and Rust tests, then package. `--skip-tests` skips the tests.
+- Prerequisites: `.claude/rules/build-linux-macos.md` (loads with `packaging/linux/**` or `packaging/macos/**`). Details: `.github/README-BUILDS.md`.
 
-Steps 1-2 mirror `ci.yml`'s `windows-test` job; the rest mirrors its
-`windows-msi` (x64) job. Requires VS 18 Community, a Qt 6.11.1+ `msvc2022_64`
-kit, and Rust on PATH. Treat its output as a local dev build, not a release
-artifact — releases still go through `gh workflow run ci.yml`.
+### CI
 
-Switches:
-
-- `-SkipTests` — build with `CONFIG+=noTests`; skip `nmake check`, `ctest` and
-  `cargo test`. Only for a packaging-only change.
-- `-SkipValidation` — passed to `smsi.ps1`, skips the `wix msi validate` ICE pass.
-
-A build script for the Windows **arm64*- MSI is planned and does not exist yet.
-Do not assume this script covers arm64.
-
-Use Qt 6.11.1 `msvc2022_64` with the VS 18 Community MSVC environment.
-
-- Put shadow builds in `build/`.
-- `build/` is gitignored.
-
-The local Qt kit must include:
-
-- `qtwebengine`
-- `qtwebchannel`
-- `qtpositioning`
-- `qtserialport`
-- `WebEngineView`
-- `QtWebEngineQuick`
-- `Qt6WebEngineCore`
-
-### Local Linux Build
-
-`packaging/linux/local_build_appimage.sh` is the build. It builds Seamly2D,
-SeamlyMe and SeamlyLayout release binaries, runs the Qt and Rust unit tests,
-then packages the Linux x86_64 AppImage via `linuxdeploy` (auto-downloaded
-into `packaging/linux/tools/` on first run).
-
-Requires `qmake`, `cmake`, `ninja`, `cargo`, `ctest`, `xvfb-run` and
-`libxerces-c-dev` already installed — the script fails
-with an install hint rather than running `sudo apt install` itself. A Qt
-6.11.1+ `gcc_64` kit under `~/Qt` is required, with the same modules as the
-Windows kit.
-
-Switch: `--skip-tests` — skip `make check`, `ctest`, and `cargo test`. Only
-for a packaging-only change; these suites have no other local runner on
-Linux besides `ci.yml`'s `linux-test` job.
-
-### Local macOS Build
-
-`packaging/macos/local_build_dmg.sh` is the build. It builds Seamly2D,
-SeamlyMe and SeamlyLayout release binaries, runs the Qt and Rust unit tests,
-then packages the macOS DMG via `packaging/macos/macos.pro`'s
-`seamlysuitedmg` target (the same `hdiutil` step `ci.yml`'s `macos` job
-uses). The output is unsigned and not notarized — signing needs CI secrets.
-
-`ci.yml`'s `macos` job does not run its own tests; it gates on the
-`linux-test` job's coverage. This script runs the Qt and Rust suites anyway
-for a safer local loop — pass `--skip-tests` to match CI's behavior exactly.
-
-Requires `qmake`, `cmake`, `ninja`, `cargo`, `ctest`, `hdiutil`, `xcrun`, and
-Xcode command-line tools (`xcode-select --install`) already installed, plus
-`xerces-c` via Homebrew. A Qt 6.11.1+ `macos` kit under `~/Qt` is required,
-with the same modules as the Windows kit (except `qtserialport`).
-
-See `.github/README-BUILDS.md` for detailed build and packaging knowledge.
+- `ci.yml` builds the three apps on Windows, Linux, and macOS. Its `QT_VERSION` sets the Qt release.
+- `version.sh` makes the version for `ci.yml` and `local_build_msi.ps1`.
 
 ## Coding Rules
 
-`.github/README-CODE-STYLES.md` is authoritative.
+`.github/README-CODE-STYLES.md` is authoritative. Read it before you write or rename code.
 
-Read it before writing or renaming code.
-
-### File Names
-
-- Use lowercase `snake_case`.
-- Name files for their purpose.
-- Use prefixes defined by the style guide.
-- Do not use generic names such as `util.h` or `helpers.cpp`.
-- Do not introduce abbreviations.
-- Make source filenames unique repository-wide.
-- Multiple SeamlyLayout crate-root `lib.rs` files are the only exception.
-- Do not start new filenames with bare `s`.
-- Do not start new filenames, functions, clasees, etc. with `v`.
-- Do not rename existing `v*` files unless the task requires it.
-- New files, functions, classes, etc. do not start with 'v'
-
-### Classes
-
-Use `UpperCamelCase` class names.
-
-When a file primarily defines one class, name the file exactly after the class.
-
-Example:
-
-`SettingsCommon.h` / `SettingsCommon.cpp` → `class SettingsCommon`
-
-### License Headers
-
-For every new or modified Seamly2D or SeamlyMe file:
-
-- Author: `slspencer`
-- Copyright: `2026 Seamly2D Project`
-- License: `GPL-3.0-or-later`
-
-For every new or modified SeamlyLayout file:
-
-- Author: `slspencer`
-- Copyright: `2026 Seamly2D Project`
-- License: `MIT`
-
-### Markdown
-
-Ignore MD041 first-line-heading warnings.
-
-Do not restructure files only to silence MD041.
+- File names: lowercase `snake_case`, named for their purpose, with the style guide's prefixes.
+- No generic names (`util.h`, `helpers.cpp`). No new abbreviations.
+- Source file names are unique repository-wide. Exception: SeamlyLayout crate-root `lib.rs` files.
+- New files, functions, and classes do not start with bare `s` or with `v`. Do not rename existing `v*` files unless the task requires it.
+- Classes: `UpperCamelCase`. A file that defines one class takes the class name: `SettingsCommon.h` → `class SettingsCommon`.
+- Markdown: ignore MD041. Do not restructure a file only to silence it.
 
 ## Control Flow
 
-Prefer the simplest control flow that preserves correctness.
-
-- Use guard clauses when they reduce nesting.
-- Use guard clauses for validation and early error exits.
-- Keep the primary execution path visually clear.
-- Avoid unnecessary nesting.
-- Do not introduce abstractions only to satisfy a nesting-depth limit.
+- Use the simplest control flow that stays correct.
+- Use guard clauses for validation and early error exits, and when they reduce nesting.
+- Keep the primary path visually clear.
+- Do not add abstractions only to satisfy a nesting-depth limit.
 - Use a state machine only for behavior with meaningful states and transitions.
-- Identify relevant inputs and outcomes before implementing complex Boolean logic.
-- Use a truth table when combinations are difficult to reason about or test.
-- Do not expose scratchpad or private reasoning.
-- Document only resulting requirements, decisions, invariants, and tests.
+- For complex Boolean logic, list inputs and outcomes first. Use a truth table when combinations are hard to test.
+- Document only resulting requirements, decisions, invariants, and tests. Do not expose scratchpad reasoning.
 
-## Git Remotes
+## Git
 
-### `origin`
-
-- Repository: `https://github.com/seamly/Seamly2D.git`
-- Working branch: `run-seamlyLayout`
-- This is the work repository and branch of record.
-- Push project work only to `origin`.
-
-### `upstream`
-
-- Repository: `https://github.com/FashionFreedom/Seamly2D`
-- Fetch only.
-- **Never push to upstream.**
-- **Never open routine task PRs against upstream.**
-
-## Branch Strategy
-
-`seamly/Seamly2D` must remain a GitHub fork of `FashionFreedom/Seamly2D`.
-
-Do not leave the fork network.
-
-### `develop`
-
-- Keep `origin/develop` as a pristine mirror of upstream `develop`.
-- Update it only from upstream.
-- Never merge project work into `develop`.
-
-### `run-seamlyLayout`
-
-- Accumulate all project work here.
-- Merge `develop` into `run-seamlyLayout`.
-- Never merge `run-seamlyLayout` into `develop`.
-
-### Merge from Upstream `develop`
-
-1. `git fetch upstream`; fast-forward `develop` to `upstream/develop`; push `origin develop`.
-2. `git checkout -b task-merge-develop run-seamlyLayout`.
-3. `git merge --no-ff --no-commit develop`.
-4. Review `git diff --cached -- src/` for code this branch removed on purpose.
-5. Resolve conflicts for this branch's intent, not "theirs".
-6. Run `git grep -n "convertPdfToPs\|PDFTOPS"`. Expect no hits.
-7. Build with `packaging\windows\local_build_msi.ps1`. A failure stops the merge.
-8. Commit, merge `--no-ff` into `run-seamlyLayout`, push.
-9. Run full CI: `gh workflow run ci.yml --ref run-seamlyLayout`.
-
-Retired code that `develop` still has:
-
-- `MainWindowsNoGUI::exportEPS`, `exportPS`, `convertPdfToPs` (pdftops), retired in `14e1d8723b`.
-  `develop` restores them whenever it edits nearby lines. Delete them on each merge.
-  Upstream keeps them until the endgame PR (user decision). Do not propose an early upstream PR.
-- `src/libs/vdxf/` and the console export mode (`--basename`, `--format`), removed by Task Dead.4.
-  SeamlyLayout writes DXF-AAMA (`seamlylayout_DXF_AAMA.md`). On the merge that brings
-  upstream PR 1783 (label-independent AAMA piece text):
-  - keep `src/libs/vdxf/` deleted;
-  - drop the `cutting_text` and `getPieceText()` changes in `vlayoutpiece.cpp` and `vlayoutpiece_p.h`: nothing reads them;
-  - drop the `aamaCuttingText` test in `tst_seamly2dcommandline.{h,cpp}`;
-  - drop `.github/validation/issue-1783/`: evidence for the removed exporter, with third-party PDFs;
-  - rewrite `.github/AAMA-INTEROP.md` to describe SeamlyLayout's DXF-AAMA;
-  - fix the `.github/README-AUTOMATION.md` example: Seamly2D has no `--basename` or `--format`;
-  - keep the `SEAMLY_DATA_DIR` code; SeamlyLayout follows in Task Layout.101.
-
-Enable `git config rerere.enabled true` so Git reuses recorded conflict resolutions.
-
-### Endgame
-
-When the project is complete:
-
-1. Push `seamly:run-seamlyLayout` to `FashionFreedom:run-seamlyLayout`.
-2. The user creates the single upstream PR.
-
-Do not use GitHub's default "Compare & pull request" banner.
-
-If a project-side PR is required, target `seamly:run-seamlyLayout`.
+- `origin` = `https://github.com/seamly/Seamly2D.git`: the work repository. `run-seamlyLayout` is the branch of record.
+- `upstream` = `https://github.com/FashionFreedom/Seamly2D`: fetch only. Never push. Never open routine task PRs against it.
+- `seamly/Seamly2D` must stay a GitHub fork of `FashionFreedom/Seamly2D`. Do not leave the fork network.
+- `develop` mirrors upstream `develop`. Update it only from upstream. Never merge project work into it.
+- `run-seamlyLayout` holds all project work. Merge `develop` into it, never the reverse.
+- Task work bases on and compares with `run-seamlyLayout` only. Do not diff, log, or rev-list against `develop`.
+- Upstream merge: only when Sue asks. Use the `merge-upstream` skill.
+- Endgame: push `seamly:run-seamlyLayout` to `FashionFreedom:run-seamlyLayout`; Sue creates the single upstream PR. Do not use GitHub's "Compare & pull request" banner.
+- A project-side PR targets `seamly:run-seamlyLayout`.
 
 ## Task Tracking
 
-`project-docs/PROJECT_PLAN.md` contains the approved implementation plan.
-
-Task files use:
-
-`project-docs/TODO_*.md` or project-docs/TEST_*.md
-
-Before working on a task:
-
-1. Read the task's file.
-2. Follow its cross-references.
-
-Do not rely on a hard-coded list of task files.
-
-For each task:
-
-- Check completed numbered subtasks.
-- Move fully completed tasks to `project-docs/TODO_COMPLETED.md`.
+- `project-docs/PLAN_PROJECT.md` is the approved plan.
+- Task files: `project-docs/**/TODO_*.md` and `project-docs/**/TEST_*.md`.
+- Before a task, read its section (grep, then `offset`/`limit`) and follow its cross-references.
+- Check completed numbered subtasks. Move fully completed tasks to `project-docs/TODO_COMPLETED.md`.
 - Never implement tasks in `project-docs/WONT_DO_MIGRATE.md`.
 
 ## Task Workflow
 
-Apply this workflow to every request to implement a `TODO_*.md` or `TEST_*.md` task or subtask.
+1. Create `task-<short-name>` from `run-seamlyLayout`. Work there.
+2. Implement only the task scope.
+3. Verify:
+   - Add or update unit tests.
+   - SeamlyLayout: `ctest --preset debug` and `cargo test --workspace`. Set the shell first:
 
-### 1. Sync `develop`
+     ```powershell
+     $env:PATH  = "C:\Qt\6.11.1\msvc2022_64\bin;$env:USERPROFILE\.cargo\bin;$env:PATH"
+     $env:QMAKE = 'C:/Qt/6.11.1/msvc2022_64/bin/qmake.exe'
+     ```
 
-- Run `git fetch origin`.
-- Fast-forward local `develop` when it is behind `origin/develop`.
-- Never merge project work into `develop`.
-
-### 2. Sync `run-seamlyLayout`
-
-Merge local `develop` into local `run-seamlyLayout`.
-
-Never merge in the opposite direction.
-
-### 3. Create Task Branch
-
-Create `task-<short-name>` from `run-seamlyLayout`.
-
-Perform all task work there.
-
-### 4. Implement
-
-Implement only the required task scope.
-
-### 5. Verify
-
-For code changes:
-
-- add or update unit tests;
-- run the local tests:
-  - Seamly2D/SeamlyMe Qt suites — `packaging\windows\local_build_msi.ps1`
-    runs them via `nmake check`;
-  - SeamlyLayout — `ctest --preset debug` and `cargo test --workspace`.
-    `local_build_msi.ps1` also runs both; its `ctest` uses the release build.
-
-The two SeamlyLayout commands need Qt and Rust in the shell first; a bare shell
-does not have them:
-
-```powershell
-$env:PATH  = "C:\Qt\6.11.1\msvc2022_64\bin;$env:USERPROFILE\.cargo\bin;$env:PATH"
-$env:QMAKE = 'C:/Qt/6.11.1/msvc2022_64/bin/qmake.exe'
-```
-
-Without them the failures name the wrong cause: a missing `cargo`, a
-`QtMissing` panic, or `STATUS_DLL_NOT_FOUND`. See
-`.github/README-BUILDS.md`.
-
-Three of the four Qt suites are GUI-subsystem binaries and print nothing to a
-console, and one shared `-o` target is overwritten by each `qExec()` call. To
-read a single suite, set `SEAMLY_TEST_LOG_DIR` to a directory and run the binary
-through its own generated `target_wrapper.bat`, which supplies `QT_PLUGIN_PATH`.
-
-Seamly2D and SeamlyMe and SeamlyLayout have a local build script: packaging\windows\local_build_msi.ps1. 
-Seamly2D and SeamlyMe and SeamlyLayout have a github build script: .github\workflows\`ci.yml` verifies them. A skip-ci push defers that verification. See CI Cost Control.
-
-Do not proceed after a failing required test or build. Report the failure.
-
-### 6. Update Tracking
-
-- Update the applicable `TODO_*.md`.
-- Move completed tasks to `TODO_COMPLETED.md`.
-- Update `SESSION_HANDOVER.md`.
-
-### 7. Commit
-
-Stage and commit the task branch.
-
-### 8. Merge
-
-Merge the task branch into local `run-seamlyLayout` with `--no-ff`.
-
-### 9. Push
-
-Push local `run-seamlyLayout` to `origin run-seamlyLayout`.
-
-Never push to `FashionFreedom/Seamly2D`.
-
-### 10. Report and Clean Up
-
-Report only:
-
-1. What changed.
-2. Test/build status.
-3. Required user decisions or actions.
-
-Then delete the local task branch.
-
-No PR is required for normal task work.
+     Without it the failures name the wrong cause: missing `cargo`, a `QtMissing` panic, or `STATUS_DLL_NOT_FOUND`.
+   - Seamly2D/SeamlyMe Qt suites run in `local_build_msi.ps1`. Ask before you start it; otherwise leave the build check open in the TODO.
+   - One Qt suite: set `SEAMLY_TEST_LOG_DIR` and run the binary through its `target_wrapper.bat` (it sets `QT_PLUGIN_PATH`). Three of the four suites print nothing to a console, and each `qExec()` overwrites one shared `-o` target.
+   - Do not continue after a failing required test or build. Report the failure.
+4. Update the TODO file, `TODO_COMPLETED.md`, and `SESSION_HANDOVER.md`.
+5. Commit on the task branch.
+6. Merge into local `run-seamlyLayout` with `--no-ff`. Use the skip-ci token by default (see CI Cost Control).
+7. Do not push. Report how many commits `run-seamlyLayout` is ahead of `origin`.
+8. Delete the local task branch. No PR for normal task work.
 
 ## CI Cost Control
 
-A push to `run-seamlyLayout` can start the full multi-platform `ci.yml` suite.
-
-Use the CI skip token in the step 8 merge commit subject by default.
-
-This default stands even though no local build remains. The user decided on
-2026-08-15 to verify releases with a manual `workflow_dispatch` run instead. See
-Milestones.
-
-The token is `[skip ci]`.
-
-Never write the literal token in commit-message prose.
-
-Use `skip-ci` when referring to it without activating it.
-
-### Run Full CI
-
-Omit the skip token when functional changes touch:
-
-- `.github/workflows/**`
-- `packaging/**`
-- `*.pro`
-- `*.pri`
-- `CMakeLists.txt`
-- `Cargo.toml`
-- Linux-specific code
-- macOS-specific code
-- `#ifdef Q_OS_*`
-- arm64 handling
-
-### Comment-Only Exception
-
-Keep the skip token when every changed line is only a comment or documentation string.
-
-Inspect the diff before deciding.
-
-If any functional line changed, apply the normal CI rule.
-
-### Mixed Pushes
-
-`paths-ignore` evaluates the complete push.
-
-Before relying on documentation path exclusions, inspect:
-
-`git diff --name-only origin/run-seamlyLayout..HEAD`
-
-### Milestones
-
-Run the full CI suite before a release or upstream handoff:
-
-`gh workflow run ci.yml --ref run-seamlyLayout`
-
-Wait for it to pass.
-
-This manual run is the only verification for Seamly2D and SeamlyMe. Skipped CI
-is deferred verification, and nothing runs locally to catch a break sooner.
+- A push to `run-seamlyLayout` can start the full multi-platform `ci.yml`.
+- The token is `[skip ci]`. Never write the literal token in commit-message prose; write `skip-ci`.
+- Put the token in the step 6 merge subject by default. User decision (2026-08-15): verify releases with a manual `workflow_dispatch` run.
+- Omit the token when functional changes touch `.github/workflows/**`, `packaging/**`, `*.pro`, `*.pri`, `CMakeLists.txt`, `Cargo.toml`, Linux- or macOS-specific code, `#ifdef Q_OS_*`, or arm64 handling.
+- Comment-only exception: keep the token when every changed line is a comment or doc string. Inspect the diff first.
+- `paths-ignore` evaluates the whole push. Check `git diff --name-only origin/run-seamlyLayout..HEAD`.
+- Before a release or upstream handoff, run `gh workflow run ci.yml --ref run-seamlyLayout` and wait for a pass. Skip-ci defers that verification.
 
 ## Documentation-Only Changes
 
-When every changed path is covered by `ci.yml` `paths-ignore`:
+When every changed path is in `ci.yml` `paths-ignore` (`*.md`, `project-docs/**`, `LICENSE`, `.claude/**`, `.vscode/**`):
 
-- skip task-workflow steps 1–5 and 8;
-- stage and commit on the current branch;
-- push to origin.
-
-Covered paths include:
-
-- `*.md`
-- `project-docs/**`
-- `LICENSE`
-- `.claude/**`
-- `.vscode/**`
-
-Do not treat `.txt` or `.svg` as documentation-only for this rule.
-
-Check the complete pending push before relying on this exception.
+- skip workflow steps 1, 3, and 6;
+- commit on the current branch. Sue pushes.
+- `.txt` and `.svg` are not documentation-only.
+- Check the complete pending push before you rely on this exception.
 
 ## Session Handover
 
-Keep `SESSION_HANDOVER.md` current.
+Keep `SESSION_HANDOVER.md` current and short. Sessions read it at start, so its size is paid every turn.
 
-Update it:
-
-- before compaction;
-- after completing a task;
-- when session state changes materially.
-
-Record only information needed by the next session:
-
-- current task;
-- exact progress;
-- task-tracking changes;
-- decisions and necessary rationale;
-- changed files;
-- concrete next steps;
-- relevant machine state outside the repository.
-
-Do not use it as a session transcript.
+- Update it before compaction, after a task, and when session state changes materially.
+- Record only: current task, exact progress, task-tracking changes, decisions with rationale, changed files, next steps, machine state outside the repository.
+- Keep the 5 newest dated entries under "Current status", each under ~15 lines. Move older ones to the top of `project-docs/SESSION_HANDOVER_ARCHIVE.md`.
+- Do not Read the archive at session start. It is not a transcript; git history holds the detail.
 
 ## Key References
 
-- `.github/README-CODE-STYLES.md` — authoritative code style.
+- `.github/README-CODE-STYLES.md` — code style (authoritative).
 - `.github/README-BUILDS.md` — build, toolchain, packaging, and platform details.
-- `project-docs/PROJECT_PLAN.md` — approved implementation plan.
-- `project-docs/NEW-ATTRIBUTES.csv` — SVG `data-*` attribute specification.
+- `project-docs/PLAN_PROJECT.md` — approved plan.
+- `project-docs/docs-data/NEW-ATTRIBUTES.csv` — SVG `data-*` attribute specification.
+- `project-docs/docs-data/SVG-DATA-ATTRIBUTES.md` — SVG attribute contract.
 - `SESSION_HANDOVER.md` — current cross-session state.
