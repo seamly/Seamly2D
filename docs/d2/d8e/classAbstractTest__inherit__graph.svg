@@ -139,30 +139,33 @@ var sectionId = 'dynsection-0';
 <g id="node7" class="node">
 <title>Node7</title>
 <g id="a_node7"><a xlink:href="../../d2/d3e/classTST__Seamly2DCommandLine.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="462,-490.5 462,-668.5 641,-668.5 641,-490.5 462,-490.5"/>
-<text text-anchor="middle" x="551.5" y="-656.5" font-family="Helvetica,sans-Serif" font-size="10.00">TST_Seamly2DCommandLine</text>
-<polyline fill="none" stroke="#666666" points="462,-649.5 641,-649.5 "/>
-<text text-anchor="middle" x="551.5" y="-637.5" font-family="Helvetica,sans-Serif" font-size="10.00"> </text>
-<polyline fill="none" stroke="#666666" points="462,-630.5 641,-630.5 "/>
-<text text-anchor="start" x="470" y="-618.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ TST_Seamly2DCommandLine()</text>
-<text text-anchor="start" x="470" y="-607.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; initTestCase()</text>
-<text text-anchor="start" x="470" y="-596.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; OpenPatterns_data()</text>
-<text text-anchor="start" x="470" y="-585.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; OpenPatterns()</text>
-<text text-anchor="start" x="470" y="-574.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; ExportMode_data()</text>
-<text text-anchor="start" x="470" y="-563.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; ExportMode()</text>
-<text text-anchor="start" x="470" y="-552.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; TestMode_data()</text>
-<text text-anchor="start" x="470" y="-541.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; TestMode()</text>
-<text text-anchor="start" x="470" y="-530.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; TestOpenCollection</text>
-<text text-anchor="start" x="470" y="-519.5" font-family="Helvetica,sans-Serif" font-size="10.00">_data()</text>
-<text text-anchor="start" x="470" y="-508.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; TestOpenCollection()</text>
-<text text-anchor="start" x="470" y="-497.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; cleanupTestCase()</text>
+<polygon fill="white" stroke="#666666" points="462,-474 462,-685 641,-685 641,-474 462,-474"/>
+<text text-anchor="middle" x="551.5" y="-673" font-family="Helvetica,sans-Serif" font-size="10.00">TST_Seamly2DCommandLine</text>
+<polyline fill="none" stroke="#666666" points="462,-666 641,-666 "/>
+<text text-anchor="middle" x="551.5" y="-654" font-family="Helvetica,sans-Serif" font-size="10.00"> </text>
+<polyline fill="none" stroke="#666666" points="462,-647 641,-647 "/>
+<text text-anchor="start" x="470" y="-635" font-family="Helvetica,sans-Serif" font-size="10.00">+ TST_Seamly2DCommandLine()</text>
+<text text-anchor="start" x="470" y="-624" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; initTestCase()</text>
+<text text-anchor="start" x="470" y="-613" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; OpenPatterns_data()</text>
+<text text-anchor="start" x="470" y="-602" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; OpenPatterns()</text>
+<text text-anchor="start" x="470" y="-591" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; ExportMode_data()</text>
+<text text-anchor="start" x="470" y="-580" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; ExportMode()</text>
+<text text-anchor="start" x="470" y="-569" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; TestMode_data()</text>
+<text text-anchor="start" x="470" y="-558" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; TestMode()</text>
+<text text-anchor="start" x="470" y="-547" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; automationDataDirectory</text>
+<text text-anchor="start" x="470" y="-536" font-family="Helvetica,sans-Serif" font-size="10.00">_data()</text>
+<text text-anchor="start" x="470" y="-525" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; automationDataDirectory()</text>
+<text text-anchor="start" x="470" y="-514" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; TestOpenCollection</text>
+<text text-anchor="start" x="470" y="-503" font-family="Helvetica,sans-Serif" font-size="10.00">_data()</text>
+<text text-anchor="start" x="470" y="-492" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; TestOpenCollection()</text>
+<text text-anchor="start" x="470" y="-481" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; cleanupTestCase()</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node7 -->
 <g id="edge6" class="edge">
 <title>Node1&#45;&gt;Node7</title>
-<path fill="none" stroke="#63b8ff" d="M941.61,-878.32C862.73,-871.29 733.59,-849.03 649.5,-779 615.39,-750.59 592.11,-707.41 576.83,-668.57"/>
+<path fill="none" stroke="#63b8ff" d="M941.61,-878.32C862.73,-871.29 733.59,-849.03 649.5,-779 620.19,-754.59 598.88,-719.27 583.76,-685.17"/>
 <polygon fill="none" stroke="#63b8ff" points="941.67,-881.83 951.92,-879.17 942.25,-874.86 941.67,-881.83"/>
 </g>
 <!-- Node8 -->
