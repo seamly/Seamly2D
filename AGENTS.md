@@ -71,7 +71,7 @@ All apps use Qt 6.11.1.
 * Path: `src/app/seamlylayout/`
 * Purpose: Creates layouts of Seamly2D pattern pieces for cutting and downstream software.
 * Code: Rust converted to C++ with `cxx-qt`.
-* GUI: Qt 6.11 / QML / QtWidgets.
+* GUI: Qt 6.11 / QML generated from Rust / Ice using cxx_qt::bridge.
 * Build: local - `packaging/<platform>/local_build_*.ps1|.sh`; GitHub - ci.yml
 * Merge its local `AGENTS.md` and `rules.md` requirements into the project-level files.
 * File header:
@@ -79,6 +79,13 @@ All apps use Qt 6.11.1.
   * Author: `slspencer`
   * Copyright: `2026 Seamly2D Project`
   * License: `MIT`
+
+* Note: SeamlyLayout code (src/seamlylayout) will replace src/libs/vlayout. The replacement code should reside in rust code in src\app\seamlylayout to implement SeamlyLayout features. etc.  When the scope is within Seamly2D not SeamlyLayout, then create new Cpp/QML code to replace the vlayout code (we want to convert to QML whenever possible); write as files, classes, methods, etc. using new code style guidelines; include doxygen-compatible briefs and terse inline code; drop the 'v' prefix; use new naming conventions. File header,and provide a link to an online copy of the GPL 30+ license:
+
+  * Author: `slspencer`
+  * Copyright: `2026 Seamly2D Project`
+  * License: `GPL-3.0-or-later` 
+
 
 ### SeamlyMe
 
