@@ -59,7 +59,7 @@ for the Linux/macOS equivalents of this script).
    `projectversion.{h,cpp}` and both `Info.plist` files, via `packaging\version.sh`.
    Reverts the stamp after a successful build, unless those files already
    carried uncommitted changes before the run.
-2. Finds the newest `msvc2022_64` Qt kit at or above 6.11.1 under `C:\Qt`;
+2. Finds the newest `msvc2022_64` Qt kit at or above 6.11.3 under `C:\Qt`;
    installs WiX v6 and its UI/Util extensions if missing.
 3. Under one `vcvars64.bat` environment: `qmake Seamly.pro -r -config release`
    and `nmake` build seamly2d and seamlyme; `nmake check` runs the four Qt
@@ -126,7 +126,7 @@ msiexec /a seamly-x64.msi /qn TARGETDIR=C:\extract                   # extract w
 
 ## 4. arm64
 
-Both `x64` and `arm64` build natively (`windows-11-arm` runner); nothing is cross-compiled, and both legs run the identical `smsi.ps1` invocation. Qt 6.11.1 ships an arm64 WebEngine, so the arm64 package includes all three apps. `windeployqt` needs no `--qtpaths` wrapper on either arch — add it back only for a cross-compiled kit.
+Both `x64` and `arm64` build natively (`windows-11-arm` runner); nothing is cross-compiled, and both legs run the identical `smsi.ps1` invocation. Qt 6.11.3 ships an arm64 WebEngine, so the arm64 package includes all three apps. `windeployqt` needs no `--qtpaths` wrapper on either arch — add it back only for a cross-compiled kit.
 
 ## 5. Runtime rules
 

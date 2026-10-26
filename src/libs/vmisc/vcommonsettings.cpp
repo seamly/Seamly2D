@@ -68,16 +68,21 @@
 #include <QString>
 #include <QStringConverter>
 #include <QVariant>
+#include <QTemporaryFile>
 #include <QtDebug>
+#include <cstdio>
 
 #include "../ifc/ifcdef.h"
 #include "../vmisc/def.h"
 #include "../vmisc/installer_record.h"
+#include "../vmisc/projectversion.h"
 #include "../vmisc/vmath.h"
+#include "../vmisc/vsysexits.h"
 #include "../vpatterndb/pmsystems.h"
 
 namespace
 {
+QString automationDataDirectory;
 const QString settingPathsDataRoot                       = QStringLiteral("paths/dataRoot");
 const QString settingImagesPath                          = QStringLiteral("paths/images");
 const QString settingPathsIndividualMeasurements         = QStringLiteral("paths/individual_size_measurements");
@@ -473,12 +478,17 @@ QString readDataRoot()
  * carry them to a machine where they may be wrong.
  *
  * Every application sets "Seamly", so all of them resolve one file.
+ * SEAMLY_DATA_DIR moves the file to its settings folder.
  *
  * @return absolute path, e.g. C:/Users/<user>/AppData/Local/Seamly/qt6_common.ini.
  */
 QString VCommonSettings::commonSettingsFilePath()
 {
     QString base = commonSettingsBaseDirOverride;
+    if (base.isEmpty() && !automationDataDirectory.isEmpty())
+    {
+        base = automationDataDirectory + QLatin1String("/settings");
+    }
     if (base.isEmpty())
     {
         base = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
@@ -575,11 +585,18 @@ QString VCommonSettings::migrateCommonSettingsLocation()
  * location the Windows installer creates on a fresh install (Setup no longer offers a
  * choice of folder).
  *
+ * SEAMLY_DATA_DIR replaces this default.
+ *
  * @return absolute path of the default user-data root, e.g. C:/Users/<user>/seamly2d.
  */
 QString VCommonSettings::getDefaultDataRoot()
 {
-    return QDir::homePath() + QLatin1String("/seamly2d");
+    QString root = automationDataDirectory;
+    if (root.isEmpty())
+    {
+        root = QDir::homePath() + QLatin1String("/seamly2d");
+    }
+    return root;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -787,7 +804,7 @@ QString VCommonSettings::rebaseOntoDataRoot(const QString &path, const QString &
  *  2. Nothing configured, and the Windows installer recorded one — adopt it. The MSI seeds
  *     paths/dataRoot at install time (smsi_ensure_user_data.ps1), so an installed Windows
  *     machine normally takes case 1 on every run after the first; this is the bridge for
- *     that first run.
+ *     that first run. SEAMLY_DATA_DIR skips this case: a job must not use the operator's data.
  *  3. Otherwise — no installer record, e.g. the macOS dmg, the Linux AppImage, a dev build,
  *     or another Windows account on a shared machine — use the built-in default.
  *
@@ -810,7 +827,7 @@ QString VCommonSettings::initializeDataRoot()
     // Case 2: the Windows installer recorded the fixed data root it created or found.
     // Recorded here, so later runs take case 1 and a change made in Preferences is never
     // overridden by the installer.
-    const QString fromInstaller = InstallerRecord::dataRoot();
+    const QString fromInstaller = automationDataDirectory.isEmpty() ? InstallerRecord::dataRoot() : QString();
     if (!fromInstaller.isEmpty())
     {
         settings.setValue(settingPathsDataRoot, fromInstaller);
@@ -825,6 +842,53 @@ QString VCommonSettings::initializeDataRoot()
     settings.sync();
 
     return resolved;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief configureDataDirectory moves settings, logs and the default data root into SEAMLY_DATA_DIR when it is set.
+/// @return V_EX_OK, V_EX_CONFIG for a relative path, or V_EX_CANTCREAT for a folder that is not writable.
+int VCommonSettings::configureDataDirectory()
+{
+    // Called before constructing either application, or opening any settings.
+    const QString requested = qEnvironmentVariable("SEAMLY_DATA_DIR");
+    if (requested.isEmpty())
+    {
+        return V_EX_OK;
+    }
+    if (!QDir::isAbsolutePath(requested))
+    {
+        std::fputs("SEAMLY_DATA_DIR must be an absolute directory.\n", stderr);
+        return V_EX_CONFIG;
+    }
+
+    const QDir directory(QDir::cleanPath(QDir::fromNativeSeparators(requested)));
+    const QStringList paths = {QStringLiteral("settings"), QStringLiteral("settings/" VER_COMPANYNAME_STR),
+                               QStringLiteral("logs/seamly2d"), QStringLiteral("logs/seamlyme")};
+    for (const QString &path : paths)
+    {
+        // mkpath succeeds for an existing read-only directory. Actually write
+        // a temporary file as well; permission bits alone are unreliable on NTFS.
+        QTemporaryFile probe(directory.filePath(path + QStringLiteral("/.seamly-write-XXXXXX")));
+        if (!directory.mkpath(path) || !probe.open() || probe.write("test") != 4 || !probe.flush())
+        {
+            std::fputs("SEAMLY_DATA_DIR must contain writable settings and log directories.\n", stderr);
+            return V_EX_CANTCREAT;
+        }
+    }
+
+    automationDataDirectory = directory.absolutePath();
+    const QString settings = directory.filePath(QStringLiteral("settings"));
+    QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, settings);
+    // Keep fallback lookups inside this job as well.
+    QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope, settings);
+    return V_EX_OK;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief dataDirectory returns the absolute SEAMLY_DATA_DIR path, or an empty string when it is not set.
+QString VCommonSettings::dataDirectory()
+{
+    return automationDataDirectory;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

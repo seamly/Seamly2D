@@ -47,7 +47,7 @@ fn rust_crate_notices_match_cargo_lock() {
 
 #[test]
 fn qt_notices_match_ci_qt_version() {
-    // ci.yml sets the Qt release every package is built with: QT_VERSION: '6.11.1'
+    // ci.yml sets the Qt release every package is built with: QT_VERSION: '6.11.3'
     let ci = std::fs::read_to_string(workspace_path("../../../.github/workflows/ci.yml")).expect("ci.yml readable");
     let ci_version = ci
         .lines()

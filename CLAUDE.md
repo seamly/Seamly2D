@@ -46,7 +46,7 @@ Document intent, contracts, constraints, and non-obvious behavior. Do not docume
 
 ## Seamly Apps
 
-All apps use Qt 6.11.1.
+All apps use Qt 6.11.3.
 
 | App | Path | Purpose | Code / GUI | License |
 |---|---|---|---|---|
@@ -82,7 +82,7 @@ cmd.exe /c "`"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxilia
 - Output is a local dev build. Releases go through `gh workflow run ci.yml`.
 - No arm64 MSI script exists yet.
 - `src\app\seamlylayout\build.ps1`, `qd.ps1`, `qr.ps1`, `run_debug.ps1`, `run_release.ps1` are removed (user decision): they built SeamlyLayout alone.
-- Needs VS 18 Community, Rust on PATH, and a Qt 6.11.1 `msvc2022_64` kit with `qtwebengine`, `qtwebchannel`, `qtpositioning`, `qtserialport`, `WebEngineView`, `QtWebEngineQuick`, `Qt6WebEngineCore`.
+- Needs VS 18 Community, Rust on PATH, and a Qt 6.11.3 `msvc2022_64` kit with `qtwebengine`, `qtwebchannel`, `qtpositioning`, `qtserialport`, `WebEngineView`, `QtWebEngineQuick`, `Qt6WebEngineCore`.
 - Shadow builds go in `build/` (gitignored).
 
 ### Linux and macOS
@@ -146,8 +146,8 @@ cmd.exe /c "`"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxilia
    - SeamlyLayout: `ctest --preset debug` and `cargo test --workspace`. Set the shell first:
 
      ```powershell
-     $env:PATH  = "C:\Qt\6.11.1\msvc2022_64\bin;$env:USERPROFILE\.cargo\bin;$env:PATH"
-     $env:QMAKE = 'C:/Qt/6.11.1/msvc2022_64/bin/qmake.exe'
+     $env:PATH  = "C:\Qt\6.11.3\msvc2022_64\bin;$env:USERPROFILE\.cargo\bin;$env:PATH"
+     $env:QMAKE = 'C:/Qt/6.11.3/msvc2022_64/bin/qmake.exe'
      ```
 
      Without it the failures name the wrong cause: missing `cargo`, a `QtMissing` panic, or `STATUS_DLL_NOT_FOUND`.

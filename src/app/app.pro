@@ -47,7 +47,7 @@ SUBDIRS = \
 #                two apps (packaging/macos/macos.pro's seamlysuitedmg target)
 #
 # The three apps are integrated at PACKAGING time, not compile time. All three
-# apps build against the same Qt release (currently 6.11.1), so
+# apps build against the same Qt release (currently 6.11.3), so
 # packaging/windows/smsi.ps1 builds seamly2d.exe and seamlym.exe with qmake
 # and SeamlyLayout with CMake, then stages all three into one install directory
 # sharing a single Qt runtime (packaging/windows/smsi.wxs).

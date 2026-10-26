@@ -44,14 +44,14 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif() # MSVC
 
 # ---------------------------------------------------------------------------
-# Qt 6.11 — require minimum 6.11.1; all modules must be LGPLv3 (no GPL modules)
+# Qt 6.11 — require minimum 6.11.3; all modules must be LGPLv3 (no GPL modules)
 #
 # Task 30: bumped from 6.10.1 so SeamlyLayout shares the same Qt release as the
-# seamly2d/seamlyme parent apps (Qt 6.11.1 msvc2022_64, matching ci.yml). One Qt
+# seamly2d/seamlyme parent apps (Qt 6.11.3 msvc2022_64, matching ci.yml). One Qt
 # version across the family lets the Windows MSI ship a single shared Qt runtime
 # instead of two side-by-side copies with colliding DLL names.
 # ---------------------------------------------------------------------------
-find_package(Qt6 6.11.1 REQUIRED COMPONENTS
+find_package(Qt6 6.11.3 REQUIRED COMPONENTS
     Core
     Gui
     Quick
@@ -67,7 +67,7 @@ find_package(Qt6 6.11.1 REQUIRED COMPONENTS
 )
 
 # Enables AUTOMOC, AUTORCC, AUTOUIC and sets standard Qt project defaults
-qt_standard_project_setup(REQUIRES 6.11.1)
+qt_standard_project_setup(REQUIRES 6.11.3)
 
 # ---------------------------------------------------------------------------
 # Windows/MSVC: map Qt imported targets' Debug config to Release.

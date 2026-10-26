@@ -33,7 +33,7 @@ permissions:
   contents: read
 
 env:
-  QT_VERSION: '6.11.1' # quotes required or YAML will interpret as float
+  QT_VERSION: '6.11.3' # quotes required or YAML will interpret as float
 
 jobs:
 
@@ -372,10 +372,12 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: 'Setup MSVC Developer Command Prompt - ${{ matrix.arch }}'
-        uses: TheMrMilchmann/setup-msvc-dev@v4.1.0
+      # aqtinstall runs on this Python, before the MSVC environment exists.
+      # Python 3.15 lacks wheels for several py7zr native dependencies.
+      - name: 'Setup Python for Qt installer - ${{ matrix.arch }}'
+        uses: actions/setup-python@v6
         with:
-          arch: ${{ matrix.msvc-arch }}
+          python-version: '3.14'
 
       # ----- Install Qt -----
       # two separate Qt kit installs, one per arch
@@ -385,11 +387,17 @@ jobs:
           version: ${{ env.QT_VERSION }}
           host: ${{ matrix.qt-host }}
           arch: ${{ matrix.qt-arch }}
+          setup-python: 'false'
           cache: true
           modules: ${{ matrix.qt-modules }}
           # TODO: Remove next line once aqtinstall 3.4.0 is released
           # see https://github.com/miurahr/aqtinstall/issues/1007
           aqtsource: git+https://github.com/miurahr/aqtinstall.git  
+
+      - name: 'Setup MSVC Developer Command Prompt - ${{ matrix.arch }}'
+        uses: TheMrMilchmann/setup-msvc-dev@v4.1.0
+        with:
+          arch: ${{ matrix.msvc-arch }}
 
       - name: 'update version - ${{ matrix.arch }}'
         shell: bash

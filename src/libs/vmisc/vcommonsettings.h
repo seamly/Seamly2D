@@ -108,6 +108,10 @@ public:
     QString              getDataRoot() const;
     void                 setDataRoot(const QString &value);
 
+    // SEAMLY_DATA_DIR: call before the application or any settings object exists.
+    static int           configureDataDirectory();
+    static QString       dataDirectory();
+
     static QString       getDefaultIndividualSizePath();
     QString              getIndividualSizePath() const;
     void                 setIndividualSizePath(const QString &value);

@@ -15,7 +15,7 @@ into `packaging/linux/tools/` on first run).
 
 Requires `qmake`, `cmake`, `ninja`, `cargo`, `ctest`, `xvfb-run` and
 `libxerces-c-dev` already installed — the script fails with an install hint
-rather than running `sudo apt install` itself. A Qt 6.11.1+ `gcc_64` kit under
+rather than running `sudo apt install` itself. A Qt 6.11.3+ `gcc_64` kit under
 `~/Qt` is required, with the same modules as the Windows kit.
 
 Switch: `--skip-tests` — skip `make check`, `ctest`, and `cargo test`. Only
@@ -36,5 +36,5 @@ for a safer local loop — pass `--skip-tests` to match CI's behavior exactly.
 
 Requires `qmake`, `cmake`, `ninja`, `cargo`, `ctest`, `hdiutil`, `xcrun`, and
 Xcode command-line tools (`xcode-select --install`) already installed, plus
-`xerces-c` via Homebrew. A Qt 6.11.1+ `macos` kit under `~/Qt` is required,
+`xerces-c` via Homebrew. A Qt 6.11.3+ `macos` kit under `~/Qt` is required,
 with the same modules as the Windows kit (except `qtserialport`).

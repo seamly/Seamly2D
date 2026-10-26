@@ -9,7 +9,7 @@
 # **  tests, then runs smsi.ps1 against the binaries. packaging\windows\README.md records the project's
 # **  documented "CI builds the MSI" decision (a dev-machine default can carry
 # **  the wrong Qt/CRT runtime); this script exists because the local Qt kit is
-# **  the same 6.11.1 release CI installs, so that risk does not apply here.
+# **  the same 6.11.3 release CI installs, so that risk does not apply here.
 # **  Treat any MSI this script produces as a local dev build, not a release
 # **  artifact - releases still go through `gh workflow run ci.yml`.
 # **
@@ -48,7 +48,7 @@
     not discarded.
 
     Requires an elevated-free MSVC + Qt + Rust dev machine: Visual Studio 18
-    Community (VC\Auxiliary\Build\vcvars64.bat), a Qt 6.11.1+ msvc2022_64 kit
+    Community (VC\Auxiliary\Build\vcvars64.bat), a Qt 6.11.3+ msvc2022_64 kit
     under C:\Qt with qtmultimedia, qtwebengine, qtwebchannel, qtpositioning and
     qtserialport installed, and a stable Rust toolchain on PATH. WiX v6 is installed
     automatically if missing.
@@ -136,10 +136,10 @@ try {
 }
 
 # --- Locate the Qt kit ---------------------------------------------------------
-# Newest msvc2022_64 kit under C:\Qt at or above 6.11.1, so 
+# Newest msvc2022_64 kit under C:\Qt at or above 6.11.3, so 
 # seamly2d/seamlyme/SeamlyLayout all deploy # against the one Qt runtime 
 # the MSI ships.
-$QtMinimumVersion = [version]'6.11.1'
+$QtMinimumVersion = [version]'6.11.3'
 $QtRoot = 'C:\Qt'
 $QtPath = $null
 if (Test-Path $QtRoot) {

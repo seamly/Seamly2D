@@ -54,7 +54,7 @@
                explicitly in the .wxs so shortcuts/associations can reference
                them; kept out of the wildcard-harvested tree above)
 
-    All three apps build against Qt 6.11.1, so one Qt runtime serves them all.
+    All three apps build against Qt 6.11.3, so one Qt runtime serves them all.
 
     PREREQUISITES (the script fails early naming whatever is missing):
       * release builds of seamly2d.exe/seamlyme.exe in the bin directories
@@ -96,7 +96,7 @@
     Full path of windeployqt.exe from the Qt kit SeamlyLayout was built
     against. Required. The caller names the kit, so no Qt version is hard-coded
     and none is detected. seamly2d, seamlyme and seamlylayout must all come
-    from that one Qt 6.11.1 kit.
+    from that one Qt 6.11.3 kit.
 
 .PARAMETER SkipValidation
     Skip the `wix msi validate` (ICE) pass after the build.

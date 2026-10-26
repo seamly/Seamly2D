@@ -141,7 +141,7 @@ will happen at first launch.  No files are moved by the installer itself.
 ```
 
 Prerequisites:
-- Qt 6.11.1 msvc2022_64 at `C:\Qt\6.11.1\msvc2022_64`
+- Qt 6.11.3 msvc2022_64 at `C:\Qt\6.11.3\msvc2022_64`
 - Inno Setup 6 at `%ProgramFiles(x86)%\Inno Setup 6\iscc.exe`
 
 Output: `packaging/windows/Output/SeamlyLayout-0.1.0-win64.exe`
@@ -167,7 +167,7 @@ bash packaging/macos/build_dmg.sh
 ```
 
 Prerequisites:
-- Qt 6.11.1 macOS at `/usr/local/Qt/6.11.1/macos`
+- Qt 6.11.3 macOS at `/usr/local/Qt/6.11.3/macos`
 - `create-dmg` (`brew install create-dmg`)
 
 Output: `packaging/macos/Output/SeamlyLayout-0.1.0-macOS.dmg`

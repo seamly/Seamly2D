@@ -36,8 +36,8 @@ Set this up yourself; a bare shell does not have it, and `cargo test --workspace
 then fails **twice, for two different reasons**:
 
 ```powershell
-$env:PATH  = "C:\Qt\6.11.1\msvc2022_64\bin;$env:USERPROFILE\.cargo\bin;$env:PATH"
-$env:QMAKE = 'C:/Qt/6.11.1/msvc2022_64/bin/qmake.exe'
+$env:PATH  = "C:\Qt\6.11.3\msvc2022_64\bin;$env:USERPROFILE\.cargo\bin;$env:PATH"
+$env:QMAKE = 'C:/Qt/6.11.3/msvc2022_64/bin/qmake.exe'
 cargo test --workspace
 ```
 

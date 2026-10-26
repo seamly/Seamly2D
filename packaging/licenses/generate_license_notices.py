@@ -12,7 +12,7 @@
 #                           components, with every license text they need (from the Qt kit SBOMs)
 #
 # Run it after any Cargo.lock change or Qt version change:
-#   python generate_license_notices.py --qt-root C:/Qt/6.11.1/msvc2022_64
+#   python generate_license_notices.py --qt-root C:/Qt/6.11.3/msvc2022_64
 # Requires: cargo-about on PATH (cargo install cargo-about --locked --features cli), network access for the
 # SPDX license texts. cargo test (cxxqt_bridge, license_notices_tests) fails while either file is stale.
 
@@ -108,7 +108,7 @@ def fetch_spdx_text(spdx_id: str, cache: dict) -> str:
 
 
 def qt_version(qt_root: Path) -> str:
-    """Qt version of the kit, read from its SBOM file names (e.g. qtbase-6.11.1.spdx.json)."""
+    """Qt version of the kit, read from its SBOM file names (e.g. qtbase-6.11.3.spdx.json)."""
     match = next((qt_root / "sbom").glob("qtbase-*.spdx.json"), None)
     if match is None:
         sys.exit(f"no Qt SBOM in {qt_root / 'sbom'}: pass --qt-root <Qt kit directory>")
@@ -181,7 +181,7 @@ def generate_qt(qt_root: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--qt-root", type=Path, required=True, help="Qt kit directory, e.g. C:/Qt/6.11.1/msvc2022_64")
+    parser.add_argument("--qt-root", type=Path, required=True, help="Qt kit directory, e.g. C:/Qt/6.11.3/msvc2022_64")
     parser.add_argument("--skip-rust", action="store_true", help="regenerate qt_notices.txt only")
     parser.add_argument("--skip-qt", action="store_true", help="regenerate rust_crate_notices.txt only")
     args = parser.parse_args()

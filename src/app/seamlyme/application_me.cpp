@@ -544,21 +544,30 @@ const VTranslateVars *ApplicationME::translateVariables()
 /// @brief Returns the directory that stores SeamlyMe log files.
 ///
 /// Mirrors Application2D::logDirPath(), so on Windows the logs land in
-/// %LOCALAPPDATA%\Seamly\SeamlyMe\logs
+/// %LOCALAPPDATA%\Seamly\SeamlyMe\logs. SEAMLY_DATA_DIR moves them to its logs/seamlyme folder.
 QString ApplicationME::logDirPath() const
 {
+    const QString data_dir = VCommonSettings::dataDirectory();
+    QString log_dir_path;
+    if (!data_dir.isEmpty())
+    {
+        log_dir_path = QDir(data_dir).filePath(QStringLiteral("logs/seamlyme"));
+    }
+    else
+    {
 #if defined(Q_OS_WIN)
-    const QString logDirPath = QDir(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation))
-                                   .filePath(QStringLiteral("logs"));
+        log_dir_path = QDir(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation))
+                           .filePath(QStringLiteral("logs"));
 #elif defined(Q_OS_OSX)
-    const QString logDirPath = QStandardPaths::locate(QStandardPaths::GenericDataLocation, QString(),
-                                                      QStandardPaths::LocateDirectory) + "SeamlyMe";
+        log_dir_path = QStandardPaths::locate(QStandardPaths::GenericDataLocation, QString(),
+                                              QStandardPaths::LocateDirectory) + "SeamlyMe";
 #else
-    const QString logDirPath = QStandardPaths::locate(QStandardPaths::ConfigLocation, QString(),
-                                                      QStandardPaths::LocateDirectory)
-            + QCoreApplication::organizationName();
+        log_dir_path = QStandardPaths::locate(QStandardPaths::ConfigLocation, QString(),
+                                              QStandardPaths::LocateDirectory)
+                       + QCoreApplication::organizationName();
 #endif
-    return logDirPath;
+    }
+    return log_dir_path;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

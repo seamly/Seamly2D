@@ -44,11 +44,11 @@ falls back to the first bare `qmake` on `PATH`. Export it before running the
 commands below:
 
 ```powershell
-$env:QMAKE = "C:\Qt\6.11.1\msvc2022_64\bin\qmake.exe"
+$env:QMAKE = "C:\Qt\6.11.3\msvc2022_64\bin\qmake.exe"
 ```
 
 ```bash
-export QMAKE=/path/to/Qt/6.11.1/gcc_64/bin/qmake
+export QMAKE=/path/to/Qt/6.11.3/gcc_64/bin/qmake
 ```
 
 Skipping this on a machine with **Qt Design Studio** installed picks up its

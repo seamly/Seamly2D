@@ -91,9 +91,9 @@ echo "stamping version into projectversion.cpp/.h and Info.plist..."
 bash packaging/version.sh "${VERSION}"
 
 # --- Locate the Qt kit ------------------------------------------------------------
-# Newest macos kit under ~/Qt at or above 6.11.1, so seamly2d/seamlyme/
+# Newest macos kit under ~/Qt at or above 6.11.3, so seamly2d/seamlyme/
 # SeamlyLayout all deploy against the one Qt runtime the DMG ships.
-QT_MINIMUM_VERSION="6.11.1"
+QT_MINIMUM_VERSION="6.11.3"
 if [ -z "${QT_ROOT}" ]; then
     best_ver=""
     for d in "${HOME}/Qt"/*/macos; do

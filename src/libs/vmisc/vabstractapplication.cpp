@@ -165,7 +165,14 @@ QString VAbstractApplication::MigrateSeamlySettingsLocation(const QString &appIn
     }
 
     // New home: AppConfigLocation = <config root>/Seamly/<AppName> (AppData/Local on Windows).
-    const QString newAppDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    // SEAMLY_DATA_DIR replaces <config root> with its settings folder.
+    QString newAppDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    const QString data_dir = VCommonSettings::dataDirectory();
+    if (!data_dir.isEmpty())
+    {
+        newAppDir = data_dir + QLatin1String("/settings/") + QCoreApplication::organizationName()
+                    + QLatin1Char('/') + QCoreApplication::applicationName();
+    }
     QDir().mkpath(newAppDir);
     const QString newAppIniPath = QDir(newAppDir).filePath(appIniFileName);
 

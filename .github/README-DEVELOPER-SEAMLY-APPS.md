@@ -6,7 +6,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started on GitFlow, Issues, Branc
 
 ## Basic Software Prerequisites
 
-* [Qt 6.11.1](https://www.qt.io/download-open-source) (includes Qt, QtCreator, QtChooser, and Qt Maintenance Tool)
+* [Qt 6.11.3](https://www.qt.io/download-open-source) (includes Qt, QtCreator, QtChooser, and Qt Maintenance Tool)
 * [Visual Studio](https://visualstudio.microsoft.com/downloads/) Qt Visual Studio Tools extension - needed to build with MSVC.
 * [Git](https://git-scm.com/downloads) or [Github Desktop for Windows and MacOS](https://desktop.github.com)
 * Compiler :
@@ -54,12 +54,12 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started on GitFlow, Issues, Branc
 
 * MS Visual Code Community Edition 18 (for the IDE)
 * MS Visual Studio 2022 (for the compiler)
-* *Qt 6.11.1* via [Qt unified installer](https://www.qt.io/download-qt-installer); you'll need a Qt account for the *Open Source Community Edition*
+* *Qt 6.11.3* via [Qt unified installer](https://www.qt.io/download-qt-installer); you'll need a Qt account for the *Open Source Community Edition*
   * If you have Qt currently installed, run the **Maintenance Tool (maintenancetool.exe)** & select "Add or remove programs"
   * If you don't have Qt installed, download & run the [Qt unified installer](https://www.qt.io/download-qt-installer) & select "Custom Installation".
   * Select:
     * Qt -- Minimize your options, otherwise your download size could be in Gs
-      * Qt 6.11.1
+      * Qt 6.11.3
       * MSVC 2022
       * Qt Debug Information Files
       * Developer and Designer Tools

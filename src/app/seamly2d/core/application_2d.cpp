@@ -546,6 +546,12 @@ QString Application2D::seamlyMeFilePath() const
 /// @brief Returns the directory that stores Seamly2D log files.
 QString Application2D::logDirPath() const
 {
+    const QString data_dir = VCommonSettings::dataDirectory();
+    if (!data_dir.isEmpty())
+    {
+        return QDir(data_dir).filePath("logs/seamly2d");
+    }
+
 #if defined(Q_OS_WIN)
     const QString logDirPath = QDir(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation))
                                    .filePath(QStringLiteral("logs"));

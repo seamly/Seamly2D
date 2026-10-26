@@ -51,7 +51,7 @@ Do not document behavior that is obvious from the code.
 
 ## Seamly Apps
 
-All apps use Qt 6.11.1.
+All apps use Qt 6.11.3.
 
 ### Seamly2D
 
@@ -102,7 +102,7 @@ All apps use Qt 6.11.1.
 
 ## Build Rules
 
-All three applications build against **Qt 6.11.1**.
+All three applications build against **Qt 6.11.3**.
 The Qt kit must include:
 
 * `qtwebengine`
@@ -114,7 +114,7 @@ The Qt kit must include:
 
 ### CI
 
-* Use Qt 6.11.1 with MSVC 2022.
+* Use Qt 6.11.3 with MSVC 2022.
 * `ci.yml` is the CI workflow on Github. It builds all three apps. Set the Qt release in its `QT_VERSION`.
 `packaging/windows/build_local_msi.ps1' is the CI workflow on the local pc. It builds seamly2d, seamlyme, and seamlylayout and creates the windows msi file.
 
@@ -126,7 +126,7 @@ SeamlyLayout builds as part of the per-platform suite script, not standalone:
 them together. `ci.yml` runs `cmake --preset release`/`debug` directly and
 never calls these scripts, so a change to one needs no CI run.
 
-Use Qt 6.11.1 `msvc2022_64` with the VS 18 Community MSVC environment.
+Use Qt 6.11.3 `msvc2022_64` with the VS 18 Community MSVC environment.
 
 * Put shadow builds in `build/`.
 * `build/` is gitignored.
