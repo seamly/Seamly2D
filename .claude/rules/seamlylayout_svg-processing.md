@@ -1,3 +1,9 @@
+---
+paths:
+  - "src/app/seamlylayout/crates/**/*.rs"
+  - "src/app/seamlylayout/qt_frontend/qml/SvgCanvas.qml"
+---
+
 # SVG and DOM Processing
 
 ## Required Tools

@@ -1,3 +1,15 @@
+---
+paths:
+  - "src/app/seamlylayout/crates/layout_tiling/src/layout_settings.rs"
+  - "src/app/seamlylayout/qt_frontend/settings/**"
+  - "src/app/seamlylayout/qt_frontend/preferences/**"
+  - "src/app/seamlylayout/qt_frontend/src/Preferences*"
+  - "src/app/seamlylayout/qt_frontend/src/SettingsModel.*"
+  - "src/app/seamlylayout/qt_frontend/qml/PreferencesPanel.qml"
+  - "src/app/seamlylayout/qt_frontend/qml/SettingsDialog.qml"
+  - "project-docs/docs-seamlylayout/settings-docs/**"
+---
+
 # Settings Guidelines
 
 ## Reference

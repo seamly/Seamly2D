@@ -1,3 +1,12 @@
+---
+paths:
+  - "src/test/SeamlyLayoutTest/**"
+  - "src/app/seamlylayout/crates/*/tests/**"
+  - "src/app/seamlylayout/crates/**/*_test.rs"
+  - "src/app/seamlylayout/crates/**/*_tests.rs"
+  - "src/app/seamlylayout/qt_frontend/CMakePresets.json"
+---
+
 # Testing Guidelines
 
 ## Test Organization

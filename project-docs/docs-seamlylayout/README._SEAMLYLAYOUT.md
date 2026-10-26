@@ -32,7 +32,7 @@ A pattern layout application — daughter app to Seamly2D. SeamlyLayout is a **Q
 - **Rust** (stable, 2024 edition ready): `rustup install stable && rustup default stable`.
 - **Qt 6.11** with QML, QtWidgets, and Qt Quick modules.
 - **CMake** ≥ 3.21 and a C++17 toolchain (MSVC on Windows, Clang/GCC on Linux/macOS).
-- See [.claude/rules/dependencies.mdc](.claude/rules/dependencies.mdc) for the exact Qt module list and crate versions.
+- See [seamlylayout_dependencies.md](../../.claude/rules/seamlylayout_dependencies.md) for the exact Qt module list and crate versions.
 
 ## Building
 
@@ -96,11 +96,11 @@ Windows 11, Linux (all flavors), macOS (latest 3 versions).
 
 - Qt frontend (`.qml`, `.cpp`, `.h`): LGPL-3.0.
 - Rust crates (`.rs`): MIT.
-- See [.claude/rules/licensing.mdc](.claude/rules/licensing.mdc) for details.
+- See [seamlylayout_licensing.md](../../.claude/rules/seamlylayout_licensing.md) for details.
 
 ## Contributing
 
-Pull requests and issues are welcome. Keep changes small and tested (`cargo test`, plus a Qt build when touching the frontend). Follow the style rules in [.claude/rules/](.claude/rules/).
+Pull requests and issues are welcome. Keep changes small and tested (`cargo test`, plus a Qt build when touching the frontend). Follow the style rules in [.claude/rules/](../../.claude/rules/).
 
 ## Git workflow
 

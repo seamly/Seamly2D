@@ -1,3 +1,9 @@
+---
+paths:
+  - "src/app/seamlylayout/crates/layout_tiling/**"
+  - "project-docs/docs-seamlylayout/layout-docs/tiling-docs/**"
+---
+
 # Tiling Guidelines
 
 ---

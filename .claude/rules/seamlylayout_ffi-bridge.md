@@ -1,3 +1,9 @@
+---
+paths:
+  - "src/app/seamlylayout/crates/*/src/ffi.rs"
+  - "src/app/seamlylayout/crates/ffi_bridge/**"
+---
+
 # FFI Bridge Guidelines
 
 Applies to all `extern "C"` Rust code under `crates/*/src/ffi.rs` and the

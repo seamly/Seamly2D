@@ -1,3 +1,12 @@
+---
+paths:
+  - "src/app/seamlylayout/crates/seamly_svg2ezdxf/**"
+  - "src/app/seamlylayout/crates/ezdxf2dxfastm/**"
+  - "src/app/seamlylayout/qt_frontend/qml/*Dxf*"
+  - "project-docs/docs-seamlylayout/dxf-docs/**"
+  - "project-docs/docs-seamlylayout/TODO_DXF.md"
+---
+
 # DXF Export Guidelines
 
 ## Reference

@@ -29,19 +29,19 @@ paths:
 
 ## Detailed Rule Files
 
-Read the file for the area you change. They do not load automatically (`.mdc`).
+Each file loads when you touch a path in its `paths` list. Read one by hand for work outside those paths.
 
-- [seamlylayout-architecture.mdc](seamlylayout-architecture.mdc) — frontend/core/bridge boundaries
-- [seamlylayout_dependencies.mdc](seamlylayout_dependencies.mdc) — crate versions, workspace structure, Qt modules
-- [seamlylayout_ffi-bridge.mdc](seamlylayout_ffi-bridge.mdc) — `extern "C"` conventions, memory ownership, error codes
-- [seamlylayout_licensing.mdc](seamlylayout_licensing.mdc) — Qt LGPL-3.0, Rust MIT
-- [seamlylayout_qt-style.mdc](seamlylayout_qt-style.mdc) — C++/QML conventions and file headers
-- [seamlylayout_rust-style.mdc](seamlylayout_rust-style.mdc) — Rust conventions and file headers
-- [seamlylayout_svg-processing.mdc](seamlylayout_svg-processing.mdc) — SVG/DOM manipulation
-- [seamlylayout_testing.mdc](seamlylayout_testing.mdc) — test frameworks and commands
-- [seamlylayout_guidelines_export_dxf.mdc](seamlylayout_guidelines_export_dxf.mdc) — DXF export pipeline
-- [seamlylayout_guidelines_layout.mdc](seamlylayout_guidelines_layout.mdc) — layout pipeline
-- [seamlylayout_guidelines_settings.mdc](seamlylayout_guidelines_settings.mdc) — settings workflow and defaults
-- [seamlylayout_guidelines_tiling.mdc](seamlylayout_guidelines_tiling.mdc) — tiling calculation and reduction
+- [seamlylayout-architecture.md](seamlylayout-architecture.md) — frontend/core/bridge boundaries
+- [seamlylayout_dependencies.md](seamlylayout_dependencies.md) — crate versions, workspace structure, Qt modules
+- [seamlylayout_ffi-bridge.md](seamlylayout_ffi-bridge.md) — `extern "C"` conventions, memory ownership, error codes
+- [seamlylayout_licensing.md](seamlylayout_licensing.md) — Qt LGPL-3.0, Rust MIT
+- [seamlylayout_qt-style.md](seamlylayout_qt-style.md) — C++/QML conventions and file headers
+- [seamlylayout_rust-style.md](seamlylayout_rust-style.md) — Rust conventions and file headers
+- [seamlylayout_svg-processing.md](seamlylayout_svg-processing.md) — SVG/DOM manipulation
+- [seamlylayout_testing.md](seamlylayout_testing.md) — test frameworks and commands
+- [seamlylayout_guidelines_export_dxf.md](seamlylayout_guidelines_export_dxf.md) — DXF export pipeline
+- [seamlylayout_guidelines_layout.md](seamlylayout_guidelines_layout.md) — layout pipeline
+- [seamlylayout_guidelines_settings.md](seamlylayout_guidelines_settings.md) — settings workflow and defaults
+- [seamlylayout_guidelines_tiling.md](seamlylayout_guidelines_tiling.md) — tiling calculation and reduction
 
 No branding rule file exists.

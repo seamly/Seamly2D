@@ -1,3 +1,11 @@
+---
+paths:
+  - "src/app/seamlylayout/**/Cargo.toml"
+  - "src/app/seamlylayout/qt_frontend/CMakeLists.txt"
+  - "src/app/seamlylayout/qt_frontend/assets/**"
+  - "src/app/seamlylayout/crates/cxxqt_bridge/src/license_notices_tests.rs"
+---
+
 # Licensing Guidelines
 
 ## Project License

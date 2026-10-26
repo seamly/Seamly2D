@@ -1,3 +1,9 @@
+---
+paths:
+  - "src/app/seamlylayout/qt_frontend/**"
+  - "src/test/SeamlyLayoutTest/**"
+---
+
 # Qt / QML Style Guidelines
 
 Applies to all files under `qt_frontend/`.

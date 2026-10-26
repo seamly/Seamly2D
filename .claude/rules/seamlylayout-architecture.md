@@ -1,3 +1,8 @@
+---
+paths:
+  - "src/app/seamlylayout/**"
+---
+
 # Architecture Rules
 
 Author: slspencer

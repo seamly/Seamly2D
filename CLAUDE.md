@@ -56,7 +56,7 @@ All apps use Qt 6.11.1.
 
 - File header for every new or modified file: Author `slspencer`, Copyright `2026 Seamly2D Project`, license from the table.
 - SeamlyLayout platforms: Windows 11, Linux (all flavors), macOS (latest 3 versions).
-- SeamlyLayout license split: `.claude/rules/seamlylayout_licensing.mdc`.
+- SeamlyLayout license split: `.claude/rules/seamlylayout_licensing.md`.
 - `.claude/rules/seamlylayout.md` loads when you touch SeamlyLayout files.
 - `.claude/rules/seamlylayout-handoff.md` (the Seamly2D → SeamlyLayout `--svg-stdin` contract) loads when you touch either side of it.
 

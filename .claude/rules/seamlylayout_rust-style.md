@@ -1,3 +1,8 @@
+---
+paths:
+  - "src/app/seamlylayout/crates/**/*.rs"
+---
+
 # Rust Style Guidelines
 
 ## File Headers

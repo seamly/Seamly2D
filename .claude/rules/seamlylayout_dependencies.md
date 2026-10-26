@@ -1,3 +1,11 @@
+---
+paths:
+  - "src/app/seamlylayout/Cargo.toml"
+  - "src/app/seamlylayout/crates/*/Cargo.toml"
+  - "src/app/seamlylayout/crates/*/build.rs"
+  - "src/app/seamlylayout/qt_frontend/CMakeLists.txt"
+---
+
 # Dependencies and Workspace Structure
 
 ## Language

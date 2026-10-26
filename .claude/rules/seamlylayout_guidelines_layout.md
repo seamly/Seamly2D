@@ -1,3 +1,13 @@
+---
+paths:
+  - "src/app/seamlylayout/crates/layout_engine/**"
+  - "src/app/seamlylayout/crates/packing/**"
+  - "src/app/seamlylayout/crates/polygon_pack/**"
+  - "src/app/seamlylayout/crates/pack_types/**"
+  - "src/app/seamlylayout/crates/cxxqt_bridge/src/layout_*.rs"
+  - "project-docs/docs-seamlylayout/layout-docs/**"
+---
+
 # Layout Processing Guidelines
 
 ## Reference
