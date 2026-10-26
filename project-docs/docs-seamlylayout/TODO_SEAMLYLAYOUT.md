@@ -6,11 +6,11 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ### [ ] Task Layout.100 — Implement - Remove the DXF-ASTM (R12) export code and menu option
 
-- User decision: remove the DXF-ASTM (R12) export option - it isn't used often. We only need DXF-ASTM (R13) and DXF-AAMA options. DXF-ASTM (CLO3D) remains disabled.
-- Keep the AC1009 writer: DXF-AAMA (R11) is the same file structure (`DxfVersion::R11`, `export_dxf_astm`). R13 is rewritten from it (`upgrade_to_r13`).
+- [ ] Remove the DXF-ASTM (R12) export option - it isn't used often. We only need DXF-ASTM (R13) and DXF-AAMA options. DXF-ASTM (CLO3D) remains disabled.
+- [ ] Keep the AC1009 writer: DXF-AAMA (R11) is the same file structure (`DxfVersion::R11`, `export_dxf_astm`). R13 is rewritten from it (`upgrade_to_r13`).
 - [ ] Layout.100.1 `ExportMenu.qml`: remove the "DXF-ASTM (R12)" item and `exportDxfAstmR12Requested`; `TopMenuBar.qml` and `Main.qml` handlers.
 - [ ] Layout.100.2 `Main.qml`: `pendingDxfVersion` defaults and the View menu "DXF-ASTM" item (`requestDxfExport(false, "R12")`) move to R13.
-- [ ] Layout.100.3 `cxxqt_bridge` `export_dxf` (`lib.rs`, `exports.rs`): drop the `"R12"` choice; R11 (AAMA) and R13 stay.
+- [ ] Layout.100.3 `cxxqt_bridge` `export_dxf` (`lib.rs`, `exports.rs`): drop the `"R12"` choice; R11 (AAMA) and R13 (ASTM) stay.
 - [ ] Layout.100.4 `DxfVersion::R12`: remove, or keep only as the internal AC1009 base of R11; update tests that export R12 (`writer_test.rs`, `writer_astm_test.rs`, `writer_r13_test.rs`, `exports.rs`).
 - [ ] Layout.100.5 File name segment `R12` (`Main.qml` `chooseDxfPath`) and docs (`seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, `TODO_DXF.md`, `AGENT_CHECKLIST.md`).
 - [ ] Layout.100.6 User check: the DXF submenu shows R13, CLO3D and AAMA only.
