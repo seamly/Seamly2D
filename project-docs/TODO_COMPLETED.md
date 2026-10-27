@@ -1744,3 +1744,5 @@ The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`sr
 - [ ] Layout.100.6 NEEDS_USER_TEST: Export > DXF shows R13, CLO3D and AAMA (R11) only; View > DXF-ASTM still opens a .dxf.
 - Verified: `cargo test --workspace` all pass (257 cxxqt_bridge, 44 ezdxf2dxfastm). QML not run (next MSI).
 - Commit: see git log "Remove DXF-ASTM (R12) export".
+
+- Layout.104.1-104.5 (e8a4255b78, merge bd372a152c): DXF-AAMA piece text. `Annotation:` from `data-annotation` after `Size:`; block name `<piece name>_<size>` (individual: `<piece name>`; ASCII, numbered name, svg id fallback, `_2` for repeats); `Creation Time:` `HH:MM:SS` in DXF and `.rul`. DXF-ASTM and CLO3D unchanged. Tests `aama_annotation_*`, `aama_block_names_*`, `aama_creation_time_has_seconds`. Open: Layout.104.6 (Qt build check, user test).
