@@ -62,6 +62,7 @@ User approved (2026-10-25). DXF-AAMA only; DXF-ASTM and CLO3D keep their output.
 - CLO3D's default DXF import swaps the cut outline (layer 1) and the net line (layer 14).
 - A CLO3D import option (like "swap internal and external seam allowance") restores the order.
 - Today the CLO3D export is D6673 plus group 250: 0 = boundary, 2 = sew line (`DxfAstmExportOptions::clo3d_group_250`).
+- BLOCKED: Layout.102.1 needs CLO3D. The repository docs hold no import option name or default. Layout.102.2 needs a user decision after 102.1. Current code writes layer 1 = boundary, layer 14 = sew line, group 250 = 0 and 2 (`writer.rs` `write_astm_block`). No code changed.
 - [ ] Layout.102.1 Find the name and default of the CLO3D import option in the current CLO3D release.
 - [ ] Layout.102.2 Decide: swap layers 1 and 14 in the CLO3D export, or keep D6673 layers and tell the user which option to set.
 - [ ] Layout.102.3 Check every CLO3D export layer against the guide.
