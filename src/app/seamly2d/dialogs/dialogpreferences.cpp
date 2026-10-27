@@ -61,6 +61,7 @@
 #include <QGuiApplication>
 #include <QPushButton>
 #include <QScreen>
+#include <QShowEvent>
 
 //---------------------------------------------------------------------------------------------------------------------
 DialogPreferences::DialogPreferences(QWidget *parent)

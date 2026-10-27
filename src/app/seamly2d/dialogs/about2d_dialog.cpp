@@ -60,6 +60,7 @@
 #include <QGuiApplication>
 #include <QMessageBox>
 #include <QScreen>
+#include <QShowEvent>
 #include <QSoundEffect>
 #include <QSysInfo>
 #include <QtDebug>

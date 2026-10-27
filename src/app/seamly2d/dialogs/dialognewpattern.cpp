@@ -60,6 +60,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSettings>
+#include <QShowEvent>
 #include <QGuiApplication>
 #include <QScreen>
 

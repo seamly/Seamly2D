@@ -64,6 +64,7 @@
 #include <QProcess>
 #include <QtDebug>
 #include <QRegularExpression>
+#include <QShowEvent>
 #include <QSpinBox>
 #include <QtDebug>
 

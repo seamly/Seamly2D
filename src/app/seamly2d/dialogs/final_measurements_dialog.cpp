@@ -40,6 +40,7 @@
 #include <QLayout>
 #include <QRegularExpressionValidator>
 #include <QScreen>
+#include <QShowEvent>
 #include <QTableWidgetItem>
 #include <QTimer>
 

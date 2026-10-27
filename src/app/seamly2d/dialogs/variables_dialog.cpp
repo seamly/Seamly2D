@@ -69,6 +69,7 @@
 #include <QTableWidget>
 #include <QScreen>
 #include <QSettings>
+#include <QShowEvent>
 #include <QTableWidgetItem>
 #include <QtNumeric>
 
