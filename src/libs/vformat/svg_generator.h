@@ -44,6 +44,7 @@ public:
     void                setMultisize(const QStringList &sizes, const QString &base_size,
                                      const QString &height = QString());
     void                setSampleSize(const QString &sample_size);
+    void                setUnits(const QString &units);
     void                addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item = nullptr,
                                         const QString &size = QString(), const QString &piece_set_key = QString());
     void                generate();
@@ -77,6 +78,7 @@ private:
     QString             m_base_size;          ///< base size of the multisize measurements, in pattern units
     QString             m_height;             ///< height of every size of a multisize export; empty when unknown
     QString             m_sample_size;        ///< individual pattern size in pattern units; empty when unknown
+    QString             m_units;              ///< pattern unit: mm, cm or inch; empty writes no data-units
 
     QList<QDomDocument> m_dom_list;
     QList<QString>      m_dom_piece_set_keys; ///< piece-set key of each m_dom_list entry; empty = no piece-set

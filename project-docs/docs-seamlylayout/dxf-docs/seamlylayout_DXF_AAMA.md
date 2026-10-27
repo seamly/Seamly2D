@@ -35,8 +35,8 @@ Same in both: layer 1 boundary and system text, `Piece Name:`, `Quantity:`, `Mat
 - **Labels never repeat piece text.** A label line `<identifier>:...` (`Piece Name`, `Size`, `Size Name`, `Quantity`, `Rotation`, `Flip`, `Tilt`, `Fold`, `Material`, `Category`, `Annotation`, any case) or `#...` is not written. A label cannot override the piece text or add a grade rule identifier. Seamly2D issue FashionFreedom/Seamly2D#1780 asks for the same rule.
 - **Piece text comes from the piece data.** `Piece Name:`, `Size:`, `Quantity:` and `Material:` come from the piece `data-*` attributes. A hidden label changes none of them. Test: `aama_piece_text_comes_from_piece_data_not_label`.
 - **`Quantity:` is `R,L`.** User decision: the DXF-ASTM form, not a total. Even total N → `N/2,N/2`; odd N, or on the fold → `N,0`. A reader that wants a total adds R and L.
-- **`Size:` is in pattern units.** User decision: the `data-size` value as sent. It matches the `.rul` size list and the size labels. A millimetre multisize pattern writes `Size:500`, not `Size:50`.
-- **`Units:METRIC`.** D6673 allows `METRIC` or `ENGLISH` only. `Units:MM` is not a defined value.
+- **`Size:` follows the pattern unit.** User decision (2026-10-25). A `mm` or `inch` pattern writes the `data-size` value as sent. A `cm` pattern writes it times 10, in mm: `Size:500`, not `Size:50`. It matches the `.rul` size list. A handoff without `data-units` writes the value as sent.
+- **`Units:` is `METRIC` or `ENGLISH`.** D6673 allows no other value; `Units:MM` is not defined. The `data-units` of the pattern decides: `inch` writes `ENGLISH`, with every length in inches to 4 decimals (coordinates, text heights, notch depth and width, `Curve Tolerance:`, `.rul` growth). `mm`, `cm` and no `data-units` write `METRIC`, in mm to 2 decimals. Angles keep 2 decimals. Tests: `english_units_*`, `cm_and_unspecified_units_write_metric`.
 - **No `Category:`.** Category is AAMA piece text, but the handoff has no value for it. AccuMark uses the piece name for a blank category.
 - **`.rul` version line.** `ANSI/AAMA VERSION: 1.0.0` is the header keyword of AAMA rule files in the field (FILExt RUL survey).
 
@@ -58,10 +58,10 @@ Two McNeel forum posts give AAMA practice (implementation evidence, not the norm
 | `Creation Time:` | `HH:MM:SS` | `hh-mm`, UTC (the D6673 form) |
 | `Author:` | System, version | `Seamly;Seamly2D;<release>` |
 | `Sample Size:` | Base size of the garment | Base size of a graded export, else blank |
-| `Units:` | `METRIC` (mm) or `ENGLISH` (inch) | `METRIC`; geometry in mm |
+| `Units:` | `METRIC` (mm) or `ENGLISH` (inch) | `METRIC` (mm) or `ENGLISH` (inch), from `data-units` |
 | Block name | `<piece name>_<size>` | `<svg id>_M` (CLO3D naming) |
 | `Piece Name:` | Piece name, under 8 characters | Full piece name |
-| `Size:` | Garment size | `data-size`, in pattern units |
+| `Size:` | Garment size | `data-size`; a `cm` pattern writes it times 10 (mm) |
 | `Annotation:` | Piece description | Not written; Seamly2D sends `data-annotation` |
 | `Category:` | Short classification: material, piece type | Not written (user decision) |
 | `Quantity:` | `1,0` for one piece; `1,1` for a pair | `R,L` from `data-quantity` |

@@ -754,4 +754,77 @@ mod tests {
         assert_eq!(ends, start);
         assert_eq!(vertices.len(), 4, "the fold vertex is not written");
     }
+
+    // @brief `sample_drawing` for a pattern unit.
+    fn sample_drawing_in(unit: seamly_svg2ezdxf::PatternUnit, version: DxfVersion) -> Drawing {
+        let mut drawing = sample_drawing();
+        drawing.version = version;
+        drawing.pattern_unit = unit;
+        drawing
+    }
+
+    // @brief An inch pattern writes `Units:ENGLISH` and every length in inches to four places;
+    //        angles keep two places.
+    #[test]
+    fn english_units_write_inches_with_four_decimals() {
+        let dxf = parse_dxf(&export_to_string(&sample_drawing_in(seamly_svg2ezdxf::PatternUnit::Inch, DxfVersion::R11), "english", &dated_options()));
+        let texts: Vec<&str> = dxf.entities.iter().filter(|e| e.kind == "TEXT").map(|e| e.get(1).unwrap()).collect();
+        assert!(texts.contains(&"Units:ENGLISH"), "{texts:?}");
+        assert!(texts.contains(&"Curve Tolerance:0.0098"), "{texts:?}");
+        let block = &dxf.blocks[0].1;
+        // System text height 5 mm.
+        assert!(block.iter().filter(|e| e.kind == "TEXT").all(|e| e.get(40).is_some()));
+        assert_eq!(block.iter().find(|e| e.kind == "TEXT").unwrap().get(40), Some("0.1969"));
+        // The 100 mm boundary corner.
+        let boundary_xs: Vec<&str> = block.iter().filter(|e| e.kind == "VERTEX" && e.layer() == "1").filter_map(|e| e.get(10)).collect();
+        assert!(boundary_xs.contains(&"3.9370"), "{boundary_xs:?}");
+        // Notch depth 5 mm and width 3 mm; angle stays in degrees.
+        let notch = block.iter().find(|e| e.kind == "POINT" && e.layer() == "80").or_else(|| block.iter().find(|e| e.kind == "POINT" && e.layer() == "4" && e.get(39).is_some())).expect("T notch");
+        assert_eq!(notch.get(30), Some("0.1969"));
+        assert_eq!(notch.get(39), Some("0.1181"));
+        assert_eq!(notch.get(50), Some("90.00"));
+    }
+
+    // @brief A cm pattern and a pattern without units write METRIC in millimetres.
+    #[test]
+    fn cm_and_unspecified_units_write_metric() {
+        for unit in [seamly_svg2ezdxf::PatternUnit::Cm, seamly_svg2ezdxf::PatternUnit::Mm, seamly_svg2ezdxf::PatternUnit::Unspecified] {
+            let text = export_to_string(&sample_drawing_in(unit, DxfVersion::R11), "metric_units", &dated_options());
+            assert_eq!(text, export_to_string(&sample_drawing(), "metric_default", &dated_options()));
+            assert!(text.contains("Units:METRIC"));
+        }
+    }
+
+    // @brief DXF R13 in inches: the same lengths, no millimetre value left.
+    #[test]
+    fn english_units_in_r13() {
+        let text = export_to_string(&sample_drawing_in(seamly_svg2ezdxf::PatternUnit::Inch, DxfVersion::R13), "english_r13", &dated_options());
+        assert!(text.contains("Units:ENGLISH"));
+        assert!(text.contains("3.9370"));
+        assert!(!text.contains("
+100.00
+"), "a boundary coordinate is still in millimetres");
+    }
+
+    // @brief The `.rul` file of an inch pattern: `UNITS:ENGLISH`, growth in inches to four places.
+    #[test]
+    fn english_units_write_inches_in_the_rule_file() {
+        let (mut drawing, _) = graded_drawing(DxfVersion::R11);
+        drawing.pattern_unit = seamly_svg2ezdxf::PatternUnit::Inch;
+        let table = drawing.grade_rule_table.as_ref().expect("table");
+        let metric = crate::grade_rule_file_text(table, seamly_svg2ezdxf::DxfUnits::Metric, &dated_options());
+        let english = crate::grade_rule_file_text(table, seamly_svg2ezdxf::DxfUnits::English, &dated_options());
+        assert!(metric.contains("UNITS:METRIC") && english.contains("UNITS:ENGLISH"));
+        // Every growth value has four decimals; the sample size column is zero.
+        let rule = english.lines().find(|l| l.starts_with("RULE:")).expect("a rule");
+        for growth in rule.split_whitespace().skip(3).flat_map(|g| g.split(',')) {
+            assert_eq!(growth.split('.').nth(1).map(str::len), Some(4), "{rule}");
+        }
+        assert!(!english.contains("-0.0000"));
+        // The first non-zero metric growth, in inches.
+        let first = |t: &str| t.lines().find(|l| l.starts_with("RULE:")).unwrap().split_whitespace().nth(3).unwrap().to_string();
+        let x_mm: f64 = first(&metric).split(',').next().unwrap().parse().unwrap();
+        let x_in: f64 = first(&english).split(',').next().unwrap().parse().unwrap();
+        assert!((x_mm / 25.4 - x_in).abs() < 0.0001);
+    }
 }

@@ -468,4 +468,32 @@ mod tests {
         let entity = &drawing.modelspace_entities[0];
         assert_eq!(entity.entity_type(), "POLYLINE");
     }
+
+    // @brief `data-units` sets the drawing's pattern unit; a cm `data-size` becomes millimetres.
+    #[test]
+    fn pattern_units_select_dxf_units_and_size_values() {
+        use crate::units::{DxfUnits, PatternUnit};
+        let convert = |units: Option<&str>| {
+            let attr = units.map(|u| format!(r#" data-units="{u}""#)).unwrap_or_default();
+            let svg = format!(
+                r#"<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+                    <g id="pattern-1" data-type="pattern"{attr}>
+                        <g id="piece-1" data-type="piece" data-size="50"><line x1="0" y1="0" x2="10" y2="10"/></g>
+                    </g></svg>"#
+            );
+            let doc = Document::parse(&svg).expect("parse");
+            svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("convert")
+        };
+        for (units, unit, dxf, size) in [
+            (Some("mm"), PatternUnit::Mm, DxfUnits::Metric, "50"),
+            (Some("cm"), PatternUnit::Cm, DxfUnits::Metric, "500"),
+            (Some("inch"), PatternUnit::Inch, DxfUnits::English, "50"),
+            (None, PatternUnit::Unspecified, DxfUnits::Metric, "50"),
+        ] {
+            let drawing = convert(units);
+            assert_eq!(drawing.pattern_unit, unit);
+            assert_eq!(drawing.pattern_unit.dxf_units(), dxf);
+            assert_eq!(drawing.blocks[0].size.as_deref(), Some(size), "{units:?}");
+        }
+    }
 }

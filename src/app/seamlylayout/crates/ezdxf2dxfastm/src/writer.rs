@@ -27,7 +27,7 @@ use crate::error::{DxfAstmExportError, Result};
 use crate::grade_rule_file::write_grade_rule_file;
 use crate::r13::upgrade_to_r13;
 use crate::validator::validate_astm_compliance;
-use seamly_svg2ezdxf::{AstmContour, Block, DxfPoint, DxfVersion, Notch, NotchKind, Point, CURVE_TOLERANCE_MM};
+use seamly_svg2ezdxf::{AstmContour, Block, DxfPoint, DxfVersion, Notch, NotchKind, Point, DxfUnits, CURVE_TOLERANCE_MM};
 use std::fs::{File, read_to_string};
 use std::io::Write;
 use std::path::Path;
@@ -130,10 +130,11 @@ fn write_group_code_int(writer: &mut dyn Write, code: i32, value: i32) -> std::i
     Ok(())
 }
 
-// @brief Write a group code with float value, in millimetres to two places.
-fn write_group_code_float(writer: &mut dyn Write, code: i32, value: f64) -> std::io::Result<()> {
+// @brief Write a group code with a length value, in the DXF units.
+// @param value Length in millimetres.
+fn write_group_code_length(writer: &mut dyn Write, code: i32, value: f64, units: DxfUnits) -> std::io::Result<()> {
     writeln!(writer, "{}", code)?;
-    writeln!(writer, "{:.2}", value)?;
+    writeln!(writer, "{}", units.length(value))?;
     Ok(())
 }
 
@@ -187,6 +188,7 @@ pub fn style_system_text(drawing: &seamly_svg2ezdxf::Drawing, options: &DxfAstmE
         .map(|s| seamly_svg2ezdxf::sanitize_ascii(&s).trim().to_string())
         .filter(|s| !s.is_empty())
         .unwrap_or_else(|| "Untitled".to_string());
+    let units = drawing.pattern_unit.dxf_units();
     let (utc_date, utc_time) = utc_date_time();
     let (sample_size, table_name) = drawing
         .grade_rule_table
@@ -199,10 +201,10 @@ pub fn style_system_text(drawing: &seamly_svg2ezdxf::Drawing, options: &DxfAstmE
         format!("Author:Seamly;Seamly2D;{}", options.author_release),
         format!("Sample Size:{}", sample_size),
         format!("Grade Rule Table:{}", table_name),
-        "Units:METRIC".to_string(),
+        format!("Units:{}", units.name()),
     ];
     if !options.aama {
-        lines.push(format!("Curve Tolerance:{:.2}", CURVE_TOLERANCE_MM));
+        lines.push(format!("Curve Tolerance:{}", units.length(CURVE_TOLERANCE_MM)));
         lines.push(format!("ASTM/D13Proposal 1 Version:{}", ASTM_VERSION));
     } // if ASTM
     lines
@@ -218,12 +220,13 @@ fn write_contour(
     layer: &str,
     validation_layer: Option<&str>,
     group_250: Option<i32>,
+    units: DxfUnits,
 ) -> std::io::Result<()> {
     let Some(validation_layer) = validation_layer else {
-        return encode_astm_polyline(writer, &contour.dense, layer, contour.closed, group_250);
+        return encode_astm_polyline(writer, &contour.dense, layer, contour.closed, group_250, units);
     }; // if no validation layer
-    encode_astm_polyline(writer, &contour.reduced, layer, contour.closed, group_250)?;
-    encode_astm_polyline(writer, &contour.dense, validation_layer, contour.closed, None)
+    encode_astm_polyline(writer, &contour.reduced, layer, contour.closed, group_250, units)?;
+    encode_astm_polyline(writer, &contour.dense, validation_layer, contour.closed, None, units)
 } // fn write_contour
 
 // @brief The notch as DXF-AAMA writes it: on layer 4, which holds every AAMA notch.
@@ -270,7 +273,13 @@ fn repeats_piece_text(text: &str) -> bool {
 // grade rule identifiers.
 // @param options `clo3d_group_250` marks the boundary and sew line polylines with CLO3D group 250.
 //        `aama` writes the DXF-AAMA layers: no 15, 80 to 87; label text on layer 1.
-fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContour, options: &DxfAstmExportOptions) -> std::io::Result<()> {
+fn write_astm_block(
+    writer: &mut dyn Write,
+    block: &Block,
+    boundary: &AstmContour,
+    options: &DxfAstmExportOptions,
+    units: DxfUnits,
+) -> std::io::Result<()> {
     let aama = options.aama;
     // Piece system text sits at the first boundary vertex.
     let anchor = boundary.reduced[0];
@@ -296,7 +305,7 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
     system_lines.push(format!("Material:{}", block.material));
     for (i, line) in system_lines.iter().enumerate() {
         let position = Point::new(anchor.x, anchor.y - (i as f64 + 1.0) * SYSTEM_TEXT_HEIGHT_MM * 1.5);
-        encode_astm_text(writer, "1", position, SYSTEM_TEXT_HEIGHT_MM, 0.0, line)?;
+        encode_astm_text(writer, "1", position, SYSTEM_TEXT_HEIGHT_MM, 0.0, line, units)?;
     } // for each system line
 
     // CLO3D line types: 0 = boundary, 2 = sewing line (seamly2clo.py convention).
@@ -304,18 +313,18 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
     // DXF-AAMA has no quality validation layers.
     let validation = |layer: &'static str| (!aama).then_some(layer);
     if aama && block.mirror_line.is_some() {
-        write_contour(writer, &start_on_mirror_line(boundary), "1", None, boundary_250)?;
+        write_contour(writer, &start_on_mirror_line(boundary), "1", None, boundary_250, units)?;
     } else {
-        write_contour(writer, boundary, "1", validation("84"), boundary_250)?;
+        write_contour(writer, boundary, "1", validation("84"), boundary_250, units)?;
     } // if AAMA with a mirror line
     for c in &block.sew_lines {
-        write_contour(writer, c, "14", validation("87"), sew_250)?;
+        write_contour(writer, c, "14", validation("87"), sew_250, units)?;
     } // for each sew line
     for c in &block.internal_lines {
-        write_contour(writer, c, "8", validation("85"), None)?;
+        write_contour(writer, c, "8", validation("85"), None, units)?;
     } // for each internal line
     for c in &block.cutouts {
-        write_contour(writer, c, "11", validation("86"), None)?;
+        write_contour(writer, c, "11", validation("86"), None, units)?;
     } // for each cutout
 
     // Layers 2 and 3 hold the turn and curve points of layers 1, 8, 11 and 14.
@@ -326,7 +335,7 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
         .filter(|c| c.declares_points());
     for contour in contours {
         for (p, &turn) in contour.reduced.iter().zip(&contour.turn) {
-            encode_dxf_point(writer, &DxfPoint::new(if turn { "2" } else { "3" }, *p))?;
+            encode_dxf_point(writer, &DxfPoint::new(if turn { "2" } else { "3" }, *p), units)?;
         } // for each key point
     } // for each contour
 
@@ -334,33 +343,33 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
     if let Some((p1, p2)) = &block.mirror_line {
         write_group_code(writer, 0, "LINE")?;
         write_group_code(writer, 8, "6")?;
-        write_group_code_float(writer, 10, p1.x)?;
-        write_group_code_float(writer, 20, p1.y)?;
-        write_group_code_float(writer, 11, p2.x)?;
-        write_group_code_float(writer, 21, p2.y)?;
+        write_group_code_length(writer, 10, p1.x, units)?;
+        write_group_code_length(writer, 20, p1.y, units)?;
+        write_group_code_length(writer, 11, p2.x, units)?;
+        write_group_code_length(writer, 21, p2.y, units)?;
     } // if mirror line
 
     if let Some((p1, p2)) = &block.grainline {
         write_group_code(writer, 0, "LINE")?;
         write_group_code(writer, 8, "7")?;
-        write_group_code_float(writer, 10, p1.x)?;
-        write_group_code_float(writer, 20, p1.y)?;
-        write_group_code_float(writer, 11, p2.x)?;
-        write_group_code_float(writer, 21, p2.y)?;
+        write_group_code_length(writer, 10, p1.x, units)?;
+        write_group_code_length(writer, 20, p1.y, units)?;
+        write_group_code_length(writer, 11, p2.x, units)?;
+        write_group_code_length(writer, 21, p2.y, units)?;
     } // if grainline
 
     for notch in &block.notches {
         if aama {
-            encode_notch(writer, &aama_notch(notch))?;
+            encode_notch(writer, &aama_notch(notch), units)?;
         } else {
-            encode_notch(writer, notch)?;
+            encode_notch(writer, notch, units)?;
         } // if AAMA
     } // for each notch
 
     // DXF-AAMA has no annotation layer: label text goes on layer 1, except lines that read as piece text.
     let annotation_layer = if aama { "1" } else { "15" };
     for a in block.annotations.iter().filter(|a| !aama || !repeats_piece_text(&a.text)) {
-        encode_astm_text(writer, annotation_layer, a.position, a.height, a.rotation, &a.text)?;
+        encode_astm_text(writer, annotation_layer, a.position, a.height, a.rotation, &a.text, units)?;
     } // for each annotation
 
     if let Some(grading) = &block.grading {
@@ -368,13 +377,13 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
         let (p1, p2) = grading.reference_line;
         write_group_code(writer, 0, "LINE")?;
         write_group_code(writer, 8, "5")?;
-        write_group_code_float(writer, 10, p1.x)?;
-        write_group_code_float(writer, 20, p1.y)?;
-        write_group_code_float(writer, 11, p2.x)?;
-        write_group_code_float(writer, 21, p2.y)?;
+        write_group_code_length(writer, 10, p1.x, units)?;
+        write_group_code_length(writer, 20, p1.y, units)?;
+        write_group_code_length(writer, 11, p2.x, units)?;
+        write_group_code_length(writer, 21, p2.y, units)?;
         // `# n` on the layer of the point it grades, at the same XY (D6673 §4.3.1.4).
         for t in &grading.rule_texts {
-            encode_astm_text(writer, t.layer, t.position, RULE_TEXT_HEIGHT_MM, 0.0, &format!("# {}", t.rule))?;
+            encode_astm_text(writer, t.layer, t.position, RULE_TEXT_HEIGHT_MM, 0.0, &format!("# {}", t.rule), units)?;
         } // for each rule text
     } // if graded
     Ok(())
@@ -390,22 +399,23 @@ fn write_blocks_section(
 ) -> std::io::Result<()> {
     write_group_code(writer, 0, "SECTION")?;
     write_group_code(writer, 2, "BLOCKS")?;
+    let units = drawing.pattern_unit.dxf_units();
 
     for block in &drawing.blocks {
         write_group_code(writer, 0, "BLOCK")?;
         write_group_code(writer, 8, "1")?;
         write_group_code(writer, 2, &block.name)?;
         write_group_code_int(writer, 70, 0)?; // no block flags
-        write_group_code_float(writer, 10, 0.0)?; // base point
-        write_group_code_float(writer, 20, 0.0)?;
+        write_group_code_length(writer, 10, 0.0, units)?; // base point
+        write_group_code_length(writer, 20, 0.0, units)?;
         write_group_code(writer, 3, &block.name)?;
 
         match &block.boundary {
-            Some(boundary) => write_astm_block(writer, block, boundary, options)?,
+            Some(boundary) => write_astm_block(writer, block, boundary, options, units)?,
             None => {
-                encode_astm_text(writer, "1", Point::new(0.0, 0.0), SYSTEM_TEXT_HEIGHT_MM, 0.0, &format!("Piece Name:{}", block.piece_name))?;
+                encode_astm_text(writer, "1", Point::new(0.0, 0.0), SYSTEM_TEXT_HEIGHT_MM, 0.0, &format!("Piece Name:{}", block.piece_name), units)?;
                 for entity in &block.entities {
-                    encode_entity(writer, entity)?;
+                    encode_entity(writer, entity, units)?;
                 } // for each entity
             } // None
         } // match boundary
@@ -423,12 +433,13 @@ fn write_insert_entity(
     block_name: &str,
     x: f64,
     y: f64,
+    units: DxfUnits,
 ) -> std::io::Result<()> {
     write_group_code(writer, 0, "INSERT")?;
     write_group_code(writer, 8, "1")?;
     write_group_code(writer, 2, block_name)?;
-    write_group_code_float(writer, 10, x)?;
-    write_group_code_float(writer, 20, y)?;
+    write_group_code_length(writer, 10, x, units)?;
+    write_group_code_length(writer, 20, y, units)?;
     Ok(())
 } // fn write_insert_entity
 
@@ -440,20 +451,21 @@ fn write_entities_section(
 ) -> std::io::Result<()> {
     write_group_code(writer, 0, "SECTION")?;
     write_group_code(writer, 2, "ENTITIES")?;
+    let units = drawing.pattern_unit.dxf_units();
 
     // Style system text occurs once, on layer 1, stacked below the origin.
     for (i, line) in style_system_text(drawing, options).iter().enumerate() {
         let position = Point::new(0.0, -(i as f64 + 1.0) * SYSTEM_TEXT_HEIGHT_MM * 1.5);
-        encode_astm_text(writer, "1", position, SYSTEM_TEXT_HEIGHT_MM, 0.0, line)?;
+        encode_astm_text(writer, "1", position, SYSTEM_TEXT_HEIGHT_MM, 0.0, line, units)?;
     } // for each style line
 
     for entity in &drawing.modelspace_entities {
-        encode_entity(writer, entity)?;
+        encode_entity(writer, entity, units)?;
     } // for each modelspace entity
 
     // Block coordinates are already absolute, so every INSERT is at the origin.
     for block in &drawing.blocks {
-        write_insert_entity(writer, &block.name, 0.0, 0.0)?;
+        write_insert_entity(writer, &block.name, 0.0, 0.0, units)?;
     } // for each block
 
     write_group_code(writer, 0, "ENDSEC")?;
@@ -831,7 +843,7 @@ pub fn export_dxf_astm(
 
     // A graded export writes its grade rule table beside the DXF, same stem, `.rul`.
     if let Some(table) = &drawing.grade_rule_table {
-        write_grade_rule_file(table, &output_path.as_ref().with_extension("rul"), options)?;
+        write_grade_rule_file(table, drawing.pattern_unit.dxf_units(), &output_path.as_ref().with_extension("rul"), options)?;
     } // if graded
 
     // 5. Create annotated version with inline comments (if requested).

@@ -781,7 +781,10 @@ pub fn do_export_dxf(
     let mut warnings = Vec::new();
     if let Some(grading) = &style.grading {
         let input = svg_to_ezdxf(&grading.input, &svg_opts).map_err(|e| format!("DXF conversion failed: {e}"))?;
-        warnings = grade_drawing(&mut drawing, &input, &grading.sizes, &grading.base_size);
+        // Size values follow the pattern unit: cm sizes become millimetres, as the piece sizes did.
+        let unit = drawing.pattern_unit;
+        let sizes: Vec<String> = grading.sizes.iter().map(|s| unit.size_value(s)).collect();
+        warnings = grade_drawing(&mut drawing, &input, &sizes, &unit.size_value(&grading.base_size));
         if let Some(table) = drawing.grade_rule_table.as_mut() {
             let stem = Path::new(path).file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
             table.name = grade_rule_table_name(&stem);
@@ -811,8 +814,9 @@ pub fn do_export_dxf(
     } // if input name
     // A multisize piece keeps its own `data-size`; any other piece takes the sample size.
     if let Some(sample) = style.sample_size.as_deref().map(str::trim).filter(|s| !s.is_empty()) {
+        let sample = drawing.pattern_unit.size_value(sample);
         for block in drawing.blocks.iter_mut().filter(|b| b.size.is_none()) {
-            block.size = Some(sample.to_string());
+            block.size = Some(sample.clone());
         } // for each block without a size
     } // if sample size
     let defaults = DxfAstmExportOptions::default();

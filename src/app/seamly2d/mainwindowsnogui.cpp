@@ -271,6 +271,7 @@ QString MainWindowsNoGUI::generateMultisizePiecesSvgDocument()
     SvgGenerator svgGenerator(paper.data(), QString(), doc->GetPatternName(), doc->GetDescription(),
                               static_cast<int>(PrintDPI));
     svgGenerator.setMultisize(sizes, baseSize, layoutHeight);
+    svgGenerator.setUnits(patternUnitName());
 
     for (int piece = 0; piece < list.size(); ++piece)
     {
@@ -562,6 +563,7 @@ QString MainWindowsNoGUI::buildPiecesSvgString(QGraphicsRectItem *paper,
     SvgGenerator svgGenerator(paper, QString(), doc->GetPatternName(), doc->GetDescription(),
                               static_cast<int>(PrintDPI));
     svgGenerator.setSampleSize(individualSampleSize());
+    svgGenerator.setUnits(patternUnitName());
 
     for (int piece = 0; piece < pieces.size(); piece++)
     {
@@ -571,6 +573,22 @@ QString MainWindowsNoGUI::buildPiecesSvgString(QGraphicsRectItem *paper,
     }
 
     return svgGenerator.toSvgString();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Pattern unit name for the SeamlyLayout handoff.
+ *
+ * @return "mm", "cm" or "inch"; empty for any other unit.
+ */
+QString MainWindowsNoGUI::patternUnitName() const
+{
+    const Unit unit = qApp->patternUnit();
+    if (unit != Unit::Mm && unit != Unit::Cm && unit != Unit::Inch)
+    {
+        return QString();
+    }
+    return UnitsToStr(unit);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

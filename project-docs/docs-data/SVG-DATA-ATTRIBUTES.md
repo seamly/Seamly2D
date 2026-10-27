@@ -162,6 +162,7 @@ first child of each piece group when it places the piece into a layout sheet
 | `data-flip` | `piece` | Mirror a layout may apply (Piece Properties > Flip): `Horizontal` (left to right, about the vertical axis), `Vertical` (top to bottom, about the horizontal axis) or `Both`. Omitted for None. Stored as the piece attribute `flip` (format 0.7.7). DXF-ASTM `Flip:Y`, `Flip:X` or `Flip:XY`. |
 | `data-orientation` | `piece` | Piece orientation (Piece Properties > Orientation): `Left` or `Right`. Omitted when undefined. Not written to DXF. |
 | `data-annotation` | `piece` | Piece annotation text (Piece Properties > Annotation). Omitted when empty. Not written to DXF. |
+| `data-units` | `pattern` | Pattern unit: `mm`, `cm` or `inch`. Omitted for another unit. DXF export: `inch` writes `Units:ENGLISH` (lengths in inches, 4 decimals); `mm` and `cm` write `Units:METRIC` (mm, 2 decimals). A `cm` pattern also writes its size values (`data-size`, `data-sizes`, `data-base-size`, `data-sample-size`) times 10, in mm: 50 becomes 500. Absent: `METRIC`, no conversion. |
 | `data-measurements` | `pattern` | `individual` or `multisize`. Absent in older handoffs; SeamlyLayout reads absent as `individual`. |
 | `data-sizes` | `pattern` (multisize) | Every handed-off size, comma-separated, in pattern units (e.g. `34,36,38`). |
 | `data-base-size` | `pattern` (multisize) | Base size of the `.smms` file, in pattern units. |

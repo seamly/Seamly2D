@@ -7,6 +7,7 @@
 use crate::drawing::{Block, Drawing, DxfVersion, DEFAULT_MATERIAL};
 use crate::entities::{Circle, Entity, Line, Point, Polyline, Text};
 use crate::error::Result;
+use crate::units::PatternUnit;
 use crate::layers::map_svg_to_astm_layer;
 use crate::astm_contour::{build_contour_tagged, AstmContour};
 use crate::astm_notch::build_notches;
@@ -71,6 +72,7 @@ pub fn svg_to_ezdxf(doc: &svg_dom::Document, options: &SvgToEzdxfOptions) -> Res
 
     let mut drawing = Drawing::new(options.dxf_version);
     drawing.style_name = find_pattern_name(root);
+    drawing.pattern_unit = find_pattern_unit(root);
 
     if options.create_blocks {
         extract_pattern_pieces(root, &mut drawing, options, svg_height)?;
@@ -80,6 +82,17 @@ pub fn svg_to_ezdxf(doc: &svg_dom::Document, options: &SvgToEzdxfOptions) -> Res
 
     Ok(drawing)
 } // fn svg_to_ezdxf
+
+// @brief Pattern unit (`data-units`) of the first `data-type="pattern"` group; Unspecified when absent.
+fn find_pattern_unit(element: &Element) -> PatternUnit {
+    if element.attributes.get("data-type").map(String::as_str) == Some("pattern") {
+        return element.attributes.get("data-units").map_or(PatternUnit::Unspecified, |v| PatternUnit::from_attribute(v));
+    } // if pattern group
+    element.children.iter().find_map(|c| match c {
+        XMLNode::Element(e) => Some(find_pattern_unit(e)).filter(|u| *u != PatternUnit::Unspecified),
+        _ => None,
+    }).unwrap_or(PatternUnit::Unspecified) // first child group with a unit
+} // fn find_pattern_unit
 
 // @brief Name of the first `data-type="pattern"` group, if any.
 fn find_pattern_name(element: &Element) -> Option<String> {
@@ -313,7 +326,8 @@ fn add_piece_block(
         .attributes
         .get("data-size")
         .map(|s| sanitize_ascii(s).trim().to_string())
-        .filter(|s| !s.is_empty());
+        .filter(|s| !s.is_empty())
+        .map(|s| drawing.pattern_unit.size_value(&s));
 
     // Generic conversion of the piece's children (the piece group itself
     // carries no layer, so its id never leaks into a layer choice).

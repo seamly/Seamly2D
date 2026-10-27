@@ -17,6 +17,7 @@ mod drawing;
 mod entities;
 mod error;
 mod layers;
+mod units;
 mod utils;
 
 #[cfg(test)]
@@ -36,6 +37,7 @@ pub use astm_notch::{build_notches, seam_allowance_at, Notch, NotchKind};
 pub use drawing::{
     Annotation, Block, BlockGrading, Drawing, DxfVersion, GradeRule, GradeRuleTable, MissingPieceData, RuleText, DEFAULT_MATERIAL,
 };
+pub use units::{DxfUnits, PatternUnit};
 pub use entities::{Arc, Circle, DxfPoint, Entity, Line, Point, Polyline, Text};
 pub use error::{Result, SvgToEzdxfError};
 pub use utils::{
