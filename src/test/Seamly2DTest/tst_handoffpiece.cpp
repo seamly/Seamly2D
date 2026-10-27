@@ -28,6 +28,7 @@
 
 #include "tst_handoffpiece.h"
 #include "../layout_handoff/handoff_piece.h"
+#include "../layout_handoff/handoff_turn_points.h"
 #include "../vpatterndb/vcontainer.h"
 #include "../vpatterndb/vpiece.h"
 #include "../vpatterndb/vpiecenode.h"
@@ -386,4 +387,157 @@ void TST_HandoffPiece::pieceWithoutFoldLineHasNoFoldData() const
     QVERIFY(handoff.fold_line_on_cut_line().isNull());
     QVERIFY(handoff.fold_line_graphic().isNull());
     QVERIFY(!handoff.is_on_fold());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief The cut corners, the corner count and the line node counts equal what VLayoutPiece gives.
+ */
+void TST_HandoffPiece::cornerCutsMatchOldWriter() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    // Equilateral triangle: every miter is longer than the width, so a forced cut shortens corner 1.
+    data->UpdateGObject(1, new VPointF(0, 0, "A1", 0, 0));
+    data->UpdateGObject(2, new VPointF(400, 0, "A2", 0, 0));
+    data->UpdateGObject(3, new VPointF(200, 346.41, "A3", 0, 0));
+
+    VPiece piece;
+    piece.SetSeamAllowance(true);
+    piece.SetSAWidth(10);
+    piece.GetPath().Append(VPieceNode(1, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(2, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(3, Tool::NodePoint));
+    piece.setForcedCornerCuts({1});
+
+    const VLayoutPiece old_piece = VLayoutPiece::Create(piece, data.data());
+    const HandoffPiece new_piece = HandoffPiece::create(piece, data.data());
+
+    QCOMPARE(new_piece.seam_allowance_corners().count, 3);
+    QCOMPARE(new_piece.seam_allowance_corners().cut, QVector<int>{1});
+    QCOMPARE(new_piece.seam_allowance_corners().count, old_piece.seamAllowanceCorners().count);
+    QCOMPARE(new_piece.seam_allowance_corners().cut, old_piece.seamAllowanceCorners().cut);
+    QCOMPARE(new_piece.line_node_counts(), old_piece.lineNodeCounts());
+}
+
+namespace
+{
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief make_size builds the slit square with its paths, scaled about the origin.
+ */
+VPiece make_size(VContainer *data, qreal scale)
+{
+    VPiece piece = square_piece_with_slit(data, true, false);
+    data->UpdateGObject(2, new VPointF(200 * scale, 0, "A2", 0, 0));
+    data->UpdateGObject(3, new VPointF(400 * scale, 0, "A3", 0, 0));
+    data->UpdateGObject(4, new VPointF(400 * scale, 400 * scale, "A4", 0, 0));
+    data->UpdateGObject(5, new VPointF(0, 400 * scale, "A5", 0, 0));
+    add_paths(data, &piece);
+    return piece;
+}
+} // namespace
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Unifying three sizes gives the turn points that VLayoutPiece::unifyTurnPoints and unify_turn_points give.
+ */
+void TST_HandoffPiece::unifyTurnPointsMatchesOldWriter() const
+{
+    const Unit unit = Unit::Mm;
+    qApp->setPatternUnit(unit);
+    const qreal scales[] = {1.0, 1.1, 1.25};
+
+    QVector<QSharedPointer<VContainer>> containers;
+    QVector<VLayoutPiece>               old_pieces;
+    QVector<HandoffPiece>               new_pieces;
+    for (const qreal scale : scales)
+    {
+        containers.append(QSharedPointer<VContainer>(new VContainer(nullptr, &unit)));
+        const VPiece piece = make_size(containers.last().data(), scale);
+        old_pieces.append(VLayoutPiece::Create(piece, containers.last().data()));
+        new_pieces.append(HandoffPiece::create(piece, containers.last().data()));
+    }
+
+    QVector<SizeLine> seam_lines;
+    QVector<SizeLine> cut_lines;
+    for (const HandoffPiece &piece : std::as_const(new_pieces))
+    {
+        seam_lines.append({piece.seam_line().points, piece.seam_line().turn_points, piece.seam_line().node_indices});
+        cut_lines.append({piece.cut_line().points, piece.cut_line().turn_points, piece.cut_line().node_indices});
+    }
+    const QVector<QVector<int>> expected_seam = unify_turn_points(seam_lines, true);
+    const QVector<QVector<int>> expected_cut  = unify_turn_points(cut_lines, true);
+    QCOMPARE(expected_seam.size(), 3);
+    QCOMPARE(expected_cut.size(), 3);
+
+    QVector<VLayoutPiece *> old_sizes;
+    QVector<HandoffPiece *> new_sizes;
+    for (int i = 0; i < 3; ++i)
+    {
+        old_sizes.append(&old_pieces[i]);
+        new_sizes.append(&new_pieces[i]);
+    }
+    VLayoutPiece::unifyTurnPoints(old_sizes);
+    HandoffPiece::unify_piece_turn_points(new_sizes);
+
+    for (int i = 0; i < 3; ++i)
+    {
+        QVERIFY(new_pieces.at(i).seam_line().turn_points.has_value());
+        QCOMPARE(*new_pieces.at(i).seam_line().turn_points, expected_seam.at(i));
+        QVERIFY(new_pieces.at(i).cut_line().turn_points.has_value());
+        QCOMPARE(*new_pieces.at(i).cut_line().turn_points, expected_cut.at(i));
+
+        QVERIFY(new_pieces.at(i).internal_paths().first().line.turn_points.has_value());
+        QCOMPARE(new_pieces.at(i).internal_paths().first().line.turn_points,
+                 old_pieces.at(i).getInternalPaths().first().turnPoints());
+        QVERIFY(new_pieces.at(i).cutout_paths().first().line.turn_points.has_value());
+        QCOMPARE(new_pieces.at(i).cutout_paths().first().line.turn_points,
+                 old_pieces.at(i).getCutoutPaths().first().turnPoints());
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief A size with another node count in a line keeps the turn points of that line, as VLayoutPiece does.
+ */
+void TST_HandoffPiece::unifySkipsLineWithDifferentNodeCount() const
+{
+    const Unit unit = Unit::Mm;
+    qApp->setPatternUnit(unit);
+
+    QScopedPointer<VContainer> data_a(new VContainer(nullptr, &unit));
+    const VPiece               full = make_size(data_a.data(), 1.0);
+
+    // The same square without the slit node: 4 nodes instead of 5.
+    QScopedPointer<VContainer> data_b(new VContainer(nullptr, &unit));
+    VPiece                     fewer = make_size(data_b.data(), 1.0);
+    fewer.GetPath().Clear();
+    fewer.GetPath().Append(VPieceNode(1, Tool::NodePoint));
+    fewer.GetPath().Append(VPieceNode(3, Tool::NodePoint));
+    fewer.GetPath().Append(VPieceNode(4, Tool::NodePoint));
+    fewer.GetPath().Append(VPieceNode(5, Tool::NodePoint));
+
+    HandoffPiece new_full  = HandoffPiece::create(full, data_a.data());
+    HandoffPiece new_fewer = HandoffPiece::create(fewer, data_b.data());
+    VLayoutPiece old_full  = VLayoutPiece::Create(full, data_a.data());
+    VLayoutPiece old_fewer = VLayoutPiece::Create(fewer, data_b.data());
+    QVERIFY(new_full.line_node_counts() != new_fewer.line_node_counts());
+    QCOMPARE(new_full.line_node_counts(), old_full.lineNodeCounts());
+    QCOMPARE(new_fewer.line_node_counts(), old_fewer.lineNodeCounts());
+
+    const std::optional<QVector<int>> before_full  = new_full.seam_line().turn_points;
+    const std::optional<QVector<int>> before_fewer = new_fewer.seam_line().turn_points;
+    HandoffPiece::unify_piece_turn_points({&new_full, &new_fewer});
+    QCOMPARE(new_full.seam_line().turn_points, before_full);
+    QCOMPARE(new_fewer.seam_line().turn_points, before_fewer);
+
+    // The paths still match by order and unify.
+    VLayoutPiece::unifyTurnPoints({&old_full, &old_fewer});
+    QCOMPARE(new_full.internal_paths().first().line.turn_points,
+             old_full.getInternalPaths().first().turnPoints());
+    QCOMPARE(new_fewer.cutout_paths().first().line.turn_points,
+             old_fewer.getCutoutPaths().first().turnPoints());
 }

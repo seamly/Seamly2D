@@ -7,6 +7,7 @@ HEADERS += \
     $$PWD/handoff_ids.h \
     $$PWD/handoff_label.h \
     $$PWD/handoff_piece.h \
+    $$PWD/handoff_sheet.h \
     $$PWD/handoff_turn_points.h
 
 SOURCES += \
@@ -15,4 +16,5 @@ SOURCES += \
     $$PWD/handoff_ids.cpp \
     $$PWD/handoff_label.cpp \
     $$PWD/handoff_piece.cpp \
+    $$PWD/handoff_sheet.cpp \
     $$PWD/handoff_turn_points.cpp

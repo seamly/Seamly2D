@@ -51,6 +51,9 @@ private slots:
     void hiddenGrainlineKeepsItsData() const;
     void foldLineMatchesOldWriter() const;
     void pieceWithoutFoldLineHasNoFoldData() const;
+    void cornerCutsMatchOldWriter() const;
+    void unifyTurnPointsMatchesOldWriter() const;
+    void unifySkipsLineWithDifferentNodeCount() const;
 };
 
 #endif // TST_HANDOFFPIECE_H

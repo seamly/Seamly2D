@@ -28,6 +28,7 @@
 
 #include "tst_handoffdocument.h"
 #include "../layout_handoff/handoff_document.h"
+#include "../layout_handoff/handoff_sheet.h"
 #include "../ifc/xml/vabstractpattern.h"
 #include "../vformat/svg_generator.h"
 #include "../vgeometry/vpointf.h"
@@ -619,7 +620,8 @@ void TST_HandoffDocument::labelLinesElideAndAlign() const
     QVector<VLabelTemplateLine> lines;
     lines << label_line(QStringLiteral("Left"), false, Qt::AlignLeft, 0)
           << label_line(QStringLiteral("Right"), false, Qt::AlignRight, 0)
-          << label_line(QStringLiteral("An extremely long label line that cannot fit the label width"), false,
+          << label_line(QStringLiteral("An extremely long label line that cannot fit the label width, "
+                                  "not even in a small font: it repeats itself to be sure of it"), false,
                         Qt::AlignLeft, 0);
     piece.GetPatternPieceData().SetLabelTemplate(lines);
     const HandoffPlacedPiece placed = placed_piece(piece, data.data(), &document, QString(), QString());
@@ -645,5 +647,87 @@ void TST_HandoffDocument::labelLinesElideAndAlign() const
     QCOMPARE(texts.at(0).tag.section(QLatin1Char('|'), 1, 1), QStringLiteral("Left"));
     QCOMPARE(texts.at(1).tag.section(QLatin1Char('|'), 1, 1), QStringLiteral("Right"));
     QVERIFY(texts.at(1).points.first().x() > texts.at(0).points.first().x() + 1);
-    QVERIFY(texts.at(2).tag.section(QLatin1Char('|'), 1, 1).contains(QChar(0x2026)));
+    QVERIFY2(texts.at(2).tag.section(QLatin1Char('|'), 1, 1).contains(QChar(0x2026)),
+             qPrintable(texts.at(2).tag + QLatin1String(" font ") + qApp->Settings()->getLabelFont().toString()));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_HandoffDocument::sheetMatchesOldScene_data() const
+{
+    pieceMatchesOldWriter_data();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief The sheet rectangle and the piece offsets equal what the scene of the old writer gives.
+ * @details Two pieces at fractional positions, one left of and above the other, as MainWindowsNoGUI places them.
+ */
+void TST_HandoffDocument::sheetMatchesOldScene() const
+{
+    QFETCH(bool, seam_allowance);
+    QFETCH(bool, built_in);
+    QFETCH(bool, on_fold);
+
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+    TestPatternDocument document;
+    VAbstractPattern   *previous = qApp->getCurrentDocument();
+    qApp->setCurrentDocument(&document);
+
+    VPiece first = make_piece(data.data(), seam_allowance, built_in, on_fold);
+    set_label_templates(&document, &first);
+    first.SetMx(37.4);
+    first.SetMy(-12.7);
+    VPiece second = first;
+    second.SetMx(500.2);
+    second.SetMy(80.6);
+    const QVector<VPiece> pieces = {first, second};
+
+    QScopedPointer<QGraphicsScene> scene(new QGraphicsScene());
+    QList<QGraphicsItem *>         items;
+    QVector<QRectF>                extents;
+    QVector<QPointF>               positions;
+    const HandoffStyle             style = HandoffStyle::from_settings(*qApp->Settings());
+    for (const VPiece &piece : pieces)
+    {
+        const VLayoutPiece layout_piece = VLayoutPiece::Create(piece, data.data());
+        QGraphicsItem     *item         = layout_piece.GetItem(false);
+        item->setPos(layout_piece.GetMx(), layout_piece.GetMy());
+        scene->addItem(item);
+        items.append(item);
+
+        extents.append(piece_extent(HandoffPiece::create(piece, data.data()), style));
+        positions.append(QPointF(piece.GetMx(), piece.GetMy()));
+    }
+    qApp->setCurrentDocument(previous);
+
+    const QRect     rect = scene->itemsBoundingRect().toRect();
+    const QTransform shift = QTransform().translate(-rect.x(), -rect.y());
+    for (QGraphicsItem *item : std::as_const(items))
+    {
+        item->setTransform(shift);
+    }
+    const QRect old_sheet = scene->itemsBoundingRect().toRect();
+
+    const FlatSheet flat = arrange_flat(extents, positions);
+    QVERIFY(!old_sheet.isEmpty());
+    QCOMPARE(flat.sheet, old_sheet);
+    QCOMPARE(flat.offsets.size(), 2);
+    for (int i = 0; i < 2; ++i)
+    {
+        const QPointF old_offset = items.at(i)->pos() + QPointF(-rect.x(), -rect.y());
+        QCOMPARE(flat.offsets.at(i), old_offset);
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief A sheet of pieces with no drawn line is empty, and its offsets keep the positions.
+ */
+void TST_HandoffDocument::emptySheetKeepsPositions() const
+{
+    const FlatSheet flat = arrange_flat({QRectF()}, {QPointF(3, 4)});
+    QVERIFY(flat.sheet.isNull());
+    QCOMPARE(flat.offsets, QVector<QPointF>({QPointF(3, 4)}));
 }

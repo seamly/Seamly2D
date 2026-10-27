@@ -36,6 +36,7 @@
 #include <QVector>
 #include <Qt>
 
+#include "../vpatterndb/AbstractPiece.h"
 #include "../vpatterndb/FoldLineGraphic.h"
 
 #include <optional>
@@ -95,6 +96,14 @@ public:
     static HandoffPiece create(const VPiece &piece, const VContainer *pattern);
 
     /**
+     * @brief unify_piece_turn_points makes a node that is a turn point in one size a turn point in every size.
+     * @details Applies to the seam line, cut line, built-in seam line, internal paths and cutout paths. A line whose
+     *          node count differs between sizes keeps its turn points, as do paths when the path count differs.
+     * @param sizes the same piece in every size, in size order; none may be null.
+     */
+    static void unify_piece_turn_points(const QVector<HandoffPiece *> &sizes);
+
+    /**
      * @brief has_shape tells whether the piece has a seam line or a cut line to draw.
      */
     bool has_shape() const;
@@ -111,6 +120,17 @@ public:
     QRectF bounds() const;
 
     const HandoffLine          &cut_line() const;
+
+    /**
+     * @brief seam_allowance_corners returns the cut line corners and the ones a ByLength angle cut short.
+     */
+    const SeamAllowanceCorners &seam_allowance_corners() const;
+
+    /**
+     * @brief line_node_counts returns the node counts of the seam line, the cut line and the built-in seam line.
+     * @details unify_piece_turn_points() matches the nodes of a line only when its count is the same in every size.
+     */
+    QVector<int> line_node_counts() const;
     const HandoffLine          &built_in_seam_line() const;
     const HandoffNotches       &notches() const;
     const QVector<HandoffPath> &internal_paths() const;
@@ -156,6 +176,7 @@ private:
     bool                 m_is_seam_line_hidden         = false;
     HandoffLine          m_seam_line;
     HandoffLine          m_cut_line;
+    SeamAllowanceCorners m_seam_allowance_corners;
     HandoffLine          m_built_in_seam_line;
     HandoffNotches       m_notches;
     QVector<HandoffPath> m_internal_paths;
