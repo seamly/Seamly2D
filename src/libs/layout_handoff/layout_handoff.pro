@@ -44,10 +44,6 @@ CONFIG += staticlib
 # The library has no stable.h, so it opts out of the release precompiled header from common.pri.
 CONFIG -= precompile_header
 
-include(warnings.pri)
-include(layout_handoff.pri)
-include(../libs.pri)
-
 # Static library: the linker puts it into the apps, so it has no install rule
 
 # Library file directory
@@ -61,6 +57,11 @@ OBJECTS_DIR = obj
 
 # Generated rcc files directory
 RCC_DIR = rcc
+
+# warnings.pri reads MOC_DIR and RCC_DIR, so the includes come after them.
+include(warnings.pri)
+include(layout_handoff.pri)
+include(../libs.pri)
 
 # No effect: default_post.prf adds -O2 after this -O3, and GCC and Clang use the last -O flag.
 CONFIG(release, debug|release){
