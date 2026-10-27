@@ -5,6 +5,26 @@
 //  @brief
 //  The tagged pieces SVG that Seamly2D hands to SeamlyLayout.
 //
+//  @details
+//  Data source: the open pattern in Seamly2D.
+//  - VPiece: piece geometry and piece properties.
+//  - VContainer: pattern data that calculates the piece points and lengths.
+//  - VAbstractPattern: pattern document with the pattern label template.
+//  - VCommonSettings: colors, line styles, label font and show flags.
+//  Constraint:
+//  - Reads no canvas items (QGraphicsScene), so the export does not depend on what the canvas shows.
+//  Exception:
+//  - Label placeholders read qApp state through LabelTextManager.
+//
+//  Classes of the layout_handoff library:
+//  - HandoffDocument: SVG with one pattern group per material and one group per piece.
+//  - HandoffPiece: seam line, cut line, notches, internal and cutout paths, grainline, fold line.
+//  - HandoffLabel: piece label and pattern label.
+//  - HandoffPieceInfo: piece properties for the data-* attributes.
+//  - HandoffIds: unique SVG ids for pieces and components.
+//  - handoff_turn_points: turn points matched across the sizes of a multisize piece.
+//  - handoff_sheet: piece bounds and the flat sheet, with no QGraphicsScene.
+//
 //  @copyright
 //  This source code is part of the Seamly2D project, a pattern making
 //  program, whose allow create and modeling patterns of clothing.
@@ -22,6 +42,7 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
+//  along with Seamly2D.  If not, see <http://www.gnu.org/licenses/>.
 //---------------------------------------------------------------------------------------------------------------------
 
 #ifndef HANDOFF_DOCUMENT_H
