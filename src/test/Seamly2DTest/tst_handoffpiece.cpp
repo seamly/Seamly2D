@@ -35,8 +35,10 @@
 #include "../vpatterndb/floatItemData/vgrainlinedata.h"
 #include "../vpatterndb/floatItemData/vpatternlabeldata.h"
 #include "../vpatterndb/floatItemData/vpiecelabeldata.h"
+#include "../vpatterndb/floatItemData/floatitemdef.h"
 #include "../vgeometry/vpointf.h"
 #include "../vlayout/vlayoutpiece.h"
+#include "../vlayout/vlayoutpiecepath.h"
 #include "../vmisc/vabstractapplication.h"
 
 #include <QtTest>
@@ -160,4 +162,228 @@ void TST_HandoffPiece::noSeamAllowanceHasNoCutLineOrNotches() const
     QVERIFY(handoff.notches().lines.isEmpty());
     QVERIFY(!handoff.seam_line().points.isEmpty());
     QVERIFY(handoff.has_shape());
+}
+
+namespace
+{
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief add_paths adds one internal path and one cutout path across the square of square_piece_with_slit.
+ */
+void add_paths(VContainer *data, VPiece *piece)
+{
+    data->UpdateGObject(6, new VPointF(100, 100, "B1", 0, 0));
+    data->UpdateGObject(7, new VPointF(300, 300, "B2", 0, 0));
+    data->UpdateGObject(8, new VPointF(100, 300, "B3", 0, 0));
+    data->UpdateGObject(9, new VPointF(300, 100, "B4", 0, 0));
+
+    VPiecePath internal_path(PiecePathType::InternalPath);
+    internal_path.Append(VPieceNode(6, Tool::NodePoint));
+    internal_path.Append(VPieceNode(7, Tool::NodePoint));
+    internal_path.setLineColor(QStringLiteral("red"));
+    internal_path.setLineType(Qt::DashLine);
+    internal_path.setLineWeight(QStringLiteral("0.5"));
+    data->UpdatePiecePath(100, internal_path);
+
+    VPiecePath cutout_path(PiecePathType::InternalPath);
+    cutout_path.Append(VPieceNode(8, Tool::NodePoint));
+    cutout_path.Append(VPieceNode(9, Tool::NodePoint));
+    cutout_path.setCutPath(true);
+    data->UpdatePiecePath(101, cutout_path);
+
+    piece->getInternalPaths() << 100 << 101;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief show_grainline gives the piece a grainline from (100, 350), pointing up, with the given length.
+ */
+void show_grainline(VPiece *piece, const QString &length, ArrowType type)
+{
+    VGrainlineData &grainline = piece->GetGrainlineGeometry();
+    grainline.SetVisible(true);
+    grainline.SetPos(QPointF(100, 350));
+    grainline.setRotation(QStringLiteral("90"));
+    grainline.setLength(length);
+    grainline.setArrowLength(QStringLiteral("20"));
+    grainline.setArrowType(type);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief square_piece_on_fold flags the first and last main path nodes as the fold line: the left side of the square.
+ */
+VPiece square_piece_on_fold(VContainer *data)
+{
+    VPiece piece = square_piece_with_slit(data, true, false);
+    QVector<VPieceNode> nodes = piece.GetPath().getNodes();
+    nodes.first().setFoldLine(true);
+    nodes.last().setFoldLine(true);
+    piece.GetPath().setNodes(nodes);
+    return piece;
+}
+} // namespace
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Internal and cutout paths keep their points, style, turn points and node indices.
+ */
+void TST_HandoffPiece::internalAndCutoutPathsMatchOldWriter() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+    VPiece piece = square_piece_with_slit(data.data(), true, false);
+    add_paths(data.data(), &piece);
+
+    const VLayoutPiece old_piece = VLayoutPiece::Create(piece, data.data());
+    const HandoffPiece new_piece = HandoffPiece::create(piece, data.data());
+
+    QCOMPARE(new_piece.internal_paths().size(), 1);
+    QCOMPARE(new_piece.cutout_paths().size(), 1);
+    QCOMPARE(old_piece.getInternalPaths().size(), 1);
+    QCOMPARE(old_piece.getCutoutPaths().size(), 1);
+
+    const HandoffPath      &internal_new = new_piece.internal_paths().first();
+    const VLayoutPiecePath  internal_old = old_piece.getInternalPaths().first();
+    QVERIFY(!internal_new.line.points.isEmpty());
+    QCOMPARE(internal_new.line.points, internal_old.Points());
+    QCOMPARE(internal_new.color, internal_old.getLineColor());
+    QCOMPARE(internal_new.color, QStringLiteral("red"));
+    QCOMPARE(internal_new.line_type, internal_old.getLineType());
+    QCOMPARE(internal_new.line_weight, internal_old.getLineWeight());
+    QVERIFY(!internal_new.cut);
+    QVERIFY(internal_new.line.turn_points.has_value());
+    QCOMPARE(internal_new.line.turn_points, internal_old.turnPoints());
+
+    const HandoffPath      &cutout_new = new_piece.cutout_paths().first();
+    const VLayoutPiecePath  cutout_old = old_piece.getCutoutPaths().first();
+    QVERIFY(!cutout_new.line.points.isEmpty());
+    QCOMPARE(cutout_new.line.points, cutout_old.Points());
+    QVERIFY(cutout_new.cut);
+    QCOMPARE(cutout_new.line.turn_points, cutout_old.turnPoints());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_HandoffPiece::grainlineMatchesOldWriter_data() const
+{
+    QTest::addColumn<QString>("length");
+    QTest::addColumn<int>("arrow_type");
+
+    QTest::newRow("both arrows")   << QStringLiteral("200") << static_cast<int>(ArrowType::Both);
+    QTest::newRow("top arrow")     << QStringLiteral("200") << static_cast<int>(ArrowType::Top);
+    QTest::newRow("bottom arrow")  << QStringLiteral("200") << static_cast<int>(ArrowType::Bottom);
+    QTest::newRow("outside piece") << QStringLiteral("600") << static_cast<int>(ArrowType::Both);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief The grainline path, with the shift that keeps it in the piece, and the grain direction equal the old writer.
+ */
+void TST_HandoffPiece::grainlineMatchesOldWriter() const
+{
+    QFETCH(QString, length);
+    QFETCH(int, arrow_type);
+
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+    VPiece piece = square_piece_with_slit(data.data(), true, false);
+    show_grainline(&piece, length, static_cast<ArrowType>(arrow_type));
+
+    const VLayoutPiece old_piece = VLayoutPiece::Create(piece, data.data());
+    const HandoffPiece new_piece = HandoffPiece::create(piece, data.data());
+
+    QVERIFY(new_piece.is_grainline_visible());
+    QVERIFY(!old_piece.getGrainline().isEmpty());
+    QVERIFY(!new_piece.grainline_points().isEmpty());
+    QCOMPARE(new_piece.grainline_points().size(), old_piece.getGrainline().size());
+    for (int i = 0; i < new_piece.grainline_points().size(); ++i)
+    {
+        QVERIFY2(QLineF(new_piece.grainline_points().at(i), old_piece.getGrainline().at(i)).length() < 0.01,
+                 qPrintable(QString::number(i)));
+    }
+
+    qreal old_angle = 0;
+    QVERIFY(old_piece.grainlineAngle(old_angle));
+    QCOMPARE(new_piece.grain_axis().size(), 2);
+    QVERIFY(qAbs(QLineF(new_piece.grain_axis().at(0), new_piece.grain_axis().at(1)).angle() - old_angle) < 0.01);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief A hidden grainline keeps its path and direction; only the visible flag changes.
+ */
+void TST_HandoffPiece::hiddenGrainlineKeepsItsData() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+    VPiece piece = square_piece_with_slit(data.data(), true, false);
+    show_grainline(&piece, QStringLiteral("200"), ArrowType::Both);
+    const HandoffPiece shown = HandoffPiece::create(piece, data.data());
+
+    piece.GetGrainlineGeometry().SetVisible(false);
+    const HandoffPiece hidden = HandoffPiece::create(piece, data.data());
+
+    QVERIFY(shown.is_grainline_visible());
+    QVERIFY(!hidden.is_grainline_visible());
+    QVERIFY(!hidden.grainline_points().isEmpty());
+    QCOMPARE(hidden.grainline_points(), shown.grainline_points());
+    QCOMPARE(hidden.grain_axis(), shown.grain_axis());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief The fold line, its cut line extension and its arrow and label geometry equal the old writer.
+ */
+void TST_HandoffPiece::foldLineMatchesOldWriter() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+    const VPiece piece = square_piece_on_fold(data.data());
+
+    const VLayoutPiece old_piece = VLayoutPiece::Create(piece, data.data());
+    const HandoffPiece new_piece = HandoffPiece::create(piece, data.data());
+
+    QVERIFY(!new_piece.fold_line().isNull());
+    QVERIFY(new_piece.is_on_fold());
+    QCOMPARE(new_piece.is_on_fold(), old_piece.isOnFold());
+    QCOMPARE(new_piece.fold_line(), old_piece.getFoldLineGraphic().foldLine());
+
+    const pattern_piece::FoldLineGraphic &graphic     = new_piece.fold_line_graphic();
+    const pattern_piece::FoldLineGraphic  old_graphic = old_piece.getFoldLineGraphic();
+    QVERIFY(!graphic.isNull());
+    QCOMPARE(graphic.arrowLine(), old_graphic.arrowLine());
+    QCOMPARE(graphic.startArrowHead(), old_graphic.startArrowHead());
+    QCOMPARE(graphic.endArrowHead(), old_graphic.endArrowHead());
+    QCOMPARE(graphic.labelCenter(), old_graphic.labelCenter());
+    QCOMPARE(graphic.labelAngle(), old_graphic.labelAngle());
+
+    // The old writer sends the fold line out to the cut line whenever it sends the cut line.
+    const QVector<QPointF> old_line = old_piece.getFoldLine();
+    QCOMPARE(old_line.size(), 2);
+    QVERIFY(!new_piece.fold_line_on_cut_line().isNull());
+    QCOMPARE(new_piece.fold_line_on_cut_line().p1(), old_line.at(0));
+    QCOMPARE(new_piece.fold_line_on_cut_line().p2(), old_line.at(1));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief A piece without a fold line has no fold line data and is not on the fold.
+ */
+void TST_HandoffPiece::pieceWithoutFoldLineHasNoFoldData() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+    const VPiece piece = square_piece_with_slit(data.data(), true, false);
+
+    const HandoffPiece handoff = HandoffPiece::create(piece, data.data());
+
+    QVERIFY(handoff.fold_line().isNull());
+    QVERIFY(handoff.fold_line_on_cut_line().isNull());
+    QVERIFY(handoff.fold_line_graphic().isNull());
+    QVERIFY(!handoff.is_on_fold());
 }
