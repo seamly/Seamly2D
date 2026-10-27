@@ -28,6 +28,9 @@ INCLUDEPATH += $${PWD}/ifc
 #VLayout static library
 INCLUDEPATH += $${PWD}/vlayout
 
+#layout_handoff static library
+INCLUDEPATH += $${PWD}/layout_handoff
+
 #QMuParser library
 INCLUDEPATH += $${PWD}/qmuparser
 

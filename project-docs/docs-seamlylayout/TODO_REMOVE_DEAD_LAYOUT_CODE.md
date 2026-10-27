@@ -54,6 +54,9 @@ Steps, in order:
   - [x] Dead.4.3.4 Tests: `TST_AbstractPiece` (new case `SeamAllowancePointWidths`), `TST_LabelTextManager`
   - [ ] Dead.4.3.5 MSI build, Qt suites and user check, `AGENT_CHECKLIST.md` §30
 - [ ] Dead.4.4 Write `layout_handoff`: `HandoffDocument`, `HandoffPiece`, `HandoffLabel`, `handoff_turn_points`, `handoff_ids`
+  - [x] Dead.4.4.1 New static lib `src/libs/layout_handoff/` (namespace `layout_handoff`; linked after `vlayout`, before `vpatterndb`). `handoff_ids` (`HandoffIds`, `sanitize_for_id`, `size_id_suffix`) and `handoff_turn_points` (`unify_turn_points`, `SizeLine`) moved out of `SvgGenerator` and `VLayoutPiece`; the old writer now calls them. Tests: `TST_HandoffIds`, `TST_HandoffTurnPoints`
+  - [ ] Dead.4.4.2 `HandoffLabel`, `HandoffPiece` (replaces `VLayoutPiece::Create`), `HandoffDocument` (replaces `SvgGenerator` and the Qt scene rendering); next: seamline, cut line, notches, internal and cutout paths, then grainline, labels, fold line
+  - [ ] Dead.4.4.3 Compare, switch `MainWindow`, jacket2 capture (the items below)
   - Port `TST_SvgComponentTags`, `BuiltInPieceWithFoldLineSendsOpenSeamline` and `FoldLineGroupHoldsArrowAndLabel` included
   - Port the `fold_line` group: fold line path out to the cut line, then the `fold_line_arrow` and `fold_line_label` parts (`VLayoutPiece::createFoldLineItem()`, nested parts in `SvgGenerator::addComponentGroups()`)
   - Compare with the old writer on the 8 sample patterns and the 13 CollectionTest patterns: same tagged tree, attributes, points (0.01 px after transforms) and label text

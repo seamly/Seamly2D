@@ -35,6 +35,8 @@
 #include <QSet>
 #include <QStringList>
 
+#include "../layout_handoff/handoff_ids.h"
+
 
 class SvgGenerator
 {
@@ -71,8 +73,7 @@ private:
     QString             m_description;
     int                 m_resolution;
     int                 m_piece_count;        ///< number of pieces added so far; provides data-type-number for pieces
-    QSet<QString>       m_used_ids;           ///< every component id emitted so far; guards uniqueness across pieces
-    QSet<QString>       m_used_piece_ids;     ///< every piece id emitted so far; guards uniqueness across pieces
+    layout_handoff::HandoffIds m_ids;         ///< piece, piece-set and component ids emitted so far
 
     QStringList         m_sizes;              ///< multisize sizes in pattern units; empty for an individual pattern
     QString             m_base_size;          ///< base size of the multisize measurements, in pattern units

@@ -79,6 +79,7 @@
 #include "../vmisc/vcommonsettings.h"
 #include "../vpatterndb/calculator.h"
 #include "../vgeometry/vpointf.h"
+#include "../layout_handoff/handoff_turn_points.h"
 #include "vlayoutdef.h"
 #include "vlayoutpiece_p.h"
 #include "../vpatterndb/LabelTextManager.h"
@@ -148,137 +149,6 @@ QPainterPath openPath(const QVector<QPointF> &points)
 bool isClosedPath(const QVector<QPointF> &points)
 {
     return points.size() > 2 && QLineF(points.first(), points.last()).length() < accuracyPointOnLine;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/** @brief One size of one piece line, for unifyNodeTurnPoints(). */
-struct SizeLine
-{
-    QVector<QPointF>            points;
-    std::optional<QVector<int>> turnPoints;
-    QVector<int>                nodeIndices;
-};
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief loopNodeShift finds how far a closed loop's node numbering moved between two sizes.
- * @details A built-in seam line starts at its longest edge, so another size can start it at another node.
- *          The shift that puts the nodes of both sizes closest together wins; the centroids first take out
- *          the drafting offset between the sizes.
- * @param from node vertices of one size.
- * @param to   node vertices of the next size; same count as @p from.
- * @return shift s: node j of @p from is node (j + s) % n of @p to.
- */
-int loopNodeShift(const QVector<QPointF> &from, const QVector<QPointF> &to)
-{
-    const int n = from.size();
-    QPointF fromCentre;
-    QPointF toCentre;
-    for (int j = 0; j < n; ++j)
-    {
-        fromCentre += from.at(j) / n;
-        toCentre += to.at(j) / n;
-    }
-
-    int bestShift = 0;
-    qreal bestCost = qInf();
-    for (int shift = 0; shift < n; ++shift)
-    {
-        qreal cost = 0;
-        for (int j = 0; j < n; ++j)
-        {
-            const QPointF d = (from.at(j) - fromCentre) - (to.at((j + shift) % n) - toCentre);
-            cost += QPointF::dotProduct(d, d);
-        }
-        // Strictly less: a tie keeps the smaller shift, so an unmoved loop keeps shift 0.
-        if (cost < bestCost)
-        {
-            bestCost = cost;
-            bestShift = shift;
-        }
-    }
-    return bestShift;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief unifyNodeTurnPoints makes a node that is a turn point in one size a turn point in every size.
- * @details Nodes match by their order along the line. Turn points away from a node stay as they are.
- * @param lines  the same line in every size, in size order.
- * @param closed whether the line is a closed loop.
- * @return the turn points of each size, parallel to @p lines. Empty when the line is skipped: a size has unknown
- *         turn points, or the sizes differ in node count.
- */
-QVector<QVector<int>> unifyNodeTurnPoints(const QVector<SizeLine> &lines, bool closed)
-{
-    if (lines.size() < 2)
-    {
-        return {};
-    }
-    const int nodeCount = lines.first().nodeIndices.size();
-    if (nodeCount == 0)
-    {
-        return {};
-    }
-    for (const SizeLine &line : lines)
-    {
-        if (!line.turnPoints.has_value() || line.nodeIndices.size() != nodeCount)
-        {
-            return {};
-        }
-    }
-
-    // Node k of the first size is node (k + offsets[s]) % nodeCount of size s. An open line always starts at
-    // the same node; a closed loop is matched to the size before it.
-    QVector<int> offsets(lines.size(), 0);
-    if (closed)
-    {
-        QVector<QPointF> previous;
-        for (int s = 0; s < lines.size(); ++s)
-        {
-            QVector<QPointF> nodes;
-            for (int i : lines.at(s).nodeIndices)
-            {
-                nodes.append(lines.at(s).points.at(i));
-            }
-            if (s > 0)
-            {
-                offsets[s] = (offsets.at(s - 1) + loopNodeShift(previous, nodes)) % nodeCount;
-            }
-            previous = nodes;
-        }
-    }
-
-    // A node is a turn point when it is one in any size.
-    QVector<bool> turnNodes(nodeCount, false);
-    for (int s = 0; s < lines.size(); ++s)
-    {
-        const SizeLine &line = lines.at(s);
-        for (int k = 0; k < nodeCount; ++k)
-        {
-            if (line.turnPoints->contains(line.nodeIndices.at((k + offsets.at(s)) % nodeCount)))
-            {
-                turnNodes[k] = true;
-            }
-        }
-    }
-
-    // Give every size the turn nodes, at that size's own vertex indices.
-    QVector<QVector<int>> turns;
-    for (int s = 0; s < lines.size(); ++s)
-    {
-        const SizeLine &line = lines.at(s);
-        QVector<int> added;
-        for (int k = 0; k < nodeCount; ++k)
-        {
-            if (turnNodes.at(k))
-            {
-                added.append(line.nodeIndices.at((k + offsets.at(s)) % nodeCount));
-            }
-        }
-        turns.append(AbstractPiece::addTurnPoints(line.points, line.turnPoints.value(), added, closed));
-    }
-    return turns;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -981,13 +851,13 @@ void VLayoutPiece::unifyTurnPoints(const QVector<VLayoutPiece *> &sizes)
                                     std::optional<QVector<int>> VLayoutPieceData::*turnPoints,
                                     QVector<int> VLayoutPieceData::*nodeIndices, bool closed)
     {
-        QVector<SizeLine> lines;
+        QVector<layout_handoff::SizeLine> lines;
         for (const VLayoutPiece *piece : sizes)
         {
             const VLayoutPieceData *data = piece->d.constData();
             lines.append({data->*points, data->*turnPoints, data->*nodeIndices});
         }
-        const QVector<QVector<int>> turns = unifyNodeTurnPoints(lines, closed);
+        const QVector<QVector<int>> turns = layout_handoff::unify_turn_points(lines, closed);
         for (int s = 0; s < turns.size(); ++s)
         {
             sizes.at(s)->d.data()->*turnPoints = turns.at(s);
@@ -1022,13 +892,14 @@ void VLayoutPiece::unifyTurnPoints(const QVector<VLayoutPiece *> &sizes)
         }
         for (int i = 0; i < count; ++i)
         {
-            QVector<SizeLine> lines;
+            QVector<layout_handoff::SizeLine> lines;
             for (const VLayoutPiece *piece : sizes)
             {
                 const VLayoutPiecePath &path = (piece->d.constData()->*paths).at(i);
                 lines.append({path.Points(), path.turnPoints(), path.nodeIndices()});
             }
-            const QVector<QVector<int>> turns = unifyNodeTurnPoints(lines, isClosedPath(lines.first().points));
+            const QVector<QVector<int>> turns = layout_handoff::unify_turn_points(lines,
+                                                                                  isClosedPath(lines.first().points));
             for (int s = 0; s < turns.size(); ++s)
             {
                 (sizes.at(s)->d.data()->*paths)[i].setTurnPoints(turns.at(s));

@@ -5,6 +5,7 @@ SUBDIRS = \
     vpropertyexplorer \
     ifc \
     vlayout \
+    layout_handoff \
     vgeometry \
     vpatterndb \
     vmisc \
