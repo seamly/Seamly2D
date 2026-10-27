@@ -65,7 +65,8 @@ SOURCES += \
     tst_handoffids.cpp \
     tst_handoffturnpoints.cpp \
     tst_handoffpiece.cpp \
-    tst_handofflabel.cpp
+    tst_handofflabel.cpp \
+    tst_handoffdocument.cpp
 
 *msvc*:SOURCES += stable.cpp
 
@@ -102,7 +103,8 @@ HEADERS += \
     tst_handoffids.h \
     tst_handoffturnpoints.h \
     tst_handoffpiece.h \
-    tst_handofflabel.h
+    tst_handofflabel.h \
+    tst_handoffdocument.h
 
 include(warnings.pri)
 
