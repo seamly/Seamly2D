@@ -143,58 +143,6 @@ void TST_Seamly2DCommandLine::OpenPatterns()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-// cppcheck-suppress unusedFunction
-void TST_Seamly2DCommandLine::ExportMode_data() const
-{
-    QTest::addColumn<QString>("file");
-    QTest::addColumn<QString>("arguments");
-    QTest::addColumn<int>("exitCode");
-
-    const QString tmp = QCoreApplication::applicationDirPath() + QDir::separator() + tmpTestFolder;
-
-    QTest::newRow("Issue #372")<< "issue_372.sm2d"
-                               << QString("-p;;0;;-d;;%1;;-b;;output").arg(tmp)
-                               << V_EX_OK;
-
-    QTest::newRow("A file with limited gradation. Multisize measurements. Wrong data.")
-            << "glimited_vst.sm2d"
-            << QString("-p;;0;;-d;;%1;;--gsize;;46;;--gheight;;164;;-b;;output").arg(tmp)
-            << V_EX_DATAERR;
-
-    QTest::newRow("A file with limited gradation. Multisize measurements. Correct data.")
-            << "glimited_vst.sm2d"
-            << QString("-p;;0;;-d;;%1;;--gsize;;40;;--gheight;;134;;-b;;output").arg(tmp)
-            << V_EX_OK;
-
-    QTest::newRow("A file with limited gradation. Individual measurements.")
-            << "glimited_vit.sm2d"
-            << QString("-p;;0;;-d;;%1;;--gsize;;40;;--gheight;;134;;-b;;output").arg(tmp)
-            << V_EX_DATAERR;
-
-    QTest::newRow("A file with limited gradation. No measurements.")
-            << "glimited_no_m.sm2d"
-            << QString("-p;;0;;-d;;%1;;--gsize;;40;;--gheight;;134;;-b;;output").arg(tmp)
-            << V_EX_DATAERR;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-// cppcheck-suppress unusedFunction
-void TST_Seamly2DCommandLine::ExportMode()
-{
-    QFETCH(QString, file);
-    QFETCH(QString, arguments);
-    QFETCH(int, exitCode);
-
-    QString error;
-    const QString tmp = QCoreApplication::applicationDirPath() + QDir::separator() + tmpTestFolder;
-    const QStringList arg = QStringList() << tmp + QDir::separator() + file
-                                          << arguments.split(";;");
-    const int exit = Run(exitCode, Seamly2DPath(), arg, error);
-
-    QVERIFY2(exit == exitCode, qUtf8Printable(error));
-}
-
-//---------------------------------------------------------------------------------------------------------------------
 void TST_Seamly2DCommandLine::TestMode_data() const
 {
     QTest::addColumn<QString>("file");

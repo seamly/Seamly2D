@@ -64,8 +64,6 @@ private slots:
     void initTestCase();
     void OpenPatterns_data() const;
     void OpenPatterns();
-    void ExportMode_data() const;
-    void ExportMode();
     void TestMode_data() const;
     void TestMode();
     void automationDataDirectory_data() const;

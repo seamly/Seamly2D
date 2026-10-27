@@ -33,6 +33,7 @@ Steps, in order:
   - [x] Dead.4.1.1 CLI export mode: `--basename` and the export and layout options. Keep `--test`, `--mfile`, `--gsize`, `--gheight`, `--no-scaling`
     - The export switch was `-b`/`--basename`. `-e` is `--gheight` and stays
     - Also removed: `MainWindow::DoExport`, `VDomDocument::UnitsHelpString`, the export dialog setters only the console used; `CLI_PARAMETERS.md` rewritten
+    - Fix: removed `TST_Seamly2DCommandLine::ExportMode`. It ran the removed `-p`, `-d`, `-b` options and failed `nmake check`
   - [x] Dead.4.1.2 Print, Print Tiled, Print Preview, Print Preview Tiled; tiled PDF export and its settings; `VPoster`; `TST_VPoster`
     - Also removed: `PreparePrinter`, `PageOrientation`, the scissors icons. `LayoutExportFormat::PDFTiled` stays, unused, so later format numbers stay the same
     - Test: `TST_ExportFormatCombobox::offersNoTiledPdf`
