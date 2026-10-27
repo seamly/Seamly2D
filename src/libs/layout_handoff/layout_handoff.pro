@@ -1,6 +1,9 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2015-01-02T15:39:01
+# @file   layout_handoff.pro
+# @author slspencer
+# Copyright (C) 2026 Seamly2D Project
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
 #-------------------------------------------------
 
@@ -8,7 +11,7 @@
 message("Entering layout_handoff.pro")
 include(../../../common.pri)
 
-QT += core gui xml
+QT += core gui widgets printsupport xml
 
 # Name of library
 TARGET = layout_handoff
@@ -17,6 +20,9 @@ TARGET = layout_handoff
 TEMPLATE = lib
 
 CONFIG += staticlib
+
+# The library has no stable.h, so it opts out of the release precompiled header from common.pri.
+CONFIG -= precompile_header
 
 include(layout_handoff.pri)
 
