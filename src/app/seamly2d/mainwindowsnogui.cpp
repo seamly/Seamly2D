@@ -62,7 +62,11 @@
 #include "../vtools/tools/vabstracttool.h"
 #include "../vtools/tools/pattern_piece_tool.h"
 #include "../../libs/vformat/svg_generator.h"
+#include "../layout_handoff/handoff_corner_cuts.h"
+#include "../layout_handoff/handoff_sheet.h"
 
+#include <QDir>
+#include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QGraphicsScene>
@@ -115,6 +119,54 @@ QString cornerList(const QVector<int> &corners)
         numbers.append(QString::number(corner));
     }
     return numbers.join(QStringLiteral(", "));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief createPlacedPiece reads a pattern piece into the handoff data of HandoffDocument.
+ * @details The offset holds the piece position on the canvas (Mx, My). generateHandoffSvgDocument() moves it onto
+ *          the flat sheet.
+ * @param piece         pattern piece, with its forced corner cuts set.
+ * @param data          pattern data at the size of the piece; must not be null.
+ * @param document      pattern document with the pattern label template; must not be null.
+ * @param size          multisize size in the data-units unit; empty for an individual pattern.
+ * @param piece_set_key same value for the same piece in every size; empty for an individual pattern.
+ */
+layout_handoff::HandoffPlacedPiece createPlacedPiece(const VPiece& piece, const VContainer* data,
+                                                     VAbstractPattern* document, const QString& size,
+                                                     const QString& piece_set_key)
+{
+    const QFont font = qApp->Settings()->getLabelFont();
+
+    // The labels shift into the piece bounds, so the piece comes first.
+    layout_handoff::HandoffPlacedPiece placed;
+    placed.info          = layout_handoff::HandoffPieceInfo::create(piece, size, piece_set_key);
+    placed.piece         = layout_handoff::HandoffPiece::create(piece, data);
+    placed.piece_label   = layout_handoff::HandoffLabel::create_piece_label(piece, data, placed.piece.bounds(), font);
+    placed.pattern_label = layout_handoff::HandoffLabel::create_pattern_label(piece.GetPatternInfo(), document, data,
+                                                                              placed.piece.bounds(), font);
+    placed.offset        = QPointF(piece.GetMx(), piece.GetMy());
+    return placed;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief writeTextFile writes text as UTF-8 to a file and logs the result.
+ * @param path absolute file path; an existing file is replaced.
+ * @param text file content.
+ */
+void writeTextFile(const QString& path, const QString& text)
+{
+    QFile file(path);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate) && file.write(text.toUtf8()) >= 0)
+    {
+        qCInfo(vMainNoGUIWindow, "Handoff compare: wrote %s", qUtf8Printable(path));
+    }
+    else
+    {
+        qCWarning(vMainNoGUIWindow, "Handoff compare: cannot write %s: %s", qUtf8Printable(path),
+                  qUtf8Printable(file.errorString()));
+    }
 }
 }
 
@@ -294,6 +346,106 @@ QString MainWindowsNoGUI::generateMultisizePiecesSvgDocument()
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief generateHandoffSvgDocument builds the pieces SVG with HandoffDocument, from pattern data only.
+ * @details Reads handoff_pieces, or every size in sizePieceLists for a multisize pattern. Layout Mode still sends
+ *          the SVG of generatePiecesSvgDocument(); this one is for the compare of the two writers.
+ * @return the complete SVG document; empty when there are no pieces.
+ */
+QString MainWindowsNoGUI::generateHandoffSvgDocument() const
+{
+    // Collect the pieces: every size in size order for a multisize pattern, else the one list.
+    QVector<layout_handoff::HandoffPlacedPiece> pieces;
+    QStringList sizes;
+    if (sizePieceLists.isEmpty())
+    {
+        pieces = handoff_pieces;
+    }
+    else
+    {
+        for (const SizePieceList& size_list : sizePieceLists)
+        {
+            sizes.append(sizeInExportUnit(size_list.size));
+            pieces += size_list.handoff_pieces;
+        }
+    }
+
+    QString svg;
+    if (!pieces.isEmpty())
+    {
+        const layout_handoff::HandoffStyle style = layout_handoff::HandoffStyle::from_settings(*qApp->Settings());
+
+        // Place every piece at its canvas position, then shift all of them so the sheet starts at the origin.
+        QVector<QRectF>  extents;
+        QVector<QPointF> positions;
+        for (const layout_handoff::HandoffPlacedPiece& placed : std::as_const(pieces))
+        {
+            extents.append(layout_handoff::piece_extent(placed.piece, style));
+            positions.append(placed.offset);
+        }
+        const layout_handoff::FlatSheet flat = layout_handoff::arrange_flat(extents, positions);
+        for (int i = 0; i < pieces.size(); ++i)
+        {
+            pieces[i].offset = flat.offsets.at(i);
+        }
+
+        // Pattern group attributes, then one piece group per piece.
+        layout_handoff::HandoffDocument document;
+        document.set_style(style);
+        document.set_pattern_name(doc->GetPatternName());
+        document.set_units(patternUnitName());
+        if (sizes.isEmpty())
+        {
+            document.set_sample_size(sizeInExportUnit(individualSampleSize()));
+        }
+        else
+        {
+            document.set_multisize(sizes, sizeInExportUnit(baseSize), sizeInExportUnit(layoutHeight));
+        }
+        document.set_sheet(flat.sheet, static_cast<int>(PrintDPI));
+        for (const layout_handoff::HandoffPlacedPiece& placed : std::as_const(pieces))
+        {
+            document.add_piece(placed);
+        }
+        svg = document.to_svg_string();
+    }
+    return svg;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief writeHandoffCompareFiles writes the SVG of both writers, so a developer can compare them.
+ * @details Developer switch: runs only when the environment variable SEAMLY_HANDOFF_COMPARE_DIR names an absolute
+ *          directory. Writes <pattern>_old.svg and <pattern>_new.svg there and creates the directory when missing.
+ *          The handoff to SeamlyLayout does not change.
+ * @param old_svg the SVG that Layout Mode sends, from generatePiecesSvgDocument().
+ */
+void MainWindowsNoGUI::writeHandoffCompareFiles(const QString& old_svg) const
+{
+    const QString directory = qEnvironmentVariable("SEAMLY_HANDOFF_COMPARE_DIR");
+    if (!directory.isEmpty())
+    {
+        // A relative path would depend on the working directory of Seamly2D.
+        if (!QDir::isAbsolutePath(directory))
+        {
+            qCWarning(vMainNoGUIWindow, "Handoff compare: SEAMLY_HANDOFF_COMPARE_DIR is not an absolute path: %s",
+                      qUtf8Printable(directory));
+        }
+        else if (!QDir().mkpath(directory))
+        {
+            qCWarning(vMainNoGUIWindow, "Handoff compare: cannot create %s", qUtf8Printable(directory));
+        }
+        else
+        {
+            const QDir compare_dir(directory);
+            writeTextFile(compare_dir.absoluteFilePath(FileName() + QStringLiteral("_old.svg")), old_svg);
+            writeTextFile(compare_dir.absoluteFilePath(FileName() + QStringLiteral("_new.svg")),
+                          generateHandoffSvgDocument());
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief refreshLabels call to recalculate piece labels. For example after changing a font.
  */
 void MainWindowsNoGUI::refreshLabels()
@@ -348,56 +500,63 @@ void MainWindowsNoGUI::refreshSeamAllowances()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<VLayoutPiece> MainWindowsNoGUI::preparePiecesForLayout(const QHash<quint32, VPiece> &pieces)
+/**
+ * @brief preparePiecesForLayout fills pieceList and handoff_pieces with the pieces at the current size.
+ * @details Both lists hold the same pieces in the same order: pieceList for the old writer, handoff_pieces for
+ *          HandoffDocument.
+ * @param pieces pieces included in the layout, keyed by VPiece id.
+ */
+void MainWindowsNoGUI::preparePiecesForLayout(const QHash<quint32, VPiece>& pieces)
 {
-    QVector<VLayoutPiece> pieceList;
-    if (!pieces.isEmpty())
+    pieceList.clear();
+    handoff_pieces.clear();
+    for (auto i = pieces.constBegin(); i != pieces.constEnd(); ++i)
     {
-        QHash<quint32, VPiece>::const_iterator i = pieces.constBegin();
-        while (i != pieces.constEnd())
-        {
-            VAbstractTool *tool = qobject_cast<VAbstractTool*>(VAbstractPattern::getTool(i.key()));
-            SCASSERT(tool != nullptr)
-            pieceList.append(VLayoutPiece::Create(i.value(), tool->getData()));
-            ++i;
-        }
+        VAbstractTool* tool = qobject_cast<VAbstractTool*>(VAbstractPattern::getTool(i.key()));
+        SCASSERT(tool != nullptr)
+        pieceList.append(VLayoutPiece::Create(i.value(), tool->getData()));
+        handoff_pieces.append(createPlacedPiece(i.value(), tool->getData(), doc, QString(), QString()));
     }
-
-    return pieceList;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief prepareSizePieceList creates the layout pieces of one multisize size.
+ * @brief prepareSizePieceList creates the layout pieces of one multisize size for both writers.
  *
- * The pattern must already be recalculated at that size. Pieces are ordered by
- * VPiece id, so every size lists the same pieces in the same order.
+ * The pattern must already be recalculated at that size: the pieces keep the results, not the pattern data.
+ * Pieces are ordered by VPiece id, so every size lists the same pieces in the same order.
  *
- * @param pieces pieces included in the layout, keyed by VPiece id.
- * @param size   size in pattern units.
- * @param cornerCuts seam allowance corners to cut in every size, per VPiece id. See unevenCornerCuts().
+ * @param pieces      pieces included in the layout, keyed by VPiece id.
+ * @param size        size in pattern units.
+ * @param corner_cuts seam allowance corners to cut in every size, per VPiece id. See unevenCornerCuts().
  * @return the size's pieces with their VPiece ids.
  */
-MainWindowsNoGUI::SizePieceList MainWindowsNoGUI::prepareSizePieceList(const QHash<quint32, VPiece> &pieces,
-                                                                      const QString &size,
-                                                                      const QHash<quint32, QVector<int>> &cornerCuts)
+MainWindowsNoGUI::SizePieceList MainWindowsNoGUI::prepareSizePieceList(
+    const QHash<quint32, VPiece>& pieces, const QString& size, const QHash<quint32, QVector<int>>& corner_cuts) const
 {
-    SizePieceList sizeList;
-    sizeList.size = size;
+    SizePieceList size_list;
+    size_list.size = size;
+
+    // The handoff writes sizes in the data-units unit; size_list.size stays in pattern units for the recalculation.
+    const QString export_size = sizeInExportUnit(size);
 
     QList<quint32> ids = pieces.keys();
     std::sort(ids.begin(), ids.end());
     for (const quint32 id : std::as_const(ids))
     {
-        VAbstractTool *tool = qobject_cast<VAbstractTool*>(VAbstractPattern::getTool(id));
+        VAbstractTool* tool = qobject_cast<VAbstractTool*>(VAbstractPattern::getTool(id));
         SCASSERT(tool != nullptr)
+
+        // Both writers build the piece with the same forced corner cuts.
         VPiece piece = pieces.value(id);
-        piece.setForcedCornerCuts(cornerCuts.value(id));
-        sizeList.pieceIds.append(id);
-        sizeList.pieces.append(VLayoutPiece::Create(piece, tool->getData()));
+        piece.setForcedCornerCuts(corner_cuts.value(id));
+        size_list.pieceIds.append(id);
+        size_list.pieces.append(VLayoutPiece::Create(piece, tool->getData()));
+        size_list.handoff_pieces.append(createPlacedPiece(piece, tool->getData(), doc, export_size,
+                                                          QString::number(id)));
     }
 
-    return sizeList;
+    return size_list;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -413,125 +572,114 @@ MainWindowsNoGUI::SizePieceList MainWindowsNoGUI::prepareSizePieceList(const QHa
 QHash<quint32, QVector<int>> MainWindowsNoGUI::unevenCornerCuts() const
 {
     QHash<quint32, QVector<int>> uneven;
-    if (sizePieceLists.size() < 2)
-    {
-        return uneven;
-    }
 
-    const SizePieceList &firstSize = sizePieceLists.first();
-    for (int p = 0; p < firstSize.pieceIds.size(); ++p)
+    // One size has nothing to match.
+    if (sizePieceLists.size() >= 2)
     {
-        const quint32 id = firstSize.pieceIds.at(p);
-        const QString name = firstSize.pieces.at(p).GetName();
-
-        // The corners of the same piece in every size that has it.
-        QVector<SeamAllowanceCorners> sizes;
-        for (const SizePieceList &sizeList : sizePieceLists)
+        const SizePieceList& first_size = sizePieceLists.first();
+        for (int p = 0; p < first_size.pieceIds.size(); ++p)
         {
-            const int i = sizeList.pieceIds.indexOf(id);
-            if (i >= 0)
+            const quint32 id   = first_size.pieceIds.at(p);
+            const QString name = first_size.handoff_pieces.at(p).info.name;
+
+            // The corners of the same piece in every size that has it.
+            QVector<SeamAllowanceCorners> sizes;
+            for (const SizePieceList& size_list : sizePieceLists)
             {
-                sizes.append(sizeList.pieces.at(i).seamAllowanceCorners());
+                const qsizetype i = size_list.pieceIds.indexOf(id);
+                if (i >= 0)
+                {
+                    sizes.append(size_list.handoff_pieces.at(i).piece.seam_allowance_corners());
+                }
+            }
+
+            const layout_handoff::CornerCutCompare compare = layout_handoff::compare_corner_cuts(sizes);
+            if (compare.match == layout_handoff::CornerCutMatch::count_differs)
+            {
+                qCInfo(vMainNoGUIWindow, "Piece \"%s\" (id %u): seam allowance corners %s are cut short in some "
+                       "sizes only. The sizes differ in corner count, so the other sizes keep these corners.",
+                       qUtf8Printable(name), id, qUtf8Printable(cornerList(compare.cuts)));
+            }
+            else if (compare.match == layout_handoff::CornerCutMatch::uneven)
+            {
+                qCInfo(vMainNoGUIWindow, "Piece \"%s\" (id %u): seam allowance corners %s are cut short in some "
+                       "sizes only. Every size cuts them.", qUtf8Printable(name), id,
+                       qUtf8Printable(cornerList(compare.cuts)));
+                uneven.insert(id, compare.cuts);
             }
         }
-
-        bool sameCount = true;
-        bool sameCuts = true;
-        QVector<int> cuts;
-        for (const SeamAllowanceCorners &corners : std::as_const(sizes))
-        {
-            sameCount = sameCount && corners.count == sizes.first().count;
-            sameCuts = sameCuts && corners.cut == sizes.first().cut;
-            cuts += corners.cut;
-        }
-        if (sameCuts)
-        {
-            continue;
-        }
-
-        std::sort(cuts.begin(), cuts.end());
-        cuts.erase(std::unique(cuts.begin(), cuts.end()), cuts.end());
-        if (!sameCount)
-        {
-            qCInfo(vMainNoGUIWindow, "Piece \"%s\" (id %u): seam allowance corners %s are cut short in some sizes "
-                   "only. The sizes differ in corner count, so the other sizes keep these corners.",
-                   qUtf8Printable(name), id, qUtf8Printable(cornerList(cuts)));
-            continue;
-        }
-
-        qCInfo(vMainNoGUIWindow, "Piece \"%s\" (id %u): seam allowance corners %s are cut short in some sizes "
-               "only. Every size cuts them.", qUtf8Printable(name), id, qUtf8Printable(cornerList(cuts)));
-        uneven.insert(id, cuts);
     }
     return uneven;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief needsCornerCuts tells whether a size has a piece whose cut corners differ from cornerCuts.
+ * @brief needsCornerCuts tells whether a size has a piece whose cut corners differ from corner_cuts.
  */
-bool MainWindowsNoGUI::needsCornerCuts(const SizePieceList &sizeList, const QHash<quint32, QVector<int>> &cornerCuts)
+bool MainWindowsNoGUI::needsCornerCuts(const SizePieceList& size_list, const QHash<quint32, QVector<int>>& corner_cuts)
 {
-    for (auto it = cornerCuts.constBegin(); it != cornerCuts.constEnd(); ++it)
+    bool needs = false;
+    for (auto it = corner_cuts.constBegin(); it != corner_cuts.constEnd() && !needs; ++it)
     {
-        const int i = sizeList.pieceIds.indexOf(it.key());
-        if (i >= 0 && sizeList.pieces.at(i).seamAllowanceCorners().cut != it.value())
-        {
-            return true;
-        }
+        const qsizetype i = size_list.pieceIds.indexOf(it.key());
+        needs = i >= 0 && size_list.handoff_pieces.at(i).piece.seam_allowance_corners().cut != it.value();
     }
-    return false;
+    return needs;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief unifySizeTurnPoints gives every size of a piece the node turn points of all its sizes.
+ * @brief unifySizeTurnPoints gives every size of a piece the node turn points of all its sizes, in both writers.
  *
  * Grading in SeamlyLayout needs the same turn points in every size of a piece. See
- * VLayoutPiece::unifyTurnPoints(). A line whose node count differs between sizes keeps the turn points of each
- * size; the log lists the node counts of each such piece, and the number of such pieces.
+ * HandoffPiece::unify_piece_turn_points(). A line whose node count differs between sizes keeps the turn points of
+ * each size; the log lists the node counts of each such piece, and the number of such pieces.
  */
 void MainWindowsNoGUI::unifySizeTurnPoints()
 {
-    if (sizePieceLists.size() < 2)
+    // One size has nothing to match.
+    if (sizePieceLists.size() >= 2)
     {
-        return;
-    }
-
-    int differing = 0;
-    const QVector<quint32> ids = sizePieceLists.first().pieceIds;
-    for (const quint32 id : ids)
-    {
-        // The same piece in every size that has it.
-        QVector<VLayoutPiece *> sizes;
-        QStringList sizeNames;
-        QStringList nodeCounts;
-        for (SizePieceList &sizeList : sizePieceLists)
+        int differing = 0;
+        const QVector<quint32> ids = sizePieceLists.first().pieceIds;
+        for (const quint32 id : ids)
         {
-            const int i = sizeList.pieceIds.indexOf(id);
-            if (i >= 0)
+            // The same piece in every size that has it.
+            QVector<VLayoutPiece*>                old_sizes;
+            QVector<layout_handoff::HandoffPiece*> sizes;
+            QString                               name;
+            QStringList                           size_names;
+            QStringList                           node_counts;
+            for (SizePieceList& size_list : sizePieceLists)
             {
-                VLayoutPiece &piece = sizeList.pieces[i];
-                sizes.append(&piece);
-                sizeNames.append(sizeList.size);
+                const qsizetype i = size_list.pieceIds.indexOf(id);
+                if (i >= 0)
+                {
+                    layout_handoff::HandoffPlacedPiece& placed = size_list.handoff_pieces[i];
+                    old_sizes.append(&size_list.pieces[i]);
+                    sizes.append(&placed.piece);
+                    name = placed.info.name;
+                    size_names.append(size_list.size);
 
-                const QVector<int> lines = piece.lineNodeCounts();
-                nodeCounts.append(QStringLiteral("%1/%2/%3/%4").arg(lines.at(0)).arg(lines.at(1)).arg(lines.at(2))
-                                  .arg(piece.seamAllowanceCorners().count));
+                    const QVector<int> lines = placed.piece.line_node_counts();
+                    node_counts.append(QStringLiteral("%1/%2/%3/%4").arg(lines.at(0)).arg(lines.at(1))
+                                       .arg(lines.at(2)).arg(placed.piece.seam_allowance_corners().count));
+                }
             }
-        }
 
-        if (nodeCounts.count(nodeCounts.first()) != nodeCounts.size())
-        {
-            ++differing;
-            qCInfo(vMainNoGUIWindow, "Piece \"%s\" (id %u): node counts differ between sizes (seam line/cut line/"
-                   "built-in seam line/seam allowance corners): %s", qUtf8Printable(sizes.first()->GetName()), id,
-                   qUtf8Printable(sizeRuns(sizeNames, nodeCounts)));
+            if (node_counts.count(node_counts.first()) != node_counts.size())
+            {
+                ++differing;
+                qCInfo(vMainNoGUIWindow, "Piece \"%s\" (id %u): node counts differ between sizes (seam line/cut "
+                       "line/built-in seam line/seam allowance corners): %s", qUtf8Printable(name), id,
+                       qUtf8Printable(sizeRuns(size_names, node_counts)));
+            }
+            VLayoutPiece::unifyTurnPoints(old_sizes);
+            layout_handoff::HandoffPiece::unify_piece_turn_points(sizes);
         }
-        VLayoutPiece::unifyTurnPoints(sizes);
+        qCInfo(vMainNoGUIWindow, "Multisize layout: %d sizes; %d of %d pieces differ in node count between sizes.",
+               static_cast<int>(sizePieceLists.size()), differing, static_cast<int>(ids.size()));
     }
-    qCInfo(vMainNoGUIWindow, "Multisize layout: %d sizes; %d of %d pieces differ in node count between sizes.",
-           static_cast<int>(sizePieceLists.size()), differing, static_cast<int>(ids.size()));
 }
 
 //---------------------------------------------------------------------------------------------------------------------

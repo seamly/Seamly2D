@@ -57,6 +57,7 @@
 #include <QToolButton>
 
 #include "../vlayout/vlayoutpiece.h"
+#include "../layout_handoff/handoff_document.h"
 #include "xml/vpattern.h"
 #include "dialogs/export_layout_dialog.h"
 #include "../vwidgets/vabstractmainwindow.h"
@@ -90,25 +91,29 @@ public slots:
                    const QMarginsF &margins)const;
 
 protected:
-    /** @brief Pieces of one multisize size; pieceIds and pieces are index-aligned. */
+    /** @brief Pieces of one multisize size; pieceIds, pieces and handoff_pieces are index-aligned. */
     struct SizePieceList
     {
         QString size;                 /**< size in pattern units, as listed in the size combo box */
         QVector<quint32> pieceIds;    /**< VPiece id of each piece; matches one piece across sizes */
-        QVector<VLayoutPiece> pieces;
+        QVector<VLayoutPiece> pieces; /**< pieces for the old writer, SvgGenerator */
+        QVector<layout_handoff::HandoffPlacedPiece> handoff_pieces; /**< the same pieces for HandoffDocument */
     };
 
     QVector<VLayoutPiece> pieceList;
+    /** @brief the pieces of pieceList for HandoffDocument, in the same order */
+    QVector<layout_handoff::HandoffPlacedPiece> handoff_pieces;
     QVector<SizePieceList> sizePieceLists; /**< every size of a multisize pattern; empty for an individual pattern */
     QString baseSize;                      /**< base size of the multisize measurements, in pattern units */
     QString layoutHeight;                  /**< height of every size in the multisize handoff, in pattern units */
 
-    SizePieceList prepareSizePieceList(const QHash<quint32, VPiece> &pieces, const QString &size,
-                                       const QHash<quint32, QVector<int>> &cornerCuts = QHash<quint32, QVector<int>>());
+    SizePieceList prepareSizePieceList(const QHash<quint32, VPiece>& pieces, const QString& size,
+                                       const QHash<quint32, QVector<int>>& corner_cuts =
+                                           QHash<quint32, QVector<int>>()) const;
     /** @brief measurementFileUnit sets unit to the unit of the referenced measurement file; false when none. */
     virtual bool  measurementFileUnit(Unit &unit) const;
     QHash<quint32, QVector<int>> unevenCornerCuts() const;
-    static bool   needsCornerCuts(const SizePieceList &sizeList, const QHash<quint32, QVector<int>> &cornerCuts);
+    static bool   needsCornerCuts(const SizePieceList& size_list, const QHash<quint32, QVector<int>>& corner_cuts);
     void          unifySizeTurnPoints();
 
     QGraphicsScene *currentScene;    /** @brief currentScene pointer to current scene. */
@@ -125,7 +130,7 @@ protected:
 
     bool         isNoScaling;
 
-    static QVector<VLayoutPiece> preparePiecesForLayout(const QHash<quint32, VPiece> &pieces);
+    void         preparePiecesForLayout(const QHash<quint32, VPiece>& pieces);
 
     void         InitTempLayoutScene();
     QString      FileName() const;
@@ -140,6 +145,8 @@ private:
 public:
     QString generatePiecesSvgDocument();
     QString generateMultisizePiecesSvgDocument();
+    QString generateHandoffSvgDocument() const;
+    void    writeHandoffCompareFiles(const QString& old_svg) const;
 };
 
 #endif // MAINWINDOWSNOGUI_H

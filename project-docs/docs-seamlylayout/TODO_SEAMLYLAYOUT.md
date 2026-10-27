@@ -25,20 +25,37 @@ Closes Gap 2 of Dead.4.4.3 (`TODO_REMOVE_DEAD_LAYOUT_CODE.md`). After it, Dead.4
 - Users of these lists: `unevenCornerCuts()`, `needsCornerCuts()`, `unifySizeTurnPoints()`, `arrangePieceItemsFlat()`, `generatePiecesSvgDocument()`, `generateMultisizePiecesSvgDocument()`, `MainWindow::prepareMultisizePieceLists()`, and the `clear()` calls in `mainwindow.cpp`.
 - New value per piece: `layout_handoff::HandoffPlacedPiece` (info, piece, piece label, pattern label, offset). `placed_piece()` in `tst_handoffdocument.cpp` shows the calls.
 - Constraint: `recalculateAtSize()` changes the pattern data. Build the pieces and labels of a size while that size is active, and keep the results, not the `VContainer`.
-- [ ] Layout.106.1 User decision: how Dead.4.4.3 compares the two writers.
+- [x] Layout.106.1 User decision: how Dead.4.4.3 compares the two writers.
   - Option A (recommended): fill the old and the new lists in the same size loop. A developer switch writes both SVGs. The `MainWindow` switch deletes the old lists.
   - Option B: replace the old lists now. Compare only in a test program that loads a pattern and runs both writers.
-- [ ] Layout.106.2 Add the new lists: `QVector<HandoffPlacedPiece>` for an individual pattern, and one in `SizePieceList`. Keep them index-aligned with `pieceIds`.
-- [ ] Layout.106.3 `preparePiecesForLayout()` and `prepareSizePieceList()`: build each piece with `HandoffPieceInfo::create()`, `HandoffPiece::create()`, `HandoffLabel::create_piece_label()` and `create_pattern_label()`.
+  - Decision: Option A. Developer switch: environment variable `SEAMLY_HANDOFF_COMPARE_DIR=<absolute directory>`. Removal: Layout.107.
+- [x] Layout.106.2 Add the new lists: `QVector<HandoffPlacedPiece>` for an individual pattern, and one in `SizePieceList`. Keep them index-aligned with `pieceIds`.
+  - Done: `MainWindowsNoGUI::handoff_pieces`, `SizePieceList::handoff_pieces`. `mainwindow.cpp` clears `handoff_pieces` with `pieceList`.
+- [x] Layout.106.3 `preparePiecesForLayout()` and `prepareSizePieceList()`: build each piece with `HandoffPieceInfo::create()`, `HandoffPiece::create()`, `HandoffLabel::create_piece_label()` and `create_pattern_label()`.
   - Call `setForcedCornerCuts()` before `HandoffPiece::create()`, as now.
   - The pattern label needs `doc`, so `preparePiecesForLayout()` can no longer be static.
   - Piece set key: the `VPiece` id, as now.
-- [ ] Layout.106.4 `unevenCornerCuts()` and `needsCornerCuts()`: read `HandoffPiece::seam_allowance_corners()` and `HandoffPieceInfo::name`. Move the corner compare into a pure function, so a unit test can call it.
-- [ ] Layout.106.5 `unifySizeTurnPoints()`: call `HandoffPiece::unify_piece_turn_points()`. Count the differing pieces with `line_node_counts()`, as now.
-- [ ] Layout.106.6 Size units: pass every size through `sizeInExportUnit()` (Layout.103.8) to `HandoffPieceInfo` and `HandoffDocument::set_multisize()`. Fix the briefs in `handoff_document.h` that say "in pattern units".
-- [ ] Layout.106.7 Add a function that builds the SVG from the new lists: `HandoffStyle::from_settings()`, `set_units()`, `set_sample_size()` or `set_multisize()`, `piece_extent()` and `arrange_flat()` for the sheet and offsets, `add_piece()`, `to_svg_string()`. Layout Mode does not call it until the Dead.4.4.3 compare passes.
-- [ ] Layout.106.8 Tests: the corner compare (same cuts; different cuts, same corner count; different corner count). Run `TST_HandoffPiece` and `TST_HandoffDocument` again.
+  - Done: both functions fill the old and the new list in one loop (`createPlacedPiece()`). `offset` holds Mx/My until the SVG function places the piece.
+- [x] Layout.106.4 `unevenCornerCuts()` and `needsCornerCuts()`: read `HandoffPiece::seam_allowance_corners()` and `HandoffPieceInfo::name`. Move the corner compare into a pure function, so a unit test can call it.
+  - Done: `layout_handoff::compare_corner_cuts()` in new `handoff_corner_cuts.h/.cpp`.
+- [x] Layout.106.5 `unifySizeTurnPoints()`: call `HandoffPiece::unify_piece_turn_points()`. Count the differing pieces with `line_node_counts()`, as now.
+  - Done: unifies the old and the new list.
+- [x] Layout.106.6 Size units: pass every size through `sizeInExportUnit()` (Layout.103.8) to `HandoffPieceInfo` and `HandoffDocument::set_multisize()`. Fix the briefs in `handoff_document.h` that say "in pattern units".
+  - Done: also the `@param size` briefs in `handoff_ids.h`.
+- [x] Layout.106.7 Add a function that builds the SVG from the new lists: `HandoffStyle::from_settings()`, `set_units()`, `set_sample_size()` or `set_multisize()`, `piece_extent()` and `arrange_flat()` for the sheet and offsets, `add_piece()`, `to_svg_string()`. Layout Mode does not call it until the Dead.4.4.3 compare passes.
+  - Done: `generateHandoffSvgDocument()`. `writeHandoffCompareFiles()` writes `<pattern>_old.svg` and `<pattern>_new.svg` when `SEAMLY_HANDOFF_COMPARE_DIR` is set. `exportPiecesToSeamlyLayout()` calls it; SeamlyLayout still gets the old SVG.
+- [x] Layout.106.8 Tests: the corner compare (same cuts; different cuts, same corner count; different corner count). Run `TST_HandoffPiece` and `TST_HandoffDocument` again.
+  - Done: new `TST_HandoffCornerCuts` (4 cases pass in a scratch harness). `TST_HandoffPiece` and `TST_HandoffDocument` run in 106.9.
+  - `cl /Zs` of `mainwindowsnogui.cpp`, `mainwindow.cpp` and `handoff_corner_cuts.cpp`: no errors.
 - [ ] Layout.106.9 Verify: MSI build and Qt suites (ask first). NEEDS_USER_TEST: Layout Mode on an individual pattern and on a multisize pattern opens SeamlyLayout with the same pieces as before.
+
+### [ ] Task Layout.107 — Implement - Seamly2D: remove the `SEAMLY_HANDOFF_COMPARE_DIR` developer switch
+
+Layout.106 added the switch for the Dead.4.4.3 compare. Remove it when that compare passes, at the latest with Dead.4.5.
+
+- [ ] Layout.107.1 Delete `writeHandoffCompareFiles()` and its call in `MainWindow::exportPiecesToSeamlyLayout()`.
+- [ ] Layout.107.2 Delete `writeTextFile()` in `mainwindowsnogui.cpp`, and the `<QDir>` and `<QFile>` includes if nothing else uses them.
+- [ ] Layout.107.3 Remove `SEAMLY_HANDOFF_COMPARE_DIR` from the docs that name it.
 
 ## VERIFY
 
