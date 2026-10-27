@@ -453,6 +453,7 @@ private:
     bool               recalculateAtSize(int size, int height);
     QHash<quint32, VPiece> currentLayoutPieces() const;
     bool               prepareMultisizePieceLists();
+    bool               measurementFileUnit(Unit &unit) const override;
     void               checkRequiredMeasurements(const MeasurementDoc *m);
     bool               isSeamlyLayoutRunning() const;
     void               raiseSeamlyLayout() const;
