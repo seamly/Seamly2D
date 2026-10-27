@@ -82,7 +82,7 @@ See `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, "Not exported".
       - [x] Fabric R13, MSI 26.10.2023: `test-seamly-layout/layouts/jacket2/20261021/jacket2_40-146_R13_Fabric_BaseSize500_202610211408_apparelwerks_compliance_report.pdf`. 7 of 7 pieces graded: 7 blocks, 7 layer 5 lines, `# n` texts in each block. No departures. 5 advisories: Unicode escapes, L84 densification, validation spans, curve tolerance, piece-113 layer 14 curve points.
       - [x] Fabric R13, MSI 26.10.2312: `test-seamly-layout/layouts/jacket2/20261023/jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf`. 7 of 7 graded, 0 departures, the same 5 advisories. Page 1 caption "L5 endpoint mismatch up to 227.990 — sizes not a pure translation": accepted as a viewer note (user decision). Back's layer 5 line ends on two corners with different grade rules; only a graded nest needs the same line in every size (D6673 §4.3.1.5).
       - [ ] Lining R13: Detail 4, the 8th piece, is in the Lining document. Export its Base Size 500 and check it in aw.fyi.
-      - [ ] R12: the same check for Fabric and Lining.
+      - [x] R12: not needed. Layout.100 removed the R12 export.
 
     | aw.fyi finding | Report | Cause | Task |
     |---|---|---|---|

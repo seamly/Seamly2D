@@ -490,3 +490,27 @@ Needs the next MSI. Nothing should look different from the previous MSI.
 - [ ] Piece labels and the pattern label: same text, same font size. Resize a label: the text refits.
 - [ ] Piece Properties: the Material list shows Fabric, Lining, Interfacing, Interlining; a new piece gets Fabric.
 - [ ] Press Layout. SeamlyLayout opens with every size; turn points and seam allowances as before.
+
+## 31. DXF export menu, units and DXF-AAMA piece text
+
+Needs the next MSI.
+
+- [ ] Export > DXF lists DXF-ASTM (R13), DXF-ASTM (CLO3D) and DXF-AAMA (R11). No R12 item. (Layout.100.6)
+- [ ] View > DXF-ASTM still opens a `.dxf` file. (Layout.100.6)
+- [ ] Inch `.smis` pattern: export DXF-AAMA and DXF-ASTM. Piece text has `Units:ENGLISH`; coordinates in inches, 4 decimals; the `.rul` has `UNITS:ENGLISH`. (Layout.103)
+- [ ] cm `.smms` pattern, size 50: piece text has `Size:500` and `Units:METRIC`. (Layout.103)
+- [ ] Pattern in mm or cm with an inch `.smis`: DXF has `Units:ENGLISH`, inches. Inch pattern with a cm `.smms`: `Units:METRIC`, sizes in mm. No measurement file: pattern unit. (Layout.103.8)
+- [ ] Multisize pattern, Export > DXF-AAMA: blocks named `<piece name>_<size>`, for example `Front_36`. (Layout.104)
+- [ ] A piece with an annotation: `Annotation:` follows `Size:`. (Layout.104)
+- [ ] `Creation Time:` reads `HH:MM:SS` in the DXF and the `.rul`. (Layout.104)
+- [ ] DXF-ASTM output is unchanged: blocks `piece_..._M`, time `hh-mm`. (Layout.104)
+
+## 32. SEAMLY_DATA_DIR for SeamlyLayout
+
+Needs the next MSI. (Layout.101.4)
+
+- [ ] Set `SEAMLY_DATA_DIR=D:/sl_job`. Run `seamlylayout.exe`. Expect `D:/sl_job/settings/qt6_seamlylayout.ini` and `D:/sl_job/logs/seamlylayout/log_*.txt`. Nothing new in `%LOCALAPPDATA%\Seamly\SeamlyLayout`.
+- [ ] Set a relative value, for example `sl_job`. SeamlyLayout exits with code 78.
+- [ ] Set a path under a file, for example `D:/notes.txt/sl`. SeamlyLayout exits with code 73.
+- [ ] Unset the variable. SeamlyLayout uses its normal settings folder.
+- [ ] Set the variable, run Seamly2D, open a pattern, press Layout. SeamlyLayout writes to the same folder.
