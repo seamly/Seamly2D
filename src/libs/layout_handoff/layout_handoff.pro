@@ -46,6 +46,7 @@ CONFIG -= precompile_header
 
 include(warnings.pri)
 include(layout_handoff.pri)
+include(../libs.pri)
 
 # Static library: the linker puts it into the apps, so it has no install rule
 
@@ -68,5 +69,3 @@ CONFIG(release, debug|release){
         QMAKE_CXXFLAGS += -O3
     }
 }
-
-include (../libs.pri)
