@@ -30,6 +30,7 @@
 
 #include <QLineF>
 #include <QPointF>
+#include <QRectF>
 #include <QString>
 #include <QStringList>
 #include <QVector>
@@ -102,6 +103,13 @@ public:
     bool                        has_built_in_seam_allowance() const;
     bool                        is_seam_line_hidden() const;
     const HandoffLine          &seam_line() const;
+
+    /**
+     * @brief bounds returns the bounding rectangle of the seam line drawn with a one pixel pen.
+     * @details Grainline and labels shift into this rectangle. A piece without a seam line gives a null rectangle.
+     */
+    QRectF bounds() const;
+
     const HandoffLine          &cut_line() const;
     const HandoffLine          &built_in_seam_line() const;
     const HandoffNotches       &notches() const;
