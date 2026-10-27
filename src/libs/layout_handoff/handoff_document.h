@@ -23,6 +23,7 @@
 //  - HandoffPieceInfo: piece properties for the data-* attributes.
 //  - HandoffIds: unique SVG ids for pieces and components.
 //  - handoff_turn_points: turn points matched across the sizes of a multisize piece.
+//  - handoff_corner_cuts: cut seam allowance corners compared across the sizes of a multisize piece.
 //  - handoff_sheet: piece bounds and the flat sheet, with no QGraphicsScene.
 //
 //  @copyright
@@ -107,7 +108,7 @@ struct HandoffPieceInfo
     QString name;
     QString letter;
     QString material;
-    QString size;         ///< multisize size in pattern units; empty for an individual pattern
+    QString size;         ///< multisize size in the data-units unit; empty for an individual pattern
     QString piece_set_key; ///< same value for the same piece in every size; empty = no piece set
     int     quantity = 1;
     int     rotation = 0; ///< rotation step in degrees; 0 = the piece may not rotate
@@ -119,7 +120,7 @@ struct HandoffPieceInfo
     /**
      * @brief create reads the piece properties of a pattern piece.
      * @param piece pattern piece.
-     * @param size  multisize size in pattern units; empty for an individual pattern.
+     * @param size  multisize size in the data-units unit; empty for an individual pattern.
      * @param piece_set_key key of the piece set; empty = no piece set.
      */
     static HandoffPieceInfo create(const VPiece &piece, const QString &size, const QString &piece_set_key);
@@ -156,13 +157,15 @@ public:
     void set_units(const QString &units);
 
     /**
-     * @brief set_sample_size sets data-sample-size of an individual pattern; ignored for a multisize pattern.
+     * @brief set_sample_size sets data-sample-size of an individual pattern, in the data-units unit.
+     * @details Ignored for a multisize pattern.
      */
     void set_sample_size(const QString &sample_size);
 
     /**
      * @brief set_multisize marks the pattern as multisize.
-     * @param sizes     every size, in pattern units, in the order the pieces are added.
+     * @details Every value is in the data-units unit.
+     * @param sizes     every size, in the order the pieces are added.
      * @param base_size base size; empty writes no attribute.
      * @param height    height of every size; empty writes no attribute.
      */

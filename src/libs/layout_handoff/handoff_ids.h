@@ -61,7 +61,7 @@ public:
      * @brief piece_id returns the id of a piece group.
      * @param fallback_id  id used when the piece name gives no usable text; unique by construction.
      * @param piece_name   piece name.
-     * @param size         multisize size in pattern units; empty for an individual pattern.
+     * @param size         multisize size in the data-units unit; empty for an individual pattern.
      * @param piece_number number of the piece in the document; makes a repeated id unique.
      */
     QString piece_id(const QString &fallback_id, const QString &piece_name, const QString &size, int piece_number);
@@ -79,7 +79,7 @@ public:
      * @param type_number  count of components of this type in the piece, from 1.
      * @param piece_name   piece name.
      * @param piece_id     id of the piece group; the fallback when the piece name gives no usable text.
-     * @param size         multisize size in pattern units; empty for an individual pattern.
+     * @param size         multisize size in the data-units unit; empty for an individual pattern.
      * @param piece_number number of the piece in the document; makes a repeated id unique.
      */
     QString component_id(const QString &type, int type_number, const QString &piece_name, const QString &piece_id,

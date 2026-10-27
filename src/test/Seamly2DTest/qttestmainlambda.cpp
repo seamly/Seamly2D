@@ -83,6 +83,7 @@
 #include "tst_labeltextmanager.h"
 #include "tst_handoffids.h"
 #include "tst_handoffturnpoints.h"
+#include "tst_handoffcornercuts.h"
 #include "tst_handoffpiece.h"
 #include "tst_handofflabel.h"
 #include "tst_handoffdocument.h"
@@ -244,6 +245,7 @@ int main(int argc, char** argv)
     ASSERT_TEST(new TST_LabelTextManager());
     ASSERT_TEST(new TST_HandoffIds());
     ASSERT_TEST(new TST_HandoffTurnPoints());
+    ASSERT_TEST(new TST_HandoffCornerCuts());
     ASSERT_TEST(new TST_HandoffPiece());
     ASSERT_TEST(new TST_HandoffLabel());
     ASSERT_TEST(new TST_HandoffDocument());
