@@ -174,7 +174,7 @@ pub fn encode_dxf_point(writer: &mut dyn Write, point: &DxfPoint) -> std::io::Re
 // @param layer    DXF layer for the POLYLINE, its VERTEXes and SEQEND.
 // @param closed   Whether the polyline is closed (group 70 = 1).
 // @param group_250 CLO3D line type (0 = boundary, 2 = sewing line); None omits it.
-//                  Group 250 is not DXF R12 or D6673: CLO3D reads it, other readers must ignore it.
+//                  Group 250 is not DXF R11 or D6673: CLO3D reads it, other readers must ignore it.
 // @return Result indicating success or error.
 pub fn encode_astm_polyline(
     writer: &mut dyn Write,

@@ -1733,3 +1733,14 @@ The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`sr
 ## Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
 
 ## Task Layout.9 — Piece-mode handoff passes a stringified SVG document
+
+## Task Layout.100 — Remove the DXF-ASTM (R12) export code and menu option
+
+- [x] Layout.100.1 `ExportMenu.qml` "DXF-ASTM (R12)" item removed; `TopMenuBar.qml` and `Main.qml` handlers removed. The View menu keeps its one "DXF-ASTM" item (opens a .dxf).
+- [x] Layout.100.2 `Main.qml` `pendingDxfVersion` defaults move to R13.
+- [x] Layout.100.3 `export_dxf` accepts "R11" and "R13"; absent or unknown writes R13.
+- [x] Layout.100.4 `DxfVersion::R12` removed. R11 stays as the AC1009 base (DXF-AAMA and the R13 rewrite). `DxfVersion` and converter default is R13. Tests that parsed AC1009 now ask for R11.
+- [x] Layout.100.5 File name segment R12 removed from tests; docs updated (`seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, `TODO_DXF.md`, `AGENT_CHECKLIST.md` section line 288).
+- [ ] Layout.100.6 NEEDS_USER_TEST: Export > DXF shows R13, CLO3D and AAMA (R11) only; View > DXF-ASTM still opens a .dxf.
+- Verified: `cargo test --workspace` all pass (257 cxxqt_bridge, 44 ezdxf2dxfastm). QML not run (next MSI).
+- Commit: see git log "Remove DXF-ASTM (R12) export".

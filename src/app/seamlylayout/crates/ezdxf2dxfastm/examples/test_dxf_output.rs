@@ -11,7 +11,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("=== Testing DXF-ASTM Export ===");
 
     // Create a simple drawing.
-    let mut drawing = Drawing::new(DxfVersion::R12);
+    let mut drawing = Drawing::new(DxfVersion::R11);
 
     // Add a block with a line.
     let mut block = Block::new("TestPiece".to_string());

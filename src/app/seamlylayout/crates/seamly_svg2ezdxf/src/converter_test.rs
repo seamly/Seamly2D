@@ -30,7 +30,7 @@ mod tests {
         let drawing = svg_to_ezdxf(&doc, &options).expect("Failed to convert");
 
         // Verify drawing structure.
-        assert_eq!(drawing.version, DxfVersion::R12);
+        assert_eq!(drawing.version, DxfVersion::R13);
         assert_eq!(drawing.blocks.len(), 0);
         assert_eq!(drawing.modelspace_entities.len(), 1);
 

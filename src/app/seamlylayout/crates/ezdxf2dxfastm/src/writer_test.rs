@@ -117,7 +117,7 @@ mod tests {
     #[test]
     fn test_export_dxf_astm() {
         // Create a simple drawing.
-        let mut drawing = Drawing::new(DxfVersion::R12);
+        let mut drawing = Drawing::new(DxfVersion::R11);
 
         // Add a block.
         let mut block = Block::new("TestPiece".to_string());
@@ -171,7 +171,7 @@ mod tests {
     #[test]
     fn test_annotated_version_progress_callback() {
         // Create a simple drawing.
-        let mut drawing = Drawing::new(DxfVersion::R12);
+        let mut drawing = Drawing::new(DxfVersion::R11);
 
         let mut block = Block::new("TestPiece".to_string());
         let line = Line {
@@ -240,10 +240,10 @@ mod tests {
     // @brief Test ASTM validation.
     #[test]
     fn test_validate_astm_compliance() {
-        // Create a valid drawing (R12).
-        let drawing = Drawing::new(DxfVersion::R12);
+        // Create a valid drawing (R11).
+        let drawing = Drawing::new(DxfVersion::R11);
         let result = validate_astm_compliance(&drawing);
-        assert!(result.is_ok(), "Valid R12 drawing should pass validation");
+        assert!(result.is_ok(), "Valid R11 drawing should pass validation");
 
         // D6673 names R13, so an R13 drawing is valid too.
         let drawing_r13 = Drawing::new(DxfVersion::R13);
@@ -257,7 +257,7 @@ mod tests {
         // Create output directory if it doesn't exist.
         std::fs::create_dir_all("output").expect("Failed to create output directory");
 
-        let drawing = Drawing::new(DxfVersion::R12);
+        let drawing = Drawing::new(DxfVersion::R11);
         let test_file = "output/test_structure.dxf";
         let options = DxfAstmExportOptions::default();
 
@@ -296,7 +296,7 @@ mod tests {
     // @brief Test export with multiple blocks.
     #[test]
     fn test_export_multiple_blocks() {
-        let mut drawing = Drawing::new(DxfVersion::R12);
+        let mut drawing = Drawing::new(DxfVersion::R11);
 
         // Add first block.
         let mut block1 = Block::new("Piece1".to_string());

@@ -4,7 +4,7 @@
 
 //! @brief DXF R13 (AC1012) file structure around the D6673 group stream.
 //!
-//! The R12 writer stays the one source of D6673 content. This module reads its
+//! The AC1009 writer stays the one source of D6673 content. This module reads its
 //! group pairs and writes them again with what R13 adds:
 //! - a handle (group 5; group 105 for DIMSTYLE) on every entity, table, table entry and object;
 //! - subclass markers (group 100);
@@ -21,7 +21,7 @@ use std::io::{Error, ErrorKind, Result};
 // One group code and its value.
 type Pair = (i32, String);
 
-// @brief One record of the R12 stream: the group 0 value and the pairs after it.
+// @brief One record of the AC1009 stream: the group 0 value and the pairs after it.
 struct Record {
     kind: String,
     groups: Vec<Pair>,
@@ -93,7 +93,7 @@ fn split_records(pairs: Vec<Pair>) -> Vec<Record> {
 } // fn split_records
 
 // @brief Subclass markers of an entity: those after the layer, and one closing marker.
-// @return None for an entity type the R12 writer never emits.
+// @return None for an entity type the AC1009 writer never emits.
 fn subclass_markers(kind: &str) -> Option<(&'static [&'static str], Option<&'static str>)> {
     Some(match kind {
         "LINE" => (&["AcDbLine"], None),
@@ -112,7 +112,7 @@ fn subclass_markers(kind: &str) -> Option<(&'static [&'static str], Option<&'sta
 } // fn subclass_markers
 
 // @brief Write one entity record in R13 form.
-// @param default_layer Layer for a record without group 8 (the R12 ENDBLK).
+// @param default_layer Layer for a record without group 8 (the AC1009 ENDBLK).
 fn write_entity(out: &mut Out, handles: &mut Handles, record: &Record, default_layer: &str) -> Result<()> {
     let (markers, closing) = subclass_markers(&record.kind)
         .ok_or_else(|| Error::new(ErrorKind::InvalidData, format!("no R13 form for DXF entity '{}'", record.kind)))?;
@@ -133,7 +133,7 @@ fn write_entity(out: &mut Out, handles: &mut Handles, record: &Record, default_l
         out.push(30, "0.00");
     } // if POLYLINE
 
-    // Entity data as the R12 writer wrote it, CLO3D group 250 included.
+    // Entity data as the AC1009 writer wrote it, CLO3D group 250 included.
     for (code, value) in &record.groups {
         let skip = *code == 8 || (record.kind == "POLYLINE" && *code == 66);
         if !skip {
@@ -249,13 +249,13 @@ fn write_tables(out: &mut Out, handles: &mut Handles, layers: &[String], blocks:
     out.push(0, "ENDSEC");
 } // fn write_tables
 
-// @brief Rewrite R12 DXF text from the D6673 writer as DXF R13 (AC1012).
-// @param r12 Complete R12 file text: HEADER, BLOCKS, ENTITIES, EOF.
-// @return R13 file text, or InvalidData for text the R12 writer cannot produce.
+// @brief Rewrite AC1009 DXF text from the D6673 writer as DXF R13 (AC1012).
+// @param r12 Complete AC1009 file text: HEADER, BLOCKS, ENTITIES, EOF.
+// @return R13 file text, or InvalidData for text the AC1009 writer cannot produce.
 pub fn upgrade_to_r13(r12: &str) -> Result<String> {
     let records = split_records(parse_pairs(r12)?);
 
-    // Sort the records of the BLOCKS and ENTITIES sections; the R12 HEADER is replaced.
+    // Sort the records of the BLOCKS and ENTITIES sections; the AC1009 HEADER is replaced.
     let (mut block_records, mut entity_records): (Vec<&Record>, Vec<&Record>) = (Vec::new(), Vec::new());
     let mut section = "";
     for r in &records {

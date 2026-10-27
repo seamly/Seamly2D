@@ -18,8 +18,8 @@
 //   PNG       — Phase 11
 //   SVG       — Phase 11
 //
-// With showDxfVariants true (Export menu), a "DXF" submenu holds DXF-ASTM (R12),
-// (R13), (CLO3D) and DXF-AAMA (R11); otherwise (View menu) one "DXF-ASTM" item
+// With showDxfVariants true (Export menu), a "DXF" submenu holds DXF-ASTM (R13),
+// (CLO3D) and DXF-AAMA (R11); otherwise (View menu) one "DXF-ASTM" item
 // opens any .dxf.
 //
 // With svgModeSubmenu true (Export menu), "SVG" is a submenu of label text
@@ -59,7 +59,7 @@ Menu {
     // @brief True when a layout is ready; enables the DXF-ASTM export item.
     required property bool layoutReady
 
-    // @brief When true, a DXF submenu holds the R12, R13, CLO3D and AAMA items (Export menu only).
+    // @brief When true, a DXF submenu holds the R13, CLO3D and AAMA items (Export menu only).
     //        The View menu opens any .dxf with one item.
     property bool showDxfVariants: false
 
@@ -140,7 +140,7 @@ Menu {
     // @param checked New check state.
     signal exportAllTabsToggled(bool checked)
 
-    // @brief Emitted when the user selects DXF-ASTM (R12) export (Phase 9).
+    // @brief Emitted when the user selects the View menu DXF-ASTM item (opens a .dxf).
     signal exportDxfAstmRequested()
 
     // @brief Emitted when the user selects DXF-ASTM (R13) export: DXF R13 (AC1012), the version D6673 names.
@@ -246,12 +246,6 @@ Menu {
             height: visible ? implicitHeight : 0
             enabled: false
         } // MenuItem DXF note
-
-        MenuItem {
-            text: "DXF-ASTM (R12)"
-            enabled: root.layoutReady && root.dxfEnabled
-            onTriggered: root.exportDxfAstmRequested()
-        } // MenuItem DXF-ASTM (R12)
 
         MenuItem {
             text: "DXF-ASTM (R13)"
