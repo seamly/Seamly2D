@@ -84,6 +84,7 @@
 #include "tst_handoffids.h"
 #include "tst_handoffturnpoints.h"
 #include "tst_handoffpiece.h"
+#include "tst_handofflabel.h"
 
 #include "../vmisc/def.h"
 #include "../qmuparser/qmudef.h"
@@ -243,6 +244,7 @@ int main(int argc, char** argv)
     ASSERT_TEST(new TST_HandoffIds());
     ASSERT_TEST(new TST_HandoffTurnPoints());
     ASSERT_TEST(new TST_HandoffPiece());
+    ASSERT_TEST(new TST_HandoffLabel());
 
     return status;
 }
