@@ -81,6 +81,8 @@
 #include "tst_dataroot.h"
 #include "tst_vtoolmove.h"
 #include "tst_labeltextmanager.h"
+#include "tst_handoffids.h"
+#include "tst_handoffturnpoints.h"
 
 #include "../vmisc/def.h"
 #include "../qmuparser/qmudef.h"
@@ -237,6 +239,8 @@ int main(int argc, char** argv)
     ASSERT_TEST(new TST_DataRoot());
     ASSERT_TEST(new TST_VToolMove());
     ASSERT_TEST(new TST_LabelTextManager());
+    ASSERT_TEST(new TST_HandoffIds());
+    ASSERT_TEST(new TST_HandoffTurnPoints());
 
     return status;
 }

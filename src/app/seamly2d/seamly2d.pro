@@ -244,6 +244,15 @@ DEPENDPATH += $$PWD/../../libs/vlayout
 win32:!win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vlayout/$${DESTDIR}/vlayout.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vlayout/$${DESTDIR}/libvlayout.a
 
+# == layout_handoff static library (depends on vpatterndb)
+unix|win32: LIBS += -L$$OUT_PWD/../../libs/layout_handoff/$${DESTDIR}/ -llayout_handoff
+
+INCLUDEPATH += $$PWD/../../libs/layout_handoff
+DEPENDPATH += $$PWD/../../libs/layout_handoff
+
+win32:!win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/layout_handoff/$${DESTDIR}/layout_handoff.lib
+else:unix|win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/layout_handoff/$${DESTDIR}/liblayout_handoff.a
+
 # == VPatternDB static library (depend on vgeometry, vmisc, ifc)
 unix|win32: LIBS += -L$$OUT_PWD/../../libs/vpatterndb/$${DESTDIR} -lvpatterndb
 

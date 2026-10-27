@@ -11,6 +11,7 @@ DEPENDPATH +=  \
             ../../src/libs/vpropertyexplorer \
             ../../src/libs/ifc \
             ../../src/libs/vlayout \
+            ../../src/libs/layout_handoff \
             ../../src/libs/vgeometry \
             ../../src/libs/vpatterndb \
             ../../src/libs/vmisc \
@@ -26,6 +27,7 @@ include(../../src/libs/qmuparser/qmuparser.pri)
 include(../../src/libs/vpropertyexplorer/vpropertyexplorer.pri)
 include(../../src/libs/ifc/ifc.pri)
 include(../../src/libs/vlayout/vlayout.pri)
+include(../../src/libs/layout_handoff/layout_handoff.pri)
 include(../../src/libs/vgeometry/vgeometry.pri)
 include(../../src/libs/vpatterndb/vpatterndb.pri)
 include(../../src/libs/vmisc/vmisc.pri)

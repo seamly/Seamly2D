@@ -27,6 +27,7 @@
 //---------------------------------------------------------------------------------------------------------------------
 
 #include "svg_generator.h"
+#include "../layout_handoff/handoff_ids.h"
 #include "../vlayout/vlayoutdef.h"
 
 #include <QFile>
@@ -40,49 +41,6 @@
 
 namespace
 {
-    //-----------------------------------------------------------------------------
-    /// @brief Turn a piece name into a valid, CSS-selector-safe SVG id fragment.
-    /// @param name raw piece name; may contain spaces, punctuation, or be empty.
-    /// @return name with every run of characters outside [A-Za-z0-9_.-] replaced by
-    ///         '_', stray leading/trailing '_' trimmed, and a leading '_' added when
-    ///         the result would otherwise start with a digit. Empty when nothing
-    ///         sanitizable remains (callers must supply a fallback id in that case).
-    //-----------------------------------------------------------------------------
-    QString sanitizeForId(const QString &name)
-    {
-        QString sanitized = name;
-        sanitized.replace(QRegularExpression(QStringLiteral("[^A-Za-z0-9_.-]+")), QStringLiteral("_"));
-        sanitized.remove(QRegularExpression(QStringLiteral("^_+|_+$")));
-        if (!sanitized.isEmpty() && sanitized.at(0).isDigit())
-        {
-            sanitized.prepend(QLatin1Char('_'));
-        }
-        return sanitized;
-    }
-
-    //-----------------------------------------------------------------------------
-    /// @brief Id suffix for one size of a multisize piece, e.g. "_s34" or "_s13.5".
-    //-----------------------------------------------------------------------------
-    QString sizeIdSuffix(const QString &size)
-    {
-        QString sanitized = sanitizeForId(size);
-        if (sanitized.startsWith(QLatin1Char('_')))
-        {
-            sanitized.remove(0, 1); // the digit guard is not needed after the "_s" prefix
-        }
-        return QStringLiteral("_s") + sanitized;
-    }
-
-    //-----------------------------------------------------------------------------
-    /// @brief Component types that can repeat per piece, so their id keeps a
-    ///        counter (`<type>_<n>_<name>`) instead of a bare `<type>_<name>`.
-    //-----------------------------------------------------------------------------
-    bool componentIdIsNumbered(const QString &type)
-    {
-        return type == QLatin1String("internal_path") || type == QLatin1String("cut_path")
-            || type == QLatin1String("piece_label") || type == QLatin1String("pattern_label");
-    }
-
     //-----------------------------------------------------------------------------
     /// @brief Check whether path data draws nothing: empty or blank, or one moveto with an optional closepath.
     /// @details An empty QPainterPath still carries an implicit MoveTo(0,0). The
@@ -286,15 +244,7 @@ QDomDocument SvgGenerator::mergeSvgDoms()
             {
                 ++piece_set_count;
                 const QString piece_name = main_group.attribute(QStringLiteral("data-name"));
-                const QString sanitized_name = sanitizeForId(piece_name);
-                QString piece_set_id = sanitized_name.isEmpty()
-                    ? QStringLiteral("piece-set-%1").arg(piece_set_count)
-                    : QStringLiteral("piece-set_%1").arg(sanitized_name);
-                if (m_used_piece_ids.contains(piece_set_id))
-                {
-                    piece_set_id += QLatin1Char('-') + QString::number(piece_set_count);
-                }
-                m_used_piece_ids.insert(piece_set_id);
+                const QString piece_set_id = m_ids.piece_set_id(piece_name, piece_set_count);
 
                 QDomElement piece_set = merged_svg.createElement("g");
                 piece_set.setAttribute("id", piece_set_id);
@@ -587,29 +537,11 @@ void SvgGenerator::tagComponentGroup(QDomElement& group, QGraphicsItem* componen
     }
     const int type_number = ++type_counters[type];
 
-    // Name-based id (e.g. "grainline_Sleeve") when the piece has a usable
-    // name; falls back to the legacy numeric id, which is unique by
-    // construction, when it does not. A name-based id that collides with
-    // one already emitted (piece names aren't guaranteed unique — see
-    // data-letter) is disambiguated with the piece's own data-type-number.
+    // Name-based id (e.g. "grainline_Sleeve"); the numeric fallback is unique by construction.
     const QString piece_name = piece_group.attribute(QStringLiteral("data-name"));
-    const QString sanitized_name = sanitizeForId(piece_name);
-    QString component_id = sanitized_name.isEmpty()
-        ? QString("%1-%2-%3").arg(piece_id, type).arg(type_number)
-        : (componentIdIsNumbered(type)
-               ? QString("%1_%2_%3").arg(type).arg(type_number).arg(sanitized_name)
-               : QString("%1_%2").arg(type, sanitized_name));
-    // The same piece repeats once per size in a multisize export.
-    const QString size = piece_group.attribute(QStringLiteral("data-size"));
-    if (!size.isEmpty())
-    {
-        component_id += sizeIdSuffix(size);
-    }
-    if (m_used_ids.contains(component_id))
-    {
-        component_id += QLatin1Char('-') + piece_group.attribute(QStringLiteral("data-type-number"));
-    }
-    m_used_ids.insert(component_id);
+    const QString component_id = m_ids.component_id(type, type_number, piece_name, piece_id,
+                                                    piece_group.attribute(QStringLiteral("data-size")),
+                                                    piece_group.attribute(QStringLiteral("data-type-number")).toInt());
 
     group.setAttribute("id", component_id);
     group.setAttribute("data-type", type);
@@ -693,25 +625,8 @@ void SvgGenerator::addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item, c
         root_groups.at(0).parentNode().removeChild(root_groups.at(0));
     }
 
-    // Name-based id (e.g. "piece_Yoke") when the piece has a usable name;
-    // falls back to the legacy numeric piece_id, which is unique by
-    // construction, when it does not. A name-based id that collides with
-    // one already emitted (piece names aren't guaranteed unique — see
-    // data-letter) is disambiguated with the piece's own data-type-number.
     const QString piece_name = item->data(PieceItemData::ObjectName).toString();
-    const QString sanitized_piece_name = sanitizeForId(piece_name);
-    QString svg_piece_id = sanitized_piece_name.isEmpty()
-        ? piece_id
-        : QStringLiteral("piece_%1").arg(sanitized_piece_name);
-    if (!size.isEmpty())
-    {
-        svg_piece_id += sizeIdSuffix(size);
-    }
-    if (m_used_piece_ids.contains(svg_piece_id))
-    {
-        svg_piece_id += QLatin1Char('-') + QString::number(m_piece_count);
-    }
-    m_used_piece_ids.insert(svg_piece_id);
+    const QString svg_piece_id = m_ids.piece_id(piece_id, piece_name, size, m_piece_count);
 
     QDomElement piece_group = piece_doc.createElement("g");
     piece_group.setAttribute("id", svg_piece_id);
