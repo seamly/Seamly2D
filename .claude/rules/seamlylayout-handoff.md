@@ -10,6 +10,7 @@ paths:
   - "src/libs/vmisc/seamly_suite_paths.*"
   - "src/test/Seamly2DTest/tst_seamlysuitepaths.*"
   - "src/app/seamly2d/core/windows_foreground_window.*"
+  - "src/libs/layout_handoff/**"
   - "project-docs/docs-data/SVG-DATA-ATTRIBUTES.md"
 ---
 
@@ -25,6 +26,7 @@ Seamly2D's Layout Mode builds the tagged pieces SVG in memory, launches SeamlyLa
 | `SeamlyLayout -h` / `--help`, `-v` / `--version` | Text in a dialog (no console on Windows: this is a WIN32-subsystem binary), exit 0 |
 | `--svg-stdin` plus a file, empty or non-SVG standard input, two or more files, unknown option, missing / unreadable / non-`.svg` file | Error dialog naming the problem, then an empty canvas — never a silent no-op |
 
+- **The SVG comes from pattern data, not from the canvas.** `src/libs/layout_handoff/` builds it from `VPiece`, `VContainer`, `VAbstractPattern` and `VCommonSettings`. It reads no `QGraphicsScene` items. Data sources, constraint and classes: `handoff_document.h`.
 - **Standard input is read only for `--svg-stdin`.** `seamlyLayout_main.mm` opens stdin on every launch, so reading it unasked would hang a shell or icon launch waiting for input that never comes.
 - **Both transports end in the same import.** `import_svg` (a path) and `import_svg_document` (a string) share `reset_import_state()` and `finish_import()` in `crates/cxxqt_bridge/src/lib.rs`, so the canvas cannot behave differently depending on where the SVG came from.
 - **Absolute paths only** — a relative positional argument is resolved with `QFileInfo::absoluteFilePath()` at parse time, because a launched process inherits SeamlyLayout's own working directory, not the user's.

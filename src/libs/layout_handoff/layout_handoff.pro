@@ -13,7 +13,11 @@
 # - VContainer: pattern data that calculates the piece points and lengths.
 # - VAbstractPattern: pattern document with the pattern label template.
 # - VCommonSettings: colors, line styles, label font and show flags.
-#
+# Constraint:
+# - Reads no canvas items (QGraphicsScene), so the export does not depend on what the canvas shows.
+# Exception:
+# - Label placeholders read qApp state through LabelTextManager.
+
 # Classes:
 # - HandoffDocument: SVG with one pattern group per material and one group per piece.
 # - HandoffPiece: seam line, cut line, notches, internal and cutout paths, grainline, fold line.
