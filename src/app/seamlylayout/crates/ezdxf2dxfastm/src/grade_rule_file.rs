@@ -10,7 +10,7 @@
 //! `UNITS:ENGLISH` writes inches to four places.
 //! A DXF-AAMA export writes the same file with an `ANSI/AAMA VERSION:` first line.
 
-use crate::writer::{utc_date_time, DxfAstmExportOptions, ASTM_VERSION};
+use crate::writer::{creation_time_text, utc_date_time, DxfAstmExportOptions, ASTM_VERSION};
 use seamly_svg2ezdxf::{DxfUnits, GradeRuleTable};
 use std::path::Path;
 
@@ -28,11 +28,11 @@ pub fn grade_rule_table_name(stem: &str) -> String {
 /// @brief Text of the grade rule table file.
 /// @param units DXF units of the growth values.
 /// @param options Supplies `Creation Date:` (dd-mm-yyyy) and `Creation Time:` (hh-mm);
-///        None uses the current UTC date and time. The file writes the time as hh:mm.
+///        None uses the current UTC date and time. The file writes hh:mm, and HH:MM:SS for DXF-AAMA.
 pub fn grade_rule_file_text(table: &GradeRuleTable, units: DxfUnits, options: &DxfAstmExportOptions) -> String {
     let (utc_date, utc_time) = utc_date_time();
     let date = options.creation_date.clone().unwrap_or(utc_date);
-    let time = options.creation_time.clone().unwrap_or(utc_time).replace('-', ":");
+    let time = if options.aama { creation_time_text(options) } else { options.creation_time.clone().unwrap_or(utc_time).replace('-', ":") };
     let sizes: Vec<String> = table.sizes.iter().map(|s| without_separators(s)).collect();
 
     let version = if options.aama {

@@ -37,6 +37,10 @@ Same in both: layer 1 boundary and system text, `Piece Name:`, `Quantity:`, `Mat
 - **`Quantity:` is `R,L`.** User decision: the DXF-ASTM form, not a total. Even total N → `N/2,N/2`; odd N, or on the fold → `N,0`. A reader that wants a total adds R and L.
 - **`Size:` follows the pattern unit.** User decision (2026-10-25). A `mm` or `inch` pattern writes the `data-size` value as sent. A `cm` pattern writes it times 10, in mm: `Size:500`, not `Size:50`. It matches the `.rul` size list. A handoff without `data-units` writes the value as sent.
 - **`Units:` is `METRIC` or `ENGLISH`.** D6673 allows no other value; `Units:MM` is not defined. The `data-units` of the pattern decides: `inch` writes `ENGLISH`, with every length in inches to 4 decimals (coordinates, text heights, notch depth and width, `Curve Tolerance:`, `.rul` growth). `mm`, `cm` and no `data-units` write `METRIC`, in mm to 2 decimals. Angles keep 2 decimals. Tests: `english_units_*`, `cm_and_unspecified_units_write_metric`.
+- **`Annotation:` is the piece `data-annotation`.** It follows `Size:`, on one line, with non-ASCII characters escaped. A piece without one writes no line. Test: `aama_annotation_follows_size`.
+- **Block names are `<piece name>_<size>`.** A multisize piece uses its `data-size`; an individual piece uses the piece name only. The name keeps ASCII letters, digits, `_` and `-` (spaces become `_`). The numbered name is used where pieces share one ("Detail (3)" is `Detail_3`). An empty result falls back to the svg id name, and a repeated name gets `_2`, `_3`. Tests: `aama_block_names_*`.
+- **`Creation Time:` is `HH:MM:SS`.** The `.rul` `CREATION TIME:` too. Test: `aama_creation_time_has_seconds`.
+- **Kept as they are (user decision).** `Piece Name:` full length; `Material:` the full name; layer 5 keeps the grade reference line.
 - **No `Category:`.** Category is AAMA piece text, but the handoff has no value for it. AccuMark uses the piece name for a blank category.
 - **`.rul` version line.** `ANSI/AAMA VERSION: 1.0.0` is the header keyword of AAMA rule files in the field (FILExt RUL survey).
 
@@ -55,14 +59,14 @@ Two McNeel forum posts give AAMA practice (implementation evidence, not the norm
 |---|---|---|
 | `Style Name:` | Project name; best the file name | Pattern `data-name`, else the file stem |
 | `Creation Date:` | `DD-MM-YYYY` | `dd-mm-yyyy`, UTC |
-| `Creation Time:` | `HH:MM:SS` | `hh-mm`, UTC (the D6673 form) |
+| `Creation Time:` | `HH:MM:SS` | `HH:MM:SS`, UTC (DXF-ASTM keeps `hh-mm`); the `.rul` header too |
 | `Author:` | System, version | `Seamly;Seamly2D;<release>` |
 | `Sample Size:` | Base size of the garment | Base size of a graded export, else blank |
 | `Units:` | `METRIC` (mm) or `ENGLISH` (inch) | `METRIC` (mm) or `ENGLISH` (inch), from `data-units` |
-| Block name | `<piece name>_<size>` | `<svg id>_M` (CLO3D naming) |
+| Block name | `<piece name>_<size>` | `<piece name>_<size>`; an individual piece `<piece name>` (DXF-ASTM and CLO3D keep `<svg id>_M`) |
 | `Piece Name:` | Piece name, under 8 characters | Full piece name |
 | `Size:` | Garment size | `data-size`; a `cm` pattern writes it times 10 (mm) |
-| `Annotation:` | Piece description | Not written; Seamly2D sends `data-annotation` |
+| `Annotation:` | Piece description | `data-annotation` on one line, after `Size:`; omitted when empty |
 | `Category:` | Short classification: material, piece type | Not written (user decision) |
 | `Quantity:` | `1,0` for one piece; `1,1` for a pair | `R,L` from `data-quantity` |
 | `Material:` (or `Fabric:`) | Short fabric code, 2 characters | Full `data-material`, else `Fabric` |

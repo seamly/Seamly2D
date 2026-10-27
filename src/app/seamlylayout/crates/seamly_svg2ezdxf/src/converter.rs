@@ -328,6 +328,13 @@ fn add_piece_block(
         .map(|s| sanitize_ascii(s).trim().to_string())
         .filter(|s| !s.is_empty())
         .map(|s| drawing.pattern_unit.size_value(&s));
+    block.multisize = block.size.is_some();
+    // One line: a line break would end the DXF text value.
+    block.annotation = piece
+        .attributes
+        .get("data-annotation")
+        .map(|a| dxf_unicode_escape(&a.split_whitespace().collect::<Vec<_>>().join(" ")))
+        .filter(|a| !a.is_empty());
 
     // Generic conversion of the piece's children (the piece group itself
     // carries no layer, so its id never leaks into a layer choice).
