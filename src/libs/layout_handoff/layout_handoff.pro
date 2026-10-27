@@ -5,6 +5,24 @@
 # Copyright (C) 2026 Seamly2D Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
+# @brief
+# Static library that writes the tagged pieces SVG. Seamly2D sends it to SeamlyLayout with --svg-stdin.
+#
+# Data source: the open pattern in Seamly2D.
+# - VPiece: piece geometry and piece properties.
+# - VContainer: pattern data that calculates the piece points and lengths.
+# - VAbstractPattern: pattern document with the pattern label template.
+# - VCommonSettings: colors, line styles, label font and show flags.
+#
+# Classes:
+# - HandoffDocument: SVG with one pattern group per material and one group per piece.
+# - HandoffPiece: seam line, cut line, notches, internal and cutout paths, grainline, fold line.
+# - HandoffLabel: piece label and pattern label.
+# - HandoffPieceInfo: piece properties for the data-* attributes.
+# - HandoffIds: unique SVG ids for pieces and components.
+# - handoff_turn_points: turn points matched across the sizes of a multisize piece.
+# - handoff_sheet: piece bounds and the flat sheet, with no QGraphicsScene.
+#
 #-------------------------------------------------
 
 # File with common stuff for whole
