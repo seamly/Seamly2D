@@ -79,6 +79,8 @@ public slots:
     QString buildPiecesSvgString(QGraphicsRectItem *paper, const QList<QGraphicsItem *> &pieces)const;
     QString individualSampleSize() const;
     QString patternUnitName() const;
+    Unit    exportUnit() const;
+    QString sizeInExportUnit(const QString &size) const;
     void exportPNG(const QString &name, QGraphicsScene *scene)const;
     void exportTIF(const QString &name, QGraphicsScene *scene)const;
     void exportJPG(const QString &name, QGraphicsScene *scene)const;
@@ -103,6 +105,8 @@ protected:
 
     SizePieceList prepareSizePieceList(const QHash<quint32, VPiece> &pieces, const QString &size,
                                        const QHash<quint32, QVector<int>> &cornerCuts = QHash<quint32, QVector<int>>());
+    /** @brief measurementFileUnit sets unit to the unit of the referenced measurement file; false when none. */
+    virtual bool  measurementFileUnit(Unit &unit) const;
     QHash<quint32, QVector<int>> unevenCornerCuts() const;
     static bool   needsCornerCuts(const SizePieceList &sizeList, const QHash<quint32, QVector<int>> &cornerCuts);
     void          unifySizeTurnPoints();

@@ -822,6 +822,22 @@ QHash<quint32, VPiece> MainWindow::currentLayoutPieces() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief measurementFileUnit gives the unit of the referenced measurement file.
+ * @param unit set to the measurement file unit when a file is loaded.
+ * @return false when the pattern references no measurement file.
+ */
+bool MainWindow::measurementFileUnit(Unit &unit) const
+{
+    if (m_measurements.isNull())
+    {
+        return false;
+    }
+    unit = m_measurements->measurementUnits();
+    return true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief prepareMultisizePieceLists fills sizePieceLists with the layout pieces of every size.
  *
  * Individual pattern: clears sizePieceLists and returns. Multisize pattern: every

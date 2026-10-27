@@ -270,7 +270,16 @@ QString MainWindowsNoGUI::generateMultisizePiecesSvgDocument()
 
     SvgGenerator svgGenerator(paper.data(), QString(), doc->GetPatternName(), doc->GetDescription(),
                               static_cast<int>(PrintDPI));
-    svgGenerator.setMultisize(sizes, baseSize, layoutHeight);
+    QStringList exportSizes;
+    for (const QString &size : std::as_const(sizes))
+    {
+        exportSizes.append(sizeInExportUnit(size));
+    }
+    for (QString &size : pieceSizes)
+    {
+        size = sizeInExportUnit(size);
+    }
+    svgGenerator.setMultisize(exportSizes, sizeInExportUnit(baseSize), sizeInExportUnit(layoutHeight));
     svgGenerator.setUnits(patternUnitName());
 
     for (int piece = 0; piece < list.size(); ++piece)
@@ -562,7 +571,7 @@ QString MainWindowsNoGUI::buildPiecesSvgString(QGraphicsRectItem *paper,
     // writes a file, so the name is only carried, never used.
     SvgGenerator svgGenerator(paper, QString(), doc->GetPatternName(), doc->GetDescription(),
                               static_cast<int>(PrintDPI));
-    svgGenerator.setSampleSize(individualSampleSize());
+    svgGenerator.setSampleSize(sizeInExportUnit(individualSampleSize()));
     svgGenerator.setUnits(patternUnitName());
 
     for (int piece = 0; piece < pieces.size(); piece++)
@@ -577,14 +586,62 @@ QString MainWindowsNoGUI::buildPiecesSvgString(QGraphicsRectItem *paper,
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief Pattern unit name for the SeamlyLayout handoff.
+ * @brief Default: no measurement file is known.
+ */
+bool MainWindowsNoGUI::measurementFileUnit(Unit &unit) const
+{
+    Q_UNUSED(unit)
+    return false;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Unit that decides the DXF file units.
+ *
+ * The unit of the referenced measurement file wins. A pattern without a measurement file uses the pattern unit.
+ *
+ * @return Mm, Cm or Inch; Unit::Px for any other unit.
+ */
+Unit MainWindowsNoGUI::exportUnit() const
+{
+    Unit unit = qApp->patternUnit();
+    measurementFileUnit(unit);
+    if (unit != Unit::Mm && unit != Unit::Cm && unit != Unit::Inch)
+    {
+        return Unit::Px;
+    }
+    return unit;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Convert a size value from pattern units to the export unit.
+ *
+ * @param size size value in pattern units; empty stays empty.
+ * @return the value in the export unit; the input when the export unit is not handed off.
+ */
+QString MainWindowsNoGUI::sizeInExportUnit(const QString &size) const
+{
+    const Unit unit = exportUnit();
+    bool ok = false;
+    const qreal value = size.toDouble(&ok);
+    if (!ok || unit == Unit::Px)
+    {
+        return size;
+    }
+    return QString::number(UnitConvertor(value, qApp->patternUnit(), unit));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Export unit name for the SeamlyLayout handoff.
  *
  * @return "mm", "cm" or "inch"; empty for any other unit.
  */
 QString MainWindowsNoGUI::patternUnitName() const
 {
-    const Unit unit = qApp->patternUnit();
-    if (unit != Unit::Mm && unit != Unit::Cm && unit != Unit::Inch)
+    const Unit unit = exportUnit();
+    if (unit == Unit::Px)
     {
         return QString();
     }
