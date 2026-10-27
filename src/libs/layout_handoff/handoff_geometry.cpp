@@ -97,4 +97,22 @@ QRectF outline_bounds(const QVector<QPointF> &outline)
     shape.addPath(path);
     return shape.controlPointRect();
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+QRectF stroked_bounds(const QPainterPath &path, const QPen &pen)
+{
+    if (pen.style() == Qt::NoPen || pen.widthF() == 0.0)
+    {
+        return path.controlPointRect();
+    }
+
+    QPainterPathStroker stroker;
+    stroker.setCapStyle(pen.capStyle());
+    stroker.setWidth(pen.widthF());
+    stroker.setJoinStyle(pen.joinStyle());
+    stroker.setMiterLimit(pen.miterLimit());
+    QPainterPath shape = stroker.createStroke(path);
+    shape.addPath(path);
+    return shape.controlPointRect();
+}
 } // namespace layout_handoff

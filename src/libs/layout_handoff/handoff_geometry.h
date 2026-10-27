@@ -28,6 +28,8 @@
 #ifndef HANDOFF_GEOMETRY_H
 #define HANDOFF_GEOMETRY_H
 
+#include <QPainterPath>
+#include <QPen>
 #include <QPointF>
 #include <QRectF>
 #include <QVector>
@@ -44,6 +46,12 @@ QVector<QPointF> keep_inside(const QRectF &rect, QVector<QPointF> points);
  * @param outline closed outline with at least one point.
  */
 QRectF outline_bounds(const QVector<QPointF> &outline);
+
+/**
+ * @brief stroked_bounds returns the bounding rectangle of a path drawn with a pen, as a QGraphicsPathItem has it.
+ * @details A pen with no style or zero width gives the control point rectangle of the path.
+ */
+QRectF stroked_bounds(const QPainterPath &path, const QPen &pen);
 } // namespace layout_handoff
 
 #endif // HANDOFF_GEOMETRY_H

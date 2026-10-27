@@ -28,6 +28,7 @@
 #include "handoff_piece.h"
 
 #include "handoff_geometry.h"
+#include "handoff_turn_points.h"
 #include "../ifc/exception/vexceptionbadid.h"
 #include "../vgeometry/vpointf.h"
 #include "../vmisc/def.h"
@@ -41,6 +42,7 @@
 #include "../vpatterndb/vpiecepath.h"
 
 #include <QPainterPath>
+#include <algorithm>
 #include <QtDebug>
 
 namespace layout_handoff
@@ -291,6 +293,7 @@ HandoffPiece HandoffPiece::create(const VPiece &piece, const VContainer *pattern
     QVector<QPointF>       cut_line_nodes;
     SeamAllowanceCorners   corners;
     const QVector<QPointF> cut_points = piece.seamAllowancePoints(pattern, &cut_line_nodes, &corners);
+    handoff.m_seam_allowance_corners = corners;
     if (piece.hasSeamAllowance())
     {
         handoff.m_has_seam_allowance          = true;
@@ -346,6 +349,73 @@ HandoffPiece HandoffPiece::create(const VPiece &piece, const VContainer *pattern
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+void HandoffPiece::unify_piece_turn_points(const QVector<HandoffPiece *> &sizes)
+{
+    if (sizes.size() < 2)
+    {
+        return;
+    }
+
+    const auto unify_line = [&sizes](HandoffLine HandoffPiece::*member)
+    {
+        QVector<SizeLine> lines;
+        for (const HandoffPiece *piece : sizes)
+        {
+            const HandoffLine &line = piece->*member;
+            lines.append({line.points, line.turn_points, line.node_indices});
+        }
+        const QVector<QVector<int>> turns = unify_turn_points(lines, (sizes.first()->*member).closed);
+        for (int s = 0; s < turns.size(); ++s)
+        {
+            (sizes.at(s)->*member).turn_points = turns.at(s);
+        }
+    };
+    unify_line(&HandoffPiece::m_seam_line);
+    unify_line(&HandoffPiece::m_cut_line);
+
+    // Sizes whose built-in seam lines differ in closed and open keep their turn points.
+    const bool built_in_closed = sizes.first()->m_built_in_seam_line.closed;
+    const bool same_shape      = std::all_of(sizes.cbegin(), sizes.cend(), [built_in_closed](const HandoffPiece *piece)
+    {
+        return piece->m_built_in_seam_line.closed == built_in_closed;
+    });
+    if (same_shape)
+    {
+        unify_line(&HandoffPiece::m_built_in_seam_line);
+    }
+
+    // Paths match by their order in the piece, so every size needs the same path count.
+    const auto unify_paths = [&sizes](QVector<HandoffPath> HandoffPiece::*paths)
+    {
+        const int count = (sizes.first()->*paths).size();
+        const bool same_count = std::all_of(sizes.cbegin(), sizes.cend(), [count, paths](const HandoffPiece *piece)
+        {
+            return (piece->*paths).size() == count;
+        });
+        if (!same_count)
+        {
+            return;
+        }
+        for (int i = 0; i < count; ++i)
+        {
+            QVector<SizeLine> lines;
+            for (const HandoffPiece *piece : sizes)
+            {
+                const HandoffLine &line = (piece->*paths).at(i).line;
+                lines.append({line.points, line.turn_points, line.node_indices});
+            }
+            const QVector<QVector<int>> turns = unify_turn_points(lines, (sizes.first()->*paths).at(i).line.closed);
+            for (int s = 0; s < turns.size(); ++s)
+            {
+                ((sizes.at(s)->*paths)[i]).line.turn_points = turns.at(s);
+            }
+        }
+    };
+    unify_paths(&HandoffPiece::m_internal_paths);
+    unify_paths(&HandoffPiece::m_cutout_paths);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 bool HandoffPiece::has_shape() const
 {
     return !m_seam_line.points.isEmpty() || !m_cut_line.points.isEmpty();
@@ -385,6 +455,19 @@ QRectF HandoffPiece::bounds() const
 const HandoffLine &HandoffPiece::cut_line() const
 {
     return m_cut_line;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+const SeamAllowanceCorners &HandoffPiece::seam_allowance_corners() const
+{
+    return m_seam_allowance_corners;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+QVector<int> HandoffPiece::line_node_counts() const
+{
+    return {static_cast<int>(m_seam_line.node_indices.size()), static_cast<int>(m_cut_line.node_indices.size()),
+            static_cast<int>(m_built_in_seam_line.node_indices.size())};
 }
 
 //---------------------------------------------------------------------------------------------------------------------
