@@ -1,42 +1,70 @@
-# AAMA cutting data
+# AAMA interoperability
 
-The AAMA exporter writes one block and one INSERT for each exported piece.
-Geometry uses millimetres, regardless of the pattern's construction units.
-Global `Units: MM` text also declares that unit for legacy DXF versions that
-cannot carry the modern unit header. Readers do not need a size heuristic.
+SeamlyLayout writes ANSI/AAMA-292 pattern data with Export > DXF > **DXF-AAMA (R11)**.
+This page tells a receiving application what to expect.
+The writer rules, the decisions and the code map are in `dxf-docs/seamlylayout_DXF_AAMA.md`.
 
-Each piece block contains these plain TEXT fields on layer 1:
+## File
 
-| Field | Source |
+- DXF R11 (`$ACADVER` AC1009), one block and one INSERT for each piece.
+- A grade rule file (`.rul`) goes with a graded export. The DXF has no grade growth.
+- Geometry is dense: each contour is one polyline on layer 1, 8, 11 or 14.
+
+## Units
+
+- `Units:METRIC`: lengths in mm, 2 decimals. The pattern units `mm`, `cm` and unspecified write this.
+- `Units:ENGLISH`: lengths in inches, 4 decimals. The pattern unit `inch` writes this.
+- The unit comes from the measurement file. `Units:MM` is not written.
+
+## Style text
+
+Plain TEXT on layer 1, before the blocks:
+
+| Field | Value |
 |---|---|
-| `Piece Name: ...` | Native piece name |
-| `Quantity: ...` | Native piece-label data's total cutting quantity |
-| `Size: ...` | Selected multisize size, expressed in centimetres |
+| `Style Name:` | Pattern name, else the file name |
+| `Creation Date:` | `DD-MM-YYYY`, UTC |
+| `Creation Time:` | `HH:MM:SS`, UTC |
+| `Author:` | `Seamly;Seamly2D;<release>` |
+| `Sample Size:` | Base size of a graded export, else blank |
+| `Units:` | `METRIC` or `ENGLISH` |
 
-These field names are stable English interchange keys. They are independent
-of label visibility, font fitting, translated words such as "Cut", and the
-user's label template. Matching fields in the visible label are omitted from
-the additional label text, so a custom template cannot override the native
-quantity or selected size. Other visible label text is preserved. Flat DXF,
-SVG, PDF and on-screen label drawing are unchanged.
+## Piece text
 
-Quantity is a total count. It does not specify how many copies are mirrored.
-Permission to flip a piece does not imply that half its copies are mirrored.
-No mirrored-count or fabric name is invented. A visible label can supply an
-additional `Material: cotton` line when that convention is agreed with the
-receiving application. There is currently no separate native fabric field.
+Plain TEXT on layer 1 inside each piece block. The values come from the piece data, not from the label.
 
-The existing geometry layers remain:
+| Field | Value |
+|---|---|
+| `Piece Name:` | Full piece name |
+| `Size:` | Piece size. A `cm` pattern writes it in mm (50 cm is `500`) |
+| `Annotation:` | Piece description. Omitted when empty |
+| `Quantity:` | `R,L`: right and left copies. Add both for a total |
+| `Material:` | Full material name, else `Fabric` |
+
+- Label text never repeats these fields and never adds a `#` rule text. A hidden label changes nothing.
+- `Category:` is not written.
+- Block name: `<piece name>_<size>` for a multisize piece, `<piece name>` for an individual piece.
+- Non-ASCII characters use the `\U+XXXX` escape.
+
+## Layers
 
 | Layer | Contents |
 |---|---|
 | 1 | Cutting outline and piece text |
-| 4 | Notch segments |
-| 7 | Visible grain line |
-| 8 | Visible stitch outline and internal drawing paths |
-| 11 | Internal cutting paths |
+| 2, 3 | Turn points and curve points; `# n` grade rule texts |
+| 4 | Notch points, one POINT each. T, castle and U notches become V |
+| 5 | Grade reference line of a graded export |
+| 6 | Mirror line |
+| 7 | Grainline |
+| 8 | Internal lines |
+| 11 | Internal cutouts |
+| 14 | Sew line |
 
-Use a separate export for each required size with `--gsize` and `--gheight`,
-and include those selections in the filename. These files contain evaluated
-geometry, not a grade-rule table. This convention does not add ASTM support
-or claim certification against an ASTM specification.
+- Layers 9, 10 and 12 are empty. Layer 13 (drill holes) is not written. Layers 15 and 80 to 87 are not used.
+- A `# n` text names a grade rule. The `.rul` file holds the rule table, with the header `ANSI/AAMA VERSION: 1.0.0`.
+
+## Limits
+
+- No ASTM D6673 certification claim. For ASTM, use Export > DXF > DXF-ASTM.
+- No drill holes, no fabric codes, no mirrored-copy count.
+- Quantity does not say how many copies are mirrored.

@@ -29,6 +29,6 @@ Enable `git config rerere.enabled true` so Git reuses recorded conflict resoluti
   - drop the `cutting_text` and `getPieceText()` changes in `vlayoutpiece.cpp` and `vlayoutpiece_p.h`: nothing reads them;
   - drop the `aamaCuttingText` test in `tst_seamly2dcommandline.{h,cpp}`;
   - drop `.github/validation/issue-1783/`: evidence for the removed exporter, with third-party PDFs;
-  - rewrite `.github/AAMA-INTEROP.md` to describe SeamlyLayout's DXF-AAMA;
+  - drop the incoming `.github/AAMA-INTEROP.md`: `project-docs/docs-seamlylayout/AAMA-INTEROP.md` is the SeamlyLayout DXF-AAMA version;
   - fix the `.github/README-AUTOMATION.md` example: Seamly2D has no `--basename` or `--format`;
   - keep the `SEAMLY_DATA_DIR` code; SeamlyLayout follows in Task Layout.101.

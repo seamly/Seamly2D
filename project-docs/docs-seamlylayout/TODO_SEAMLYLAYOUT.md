@@ -50,7 +50,7 @@ User approved (2026-10-25). DXF-AAMA only; DXF-ASTM and CLO3D keep their output.
 - Known differences: `Units: MM` (output: `Units:METRIC`); total quantity (output: `R,L`); size in cm (output: Layout.103 units); notch segments on layer 4 (output: notch points); `--gsize` exports (Seamly2D has none now).
 - [ ] Layout.105.1 Review both documents side by side with the user, section by section.
 - [ ] Layout.105.2 User decision: rewrite it for SeamlyLayout's DXF-AAMA, merge its useful parts into `seamlylayout_DXF_AAMA.md`, or leave it as reference.
-- [ ] Layout.105.3 Apply the decision; keep the `.github/AAMA-INTEROP.md` merge rule in `CLAUDE.md` consistent with it.
+- [X] Layout.105.3 Apply the decision; keep the `.github/AAMA-INTEROP.md` merge rule in `CLAUDE.md` consistent with it. Done: `AAMA-INTEROP.md` rewritten; the rule lives in the `merge-upstream` skill (not `CLAUDE.md`), now says drop the incoming `.github/` copy.
 
 ### [ ] Task Layout.101 — Implement - `SEAMLY_DATA_DIR` for SeamlyLayout
 
