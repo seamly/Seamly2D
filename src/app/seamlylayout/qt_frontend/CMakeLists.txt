@@ -130,6 +130,7 @@ FetchContent_MakeAvailable(CxxQt)
 qt_add_executable(SeamlyLayout
     WIN32
     seamlyLayout_main.mm
+    src/DataDirectory.cpp
     src/Logger.cpp
     src/Platform.cpp
     src/SettingsModel.cpp
@@ -380,6 +381,7 @@ add_executable(AdjustControllerTests
     src/adjust/AdjustWindow.cpp
     src/adjust/AdjustScene.cpp
     src/adjust/PieceOverlayItem.cpp
+    src/DataDirectory.cpp
     src/Logger.cpp
 )
 
@@ -408,6 +410,7 @@ set_tests_properties(AdjustSceneTests AdjustControllerTests PROPERTIES ENVIRONME
 add_executable(PreferencesModelTests
     ${SEAMLYLAYOUT_TEST_DIR}/PreferencesModelTests.cpp
     src/PreferencesModel.cpp
+    src/DataDirectory.cpp
     src/Logger.cpp
     src/Platform.cpp
 )
@@ -441,6 +444,7 @@ add_test(NAME PreferencesModelTests COMMAND PreferencesModelTests)
 add_executable(SettingsModelTests
     ${SEAMLYLAYOUT_TEST_DIR}/SettingsModelTests.cpp
     src/SettingsModel.cpp
+    src/DataDirectory.cpp
     src/Logger.cpp
 )
 
@@ -467,6 +471,7 @@ set_tests_properties(PreferencesModelTests SettingsModelTests PROPERTIES ENVIRON
 # real user configuration.
 add_executable(LoggerTests
     ${SEAMLYLAYOUT_TEST_DIR}/LoggerTests.cpp
+    src/DataDirectory.cpp
     src/Logger.cpp
 )
 
@@ -485,6 +490,23 @@ if(WIN32)
 endif()
 
 add_test(NAME LoggerTests COMMAND LoggerTests)
+
+# SEAMLY_DATA_DIR — settings and log folders for a job.
+add_executable(DataDirectoryTests
+    ${SEAMLYLAYOUT_TEST_DIR}/DataDirectoryTests.cpp
+    src/DataDirectory.cpp
+)
+
+target_include_directories(DataDirectoryTests PRIVATE
+    src/
+)
+
+target_link_libraries(DataDirectoryTests PRIVATE
+    Qt6::Core
+    Qt6::Test
+)
+
+add_test(NAME DataDirectoryTests COMMAND DataDirectoryTests)
 
 # Task 49 — the command-line contract with Seamly2D's Layout Mode handoff.
 # StartupOptions is a plain value type with no QObject and no GUI, so this
@@ -525,6 +547,7 @@ if(WIN32)
         SettingsModelTests
         StartupOptionsTests
         LoggerTests
+        DataDirectoryTests
         PROPERTIES ENVIRONMENT_MODIFICATION
         "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>"
     )

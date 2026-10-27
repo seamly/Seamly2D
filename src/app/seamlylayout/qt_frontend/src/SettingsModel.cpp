@@ -10,6 +10,7 @@
 // JSON keys match the Rust #[serde(rename_all = "camelCase")] annotation.
 
 #include "SettingsModel.h"
+#include "DataDirectory.h"
 #include "Logger.h"
 
 #include <QCoreApplication>
@@ -565,13 +566,18 @@ QString SettingsModel::localFileToUrl(const QString &path)
 // since QML may resolve either model first).
 QString SettingsModel::defaultSettingsFilePath()
 {
-    QString appConfigRoot = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    // SEAMLY_DATA_DIR replaces the config root and skips the legacy migration.
+    const QString dataRoot = DataDirectory::settingsRoot();
+    QString appConfigRoot = dataRoot.isEmpty()
+        ? QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation) : dataRoot;
     if (appConfigRoot.isEmpty()) {
         appConfigRoot = QCoreApplication::applicationDirPath();
     } // if AppConfigLocation unavailable
     appConfigRoot = QDir(appConfigRoot).absolutePath();
     QDir().mkpath(appConfigRoot);
-    migrateLegacyOrganization(appConfigRoot);
+    if (dataRoot.isEmpty()) {
+        migrateLegacyOrganization(appConfigRoot);
+    } // if no SEAMLY_DATA_DIR
 
     const QString settingsDir = QDir(appConfigRoot).filePath(QStringLiteral("settings"));
     QDir dir(settingsDir);
