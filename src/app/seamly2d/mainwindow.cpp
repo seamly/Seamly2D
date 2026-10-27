@@ -4411,12 +4411,13 @@ void MainWindow::showLayoutMode(bool checked)
 
         try
         {
-            pieceList = preparePiecesForLayout(pieces);
+            preparePiecesForLayout(pieces);
             // Multisize: the handoff carries every size, grouped by piece.
             if (!prepareMultisizePieceLists())
             {
                 // The user canceled: no message, back to the mode the user came from.
                 pieceList.clear();
+                handoff_pieces.clear();
                 doc->getDraftStage() == Draw::Calculation ? showDraftMode(true) : showPieceMode(true);
                 return;
             }
@@ -4425,6 +4426,7 @@ void MainWindow::showLayoutMode(bool checked)
         catch (VException &exception)
         {
             pieceList.clear();
+            handoff_pieces.clear();
             sizePieceLists.clear();
             QMessageBox::warning(this, tr("Layout mode"),
                                  tr("You can't use Layout mode yet.") + QLatin1String(" \n") + exception.ErrorMessage(),
@@ -4538,6 +4540,9 @@ bool MainWindow::exportPiecesToSeamlyLayout()
                              QMessageBox::Ok, QMessageBox::Ok);
         return false;
     }
+
+    // Developer switch: SEAMLY_HANDOFF_COMPARE_DIR writes this SVG and the HandoffDocument SVG side by side.
+    writeHandoffCompareFiles(piecesSvg);
 
     // Locate the SeamlyLayout executable (settings override first, then the install directory).
     const QString seamlyLayout = qApp->seamlyLayoutFilePath();
@@ -4951,6 +4956,7 @@ void MainWindow::Clear()
     groups_widget->clear();
     piecesWidget->clear();
     pieceList.clear();
+    handoff_pieces.clear();
     doc->clearBackgroundImageMap();
     doc->clearHistory();
     qApp->getUndoStack()->clear();

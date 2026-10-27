@@ -2,6 +2,7 @@
 # This need for corect working file translations.pro
 
 HEADERS += \
+    $$PWD/handoff_corner_cuts.h \
     $$PWD/handoff_document.h \
     $$PWD/handoff_geometry.h \
     $$PWD/handoff_ids.h \
@@ -11,6 +12,7 @@ HEADERS += \
     $$PWD/handoff_turn_points.h
 
 SOURCES += \
+    $$PWD/handoff_corner_cuts.cpp \
     $$PWD/handoff_document.cpp \
     $$PWD/handoff_geometry.cpp \
     $$PWD/handoff_ids.cpp \

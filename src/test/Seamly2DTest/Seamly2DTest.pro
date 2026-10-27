@@ -64,6 +64,7 @@ SOURCES += \
     tst_labeltextmanager.cpp \
     tst_handoffids.cpp \
     tst_handoffturnpoints.cpp \
+    tst_handoffcornercuts.cpp \
     tst_handoffpiece.cpp \
     tst_handofflabel.cpp \
     tst_handoffdocument.cpp
@@ -102,6 +103,7 @@ HEADERS += \
     tst_labeltextmanager.h \
     tst_handoffids.h \
     tst_handoffturnpoints.h \
+    tst_handoffcornercuts.h \
     tst_handoffpiece.h \
     tst_handofflabel.h \
     tst_handoffdocument.h
