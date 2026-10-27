@@ -11,12 +11,10 @@ use crate::entities::{Entity, Point};
 // @brief DXF version enumeration.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum DxfVersion {
-    // DXF R11 (AC1009): the DXF-AAMA export. ANSI/AAMA-292 builds on R11; R11 and R12 share AC1009.
+    // DXF R11 (AC1009): the DXF-AAMA export. ANSI/AAMA-292 builds on R11; the ASTM writer builds R13 from it.
     R11,
-    // DXF R12 (AC1009): the widest importer support.
-    #[default]
-    R12,
     // DXF R13 (AC1012): the version ASTM D6673 §1.2 names.
+    #[default]
     R13,
 }
 

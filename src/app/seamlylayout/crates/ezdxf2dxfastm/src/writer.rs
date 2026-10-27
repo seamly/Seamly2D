@@ -2,14 +2,14 @@
 // author: slspencer, copyright 2026
 // MIT License: https://opensource.org/licenses/MIT
 
-//! @brief DXF-ASTM file writer (ASTM D6673-10, METRIC units, DXF R12 or R13).
+//! @brief DXF-ASTM file writer (ASTM D6673-10, METRIC units, DXF R11 or R13).
 //!
-//! R12 file layout:
+//! AC1009 file layout:
 //! - HEADER: `$ACADVER` only (D6673 §4.2 recommends a minimal header).
 //! - BLOCKS: one block per piece; see `write_astm_block`.
 //! - ENTITIES: style system text on layer 1, then one INSERT per block.
 //!
-//! `Drawing::version` selects the file version. An R13 file is the R12 file
+//! `Drawing::version` selects the file version. An R13 file is the AC1009 file
 //! rewritten by `r13::upgrade_to_r13`, so both versions carry the same D6673 content.
 //!
 //! `DxfAstmExportOptions::aama` writes DXF-AAMA (ANSI/AAMA-292) content instead,
@@ -20,7 +20,7 @@
 //! - label text is on layer 1 (no 15);
 //! - no `Curve Tolerance:` or ASTM version style text; the size is `Size:`, not `Size Name:`.
 //!
-//! An R11 file is the R12 file: both versions are AC1009.
+//! An R11 file is the AC1009 file.
 
 use crate::encoder::{encode_astm_polyline, encode_astm_text, encode_dxf_point, encode_entity, encode_notch};
 use crate::error::{DxfAstmExportError, Result};
@@ -143,7 +143,7 @@ fn write_header_section(writer: &mut dyn Write, include_header: bool) -> std::io
     write_group_code(writer, 0, "SECTION")?;
     write_group_code(writer, 2, "HEADER")?;
     write_group_code(writer, 9, "$ACADVER")?;
-    write_group_code(writer, 1, "AC1009")?; // DXF R11 and R12 syntax, the widest importer support
+    write_group_code(writer, 1, "AC1009")?; // DXF R11 syntax, the widest importer support
     if include_header {
         // (reserved for future HEADER variables)
     } // if include_header
@@ -573,7 +573,7 @@ fn get_line_comment(line: &str, prev_line: &str, next_line: Option<&str>, is_cod
     else if prev_line.trim() == "39" {
         format!("Value: {} (notch width in millimetres)", line_trimmed)
     }
-    // Group code 250 - CLO3D line type (not DXF R12 or D6673).
+    // Group code 250 - CLO3D line type (not DXF R11 or D6673).
     else if prev_line.trim() == "250" {
         format!("Value: {} (CLO3D line type: 0 = boundary, 2 = sewing line)", line_trimmed)
     }
@@ -789,7 +789,7 @@ fn create_annotated_version(
 }
 
 // @brief Export Drawing to DXF-ASTM format, or to DXF-AAMA when `options.aama` is set.
-// @param drawing The ezdxf Drawing object to export; its `version` selects DXF R11, R12 or R13.
+// @param drawing The ezdxf Drawing object to export; its `version` selects DXF R11 or R13.
 // @param output_path Path to write the DXF file.
 // @param options Export options.
 // @return Result indicating success or error.
@@ -809,8 +809,8 @@ pub fn export_dxf_astm(
         }
     }
 
-    // Write the R12 file structure to memory; an R13 file is rewritten from it.
-    // An R11 file is the same file: R11 and R12 share AC1009.
+    // Write the AC1009 file structure to memory; an R13 file is rewritten from it.
+    // An R11 file is the same file: R11 is AC1009.
     let mut buffer: Vec<u8> = Vec::new();
     // 1. HEADER section (minimal or empty).
     write_header_section(&mut buffer, options.include_header)?;
@@ -824,7 +824,7 @@ pub fn export_dxf_astm(
     let r12 = String::from_utf8(buffer)
         .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
     let text = match drawing.version {
-        DxfVersion::R11 | DxfVersion::R12 => r12,
+        DxfVersion::R11 => r12,
         DxfVersion::R13 => upgrade_to_r13(&r12)?,
     }; // match version
     std::fs::write(output_path.as_ref(), text)?;

@@ -21,7 +21,7 @@ use xmltree::{Element, XMLNode};
 // @brief Conversion options for SVG to ezdxf.
 #[derive(Debug, Clone)]
 pub struct SvgToEzdxfOptions {
-    // Target DXF version (default: R12 for ASTM).
+    // Target DXF version (default: R13).
     pub dxf_version: DxfVersion,
     // Whether to create blocks for pattern pieces.
     pub create_blocks: bool,
@@ -38,7 +38,7 @@ pub struct SvgToEzdxfOptions {
 impl Default for SvgToEzdxfOptions {
     fn default() -> Self {
         Self {
-            dxf_version: DxfVersion::R12,
+            dxf_version: DxfVersion::R13,
             create_blocks: true,
             invert_y: true,
             svg_height: None,

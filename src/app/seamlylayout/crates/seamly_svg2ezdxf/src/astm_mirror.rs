@@ -137,7 +137,7 @@ mod tests {
         // Every vertex a turn point, so (0, 100) stays a key point inside the fold edge.
         block.boundary = build_contour_tagged(&outline, true, Some(&[true; 5]));
         block.mirror_line = Some(fold);
-        let mut drawing = Drawing::new(crate::drawing::DxfVersion::R12);
+        let mut drawing = Drawing::new(crate::drawing::DxfVersion::R11);
         drawing.add_block(block);
         drawing
     } // fn half_piece

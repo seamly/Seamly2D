@@ -13,7 +13,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | Grading | `seamly_svg2ezdxf/src/astm_grading.rs`, `astm_contour::grade_contours` | Grade rules, `# n` texts on the base size |
 | Rule table | `ezdxf2dxfastm/src/grade_rule_file.rs` | `.rul` file beside the DXF |
 | Drawing → file | `ezdxf2dxfastm::export_dxf_astm` (`writer.rs`) | `.dxf` (+ annotated `.txt`) |
-| R12 → R13 | `ezdxf2dxfastm::upgrade_to_r13` (`r13.rs`) | R13 file from the R12 group stream |
+| AC1009 → R13 | `ezdxf2dxfastm::upgrade_to_r13` (`r13.rs`) | R13 file from the AC1009 group stream |
 | Bridge | `cxxqt_bridge::exports::do_export_dxf` | style text from QML |
 
 ## Decisions
@@ -21,10 +21,10 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | Topic | Decision | Reason |
 |---|---|---|
 | Units | Always `Units:METRIC`: millimetres to 2 decimals. Every real value (groups 10–59) has exactly 2 decimals, R13 table and dummy values included (`0.00`) | User decision. SVG px (96 dpi) × 25.4 / 96 |
-| DXF version | User picks: **DXF-ASTM (R12)** writes `AC1009`; **DXF-ASTM (R13)** writes `AC1012`. **DXF-ASTM (CLO3D)** writes R13 (`AC1012`): the CLO3D variant must be D6673-10 compliant (user decision) | D6673 §1.2 / 4.1 names R13. R12 has the widest importer support. Gerber AccuMark writes no version at all |
-| R13 structure | R12 group stream plus handles (5; 105 for DIMSTYLE), subclass markers (100), CLASSES (empty), TABLES (VPORT, LTYPE, LAYER, STYLE, VIEW, UCS, APPID, DIMSTYLE, BLOCK_RECORD), `*MODEL_SPACE` / `*PAPER_SPACE` blocks, OBJECTS (root dictionary + ACAD_GROUP) | One source of D6673 content for both versions. No owner handles (330) on entities and table entries: R14 added them. Checked: ezdxf 1.4.4 `audit` 0 errors, 0 fixes; libdxfrw reads the same entity counts as R12 |
-| Header | R12: `$ACADVER` only. R13: `$ACADVER`, `$DWGCODEPAGE`, `$HANDSEED` | D6673 §4.2: keep the header minimal. R13 needs `$HANDSEED` |
-| CLO3D group 250 | Off in **DXF-ASTM (R12)** and **(R13)**; on in **DXF-ASTM (CLO3D)** | Not DXF R12, not D6673. CLO3D reads it: 0 = boundary (layer 1), 2 = sew line (layer 14). Only those key-point polylines carry it. The R13 rewrite keeps it |
+| DXF version | User picks: **DXF-ASTM (R13)** writes `AC1012`. **DXF-ASTM (CLO3D)** writes R13 (`AC1012`): the CLO3D variant must be D6673-10 compliant (user decision) | D6673 §1.2 / 4.1 names R13. Gerber AccuMark writes no version at all |
+| R13 structure | AC1009 group stream plus handles (5; 105 for DIMSTYLE), subclass markers (100), CLASSES (empty), TABLES (VPORT, LTYPE, LAYER, STYLE, VIEW, UCS, APPID, DIMSTYLE, BLOCK_RECORD), `*MODEL_SPACE` / `*PAPER_SPACE` blocks, OBJECTS (root dictionary + ACAD_GROUP) | One source of D6673 content for both versions. No owner handles (330) on entities and table entries: R14 added them. Checked: ezdxf 1.4.4 `audit` 0 errors, 0 fixes; libdxfrw reads the same entity counts as R12 |
+| Header | AC1009 (AAMA): `$ACADVER` only. R13: `$ACADVER`, `$DWGCODEPAGE`, `$HANDSEED` | D6673 §4.2: keep the header minimal. R13 needs `$HANDSEED` |
+| CLO3D group 250 | Off in **DXF-ASTM (R13)**; on in **DXF-ASTM (CLO3D)** | Not DXF AC1009, not D6673. CLO3D reads it: 0 = boundary (layer 1), 2 = sew line (layer 14). Only those key-point polylines carry it. The R13 rewrite keeps it |
 | Block names | `<svg id>_M` kept | Existing CLO3D naming. `Piece Name:` carries the real name |
 | Piece Name | Piece `data-name`, each non-ASCII character as an AutoCAD `\U+XXXX` escape: "Комір" → `\U+041A\U+043E\U+043C\U+0456\U+0440`. A name that several pieces share ends in the piece letter, else the piece number: `Detail (3)`. Every size of a piece gets the same name. Dialogs and warnings show the name as written, with the same number | User decision. System text is 7-bit ASCII (§4.3.1.2). aw.fyi groups the sizes of a piece by name, and merges pieces that share one. Piece number: piece-set `data-type-number`, else the piece `data-set-number` (Marker layout), else the individual piece `data-type-number` |
 | Missing Piece Data dialog | One line per piece, not per placed size. A size that lacks Quantity or grainline marks it missing for the piece. A hidden label is not missing data | A multisize layout places every size. A label only displays Piece Properties |
@@ -149,7 +149,7 @@ Reports live beside the DXF files in `test-seamly-layout/layouts/<pattern>/`.
 |---|---|---|
 | `male_shirt_R13_202610071908.dxf` | 2 | FrontPanel junction missing turn point; FullSleeve open line ends as turn points (DXF.19) |
 | `male_shirt_R13_202610101837.dxf` | 1 | FullSleeve open line ends as curve points (DXF.21); FrontPanel L1 junction "should be curve" while L14 agrees (DXF.22) |
-| `male_shirt_R12_202610101837.dxf` | 2 | As R13, plus "File is not DXF R13" (expected for R12) |
+| `male_shirt_R11_202610101837.dxf` | 2 | As R13, plus "File is not DXF R13" (expected for R11) |
 | `jacket2_40-146_nested_allsizes_R13_202610121136.dxf` | 2 | Both from 6 pieces named "Detail" (Layout.26.5); layer 5 mismatch, same cause; duplicate vertices (Layout.27.9) |
 | `jacket2_40-146_nested_size240_R13_202610121142.dxf` | 3 | 2 from the "Detail" names; Detail (4) and Detail (6) bends not turn points: reader advisory (DXF.23) |
 | `jacket2_40-146_marker_allsizes_R13_202610121149.dxf` | 3 | 2 from the "Detail" names; Detail (4) bend: reader advisory (DXF.23). Nothing graded (Layout.25, 27.3) |

@@ -104,9 +104,6 @@ ToolBar {
     // @brief User toggled Export > "Export all tabs".
     signal exportAllTabsToggled(bool checked)
 
-    // @brief User selected DXF-ASTM (R12) from the Export dropdown (Phase 9).
-    signal exportDxfAstmRequested()
-
     // @brief User selected DXF-ASTM (R13) from the Export dropdown.
     signal exportDxfAstmR13Requested()
 
@@ -248,7 +245,6 @@ ToolBar {
             labelTextState:  root.labelTextState
             lastSvgTextMode: root.lastSvgTextMode
             showDxfVariants:           true
-            onExportDxfAstmRequested:  root.exportDxfAstmRequested()
             onExportDxfAstmR13Requested:   root.exportDxfAstmR13Requested()
             onExportDxfAstmClo3dRequested: root.exportDxfAstmClo3dRequested()
             onExportDxfAamaRequested:      root.exportDxfAamaRequested()

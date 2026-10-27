@@ -693,7 +693,7 @@ pub struct DxfStyleInfo {
     pub clo3d_group_250: bool,
     // DXF-AAMA (ANSI/AAMA-292) content instead of DXF-ASTM; the frontend pairs it with R11.
     pub aama: bool,
-    // File version: R11 or R12 (both AC1009), or R13 (AC1012).
+    // File version: R11 (AC1009) or R13 (AC1012).
     pub dxf_version: DxfVersion,
     // Seamly2D suite version for `Author:`.
     pub app_version: Option<String>,
@@ -1997,7 +1997,7 @@ pub fn export_name_segment(format: &str, mode: &str) -> &'static str {
 //
 // Example: ("R13", true) → "R13_annotated". The standard version keeps the variant alone.
 //
-// @param variant   "R12", "R13", "CLO3D" or "AAMA". CLO3D is always R13 and AAMA always R11,
+// @param variant   "R13", "CLO3D" or "AAMA". CLO3D is always R13 and AAMA always R11,
 //                  so their names carry no version.
 // @param annotated true when the export also writes the annotated `.txt` file.
 pub fn dxf_export_name_segment(variant: &str, annotated: bool) -> String {
@@ -2064,12 +2064,11 @@ mod tests {
     // @brief The variant segment goes before the stamp; "_tiled" stays after it.
     #[test]
     fn default_export_file_name_places_segment_before_stamp() {
-        assert_eq!(default_export_file_name("male_shirt", "R12", "", "202610031234", "dxf", false), "male_shirt_R12_202610031234.dxf");
         assert_eq!(default_export_file_name("male_shirt", "R13", "", "202610031234", "dxf", false), "male_shirt_R13_202610031234.dxf");
         assert_eq!(default_export_file_name("male_shirt", "CLO3D", "", "202610031234", "dxf", false), "male_shirt_CLO3D_202610031234.dxf");
         assert_eq!(default_export_file_name("male_shirt", "", "", "202610031234", "png", false), "male_shirt_202610031234.png");
         assert_eq!(default_export_file_name("male_shirt", "", "", "202610031234", "pdf", true), "male_shirt_202610031234_tiled.pdf");
-        assert_eq!(default_export_file_name("", "R12", "", "202610031234", "dxf", false), "");
+        assert_eq!(default_export_file_name("", "R13", "", "202610031234", "dxf", false), "");
     } // default_export_file_name_places_segment_before_stamp
 
     // @brief Each content-changing mode gets its own segment; the other modes keep the plain name.
@@ -2106,10 +2105,8 @@ mod tests {
     // @brief The annotated version adds "_annotated" after the variant; the standard name does not change.
     #[test]
     fn dxf_export_name_segment_marks_annotated() {
-        assert_eq!(dxf_export_name_segment("R12", false), "R12");
         assert_eq!(dxf_export_name_segment("R13", false), "R13");
         assert_eq!(dxf_export_name_segment("CLO3D", false), "CLO3D");
-        assert_eq!(dxf_export_name_segment("R12", true), "R12_annotated");
         assert_eq!(dxf_export_name_segment("R13", true), "R13_annotated");
         assert_eq!(dxf_export_name_segment("CLO3D", true), "CLO3D_annotated");
         assert_eq!(dxf_export_name_segment("AAMA", false), "AAMA");
@@ -2123,10 +2120,8 @@ mod tests {
         let name = |variant: &str, annotated: bool| {
             default_export_file_name("male_shirt", &dxf_export_name_segment(variant, annotated), "", stamp, "dxf", false)
         };
-        assert_eq!(name("R12", false), "male_shirt_R12_202610011721.dxf");
         assert_eq!(name("R13", false), "male_shirt_R13_202610011721.dxf");
         assert_eq!(name("CLO3D", false), "male_shirt_CLO3D_202610011721.dxf");
-        assert_eq!(name("R12", true), "male_shirt_R12_annotated_202610011721.dxf");
         assert_eq!(name("R13", true), "male_shirt_R13_annotated_202610011721.dxf");
         assert_eq!(name("CLO3D", true), "male_shirt_CLO3D_annotated_202610011721.dxf");
         assert_eq!(name("AAMA", false), "male_shirt_AAMA_202610011721.dxf");
@@ -2322,7 +2317,7 @@ mod tests {
     //
     // Creates a minimal SVG DOM (one stroked rectangle), exports it via the full
     // do_export_dxf pipeline (DOM → ezdxf Drawing → DXF-ASTM → disk), and asserts
-    // that the written file contains the DXF R12 version identifier "AC1009", a
+    // that the written file contains the DXF R11 version identifier "AC1009", a
     // SECTION marker anywhere in the file, and ends with the EOF marker.
     #[test]
     fn do_export_dxf_writes_valid_dxf() {
@@ -2338,12 +2333,12 @@ mod tests {
         path.push(format!("seamly_dxf_export_test_{}.dxf", std::process::id()));
         let path_str = path.to_string_lossy().to_string();
 
-        do_export_dxf(&doc, &path_str, false, &DxfStyleInfo::default(), &mut |_| {}).expect("DXF export should succeed");
+        do_export_dxf(&doc, &path_str, false, &DxfStyleInfo { dxf_version: DxfVersion::R11, ..DxfStyleInfo::default() }, &mut |_| {}).expect("DXF export should succeed");
 
         let content = std::fs::read_to_string(&path_str).expect("exported DXF file should be readable");
         let _ = std::fs::remove_file(&path_str); // best-effort cleanup
 
-        // DXF R12 files contain the AC1009 version identifier in the HEADER section.
+        // DXF R11 files contain the AC1009 version identifier in the HEADER section.
         assert!(
             content.contains("AC1009"),
             "exported DXF should contain AC1009 version identifier, got first 200 chars: {:?}",
@@ -2375,7 +2370,7 @@ mod tests {
             let doc = Document::parse(&svg(fold_x)).expect("fixture SVG should parse");
             let path = std::env::temp_dir().join(format!("seamly_dxf_mirror_{tag}_{}.dxf", std::process::id()));
             let path_str = path.to_string_lossy().to_string();
-            let report = do_export_dxf(&doc, &path_str, false, &DxfStyleInfo::default(), &mut |_| {}).expect("DXF export should succeed");
+            let report = do_export_dxf(&doc, &path_str, false, &DxfStyleInfo { dxf_version: DxfVersion::R11, ..DxfStyleInfo::default() }, &mut |_| {}).expect("DXF export should succeed");
             let content = std::fs::read_to_string(&path_str).expect("exported DXF file should be readable");
             let _ = std::fs::remove_file(&path_str);
             (report, content.lines().map(|l| l.trim().to_string()).collect::<Vec<String>>())

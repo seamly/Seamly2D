@@ -1393,7 +1393,7 @@ mod tests {
         tag: &str,
         grading: Option<crate::exports::DxfGradingSource>,
     ) -> (Vec<String>, String, Option<String>, String) {
-        let style = crate::exports::DxfStyleInfo { grading, ..crate::exports::DxfStyleInfo::default() };
+        let style = crate::exports::DxfStyleInfo { grading, dxf_version: seamly_svg2ezdxf::DxfVersion::R11, ..crate::exports::DxfStyleInfo::default() };
         let stem = format!("{tag}_{}", std::process::id());
         let path = std::env::temp_dir().join(format!("{stem}.dxf"));
         let _ = std::fs::remove_file(path.with_extension("rul"));

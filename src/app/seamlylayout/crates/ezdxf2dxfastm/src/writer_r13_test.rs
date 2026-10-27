@@ -80,7 +80,7 @@ mod tests {
         text
     }
 
-    // @brief Fixed date and time, so R12 and R13 exports compare equal.
+    // @brief Fixed date and time, so R11 and R13 exports compare equal.
     fn fixed_options() -> DxfAstmExportOptions {
         DxfAstmExportOptions {
             creation_date: Some("03-10-2026".to_string()),
@@ -189,7 +189,7 @@ mod tests {
         assert_eq!((poly.get(10), poly.get(20), poly.get(30), poly.get(66)), (Some("0.00"), Some("0.00"), Some("0.00"), None));
     }
 
-    // @brief R13 holds the same D6673 entities, layers and values as R12.
+    // @brief R13 holds the same D6673 entities, layers and values as R11.
     #[test]
     fn r13_keeps_the_d6673_content_of_r12() {
         // Pairs that are D6673 content: handles, markers, dummy points and R13-only records removed.
@@ -212,7 +212,7 @@ mod tests {
                 })
                 .collect()
         };
-        let r12 = export(&sample_drawing(DxfVersion::R12), "same12", &fixed_options());
+        let r12 = export(&sample_drawing(DxfVersion::R11), "same11", &fixed_options());
         let r13 = export(&sample_drawing(DxfVersion::R13), "same13", &fixed_options());
         assert!(r12.contains("AC1009"));
         assert_eq!(content(&r12), content(&r13));
@@ -254,11 +254,11 @@ mod tests {
     }
 
     #[test]
-    fn every_real_value_has_two_decimals_in_r12_and_r13() {
+    fn every_real_value_has_two_decimals_in_r11_and_r13() {
         let svg = std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/test_data/male_shirt_pieces.svg"))
             .expect("fixture present");
         let doc = svg_dom::Document::parse(&svg).expect("fixture parses");
-        for version in [DxfVersion::R12, DxfVersion::R13] {
+        for version in [DxfVersion::R11, DxfVersion::R13] {
             let svg_opts = SvgToEzdxfOptions { dxf_version: version, ..SvgToEzdxfOptions::default() };
             let drawing = svg_to_ezdxf(&doc, &svg_opts).expect("converts");
             for (_, rec) in parse(&export(&drawing, "decimals", &fixed_options())) {

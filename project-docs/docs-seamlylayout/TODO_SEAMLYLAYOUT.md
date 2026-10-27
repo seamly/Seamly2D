@@ -4,16 +4,9 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Implement
 
-### [ ] Task Layout.100 — Implement - Remove the DXF-ASTM (R12) export code and menu option
+### [ ] Task Layout.100 — Remove the DXF-ASTM (R12) export code and menu option (100.1-100.5 done, see TODO_COMPLETED.md)
 
-- [ ] Remove the DXF-ASTM (R12) export option - it isn't used often. We only need DXF-ASTM (R13) and DXF-AAMA options. DXF-ASTM (CLO3D) remains disabled.
-- [ ] Keep the AC1009 writer: DXF-AAMA (R11) is the same file structure (`DxfVersion::R11`, `export_dxf_astm`). R13 is rewritten from it (`upgrade_to_r13`).
-- [ ] Layout.100.1 `ExportMenu.qml`: remove the "DXF-ASTM (R12)" item and `exportDxfAstmR12Requested`; `TopMenuBar.qml` and `Main.qml` handlers.
-- [ ] Layout.100.2 `Main.qml`: `pendingDxfVersion` defaults and the View menu "DXF-ASTM" item (`requestDxfExport(false, "R12")`) move to R13.
-- [ ] Layout.100.3 `cxxqt_bridge` `export_dxf` (`lib.rs`, `exports.rs`): drop the `"R12"` choice; R11 (AAMA) and R13 (ASTM) stay.
-- [ ] Layout.100.4 `DxfVersion::R12`: remove, or keep only as the internal AC1009 base of R11; update tests that export R12 (`writer_test.rs`, `writer_astm_test.rs`, `writer_r13_test.rs`, `exports.rs`).
-- [ ] Layout.100.5 File name segment `R12` (`Main.qml` `chooseDxfPath`) and docs (`seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, `TODO_DXF.md`, `AGENT_CHECKLIST.md`).
-- [ ] Layout.100.6 User check: the DXF submenu shows R13, CLO3D and AAMA only.
+- [ ] Layout.100.6 NEEDS_USER_TEST: Export > DXF shows DXF-ASTM (R13), (CLO3D) and DXF-AAMA (R11) only. View > DXF-ASTM still opens a .dxf. Qt build check open (next MSI).
 
 ### [ ] Task Layout.103 — Implement - DXF units: `METRIC` in mm, `ENGLISH` in inches
 
@@ -33,7 +26,7 @@ User approved (2026-10-25). The pattern unit decides the file units:
 - [ ] Layout.103.2 `SVG-DATA-ATTRIBUTES.md`: add `data-units`; size rows name the DXF conversion.
 - [ ] Layout.103.3 `seamly_svg2ezdxf`: read `data-units` into `Drawing`; convert cm size values to mm.
 - [ ] Layout.103.4 `ezdxf2dxfastm`: `ENGLISH` writes every length in inches with 4 decimals: coordinates, text heights, notch depth and width, `Curve Tolerance:`, `.rul` grade steps. `Units:ENGLISH`.
-- [ ] Layout.103.5 Rust tests: mm, cm and inch handoffs; `.rul`; R11, R12 and R13 (R12 until Layout.100).
+- [ ] Layout.103.5 Rust tests: mm, cm and inch handoffs; `.rul`; R11 and R13.
 - [ ] Layout.103.6 Docs: `seamlylayout_DXF_AAMA.md` (Decisions, McNeel table `Size:` row), `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
 - [ ] Layout.103.7 Verify: `cargo test --workspace`; Qt test via the scratch test harness; MSI only when the user asks.
 

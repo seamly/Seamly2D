@@ -285,7 +285,7 @@ Needs the next MSI.
 Needs the next MSI. Settings from section 1.
 
 - [ ] Export menu: one "DXF" item below "Export all tabs". No DXF-ASTM item in the Export menu itself.
-- [ ] Base Size 500 tab, Export > DXF: "DXF-ASTM (R12)", "DXF-ASTM (R13)", "DXF-ASTM (CLO3D)", "DXF-AAMA (R11)", all enabled. No note.
+- [ ] Base Size 500 tab, Export > DXF: "DXF-ASTM (R13)", "DXF-ASTM (CLO3D)", "DXF-AAMA (R11)", all enabled. No note.
 - [ ] Export > DXF > DXF-ASTM (R13): the export starts (Missing Piece Data or Standard/Annotated dialog). Cancel.
 - [ ] Marker tab, Export > DXF: "DXF: select Base Size or a size tab" is the first item and reads in full. The four items are disabled.
 - [ ] Nested tab: same.

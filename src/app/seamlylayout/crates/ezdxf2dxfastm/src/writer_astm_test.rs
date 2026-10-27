@@ -112,7 +112,7 @@ mod tests {
         block.notches.push(Notch { base: Point::new(50.0, 0.0), angle_deg: 90.0, depth: 5.0, width: 0.0, kind: NotchKind::Slit });
         block.notches.push(Notch { base: Point::new(30.0, 0.0), angle_deg: 90.0, depth: 5.0, width: 3.0, kind: NotchKind::T });
         block.annotations.push(Annotation { position: Point::new(30.0, 30.0), height: 5.0, rotation: 0.0, text: "Front".to_string() });
-        let mut drawing = Drawing::new(DxfVersion::R12);
+        let mut drawing = Drawing::new(DxfVersion::R11);
         drawing.style_name = Some("Test Shirt".to_string());
         drawing.add_block(block);
         drawing
@@ -296,7 +296,7 @@ mod tests {
     #[test]
     fn built_in_seam_allowance_writes_boundary_and_sew_line() {
         let doc = svg_dom::Document::parse(BUILT_IN_HANDOFF).expect("fixture parses");
-        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions { dxf_version: DxfVersion::R11, ..SvgToEzdxfOptions::default() }).expect("converts");
         let dxf = parse_dxf(&export_to_string(&drawing, "built_in", &DxfAstmExportOptions::default()));
         let (_, body) = &dxf.blocks[0];
 
@@ -325,7 +325,7 @@ mod tests {
         let svg = std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/test_data/male_shirt_pieces.svg"))
             .expect("fixture present");
         let doc = svg_dom::Document::parse(&svg).expect("fixture parses");
-        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions { dxf_version: DxfVersion::R11, ..SvgToEzdxfOptions::default() }).expect("converts");
         let options = DxfAstmExportOptions { style_name: Some("male_shirt".to_string()), ..DxfAstmExportOptions::default() };
         let dxf = parse_dxf(&export_to_string(&drawing, "fixture", &options));
 
@@ -389,7 +389,7 @@ mod tests {
         let svg = std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/test_data/male_shirt_pieces.svg"))
             .expect("fixture present");
         let doc = svg_dom::Document::parse(&svg).expect("fixture parses");
-        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions { dxf_version: DxfVersion::R11, ..SvgToEzdxfOptions::default() }).expect("converts");
         let limit = CURVE_TOLERANCE_MM + 1e-9;
         for block in &drawing.blocks {
             let groups: Vec<(&str, Vec<&AstmContour>)> = vec![
@@ -415,7 +415,7 @@ mod tests {
         let svg = std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/test_data/male_shirt_pieces.svg"))
             .expect("fixture present");
         let doc = svg_dom::Document::parse(&svg).expect("fixture parses");
-        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions { dxf_version: DxfVersion::R11, ..SvgToEzdxfOptions::default() }).expect("converts");
         let ceilings = [("piece_Yoke_M", 7, 8), ("piece_PocketFlapRound_M", 4, 5)];
         for (name, boundary_max, sew_max) in ceilings {
             let block = drawing.blocks.iter().find(|b| b.name == name).expect("piece present");
@@ -466,7 +466,7 @@ mod tests {
     //        the full piece system text, a grade reference line and the `# n` texts.
     #[test]
     fn graded_sample_blocks_follow_d6673() {
-        let (drawing, _) = graded_drawing(DxfVersion::R12);
+        let (drawing, _) = graded_drawing(DxfVersion::R11);
         let parsed = parse_dxf(&export_to_string(&drawing, "graded_sample", &dated_options()));
         let names: Vec<&str> = parsed.blocks.iter().map(|(n, _)| n.as_str()).collect();
         assert_eq!(names, vec!["piece_Front_s36_M", "piece_Back_s36_M"]);
@@ -495,7 +495,7 @@ mod tests {
     // @brief Style text names the sample size and the grade rule table.
     #[test]
     fn graded_style_text_names_sample_size_and_table() {
-        let (drawing, _) = graded_drawing(DxfVersion::R12);
+        let (drawing, _) = graded_drawing(DxfVersion::R11);
         let lines = crate::writer::style_system_text(&drawing, &dated_options());
         assert!(lines.contains(&"Sample Size:36".to_string()), "{lines:?}");
         assert!(lines.contains(&"Grade Rule Table:GradingTest".to_string()), "{lines:?}");
@@ -504,7 +504,7 @@ mod tests {
     // @brief The `.rul` file (D6673 §4.4) sits beside the DXF: header, then one rule per identifier.
     #[test]
     fn graded_export_writes_the_rule_file() {
-        let (drawing, _) = graded_drawing(DxfVersion::R12);
+        let (drawing, _) = graded_drawing(DxfVersion::R11);
         let path = std::env::temp_dir().join(format!("seamly_astm_rul_{}.dxf", std::process::id()));
         export_dxf_astm(&drawing, &path, &dated_options()).expect("export succeeds");
         let rul_path = path.with_extension("rul");
@@ -543,7 +543,7 @@ mod tests {
     // @brief Equal growths share one identifier: the texts use fewer rules than points.
     #[test]
     fn equal_rules_share_an_identifier() {
-        let (drawing, _) = graded_drawing(DxfVersion::R12);
+        let (drawing, _) = graded_drawing(DxfVersion::R11);
         let sample = drawing.blocks.iter().find(|b| b.grading.is_some()).expect("graded block");
         let texts = &sample.grading.as_ref().unwrap().rule_texts;
         let table = drawing.grade_rule_table.as_ref().unwrap();
@@ -580,8 +580,8 @@ mod tests {
         let dxf = parse_dxf(&text);
         let version = dxf.all_pairs.windows(2).find(|w| w[0] == (9, "$ACADVER".to_string())).map(|w| w[1].1.clone());
         assert_eq!(version.as_deref(), Some("AC1009"));
-        // R11 and R12 share AC1009, so the R12 file is the same file.
-        assert_eq!(text, export_to_string(&sample_drawing(), "aama_r12", &aama_options()));
+        // The ASTM drawing in R11 is the same AC1009 file.
+        assert_eq!(text, export_to_string(&sample_drawing(), "aama_astm_r11", &aama_options()));
     }
 
     // @brief Style text ends at `Units:`: AAMA has no curve tolerance and no ASTM version.

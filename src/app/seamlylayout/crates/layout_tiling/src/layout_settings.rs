@@ -139,7 +139,7 @@ pub struct LayoutSettings {
     #[serde(default = "default_tile_orientation")]
     pub tile_orientation: String,
 
-    // export format: "svg" | "pdf" | "pdf-tiled" | "png" | "dxf-astm" | "ASCII DXF" | "DXF R12" " "GCode" | "HPGL" | "Gerber" |
+    // export format: "svg" | "pdf" | "pdf-tiled" | "png" | "dxf-astm" | "ASCII DXF" | "DXF R13" " "GCode" | "HPGL" | "Gerber" |
     #[serde(default)]
     pub output_format: String,
 

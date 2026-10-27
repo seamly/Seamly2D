@@ -4,7 +4,7 @@
 
 //! @brief Convert ezdxf intermediate representation to DXF-ASTM format.
 //! @details This crate exports the ezdxf-like Drawing object to DXF-ASTM
-//!          (ASTM D6673-10) format, as DXF R12 (AC1009) or R13 (AC1012),
+//!          (ASTM D6673-10) format, as DXF R11 (AC1009) or R13 (AC1012),
 //!          and to DXF-AAMA (ANSI/AAMA-292) format, as DXF R11 (AC1009).
 
 mod encoder;
