@@ -70,6 +70,29 @@ User approved (2026-10-25). DXF-AAMA only; DXF-ASTM and CLO3D keep their output.
 - [ ] Layout.102.4 Tests for the chosen layer order.
 - [ ] Layout.102.5 User check: import a CLO3D export in CLO3D, with the default settings and with the option set.
 
+### [ ] Task Layout.106 — Implement - Seamly2D: build the handoff pieces with `layout_handoff`, not `VLayoutPiece` (Gap 2)
+
+Closes Gap 2 of Dead.4.4.3 (`TODO_REMOVE_DEAD_LAYOUT_CODE.md`). After it, Dead.4.4.3 can compare the two writers and switch `MainWindow`. Dead.4.5 can then delete `VLayoutPiece`.
+
+- Today `MainWindowsNoGUI` holds `VLayoutPiece` in `pieceList` and `SizePieceList::pieces`. `preparePiecesForLayout()` and `prepareSizePieceList()` fill them with `VLayoutPiece::Create()`.
+- Users of these lists: `unevenCornerCuts()`, `needsCornerCuts()`, `unifySizeTurnPoints()`, `arrangePieceItemsFlat()`, `generatePiecesSvgDocument()`, `generateMultisizePiecesSvgDocument()`, `MainWindow::prepareMultisizePieceLists()`, and the `clear()` calls in `mainwindow.cpp`.
+- New value per piece: `layout_handoff::HandoffPlacedPiece` (info, piece, piece label, pattern label, offset). `placed_piece()` in `tst_handoffdocument.cpp` shows the calls.
+- Constraint: `recalculateAtSize()` changes the pattern data. Build the pieces and labels of a size while that size is active, and keep the results, not the `VContainer`.
+- [ ] Layout.106.1 User decision: how Dead.4.4.3 compares the two writers.
+  - Option A (recommended): fill the old and the new lists in the same size loop. A developer switch writes both SVGs. The `MainWindow` switch deletes the old lists.
+  - Option B: replace the old lists now. Compare only in a test program that loads a pattern and runs both writers.
+- [ ] Layout.106.2 Add the new lists: `QVector<HandoffPlacedPiece>` for an individual pattern, and one in `SizePieceList`. Keep them index-aligned with `pieceIds`.
+- [ ] Layout.106.3 `preparePiecesForLayout()` and `prepareSizePieceList()`: build each piece with `HandoffPieceInfo::create()`, `HandoffPiece::create()`, `HandoffLabel::create_piece_label()` and `create_pattern_label()`.
+  - Call `setForcedCornerCuts()` before `HandoffPiece::create()`, as now.
+  - The pattern label needs `doc`, so `preparePiecesForLayout()` can no longer be static.
+  - Piece set key: the `VPiece` id, as now.
+- [ ] Layout.106.4 `unevenCornerCuts()` and `needsCornerCuts()`: read `HandoffPiece::seam_allowance_corners()` and `HandoffPieceInfo::name`. Move the corner compare into a pure function, so a unit test can call it.
+- [ ] Layout.106.5 `unifySizeTurnPoints()`: call `HandoffPiece::unify_piece_turn_points()`. Count the differing pieces with `line_node_counts()`, as now.
+- [ ] Layout.106.6 Size units: pass every size through `sizeInExportUnit()` (Layout.103.8) to `HandoffPieceInfo` and `HandoffDocument::set_multisize()`. Fix the briefs in `handoff_document.h` that say "in pattern units".
+- [ ] Layout.106.7 Add a function that builds the SVG from the new lists: `HandoffStyle::from_settings()`, `set_units()`, `set_sample_size()` or `set_multisize()`, `piece_extent()` and `arrange_flat()` for the sheet and offsets, `add_piece()`, `to_svg_string()`. Layout Mode does not call it until the Dead.4.4.3 compare passes.
+- [ ] Layout.106.8 Tests: the corner compare (same cuts; different cuts, same corner count; different corner count). Run `TST_HandoffPiece` and `TST_HandoffDocument` again.
+- [ ] Layout.106.9 Verify: MSI build and Qt suites (ask first). NEEDS_USER_TEST: Layout Mode on an individual pattern and on a multisize pattern opens SeamlyLayout with the same pieces as before.
+
 ## VERIFY
 
 ### [ ] Task Layout.6 — Verify - DXF-ASTM grading
@@ -418,7 +441,6 @@ Export > DXF > "DXF-AAMA (R11)": ANSI/AAMA-292 content in a DXF R11 (AC1009) fil
     - No `Category:`: the handoff has no value for it.
   - Open: an untagged SVG (no `data-type`) keeps its generic layers, so its text stays on layer 15.
 - [ ] Layout.85.5 Next MSI: user check, `AGENT_CHECKLIST.md` §22. Import the file in an AAMA reader (CLO3D or another pattern CAD).
-
 
 ### [ ] Task Layout.95 - Verify - Seamly2D Piece Properties - Rotation" Change Rotation to be radio buttons for: None, 1-Way → 360, 2-Way → 180, 4-Way → 90, Any → 1. None or Undefined writes no line. (Default is "None"). Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
 
