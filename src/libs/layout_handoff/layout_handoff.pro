@@ -29,16 +29,14 @@
 #
 #-------------------------------------------------
 
-# File with common stuff for whole
+# Settings shared by every project.
 message("Entering layout_handoff.pro")
 include(../../../common.pri)
 
 QT += core gui widgets printsupport xml
 
-# Name of library
 TARGET = layout_handoff
 
-# We want create library
 TEMPLATE = lib
 
 CONFIG += staticlib
@@ -46,28 +44,28 @@ CONFIG += staticlib
 # The library has no stable.h, so it opts out of the release precompiled header from common.pri.
 CONFIG -= precompile_header
 
+include(warnings.pri)
 include(layout_handoff.pri)
 
-# This is static library so no need in "make install"
+# Static library: the linker puts it into the apps, so it has no install rule
 
-# directory for executable file
+# Library file directory
 DESTDIR = bin
 
-# files created moc
+# Generated moc files directory
 MOC_DIR = moc
 
-# objecs files
+# Object files directory
 OBJECTS_DIR = obj
 
-# Directory for files created rcc
+# Generated rcc files directory
 RCC_DIR = rcc
 
-include(warnings.pri)
-
+# No effect: default_post.prf adds -O2 after this -O3, and GCC and Clang use the last -O flag.
 CONFIG(release, debug|release){
     !*msvc* {
-        QMAKE_CXXFLAGS -= -O2 # Disable default optimization level
-        QMAKE_CXXFLAGS += -O3 # For layout_handoff library enable speed optimizations
+        QMAKE_CXXFLAGS -= -O2
+        QMAKE_CXXFLAGS += -O3
     }
 }
 
