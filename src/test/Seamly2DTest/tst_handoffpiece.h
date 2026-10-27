@@ -45,6 +45,12 @@ private slots:
     void seamAndCutLinesMatchOldWriter_data() const;
     void seamAndCutLinesMatchOldWriter() const;
     void noSeamAllowanceHasNoCutLineOrNotches() const;
+    void internalAndCutoutPathsMatchOldWriter() const;
+    void grainlineMatchesOldWriter_data() const;
+    void grainlineMatchesOldWriter() const;
+    void hiddenGrainlineKeepsItsData() const;
+    void foldLineMatchesOldWriter() const;
+    void pieceWithoutFoldLineHasNoFoldData() const;
 };
 
 #endif // TST_HANDOFFPIECE_H

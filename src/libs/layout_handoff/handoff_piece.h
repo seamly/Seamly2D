@@ -3,7 +3,7 @@
 //  @author slspencer
 //
 //  @brief
-//  Geometry of one piece in the SeamlyLayout handoff: lines, notches and internal paths.
+//  Geometry of one piece in the SeamlyLayout handoff: lines, notches, internal paths, grainline and fold line.
 //
 //  @copyright
 //  This source code is part of the Seamly2D project, a pattern making
@@ -34,6 +34,8 @@
 #include <QStringList>
 #include <QVector>
 #include <Qt>
+
+#include "../vpatterndb/FoldLineGraphic.h"
 
 #include <optional>
 
@@ -106,6 +108,40 @@ public:
     const QVector<HandoffPath> &internal_paths() const;
     const QVector<HandoffPath> &cutout_paths() const;
 
+    /**
+     * @brief grainline_points returns the grainline with its arrow heads; empty when the grainline data is invalid.
+     * @details Kept when the grainline is hidden, so a hidden grainline does not lose its data.
+     */
+    const QVector<QPointF> &grainline_points() const;
+
+    /**
+     * @brief grain_axis returns the start point and a point one pixel along the grain; empty when unknown.
+     */
+    const QVector<QPointF> &grain_axis() const;
+
+    bool is_grainline_visible() const;
+
+    /**
+     * @brief is_on_fold is true when the label data or a fold line puts the piece on the fold.
+     */
+    bool is_on_fold() const;
+
+    /**
+     * @brief fold_line returns the fold line from node to node; a null line when the piece has none.
+     */
+    const QLineF &fold_line() const;
+
+    /**
+     * @brief fold_line_on_cut_line returns the fold line sent out to the cut line.
+     * @details A null line when the piece has no fold line or no cut line.
+     */
+    const QLineF &fold_line_on_cut_line() const;
+
+    /**
+     * @brief fold_line_graphic returns the arrow and label geometry; null when the piece has no fold line.
+     */
+    const pattern_piece::FoldLineGraphic &fold_line_graphic() const;
+
 private:
     bool                 m_has_seam_allowance          = false;
     bool                 m_has_built_in_seam_allowance = false;
@@ -116,6 +152,13 @@ private:
     HandoffNotches       m_notches;
     QVector<HandoffPath> m_internal_paths;
     QVector<HandoffPath> m_cutout_paths;
+    QVector<QPointF>     m_grainline_points;
+    QVector<QPointF>     m_grain_axis;
+    bool                 m_is_grainline_visible = false;
+    bool                 m_is_on_fold           = false;
+    QLineF               m_fold_line;
+    QLineF               m_fold_line_on_cut_line;
+    pattern_piece::FoldLineGraphic m_fold_line_graphic;
 };
 } // namespace layout_handoff
 

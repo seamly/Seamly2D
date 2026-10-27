@@ -27,12 +27,20 @@
 
 #include "handoff_piece.h"
 
+#include "../ifc/exception/vexceptionbadid.h"
+#include "../vgeometry/vpointf.h"
+#include "../vmisc/def.h"
+#include "../vmisc/vmath.h"
 #include "../vpatterndb/AbstractPiece.h"
+#include "../vpatterndb/calculator.h"
+#include "../vpatterndb/floatItemData/vgrainlinedata.h"
+#include "../vpatterndb/floatItemData/vpiecelabeldata.h"
 #include "../vpatterndb/vcontainer.h"
 #include "../vpatterndb/vpiece.h"
 #include "../vpatterndb/vpiecepath.h"
-#include "../vmisc/def.h"
 
+#include <QPainterPath>
+#include <QPainterPathStroker>
 #include <QtDebug>
 
 namespace layout_handoff
@@ -129,6 +137,212 @@ HandoffNotches make_notches(const QVector<QLineF> &lines, const QVector<int> &li
     }
     return notches;
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief find_grainline_geometry evaluates the grainline start, direction and lengths.
+ * @param data        grainline data of the piece.
+ * @param pattern     pattern data; must not be null.
+ * @param length      receives the grainline length in pixels.
+ * @param angle       receives the direction in radians, counter-clockwise on screen.
+ * @param arrow_length receives the arrow head length in pixels.
+ * @param start       receives the grainline start point.
+ * @return false when a formula or an anchor point is invalid.
+ */
+bool find_grainline_geometry(const VGrainlineData &data, const VContainer *pattern, qreal &length, qreal &angle,
+                             qreal &arrow_length, QPointF &start)
+{
+    const quint32 top_id    = data.topAnchorPoint();
+    const quint32 bottom_id = data.bottomAnchorPoint();
+
+    if (top_id != NULL_ID && bottom_id != NULL_ID)
+    {
+        try
+        {
+            const auto top    = pattern->GeometricObject<VPointF>(top_id);
+            const auto bottom = pattern->GeometricObject<VPointF>(bottom_id);
+
+            const QLineF line(static_cast<QPointF>(*bottom), static_cast<QPointF>(*top));
+            length = line.length();
+            angle  = qDegreesToRadians(line.angle());
+
+            Calculator calculator;
+            arrow_length = ToPixel(calculator.EvalFormula(pattern->DataVariables(), data.getArrowLength()),
+                                   *pattern->GetPatternUnit());
+            start = line.p1();
+            return true;
+        }
+        catch (const VExceptionBadId &)
+        {
+            // Fall through to the formula data.
+        }
+    }
+
+    try
+    {
+        Calculator rotation_calculator;
+        angle = qDegreesToRadians(rotation_calculator.EvalFormula(pattern->DataVariables(), data.getRotation()));
+
+        Calculator length_calculator;
+        length = ToPixel(length_calculator.EvalFormula(pattern->DataVariables(), data.getLength()),
+                         *pattern->GetPatternUnit());
+
+        Calculator arrow_calculator;
+        arrow_length = ToPixel(arrow_calculator.EvalFormula(pattern->DataVariables(), data.getArrowLength()),
+                               *pattern->GetPatternUnit());
+    }
+    catch (const qmu::QmuParserError &)
+    {
+        return false;
+    }
+
+    start = data.GetPos();
+    const quint32 center_id = data.centerAnchorPoint();
+    if (center_id != NULL_ID)
+    {
+        try
+        {
+            const auto center = pattern->GeometricObject<VPointF>(center_id);
+            QLineF line(center->x(), center->y(), center->x() + length / 2.0, center->y());
+            line.setAngle(qRadiansToDegrees(angle));
+            line = QLineF(line.p2(), line.p1());
+            line.setLength(length);
+            start = line.p2();
+        }
+        catch (const VExceptionBadId &)
+        {
+            start = data.GetPos();
+        }
+    }
+    return true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief make_grainline_points builds the grainline path: both ends and the arrow heads that the arrow type asks for.
+ */
+QVector<QPointF> make_grainline_points(const VGrainlineData &data, qreal length, qreal angle, qreal arrow_length,
+                                       const QPointF &start)
+{
+    const QPointF end(start.x() + length * qCos(angle), start.y() - length * qSin(angle));
+    const qreal   spread = M_PI / 9;
+
+    QVector<QPointF> path;
+    path << start;
+    if (data.getArrowType() != ArrowType::Top)
+    {
+        path << QPointF(start.x() + arrow_length * cos(angle + spread), start.y() - arrow_length * sin(angle + spread));
+        path << QPointF(start.x() + arrow_length * cos(angle - spread), start.y() - arrow_length * sin(angle - spread));
+    }
+    path << start << end;
+    if (data.getArrowType() != ArrowType::Bottom)
+    {
+        path << QPointF(end.x() + arrow_length * cos(M_PI + angle + spread),
+                        end.y() - arrow_length * sin(M_PI + angle + spread));
+        path << QPointF(end.x() + arrow_length * cos(M_PI + angle - spread),
+                        end.y() - arrow_length * sin(M_PI + angle - spread));
+    }
+    path << end;
+    return path;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief keep_inside moves the points by the largest overshoot per axis so that every point lies in the rectangle.
+ */
+QVector<QPointF> keep_inside(const QRectF &rect, QVector<QPointF> points)
+{
+    qreal move_x = 0;
+    qreal move_y = 0;
+    for (const QPointF &point : points)
+    {
+        if (rect.contains(point))
+        {
+            continue;
+        }
+        qreal dx = 0;
+        qreal dy = 0;
+        if (point.x() < rect.left())
+        {
+            dx = rect.left() - point.x();
+        }
+        else if (point.x() > rect.right())
+        {
+            dx = rect.right() - point.x();
+        }
+        if (point.y() < rect.top())
+        {
+            dy = rect.top() - point.y();
+        }
+        else if (point.y() > rect.bottom())
+        {
+            dy = rect.bottom() - point.y();
+        }
+        move_x = qAbs(dx) > qAbs(move_x) ? dx : move_x;
+        move_y = qAbs(dy) > qAbs(move_y) ? dy : move_y;
+    }
+    for (QPointF &point : points)
+    {
+        point += QPointF(move_x, move_y);
+    }
+    return points;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief outline_bounds returns the bounding rectangle of the outline drawn with the default one pixel pen.
+ */
+QRectF outline_bounds(const QVector<QPointF> &outline)
+{
+    QPainterPath path;
+    path.moveTo(outline.first());
+    for (int i = 1; i < outline.size(); ++i)
+    {
+        path.lineTo(outline.at(i));
+    }
+    path.lineTo(outline.first());
+
+    QPainterPathStroker stroker;
+    stroker.setWidth(1);
+    stroker.setCapStyle(Qt::SquareCap);
+    stroker.setJoinStyle(Qt::BevelJoin);
+    stroker.setMiterLimit(2);
+    QPainterPath shape = stroker.createStroke(path);
+    shape.addPath(path);
+    return shape.controlPointRect();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief read_grainline fills the grainline path and the grain axis of a piece.
+ * @details Without top and bottom anchors the axis points up, so SeamlyLayout sees one direction per axis.
+ *          The axis does not depend on the length, so a zero or invalid length does not hide it.
+ */
+void read_grainline(const VGrainlineData &data, const VContainer *pattern, const QVector<QPointF> &outline,
+                    QVector<QPointF> *points, QVector<QPointF> *axis)
+{
+    qreal   length       = 0;
+    qreal   angle        = 0;
+    qreal   arrow_length = 0;
+    QPointF start;
+    if (!find_grainline_geometry(data, pattern, length, angle, arrow_length, start))
+    {
+        return;
+    }
+
+    *points = make_grainline_points(data, length, angle, arrow_length, start);
+    if (!outline.isEmpty())
+    {
+        *points = keep_inside(outline_bounds(outline), *points);
+    }
+
+    qreal axis_angle = angle;
+    if (data.topAnchorPoint() == NULL_ID || data.bottomAnchorPoint() == NULL_ID)
+    {
+        axis_angle = qDegreesToRadians(VGrainlineData::upwardAngle(qRadiansToDegrees(angle)));
+    }
+    *axis << start << QPointF(start.x() + qCos(axis_angle), start.y() - qSin(axis_angle));
+}
 } // namespace
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -177,6 +391,23 @@ HandoffPiece HandoffPiece::create(const VPiece &piece, const VContainer *pattern
         const QVector<QLineF> lines = piece.createNotchLines(pattern, cut_points, true, &widths, &types, &line_counts);
         handoff.m_notches = make_notches(lines, line_counts, widths, types);
     }
+
+    const QLineF fold_line = piece.foldLine(pattern);
+    handoff.m_is_on_fold   = piece.GetPatternPieceData().IsOnFold() || !fold_line.isNull();
+    if (!fold_line.isNull())
+    {
+        handoff.m_fold_line = fold_line;
+        if (!cut_points.isEmpty())
+        {
+            handoff.m_fold_line_on_cut_line = VPiece::foldLineOnCutLine(cut_points, fold_line);
+        }
+        handoff.m_fold_line_graphic = pattern_piece::FoldLineGraphic(fold_line, piece.mainPathPoints(pattern));
+    }
+
+    const VGrainlineData &grainline = piece.GetGrainlineGeometry();
+    handoff.m_is_grainline_visible  = grainline.IsVisible();
+    read_grainline(grainline, pattern, handoff.m_seam_line.points, &handoff.m_grainline_points,
+                   &handoff.m_grain_axis);
     return handoff;
 }
 
@@ -238,5 +469,47 @@ const QVector<HandoffPath> &HandoffPiece::internal_paths() const
 const QVector<HandoffPath> &HandoffPiece::cutout_paths() const
 {
     return m_cutout_paths;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+const QVector<QPointF> &HandoffPiece::grainline_points() const
+{
+    return m_grainline_points;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+const QVector<QPointF> &HandoffPiece::grain_axis() const
+{
+    return m_grain_axis;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+bool HandoffPiece::is_grainline_visible() const
+{
+    return m_is_grainline_visible;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+bool HandoffPiece::is_on_fold() const
+{
+    return m_is_on_fold;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+const QLineF &HandoffPiece::fold_line() const
+{
+    return m_fold_line;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+const QLineF &HandoffPiece::fold_line_on_cut_line() const
+{
+    return m_fold_line_on_cut_line;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+const pattern_piece::FoldLineGraphic &HandoffPiece::fold_line_graphic() const
+{
+    return m_fold_line_graphic;
 }
 } // namespace layout_handoff
