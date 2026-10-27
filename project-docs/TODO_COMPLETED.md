@@ -1746,3 +1746,5 @@ The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`sr
 - Commit: see git log "Remove DXF-ASTM (R12) export".
 
 - Layout.104.1-104.5 (e8a4255b78, merge bd372a152c): DXF-AAMA piece text. `Annotation:` from `data-annotation` after `Size:`; block name `<piece name>_<size>` (individual: `<piece name>`; ASCII, numbered name, svg id fallback, `_2` for repeats); `Creation Time:` `HH:MM:SS` in DXF and `.rul`. DXF-ASTM and CLO3D unchanged. Tests `aama_annotation_*`, `aama_block_names_*`, `aama_creation_time_has_seconds`. Open: Layout.104.6 (Qt build check, user test).
+
+- Layout.101.1-101.3: `SEAMLY_DATA_DIR` for SeamlyLayout. `DataDirectory` reads it before `QApplication`. Settings root `<dir>/settings/` (replaces the AppConfigLocation root, no legacy migration); logs `<dir>/logs/seamlylayout/`. Relative path exits 78, unwritable exits 73, empty or unset is a normal run. Tests `DataDirectoryTests` (valid, empty, relative, unwritable). Open: Layout.101.4 (Qt build check, user test).

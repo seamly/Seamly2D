@@ -37,6 +37,7 @@
 #include <cxxqt_bridge/src/lib.cxxqt.h>
 
 // Logger — singleton debug logger; writes [unix_sec] DEBUG: lines to logs/log_{ts}.txt
+#include "src/DataDirectory.h"
 #include "src/Logger.h"
 
 // Defined in crates/cxxqt_bridge/src/log_sink.rs. Registers the function that
@@ -135,6 +136,13 @@ void setMacOSTitleBarColor(QQuickWindow *window, int r, int g, int b)
 // @return Exit code: 0 on clean exit, non-zero on error.
 int main(int argc, char *argv[])
 {
+    // SEAMLY_DATA_DIR: check before any Qt application object or settings exist.
+    // 78 = relative path, 73 = unwritable folder (same codes as Seamly2D).
+    const int dataDirectoryResult = DataDirectory::configure();
+    if (dataDirectoryResult != DataDirectory::exitOk) {
+        return dataDirectoryResult;
+    } // if SEAMLY_DATA_DIR rejected
+
     // Initialise Qt WebEngine — must be called before QApplication
     QtWebEngineQuick::initialize();
 

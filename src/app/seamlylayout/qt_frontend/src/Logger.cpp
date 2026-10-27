@@ -20,6 +20,8 @@
 
 #include "Logger.h"
 
+#include "DataDirectory.h"
+
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QDebug>
@@ -68,11 +70,15 @@ void Logger::init()
     // Flatpak sandbox — so every platform uses the same writable
     // AppConfigLocation root, the "Seamly/SeamlyLayout" tree the settings and
     // preferences files already use.
-    QString logsDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    // SEAMLY_DATA_DIR sends the log to <dir>/logs/seamlylayout instead.
+    QString logsDir = DataDirectory::logsDirectory();
     if (logsDir.isEmpty()) {
-        logsDir = QCoreApplication::applicationDirPath();
-    } // if AppConfigLocation unavailable
-    logsDir += QStringLiteral("/logs");
+        logsDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+        if (logsDir.isEmpty()) {
+            logsDir = QCoreApplication::applicationDirPath();
+        } // if AppConfigLocation unavailable
+        logsDir += QStringLiteral("/logs");
+    } // if no SEAMLY_DATA_DIR
 
     QDir().mkpath(logsDir);
     clearLogDirectory(logsDir);

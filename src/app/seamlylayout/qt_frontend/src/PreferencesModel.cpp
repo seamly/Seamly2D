@@ -9,6 +9,7 @@
 // JSON remains the format for bundled defaults and legacy migration.
 
 #include "PreferencesModel.h"
+#include "DataDirectory.h"
 #include "Logger.h"
 #include "Platform.h"
 #include "SeamlyTheme.h"
@@ -111,6 +112,13 @@ void migrateLegacyOrganizationTree(const QString &legacyRoot, const QString &new
 // Qt resolves that path for each platform, so no platform logic is hard-coded here.
 QString appConfigRootPath()
 {
+    // SEAMLY_DATA_DIR replaces the config root; no legacy migration into a job folder.
+    const QString dataRoot = DataDirectory::settingsRoot();
+    if (!dataRoot.isEmpty()) {
+        QDir().mkpath(dataRoot);
+        return QDir(dataRoot).absolutePath();
+    } // if SEAMLY_DATA_DIR is set
+
     QString root = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
     if (root.isEmpty()) {
         root = QCoreApplication::applicationDirPath();

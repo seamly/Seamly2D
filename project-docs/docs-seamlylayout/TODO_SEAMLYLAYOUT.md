@@ -53,14 +53,8 @@ User approved (2026-10-25). DXF-AAMA only; DXF-ASTM and CLO3D keep their output.
 
 ### [ ] Task Layout.101 — Implement - `SEAMLY_DATA_DIR` for SeamlyLayout
 
-- A coming `develop` merge adds `SEAMLY_DATA_DIR` to Seamly2D and SeamlyMe (`VCommonSettings::configureDataDirectory`).
-- When it is set, they keep settings in `<dir>/settings/` and logs in `<dir>/logs/seamly2d/`. A relative path exits 78; an unwritable one exits 73.
-- SeamlyLayout ignores it: settings (`PreferencesModel.cpp`) and logs (`Logger.cpp`) stay in `AppConfigLocation`.
-- SeamlyLayout inherits the variable from Seamly2D's `--svg-stdin` launch, so one variable can isolate the whole suite.
-- [ ] Layout.101.1 Decide the SeamlyLayout folders, e.g. `<dir>/settings/` and `<dir>/logs/seamlylayout/`.
-- [ ] Layout.101.2 Read and check the variable before `QApplication`, with the same exit codes.
-- [ ] Layout.101.3 Tests: valid, empty, relative, and unwritable directory.
-- Starts after the `develop` merge that brings `configureDataDirectory`.
+- Done: `DataDirectory` (`qt_frontend/src/DataDirectory.{h,cpp}`) reads the variable first in `main()`. Settings go to `<dir>/settings/`, logs to `<dir>/logs/seamlylayout/`. A relative path exits 78; an unwritable one exits 73. Seamly2D's `--svg-stdin` launch passes the variable on.
+- [ ] Layout.101.4 NEEDS_USER_TEST: with the MSI, run `$env:SEAMLY_DATA_DIR="D:/sl_job"; seamlylayout.exe`. Expect `settings\qt6_seamlylayout.ini` and `logs\seamlylayout\log_*.txt` under it, nothing new in `%LOCALAPPDATA%\Seamly\SeamlyLayout`. Run with `SEAMLY_DATA_DIR=rel` (exit 78) and a path under a file (exit 73). Run Seamly2D with the variable set, open Layout Mode: SeamlyLayout uses the same folder. Qt build check open (next MSI).
 
 ### [ ] Task Layout.102 — Implement - DXF-ASTM (CLO3D): follow the McNeel layer guide
 
