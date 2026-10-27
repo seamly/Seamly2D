@@ -29,6 +29,7 @@
 #include <QDate>
 #include <QDesktopServices>
 #include <QMessageBox>
+#include <QShowEvent>
 #include <QtDebug>
 #include <QWidget>
 #include <QDialog>

@@ -76,6 +76,7 @@
 #include <QGuiApplication>
 #include <QScreen>
 #include <QScrollBar>
+#include <QShowEvent>
 
 // We need this enum in case we will add or delete a column. It also makes code more readable.
 enum {CursorColumn = 0, IdColumn, NameColumn, DescColumn, LengthColumn, AngleColumn};
