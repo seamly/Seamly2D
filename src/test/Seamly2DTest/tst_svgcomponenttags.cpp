@@ -161,9 +161,11 @@ qreal normalizedDegrees(qreal degrees)
  * pipeline (SvgGenerator) into a temporary file and parses the result back.
  * @param item piece root item; the function takes ownership.
  * @param sampleSize individual pattern size passed to setSampleSize(); empty sets none.
+ * @param units pattern unit passed to setUnits(); empty sets none.
  * @return the parsed SVG document; null if export or parsing failed.
  */
-QDomDocument exportItemSvg(QGraphicsItem *item, const QString &sampleSize = QString())
+QDomDocument exportItemSvg(QGraphicsItem *item, const QString &sampleSize = QString(),
+                           const QString &units = QString())
 {
     QTemporaryDir tempDir;
     if (!tempDir.isValid())
@@ -179,6 +181,7 @@ QDomDocument exportItemSvg(QGraphicsItem *item, const QString &sampleSize = QStr
     QGraphicsRectItem paper(QRectF(0, 0, 400, 400));
     SvgGenerator generator(&paper, filePath, QStringLiteral("Test Pattern"), QString(), 96);
     generator.setSampleSize(sampleSize);
+    generator.setUnits(units);
     generator.addSvgFromScene(&scene, item);
     generator.generate();
 
@@ -816,6 +819,23 @@ void TST_SvgComponentTags::IndividualPatternCarriesSampleSize() const
     QCOMPARE(patterns.at(0).attribute(QStringLiteral("data-measurements")), QStringLiteral("individual"));
     QCOMPARE(patterns.at(0).attribute(QStringLiteral("data-sample-size")), QStringLiteral("102"));
     QVERIFY(!groupsOfType(doc, QStringLiteral("piece")).at(0).hasAttribute(QStringLiteral("data-size")));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PatternCarriesUnits checks that setUnits() writes data-units on the pattern group.
+ */
+void TST_SvgComponentTags::PatternCarriesUnits() const
+{
+    const QDomDocument doc = exportItemSvg(makeTestPiece(QStringLiteral("Yoke")).GetItem(true), QString(),
+                                           QStringLiteral("inch"));
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+    const QVector<QDomElement> patterns = groupsOfType(doc, QStringLiteral("pattern"));
+    QCOMPARE(patterns.size(), 1);
+    QCOMPARE(patterns.at(0).attribute(QStringLiteral("data-units")), QStringLiteral("inch"));
+
+    const QDomDocument none = exportPieceSvg(makeTestPiece(QStringLiteral("Yoke")));
+    QVERIFY(!groupsOfType(none, QStringLiteral("pattern")).at(0).hasAttribute(QStringLiteral("data-units")));
 }
 
 //---------------------------------------------------------------------------------------------------------------------

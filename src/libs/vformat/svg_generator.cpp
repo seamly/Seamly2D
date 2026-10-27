@@ -158,6 +158,16 @@ void SvgGenerator::setSampleSize(const QString &sample_size)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/// @brief Set the pattern unit, written as data-units on the pattern group.
+/// @details Downstream tools use it to pick the DXF units and to convert size values.
+/// @param units pattern unit: "mm", "cm" or "inch"; empty writes no attribute.
+//---------------------------------------------------------------------------------------------------------------------
+void SvgGenerator::setUnits(const QString &units)
+{
+    m_units = units;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 /// @brief Merge all the SVGs in the m_dom_list list into a single SVG
 /// @return The merged SVG as a DOM document
 /// @details m_dom_list contains DOM representations of multiple SVGs
@@ -216,6 +226,7 @@ QDomDocument SvgGenerator::mergeSvgDoms()
             pattern_group.setAttribute("data-type-number", QString::number(n + 1));
             setAttribute(pattern_group, "data-name", m_pattern_name);
             setAttribute(pattern_group, "data-material", materials.at(n));
+            setAttribute(pattern_group, "data-units", m_units);
             if (m_sizes.isEmpty())
             {
                 pattern_group.setAttribute("data-measurements", "individual");

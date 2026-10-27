@@ -20,7 +20,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 
 | Topic | Decision | Reason |
 |---|---|---|
-| Units | Always `Units:METRIC`: millimetres to 2 decimals. Every real value (groups 10–59) has exactly 2 decimals, R13 table and dummy values included (`0.00`) | User decision. SVG px (96 dpi) × 25.4 / 96 |
+| Units | `Units:METRIC` (mm, 2 decimals) or `Units:ENGLISH` (inches, 4 decimals), from the handoff `data-units`: `inch` is `ENGLISH`, anything else `METRIC`. Every real value (groups 10–59 except angles) uses the unit's decimals; the R13 table and dummy values stay `0.00` | User decision. SVG px (96 dpi) × 25.4 / 96 |
 | DXF version | User picks: **DXF-ASTM (R13)** writes `AC1012`. **DXF-ASTM (CLO3D)** writes R13 (`AC1012`): the CLO3D variant must be D6673-10 compliant (user decision) | D6673 §1.2 / 4.1 names R13. Gerber AccuMark writes no version at all |
 | R13 structure | AC1009 group stream plus handles (5; 105 for DIMSTYLE), subclass markers (100), CLASSES (empty), TABLES (VPORT, LTYPE, LAYER, STYLE, VIEW, UCS, APPID, DIMSTYLE, BLOCK_RECORD), `*MODEL_SPACE` / `*PAPER_SPACE` blocks, OBJECTS (root dictionary + ACAD_GROUP) | One source of D6673 content for both versions. No owner handles (330) on entities and table entries: R14 added them. Checked: ezdxf 1.4.4 `audit` 0 errors, 0 fixes; libdxfrw reads the same entity counts as R12 |
 | Header | AC1009 (AAMA): `$ACADVER` only. R13: `$ACADVER`, `$DWGCODEPAGE`, `$HANDSEED` | D6673 §4.2: keep the header minimal. R13 needs `$HANDSEED` |
@@ -123,7 +123,7 @@ A DXF-ASTM export of the **Base Size** tab is graded (D6673 §4.3.1.4, §4.4). T
 - Rule = growth of one key point or notch from the sample size, per size. Rules equal within 0.01 mm share one identifier. Zero growth is a rule too (§4.3.1.4).
 - Base size block: every layer, full piece system text, `# n` TEXT on layers 1, 4, 8, 11, 14 at each graded point.
 - Grade reference line (layer 5): one horizontal draft-space line along the bottom of the base size boundary. A rigid fit of the layout block to its handoff block maps it into the block, so it gives the X axis of the rules when the layout turned the piece.
-- `.rul` file: same stem as the DXF. Header: version, `AUTHOR:Seamly2D`, date, time (hh:mm), `UNITS:METRIC`, table name, sample size, number of sizes, size list. Then `RULE: DELTA n dx,dy ...`, one growth per size.
+- `.rul` file: same stem as the DXF. Header: version, `AUTHOR:Seamly2D`, date, time (hh:mm), `UNITS:METRIC` or `UNITS:ENGLISH`, table name, sample size, number of sizes, size list. Then `RULE: DELTA n dx,dy ...`, one growth per size, in mm (2 decimals) or inches (4 decimals).
 - Not graded, with a warning in the export dialog; the base size block is written without `# n` texts:
   - sizes differ in turn points, lines or notch count;
   - the layout block does not fit its handoff shape (also a mirrored piece).

@@ -22,13 +22,13 @@ User approved (2026-10-25). The pattern unit decides the file units:
 - Size values: `Size:` / `Size Name:`, `Sample Size:`, `.rul` size list and sample size, the "Size N" label text in the DXF.
 - The screen, tabs, file names and legend keep pattern units.
 - A handoff without `data-units` writes `METRIC` with no conversion.
-- [ ] Layout.103.1 Seamly2D: `SvgGenerator` writes `data-units` (`mm`, `cm`, `inch`, the pattern unit) on the pattern group; caller `MainWindowsNoGUI`. Qt test in `tst_svgcomponenttags.cpp`.
-- [ ] Layout.103.2 `SVG-DATA-ATTRIBUTES.md`: add `data-units`; size rows name the DXF conversion.
-- [ ] Layout.103.3 `seamly_svg2ezdxf`: read `data-units` into `Drawing`; convert cm size values to mm.
-- [ ] Layout.103.4 `ezdxf2dxfastm`: `ENGLISH` writes every length in inches with 4 decimals: coordinates, text heights, notch depth and width, `Curve Tolerance:`, `.rul` grade steps. `Units:ENGLISH`.
-- [ ] Layout.103.5 Rust tests: mm, cm and inch handoffs; `.rul`; R11 and R13.
-- [ ] Layout.103.6 Docs: `seamlylayout_DXF_AAMA.md` (Decisions, McNeel table `Size:` row), `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
-- [ ] Layout.103.7 Verify: `cargo test --workspace`; Qt test via the scratch test harness; MSI only when the user asks.
+- [x] Layout.103.1 Seamly2D: `SvgGenerator` writes `data-units` (`mm`, `cm`, `inch`, the pattern unit) on the pattern group; caller `MainWindowsNoGUI`. Qt test in `tst_svgcomponenttags.cpp`.
+- [x] Layout.103.2 `SVG-DATA-ATTRIBUTES.md`: add `data-units`; size rows name the DXF conversion.
+- [x] Layout.103.3 `seamly_svg2ezdxf`: read `data-units` into `Drawing`; convert cm size values to mm.
+- [x] Layout.103.4 `ezdxf2dxfastm`: `ENGLISH` writes every length in inches with 4 decimals: coordinates, text heights, notch depth and width, `Curve Tolerance:`, `.rul` grade steps. `Units:ENGLISH`.
+- [x] Layout.103.5 Rust tests: mm, cm and inch handoffs; `.rul`; R11 and R13.
+- [x] Layout.103.6 Docs: `seamlylayout_DXF_AAMA.md` (Decisions, McNeel table `Size:` row), `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
+- [ ] Layout.103.7 Verify: `cargo test --workspace` and `ctest --preset debug` pass. Open: Qt test `PatternCarriesUnits` (`tst_svgcomponenttags.cpp`) not run, and the Qt build check, until the next MSI. NEEDS_USER_TEST: in an inch pattern (`.smis` in inches), export DXF-AAMA and DXF-ASTM; the DXF has `Units:ENGLISH` and inch coordinates with 4 decimals. In a cm pattern, a `.smms` size 50 writes `Size:500` and `Units:METRIC`.
 
 ### [ ] Task Layout.104 — Implement - DXF-AAMA piece text from the McNeel guide
 

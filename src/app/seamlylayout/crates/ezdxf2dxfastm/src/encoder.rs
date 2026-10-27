@@ -4,7 +4,7 @@
 
 //! @brief DXF entity encoding using group codes.
 
-use seamly_svg2ezdxf::{Circle, DxfPoint, Entity, Line, Notch, NotchKind, Point, Polyline, Text};
+use seamly_svg2ezdxf::{Circle, DxfPoint, DxfUnits, Entity, Line, Notch, NotchKind, Point, Polyline, Text};
 use std::any::Any;
 use std::io::Write;
 
@@ -30,8 +30,7 @@ fn write_group_code_int(writer: &mut dyn Write, code: i32, value: i32) -> std::i
     Ok(())
 }
 
-// @brief Write a group code with float value.
-// @details D6673 METRIC: decimal millimetres to two places.
+// @brief Write a group code with a non-length float value (an angle), to two places.
 // @param writer The writer to write to.
 // @param code The group code.
 // @param value The float value.
@@ -42,11 +41,19 @@ fn write_group_code_float(writer: &mut dyn Write, code: i32, value: f64) -> std:
     Ok(())
 }
 
+// @brief Write a group code with a length value, in the DXF units.
+// @param value Length in millimetres.
+fn write_group_code_length(writer: &mut dyn Write, code: i32, value: f64, units: DxfUnits) -> std::io::Result<()> {
+    writeln!(writer, "{}", code)?;
+    writeln!(writer, "{}", units.length(value))?;
+    Ok(())
+}
+
 // @brief Encode a LINE entity to DXF format.
 // @param writer The writer to write to.
 // @param line The LINE entity to encode.
 // @return Result indicating success or error.
-pub fn encode_line(writer: &mut dyn Write, line: &Line) -> std::io::Result<()> {
+pub fn encode_line(writer: &mut dyn Write, line: &Line, units: DxfUnits) -> std::io::Result<()> {
     // Entity type.
     write_group_code(writer, 0, "LINE")?;
 
@@ -54,12 +61,12 @@ pub fn encode_line(writer: &mut dyn Write, line: &Line) -> std::io::Result<()> {
     write_group_code(writer, 8, &line.layer)?;
 
     // Start point (group codes 10, 20 for X, Y).
-    write_group_code_float(writer, 10, line.start.x)?;
-    write_group_code_float(writer, 20, line.start.y)?;
+    write_group_code_length(writer, 10, line.start.x, units)?;
+    write_group_code_length(writer, 20, line.start.y, units)?;
 
     // End point (group codes 11, 21 for X, Y).
-    write_group_code_float(writer, 11, line.end.x)?;
-    write_group_code_float(writer, 21, line.end.y)?;
+    write_group_code_length(writer, 11, line.end.x, units)?;
+    write_group_code_length(writer, 21, line.end.y, units)?;
 
     Ok(())
 }
@@ -68,7 +75,7 @@ pub fn encode_line(writer: &mut dyn Write, line: &Line) -> std::io::Result<()> {
 // @param writer The writer to write to.
 // @param circle The CIRCLE entity to encode.
 // @return Result indicating success or error.
-pub fn encode_circle(writer: &mut dyn Write, circle: &Circle) -> std::io::Result<()> {
+pub fn encode_circle(writer: &mut dyn Write, circle: &Circle, units: DxfUnits) -> std::io::Result<()> {
     // Entity type.
     write_group_code(writer, 0, "CIRCLE")?;
 
@@ -76,11 +83,11 @@ pub fn encode_circle(writer: &mut dyn Write, circle: &Circle) -> std::io::Result
     write_group_code(writer, 8, &circle.layer)?;
 
     // Center point (group codes 10, 20 for X, Y).
-    write_group_code_float(writer, 10, circle.center.x)?;
-    write_group_code_float(writer, 20, circle.center.y)?;
+    write_group_code_length(writer, 10, circle.center.x, units)?;
+    write_group_code_length(writer, 20, circle.center.y, units)?;
 
     // Radius (group code 40).
-    write_group_code_float(writer, 40, circle.radius)?;
+    write_group_code_length(writer, 40, circle.radius, units)?;
 
     Ok(())
 }
@@ -89,7 +96,7 @@ pub fn encode_circle(writer: &mut dyn Write, circle: &Circle) -> std::io::Result
 // @param writer The writer to write to.
 // @param polyline The POLYLINE entity to encode.
 // @return Result indicating success or error.
-pub fn encode_polyline(writer: &mut dyn Write, polyline: &Polyline) -> std::io::Result<()> {
+pub fn encode_polyline(writer: &mut dyn Write, polyline: &Polyline, units: DxfUnits) -> std::io::Result<()> {
     // Entity type.
     write_group_code(writer, 0, "POLYLINE")?;
 
@@ -109,8 +116,8 @@ pub fn encode_polyline(writer: &mut dyn Write, polyline: &Polyline) -> std::io::
         write_group_code(writer, 8, &polyline.layer)?;
 
         // Vertex coordinates (group codes 10, 20 for X, Y).
-        write_group_code_float(writer, 10, vertex.x)?;
-        write_group_code_float(writer, 20, vertex.y)?;
+        write_group_code_length(writer, 10, vertex.x, units)?;
+        write_group_code_length(writer, 20, vertex.y, units)?;
 
         // Vertex flag (group code 70: 32 = polyline vertex, 128 = curve-fit vertex).
         write_group_code_int(writer, 70, 32)?;
@@ -127,7 +134,7 @@ pub fn encode_polyline(writer: &mut dyn Write, polyline: &Polyline) -> std::io::
 // @param writer The writer to write to.
 // @param text The TEXT entity to encode.
 // @return Result indicating success or error.
-pub fn encode_text(writer: &mut dyn Write, text: &Text) -> std::io::Result<()> {
+pub fn encode_text(writer: &mut dyn Write, text: &Text, units: DxfUnits) -> std::io::Result<()> {
     // Entity type.
     write_group_code(writer, 0, "TEXT")?;
 
@@ -135,11 +142,11 @@ pub fn encode_text(writer: &mut dyn Write, text: &Text) -> std::io::Result<()> {
     write_group_code(writer, 8, &text.layer)?;
 
     // Insertion point (group codes 10, 20 for X, Y).
-    write_group_code_float(writer, 10, text.insertion_point.x)?;
-    write_group_code_float(writer, 20, text.insertion_point.y)?;
+    write_group_code_length(writer, 10, text.insertion_point.x, units)?;
+    write_group_code_length(writer, 20, text.insertion_point.y, units)?;
 
     // Text height (group code 40).
-    write_group_code_float(writer, 40, text.height)?;
+    write_group_code_length(writer, 40, text.height, units)?;
 
     // Text content (group code 1).
     write_group_code(writer, 1, &text.content)?;
@@ -154,7 +161,7 @@ pub fn encode_text(writer: &mut dyn Write, text: &Text) -> std::io::Result<()> {
 // @param writer The writer to write to.
 // @param point The DxfPoint entity to encode.
 // @return Result indicating success or error.
-pub fn encode_dxf_point(writer: &mut dyn Write, point: &DxfPoint) -> std::io::Result<()> {
+pub fn encode_dxf_point(writer: &mut dyn Write, point: &DxfPoint, units: DxfUnits) -> std::io::Result<()> {
     // Entity type.
     write_group_code(writer, 0, "POINT")?;
 
@@ -162,8 +169,8 @@ pub fn encode_dxf_point(writer: &mut dyn Write, point: &DxfPoint) -> std::io::Re
     write_group_code(writer, 8, &point.layer)?;
 
     // Position (group codes 10, 20 for X, Y).
-    write_group_code_float(writer, 10, point.position.x)?;
-    write_group_code_float(writer, 20, point.position.y)?;
+    write_group_code_length(writer, 10, point.position.x, units)?;
+    write_group_code_length(writer, 20, point.position.y, units)?;
 
     Ok(())
 } // fn encode_dxf_point
@@ -182,6 +189,7 @@ pub fn encode_astm_polyline(
     layer: &str,
     closed: bool,
     group_250: Option<i32>,
+    units: DxfUnits,
 ) -> std::io::Result<()> {
     write_group_code(writer, 0, "POLYLINE")?;
     write_group_code(writer, 8, layer)?;
@@ -193,8 +201,8 @@ pub fn encode_astm_polyline(
     for v in vertices {
         write_group_code(writer, 0, "VERTEX")?;
         write_group_code(writer, 8, layer)?;
-        write_group_code_float(writer, 10, v.x)?;
-        write_group_code_float(writer, 20, v.y)?;
+        write_group_code_length(writer, 10, v.x, units)?;
+        write_group_code_length(writer, 20, v.y, units)?;
     } // for each vertex
     write_group_code(writer, 0, "SEQEND")?;
     write_group_code(writer, 8, layer)?;
@@ -210,12 +218,13 @@ pub fn encode_astm_text(
     height: f64,
     rotation: f64,
     content: &str,
+    units: DxfUnits,
 ) -> std::io::Result<()> {
     write_group_code(writer, 0, "TEXT")?;
     write_group_code(writer, 8, layer)?;
-    write_group_code_float(writer, 10, position.x)?;
-    write_group_code_float(writer, 20, position.y)?;
-    write_group_code_float(writer, 40, height)?;
+    write_group_code_length(writer, 10, position.x, units)?;
+    write_group_code_length(writer, 20, position.y, units)?;
+    write_group_code_length(writer, 40, height, units)?;
     write_group_code(writer, 1, content)?;
     if rotation.abs() >= 0.005 {
         write_group_code_float(writer, 50, rotation)?;
@@ -225,14 +234,14 @@ pub fn encode_astm_text(
 
 // @brief Encode a notch as a D6673 §4.3.4 POINT: base point, depth (30), width (39), angle (50).
 // @details Width is omitted for a slit notch, which has none.
-pub fn encode_notch(writer: &mut dyn Write, notch: &Notch) -> std::io::Result<()> {
+pub fn encode_notch(writer: &mut dyn Write, notch: &Notch, units: DxfUnits) -> std::io::Result<()> {
     write_group_code(writer, 0, "POINT")?;
     write_group_code(writer, 8, notch.kind.layer())?;
-    write_group_code_float(writer, 10, notch.base.x)?;
-    write_group_code_float(writer, 20, notch.base.y)?;
-    write_group_code_float(writer, 30, notch.depth)?;
+    write_group_code_length(writer, 10, notch.base.x, units)?;
+    write_group_code_length(writer, 20, notch.base.y, units)?;
+    write_group_code_length(writer, 30, notch.depth, units)?;
     if notch.kind != NotchKind::Slit {
-        write_group_code_float(writer, 39, notch.width)?;
+        write_group_code_length(writer, 39, notch.width, units)?;
     } // if has width
     write_group_code_float(writer, 50, notch.angle_deg)?;
     Ok(())
@@ -243,7 +252,7 @@ pub fn encode_notch(writer: &mut dyn Write, notch: &Notch) -> std::io::Result<()
 // @param entity The entity to encode (as Box<dyn Entity>).
 // @return Result indicating success or error.
 // @note This function uses downcasting via Any trait to determine the concrete entity type.
-pub fn encode_entity(writer: &mut dyn Write, entity: &Box<dyn Entity>) -> std::io::Result<()> {
+pub fn encode_entity(writer: &mut dyn Write, entity: &Box<dyn Entity>, units: DxfUnits) -> std::io::Result<()> {
     // Get the entity as Any for downcasting.
     let entity_any = entity.as_ref() as &dyn Any;
 
@@ -251,7 +260,7 @@ pub fn encode_entity(writer: &mut dyn Write, entity: &Box<dyn Entity>) -> std::i
     match entity.entity_type() {
         "LINE" => {
             if let Some(line) = entity_any.downcast_ref::<Line>() {
-                encode_line(writer, line)
+                encode_line(writer, line, units)
             } else {
                 Err(std::io::Error::new(
                     std::io::ErrorKind::InvalidData,
@@ -261,7 +270,7 @@ pub fn encode_entity(writer: &mut dyn Write, entity: &Box<dyn Entity>) -> std::i
         }
         "CIRCLE" => {
             if let Some(circle) = entity_any.downcast_ref::<Circle>() {
-                encode_circle(writer, circle)
+                encode_circle(writer, circle, units)
             } else {
                 Err(std::io::Error::new(
                     std::io::ErrorKind::InvalidData,
@@ -271,7 +280,7 @@ pub fn encode_entity(writer: &mut dyn Write, entity: &Box<dyn Entity>) -> std::i
         }
         "POLYLINE" => {
             if let Some(polyline) = entity_any.downcast_ref::<Polyline>() {
-                encode_polyline(writer, polyline)
+                encode_polyline(writer, polyline, units)
             } else {
                 Err(std::io::Error::new(
                     std::io::ErrorKind::InvalidData,
@@ -281,7 +290,7 @@ pub fn encode_entity(writer: &mut dyn Write, entity: &Box<dyn Entity>) -> std::i
         }
         "TEXT" => {
             if let Some(text) = entity_any.downcast_ref::<Text>() {
-                encode_text(writer, text)
+                encode_text(writer, text, units)
             } else {
                 Err(std::io::Error::new(
                     std::io::ErrorKind::InvalidData,
@@ -291,7 +300,7 @@ pub fn encode_entity(writer: &mut dyn Write, entity: &Box<dyn Entity>) -> std::i
         }
         "POINT" => {
             if let Some(point) = entity_any.downcast_ref::<DxfPoint>() {
-                encode_dxf_point(writer, point)
+                encode_dxf_point(writer, point, units)
             } else {
                 Err(std::io::Error::new(
                     std::io::ErrorKind::InvalidData,

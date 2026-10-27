@@ -9,7 +9,7 @@ mod tests {
     use crate::encoder::{encode_circle, encode_entity, encode_line, encode_polyline, encode_text};
     use crate::validator::validate_astm_compliance;
     use crate::writer::{DxfAstmExportOptions, ProgressCallback, export_dxf_astm};
-    use seamly_svg2ezdxf::{Block, Circle, Drawing, DxfVersion, Line, Point, Polyline, Text};
+    use seamly_svg2ezdxf::{Block, Circle, Drawing, DxfUnits, DxfVersion, Line, Point, Polyline, Text};
     use std::fs;
     use std::sync::{Arc, Mutex};
 
@@ -23,7 +23,7 @@ mod tests {
         };
 
         let mut buffer = Vec::new();
-        encode_line(&mut buffer, &line).expect("Failed to encode LINE");
+        encode_line(&mut buffer, &line, DxfUnits::Metric).expect("Failed to encode LINE");
 
         let output = String::from_utf8(buffer).expect("Invalid UTF-8");
         assert!(output.contains("LINE"));
@@ -42,7 +42,7 @@ mod tests {
         };
 
         let mut buffer = Vec::new();
-        encode_circle(&mut buffer, &circle).expect("Failed to encode CIRCLE");
+        encode_circle(&mut buffer, &circle, DxfUnits::Metric).expect("Failed to encode CIRCLE");
 
         let output = String::from_utf8(buffer).expect("Invalid UTF-8");
         assert!(output.contains("CIRCLE"));
@@ -66,7 +66,7 @@ mod tests {
         };
 
         let mut buffer = Vec::new();
-        encode_polyline(&mut buffer, &polyline).expect("Failed to encode POLYLINE");
+        encode_polyline(&mut buffer, &polyline, DxfUnits::Metric).expect("Failed to encode POLYLINE");
 
         let output = String::from_utf8(buffer).expect("Invalid UTF-8");
         assert!(output.contains("POLYLINE"));
@@ -87,7 +87,7 @@ mod tests {
         };
 
         let mut buffer = Vec::new();
-        encode_text(&mut buffer, &text).expect("Failed to encode TEXT");
+        encode_text(&mut buffer, &text, DxfUnits::Metric).expect("Failed to encode TEXT");
 
         let output = String::from_utf8(buffer).expect("Invalid UTF-8");
         assert!(output.contains("TEXT"));
@@ -107,7 +107,7 @@ mod tests {
 
         let entity: Box<dyn seamly_svg2ezdxf::Entity> = Box::new(line);
         let mut buffer = Vec::new();
-        encode_entity(&mut buffer, &entity).expect("Failed to encode entity");
+        encode_entity(&mut buffer, &entity, DxfUnits::Metric).expect("Failed to encode entity");
 
         let output = String::from_utf8(buffer).expect("Invalid UTF-8");
         assert!(output.contains("LINE"));

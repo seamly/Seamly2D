@@ -70,6 +70,7 @@ private slots:
     void DownwardGrainAxisPointsUp() const;
     void IndividualPatternIsMarkedIndividual() const;
     void IndividualPatternCarriesSampleSize() const;
+    void PatternCarriesUnits() const;
     void MultisizePatternCarriesSizeList() const;
     void MultisizePiecesNestInPieceSets() const;
     void MultisizeIdsAreUniqueAndSized() const;

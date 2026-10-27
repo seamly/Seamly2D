@@ -6,11 +6,12 @@
 //!
 //! An ASCII file: a header, then one `RULE: DELTA` line per grade rule
 //! identifier. Each rule lists the X,Y growth of every size from the sample
-//! size, in size list order, in millimetres to two places (`UNITS:METRIC`).
+//! size, in size list order. `UNITS:METRIC` writes millimetres to two places;
+//! `UNITS:ENGLISH` writes inches to four places.
 //! A DXF-AAMA export writes the same file with an `ANSI/AAMA VERSION:` first line.
 
 use crate::writer::{utc_date_time, DxfAstmExportOptions, ASTM_VERSION};
-use seamly_svg2ezdxf::GradeRuleTable;
+use seamly_svg2ezdxf::{DxfUnits, GradeRuleTable};
 use std::path::Path;
 
 /// @brief `ANSI/AAMA VERSION:` value, the first line of a DXF-AAMA rule file.
@@ -25,9 +26,10 @@ pub fn grade_rule_table_name(stem: &str) -> String {
 } // fn grade_rule_table_name
 
 /// @brief Text of the grade rule table file.
+/// @param units DXF units of the growth values.
 /// @param options Supplies `Creation Date:` (dd-mm-yyyy) and `Creation Time:` (hh-mm);
 ///        None uses the current UTC date and time. The file writes the time as hh:mm.
-pub fn grade_rule_file_text(table: &GradeRuleTable, options: &DxfAstmExportOptions) -> String {
+pub fn grade_rule_file_text(table: &GradeRuleTable, units: DxfUnits, options: &DxfAstmExportOptions) -> String {
     let (utc_date, utc_time) = utc_date_time();
     let date = options.creation_date.clone().unwrap_or(utc_date);
     let time = options.creation_time.clone().unwrap_or(utc_time).replace('-', ":");
@@ -45,7 +47,7 @@ pub fn grade_rule_file_text(table: &GradeRuleTable, options: &DxfAstmExportOptio
         "AUTHOR:Seamly2D".to_string(),
         format!("CREATION DATE:{}", date),
         format!("CREATION TIME:{}", time),
-        "UNITS:METRIC".to_string(),
+        format!("UNITS:{}", units.name()),
         format!("GRADE RULE TABLE:{}", table.name),
         format!("SAMPLE SIZE:{}", without_separators(&table.sample_size)),
         format!("NUMBER OF SIZES:{}", sizes.len()),
@@ -53,7 +55,7 @@ pub fn grade_rule_file_text(table: &GradeRuleTable, options: &DxfAstmExportOptio
     ];
     // Rules: one growth pair per size, in size list order (§4.4.2).
     for rule in &table.rules {
-        let growths: Vec<String> = rule.deltas.iter().map(|&(x, y)| format!("{},{}", millimetres(x), millimetres(y))).collect();
+        let growths: Vec<String> = rule.deltas.iter().map(|&(x, y)| format!("{},{}", growth(units, x), growth(units, y))).collect();
         lines.push(format!("RULE: DELTA {} {}", rule.id, growths.join(" ")));
     } // for each rule
     let mut text = lines.join("\n");
@@ -62,15 +64,18 @@ pub fn grade_rule_file_text(table: &GradeRuleTable, options: &DxfAstmExportOptio
 } // fn grade_rule_file_text
 
 // @brief Write the grade rule table file.
-pub(crate) fn write_grade_rule_file(table: &GradeRuleTable, path: &Path, options: &DxfAstmExportOptions) -> std::io::Result<()> {
-    std::fs::write(path, grade_rule_file_text(table, options))
+pub(crate) fn write_grade_rule_file(table: &GradeRuleTable, units: DxfUnits, path: &Path, options: &DxfAstmExportOptions) -> std::io::Result<()> {
+    std::fs::write(path, grade_rule_file_text(table, units, options))
 } // fn write_grade_rule_file
 
-// @brief Millimetres to two places; a value that rounds to zero is written without a sign.
-fn millimetres(value: f64) -> String {
-    let text = format!("{:.2}", value);
-    if text == "-0.00" { "0.00".to_string() } else { text }
-} // fn millimetres
+// @brief A growth value (millimetres) in the DXF units; a value that rounds to zero is written without a sign.
+fn growth(units: DxfUnits, value: f64) -> String {
+    let text = units.length(value);
+    match text.strip_prefix('-') {
+        Some(rest) if rest.chars().all(|c| c == '0' || c == '.') => rest.to_string(),
+        _ => text,
+    }
+} // fn growth
 
 // @brief `s` trimmed, with every rule file separator replaced by `_`.
 fn without_separators(s: &str) -> String {

@@ -7,6 +7,7 @@
 use crate::astm_contour::AstmContour;
 use crate::astm_notch::Notch;
 use crate::entities::{Entity, Point};
+use crate::units::PatternUnit;
 
 // @brief DXF version enumeration.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -189,6 +190,8 @@ pub struct Drawing {
     pub style_name: Option<String>,
     // Grade rule table of a graded export; None for an ungraded export.
     pub grade_rule_table: Option<GradeRuleTable>,
+    // Pattern unit from `data-units`; selects the DXF `Units:` and converts size values.
+    pub pattern_unit: PatternUnit,
 }
 
 impl Drawing {
@@ -202,6 +205,7 @@ impl Drawing {
             modelspace_entities: Vec::new(),
             style_name: None,
             grade_rule_table: None,
+            pattern_unit: PatternUnit::default(),
         }
     }
 
