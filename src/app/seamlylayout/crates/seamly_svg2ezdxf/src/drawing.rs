@@ -107,6 +107,10 @@ pub struct Block {
     pub fold: Option<String>,
     // `Size Name:` system text: the piece `data-size`, else the pattern sample size.
     pub size: Option<String>,
+    // True when the piece carries its own `data-size` (a multisize piece).
+    pub multisize: bool,
+    // `Annotation:` system text (DXF-AAMA): the piece `data-annotation` on one line, non-ASCII escaped. None writes no line.
+    pub annotation: Option<String>,
     // `Material:` system text: the piece `data-material`, else `DEFAULT_MATERIAL`.
     pub material: String,
     // Piece boundary (layer 1 / 84).
@@ -147,6 +151,8 @@ impl Block {
             tilt: None,
             fold: None,
             size: None,
+            multisize: false,
+            annotation: None,
             material: DEFAULT_MATERIAL.to_string(),
             boundary: None,
             sew_lines: Vec::new(),

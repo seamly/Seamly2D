@@ -152,8 +152,8 @@ fn write_header_section(writer: &mut dyn Write, include_header: bool) -> std::io
     Ok(())
 }
 
-// @brief Today's UTC date and time as (dd-mm-yyyy, hh-mm).
-pub(crate) fn utc_date_time() -> (String, String) {
+// @brief Today's UTC date and time as (dd-mm-yyyy, hh-mm-ss).
+fn utc_date_time_seconds() -> (String, String) {
     let secs = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| d.as_secs() as i64)
@@ -171,9 +171,28 @@ pub(crate) fn utc_date_time() -> (String, String) {
     let year = yoe + era * 400 + if month <= 2 { 1 } else { 0 };
     (
         format!("{:02}-{:02}-{:04}", day, month, year),
-        format!("{:02}-{:02}", rem / 3600, (rem % 3600) / 60),
+        format!("{:02}-{:02}-{:02}", rem / 3600, (rem % 3600) / 60, rem % 60),
     )
+} // fn utc_date_time_seconds
+
+// @brief Today's UTC date and time as (dd-mm-yyyy, hh-mm).
+pub(crate) fn utc_date_time() -> (String, String) {
+    let (date, time) = utc_date_time_seconds();
+    (date, time[..5].to_string())
 } // fn utc_date_time
+
+// @brief The `Creation Time:` value of a file.
+// @details DXF-AAMA writes HH:MM:SS; DXF-ASTM writes hh-mm (D6673). A supplied hh-mm time gets `:00` seconds in DXF-AAMA.
+pub(crate) fn creation_time_text(options: &DxfAstmExportOptions) -> String {
+    if !options.aama {
+        return options.creation_time.clone().unwrap_or_else(|| utc_date_time().1);
+    } // if DXF-ASTM
+    let time = match &options.creation_time {
+        Some(t) => t.replace('-', ":"),
+        None => utc_date_time_seconds().1.replace('-', ":"),
+    }; // time
+    if time.matches(':').count() == 1 { format!("{time}:00") } else { time }
+} // fn creation_time_text
 
 /// @brief Style system text lines (D6673 §4.3.1.1), in writing order.
 /// @details Sample Size and Grade Rule Table come from the drawing's grade rule
@@ -189,7 +208,7 @@ pub fn style_system_text(drawing: &seamly_svg2ezdxf::Drawing, options: &DxfAstmE
         .filter(|s| !s.is_empty())
         .unwrap_or_else(|| "Untitled".to_string());
     let units = drawing.pattern_unit.dxf_units();
-    let (utc_date, utc_time) = utc_date_time();
+    let (utc_date, _) = utc_date_time();
     let (sample_size, table_name) = drawing
         .grade_rule_table
         .as_ref()
@@ -197,7 +216,7 @@ pub fn style_system_text(drawing: &seamly_svg2ezdxf::Drawing, options: &DxfAstmE
     let mut lines = vec![
         format!("Style Name:{}", style_name),
         format!("Creation Date:{}", options.creation_date.clone().unwrap_or(utc_date)),
-        format!("Creation Time:{}", options.creation_time.clone().unwrap_or(utc_time)),
+        format!("Creation Time:{}", creation_time_text(options)),
         format!("Author:Seamly;Seamly2D;{}", options.author_release),
         format!("Sample Size:{}", sample_size),
         format!("Grade Rule Table:{}", table_name),
@@ -288,6 +307,9 @@ fn write_astm_block(
         // D6673 §4.3.1.5.1 names the size `Size Name:`; AAMA readers read `Size:`.
         system_lines.push(format!("{}:{}", if aama { "Size" } else { "Size Name" }, size));
     } // if size
+    if let (true, Some(annotation)) = (aama, &block.annotation) {
+        system_lines.push(format!("Annotation:{annotation}"));
+    } // if DXF-AAMA annotation
     // No `Category:`: no D6673 edition defines it, and the handoff has no value for it.
     if let Some(q) = &block.quantity {
         system_lines.push(format!("Quantity:{}", q));
@@ -389,6 +411,36 @@ fn write_astm_block(
     Ok(())
 } // fn write_astm_block
 
+// @brief Block name of every block, in drawing order.
+// @details DXF-AAMA names a block `<piece name>_<size>`, or `<piece name>` for an individual
+//          piece. The name keeps ASCII letters, digits, `_` and `-`. A name that is empty or
+//          already taken falls back to the svg id name, then gets a number. DXF-ASTM and
+//          CLO3D keep `<svg id>_M`.
+fn block_names(drawing: &seamly_svg2ezdxf::Drawing, options: &DxfAstmExportOptions) -> Vec<String> {
+    let mut names: Vec<String> = Vec::with_capacity(drawing.blocks.len());
+    for block in &drawing.blocks {
+        let mut name = block.name.clone();
+        // A block named from its piece data (not an untagged group) gets the AAMA name.
+        if options.aama && block.display_name != block.name {
+            let piece = seamly_svg2ezdxf::sanitize_block_name(&block.display_name.replace(' ', "_"));
+            let size = block.size.as_deref().filter(|_| block.multisize).map(seamly_svg2ezdxf::sanitize_block_name);
+            name = match (piece.is_empty(), size) {
+                (true, _) => block.name.clone(),
+                (false, Some(size)) if !size.is_empty() => format!("{piece}_{size}"),
+                (false, _) => piece,
+            }; // name
+        } // if AAMA piece name
+        let base = name.clone();
+        let mut n = 1;
+        while names.contains(&name) {
+            n += 1;
+            name = format!("{base}_{n}");
+        } // while the name is taken
+        names.push(name);
+    } // for each block
+    names
+} // fn block_names
+
 // @brief Write DXF BLOCKS section, one block per pattern piece.
 // @details A block without a recognised boundary (an untagged SVG group with
 //          no closed outline) is written from its generic entities.
@@ -401,14 +453,15 @@ fn write_blocks_section(
     write_group_code(writer, 2, "BLOCKS")?;
     let units = drawing.pattern_unit.dxf_units();
 
-    for block in &drawing.blocks {
+    let names = block_names(drawing, options);
+    for (block, name) in drawing.blocks.iter().zip(&names) {
         write_group_code(writer, 0, "BLOCK")?;
         write_group_code(writer, 8, "1")?;
-        write_group_code(writer, 2, &block.name)?;
+        write_group_code(writer, 2, name)?;
         write_group_code_int(writer, 70, 0)?; // no block flags
         write_group_code_length(writer, 10, 0.0, units)?; // base point
         write_group_code_length(writer, 20, 0.0, units)?;
-        write_group_code(writer, 3, &block.name)?;
+        write_group_code(writer, 3, name)?;
 
         match &block.boundary {
             Some(boundary) => write_astm_block(writer, block, boundary, options, units)?,
@@ -464,8 +517,8 @@ fn write_entities_section(
     } // for each modelspace entity
 
     // Block coordinates are already absolute, so every INSERT is at the origin.
-    for block in &drawing.blocks {
-        write_insert_entity(writer, &block.name, 0.0, 0.0, units)?;
+    for name in &block_names(drawing, options) {
+        write_insert_entity(writer, name, 0.0, 0.0, units)?;
     } // for each block
 
     write_group_code(writer, 0, "ENDSEC")?;

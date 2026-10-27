@@ -692,6 +692,90 @@ mod tests {
         } // for each case
     }
 
+    // @brief Convert an AAMA handoff with the given piece attributes in place of `data-size="36"`.
+    fn aama_drawing(piece_attributes: &str) -> Drawing {
+        let svg = AAMA_HANDOFF.replace("{label}", "").replace(r#"data-size="36""#, piece_attributes);
+        let doc = svg_dom::Document::parse(&svg).expect("fixture parses");
+        let options = SvgToEzdxfOptions { dxf_version: DxfVersion::R11, ..SvgToEzdxfOptions::default() };
+        svg_to_ezdxf(&doc, &options).expect("converts")
+    }
+
+    // @brief Names of the BLOCK entries and of the INSERT entities, from the raw DXF text.
+    fn block_and_insert_names(text: &str) -> (Vec<String>, Vec<String>) {
+        let lines: Vec<&str> = text.lines().map(str::trim).collect();
+        let named = |kind: &str| -> Vec<String> {
+            lines.windows(6).filter(|w| w[0] == "0" && w[1] == kind && w[4] == "2").map(|w| w[5].to_string()).collect()
+        };
+        (named("BLOCK"), named("INSERT"))
+    }
+
+    // @brief DXF-AAMA writes `Annotation:` after `Size:`, on one line; DXF-ASTM and a piece without one write none.
+    #[test]
+    fn aama_annotation_follows_size() {
+        let drawing = aama_drawing(r#"data-size="36" data-annotation="Cut in
+            contrast""#);
+        let dxf = parse_dxf(&export_to_string(&drawing, "aama_annotation", &aama_options()));
+        let texts: Vec<&str> = dxf.blocks[0].1.iter().filter(|e| e.kind == "TEXT").map(|e| e.get(1).unwrap()).collect();
+        assert_eq!(texts[..3], ["Piece Name:Front", "Size:36", "Annotation:Cut in contrast"]);
+
+        let astm = export_to_string(&drawing, "astm_annotation", &DxfAstmExportOptions::default());
+        assert!(!astm.contains("Annotation:"), "DXF-ASTM writes no annotation");
+        let plain = export_to_string(&aama_drawing(r#"data-size="36""#), "aama_no_annotation", &aama_options());
+        assert!(!plain.contains("Annotation:"), "no data-annotation, no line");
+    }
+
+    // @brief DXF-AAMA names a multisize block `<piece name>_<size>` and an individual piece `<piece name>`.
+    #[test]
+    fn aama_block_names_use_piece_name_and_size() {
+        let sized = export_to_string(&aama_drawing(r#"data-size="36""#), "aama_name_sized", &aama_options());
+        assert_eq!(block_and_insert_names(&sized), (vec!["Front_36".to_string()], vec!["Front_36".to_string()]));
+
+        let individual = export_to_string(&aama_drawing(""), "aama_name_single", &aama_options());
+        assert_eq!(block_and_insert_names(&individual).0, vec!["Front".to_string()]);
+
+        let astm = export_to_string(&aama_drawing(r#"data-size="36""#), "astm_name", &DxfAstmExportOptions::default());
+        assert_eq!(block_and_insert_names(&astm).0, vec!["piece_Front_s36_M".to_string()]);
+    }
+
+    // @brief A name with other characters keeps letters, digits, `_` and `-`; an empty name falls back to the svg id.
+    #[test]
+    fn aama_block_names_are_ascii_and_unique() {
+        let mut drawing = aama_drawing(r#"data-size="36""#);
+        drawing.blocks[0].display_name = "Front (L) é-1".to_string();
+        let text = export_to_string(&drawing, "aama_name_chars", &aama_options());
+        assert_eq!(block_and_insert_names(&text).0, vec!["Front_L_-1_36".to_string()]);
+
+        drawing.blocks[0].display_name = "é".to_string();
+        let text = export_to_string(&drawing, "aama_name_fallback", &aama_options());
+        assert_eq!(block_and_insert_names(&text).0, vec!["piece_Front_s36_M".to_string()]);
+
+        let mut twin = aama_drawing(r#"data-size="36""#);
+        let copy = twin.blocks.remove(0);
+        let mut second = aama_drawing(r#"data-size="36""#).blocks.remove(0);
+        second.name = "other_M".to_string();
+        twin.add_block(copy);
+        twin.add_block(second);
+        let text = export_to_string(&twin, "aama_name_twin", &aama_options());
+        assert_eq!(block_and_insert_names(&text).0, vec!["Front_36".to_string(), "Front_36_2".to_string()]);
+    }
+
+    // @brief `Creation Time:` is HH:MM:SS in DXF-AAMA (also in its rule file) and hh-mm in DXF-ASTM.
+    #[test]
+    fn aama_creation_time_has_seconds() {
+        let drawing = aama_drawing(r#"data-size="36""#);
+        let aama = export_to_string(&drawing, "aama_time", &aama_options());
+        assert!(aama.contains("Creation Time:14:05:00"), "AAMA time");
+        let astm = export_to_string(&drawing, "astm_time", &dated_options());
+        assert!(astm.contains("Creation Time:14-05
+"), "ASTM time");
+
+        let now = DxfAstmExportOptions { creation_time: None, ..aama_options() };
+        let text = export_to_string(&drawing, "aama_time_now", &now);
+        let time = text.lines().find_map(|l| l.trim().strip_prefix("Creation Time:")).expect("time line");
+        let parts: Vec<&str> = time.split(':').collect();
+        assert!(parts.len() == 3 && parts.iter().all(|p| p.len() == 2 && p.chars().all(|c| c.is_ascii_digit())), "{time}");
+    }
+
     // @brief A graded DXF-AAMA export keeps layer 5 and the `# n` texts, and its rule file names ANSI/AAMA.
     #[test]
     fn aama_graded_export_writes_rule_ids_and_aama_rule_file() {
@@ -711,7 +795,7 @@ mod tests {
 
         let lines: Vec<&str> = rul.lines().collect();
         assert_eq!(lines[0], "ANSI/AAMA VERSION:1.0.0");
-        assert_eq!(lines[1..9], ["AUTHOR:Seamly2D", "CREATION DATE:11-10-2026", "CREATION TIME:14:05", "UNITS:METRIC", "GRADE RULE TABLE:GradingTest", "SAMPLE SIZE:36", "NUMBER OF SIZES:3", "SIZE LIST:34 36 38"]);
+        assert_eq!(lines[1..9], ["AUTHOR:Seamly2D", "CREATION DATE:11-10-2026", "CREATION TIME:14:05:00", "UNITS:METRIC", "GRADE RULE TABLE:GradingTest", "SAMPLE SIZE:36", "NUMBER OF SIZES:3", "SIZE LIST:34 36 38"]);
         assert!(lines[9].starts_with("RULE: DELTA 1 "), "{}", lines[9]);
     }
 
