@@ -185,9 +185,10 @@ public:
     template <class T>
     static QVector<T> CorrectEquidistantPoints(const QVector<T>& points, bool remove_first_and_last = true);
 
-protected:
     template <class T>
     static QVector<T> RemoveDublicates(const QVector<T>& points, bool remove_first_and_last = true);
+
+protected:
     static qreal      MaxLocalSA(const SeamAllowancePoint& point, qreal width);
     static bool       IsEkvPointOnLine(const QPointF& point, const QPointF& previous_point,
                                        const QPointF& next_point);

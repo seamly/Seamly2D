@@ -55,7 +55,9 @@ Steps, in order:
   - [ ] Dead.4.3.5 MSI build, Qt suites and user check, `AGENT_CHECKLIST.md` §30
 - [ ] Dead.4.4 Write `layout_handoff`: `HandoffDocument`, `HandoffPiece`, `HandoffLabel`, `handoff_turn_points`, `handoff_ids`
   - [x] Dead.4.4.1 New static lib `src/libs/layout_handoff/` (namespace `layout_handoff`; linked after `vlayout`, before `vpatterndb`). `handoff_ids` (`HandoffIds`, `sanitize_for_id`, `size_id_suffix`) and `handoff_turn_points` (`unify_turn_points`, `SizeLine`) moved out of `SvgGenerator` and `VLayoutPiece`; the old writer now calls them. Tests: `TST_HandoffIds`, `TST_HandoffTurnPoints`
-  - [ ] Dead.4.4.2 `HandoffLabel`, `HandoffPiece` (replaces `VLayoutPiece::Create`), `HandoffDocument` (replaces `SvgGenerator` and the Qt scene rendering); next: seamline, cut line, notches, internal and cutout paths, then grainline, labels, fold line
+  - [ ] Dead.4.4.2 `HandoffLabel`, `HandoffPiece` (replaces `VLayoutPiece::Create`), `HandoffDocument` (replaces `SvgGenerator` and the Qt scene rendering)
+    - [x] `HandoffPiece::create` geometry: seam line, cut line, built-in seam line, notches, internal and cutout paths (plain structs `HandoffLine`, `HandoffPath`, `HandoffNotches`). `AbstractPiece::RemoveDublicates` is now public. Test `TST_HandoffPiece` compares with `VLayoutPiece::Create`; internal and cutout paths are not yet in the test
+    - [ ] Next: `HandoffPiece` grainline, fold line (`fold_line` group), piece and pattern labels (`HandoffLabel`), then `HandoffDocument`
   - [ ] Dead.4.4.3 Compare, switch `MainWindow`, jacket2 capture (the items below)
   - Port `TST_SvgComponentTags`, `BuiltInPieceWithFoldLineSendsOpenSeamline` and `FoldLineGroupHoldsArrowAndLabel` included
   - Port the `fold_line` group: fold line path out to the cut line, then the `fold_line_arrow` and `fold_line_label` parts (`VLayoutPiece::createFoldLineItem()`, nested parts in `SvgGenerator::addComponentGroups()`)
