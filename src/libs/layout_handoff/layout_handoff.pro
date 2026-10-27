@@ -29,8 +29,9 @@
 #
 #-------------------------------------------------
 
-# Settings shared by every project.
 message("Entering layout_handoff.pro")
+
+# Settings shared by every project.
 include(../../../common.pri)
 
 QT += core gui widgets printsupport xml
@@ -58,7 +59,7 @@ OBJECTS_DIR = obj
 # Generated rcc files directory
 RCC_DIR = rcc
 
-# warnings.pri reads MOC_DIR and RCC_DIR, so the includes come after them.
+# warnings.pri reads MOC_DIR and RCC_DIR, so those includes come after 'warnings'
 include(warnings.pri)
 include(layout_handoff.pri)
 include(../libs.pri)

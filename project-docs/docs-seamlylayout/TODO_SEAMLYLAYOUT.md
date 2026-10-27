@@ -4,59 +4,6 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Implement
 
-### [ ] Task Layout.100 — Remove the DXF-ASTM (R12) export code and menu option (100.1-100.5 done, see TODO_COMPLETED.md)
-
-- [ ] Layout.100.6 NEEDS_USER_TEST: Export > DXF shows DXF-ASTM (R13), (CLO3D) and DXF-AAMA (R11) only. View > DXF-ASTM still opens a .dxf. Qt build check open (next MSI).
-
-### [ ] Task Layout.103 — Implement - DXF units: `METRIC` in mm, `ENGLISH` in inches
-
-User approved (2026-10-25). The pattern unit decides the file units:
-
-| Pattern unit | `Units:` | Size values | Lengths |
-|---|---|---|---|
-| mm | `METRIC` | Unchanged | mm, 2 decimals (as now) |
-| cm | `METRIC` | Multiplied by 10 (50 → 500) | mm, 2 decimals (as now) |
-| inch | `ENGLISH` | Unchanged | inches, 4 decimals |
-
-- `.smms` files cannot be in inches (SeamlyMe offers inches for `.smis` only), so `ENGLISH` comes from an inch pattern with individual measurements (`data-sample-size`).
-- Size values: `Size:` / `Size Name:`, `Sample Size:`, `.rul` size list and sample size, the "Size N" label text in the DXF.
-- The screen, tabs, file names and legend keep pattern units.
-- A handoff without `data-units` writes `METRIC` with no conversion.
-- [x] Layout.103.1 Seamly2D: `SvgGenerator` writes `data-units` (`mm`, `cm`, `inch`, the pattern unit) on the pattern group; caller `MainWindowsNoGUI`. Qt test in `tst_svgcomponenttags.cpp`.
-- [x] Layout.103.2 `SVG-DATA-ATTRIBUTES.md`: add `data-units`; size rows name the DXF conversion.
-- [x] Layout.103.3 `seamly_svg2ezdxf`: read `data-units` into `Drawing`; convert cm size values to mm.
-- [x] Layout.103.4 `ezdxf2dxfastm`: `ENGLISH` writes every length in inches with 4 decimals: coordinates, text heights, notch depth and width, `Curve Tolerance:`, `.rul` grade steps. `Units:ENGLISH`.
-- [x] Layout.103.5 Rust tests: mm, cm and inch handoffs; `.rul`; R11 and R13.
-- [x] Layout.103.6 Docs: `seamlylayout_DXF_AAMA.md` (Decisions, McNeel table `Size:` row), `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
-- [x] Layout.103.8 Seamly2D picks the file unit: the referenced measurement file unit, else the pattern unit (`MainWindowsNoGUI::exportUnit`, `MainWindow::measurementFileUnit`). `data-units` carries it; size values (`data-size`, `data-sizes`, `data-base-size`, `data-height`, `data-sample-size`) convert from pattern units to it. Decision: conversion on the Seamly2D side; the `--svg-stdin` contract and the Rust DXF writers stay unchanged (lengths are px). NEEDS_USER_TEST: mm/cm pattern with an inch `.smis` writes `Units:ENGLISH`; inch pattern with a `.smms` in cm writes `Units:METRIC` with sizes in mm.
-- [ ] Layout.103.7 Verify: `cargo test --workspace` and `ctest --preset debug` pass. Open: Qt test `PatternCarriesUnits` (`tst_svgcomponenttags.cpp`) not run, and the Qt build check, until the next MSI. NEEDS_USER_TEST: in an inch pattern (`.smis` in inches), export DXF-AAMA and DXF-ASTM; the DXF has `Units:ENGLISH` and inch coordinates with 4 decimals. In a cm pattern, a `.smms` size 50 writes `Size:500` and `Units:METRIC`.
-
-### [ ] Task Layout.104 — Implement - DXF-AAMA piece text from the McNeel guide
-
-User approved (2026-10-25). DXF-AAMA only; DXF-ASTM and CLO3D keep their output. Guide: `dxf-docs/seamlylayout_DXF_AAMA.md`, "McNeel guide".
-
-- [x] Layout.104.1 `Annotation:` piece text from the piece `data-annotation` (omitted when absent). Converter field on `Block`; writer line after `Size:`.
-- [x] Layout.104.2 Block name `<piece name>_<size>` (e.g. `Front_36`); individual pattern `<piece name>`. ASCII letters, digits, `_` and `-` only; use the numbered name when pieces share one; fall back to the svg id. ASTM and CLO3D keep `<svg id>_M`.
-- [x] Layout.104.3 `Creation Time:` as `HH:MM:SS` in DXF-AAMA; DXF-ASTM keeps `hh-mm`. Check the `.rul` header time too.
-- [x] Layout.104.4 Tests in `writer_astm_test.rs` (`aama_*`).
-- [x] Layout.104.5 Docs: `seamlylayout_DXF_AAMA.md` Decisions and McNeel table.
-- [ ] Layout.104.6 Verify: `cargo test --workspace` and `ctest --preset debug` pass. Open: Qt build check until the next MSI. NEEDS_USER_TEST: export a multisize pattern to DXF-AAMA; blocks are `<piece name>_<size>` (e.g. `Front_36`), `Annotation:` follows `Size:` when the piece has one, `Creation Time:` is `HH:MM:SS`, and the `.rul` `CREATION TIME:` too. DXF-ASTM keeps `<svg id>_M` and `hh-mm`.
-- Not done (user decisions): `Piece Name:` stays full length; `Material:` stays the full name; no `Category:`; layer 5 keeps the grade reference line.
-
-### [ ] Task Layout.105 — Decide - rewrite or leave the untracked `AAMA-INTEROP.md`
-
-- `project-docs/docs-seamlylayout/AAMA-INTEROP.md` (untracked, user file) copies the upstream PR 1783 text. It describes the removed Seamly2D `vdxf` AAMA output.
-- Needs a side-by-side document review with the user: `AAMA-INTEROP.md` against `dxf-docs/seamlylayout_DXF_AAMA.md`.
-- Known differences: `Units: MM` (output: `Units:METRIC`); total quantity (output: `R,L`); size in cm (output: Layout.103 units); notch segments on layer 4 (output: notch points); `--gsize` exports (Seamly2D has none now).
-- [ ] Layout.105.1 Review both documents side by side with the user, section by section.
-- [ ] Layout.105.2 User decision: rewrite it for SeamlyLayout's DXF-AAMA, merge its useful parts into `seamlylayout_DXF_AAMA.md`, or leave it as reference.
-- [X] Layout.105.3 Apply the decision; keep the `.github/AAMA-INTEROP.md` merge rule in `CLAUDE.md` consistent with it. Done: `AAMA-INTEROP.md` rewritten; the rule lives in the `merge-upstream` skill (not `CLAUDE.md`), now says drop the incoming `.github/` copy.
-
-### [ ] Task Layout.101 — Implement - `SEAMLY_DATA_DIR` for SeamlyLayout
-
-- Done: `DataDirectory` (`qt_frontend/src/DataDirectory.{h,cpp}`) reads the variable first in `main()`. Settings go to `<dir>/settings/`, logs to `<dir>/logs/seamlylayout/`. A relative path exits 78; an unwritable one exits 73. Seamly2D's `--svg-stdin` launch passes the variable on.
-- [ ] Layout.101.4 NEEDS_USER_TEST: with the MSI, run `$env:SEAMLY_DATA_DIR="D:/sl_job"; seamlylayout.exe`. Expect `settings\qt6_seamlylayout.ini` and `logs\seamlylayout\log_*.txt` under it, nothing new in `%LOCALAPPDATA%\Seamly\SeamlyLayout`. Run with `SEAMLY_DATA_DIR=rel` (exit 78) and a path under a file (exit 73). Run Seamly2D with the variable set, open Layout Mode: SeamlyLayout uses the same folder. Qt build check open (next MSI).
-
 ### [ ] Task Layout.102 — Implement - DXF-ASTM (CLO3D): follow the McNeel layer guide
 
 - Guide: `dxf-docs/seamlylayout_DXF_AAMA.md`, "McNeel guide" (layers 0 to 19, piece text).
@@ -68,7 +15,7 @@ User approved (2026-10-25). DXF-AAMA only; DXF-ASTM and CLO3D keep their output.
 - [ ] Layout.102.2 Decide: swap layers 1 and 14 in the CLO3D export, or keep D6673 layers and tell the user which option to set.
 - [ ] Layout.102.3 Check every CLO3D export layer against the guide.
 - [ ] Layout.102.4 Tests for the chosen layer order.
-- [ ] Layout.102.5 User check: import a CLO3D export in CLO3D, with the default settings and with the option set.
+- [ ] Layout.102.5 User check: import a DXF-ASTM (CLO3D) export in CLO3D, with the default settings and with the option set.
 
 ### [ ] Task Layout.106 — Implement - Seamly2D: build the handoff pieces with `layout_handoff`, not `VLayoutPiece` (Gap 2)
 
@@ -442,6 +389,7 @@ Export > DXF > "DXF-AAMA (R11)": ANSI/AAMA-292 content in a DXF R11 (AC1009) fil
   - Open: an untagged SVG (no `data-type`) keeps its generic layers, so its text stays on layer 15.
 - [ ] Layout.85.5 Next MSI: user check, `AGENT_CHECKLIST.md` §22. Import the file in an AAMA reader (CLO3D or another pattern CAD).
 
+
 ### [ ] Task Layout.95 - Verify - Seamly2D Piece Properties - Rotation" Change Rotation to be radio buttons for: None, 1-Way → 360, 2-Way → 180, 4-Way → 90, Any → 1. None or Undefined writes no line. (Default is "None"). Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
 
 - [x] Layout.95.1 Piece Properties > Rotation: five radio buttons in three columns. Default None. `rotation_ButtonGroup`; button id = `PieceRotation` value.
@@ -544,3 +492,56 @@ Select the position of the base size's grainline (when visible), pattern label (
 - [x] Layout.94.4 Tests: `annotation_alignment` (5); `layout_utils::jacket2_nested_stacks_each_piece_set_annotations` with the MSI 26.10.2023 capture as fixture (now `jacket2_40-146_handoff.svg`, Layout.27.13.4). `cargo test --workspace` 611 passed. Doc: `SVG-DATA-ATTRIBUTES.md`, "Multisize grainline and label positions".
 - [ ] Layout.94.5 Next MSI: user check, `AGENT_CHECKLIST.md` §26.
 
+### [ ] Task Layout.100 — Verify - Remove the DXF-ASTM (R12) export code and menu option (100.1-100.5 done, see TODO_COMPLETED.md)
+
+- [ ] Layout.100.6 NEEDS_USER_TEST: Export > DXF shows DXF-ASTM (R13), (CLO3D) and DXF-AAMA (R11) only. View > DXF-ASTM still opens a .dxf. Qt build check open (next MSI).
+
+
+### [ ] Task Layout.103 — Verify - DXF units: `METRIC` (in mm) or `ENGLISH` (in inches), these are the options for DXF units.
+
+User approved (2026-10-25). The measurement file's unit decides the file units. If a measurement file (.smms or .smis) isn't referenced in the .sm2d file then use the pattern units; if this unit is 'cm' then convert to 'mm; if this unit is different than the pattern unit, convert pattern units to measurement units.
+
+| Pattern unit | `Units:` | Size values | Lengths |
+|---|---|---|---|
+| mm | `METRIC` | Unchanged | mm, 2 decimals (as now) |
+| cm | `METRIC` | Multiplied by 10 (50 → 500) | mm, 2 decimals (as now) |
+| inch | `ENGLISH` | Unchanged | inches, 4 decimals |
+
+- `.smms` files cannot be in inches (SeamlyMe offers inches for `.smis` only), so `ENGLISH` is only an option for individual .smis measurement files.
+- Size values: `Size:` / `Size Name:`, `Sample Size:`, `.rul` size list and sample size, the "Size N" label text in the DXF.
+- The screen, tabs, file names and legend keep pattern units.
+- A handoff without `data-units` writes `METRIC` with no conversion.
+- [x] Layout.103.1 Seamly2D: `SvgGenerator` writes `data-units` (`mm`, `cm`, `inch`, the pattern unit) on the pattern group; caller `MainWindowsNoGUI`. Qt test in `tst_svgcomponenttags.cpp`.
+- [x] Layout.103.2 `SVG-DATA-ATTRIBUTES.md`: add `data-units`; size rows name the DXF conversion.
+- [x] Layout.103.3 `seamly_svg2ezdxf`: read `data-units` into `Drawing`; convert cm size values to mm.
+- [x] Layout.103.4 `ezdxf2dxfastm`: `ENGLISH` writes every length in inches with 4 decimals: coordinates, text heights, notch depth and width, `Curve Tolerance:`, `.rul` grade steps. `Units:ENGLISH`.
+- [x] Layout.103.5 Rust tests: mm, cm and inch handoffs; `.rul`; R11 and R13.
+- [x] Layout.103.6 Docs: `seamlylayout_DXF_AAMA.md` (Decisions, McNeel table `Size:` row), `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
+- [x] Layout.103.8 Seamly2D picks the file unit: the referenced measurement file unit, else the pattern unit (`MainWindowsNoGUI::exportUnit`, `MainWindow::measurementFileUnit`). `data-units` carries it; size values (`data-size`, `data-sizes`, `data-base-size`, `data-height`, `data-sample-size`) convert from pattern units to it. Decision: conversion on the Seamly2D side; the `--svg-stdin` contract and the Rust DXF writers stay unchanged (lengths are px). NEEDS_USER_TEST: mm/cm pattern with an inch `.smis` writes `Units:ENGLISH`; inch pattern with a `.smms` in cm writes `Units:METRIC` with sizes in mm.
+- [ ] Layout.103.7 Verify: `cargo test --workspace` and `ctest --preset debug` pass. Open: Qt test `PatternCarriesUnits` (`tst_svgcomponenttags.cpp`) not run, and the Qt build check, until the next MSI. NEEDS_USER_TEST: in an inch pattern (`.smis` in inches), export DXF-AAMA and DXF-ASTM; the DXF has `Units:ENGLISH` and inch coordinates with 4 decimals. In a cm pattern, a `.smms` size 50 writes `Size:500` and `Units:METRIC`.
+
+### [ ] Task Layout.104 — Verify - DXF-AAMA piece text from the McNeel guide
+
+User approved (2026-10-25). DXF-AAMA only; DXF-ASTM and CLO3D keep their output. Guide: `dxf-docs/seamlylayout_DXF_AAMA.md`, "McNeel guide".
+
+- [x] Layout.104.1 `Annotation:` piece text from the piece `data-annotation` (omitted when absent). Converter field on `Block`; writer line after `Size:`.
+- [x] Layout.104.2 Block name `<piece name>_<size>` (e.g. `Front_36`); individual pattern `<piece name>`. ASCII letters, digits, `_` and `-` only; use the numbered name when pieces share one; fall back to the svg id. ASTM and CLO3D keep `<svg id>_M`.
+- [x] Layout.104.3 `Creation Time:` as `HH:MM:SS` in DXF-AAMA; DXF-ASTM keeps `hh-mm`. Check the `.rul` header time too.
+- [x] Layout.104.4 Tests in `writer_astm_test.rs` (`aama_*`).
+- [x] Layout.104.5 Docs: `seamlylayout_DXF_AAMA.md` Decisions and McNeel table.
+- [ ] Layout.104.6 Verify: `cargo test --workspace` and `ctest --preset debug` pass. Open: Qt build check until the next MSI. NEEDS_USER_TEST: export a multisize pattern to DXF-AAMA; blocks are `<piece name>_<size>` (e.g. `Front_36`), `Annotation:` follows `Size:` when the piece has one, `Creation Time:` is `HH:MM:SS`, and the `.rul` `CREATION TIME:` too. DXF-ASTM keeps `<svg id>_M` and `hh-mm`.
+- Not done (user decisions): `Piece Name:` stays full length; `Material:` stays the full name; no `Category:`; layer 5 keeps the grade reference line.
+
+### [ ] Task Layout.105 — Verify - rewrite or leave the untracked `AAMA-INTEROP.md`
+
+- `project-docs/docs-seamlylayout/AAMA-INTEROP.md` (untracked, user file) copies the upstream PR 1783 text. It describes the removed Seamly2D `vdxf` AAMA output.
+- Needs a side-by-side document review with the user: `AAMA-INTEROP.md` against `dxf-docs/seamlylayout_DXF_AAMA.md`.
+- Known differences: `Units: MM` (output: `Units:METRIC`); total quantity (output: `R,L`); size in cm (output: Layout.103 units); notch segments on layer 4 (output: notch points); `--gsize` exports (Seamly2D has none now).
+- [ ] Layout.105.1 Verify - review both documents side by side with the user, section by section.
+- [X] Layout.105.2 User decision: rewrite it for SeamlyLayout's DXF-AAMA, merge its useful parts into `seamlylayout_DXF_AAMA.md`, or leave it as reference. --> rewrite it for SeamlyLayout's DXF-AAMA
+- [X] Layout.105.3 Apply the decision; keep the `.github/AAMA-INTEROP.md` merge rule in `CLAUDE.md` consistent with it. Done: `AAMA-INTEROP.md` rewritten; the rule lives in the `merge-upstream` skill (not `CLAUDE.md`), now says drop the incoming `.github/` copy.
+
+### [ ] Task Layout.101 — Verify - `SEAMLY_DATA_DIR` for SeamlyLayout
+
+- Done: `DataDirectory` (`qt_frontend/src/DataDirectory.{h,cpp}`) reads the variable first in `main()`. Settings go to `<dir>/settings/`, logs to `<dir>/logs/seamlylayout/`. A relative path exits 78; an unwritable one exits 73. Seamly2D's `--svg-stdin` launch passes the variable on.
+- [ ] Layout.101.4 NEEDS_USER_TEST: with the MSI, run `$env:SEAMLY_DATA_DIR="D:/sl_job"; seamlylayout.exe`. Expect `settings\qt6_seamlylayout.ini` and `logs\seamlylayout\log_*.txt` under it, nothing new in `%LOCALAPPDATA%\Seamly\SeamlyLayout`. Run with `SEAMLY_DATA_DIR=rel` (exit 78) and a path under a file (exit 73). Run Seamly2D with the variable set, open Layout Mode: SeamlyLayout uses the same folder. Qt build check open (next MSI).
