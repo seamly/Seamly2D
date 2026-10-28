@@ -68,8 +68,8 @@ Layout.106 added the switch for the Dead.4.4.3 compare. Remove it when that comp
 - [ ] Layout.108.1 Blocked by Dead.4.4.3 (`TODO_REMOVE_DEAD_LAYOUT_CODE.md`): Layout Mode sends the old writer's SVG until the switch.
 - [ ] Layout.108.2 Stack point per piece set: the fold line start when every size has one, else the outline centre (as in `annotation_alignment.rs`).
 - [ ] Layout.108.3 Shared place: the base size's offset from the stack point when it fits every size. Else the nearest offset whose grainline ends and label line anchors lie inside every size's cut line.
-- [ ] Layout.108.4 Open decision: no shared place fits (a label larger than the smallest size). Proposal: keep the base size's place and warn in Seamly2D before the launch.
-- [ ] Layout.108.5 Open decision: SeamlyLayout keeps or removes its import move and warning (`annotation_alignment.rs`, `finish_import`). Keeping it covers SVG files from older Seamly2D builds.
+- [x] Layout.108.4 Decision: when no shared place fits (a label larger than the smallest size), keep the base size's place. Seamly2D warns before the launch.
+- [x] Layout.108.5 Decision: SeamlyLayout keeps its import move and warning (`annotation_alignment.rs`, `finish_import`). They cover SVG files from older Seamly2D builds.
 - [ ] Layout.108.6 Tests: `TST_HandoffDocument` multisize set (one shared place, inside every size, fallback). New jacket2 capture for `layout_utils::jacket2_nested_stacks_each_piece_set_annotations`.
 - [ ] Layout.108.7 Docs: `SVG-DATA-ATTRIBUTES.md` "Multisize grainline and label positions", `AGENT_CHECKLIST.md` section 26.
 - [ ] Layout.108.8 Verify: MSI. jacket2 Layout Mode: no import warning; Size 220 tab: Back's piece label inside the cut line.
