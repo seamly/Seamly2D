@@ -370,10 +370,10 @@ ApplicationWindow {
             errorDialog.open();
         } // onErrorOccurred
 
-        // Layout warning — the layout succeeded but some pieces could not be
-        // placed.  Shown as a non-blocking popup; the layout (with the pieces
-        // that fit) has already been loaded into the right canvas.
+        // Layout warning — the layout succeeded with left-out pieces or fold lines
+        // off the edge.  Non-blocking: the right canvas already shows the layout.
         onLayoutWarning: function(message) {
+            warningDialog.title = "Layout warning";
             warningDialog.warningText = message;
             warningDialog.open();
         } // onLayoutWarning
@@ -385,10 +385,11 @@ ApplicationWindow {
             oversizedPiecesDialog.open();
         } // onOversizedPiecesFound
 
-        // Import warning — the SVG loaded, but it carries no data-type="piece"
-        // tagging, so it is not a Seamly2D Layout Mode handoff file (Task 49).
+        // Import warning — the SVG loaded with a caveat: no data-type="piece" groups,
+        // piece numbers shared between sizes, or labels past a size's cut line.
         // Non-blocking: the file is already on the left canvas.
         onImportWarning: function(message) {
+            warningDialog.title = "Import warning";
             warningDialog.warningText = message;
             warningDialog.open();
         } // onImportWarning
@@ -1595,14 +1596,13 @@ ApplicationWindow {
     } // Dialog errorDialog
 
     // -----------------------------------------------------------------------
-    // Warning dialog — layout completed but some pieces were left out
+    // Warning dialog — import and layout warnings; each handler sets the title
     // -----------------------------------------------------------------------
     Dialog {
         id: warningDialog
 
         property string warningText: ""
 
-        title:    "Some pieces could not be placed"
         modal:    true
         width:    400
         anchors.centerIn: parent

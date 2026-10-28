@@ -1479,7 +1479,7 @@ mod tests {
             assert!(report.moved > 0, "material {}: sizes take the base size's places", part.name);
             // Back's sizes stack on their fold line start; its piece label leaves the smallest size.
             let expected_outside: Vec<String> = if part.name == "Fabric" {
-                vec!["Back: piece label past the cut line in sizes 220".to_string()]
+                vec!["Back: piece label past the cut line in size 220".to_string()]
             } else {
                 Vec::new()
             }; // expected_outside
