@@ -426,11 +426,11 @@ Needs the next MSI. jacket2 handoff: Fabric and Lining. Settings from section 1.
 
 Needs the next MSI. jacket2 handoff (grainlines and labels shown).
 
-- [ ] Import: one warning names "Back: piece label past the cut line in sizes 220" (Back's sizes stack on their fold line start).
+- [ ] Import: one popup, title "Import warning", names "Back: piece label past the cut line in size 220" (Back's sizes stack on their fold line start).
 - [ ] Nested tab, Fabric: each piece shows one grainline stack and one label stack; the sizes' copies lie exactly on top of each other.
 - [ ] Size 220 and Size 720 tabs: each piece's grainline and labels sit in the same place inside the piece as on the Base Size 500 tab.
 - [ ] Lining, Nested tab: Detail 4's grainline, piece label and pattern label each stack as one.
-- [ ] Seamly2D: move Back's pattern label toward the middle of the piece. Press Layout: no warning.
+- [ ] Seamly2D: move Back's piece label toward the middle of the piece. Press Layout: no warning.
 
 ## 27. male_shirt: built-in seam line in Piece mode
 

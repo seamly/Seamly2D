@@ -126,9 +126,15 @@ fn align_piece_set(set: &mut Element, base_size: &str, report: &mut AlignmentRep
         } // for each annotation
     } // for each size
     for (name, sizes) in outside {
-        report.outside.push(format!("{piece_name}: {name} past the cut line in sizes {}", sizes.join(", ")));
+        report.outside.push(format!("{piece_name}: {name} past the cut line in {}", size_list(&sizes)));
     } // for each annotation past the cut line
 } // fn align_piece_set
+
+// @brief "size 220" for one size, "sizes 220, 240" for more.
+fn size_list(sizes: &[String]) -> String {
+    let noun = if sizes.len() == 1 { "size" } else { "sizes" };
+    format!("{noun} {}", sizes.join(", "))
+} // fn size_list
 
 // @brief True when `elem` is a `<g>` with this `data-type`.
 fn is_type(elem: &Element, data_type: &str) -> bool {
@@ -389,7 +395,7 @@ mod tests {
             .replace("matrix(1,0,0,1,140,260)", "matrix(1,0,0,1,55,256)");
         let mut doc = svg_dom::Document::parse(&svg).expect("fixture parses");
         let report = align_size_annotations(&mut doc);
-        assert_eq!(report.outside, vec!["Front: piece label past the cut line in sizes 36".to_string()]);
+        assert_eq!(report.outside, vec!["Front: piece label past the cut line in size 36".to_string()]);
     } // annotation_past_a_smaller_cut_line_is_reported
 
     // @brief The warning lists one bullet per line and says what to do.
@@ -399,6 +405,13 @@ mod tests {
         assert!(text.contains("\n\n\u{2022} Back: pattern label past the cut line in sizes 220, 240\n\n"), "{text}");
         assert!(text.ends_with("in the base size in Seamly2D."), "{text}");
     } // outside_warning_lists_each_line
+
+    // @brief One size takes the singular noun; two or more take the plural.
+    #[test]
+    fn size_list_matches_the_size_count() {
+        assert_eq!(size_list(&["220".to_string()]), "size 220");
+        assert_eq!(size_list(&["220".to_string(), "240".to_string()]), "sizes 220, 240");
+    } // size_list_matches_the_size_count
 
     // @brief No base size piece, or an individual pattern: nothing moves.
     #[test]
