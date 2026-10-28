@@ -71,5 +71,6 @@ Steps, in order:
   - Port the `fold_line` group: fold line path out to the cut line, then the `fold_line_arrow` and `fold_line_label` parts (`VLayoutPiece::createFoldLineItem()`, nested parts in `SvgGenerator::addComponentGroups()`)
   - Compare with the old writer on the 8 sample patterns and the 13 CollectionTest patterns: same tagged tree, attributes, points (0.01 px after transforms) and label text
   - Switch `MainWindow` to the new writer only after a clean compare
+  - After the switch: Task Layout.108 (`TODO_SEAMLYLAYOUT.md`) stacks multisize grainlines and labels in `layout_handoff`
   - New jacket2 handoff capture: `cargo test --workspace`, DXF-ASTM compare
 - [ ] Dead.4.5 Delete the old writer (`VLayoutPiece`, `VLayoutPiecePath`, `SvgGenerator`, `SvgTextItem`, `VGraphicsFillItem`, `vlayoutdef.h`) and `src/libs/vlayout`; update `SVG-DATA-ATTRIBUTES.md`. Remove the compare switch too: Task Layout.107 in `TODO_SEAMLYLAYOUT.md`.

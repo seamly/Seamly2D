@@ -57,6 +57,23 @@ Layout.106 added the switch for the Dead.4.4.3 compare. Remove it when that comp
 - [ ] Layout.107.2 Delete `writeTextFile()` in `mainwindowsnogui.cpp`, and the `<QDir>` and `<QFile>` includes if nothing else uses them.
 - [ ] Layout.107.3 Remove `SEAMLY_HANDOFF_COMPARE_DIR` from the docs that name it.
 
+### [ ] Task Layout.108 — Implement - Seamly2D: stack multisize grainlines and labels in `layout_handoff`, inside every size's cut line
+
+`layout_handoff` gives every size of a piece set one shared place for its grainline, piece label and pattern label. The Nested stacks read as one, and no label leaves a size's cut line. Replaces the SeamlyLayout import move of Layout.94 (`annotation_alignment.rs`).
+
+- User decisions:
+  - Fit every size: one shared place inside every size's cut line, nearest the base size's place. No pattern edit, no warning.
+  - Seamly2D handoff, not SeamlyLayout import.
+  - Start after the Dead.4.4.3 compare and `MainWindow` switch, so the compare stays clean and the work is done once.
+- [ ] Layout.108.1 Blocked by Dead.4.4.3 (`TODO_REMOVE_DEAD_LAYOUT_CODE.md`): Layout Mode sends the old writer's SVG until the switch.
+- [ ] Layout.108.2 Stack point per piece set: the fold line start when every size has one, else the outline centre (as in `annotation_alignment.rs`).
+- [ ] Layout.108.3 Shared place: the base size's offset from the stack point when it fits every size. Else the nearest offset whose grainline ends and label line anchors lie inside every size's cut line.
+- [ ] Layout.108.4 Open decision: no shared place fits (a label larger than the smallest size). Proposal: keep the base size's place and warn in Seamly2D before the launch.
+- [ ] Layout.108.5 Open decision: SeamlyLayout keeps or removes its import move and warning (`annotation_alignment.rs`, `finish_import`). Keeping it covers SVG files from older Seamly2D builds.
+- [ ] Layout.108.6 Tests: `TST_HandoffDocument` multisize set (one shared place, inside every size, fallback). New jacket2 capture for `layout_utils::jacket2_nested_stacks_each_piece_set_annotations`.
+- [ ] Layout.108.7 Docs: `SVG-DATA-ATTRIBUTES.md` "Multisize grainline and label positions", `AGENT_CHECKLIST.md` section 26.
+- [ ] Layout.108.8 Verify: MSI. jacket2 Layout Mode: no import warning; Size 220 tab: Back's piece label inside the cut line.
+
 ## VERIFY
 
 ### [ ] Task Layout.6 — Verify - DXF-ASTM grading
@@ -505,6 +522,7 @@ Select the position of the base size's grainline (when visible), pattern label (
 - [x] Layout.94.3 Cut line check: a grainline end or label line anchor outside a size's cut line is named in one import warning.
   - Finding: jacket2 Back's pattern label sits near the edge in size 500 and leaves sizes 220–280: "Back: pattern label past the cut line in sizes 220, 240, 260, 280". Fix in Seamly2D: move Back's pattern label toward the middle in the base size.
   - Decision taken: positions stay the base size's even then (the task's rule); the warning names the sizes. No label is moved inward on its own.
+  - Decision revised: Task Layout.108 fits every size in Seamly2D's `layout_handoff`. The warning stays until then.
   - Open: on the Nested canvas the size labels of every size stack too ("Size 220" over "Size 240"). Nested exports keep the smallest size's only (Layout.84).
 - [x] Layout.94.4 Tests: `annotation_alignment` (5); `layout_utils::jacket2_nested_stacks_each_piece_set_annotations` with the MSI 26.10.2023 capture as fixture (now `jacket2_40-146_handoff.svg`, Layout.27.13.4). `cargo test --workspace` 611 passed. Doc: `SVG-DATA-ATTRIBUTES.md`, "Multisize grainline and label positions".
 - [ ] Layout.94.5 Next MSI: user check, `AGENT_CHECKLIST.md` §26.
