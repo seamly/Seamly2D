@@ -41,8 +41,10 @@
       >> pageWidth = numTilesWide * trimTileWidth + marginLeft + marginRight
       >> pageHeight = numTilesHigh * trimTileHeight + marginTop + marginBottom
   - if media='fabric':
-    > fabricWidth -- width of fabric inluding selvedges; default is 0.
-    > fabricHeight -- height of fabric including margins; default is 0.
+    > fabricWidth -- width of fabric including selvedges; default is 0 (then pageWidth).
+      >> if fabricFold is True then the canvas is fabricWidth / 2: pieces go on the folded half.
+    > fabricHeight -- length of fabric including margins; default is 0: no fixed length (500 in, trimmed after packing). No field in the Settings dialog.
+    > The paper sheet size (pageWidth, pageHeight) does not apply to fabric.
     > selvedgeWidth -- default is 0.
     > fabricFold -- checkbox.
     > Margins - marginLeft, marginRight, marginTop, marginBottom

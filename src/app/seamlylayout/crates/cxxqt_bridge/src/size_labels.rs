@@ -286,7 +286,7 @@ mod tests {
 
         let settings = serde_json::json!({
             "unit": "in", "mediaType": "fabric", "paperType": "roll",
-            "pageWidth": 20.0, "pageHeight": 40.0,
+            "fabricWidth": 20.0, "fabricHeight": 40.0,
             "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
             "pieceGap": 0.125, "layoutMode": "alongGrainline",
             "tileSize": "Letter", "tileOrientation": "Portrait"

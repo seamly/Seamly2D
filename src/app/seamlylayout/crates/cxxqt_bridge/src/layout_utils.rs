@@ -921,8 +921,8 @@ mod tests {
             "unit": "in",
             "mediaType": "fabric",
             "paperType": "roll",
-            "pageWidth": 60.0,
-            "pageHeight": 300.0,
+            "fabricWidth": 60.0,
+            "fabricHeight": 300.0,
             "marginLeft": 0.5,
             "marginRight": 0.5,
             "marginTop": 0.5,
@@ -1060,8 +1060,8 @@ mod tests {
             "unit": "in",
             "mediaType": "fabric",
             "paperType": "roll",
-            "pageWidth": width_in,
-            "pageHeight": length_in,
+            "fabricWidth": width_in,
+            "fabricHeight": length_in,
             "marginLeft": 0.5,
             "marginRight": 0.5,
             "marginTop": 0.5,
@@ -1187,14 +1187,42 @@ mod tests {
         assert!(result.layout_h_px > 36 * 96, "the sheet grows past 36 in: {} px", result.layout_h_px);
     } // trousers_long_pieces_extend_a_sheet
 
+    // @brief 36 in fabric folded to 18 in: the trousers go on the fabric, not on the
+    // B0 paper sheet that the settings keep from paper media.  The fabric has no fixed
+    // length, so no piece is left out, and every piece lies inside the 17.5 in content.
+    #[test]
+    fn trousers_on_folded_fabric_ignore_the_paper_sheet() {
+        let settings_json = serde_json::json!({
+            "unit": "in", "mediaType": "fabric", "paperType": "roll",
+            "pageWidth": 39.37, "pageHeight": 55.67, "sheetName": "B0",
+            "fabricWidth": 36.0, "fabricHeight": 0.0, "fabricFolded": true, "selvedgeWidth": 0.5,
+            "foldLinesOnLeftEdge": true,
+            "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
+            "pieceGap": 0.05, "layoutMode": "alongGrainline"
+        }).to_string();
+        let input_dom = Document::parse(TROUSERS_HANDOFF_SVG).expect("trousers fixture should parse");
+        let init = do_initialize_layout(&settings_json, Some(&input_dom)).expect("initialize_layout should succeed");
+        // (18 - 0.5) * 96 = 1680: no left margin on the fold, the selvedge on the right.
+        assert_eq!(init.initial_dom.get_attr_by_id("contentRect", "width"), Some("1680"));
+
+        let result = process_trousers_sheet(&settings_json, false, false);
+        assert!(result.unplaced_labels.is_empty(), "unplaced: {:?}", result.unplaced_labels);
+        assert_eq!(placed_count(&result), 12, "every piece placed whole");
+        let bbox: serde_json::Value = serde_json::from_str(&result.bbox_json).expect("valid JSON");
+        for piece in bbox["pieces"].as_array().expect("pieces array") {
+            let right = piece["x"].as_u64().unwrap_or(0) + piece["w"].as_u64().unwrap_or(0);
+            assert!(right <= 1680, "{} ends at x {right}, past the fold half", piece["label"]);
+        } // for each placed piece
+    } // trousers_on_folded_fabric_ignore_the_paper_sheet
+
     // @brief Fabric roll settings for the multisize fixture.
     fn multisize_settings_json() -> String {
         serde_json::json!({
             "unit": "in",
             "mediaType": "fabric",
             "paperType": "roll",
-            "pageWidth": 36.0,
-            "pageHeight": 100.0,
+            "fabricWidth": 36.0,
+            "fabricHeight": 100.0,
             "marginLeft": 0.5,
             "marginRight": 0.5,
             "marginTop": 0.5,
@@ -1528,8 +1556,8 @@ mod tests {
             "unit": "in",
             "mediaType": "fabric",
             "paperType": "roll",
-            "pageWidth": width_in,
-            "pageHeight": length_in,
+            "fabricWidth": width_in,
+            "fabricHeight": length_in,
             "marginLeft": 0.5,
             "marginRight": 0.5,
             "marginTop": 0.5,
@@ -2236,14 +2264,14 @@ mod tests {
   </g>
 </svg>"#;
 
-    // @brief Lay out FOLD_PIECES_SVG on 20 in folded fabric, or on a 20 x 40 in paper
-    // sheet, with the given layout mode.
+    // @brief Lay out FOLD_PIECES_SVG on 40 in fabric folded to 20 in, or on a 20 x 40 in
+    // paper sheet, with the given layout mode.
     fn process_fold_pieces(media: &str, layout_mode: &str, rotation_step: f64, fold_lines_on_left_edge: bool) -> ProcessLayoutResult {
         let input = Document::parse(FOLD_PIECES_SVG).expect("valid SVG");
         let paper_type = if media == "paper" { "sheet" } else { "roll" };
         let settings = serde_json::json!({
             "unit": "in", "mediaType": media, "paperType": paper_type,
-            "pageWidth": 20.0, "pageHeight": 40.0,
+            "pageWidth": 20.0, "pageHeight": 40.0, "fabricWidth": 40.0,
             "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
             "pieceGap": 0.125, "layoutMode": layout_mode, "rotationStep": rotation_step,
             "fabricFolded": media == "fabric", "foldLinesOnLeftEdge": fold_lines_on_left_edge,
