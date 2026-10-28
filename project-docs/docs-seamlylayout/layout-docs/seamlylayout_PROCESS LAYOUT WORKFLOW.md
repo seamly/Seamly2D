@@ -81,7 +81,17 @@ They are **stripped from the export clone** before any export operation.
 
 ## Roll Media Height Trim
 
-Roll and fabric media: the packing bin height is the media length (paper roll: 500 in sentinel).
+Roll and fabric media: the packing bin height is the media length (paper roll: 500 in sentinel; fabric: `fabricHeight`, or the 500 in sentinel when 0).
+
+`LayoutSettings::media_size_in()` sizes the canvas (`create_initial_layout_dom`) and `effective_bin_px()`. Each media reads only its own fields:
+
+| Media | Width | Length |
+|---|---|---|
+| fabric | `fabricWidth` (`pageWidth` when 0), half when `fabricFolded` | `fabricHeight`, 500 in when 0 |
+| paper roll | `rollWidth` | 500 in |
+| paper sheet, tiled | `pageWidth` | `pageHeight` |
+
+The settings keep the paper sheet size while fabric is the media. Fabric never reads it.
 After packing, `trim_roll_height()` reduces the SVG to actual content height:
 
 ```

@@ -100,11 +100,13 @@ pub struct LayoutSettings {
     #[serde(default)]
     pub fold_lines_on_left_edge: bool,
 
-    // Fabric width override in active units (0 = use page/roll width).
+    // Fabric width in active units, selvedges included; fabric media only
+    // (0 = use page_width).
     #[serde(default)]
     pub fabric_width: f64,
 
-    // Fabric height override in active units (0 = use page/roll height).
+    // Fabric length in active units; fabric media only (0 = no fixed length:
+    // the ROLL_DEFAULT_LENGTH_IN sentinel, trimmed after packing).
     #[serde(default)]
     pub fabric_height: f64,
 
@@ -226,32 +228,54 @@ impl LayoutSettings {
         (Self::to_inches(self.piece_gap, &self.unit) * LAYOUT_PPI).round() as u32
     } // fn piece_gap_px
 
-    // @brief Return the page/canvas width in pixels at `LAYOUT_PPI`.
+    // @brief Media width and length in inches, before margins.
     //
-    // For roll media uses `roll_width`; for sheet/tiled uses `page_width`.
-    pub fn page_w_px(&self) -> u32 {
+    // | media              | width                                              | length                                  |
+    // | ------------------ | -------------------------------------------------- | --------------------------------------- |
+    // | fabric             | `fabric_width` (`page_width` when 0), half if folded | `fabric_height`, sentinel when 0        |
+    // | paper roll, "roll" | `roll_width`                                       | `ROLL_DEFAULT_LENGTH_IN` sentinel       |
+    // | paper sheet, tiled | `page_width`                                       | `page_height`                           |
+    //
+    // The settings keep the paper fields while fabric is the media, and the
+    // fabric fields while paper is the media.  Each media reads only its own.
+    fn media_size_in(&self) -> (f64, f64) {
+        let u = self.unit.as_str();
+        if self.media_type == "fabric" {
+            // Fabric: the cutting area is the fabric itself, of no fixed length.
+            let full_w_in = if self.fabric_width > 0.0 {
+                Self::to_inches(self.fabric_width, u)
+            } else {
+                Self::to_inches(self.page_width, u)
+            }; // if fabric_width set
+            // Folded fabric: pieces go on the half from the fold to the open edge.
+            let w_in = if self.fabric_folded { full_w_in / 2.0 } else { full_w_in };
+            let h_in = if self.fabric_height > 0.0 {
+                Self::to_inches(self.fabric_height, u)
+            } else {
+                ROLL_DEFAULT_LENGTH_IN
+            }; // if fabric_height set
+            return (w_in, h_in);
+        } // if fabric
+
         let is_roll = self.media_type == "roll"
             || (self.media_type == "paper" && self.paper_type == "roll");
-        let w_in = if is_roll {
-            Self::to_inches(self.roll_width, &self.unit)
-        } else {
-            Self::to_inches(self.page_width, &self.unit)
-        };
-        (w_in * LAYOUT_PPI).round() as u32
+        if is_roll {
+            // Paper roll: finite width, full-bolt length; trimmed after packing.
+            return (Self::to_inches(self.roll_width, u), ROLL_DEFAULT_LENGTH_IN);
+        } // if paper roll
+
+        // Paper sheet or tiled: the physical sheet.
+        (Self::to_inches(self.page_width, u), Self::to_inches(self.page_height, u))
+    } // fn media_size_in
+
+    // @brief Return the page/canvas width in pixels at `LAYOUT_PPI`: the media width (`media_size_in`).
+    pub fn page_w_px(&self) -> u32 {
+        (self.media_size_in().0 * LAYOUT_PPI).round() as u32
     } // fn page_w_px
 
-    // @brief Return the page/canvas height in pixels at `LAYOUT_PPI`.
-    //
-    // For roll media uses the `ROLL_DEFAULT_LENGTH_IN` sentinel; for sheet/tiled uses `page_height`.
+    // @brief Return the page/canvas height in pixels at `LAYOUT_PPI`: the media length (`media_size_in`).
     pub fn page_h_px(&self) -> u32 {
-        let is_roll = self.media_type == "roll"
-            || (self.media_type == "paper" && self.paper_type == "roll");
-        let h_in = if is_roll {
-            ROLL_DEFAULT_LENGTH_IN
-        } else {
-            Self::to_inches(self.page_height, &self.unit)
-        };
-        (h_in * LAYOUT_PPI).round() as u32
+        (self.media_size_in().1 * LAYOUT_PPI).round() as u32
     } // fn page_h_px
 
     // @brief Return the bottom margin converted to pixels at `LAYOUT_PPI`.
@@ -266,17 +290,17 @@ impl LayoutSettings {
     // @brief Compute effective bin dimensions in pixels for `pack_maxrects`.
     //
     // Applies the following transformations in order:
-    //   1. Select base dimensions:
-    //      - media_type=="roll" OR paper_type=="roll" → rollW × ROLL_DEFAULT_LENGTH_IN (500 in sentinel)
-    //      - media_type=="paper" (sheet or tiled)     → pageW × pageH
-    //   2. Override base with `fabric_width` / `fabric_height` when > 0.
-    //   3. Halve width if `fabric_folded` (pieces are placed on the folded half).
-    //   4. Subtract all four margins.  For media_type == "fabric" the margins
+    //   1. Take the media size from `media_size_in` (fabric width and fold,
+    //      roll width, or sheet size; see its table).
+    //   2. Subtract all four margins.  For media_type == "fabric" the margins
     //      already carry the selvedge (SettingsModel::syncFabricMarginsFromSelvedge()
     //      sets each margin to selvedgeWidth), so no separate selvedge step
     //      exists here — see the `selvedge_width` field comment.
-    //   5. Clamp each dimension to `MIN_BIN_PX` to prevent zero-size bins.
-    //   6. Convert from inches to pixels at `LAYOUT_PPI` (96 px/in).
+    //   3. Clamp each dimension to `MIN_BIN_PX` to prevent zero-size bins.
+    //   4. Convert from inches to pixels at `LAYOUT_PPI` (96 px/in).
+    //
+    // Matches the `contentRect` of `create_initial_layout_dom` (same media
+    // size), up to 1 px of rounding.
     //
     // NOTE: `layout_mode` and `rotation_step` are NOT applied here — piece
     // arrangement (alongGrainline / withNap) and rotation step are
@@ -289,45 +313,10 @@ impl LayoutSettings {
 
         let u = self.unit.as_str();
 
-        // --- step 1: base dimensions from media_type / paper_type ---
-        let is_roll = self.media_type == "roll"
-            || (self.media_type == "paper" && self.paper_type == "roll");
-        let (base_w_in, base_h_in) = if is_roll {
-            // Roll form: width is finite; height sentinel = full bolt (500 in); trimmed after packing.
-            let rw = Self::to_inches(self.roll_width, u);
-            (rw, ROLL_DEFAULT_LENGTH_IN)
-        } else {
-            // "paper" (sheet or tiled) — use physical sheet dimensions
-            (
-                Self::to_inches(self.page_width,  u),
-                Self::to_inches(self.page_height, u),
-            )
-        }; // if is_roll
+        // --- step 1: media size, fold included ---
+        let (base_w_in, base_h_in) = self.media_size_in();
 
-        // --- step 2: fabric_width / fabric_height overrides ---
-        let base_w_in = if self.fabric_width > 0.0 {
-            Self::to_inches(self.fabric_width, u)
-        } else {
-            base_w_in
-        }; // if fabric_width override
-        let base_h_in = if self.fabric_height > 0.0 {
-            Self::to_inches(self.fabric_height, u)
-        } else {
-            base_h_in
-        }; // if fabric_height override
-
-        // --- step 3: fabric_folded halves the usable width ---
-        //
-        // When folded, pieces are cut on the fold: the cutting area is the
-        // half-width from the fold line to the open selvedge edge.
-        // layout_mode (piece arrangement) is deferred — see NOTE above.
-        let base_w_in = if self.fabric_folded {
-            base_w_in / 2.0
-        } else {
-            base_w_in
-        }; // if fabric_folded
-
-        // --- step 4: subtract margins ---
+        // --- step 2: subtract margins ---
         let ml = Self::to_inches(self.margin_left_value(), u);
         let mr = Self::to_inches(self.margin_right,  u);
         let mt = Self::to_inches(self.margin_top,    u);
@@ -339,16 +328,16 @@ impl LayoutSettings {
         // NOTE: no separate selvedge step.  Selvedge is a fabric-only concept;
         // for media_type == "fabric" the C++ SettingsModel maps selvedgeWidth
         // into all four margins before the JSON reaches this crate
-        // (syncFabricMarginsFromSelvedge()), so step 4 above already accounts
+        // (syncFabricMarginsFromSelvedge()), so step 2 above already accounts
         // for it.  Deducting `selvedge_width` here as well would subtract the
         // selvedge twice; for paper/roll media it never applies at all.
 
-        // --- step 5: clamp to minimum ---
+        // --- step 3: clamp to minimum ---
         // Prevent zero-size bins on bad settings (e.g., margins larger than page).
         let w_in = w_in.max(MIN_BIN_PX as f64 / LAYOUT_PPI);
         let h_in = h_in.max(MIN_BIN_PX as f64 / LAYOUT_PPI);
 
-        // --- step 6: convert to pixels at 96 px/in (u32, no decimals for pixels) ---
+        // --- step 4: convert to pixels at 96 px/in (u32, no decimals for pixels) ---
         let w_px = (w_in * LAYOUT_PPI).round() as u32;
         let h_px = (h_in * LAYOUT_PPI).round() as u32;
 
@@ -545,8 +534,8 @@ mod tests {
             piece_gap:      0.05,
             fabric_folded:  false,
             fold_lines_on_left_edge: false,
-            fabric_width:   0.0,
-            fabric_height:  0.0,
+            fabric_width:   36.0,
+            fabric_height:  48.0,
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
             no_grainline_rotation: "upright".to_string(),
@@ -604,7 +593,7 @@ mod tests {
     fn fabric_folded_halves_width() {
         let s = LayoutSettings {
             unit:          "in".to_string(),
-            media_type:    "paper".to_string(),
+            media_type:    "fabric".to_string(),
             paper_type:    "sheet".to_string(),
             page_width:    36.0,
             page_height:   48.0,
@@ -632,6 +621,32 @@ mod tests {
         // (36 / 2) * 96 = 1728
         assert_eq!(w, 1728);
     } // fabric_folded_halves_width
+
+    // @brief Each media reads only its own size fields.  Fabric takes its
+    // width, fold and open length, never the paper sheet size that the
+    // settings keep; paper takes the sheet, never the fabric width or fold.
+    #[test]
+    fn media_reads_only_its_own_size_fields() {
+        let json = |media: &str, fabric_height: f64| format!(
+            r#"{{"unit": "in", "mediaType": "{media}", "paperType": "sheet", "pageWidth": 39.37, "pageHeight": 55.67,
+                "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
+                "fabricWidth": 36.0, "fabricHeight": {fabric_height}, "fabricFolded": true, "foldLinesOnLeftEdge": true}}"#);
+
+        // 36 in fabric, folded: 18 in wide, 500 in long.  No left margin on the fold.
+        let fabric = LayoutSettings::from_json(&json("fabric", 0.0)).expect("parse ok");
+        assert_eq!((fabric.page_w_px(), fabric.page_h_px()), (1728, 48000));
+        // (18 - 0.5) * 96 = 1680; (500 - 1) * 96 = 47904
+        assert_eq!(fabric.effective_bin_px(), (1680, 47904));
+
+        // A set fabric length replaces the 500 in sentinel: 60 * 96 = 5760.
+        let cut_length = LayoutSettings::from_json(&json("fabric", 60.0)).expect("parse ok");
+        assert_eq!(cut_length.page_h_px(), 5760);
+
+        // B0 paper sheet: 39.37 x 55.67 in, all four margins.
+        let paper = LayoutSettings::from_json(&json("paper", 0.0)).expect("parse ok");
+        assert_eq!((paper.page_w_px(), paper.page_h_px()), (3780, 5344));
+        assert_eq!(paper.effective_bin_px(), (3684, 5248));
+    } // media_reads_only_its_own_size_fields
 
     // @brief Fold lines on the left edge of fabric, folded or not: no left margin.
     // Paper keeps its left margin; so does fabric with the option off.
