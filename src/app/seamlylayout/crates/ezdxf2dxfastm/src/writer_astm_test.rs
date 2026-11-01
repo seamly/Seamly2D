@@ -271,6 +271,53 @@ mod tests {
         assert_eq!(polyline_sizes(body, "87").len(), 1);
     }
 
+    // @brief Options with a fixed creation time, so two exports compare byte for byte.
+    fn fixed_time_options() -> DxfAstmExportOptions {
+        DxfAstmExportOptions {
+            creation_date: Some("01-11-2026".to_string()),
+            creation_time: Some("12-00".to_string()),
+            ..DxfAstmExportOptions::default()
+        }
+    }
+
+    // @brief The standard mapping and the CLO3D preset write cut on 1/84 and sew on 14/87.
+    #[test]
+    fn standard_and_clo3d_preset_keep_cut_on_1_and_sew_on_14() {
+        let standard = export_to_string(&sample_drawing(), "layers_std", &fixed_time_options());
+        let preset = DxfAstmExportOptions { cut_sew_layers: crate::CLO3D_CUT_SEW_LAYERS, ..fixed_time_options() };
+        let preset_text = export_to_string(&sample_drawing(), "layers_preset", &preset);
+        assert_eq!(standard, preset_text, "the CLO3D preset layers match the standard export");
+        let body = &parse_dxf(&standard).blocks[0].1;
+        for layer in ["1", "84", "14", "87"] {
+            assert_eq!(polyline_sizes(body, layer).len(), 1, "layer {layer}");
+        }
+    }
+
+    // @brief The swapped mapping writes the cut line on 14/87 and the sew line on 1/84.
+    #[test]
+    fn swapped_mapping_writes_cut_on_14_and_sew_on_1() {
+        let standard = parse_dxf(&export_to_string(&sample_drawing(), "swap_std", &fixed_time_options()));
+        let options = DxfAstmExportOptions {
+            cut_sew_layers: crate::CutSewLayers::Swapped,
+            clo3d_group_250: true,
+            ..fixed_time_options()
+        };
+        let swapped = parse_dxf(&export_to_string(&sample_drawing(), "swap", &options));
+        let body = &swapped.blocks[0].1;
+        let std_body = &standard.blocks[0].1;
+        // Group 250 follows the line role: boundary 0 now on layer 14, sew line 2 on layer 1.
+        let marked: Vec<(&str, &str)> = body
+            .iter()
+            .filter(|e| e.kind == "POLYLINE")
+            .filter_map(|e| e.get(250).map(|v| (e.layer(), v)))
+            .collect();
+        assert_eq!(marked, vec![("14", "0"), ("1", "2")]);
+        assert_eq!(polyline_sizes(body, "14"), polyline_sizes(std_body, "1"));
+        assert_eq!(polyline_sizes(body, "87"), polyline_sizes(std_body, "84"));
+        assert_eq!(polyline_sizes(body, "1"), polyline_sizes(std_body, "14"));
+        assert_eq!(polyline_sizes(body, "84"), polyline_sizes(std_body, "87"));
+    }
+
     // @brief Handoff of a piece with a built-in seam allowance: the main path is the
     //        `cutline`, the line Seamly2D computes 10 mm inside it is the `seamline`.
     // @details 96 px = 25.4 mm, so 10 mm = 37.795276 px.

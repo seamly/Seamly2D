@@ -173,6 +173,14 @@ Export all tabs unchecked.
 
 - [ ] Import the Base Size `.dxf` from section 5 with its `.rul`. Each piece appears once, graded.
 
+### 8.1 DXF-ASTM (CLO3D) layers (Layout.102.5)
+
+- [ ] Any layout tab, Export > DXF > DXF-ASTM (CLO3D). Save `clo3d_test.dxf`.
+- [ ] CLO3D: File > Import > DXF (AAMA/ASTM). Unit mm. Set "Swap Cutting Line and Sewing Line" OFF.
+- [ ] Check: cut lines, sew lines, seam allowances, notches, grainlines, units, curves.
+- [ ] If cut and sew lines come in reversed: report it. The agent sets the CLO3D preset to `Swapped`.
+- [ ] Repeat with the option ON: the lines swap. This confirms the option name.
+
 ## 9. PNG and JPG resolution
 
 - [ ] Size 220 tab, Export > PNG, then Export > JPG.

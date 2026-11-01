@@ -78,7 +78,42 @@ pub struct DxfAstmExportOptions {
     pub clo3d_group_250: bool,
     // DXF-AAMA (ANSI/AAMA-292) content: layers 1 to 14 only; see the module notes.
     pub aama: bool,
+    // Layers of the cut line and the sew line.
+    pub cut_sew_layers: CutSewLayers,
 }
+
+// @brief Which layers hold the cut line and the sew line.
+// @details Each layer keeps its own validation layer (1 with 84, 14 with 87).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum CutSewLayers {
+    // ASTM D6673: the cut line (boundary) on layer 1, the sew line on layer 14.
+    #[default]
+    Standard,
+    // The cut line on layer 14, the sew line on layer 1.
+    Swapped,
+}
+
+impl CutSewLayers {
+    // @brief Layer and validation layer of the cut line.
+    fn cut(self) -> (&'static str, &'static str) {
+        match self {
+            CutSewLayers::Standard => ("1", "84"),
+            CutSewLayers::Swapped => ("14", "87"),
+        } // match self
+    } // fn cut
+
+    // @brief Layer and validation layer of the sew line.
+    fn sew(self) -> (&'static str, &'static str) {
+        match self {
+            CutSewLayers::Standard => ("14", "87"),
+            CutSewLayers::Swapped => ("1", "84"),
+        } // match self
+    } // fn sew
+} // impl CutSewLayers
+
+// @brief Cut and sew line layers of the DXF-ASTM (CLO3D) preset.
+// @details The preset keeps the D6673 layers. Set `Swapped` only if a CLO3D import needs it.
+pub const CLO3D_CUT_SEW_LAYERS: CutSewLayers = CutSewLayers::Standard;
 
 impl Default for DxfAstmExportOptions {
     fn default() -> Self {
@@ -94,6 +129,7 @@ impl Default for DxfAstmExportOptions {
             creation_time: None,
             clo3d_group_250: false,
             aama: false,
+            cut_sew_layers: CutSewLayers::Standard,
         }
     }
 }
@@ -112,6 +148,7 @@ impl std::fmt::Debug for DxfAstmExportOptions {
             .field("creation_time", &self.creation_time)
             .field("clo3d_group_250", &self.clo3d_group_250)
             .field("aama", &self.aama)
+            .field("cut_sew_layers", &self.cut_sew_layers)
             .finish()
     }
 }
@@ -291,6 +328,7 @@ fn repeats_piece_text(text: &str) -> bool {
 // notches (4/80/81/83), annotation text (15), grade reference line (5),
 // grade rule identifiers.
 // @param options `clo3d_group_250` marks the boundary and sew line polylines with CLO3D group 250.
+//        `cut_sew_layers` sets the layers of the boundary and the sew lines.
 //        `aama` writes the DXF-AAMA layers: no 15, 80 to 87; label text on layer 1.
 fn write_astm_block(
     writer: &mut dyn Write,
@@ -334,13 +372,15 @@ fn write_astm_block(
     let (boundary_250, sew_250) = if options.clo3d_group_250 { (Some(0), Some(2)) } else { (None, None) };
     // DXF-AAMA has no quality validation layers.
     let validation = |layer: &'static str| (!aama).then_some(layer);
+    let (cut_layer, cut_validation) = options.cut_sew_layers.cut();
+    let (sew_layer, sew_validation) = options.cut_sew_layers.sew();
     if aama && block.mirror_line.is_some() {
-        write_contour(writer, &start_on_mirror_line(boundary), "1", None, boundary_250, units)?;
+        write_contour(writer, &start_on_mirror_line(boundary), cut_layer, None, boundary_250, units)?;
     } else {
-        write_contour(writer, boundary, "1", validation("84"), boundary_250, units)?;
+        write_contour(writer, boundary, cut_layer, validation(cut_validation), boundary_250, units)?;
     } // if AAMA with a mirror line
     for c in &block.sew_lines {
-        write_contour(writer, c, "14", validation("87"), sew_250, units)?;
+        write_contour(writer, c, sew_layer, validation(sew_validation), sew_250, units)?;
     } // for each sew line
     for c in &block.internal_lines {
         write_contour(writer, c, "8", validation("85"), None, units)?;
