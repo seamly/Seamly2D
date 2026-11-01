@@ -22,6 +22,7 @@ use std::collections::VecDeque;
 use svg_dom::Document;
 
 use crate::layout_utils::ProcessLayoutResult;
+use layout_tiling::layout_settings::LayoutSettings;
 use crate::piece_divider::DivideSpec;
 
 // @brief Label of the tab where every size of every piece packs as its own piece.
@@ -41,16 +42,23 @@ pub fn base_size_label(size: &str) -> String {
 } // fn base_size_label
 
 // @brief Advice that ends every "pieces left out" warning.
-const UNPLACED_ADVICE: &str =
-    "The remaining pieces were laid out. Try a larger sheet size, reduce the piece gap or margins, or remove pieces.";
+// @param is_fabric True for fabric media: it has a width and a length, not a sheet.
+fn unplaced_advice(is_fabric: bool) -> &'static str {
+    if is_fabric {
+        "The remaining pieces were laid out. Try a wider fabric, a longer fabric length, or remove pieces."
+    } else {
+        "The remaining pieces were laid out. Try a larger sheet size, reduce the piece gap or margins, or remove pieces."
+    }
+} // fn unplaced_advice
 
 // @brief Warning for a single layout that left pieces out.
 // @param lines One line per piece, from `ProcessLayoutResult::unplaced_labels`.
-pub fn unplaced_warning(lines: &[String]) -> String {
+pub fn unplaced_warning(lines: &[String], is_fabric: bool) -> String {
     format!(
-        "{} piece(s) could not be placed and were left out of the layout:\n\n{}\n\n{UNPLACED_ADVICE}",
+        "{} piece(s) could not be placed and were left out of the layout:\n\n{}\n\n{}",
         lines.len(),
-        bullet_lines(lines)
+        bullet_lines(lines),
+        unplaced_advice(is_fabric)
     )
 } // fn unplaced_warning
 
@@ -69,8 +77,8 @@ pub fn tab_unplaced_problem(label: &str, lines: &[String]) -> String {
 } // fn tab_unplaced_problem
 
 // @brief Warning after the last tab: every tab that left pieces out or failed.
-pub fn tab_problems_warning(problems: &[String]) -> String {
-    format!("Some layouts left pieces out:\n\n{}\n\n{UNPLACED_ADVICE}", problems.join("\n"))
+pub fn tab_problems_warning(problems: &[String], is_fabric: bool) -> String {
+    format!("Some layouts left pieces out:\n\n{}\n\n{}", problems.join("\n"), unplaced_advice(is_fabric))
 } // fn tab_problems_warning
 
 // @brief One "• line" per line.
@@ -461,7 +469,10 @@ impl TabLayoutQueue {
     pub fn final_warning(&self) -> Option<String> {
         let mut parts = Vec::new();
         if !self.problems.is_empty() {
-            parts.push(tab_problems_warning(&self.problems));
+            let is_fabric = LayoutSettings::from_json(&self.settings_json)
+                .map(|settings| settings.media_type == "fabric")
+                .unwrap_or(false);
+            parts.push(tab_problems_warning(&self.problems, is_fabric));
         } // if problems
         if !self.fold_line_lines.is_empty() {
             parts.push(fold_line_warning(&self.fold_line_lines));
@@ -717,12 +728,13 @@ mod tests {
     #[test]
     fn unplaced_warnings_list_one_piece_per_line() {
         let lines = sizes(&["Detail (3): 220, 240", "Front: 220"]);
-        let single = unplaced_warning(&lines);
+        let single = unplaced_warning(&lines, false);
+        assert!(unplaced_warning(&lines, true).contains("wider fabric"), "fabric advice");
         assert!(single.starts_with("2 piece(s) could not be placed"), "{single}");
         assert!(single.contains("\n\n\u{2022} Detail (3): 220, 240\n\u{2022} Front: 220\n\n"), "{single}");
 
         let problems = vec![tab_unplaced_problem(MARKER_LABEL, &lines), "Size 220: not laid out (no room)".to_string()];
-        let tabs = tab_problems_warning(&problems);
+        let tabs = tab_problems_warning(&problems, false);
         assert!(
             tabs.contains("Marker:\n\u{2022} Detail (3): 220, 240\n\u{2022} Front: 220\nSize 220: not laid out (no room)"),
             "{tabs}"

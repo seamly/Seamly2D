@@ -15,7 +15,7 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 - [ ] Layout.102.2 Decide: swap layers 1 and 14 in the CLO3D export, or keep D6673 layers and tell the user which option to set.
 - [ ] Layout.102.3 Check every CLO3D export layer against the guide.
 - [ ] Layout.102.4 Tests for the chosen layer order.
-- [ ] Layout.102.5 User check: import a DXF-ASTM (CLO3D) export in CLO3D, with the default settings and with the option set.
+- [ ] Layout.102.5 User check: export to DXF-ASTM (CLO3D) then import to CLO3D, with the default settings and with the option set.
 
 ### [ ] Task Layout.106 — Implement - Seamly2D: build the handoff pieces with `layout_handoff`, not `VLayoutPiece` (Gap 2)
 
@@ -73,6 +73,14 @@ Layout.106 added the switch for the Dead.4.4.3 compare. Remove it when that comp
 - [ ] Layout.108.6 Tests: `TST_HandoffDocument` multisize set (one shared place, inside every size, fallback). New jacket2 capture for `layout_utils::jacket2_nested_stacks_each_piece_set_annotations`.
 - [ ] Layout.108.7 Docs: `SVG-DATA-ATTRIBUTES.md` "Multisize grainline and label positions", `AGENT_CHECKLIST.md` section 26.
 - [ ] Layout.108.8 Verify: MSI. jacket2 Layout Mode: no import warning; Size 220 tab: Back's piece label inside the cut line.
+
+### [ ] Task Layout.109 - Implement - SeamlyLayout > Layout Settings > Media Type=Fabric. 
+
+- trousers.sm2d with fabric, folded, displayed message "Some pieces could not be placed". Message suggested "Try a larger sheet size". Remember that fabric layouts should initially be created at 500" long (similar to paper roll) then trimmed to fit the pieces; remember to set the left margin to 0 when folded is true.
+
+- [x] Fix the initial layout size for media=fabric. Fabric starts 500 in long (01562ef927) and trims after packing. Folded fabric has left margin 0. The fabric warning no longer advises a larger sheet size.
+- [ ] Verify that initial fabric layout is long, similar to paper roll. (MSI, AGENT_CHECKLIST.md section 33)
+- [ ] Verify that all pieces are placed on the fabric layout and that piece foldlines are placed along fold if folded=true.
 
 ## VERIFY
 

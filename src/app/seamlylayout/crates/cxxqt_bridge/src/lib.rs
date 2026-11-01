@@ -1752,6 +1752,9 @@ impl qobject::AppController {
         let is_roll_layout = LayoutSettings::from_json(&json_str)
             .map(|settings| settings.is_roll_form())
             .unwrap_or(false);
+        let is_fabric_layout = LayoutSettings::from_json(&json_str)
+            .map(|settings| settings.media_type == "fabric")
+            .unwrap_or(false);
 
         // Delegate to pure-logic function in layout_utils.rs.  A multisize layout
         // starts with the Marker tab: every size of every piece packs alone.
@@ -1873,7 +1876,7 @@ impl qobject::AppController {
                 // so this is a warning (popup), not an error that aborts the layout.
                 let mut warnings = Vec::new();
                 if !result.unplaced_labels.is_empty() {
-                    warnings.push(layout_views::unplaced_warning(&result.unplaced_labels));
+                    warnings.push(layout_views::unplaced_warning(&result.unplaced_labels, is_fabric_layout));
                 } // if unplaced pieces
                 if !result.fold_line_warnings.is_empty() {
                     warnings.push(layout_views::fold_line_warning(&result.fold_line_warnings));

@@ -15,32 +15,35 @@ Mark each box. Write FAIL and a short note beside a failed step.
 | Layout.69.3 | 9 | PNG and JPG resolution | PASS
 | Layout.73.5 | 1, 5 | Unique piece names | PASS
 | Seamly2D.12.8 | 14 | SeamlyLayout windows opens in front of Seamly2D | PASS
+| Layout.61.7.2 | 5 | SL > jacket_2 > DXF-ASTM (R13) - multisize (base size only) - aw.fyi report - Fabric | See jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf | PASS. Layer 5 caption accepted as a viewer note
+| Layout.84.4 | 19 | SL > jacket_2 > Nested exports: one grainline and label set per piece | See jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf | PASS
+| Layout.92.4 | 25 | SL > jacket_2 > Material tabs over the layout; every material laid out | PASS
+| Layout.94.5 | 26 | SL > jacket_2 > Grainlines and labels in the base size's place; Nested stacks | PASS
+| Layout.28.7 | 13 | S2D > male_shirt > Built-in seam line | PASS
+| Layout.80.7 | 20 | S2D > male_shirt > mark a fold line | PASS
+| Layout.80.3.1 | 20 | S2D: male_shirt > Piece Mirror tool | PASS
+| Layout.95.6 | 24 | S2D > male_shirt > Piece Properties: Rotation radio buttons | PASS
+| Layout.96.6 | 24 | S2D > male_shirt > Piece Properties: Tilt radio buttons and degrees | PASS
+| Layout.97.5 | 24 | S2D > male_shirt, jacket2 > Piece Properties: On fold check box, no fold position |PASS
+| Seamly2D.11.9 | 27 | S2D > male_shirt > Built-in seam line in Piece mode, at a fold line | PASS. Add a task to TODO_LAYOUT.md to improve the seamline for 'Built in Seam Allowance'
+| Dead.4.1.5, Dead.4.2 | 28 | S2D > jacket2, male_shirt > Old layout, print, console export and Export Pieces removed | PASS. When I select the Layout icon then seamlyLayout application appears.
+| Layout.83.4 | 15 | SL > male_shirt > Nested legend squares | PASS
+| Layout.82.3 | 16 | SL > male_shirt > Nested size colors: dark and pastel | PASS
+| Layout.87.3 | 4, 17 | SL > male_shirt > Marker tab: PDF (Tiled) disabled | PASS
+| Layout.86.3 | 3, 18 | SL > male_shirt > Export > DXF submenu | PASS
+| Layout.80.6.6 | 21 | S > male_shirt: fold lines placed along left edge of content rect | PASS
+| Layout.80.6.3 | 21 | SL > male_shirt > Adjust Mode: fold line moves with its piece | PASS
+| Layout.89.3 | 12 | SL > trousers > Settings > B0 sheet: Oversized pieces dialog: light text | PASS
+| Layout.70.5 | 12 | SL > trousers > Left-out pieces warning | PASS --> this warning appears when pieces couldn't be placed
 
 JACKET_2
-| Layout.61.7.2 | 5 | SL > jacket_2 > DXF-ASTM (R13) - multisize (base size only) - aw.fyi report - Fabric | See jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf | PASS. Layer 5 caption accepted as a viewer note
-| Layout.84.4 | 19 | SL > jacket_2 > Nested exports: one grainline and label set per piece | See jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf | Not checked: the Nested tab has no DXF export. Run §19
-| Layout.93.7 | 23 | SL > jacket_2 > DXF piece properties: Material, Missing Piece Data, Rotation, Flip, Tilt, Fold | ?
-| Layout.92.4 | 25 | SL > jacket_2 > Material tabs over the layout; every material laid out | ?
-| Layout.94.5 | 26 | SL > jacket_2 > Grainlines and labels in the base size's place; Nested stacks | ?
+| Layout.93.7 | 23 | SL > jacket_2 > DXF piece properties: Material, Missing Piece Data, Rotation, Flip, Tilt, Fold | --> export DXF (R13), upload to https://aw.fyi/dxf
 
 MALE_SHIRT
-| Layout.28.7 | 13 | S2D > male_shirt > Built-in seam line | ?
-| Layout.80.7 | 20 | S2D > male_shirt > mark a fold line | ?
-| Layout.80.3.1 | 20 | S2D: male_shirt > Piece Mirror tool | ?
-| Layout.95.6 | 24 | S2D > male_shirt > Piece Properties: Rotation radio buttons | ?
-| Layout.96.6 | 24 | S2D > male_shirt > Piece Properties: Tilt radio buttons and degrees | ?
-| Layout.97.5 | 24 | S2D > male_shirt, jacket2 > Piece Properties: On fold check box, no fold position | ?
-| Layout.98.6 | 24 | S2D > male_shirt > Piece Properties: Flip radio buttons, Flip submenu | ?
-| Seamly2D.11.9 | 27 | S2D > male_shirt > Built-in seam line in Piece mode, at a fold line | ?
-| Dead.4.1.5, Dead.4.2 | 28 | S2D > jacket2, male_shirt > Old layout, print, console export and Export Pieces removed | ?
+| Layout.98.6 | 24 | S2D > male_shirt > Piece Properties: Flip radio buttons, Flip submenu | FAIL --> Flip selection appears in piece context menu but without a checkbox, and the submenu appears when 'Flip' is selected, but the piece isn't flipped.
+| Layout.88.2 | 3 | SL > male_shirt > Export menu: DXF-ASTM note reads in full | FAIL --> Note did not appear
 
-| Layout.83.4 | 15 | SL > male_shirt > Nested legend squares | ?
-| Layout.82.3 | 16 | SL > male_shirt > Nested size colors: dark and pastel | ?
-| Layout.87.3 | 4, 17 | SL > male_shirt > Marker tab: PDF (Tiled) disabled | ?
-| Layout.86.3 | 3, 18 | SL > male_shirt > Export > DXF submenu | ?
-| Layout.80.6.6 | 21 | S > male_shirt: fold lines placed along left edge of content rect | ?
-| Layout.80.6.3 | 21 | SL > male_shirt > Adjust Mode: fold line moves with its piece | ?
-| Layout.88.2 | 3 | SL > male_shirt > Export menu: DXF-ASTM note reads in full | ?
+Check in aw.fyi/dxf
 | Layout.80.6.6 | 21 | SL > Export > DXF-ASTM (R13): mirror line | ?
 | Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Fabric | ?
@@ -48,9 +51,8 @@ MALE_SHIRT
 
 TROUSERS
 | Layout.71.6 | 11 | SL > trousers > Media grows in width | ?
-| Layout.72.8 | 12 | SL > trousers > Settings > B0 sheet: Oversized pieces - split or enlarge |
-| Layout.89.3 | 12 | SL > trousers > Settings > B0 sheet: Oversized pieces dialog: light text |
-| Layout.70.5 | 12 | SL > trousers > Left-out pieces warning | ?
+| Layout.72.8 | 12 | SL > trousers > Settings > B0 sheet: Oversized pieces - split or enlarge | FAIL -- 'Some pieces could not be placed' error
+
 
 ## [x] 0. Install
 
@@ -514,3 +516,12 @@ Needs the next MSI. (Layout.101.4)
 - [ ] Set a path under a file, for example `D:/notes.txt/sl`. SeamlyLayout exits with code 73.
 - [ ] Unset the variable. SeamlyLayout uses its normal settings folder.
 - [ ] Set the variable, run Seamly2D, open a pattern, press Layout. SeamlyLayout writes to the same folder.
+
+## 33. Fabric layout: initial length, fold margin, warning
+
+Needs the next MSI. (Layout.109)
+
+- [ ] Open trousers.sm2d. Layout Settings: Media Fabric, width 36 in, Folded on. Create Layout. All pieces placed, no "could not be placed" popup.
+- [ ] Layout is trimmed to the pieces (not 500 in long). Left margin is 0; fold lines lie on the left edge.
+- [ ] Fabric width 10 in so a piece cannot fit: the popup says "wider fabric, a longer fabric length", not "larger sheet size".
+- [ ] Media Paper with an oversize piece: the popup still says "Try a larger sheet size".
