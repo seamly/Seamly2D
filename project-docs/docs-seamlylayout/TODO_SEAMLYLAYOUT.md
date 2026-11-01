@@ -4,18 +4,19 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Implement
 
-### [ ] Task Layout.102 — Implement - DXF-ASTM (CLO3D): follow the McNeel layer guide
+### [ ] Task Layout.102 — Implement - DXF-ASTM (CLO3D): preset of the shared exporter with a configurable cut/sew layer mapping
 
+- Design rule: a vendor export preset may make compatibility changes. They never change the standard DXF-ASTM export.
+- DXF-ASTM (CLO3D) is a preset of the shared DXF-ASTM exporter, not a second implementation.
+- User decision (Sue, 2026-11-01): DXF-ASTM keeps the ASTM D6673 layers. The CLO3D preset makes only the changes CLO3D import needs. It keeps the standard mapping (layer 1 = cut line, layer 14 = sew line) for now.
+- CLO3D import option (import side): "Swap Cutting Line and Sewing Line". CLO documentation confirms DXF-ASTM support and that setting. It does not show that SeamlyLayout must swap layers.
+- Swap layers 1 and 14 in the CLO3D preset only if the CLO3D import test (102.5) shows it is needed.
 - Guide: `dxf-docs/seamlylayout_DXF_AAMA.md`, "McNeel guide" (layers 0 to 19, piece text).
-- CLO3D's default DXF import swaps the cut outline (layer 1) and the net line (layer 14).
-- A CLO3D import option (like "swap internal and external seam allowance") restores the order.
-- Today the CLO3D export is D6673 plus group 250: 0 = boundary, 2 = sew line (`DxfAstmExportOptions::clo3d_group_250`).
-- BLOCKED: Layout.102.1 needs CLO3D. The repository docs hold no import option name or default. Layout.102.2 needs a user decision after 102.1. Current code writes layer 1 = boundary, layer 14 = sew line, group 250 = 0 and 2 (`writer.rs` `write_astm_block`). No code changed.
-- [ ] Layout.102.1 Find the name and default of the CLO3D import option in the current CLO3D release.
-- [ ] Layout.102.2 Decide: swap layers 1 and 14 in the CLO3D export, or keep D6673 layers and tell the user which option to set.
-- [ ] Layout.102.3 Check every CLO3D export layer against the guide.
-- [ ] Layout.102.4 Tests for the chosen layer order.
-- [ ] Layout.102.5 User check: export to DXF-ASTM (CLO3D) then import to CLO3D, with the default settings and with the option set.
+- [x] Layout.102.1 Reuse the "DXF-ASTM (CLO3D)" menu item and `clo3d_group_250`. Add `CutSewLayers` (`Standard`, `Swapped`) to `DxfAstmExportOptions` (`writer.rs`). The preset sets `CLO3D_CUT_SEW_LAYERS = Standard` in `do_export_dxf()` (`exports.rs`).
+- [x] Layout.102.2 Document the CLO3D import settings in `dxf-docs/seamlylayout_DXF_EXPORT_WORKFLOW.md` and `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
+- [x] Layout.102.3 Tests (`writer_astm_test.rs`): the standard export and the preset write layers 1/84/14/87 byte for byte alike; a `Swapped` mapping writes cut on 14/87 and sew on 1/84, group 250 follows the role. `cargo test --workspace` passed.
+- [ ] Layout.102.4 Build check: next MSI build.
+- [ ] Layout.102.5 NEEDS_USER_TEST: see `AGENT_CHECKLIST.md` section 8. Export DXF-ASTM (CLO3D), import in CLO3D with "Swap Cutting Line and Sewing Line" off. If cut and sew lines come in reversed, set `CLO3D_CUT_SEW_LAYERS = CutSewLayers::Swapped` (one line, `writer.rs`) and rerun the test.
 
 ### [ ] Task Layout.106 — Implement - Seamly2D: build the handoff pieces with `layout_handoff`, not `VLayoutPiece` (Gap 2)
 

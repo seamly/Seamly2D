@@ -38,7 +38,7 @@
 use std::path::Path;
 use xmltree::{Element as XmlElement, XMLNode};
 
-use ezdxf2dxfastm::{export_dxf_astm, grade_rule_table_name, DxfAstmExportOptions};
+use ezdxf2dxfastm::{export_dxf_astm, grade_rule_table_name, CutSewLayers, DxfAstmExportOptions, CLO3D_CUT_SEW_LAYERS};
 use seamly_svg2ezdxf::{align_mirror_lines, grade_drawing, svg_to_ezdxf, DxfVersion, MissingPieceData, SvgToEzdxfOptions};
 
 use hpgl_writer::{HpglMode, HpglOptions, PenMap};
@@ -828,6 +828,8 @@ pub fn do_export_dxf(
         creation_time: style.creation_time.clone(),
         clo3d_group_250: style.clo3d_group_250,
         aama: style.aama,
+        // The CLO3D preset sets its own cut and sew layers; DXF-ASTM keeps D6673.
+        cut_sew_layers: if style.clo3d_group_250 { CLO3D_CUT_SEW_LAYERS } else { CutSewLayers::Standard },
         ..defaults
     }; // export_opts
     let result = export_dxf_astm(&drawing, Path::new(path), &export_opts)

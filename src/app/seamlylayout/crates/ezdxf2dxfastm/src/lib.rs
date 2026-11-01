@@ -26,4 +26,4 @@ pub use r13::upgrade_to_r13;
 pub use error::{DxfAstmExportError, Result};
 pub use validator::{ValidationError, validate_astm_compliance};
 pub use grade_rule_file::{grade_rule_file_text, grade_rule_table_name, AAMA_RULE_FILE_VERSION};
-pub use writer::{DxfAstmExportOptions, ProgressCallback, export_dxf_astm};
+pub use writer::{CutSewLayers, DxfAstmExportOptions, CLO3D_CUT_SEW_LAYERS, ProgressCallback, export_dxf_astm};
