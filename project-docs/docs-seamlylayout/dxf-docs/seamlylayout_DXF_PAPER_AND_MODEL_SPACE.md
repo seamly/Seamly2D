@@ -1,7 +1,9 @@
 <!-- MIT License: https://opensource.org/licenses/MIT -->
 # DXF paper space and model space
 
-Research and plan for Layout.90 (paper space) and Layout.91 (model space). Nothing is implemented. Read, then choose one option per space.
+Research and plan for Layout.90 (paper space) and Layout.91 (model space).
+
+Decided (user): P1 and M1, no code change. `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md` Decisions records them.
 
 ## What ASTM D6673-10 says
 
