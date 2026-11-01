@@ -4,55 +4,9 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Implement
 
-### [ ] Task Layout.102 — Implement - DXF-ASTM (CLO3D): preset of the shared exporter with a configurable cut/sew layer mapping
-
-- Design rule: a vendor export preset may make compatibility changes. They never change the standard DXF-ASTM export.
-- DXF-ASTM (CLO3D) is a preset of the shared DXF-ASTM exporter, not a second implementation.
-- User decision (Sue, 2026-11-01): DXF-ASTM keeps the ASTM D6673 layers. The CLO3D preset makes only the changes CLO3D import needs. It keeps the standard mapping (layer 1 = cut line, layer 14 = sew line) for now.
-- CLO3D import option (import side): "Swap Cutting Line and Sewing Line". CLO documentation confirms DXF-ASTM support and that setting. It does not show that SeamlyLayout must swap layers.
-- Swap layers 1 and 14 in the CLO3D preset only if the CLO3D import test (102.5) shows it is needed.
-- Guide: `dxf-docs/seamlylayout_DXF_AAMA.md`, "McNeel guide" (layers 0 to 19, piece text).
-- [x] Layout.102.1 Reuse the "DXF-ASTM (CLO3D)" menu item and `clo3d_group_250`. Add `CutSewLayers` (`Standard`, `Swapped`) to `DxfAstmExportOptions` (`writer.rs`). The preset sets `CLO3D_CUT_SEW_LAYERS = Standard` in `do_export_dxf()` (`exports.rs`).
-- [x] Layout.102.2 Document the CLO3D import settings in `dxf-docs/seamlylayout_DXF_EXPORT_WORKFLOW.md` and `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
-- [x] Layout.102.3 Tests (`writer_astm_test.rs`): the standard export and the preset write layers 1/84/14/87 byte for byte alike; a `Swapped` mapping writes cut on 14/87 and sew on 1/84, group 250 follows the role. `cargo test --workspace` passed.
-- [ ] Layout.102.4 Build check: next MSI build.
-- [ ] Layout.102.5 NEEDS_USER_TEST: see `AGENT_CHECKLIST.md` section 8. Export DXF-ASTM (CLO3D), import in CLO3D with "Swap Cutting Line and Sewing Line" off. If cut and sew lines come in reversed, set `CLO3D_CUT_SEW_LAYERS = CutSewLayers::Swapped` (one line, `writer.rs`) and rerun the test.
-
-### [ ] Task Layout.106 — Implement - Seamly2D: build the handoff pieces with `layout_handoff`, not `VLayoutPiece` (Gap 2)
-
-Closes Gap 2 of Dead.4.4.3 (`TODO_REMOVE_DEAD_LAYOUT_CODE.md`). After it, Dead.4.4.3 can compare the two writers and switch `MainWindow`. Dead.4.5 can then delete `VLayoutPiece`.
-
-- Today `MainWindowsNoGUI` holds `VLayoutPiece` in `pieceList` and `SizePieceList::pieces`. `preparePiecesForLayout()` and `prepareSizePieceList()` fill them with `VLayoutPiece::Create()`.
-- Users of these lists: `unevenCornerCuts()`, `needsCornerCuts()`, `unifySizeTurnPoints()`, `arrangePieceItemsFlat()`, `generatePiecesSvgDocument()`, `generateMultisizePiecesSvgDocument()`, `MainWindow::prepareMultisizePieceLists()`, and the `clear()` calls in `mainwindow.cpp`.
-- New value per piece: `layout_handoff::HandoffPlacedPiece` (info, piece, piece label, pattern label, offset). `placed_piece()` in `tst_handoffdocument.cpp` shows the calls.
-- Constraint: `recalculateAtSize()` changes the pattern data. Build the pieces and labels of a size while that size is active, and keep the results, not the `VContainer`.
-- [x] Layout.106.1 User decision: how Dead.4.4.3 compares the two writers.
-  - Option A (recommended): fill the old and the new lists in the same size loop. A developer switch writes both SVGs. The `MainWindow` switch deletes the old lists.
-  - Option B: replace the old lists now. Compare only in a test program that loads a pattern and runs both writers.
-  - Decision: Option A. Developer switch: environment variable `SEAMLY_HANDOFF_COMPARE_DIR=<absolute directory>`. Removal: Layout.107.
-- [x] Layout.106.2 Add the new lists: `QVector<HandoffPlacedPiece>` for an individual pattern, and one in `SizePieceList`. Keep them index-aligned with `pieceIds`.
-  - Done: `MainWindowsNoGUI::handoff_pieces`, `SizePieceList::handoff_pieces`. `mainwindow.cpp` clears `handoff_pieces` with `pieceList`.
-- [x] Layout.106.3 `preparePiecesForLayout()` and `prepareSizePieceList()`: build each piece with `HandoffPieceInfo::create()`, `HandoffPiece::create()`, `HandoffLabel::create_piece_label()` and `create_pattern_label()`.
-  - Call `setForcedCornerCuts()` before `HandoffPiece::create()`, as now.
-  - The pattern label needs `doc`, so `preparePiecesForLayout()` can no longer be static.
-  - Piece set key: the `VPiece` id, as now.
-  - Done: both functions fill the old and the new list in one loop (`createPlacedPiece()`). `offset` holds Mx/My until the SVG function places the piece.
-- [x] Layout.106.4 `unevenCornerCuts()` and `needsCornerCuts()`: read `HandoffPiece::seam_allowance_corners()` and `HandoffPieceInfo::name`. Move the corner compare into a pure function, so a unit test can call it.
-  - Done: `layout_handoff::compare_corner_cuts()` in new `handoff_corner_cuts.h/.cpp`.
-- [x] Layout.106.5 `unifySizeTurnPoints()`: call `HandoffPiece::unify_piece_turn_points()`. Count the differing pieces with `line_node_counts()`, as now.
-  - Done: unifies the old and the new list.
-- [x] Layout.106.6 Size units: pass every size through `sizeInExportUnit()` (Layout.103.8) to `HandoffPieceInfo` and `HandoffDocument::set_multisize()`. Fix the briefs in `handoff_document.h` that say "in pattern units".
-  - Done: also the `@param size` briefs in `handoff_ids.h`.
-- [x] Layout.106.7 Add a function that builds the SVG from the new lists: `HandoffStyle::from_settings()`, `set_units()`, `set_sample_size()` or `set_multisize()`, `piece_extent()` and `arrange_flat()` for the sheet and offsets, `add_piece()`, `to_svg_string()`. Layout Mode does not call it until the Dead.4.4.3 compare passes.
-  - Done: `generateHandoffSvgDocument()`. `writeHandoffCompareFiles()` writes `<pattern>_old.svg` and `<pattern>_new.svg` when `SEAMLY_HANDOFF_COMPARE_DIR` is set. `exportPiecesToSeamlyLayout()` calls it; SeamlyLayout still gets the old SVG.
-- [x] Layout.106.8 Tests: the corner compare (same cuts; different cuts, same corner count; different corner count). Run `TST_HandoffPiece` and `TST_HandoffDocument` again.
-  - Done: new `TST_HandoffCornerCuts` (4 cases pass in a scratch harness). `TST_HandoffPiece` and `TST_HandoffDocument` run in 106.9.
-  - `cl /Zs` of `mainwindowsnogui.cpp`, `mainwindow.cpp` and `handoff_corner_cuts.cpp`: no errors.
-- [ ] Layout.106.9 Verify: MSI build and Qt suites (ask first). NEEDS_USER_TEST: Layout Mode on an individual pattern and on a multisize pattern opens SeamlyLayout with the same pieces as before.
-
 ### [ ] Task Layout.107 — Implement - Seamly2D: remove the `SEAMLY_HANDOFF_COMPARE_DIR` developer switch
 
-Layout.106 added the switch for the Dead.4.4.3 compare. Remove it when that compare passes, at the latest with Dead.4.5.
+Layout.106 added the switch for the Dead.4.4.3 compare. Remove it when that compare passes, at the latest with Dead.4.5. Requires a build containing Layout.106.
 
 - [ ] Layout.107.1 Delete `writeHandoffCompareFiles()` and its call in `MainWindow::exportPiecesToSeamlyLayout()`.
 - [ ] Layout.107.2 Delete `writeTextFile()` in `mainwindowsnogui.cpp`, and the `<QDir>` and `<QFile>` includes if nothing else uses them.
@@ -60,12 +14,12 @@ Layout.106 added the switch for the Dead.4.4.3 compare. Remove it when that comp
 
 ### [ ] Task Layout.108 — Implement - Seamly2D: stack multisize grainlines and labels in `layout_handoff`, inside every size's cut line
 
-`layout_handoff` gives every size of a piece set one shared place for its grainline, piece label and pattern label. The Nested stacks read as one, and no label leaves a size's cut line. Replaces the SeamlyLayout import move of Layout.94 (`annotation_alignment.rs`).
+`layout_handoff` gives every size of a piece set one shared place for its grainline, piece label and pattern label. The Nested stacks read as one, and no label leaves a size's cut line. This replaces the SeamlyLayout import move of Layout.94 (`annotation_alignment.rs`) where each multisize file's grainline.
 
 - User decisions:
-  - Fit every size: one shared place inside every size's cut line, nearest the base size's place. No pattern edit, no warning.
-  - Seamly2D handoff, not SeamlyLayout import.
-  - Start after the Dead.4.4.3 compare and `MainWindow` switch, so the compare stays clean and the work is done once.
+  - Fit every size: one shared place inside every size's cut line, nearest the base size's place. No pattern edit, no warning. --> Agree
+  - Seamly2D handoff, not SeamlyLayout import. --> what's the difference between the handoff and the import?
+  - Start after the Dead.4.4.3 compare and `MainWindow` switch, so the compare stays clean and the work is done once. 
 - [ ] Layout.108.1 Blocked by Dead.4.4.3 (`TODO_REMOVE_DEAD_LAYOUT_CODE.md`): Layout Mode sends the old writer's SVG until the switch.
 - [ ] Layout.108.2 Stack point per piece set: the fold line start when every size has one, else the outline centre (as in `annotation_alignment.rs`).
 - [ ] Layout.108.3 Shared place: the base size's offset from the stack point when it fits every size. Else the nearest offset whose grainline ends and label line anchors lie inside every size's cut line.
@@ -75,15 +29,6 @@ Layout.106 added the switch for the Dead.4.4.3 compare. Remove it when that comp
 - [ ] Layout.108.7 Docs: `SVG-DATA-ATTRIBUTES.md` "Multisize grainline and label positions", `AGENT_CHECKLIST.md` section 26.
 - [ ] Layout.108.8 Verify: MSI. jacket2 Layout Mode: no import warning; Size 220 tab: Back's piece label inside the cut line.
 
-### [ ] Task Layout.109 - Implement - SeamlyLayout > Layout Settings > Media Type=Fabric. 
-
-- trousers.sm2d with fabric, folded, displayed message "Some pieces could not be placed". Message suggested "Try a larger sheet size". Remember that fabric layouts should initially be created at 500" long (similar to paper roll) then trimmed to fit the pieces; remember to set the left margin to 0 when folded is true.
-
-- [x] Decision: fabric starts 500 in long, as a paper roll does. Both use `ROLL_DEFAULT_LENGTH_IN`; neither is a setting.
-- [x] Decision: folded fabric has left margin 0 by definition. The fold-lines-on-left-edge option does not change it.
-- [x] Fix the initial layout size for media=fabric. Fabric starts 500 in long (01562ef927) and trims after packing. Folded fabric has left margin 0. The fabric warning no longer advises a larger sheet size.
-- [ ] Verify that initial fabric layout is long, similar to paper roll. (MSI, AGENT_CHECKLIST.md section 33)
-- [ ] Verify that all pieces are placed on the fabric layout and that piece foldlines are placed along fold if folded=true.
 
 ## VERIFY
 
@@ -591,3 +536,61 @@ User approved (2026-10-25). DXF-AAMA only; DXF-ASTM and CLO3D keep their output.
 
 - Done: `DataDirectory` (`qt_frontend/src/DataDirectory.{h,cpp}`) reads the variable first in `main()`. Settings go to `<dir>/settings/`, logs to `<dir>/logs/seamlylayout/`. A relative path exits 78; an unwritable one exits 73. Seamly2D's `--svg-stdin` launch passes the variable on.
 - [ ] Layout.101.4 NEEDS_USER_TEST: with the MSI, run `$env:SEAMLY_DATA_DIR="D:/sl_job"; seamlylayout.exe`. Expect `settings\qt6_seamlylayout.ini` and `logs\seamlylayout\log_*.txt` under it, nothing new in `%LOCALAPPDATA%\Seamly\SeamlyLayout`. Run with `SEAMLY_DATA_DIR=rel` (exit 78) and a path under a file (exit 73). Run Seamly2D with the variable set, open Layout Mode: SeamlyLayout uses the same folder. Qt build check open (next MSI).
+
+
+### [ ] Task Layout.106 — Verify - Seamly2D: build the handoff pieces with `layout_handoff`, not `VLayoutPiece` (Gap 2)
+
+Closes Gap 2 of Dead.4.4.3 (`TODO_REMOVE_DEAD_LAYOUT_CODE.md`). After it, Dead.4.4.3 can compare the two writers and switch `MainWindow`. Dead.4.5 can then delete `VLayoutPiece`.
+
+- Today `MainWindowsNoGUI` holds `VLayoutPiece` in `pieceList` and `SizePieceList::pieces`. `preparePiecesForLayout()` and `prepareSizePieceList()` fill them with `VLayoutPiece::Create()`.
+- Users of these lists: `unevenCornerCuts()`, `needsCornerCuts()`, `unifySizeTurnPoints()`, `arrangePieceItemsFlat()`, `generatePiecesSvgDocument()`, `generateMultisizePiecesSvgDocument()`, `MainWindow::prepareMultisizePieceLists()`, and the `clear()` calls in `mainwindow.cpp`.
+- New value per piece: `layout_handoff::HandoffPlacedPiece` (info, piece, piece label, pattern label, offset). `placed_piece()` in `tst_handoffdocument.cpp` shows the calls.
+- Constraint: `recalculateAtSize()` changes the pattern data. Build the pieces and labels of a size while that size is active, and keep the results, not the `VContainer`.
+- [x] Layout.106.1 User decision: how Dead.4.4.3 compares the two writers.
+  - Option A (recommended): fill the old and the new lists in the same size loop. A developer switch writes both SVGs. The `MainWindow` switch deletes the old lists.
+  - Option B: replace the old lists now. Compare only in a test program that loads a pattern and runs both writers.
+  - Decision: Option A. Developer switch: environment variable `SEAMLY_HANDOFF_COMPARE_DIR=<absolute directory>`. Removal: Layout.107.
+- [x] Layout.106.2 Add the new lists: `QVector<HandoffPlacedPiece>` for an individual pattern, and one in `SizePieceList`. Keep them index-aligned with `pieceIds`.
+  - Done: `MainWindowsNoGUI::handoff_pieces`, `SizePieceList::handoff_pieces`. `mainwindow.cpp` clears `handoff_pieces` with `pieceList`.
+- [x] Layout.106.3 `preparePiecesForLayout()` and `prepareSizePieceList()`: build each piece with `HandoffPieceInfo::create()`, `HandoffPiece::create()`, `HandoffLabel::create_piece_label()` and `create_pattern_label()`.
+  - Call `setForcedCornerCuts()` before `HandoffPiece::create()`, as now.
+  - The pattern label needs `doc`, so `preparePiecesForLayout()` can no longer be static.
+  - Piece set key: the `VPiece` id, as now.
+  - Done: both functions fill the old and the new list in one loop (`createPlacedPiece()`). `offset` holds Mx/My until the SVG function places the piece.
+- [x] Layout.106.4 `unevenCornerCuts()` and `needsCornerCuts()`: read `HandoffPiece::seam_allowance_corners()` and `HandoffPieceInfo::name`. Move the corner compare into a pure function, so a unit test can call it.
+  - Done: `layout_handoff::compare_corner_cuts()` in new `handoff_corner_cuts.h/.cpp`.
+- [x] Layout.106.5 `unifySizeTurnPoints()`: call `HandoffPiece::unify_piece_turn_points()`. Count the differing pieces with `line_node_counts()`, as now.
+  - Done: unifies the old and the new list.
+- [x] Layout.106.6 Size units: pass every size through `sizeInExportUnit()` (Layout.103.8) to `HandoffPieceInfo` and `HandoffDocument::set_multisize()`. Fix the briefs in `handoff_document.h` that say "in pattern units".
+  - Done: also the `@param size` briefs in `handoff_ids.h`.
+- [x] Layout.106.7 Add a function that builds the SVG from the new lists: `HandoffStyle::from_settings()`, `set_units()`, `set_sample_size()` or `set_multisize()`, `piece_extent()` and `arrange_flat()` for the sheet and offsets, `add_piece()`, `to_svg_string()`. Layout Mode does not call it until the Dead.4.4.3 compare passes.
+  - Done: `generateHandoffSvgDocument()`. `writeHandoffCompareFiles()` writes `<pattern>_old.svg` and `<pattern>_new.svg` when `SEAMLY_HANDOFF_COMPARE_DIR` is set. `exportPiecesToSeamlyLayout()` calls it; SeamlyLayout still gets the old SVG.
+- [x] Layout.106.8 Tests: the corner compare (same cuts; different cuts, same corner count; different corner count). Run `TST_HandoffPiece` and `TST_HandoffDocument` again.
+  - Done: new `TST_HandoffCornerCuts` (4 cases pass in a scratch harness). `TST_HandoffPiece` and `TST_HandoffDocument` run in 106.9.
+  - `cl /Zs` of `mainwindowsnogui.cpp`, `mainwindow.cpp` and `handoff_corner_cuts.cpp`: no errors.
+- [ ] Layout.106.9 Verify: MSI build and Qt suites (ask first). NEEDS_USER_TEST: Layout Mode on an individual pattern and on a multisize pattern opens SeamlyLayout with the same pieces as before.
+
+### [ ] Task Layout.102 — Verify - DXF-ASTM (CLO3D): preset of the shared exporter with a configurable cut/sew layer mapping
+
+- Design rule: a vendor export preset may make compatibility changes. They never change the standard DXF-ASTM export.
+- DXF-ASTM (CLO3D) is a preset of the shared DXF-ASTM exporter, not a second implementation.
+- User decision (Sue, 2026-11-01): DXF-ASTM keeps the ASTM D6673 layers. The CLO3D preset makes only the changes CLO3D import needs. It keeps the standard mapping (layer 1 = cut line, layer 14 = sew line) for now.
+- CLO3D import option (import side): "Swap Cutting Line and Sewing Line". CLO documentation confirms DXF-ASTM support and that setting. It does not show that SeamlyLayout must swap layers.
+- Swap layers 1 and 14 in the CLO3D preset only if the CLO3D import test (102.5) shows it is needed.
+- Guide: `dxf-docs/seamlylayout_DXF_AAMA.md`, "McNeel guide" (layers 0 to 19, piece text).
+- [x] Layout.102.1 Reuse the "DXF-ASTM (CLO3D)" menu item and `clo3d_group_250`. Add `CutSewLayers` (`Standard`, `Swapped`) to `DxfAstmExportOptions` (`writer.rs`). The preset sets `CLO3D_CUT_SEW_LAYERS = Standard` in `do_export_dxf()` (`exports.rs`).
+- [x] Layout.102.2 Document the CLO3D import settings in `dxf-docs/seamlylayout_DXF_EXPORT_WORKFLOW.md` and `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
+- [x] Layout.102.3 Tests (`writer_astm_test.rs`): the standard export and the preset write layers 1/84/14/87 byte for byte alike; a `Swapped` mapping writes cut on 14/87 and sew on 1/84, group 250 follows the role. `cargo test --workspace` passed.
+- [ ] Layout.102.4 Build check: next MSI build.
+- [ ] Layout.102.5 NEEDS_USER_TEST: see `AGENT_CHECKLIST.md` section 8. Export DXF-ASTM (CLO3D), import in CLO3D with "Swap Cutting Line and Sewing Line" off. If cut and sew lines come in reversed, set `CLO3D_CUT_SEW_LAYERS = CutSewLayers::Swapped` (one line, `writer.rs`) and rerun the test.
+
+
+### [ ] Task Layout.109 - Verify - SeamlyLayout > Layout Settings > Media Type=Fabric
+
+- trousers.sm2d with fabric, folded, displayed message "Some pieces could not be placed". Message suggested "Try a larger sheet size". Remember 1) that fabric layouts should initially be created at 500" long (similar to initial layout size when paperType=roll) then trimmed after layout is created to fit the pieces, 2) leftMargin=0 when folded=True.
+
+- [x] Decision: fabric starts 500 in long, as a paper roll does. Both use `ROLL_DEFAULT_LENGTH_IN`; neither is a setting.
+- [x] Decision: folded fabric has left margin 0 by definition. The fold-lines-on-left-edge option does not change it.
+- [x] Fix the initial layout size for media=fabric. Fabric starts 500 in long (01562ef927) and trims after packing. Folded fabric has left margin 0. The fabric warning no longer advises a larger sheet size.
+- [ ] Verify that initial fabric layout is long, similar to paper roll. (MSI, AGENT_CHECKLIST.md section 33)
+- [ ] Verify that all pieces are placed on the fabric layout and that piece foldlines are placed along fold if folded=true.

@@ -2,69 +2,63 @@
 
 ## Current status
 
-### 2026-10-25 — DXF units and McNeel AAMA items approved, not started
+### 2026-10-28 — Fabric media size fix; merged into local `run-seamlyLayout`, not pushed
 
-- Next session: implement Task Layout.103 (DXF units), then Layout.104 (DXF-AAMA piece text), then Layout.100 (remove DXF-ASTM R12). Full specs and decisions are in `TODO_SEAMLYLAYOUT.md`.
-- Layout.103: pattern unit decides the units. mm → `METRIC`, sizes unchanged; cm → `METRIC`, sizes ×10; inch → `ENGLISH`, sizes unchanged, every length in inches with 4 decimals. Needs new handoff attribute `data-units` (Seamly2D `SvgGenerator`), so it touches Seamly2D C++ and the contract.
-- Layout.104: `Annotation:` from `data-annotation`; block name `<piece name>_<size>`; `Creation Time:` `HH:MM:SS`. DXF-AAMA only.
-- Layout.100: keep the AC1009 writer, which DXF-AAMA (R11) uses.
-- Layout.102 (CLO3D layers) and Layout.101 (`SEAMLY_DATA_DIR`) are filed, not approved for work.
-- Committed today: `seamlylayout_DXF_AAMA.md` "McNeel guide" (piece text and layers 0–19 compared with the output).
-- Open question for the user: untracked `project-docs/docs-seamlylayout/AAMA-INTEROP.md` copies the upstream PR text about the old `vdxf` output; rewrite or leave.
-- Work method: peer sessions share the main tree. Use a worktree from `run-seamlyLayout`, merge with `merge-tree` + `commit-tree` + `update-ref`, then sync the main tree paths and tell the peers.
-- Uncommitted user files left untouched: `AGENTS.md`, `AAMA-INTEROP.md`, `test-seamly-layout/foldline_arrowline.*`, `test-seamly-layout/layouts/*`. `TODO_SEAMLYLAYOUT.md` Layout.100 is now committed (user asked for the task).
+- Cause: Sue's trousers on fabric (folded, 36 in, selvedge 0.5 in) left 4 pieces out. The fabric canvas used the B0 paper sheet size that the settings keep from paper media; fabric width, fold and open length were ignored.
+- Fix: `LayoutSettings::media_size_in()` gives the canvas (`page_w_px`, `page_h_px`) and the bin (`effective_bin_px`). Fabric: `fabricWidth` (0 = `pageWidth`; folded: half), `fabricHeight` (0 = 500 in, trimmed). Paper ignores the fabric fields.
+- Commit `01562ef927`. Changed: `layout_settings.rs`, `layout_utils.rs`, `material_split.rs`, `size_labels.rs` (fabric fixtures use `fabricWidth`/`fabricHeight`), the layout and settings workflow docs.
+- Verified: `cargo test --workspace` 636 passed; `ctest --preset debug` 7 of 7. Not run: MSI, GUI.
+- Sue's popup had the old title, so her MSI predates `3b1310115e`.
+- CLAUDE.md vcvars path: VS 2022 → VS 18 (user decision: local builds use VS 18; `local_build_msi.ps1` already does).
+- Next: MSI build (ask). User test: trousers on 36 in folded fabric place all 12 pieces inside the fold half.
+- `run-seamlyLayout` is 8 commits ahead of `origin`.
 
-### 2026-10-25 — Dead.4.3: `AbstractPiece`, `SeamAllowancePoint`, `LabelTextManager` in `vpatterndb`; merged into local `run-seamlyLayout`, not pushed
+### 2026-10-27 — Warning popup titles and size noun; merged into local `run-seamlyLayout`, not pushed
 
-- Moved from vlayout and renamed: `VAbstractPiece` → `AbstractPiece` (+ `AbstractPieceData.h`), `VSAPoint` → `SeamAllowancePoint` (own header), `VTextManager` → `LabelTextManager`. vpatterndb includes no vlayout header now.
-- User decisions: keep the method names; rename `VSAPoint`; one exit point per function; no namespace.
-- Restyle: briefs, snake_case, one exit; `LabelTextManager::min_font_size` replaces `MIN_FONT_SIZE` (`MAX_FONT_SIZE` was unused, gone); `TextLine` members `text`, `font_size_increment`, `bold`, `italic`, `alignment`.
-- Build files: vpatterndb `QT += xml`; vlayout links before vpatterndb in 4 `.pro` files. Translation context `VAbstractPieceData` → `AbstractPieceData` in the `.ts` files.
-- Tests: `TST_AbstractPiece` (new `SeamAllowancePointWidths`), `TST_LabelTextManager`.
-- Verified: `cl /Zs` on every changed `.cpp` and their includers. Scratch harness (session scratchpad `223c6375-…/harness`): `TST_AbstractPiece` 58 passed, `TST_LabelTextManager` 7 passed; old/new differential, 30 000 random paths and 200 000 random corners, label fits: no output difference. Not run: Qt suites, MSI (ask first), Linux link (CI), GUI.
-- User check: `AGENT_CHECKLIST.md` §30.
-- Next: Dead.4.4 (`layout_handoff`).
-- Work done in worktree `C:\Users\susan\Projects\s2d-abstract-piece` (removed after the merge).
+- Cause: Sue saw jacket2's import warning under the title "Some pieces could not be placed". Import and layout warnings shared one fixed title.
+- Merge `3b1310115e` (commit `3aa24ea580`), skip-ci token: `.rs`, `.qml`, `.md` only.
+- Changed: `Main.qml` (titles "Import warning", "Layout warning"), `annotation_alignment.rs` (`size_list`: "in size 220"), `layout_utils.rs` test, `AGENT_CHECKLIST.md` §26.
+- Verified: `cargo test --workspace` 634 passed; `ctest --preset debug` 7 of 7. Not run: MSI.
+- User decisions: one shared place inside every size's cut line; built in `layout_handoff`, after the Dead.4.4.3 switch. Filed Task Layout.108 (commit `375954483c`, docs only).
+- Decisions 108.4 (keep base place, warn in Seamly2D) and 108.5 (keep the SeamlyLayout import move) recorded, commit `a952e29d1e` (docs only).
+- Fixed: working copies of `TODO_SEAMLYLAYOUT.md` and `TODO_REMOVE_DEAD_LAYOUT_CODE.md` dropped committed lines (stale editor buffer). Restored (user decision). Uncommitted Sue edits kept: Layout.102.5 wording, the `VPattern` question in Dead.4.4.3.
+- `run-seamlyLayout` is 6 commits ahead of `origin`.
 
-### 2026-10-25 — DXF-AAMA piece text review (upstream PR 1783); merged into local `run-seamlyLayout`, not pushed
+### 2026-10-27 — `nmake check` fix: `TST_Seamly2DCommandLine::ExportMode` removed; merged into local `run-seamlyLayout`, not pushed
 
-- Upstream PR 1783 (open) makes the `vdxf` AAMA piece text independent of the label. SeamlyLayout DXF-AAMA already did this; no exporter code change.
-- User decisions: AAMA `Quantity:` stays `R,L` (not a total); `Size:` stays in pattern units (not cm); `Units:METRIC` stays.
-- New test `aama_piece_text_comes_from_piece_data_not_label` (`writer_astm_test.rs`): handoff SVG to DXF-AAMA, label hidden and label contradicting the piece data.
-- Docs: `seamlylayout_DXF_AAMA.md` Decisions; `SVG-DATA-ATTRIBUTES.md` `data-size` row; CLAUDE.md merge rules for PR 1783 under "Retired code"; new Task Layout.101 (`SEAMLY_DATA_DIR` in SeamlyLayout).
-- Verified: `cargo test --workspace` 622 passed. Not run: ctest, Qt suites, MSI (Rust test and docs only).
-- Open question for the user: untracked `project-docs/docs-seamlylayout/AAMA-INTEROP.md` copies the PR text, which describes the old `vdxf` output.
-- Work done in worktree `C:\Users\susan\Projects\s2d-aama-piece-text` (removed after the merge).
-- Uncommitted user files left untouched: `AGENTS.md`, `TODO_SEAMLYLAYOUT.md` (Layout.100), `AAMA-INTEROP.md`, `test-seamly-layout/foldline_arrowline.*`, `test-seamly-layout/layouts/*`.
+- Cause: the MSI build stopped in `CollectionTest`. `ExportMode` ran `-p`, `-d`, `-b`, removed with the console export mode (Dead.4.1.1).
+- Merge `8813562a51` (commit `899adb914a`), skip-ci token: test and doc change only.
+- Changed: `tst_seamly2dcommandline.cpp/.h`, `TODO_REMOVE_DEAD_LAYOUT_CODE.md` Dead.4.1.1.
+- Verified: in-tree `CollectionTest` rebuilt and run: 51 passed, 0 failed, 4 skipped (read-only checks, Windows ACLs). `ParserTest`, `TranslationsTest` exit 0. Not run: MSI.
+- Open user decision: test mode ignores a bad `--gsize`/`--gheight` (exit 0). The 4 gradation rows of the old test are not ported. `glimited/*.sm2d` and `issue_372.sm2d` are now unused.
+- `run-seamlyLayout` is 2 commits ahead of `origin`.
+- Next: MSI build (ask).
 
-### 2026-10-25 — Seamly2D.71 fold line arrow line, label and extended fold line; merged into local `run-seamlyLayout`, not pushed
+### 2026-10-27 — Layout.106.1–106.8: handoff pieces built with `layout_handoff` too; merged into local `run-seamlyLayout`, not pushed
 
-- Piece Properties Apply/OK rotates the main path to end with the fold line (`VPiece::endPathAtFoldLine`). The 0.7.7 conversion does the same for older files (`endMainPathAtFoldLineV0_7_7`); no schema change.
-- New `pattern_piece::FoldLineGraphic` (`src/libs/vpatterndb/FoldLineGraphic.{h,cpp}`): arrow line 50% of the fold line, 10% bends at each end, heads touch the fold line; "Foldline" label between the lines. Piece mode draws both (`PatternPieceTool::refreshFoldLine`).
-- Extended fold line: `VPiece::foldLineOnCutLine`, drawn and sent while the cut line shows.
-- Handoff: `fold_line` group = fold line path, then `fold_line_arrow` and `fold_line_label` groups. `SvgGenerator` renders tagged child items as nested tagged groups.
-- SeamlyLayout: `svg_dom::fold_line_d`; Nested sizes with a fold line stack on its start (`center_piece_sets`, `annotation_alignment`); a piece-set sharing one fold line goes on the left edge; `piece_divider` splits the fold path only; DXF layer 8/15, HPGL, text modes.
-- Decisions to confirm: ids `fold_line_arrow_<name>`, `fold_line_label_<name>` (scheme), not `<name>_foldline`; conversion in 0.7.7, not 0.7.8; Nested piece-sets now go on the left edge.
-- Changed expectation: jacket2 import warning is now "Back: piece label past the cut line in sizes 220" (`AGENT_CHECKLIST.md` §26 updated).
-- Risk: a custom seam allowance that starts at the fold line end node wraps after the rotation and is dropped.
-- Code style: new code follows `README-CODE-STYLES.md` and the `AGENTS.md` note (snake_case, `Type*`, one exit, briefs, namespace, GPL link).
-- Verified: scratch harness `TST_VPiece` 128, `TST_SvgComponentTags` 49 passed; `cargo test --workspace` 621 passed; `cl /Zs` clean. Not run: Qt suites (next MSI, ask first), ctest (no QML or C++ frontend change), GUI.
-- User check: `AGENT_CHECKLIST.md` §29; §21 Nested step changed.
-- Port note added to Dead.4.4 (`layout_handoff` must write the nested fold line parts).
-- Scratch tools (session scratchpad `18654feb-…`): `harness/make_build.py` (two suites, changed lib sources rebuilt), `make_zs.py`.
-- Uncommitted user files left untouched: `AGENTS.md`, `TODO_SEAMLYLAYOUT.md` (Layout.100), `test-seamly-layout/foldline_arrowline.*`, `test-seamly-layout/layouts/*`.
+- User decisions: Option A (old and new lists filled in one size loop; SeamlyLayout keeps the old SVG until the Dead.4.4.3 compare passes). Compare switch: env `SEAMLY_HANDOFF_COMPARE_DIR=<absolute dir>` writes `<pattern>_old.svg` and `<pattern>_new.svg`. Removal filed as Task Layout.107.
+- Merge `d7526a1ee6` (commits `9b509372c6`, `b2484d7dd8`). No skip-ci token: `.pri` and `.pro` changed.
+- New: `layout_handoff/handoff_corner_cuts.h/.cpp` (`compare_corner_cuts`), `TST_HandoffCornerCuts`.
+- Changed: `mainwindowsnogui.h/.cpp` (`handoff_pieces`, `createPlacedPiece`, `generateHandoffSvgDocument`, `writeHandoffCompareFiles`; corner cuts and node counts read the new lists), `mainwindow.cpp` (clears, compare call), size briefs in `handoff_document.h`, `handoff_ids.h`.
+- Verified: `cl /Zs` of `mainwindowsnogui.cpp`, `mainwindow.cpp`, `handoff_corner_cuts.cpp`; scratch harness `TST_HandoffCornerCuts` 4 passed. Not run: MSI, Qt suites (`TST_HandoffPiece`, `TST_HandoffDocument`), GUI.
+- Next: MSI build (ask). Then user test 106.9, then the compare with the env switch (Dead.4.4.3).
+- `run-seamlyLayout` is 28 commits ahead of `origin`.
 
-### 2026-10-24 — Dead.4.1 and Dead.4.2: old Seamly2D layout, print, console export, Export Pieces, `vdxf`, `vobj` removed; merged into local `run-seamlyLayout`, not pushed
+### 2026-10-27 — `layout_handoff` release build fix, docs, Task Layout.106 filed; merged into local `run-seamlyLayout`, not pushed
 
-- Plan: Task Dead.4 in `project-docs/docs-seamlylayout/TODO_REMOVE_DEAD_LAYOUT_CODE.md` replaces `src/libs/vlayout` in five steps. Dead.4.1 and Dead.4.2 are done; their MSI + user check (`AGENT_CHECKLIST.md` §28) is open.
-- User decisions: delete the nesting engine, print tiling, layout UI, Export Pieces, File > Export As, the console export mode, `vdxf`, `vobj`. Keep Export Draft Blocks.
-- User decisions: rewrite the handoff writer as new library `src/libs/layout_handoff/` (no `v` names, new code style, every `SVG-DATA-ATTRIBUTES.md` rule incl. the open seam line). Rename and restyle `VAbstractPiece` → `AbstractPiece`, `VTextManager` → `LabelTextManager` in `vpatterndb`.
-- Removed: `--basename` export mode and its options (`-e` is `--gheight` and stays); Print/Preview/Tiled; tiled PDF; `VPoster`; New Print Layout, Layout Pages dock, Layout toolbar/toolbox, File > Export As; `LayoutSettingsDialog`, `DialogLayoutProgress`, `AbstractLayoutDialog`, `PageFormatCombobox`, `ExportProgressDialog`; layout settings; nesting engine classes; Export Pieces; `src/libs/vdxf`, `src/libs/vobj`.
-- The export dialog now serves Export Draft Blocks only: SVG, PDF, PNG, JPG, BMP, TIF, PPM.
-- Kept for later steps: `VLayoutPiece`, `VLayoutPiecePath`, `SvgGenerator`, `SvgTextItem`, `VGraphicsFillItem`, `VAbstractPiece`, `VTextManager`.
-- Verified: `cl /Zs` on every `.cpp` of seamly2d, seamlyme, the touched libs and the Qt test suites. Not run: Qt suites, MSI (ask first), GUI.
-- Next: Dead.4.3 (move and restyle `VAbstractPiece`, `VTextManager`).
-- Work done in worktree `C:\Users\susan\Projects\s2d-layout-engine` (removed after the merge).
+- Build fix (merge `22bcc09a30`): `layout_handoff.pro` sets `CONFIG -= precompile_header` (the lib has no `stable.h`) and `QT += widgets printsupport` (`vmisc/def.h` includes `QColorDialog`, `QPrinter`). Linux and macOS release builds had the same fault.
+- Verified: scratch qmake + nmake release build of `layout_handoff` alone. Not run: MSI (ask first).
+- Docs: data source, constraint and classes in `layout_handoff.pro` and the `handoff_document.h` `@details`; handoff rule bullet "The SVG comes from pattern data". Comments in `layout_handoff.pro` and `warnings.pri` rewritten.
+- Filed Task Layout.106 (`TODO_SEAMLYLAYOUT.md`, commit `c3f0be692e`): close Gap 2, so `MainWindowsNoGUI` builds pieces with `layout_handoff`, not `VLayoutPiece`. Cross-reference at `TODO_REMOVE_DEAD_LAYOUT_CODE.md` Dead.4.4.3.
+- Head commit has no skip-ci token: the push runs CI for the `.pro` fix.
+- Finding: the `-O3` block in `layout_handoff.pro` gives no effect (`default_post.prf` adds `-O2` last). `CONFIG += optimize_full` is the working form.
+- Open user decisions: (a) delete the `-O3` block, the `*_DEBUG_CXXFLAGS` lines and the Clang `-=` lines; (b) rewrite the `layout_handoff.pri:1-2` comment; (c) "writes" → "builds in memory" in the `.pro` and `HandoffDocument` briefs. (d) Layout.106.1: decided, see the entry above.
+- Peer change kept: the staged blank line in `TODO_SEAMLYLAYOUT.md` stays in the index, on top of `c3f0be692e`.
+- Merge `66ba40f4dc`: `include(../libs.pri)` moved next to the other includes in `layout_handoff.pro`. qmake Makefile identical. User comment `# include statements` not committed.
+- Merge `745556996e`: include group moved below `RCC_DIR`, so the GCC and Clang `-isystem` flags name `moc/` and `rcc/` (they named `$OUT_PWD/`). `linux-g++` spec Makefile checked; MSVC Makefile identical. Other libs already set `MOC_DIR` first.
+- Merge `974ef5fe20`: `#include <QShowEvent>` in 8 seamly2d dialogs. Fixes the MSI build C2027 in `calculator_dialog.cpp`, `dialognewpattern.cpp`, `dialogpreferences.cpp`. `cl /Zs` check passed. No skip-ci token: the push still needs CI for the `.pro` fix.
+- `run-seamlyLayout` is 24 commits ahead of `origin`.
+- Next: MSI build (ask).
 
 Older entries: `project-docs/SESSION_HANDOVER_ARCHIVE.md`. Do not Read it at session start.
 

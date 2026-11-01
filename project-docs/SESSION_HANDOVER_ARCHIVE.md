@@ -2,6 +2,84 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-10-26 — `develop` merge (7 upstream commits) committed as `ddf3e6256f`; not built, not pushed
+
+- Sue asked to commit before the MSI build. `run-seamlyLayout` is 9 commits ahead of `origin`.
+- Pattern schema: kept ours. Upstream `v0.7.6.xsd` is a copy of v0.7.5 (version bump for true dart lines); our v0.7.6 is a superset; v0.7.7 stays current.
+- `SEAMLY_DATA_DIR` kept and adapted: common ini, app ini (`MigrateSeamlySettingsLocation`), data root and logs go under the directory; installer record skipped. `getDefaultDataRoot()` replaces upstream `defaultDataPath()`.
+- `automationDataDirectory` test now expects `settings/Seamly/...` paths. SeamlyMe logs also go to `<dir>/logs/seamlyme` (ours log; upstream SeamlyMe did not); test checks it.
+- Qt 6.11.3 (user decision): `QT_VERSION`, CMake and build-script minimums, docs bumped in the merge. Historical lines stay 6.11.1.
+- Qt 6.11.3 kit installed. `qt_notices.txt` regenerated and in the merge commit.
+- `c27faa9d29`: `Cargo.lock` synced with `lopdf = "0.45"` (dependabot #31 left it at 0.42.0); `rust_crate_notices.txt` regenerated; fingerprint matches. `cargo check --workspace --all-targets` passes.
+- `ci.yml`: Python 3.14 pin and `setup-python: 'false'` from upstream; no forced x64 Python (our arm64 job runs on a native runner); MSVC setup after the Qt install.
+- `.github/README-AUTOMATION.md`: example uses `--test` (no console export), settings paths fixed.
+- Verified: `cl /Zs` on changed `.cpp`. Not run: Qt suites, `cargo test`, MSI (ask first).
+- Next: MSI build (ask). Then Sue pushes (no skip-ci token: `ci.yml` changed) and runs `gh workflow run ci.yml --ref run-seamlyLayout`.
+
+### 2026-10-25 — DXF units and McNeel AAMA items approved, not started
+
+- Next session: implement Task Layout.103 (DXF units), then Layout.104 (DXF-AAMA piece text), then Layout.100 (remove DXF-ASTM R12). Full specs and decisions are in `TODO_SEAMLYLAYOUT.md`.
+- Layout.103: pattern unit decides the units. mm → `METRIC`, sizes unchanged; cm → `METRIC`, sizes ×10; inch → `ENGLISH`, sizes unchanged, every length in inches with 4 decimals. Needs new handoff attribute `data-units` (Seamly2D `SvgGenerator`), so it touches Seamly2D C++ and the contract.
+- Layout.104: `Annotation:` from `data-annotation`; block name `<piece name>_<size>`; `Creation Time:` `HH:MM:SS`. DXF-AAMA only.
+- Layout.100: keep the AC1009 writer, which DXF-AAMA (R11) uses.
+- Layout.102 (CLO3D layers) and Layout.101 (`SEAMLY_DATA_DIR`) are filed, not approved for work.
+- Committed today: `seamlylayout_DXF_AAMA.md` "McNeel guide" (piece text and layers 0–19 compared with the output).
+- Open question for the user: untracked `project-docs/docs-seamlylayout/AAMA-INTEROP.md` copies the upstream PR text about the old `vdxf` output; rewrite or leave.
+- Work method: peer sessions share the main tree. Use a worktree from `run-seamlyLayout`, merge with `merge-tree` + `commit-tree` + `update-ref`, then sync the main tree paths and tell the peers.
+- Uncommitted user files left untouched: `AGENTS.md`, `AAMA-INTEROP.md`, `test-seamly-layout/foldline_arrowline.*`, `test-seamly-layout/layouts/*`. `TODO_SEAMLYLAYOUT.md` Layout.100 is now committed (user asked for the task).
+
+### 2026-10-25 — Dead.4.3: `AbstractPiece`, `SeamAllowancePoint`, `LabelTextManager` in `vpatterndb`; merged into local `run-seamlyLayout`, not pushed
+
+- Moved from vlayout and renamed: `VAbstractPiece` → `AbstractPiece` (+ `AbstractPieceData.h`), `VSAPoint` → `SeamAllowancePoint` (own header), `VTextManager` → `LabelTextManager`. vpatterndb includes no vlayout header now.
+- User decisions: keep the method names; rename `VSAPoint`; one exit point per function; no namespace.
+- Restyle: briefs, snake_case, one exit; `LabelTextManager::min_font_size` replaces `MIN_FONT_SIZE` (`MAX_FONT_SIZE` was unused, gone); `TextLine` members `text`, `font_size_increment`, `bold`, `italic`, `alignment`.
+- Build files: vpatterndb `QT += xml`; vlayout links before vpatterndb in 4 `.pro` files. Translation context `VAbstractPieceData` → `AbstractPieceData` in the `.ts` files.
+- Tests: `TST_AbstractPiece` (new `SeamAllowancePointWidths`), `TST_LabelTextManager`.
+- Verified: `cl /Zs` on every changed `.cpp` and their includers. Scratch harness (session scratchpad `223c6375-…/harness`): `TST_AbstractPiece` 58 passed, `TST_LabelTextManager` 7 passed; old/new differential, 30 000 random paths and 200 000 random corners, label fits: no output difference. Not run: Qt suites, MSI (ask first), Linux link (CI), GUI.
+- User check: `AGENT_CHECKLIST.md` §30.
+- Next: Dead.4.4 (`layout_handoff`).
+- Work done in worktree `C:\Users\susan\Projects\s2d-abstract-piece` (removed after the merge).
+
+### 2026-10-25 — DXF-AAMA piece text review (upstream PR 1783); merged into local `run-seamlyLayout`, not pushed
+
+- Upstream PR 1783 (open) makes the `vdxf` AAMA piece text independent of the label. SeamlyLayout DXF-AAMA already did this; no exporter code change.
+- User decisions: AAMA `Quantity:` stays `R,L` (not a total); `Size:` stays in pattern units (not cm); `Units:METRIC` stays.
+- New test `aama_piece_text_comes_from_piece_data_not_label` (`writer_astm_test.rs`): handoff SVG to DXF-AAMA, label hidden and label contradicting the piece data.
+- Docs: `seamlylayout_DXF_AAMA.md` Decisions; `SVG-DATA-ATTRIBUTES.md` `data-size` row; CLAUDE.md merge rules for PR 1783 under "Retired code"; new Task Layout.101 (`SEAMLY_DATA_DIR` in SeamlyLayout).
+- Verified: `cargo test --workspace` 622 passed. Not run: ctest, Qt suites, MSI (Rust test and docs only).
+- Open question for the user: untracked `project-docs/docs-seamlylayout/AAMA-INTEROP.md` copies the PR text, which describes the old `vdxf` output.
+- Work done in worktree `C:\Users\susan\Projects\s2d-aama-piece-text` (removed after the merge).
+- Uncommitted user files left untouched: `AGENTS.md`, `TODO_SEAMLYLAYOUT.md` (Layout.100), `AAMA-INTEROP.md`, `test-seamly-layout/foldline_arrowline.*`, `test-seamly-layout/layouts/*`.
+
+### 2026-10-25 — Seamly2D.71 fold line arrow line, label and extended fold line; merged into local `run-seamlyLayout`, not pushed
+
+- Piece Properties Apply/OK rotates the main path to end with the fold line (`VPiece::endPathAtFoldLine`). The 0.7.7 conversion does the same for older files (`endMainPathAtFoldLineV0_7_7`); no schema change.
+- New `pattern_piece::FoldLineGraphic` (`src/libs/vpatterndb/FoldLineGraphic.{h,cpp}`): arrow line 50% of the fold line, 10% bends at each end, heads touch the fold line; "Foldline" label between the lines. Piece mode draws both (`PatternPieceTool::refreshFoldLine`).
+- Extended fold line: `VPiece::foldLineOnCutLine`, drawn and sent while the cut line shows.
+- Handoff: `fold_line` group = fold line path, then `fold_line_arrow` and `fold_line_label` groups. `SvgGenerator` renders tagged child items as nested tagged groups.
+- SeamlyLayout: `svg_dom::fold_line_d`; Nested sizes with a fold line stack on its start (`center_piece_sets`, `annotation_alignment`); a piece-set sharing one fold line goes on the left edge; `piece_divider` splits the fold path only; DXF layer 8/15, HPGL, text modes.
+- Decisions to confirm: ids `fold_line_arrow_<name>`, `fold_line_label_<name>` (scheme), not `<name>_foldline`; conversion in 0.7.7, not 0.7.8; Nested piece-sets now go on the left edge.
+- Changed expectation: jacket2 import warning is now "Back: piece label past the cut line in sizes 220" (`AGENT_CHECKLIST.md` §26 updated).
+- Risk: a custom seam allowance that starts at the fold line end node wraps after the rotation and is dropped.
+- Code style: new code follows `README-CODE-STYLES.md` and the `AGENTS.md` note (snake_case, `Type*`, one exit, briefs, namespace, GPL link).
+- Verified: scratch harness `TST_VPiece` 128, `TST_SvgComponentTags` 49 passed; `cargo test --workspace` 621 passed; `cl /Zs` clean. Not run: Qt suites (next MSI, ask first), ctest (no QML or C++ frontend change), GUI.
+- User check: `AGENT_CHECKLIST.md` §29; §21 Nested step changed.
+- Port note added to Dead.4.4 (`layout_handoff` must write the nested fold line parts).
+- Scratch tools (session scratchpad `18654feb-…`): `harness/make_build.py` (two suites, changed lib sources rebuilt), `make_zs.py`.
+- Uncommitted user files left untouched: `AGENTS.md`, `TODO_SEAMLYLAYOUT.md` (Layout.100), `test-seamly-layout/foldline_arrowline.*`, `test-seamly-layout/layouts/*`.
+
+### 2026-10-24 — Dead.4.1 and Dead.4.2: old Seamly2D layout, print, console export, Export Pieces, `vdxf`, `vobj` removed; merged into local `run-seamlyLayout`, not pushed
+
+- Plan: Task Dead.4 in `project-docs/docs-seamlylayout/TODO_REMOVE_DEAD_LAYOUT_CODE.md` replaces `src/libs/vlayout` in five steps. Dead.4.1 and Dead.4.2 are done; their MSI + user check (`AGENT_CHECKLIST.md` §28) is open.
+- User decisions: delete the nesting engine, print tiling, layout UI, Export Pieces, File > Export As, the console export mode, `vdxf`, `vobj`. Keep Export Draft Blocks.
+- User decisions: rewrite the handoff writer as new library `src/libs/layout_handoff/` (no `v` names, new code style, every `SVG-DATA-ATTRIBUTES.md` rule incl. the open seam line). Rename and restyle `VAbstractPiece` → `AbstractPiece`, `VTextManager` → `LabelTextManager` in `vpatterndb`.
+- Removed: `--basename` export mode and its options (`-e` is `--gheight` and stays); Print/Preview/Tiled; tiled PDF; `VPoster`; New Print Layout, Layout Pages dock, Layout toolbar/toolbox, File > Export As; `LayoutSettingsDialog`, `DialogLayoutProgress`, `AbstractLayoutDialog`, `PageFormatCombobox`, `ExportProgressDialog`; layout settings; nesting engine classes; Export Pieces; `src/libs/vdxf`, `src/libs/vobj`.
+- The export dialog now serves Export Draft Blocks only: SVG, PDF, PNG, JPG, BMP, TIF, PPM.
+- Kept for later steps: `VLayoutPiece`, `VLayoutPiecePath`, `SvgGenerator`, `SvgTextItem`, `VGraphicsFillItem`, `VAbstractPiece`, `VTextManager`.
+- Verified: `cl /Zs` on every `.cpp` of seamly2d, seamlyme, the touched libs and the Qt test suites. Not run: Qt suites, MSI (ask first), GUI.
+- Next: Dead.4.3 (move and restyle `VAbstractPiece`, `VTextManager`).
+- Work done in worktree `C:\Users\susan\Projects\s2d-layout-engine` (removed after the merge).
+
 ### 2026-10-24 — Seamly2D.11 built-in seam allowance; merged into local `run-seamlyLayout` (c18f080c0e), not pushed
 
 - Piece mode draws the built-in seam line (seam line style) inside the main path (cut line style); hatch between; Hide Seam Line hides it. Dialog preview draws it too.
