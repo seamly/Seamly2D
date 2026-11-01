@@ -2331,8 +2331,8 @@ mod tests {
         assert!(xs.iter().all(|x| (x - 48.0).abs() < 1.0), "paper: fold line at x {xs:?}");
 
         let off = process_fold_pieces("fabric", "alongGrainline", 0.0, false);
-        assert_eq!(off.output_doc.get_attr_by_id("contentRect", "x"), Some("48"), "the left margin stays");
-        assert!(fold_line_xs(&off.output_doc).iter().all(|x| (x - 48.0).abs() > 1.0), "fold line off the edge");
+        assert_eq!(off.output_doc.get_attr_by_id("contentRect", "x"), Some("0"), "folded fabric has no left margin");
+        assert!(fold_line_xs(&off.output_doc).iter().all(|x| x.abs() > 1.0), "fold line off the edge");
     } // fold_line_lies_on_the_left_edge
 
     // @brief The paper-sheet PDF input pins the fold line pieces as the layout does.

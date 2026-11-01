@@ -208,7 +208,7 @@ impl LayoutSettings {
     // Used by `create_initial_layout_dom` to position the content rectangle
     // and size the full canvas, and by `process_layout` for roll-trim math.
     //
-    // The left margin is 0 when the fold lines go on the left edge.
+    // The left margin is 0 for fabric that is folded or has fold lines on the left edge.
     //
     // @return `(margin_left_px, margin_right_px, margin_top_px, margin_bottom_px)`
     pub fn margin_px(&self) -> (u32, u32, u32, u32) {
@@ -379,9 +379,9 @@ impl LayoutSettings {
         } // match layout_mode
     } // fn rotation_trial_set_deg
 
-    // @brief Left margin in the active unit: 0 on the fold edge of fabric, else `margin_left`.
+    // @brief Left margin in the active unit: 0 on the fold edge of fabric (folded, or fold lines on the left edge), else `margin_left`.
     fn margin_left_value(&self) -> f64 {
-        if self.fold_lines_on_left_edge && self.media_type == "fabric" { 0.0 } else { self.margin_left }
+        if (self.fold_lines_on_left_edge || self.fabric_folded) && self.media_type == "fabric" { 0.0 } else { self.margin_left }
     } // fn margin_left_value
 
     // @brief True when pieces without a grain direction may be quarter-turned.
@@ -649,7 +649,7 @@ mod tests {
     } // media_reads_only_its_own_size_fields
 
     // @brief Fold lines on the left edge of fabric, folded or not: no left margin.
-    // Paper keeps its left margin; so does fabric with the option off.
+    // Folded fabric also has no left margin. Paper, and open fabric with the option off, keep it.
     #[test]
     fn fold_lines_on_left_edge_drop_the_left_margin_of_fabric_only() {
         let json = |media: &str, folded: bool, on_edge: bool| format!(
@@ -663,8 +663,10 @@ mod tests {
         assert_eq!(fold.effective_bin_px().0, 1872);
         let open = LayoutSettings::from_json(&json("fabric", false, true)).expect("parse ok");
         assert_eq!(open.margin_px().0, 0, "unfolded fabric");
+        let folded_off = LayoutSettings::from_json(&json("fabric", true, false)).expect("parse ok");
+        assert_eq!(folded_off.margin_px().0, 0, "folded fabric, option off");
 
-        for (media, folded, on_edge) in [("paper", false, true), ("paper", true, true), ("fabric", true, false)] {
+        for (media, folded, on_edge) in [("paper", false, true), ("paper", true, true), ("fabric", false, false)] {
             let s = LayoutSettings::from_json(&json(media, folded, on_edge)).expect("parse ok");
             assert_eq!(s.margin_px().0, 48, "{media} folded={folded} on_edge={on_edge}");
         } // for each case that keeps the margin
