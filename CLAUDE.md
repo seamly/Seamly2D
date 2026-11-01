@@ -68,7 +68,7 @@ All apps use Qt 6.11.3.
 - Do not run `cl.exe` directly. Run it inside `cmd.exe` after `vcvars64.bat`:
 
 ```powershell
-cmd.exe /c "`"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat`" && cl /EHsc main.cpp"
+cmd.exe /c "`"C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvars64.bat`" && cl /EHsc main.cpp"
 ```
 
 ### Local Windows Build
