@@ -79,6 +79,7 @@ Layout.106 added the switch for the Dead.4.4.3 compare. Remove it when that comp
 
 - trousers.sm2d with fabric, folded, displayed message "Some pieces could not be placed". Message suggested "Try a larger sheet size". Remember that fabric layouts should initially be created at 500" long (similar to paper roll) then trimmed to fit the pieces; remember to set the left margin to 0 when folded is true.
 
+- [x] Decision: fabric starts 500 in long, as a paper roll does. Both use `ROLL_DEFAULT_LENGTH_IN`; neither is a setting.
 - [x] Fix the initial layout size for media=fabric. Fabric starts 500 in long (01562ef927) and trims after packing. Folded fabric has left margin 0. The fabric warning no longer advises a larger sheet size.
 - [ ] Verify that initial fabric layout is long, similar to paper roll. (MSI, AGENT_CHECKLIST.md section 33)
 - [ ] Verify that all pieces are placed on the fabric layout and that piece foldlines are placed along fold if folded=true.
