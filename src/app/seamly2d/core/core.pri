@@ -22,3 +22,9 @@ win32 {
     # Qt 6 does not link user32 for the app; the Win32 window calls need it.
     LIBS += -luser32
 }
+
+macx{
+    HEADERS += $$PWD/macos_dock.h
+    OBJECTIVE_SOURCES += $$PWD/macos_dock.mm
+    LIBS += -framework AppKit
+}
