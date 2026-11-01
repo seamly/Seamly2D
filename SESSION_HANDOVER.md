@@ -2,15 +2,17 @@
 
 ## Current status
 
-### 2026-11-01 — `develop` merge (14 upstream commits) on `task-merge-develop`; not built, not merged
+### 2026-11-01 — `develop` merge (14 upstream commits); merged into local `run-seamlyLayout`, not built, not pushed
 
 - Added remote `upstream` (fetch only, push URL `DISABLED`). Local `develop` already equals `upstream/develop` and `origin/develop`.
-- Merge commit `06287a0dc7` on `task-merge-develop`. `run-seamlyLayout` unchanged.
+- Merge commit `06287a0dc7` on `task-merge-develop`, then `--no-ff` into `run-seamlyLayout`; task branch deleted.
 - Conflicts: `core.pri` both blocks; `pattern_piece_tool.cpp` ours plus `adaptColor`; `vtextmanager.cpp` stays deleted.
 - Upstream #1793 (untranslated combo values): orientation only. New `VPieceLabelData::orientationDisplayName`.
 - "console mode (export / test)" comments → "(test)" in 6 files.
-- Finding: upstream `85c36c0bcc` `fixGroupsOrder` adds `<images>` to pre-0.7.1 files. lxml: `jacket1_52-176.sm2d` (v0.6.8) then fails `v0.6.8.xsd`. Not changed.
-- Next: Sue decides the converter fix; MSI build (ask); then `--no-ff` merge without skip-ci (`.pri`, `packaging/`, `Q_OS_MAC`).
+- Finding: upstream `85c36c0bcc` `fixGroupsOrder` adds `<images>` to pre-0.7.1 files. lxml: `jacket1_52-176.sm2d` (v0.6.8) then fails `v0.6.8.xsd`. Not changed in the merge.
+- User decision: `<images>` in every draft block comes with a new schema version and converter. Filed Task Seamly2D.72 (`TODO_SEAMLY2D.md`, Required for SeamlyLayout release).
+- User decision: merge without the MSI build. Merge subject has no skip-ci token (`.pri`, `packaging/`, `Q_OS_MAC`).
+- Next: MSI build (ask); Task Seamly2D.72; after the push, `gh workflow run ci.yml --ref run-seamlyLayout`.
 
 ### 2026-10-28 — Fabric media size fix; merged into local `run-seamlyLayout`, not pushed
 
