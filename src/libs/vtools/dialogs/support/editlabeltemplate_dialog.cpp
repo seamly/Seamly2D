@@ -637,7 +637,7 @@ void EditLabelTemplateDialog::SetPiece(const VPiece &piece)
     const VPieceLabelData& pieceData = piece.GetPatternPieceData();
     m_placeholders[pl_pLetter].second = pieceData.GetLetter();
     m_placeholders[pl_pAnnotation].second = pieceData.GetAnnotation();
-    m_placeholders[pl_pOrientation].second = pieceData.GetOrientation();
+    m_placeholders[pl_pOrientation].second = VPieceLabelData::orientationDisplayName(pieceData.GetOrientation());
     m_placeholders[pl_pRotation].second = VPieceLabelData::rotationDisplayName(pieceData.getRotationWay());
     m_placeholders[pl_pTilt].second = VPieceLabelData::tiltDisplayText(pieceData.GetTilt(),
                                                                        pieceData.getTiltDegrees());

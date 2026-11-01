@@ -2,6 +2,18 @@
 
 ## Current status
 
+### 2026-11-01 — `develop` merge (14 upstream commits); merged into local `run-seamlyLayout`, not built, not pushed
+
+- Added remote `upstream` (fetch only, push URL `DISABLED`). Local `develop` already equals `upstream/develop` and `origin/develop`.
+- Merge commit `06287a0dc7` on `task-merge-develop`, then `--no-ff` into `run-seamlyLayout`; task branch deleted.
+- Conflicts: `core.pri` both blocks; `pattern_piece_tool.cpp` ours plus `adaptColor`; `vtextmanager.cpp` stays deleted.
+- Upstream #1793 (untranslated combo values): orientation only. New `VPieceLabelData::orientationDisplayName`.
+- "console mode (export / test)" comments → "(test)" in 6 files.
+- Finding: upstream `85c36c0bcc` `fixGroupsOrder` adds `<images>` to pre-0.7.1 files. lxml: `jacket1_52-176.sm2d` (v0.6.8) then fails `v0.6.8.xsd`. Not changed in the merge.
+- User decision: `<images>` in every draft block comes with a new schema version and converter. Filed Task Seamly2D.72 (`TODO_SEAMLY2D.md`, Required for SeamlyLayout release).
+- User decision: merge without the MSI build. Merge subject has no skip-ci token (`.pri`, `packaging/`, `Q_OS_MAC`).
+- Next: MSI build (ask); Task Seamly2D.72; after the push, `gh workflow run ci.yml --ref run-seamlyLayout`.
+
 ### 2026-10-28 — Fabric media size fix; merged into local `run-seamlyLayout`, not pushed
 
 - Cause: Sue's trousers on fabric (folded, 36 in, selvedge 0.5 in) left 4 pieces out. The fabric canvas used the B0 paper sheet size that the settings keep from paper media; fabric width, fold and open length were ignored.
@@ -43,22 +55,6 @@
 - Verified: `cl /Zs` of `mainwindowsnogui.cpp`, `mainwindow.cpp`, `handoff_corner_cuts.cpp`; scratch harness `TST_HandoffCornerCuts` 4 passed. Not run: MSI, Qt suites (`TST_HandoffPiece`, `TST_HandoffDocument`), GUI.
 - Next: MSI build (ask). Then user test 106.9, then the compare with the env switch (Dead.4.4.3).
 - `run-seamlyLayout` is 28 commits ahead of `origin`.
-
-### 2026-10-27 — `layout_handoff` release build fix, docs, Task Layout.106 filed; merged into local `run-seamlyLayout`, not pushed
-
-- Build fix (merge `22bcc09a30`): `layout_handoff.pro` sets `CONFIG -= precompile_header` (the lib has no `stable.h`) and `QT += widgets printsupport` (`vmisc/def.h` includes `QColorDialog`, `QPrinter`). Linux and macOS release builds had the same fault.
-- Verified: scratch qmake + nmake release build of `layout_handoff` alone. Not run: MSI (ask first).
-- Docs: data source, constraint and classes in `layout_handoff.pro` and the `handoff_document.h` `@details`; handoff rule bullet "The SVG comes from pattern data". Comments in `layout_handoff.pro` and `warnings.pri` rewritten.
-- Filed Task Layout.106 (`TODO_SEAMLYLAYOUT.md`, commit `c3f0be692e`): close Gap 2, so `MainWindowsNoGUI` builds pieces with `layout_handoff`, not `VLayoutPiece`. Cross-reference at `TODO_REMOVE_DEAD_LAYOUT_CODE.md` Dead.4.4.3.
-- Head commit has no skip-ci token: the push runs CI for the `.pro` fix.
-- Finding: the `-O3` block in `layout_handoff.pro` gives no effect (`default_post.prf` adds `-O2` last). `CONFIG += optimize_full` is the working form.
-- Open user decisions: (a) delete the `-O3` block, the `*_DEBUG_CXXFLAGS` lines and the Clang `-=` lines; (b) rewrite the `layout_handoff.pri:1-2` comment; (c) "writes" → "builds in memory" in the `.pro` and `HandoffDocument` briefs. (d) Layout.106.1: decided, see the entry above.
-- Peer change kept: the staged blank line in `TODO_SEAMLYLAYOUT.md` stays in the index, on top of `c3f0be692e`.
-- Merge `66ba40f4dc`: `include(../libs.pri)` moved next to the other includes in `layout_handoff.pro`. qmake Makefile identical. User comment `# include statements` not committed.
-- Merge `745556996e`: include group moved below `RCC_DIR`, so the GCC and Clang `-isystem` flags name `moc/` and `rcc/` (they named `$OUT_PWD/`). `linux-g++` spec Makefile checked; MSVC Makefile identical. Other libs already set `MOC_DIR` first.
-- Merge `974ef5fe20`: `#include <QShowEvent>` in 8 seamly2d dialogs. Fixes the MSI build C2027 in `calculator_dialog.cpp`, `dialognewpattern.cpp`, `dialogpreferences.cpp`. `cl /Zs` check passed. No skip-ci token: the push still needs CI for the `.pro` fix.
-- `run-seamlyLayout` is 24 commits ahead of `origin`.
-- Next: MSI build (ask).
 
 Older entries: `project-docs/SESSION_HANDOVER_ARCHIVE.md`. Do not Read it at session start.
 

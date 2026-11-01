@@ -6,6 +6,21 @@ Tasks in this file begin with `Seamly2D.`
 
 ## Required for SeamlyLayout release
 
+### [ ] Task Seamly2D.72 — Implement - Pattern schema: every draft block has `<images>`
+
+Upstream `85c36c0bcc` changed `VPatternConverter::fixGroupsOrder()`. It adds missing `<groups>` and `<images>` tags before validation. Schemas before v0.7.1 have no `<images>`. A pattern before v0.7.1 that has `<groups>` then fails validation and does not open. Example: `src/app/share/samples/patterns/jacket1_52-176.sm2d` (v0.6.8).
+
+User decision: every draft block gets `<images>` in a new schema version. Seamly2D opens a pattern in its own schema version, then saves it in the new version.
+
+- [ ] Seamly2D.72.1 Find the newest upstream pattern schema. Use the next free version number (v0.7.8 if free). Our v0.7.6 and v0.7.7 differ from upstream.
+- [ ] Seamly2D.72.2 Add `src/libs/ifc/schema/pattern/v0.7.8.xsd`: a copy of v0.7.7, with `images` required in `draftBlock` (`minOccurs="1"`), after `groups`. Add it to `src/libs/ifc/schema.qrc`.
+- [ ] Seamly2D.72.3 `VPatternConverter`: update `PatternMaxVerStr`, `CurrentSchema`, `PatternMaxVer`, `getSchema()`, `ApplyPatches()`. Add `toVersion0_7_8()`: it adds the missing `<groups>` and `<images>` in each draft block, in schema order.
+- [ ] Seamly2D.72.4 `fixGroupsOrder()`: only move `<groups>` in front of `<images>`. It must not add tags before validation.
+- [ ] Seamly2D.72.5 Writer: each new draft block gets `<images>` (`VAbstractPattern::appendDraftBlock()`, `createDraftImages()`, `createGroups()`).
+- [ ] Seamly2D.72.6 Unit tests: each pattern in `src/app/share/samples/patterns/` opens in its own schema version and converts to the new version. Cases: v0.6.8 with `<groups>` (`jacket1_52-176.sm2d`); `<groups>` after `<images>`; no `<groups>` and no `<images>`.
+- [ ] Seamly2D.72.7 Next MSI: Qt suites (`nmake check` in `local_build_msi.ps1`).
+- [ ] Seamly2D.72.8 Verify (User): open `jacket1_52-176.sm2d`, save, reopen. The file has the new version, and each draft block has `<images>`.
+
 ### [ ] Task Seamly2D.11 — Implement - Piece mode: Fix Built-in seam allowance calculation, display, and export of built-in seam allowance
 
 A piece with a built-in seam allowance erroneously:

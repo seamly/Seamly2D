@@ -641,21 +641,6 @@ QListWidget::item:selected {
                   <bold>false</bold>
                  </font>
                 </property>
-                <item>
-                 <property name="text">
-                  <string>Undefined</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Left</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Right</string>
-                 </property>
-                </item>
                </widget>
               </item>
               <item row="6" column="0">

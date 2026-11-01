@@ -101,6 +101,7 @@
 #include "../vtools/undocommands/rename_draftblock.h"
 #include "../vtools/undocommands/delete_draftblock.h"
 #include "../vtools/undocommands/label/showpointname.h"
+#include "../vwidgets/global.h"
 #include "../vwidgets/mouse_coordinates.h"
 #include "../vwidgets/vmaingraphicsscene.h"
 #include "../vwidgets/vwidgetpopup.h"
@@ -287,8 +288,12 @@ MainWindow::MainWindow(QWidget *parent)
         initializeModesToolBar();
 
         // Initialize tool buttons and show the main window maximized.
+        // Keep the window hidden in console mode (test).
         initializeToolButtons();
-        showMaximized();
+        if (Application2D::isGUIMode())
+        {
+            showMaximized();
+        }
 
         initPenToolBar();
 
@@ -4096,6 +4101,8 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 void MainWindow::setSceneBackgroundColor()
 {
     QColor color = QColor(qApp->Seamly2DSettings()->getBackgroundColor());
+    // Lines, points and labels flip their lightness to stay visible on a dark background
+    setDarkBackground(qApp->Settings()->getAdaptColors() && color.lightnessF() < 0.5);
     draftScene->setBackgroundBrush(color);
     pieceScene->setBackgroundBrush(color);
     layout_scene->setBackgroundBrush(color);
@@ -7458,9 +7465,17 @@ void MainWindow::updatePreferences()
     initToolBarStyles();
     updateToolBarVisibility();
     refreshLabels();
-    resetOrigins();
     upDateScenes();
+    const bool was_dark_background = isDarkBackground();
     setSceneBackgroundColor();
+    // After setSceneBackgroundColor, which is what decides whether colors adapt. The origins take their color
+    // when they are created, so rebuilding them earlier would use the previous background
+    resetOrigins();
+    if (was_dark_background != isDarkBackground() && !doc->getActiveDraftBlockName().isEmpty())
+    {
+        // Some items take their color when they are created, rebuild them with the adapted or real colors
+        doc->changeActiveDraftBlock(doc->getActiveDraftBlockName(), Document::FullParse);
+    }
     updateViewToolbar();
     resetPanShortcuts();
     initPropertyEditor();
@@ -7502,6 +7517,15 @@ void MainWindow::exportDraftBlocksAs()
     int vScrollBar = ui->view->verticalScrollBar()->value();
     int hScrollBar = ui->view->horizontalScrollBar()->value();
     QTransform viewTransform = ui->view->transform();
+
+    // Export the real colors on white, not the adapted dark workspace view. Some items take their color when they
+    // are created, so rebuild them. The scene is rebuilt with the workspace colors again at the end.
+    if (isDarkBackground())
+    {
+        setDarkBackground(false);
+        draftScene->setBackgroundBrush(QColor(Qt::white));
+        doc->changeActiveDraftBlock(doc->getActiveDraftBlockName(), Document::FullParse);
+    }
 
     //Include all items in draft scene
     ui->view->zoomToFit();
@@ -7576,6 +7600,8 @@ void MainWindow::exportDraftBlocksAs()
                 break;
         }
     }
+
+    setSceneBackgroundColor();
 
     // Disable draft blocks in the scenee except current block
     doc->changeActiveDraftBlock(doc->getActiveDraftBlockName(), Document::FullParse);

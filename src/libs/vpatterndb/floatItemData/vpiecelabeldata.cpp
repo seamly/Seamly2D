@@ -132,6 +132,13 @@ void VPieceLabelData::SetOrientation(const QString &val)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/// @brief Translated orientation for display. The pattern file stores the untranslated text of the piece dialog item.
+QString VPieceLabelData::orientationDisplayName(const QString &orientation)
+{
+    return QCoreApplication::translate("PatternPieceDialog", orientation.toUtf8().constData());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 PieceRotation VPieceLabelData::getRotationWay() const
 {
     return d->m_rotation;

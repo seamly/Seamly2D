@@ -86,6 +86,8 @@ public:
     QVector<VLabelTemplateLine> GetLabelTemplate() const;
     void                        SetLabelTemplate(const QVector<VLabelTemplateLine> &lines);
 
+    static QString orientationDisplayName(const QString &orientation);
+
     static QString       rotationToString(PieceRotation rotation);
     static PieceRotation stringToRotation(const QString &value);
     static QString       rotationDisplayName(PieceRotation rotation);

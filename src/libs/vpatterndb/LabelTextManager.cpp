@@ -163,7 +163,7 @@ void initPiecePlaceholders(QMap<QString, QString>& placeholders, const QString& 
 {
     placeholders[pl_pLetter] = data.GetLetter();
     placeholders[pl_pAnnotation] = data.GetAnnotation();
-    placeholders[pl_pOrientation] = data.GetOrientation();
+    placeholders[pl_pOrientation] = VPieceLabelData::orientationDisplayName(data.GetOrientation());
     placeholders[pl_pRotation] = VPieceLabelData::rotationDisplayName(data.getRotationWay());
     placeholders[pl_pTilt] = VPieceLabelData::tiltDisplayText(data.GetTilt(), data.getTiltDegrees());
     placeholders[pl_pName] = name;
