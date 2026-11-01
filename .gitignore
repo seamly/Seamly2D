@@ -30,10 +30,10 @@ CLAUDE.md
 # text files
 *.txt
 
-# track Third-party license notices - shipped in every installer
+# include track Third-party license notices - shipped in every installer
 !packaging/licenses/*.txt
 
-# track project docs
+# include track project docs
 !project-docs/
 
 # other docs
@@ -55,6 +55,8 @@ CLAUDE.md
 # test layouts
 test-seamly-layout
 test-seamly-layout/
+test-seamly-layout/layouts/
+test-seamly-layout/layouts/*
 
 # packaging files
 Info.plist
