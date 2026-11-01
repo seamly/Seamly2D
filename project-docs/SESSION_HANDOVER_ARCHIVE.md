@@ -2,6 +2,22 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-10-27 — `layout_handoff` release build fix, docs, Task Layout.106 filed; merged into local `run-seamlyLayout`, not pushed
+
+- Build fix (merge `22bcc09a30`): `layout_handoff.pro` sets `CONFIG -= precompile_header` (the lib has no `stable.h`) and `QT += widgets printsupport` (`vmisc/def.h` includes `QColorDialog`, `QPrinter`). Linux and macOS release builds had the same fault.
+- Verified: scratch qmake + nmake release build of `layout_handoff` alone. Not run: MSI (ask first).
+- Docs: data source, constraint and classes in `layout_handoff.pro` and the `handoff_document.h` `@details`; handoff rule bullet "The SVG comes from pattern data". Comments in `layout_handoff.pro` and `warnings.pri` rewritten.
+- Filed Task Layout.106 (`TODO_SEAMLYLAYOUT.md`, commit `c3f0be692e`): close Gap 2, so `MainWindowsNoGUI` builds pieces with `layout_handoff`, not `VLayoutPiece`. Cross-reference at `TODO_REMOVE_DEAD_LAYOUT_CODE.md` Dead.4.4.3.
+- Head commit has no skip-ci token: the push runs CI for the `.pro` fix.
+- Finding: the `-O3` block in `layout_handoff.pro` gives no effect (`default_post.prf` adds `-O2` last). `CONFIG += optimize_full` is the working form.
+- Open user decisions: (a) delete the `-O3` block, the `*_DEBUG_CXXFLAGS` lines and the Clang `-=` lines; (b) rewrite the `layout_handoff.pri:1-2` comment; (c) "writes" → "builds in memory" in the `.pro` and `HandoffDocument` briefs. (d) Layout.106.1: decided, see the entry above.
+- Peer change kept: the staged blank line in `TODO_SEAMLYLAYOUT.md` stays in the index, on top of `c3f0be692e`.
+- Merge `66ba40f4dc`: `include(../libs.pri)` moved next to the other includes in `layout_handoff.pro`. qmake Makefile identical. User comment `# include statements` not committed.
+- Merge `745556996e`: include group moved below `RCC_DIR`, so the GCC and Clang `-isystem` flags name `moc/` and `rcc/` (they named `$OUT_PWD/`). `linux-g++` spec Makefile checked; MSVC Makefile identical. Other libs already set `MOC_DIR` first.
+- Merge `974ef5fe20`: `#include <QShowEvent>` in 8 seamly2d dialogs. Fixes the MSI build C2027 in `calculator_dialog.cpp`, `dialognewpattern.cpp`, `dialogpreferences.cpp`. `cl /Zs` check passed. No skip-ci token: the push still needs CI for the `.pro` fix.
+- `run-seamlyLayout` is 24 commits ahead of `origin`.
+- Next: MSI build (ask).
+
 ### 2026-10-26 — `develop` merge (7 upstream commits) committed as `ddf3e6256f`; not built, not pushed
 
 - Sue asked to commit before the MSI build. `run-seamlyLayout` is 9 commits ahead of `origin`.
