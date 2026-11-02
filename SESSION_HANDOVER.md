@@ -13,7 +13,7 @@
 - Merge subject has the skip-ci token (`.cpp`, `.h`, `.rs`, `.md` only). Task branch deleted.
 - Not committed: `project-docs/AGENT_CHECKLIST.md` (Sue edits it). No checklist row added for Seamly2D.71.12.
 - Next: MSI build (ask): Seamly2D.71.9, 71.12, 11.8, 11.9, Layout.97.7.
-- `run-seamlyLayout` is 36 commits ahead of `origin`.
+- `run-seamlyLayout` is 39 commits ahead of `origin`. The head commit (docs) has no skip-ci token, so the push starts CI; the pending push has `.pri` and `packaging/` changes.
 
 ### 2026-11-01 — male_shirt DXF review: Flip Both, seam line corner, On fold box, Fold needs a fold line; merged into local `run-seamlyLayout`, not pushed
 
