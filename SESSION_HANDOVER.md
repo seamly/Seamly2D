@@ -12,9 +12,11 @@
 - Layout.111 closed (user decision: the warning was correct); moved to `TODO_COMPLETED.md`.
 - Harness: `%TEMP%\seam_corner_harness\` (`build.bat [fix]`, `run.bat`; xerces DLL directory on PATH).
 - Layout.97.8 done (user decision: no fold line → `Fold:N`, also with `onFold="true"`; FrontPanel case). Merge `2171bf01dc` (`a8e5d348a6`): `converter::piece_is_on_fold`; the `Quantity:` split follows. cargo 639 pass.
+- Layout.112.5 done (user wording): DXF warning "the fold line doesn't connect with the cutline". Merge `a25e25cbb9`. cargo 639 pass.
+- User rule: with a fold line, the cut line is open; the fold line runs from the cut line end to its begin. Filed Seamly2D.71.11 and Layout.112 (approach proposed, not approved).
 - User action (agreed): uncheck "On fold" on "CollarTopInterface Mirrored" in both male_shirt copies.
 - Next: MSI build, not yet approved (ask): Seamly2D.11.8, Seamly2D.11.9, Layout.97.7. Then the user checks `AGENT_CHECKLIST.md`, then pushes (user decision; the push will start CI).
-- `run-seamlyLayout` is 29 commits ahead of `origin`.
+- `run-seamlyLayout` is 33 commits ahead of `origin`.
 
 ### 2026-11-01 — `develop` merge (14 upstream commits); merged into local `run-seamlyLayout`, not built, not pushed
 
