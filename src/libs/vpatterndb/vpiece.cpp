@@ -270,6 +270,83 @@ void setFoldLineWidths(QVector<SeamAllowancePoint> &points, const QPointF &foldS
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief offsetCorner returns where the seam allowance lines of the edges before and after @p point meet.
+ * @param width piece width, for a point that sets none.
+ *
+ * Edges on one line have parallel seam allowance lines; the corner is then the offset of @p point.
+ */
+QPointF offsetCorner(const SeamAllowancePoint& previous, const SeamAllowancePoint& point,
+                     const SeamAllowancePoint& next, qreal width)
+{
+    const QLineF before = AbstractPiece::createParallelLine(previous, point, width);
+    const QLineF after = AbstractPiece::createParallelLine(point, next, width);
+    QPointF corner;
+    if (before.intersects(after, &corner) == QLineF::NoIntersection)
+    {
+        corner = before.p2();
+    }
+    return corner;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief removeConsumedEdges collapses each edge that the offset turns around into one point.
+ * @param points closed path, its first point not repeated at the end, with the seam line widths set.
+ * @param width  piece width, for a point that sets none.
+ * @return @p points without repeated points and without consumed edges.
+ *
+ * An edge is consumed when the corners at its ends lie in the reverse order: its seam allowance line runs against
+ * the edge. A short curve chord next to an acute corner is consumed. Equidistant() then builds a spike, and
+ * CheckLoops() misses it when the spike only touches the next seam allowance line.
+ *
+ * The edge collapses to the crossing of its neighbour edge lines, so their seam allowance lines meet as they do
+ * without the edge. The crossing replaces the node end of the edge. Near-parallel neighbour edges cross far away;
+ * the function then removes only the curve point. An edge between two nodes stays.
+ */
+QVector<SeamAllowancePoint> removeConsumedEdges(const QVector<SeamAllowancePoint>& points, qreal width)
+{
+    QVector<SeamAllowancePoint> path = AbstractPiece::RemoveDublicates(points);
+    bool collapsed = true;
+    while (collapsed && path.size() > 3)
+    {
+        // Collapse one edge, then test the changed path again from its start.
+        collapsed = false;
+        const int count = path.size();
+        for (int i = 0; i < count && !collapsed; ++i)
+        {
+            const int end = (i + 1) % count;
+            const SeamAllowancePoint previous_point = path.at((i + count - 1) % count);
+            const SeamAllowancePoint start_point = path.at(i);
+            const SeamAllowancePoint end_point = path.at(end);
+            const SeamAllowancePoint next_point = path.at((i + 2) % count);
+            const QPointF start_corner = offsetCorner(previous_point, start_point, end_point, width);
+            const QPointF end_corner = offsetCorner(start_point, end_point, next_point, width);
+            const bool consumed = QPointF::dotProduct(end_corner - start_corner, end_point - start_point) < 0;
+            if (consumed && !(start_point.isNode() && end_point.isNode()))
+            {
+                const int kept = end_point.isNode() ? end : i;
+                const QLineF edge(start_point, end_point);
+                const QLineF previous_edge(previous_point, start_point);
+                QPointF crossing;
+                const bool crosses = previous_edge.intersects(QLineF(end_point, next_point), &crossing)
+                                     != QLineF::NoIntersection;
+                if (crosses && QLineF(edge.center(), crossing).length() <= edge.length())
+                {
+                    path[kept].setX(crossing.x());
+                    path[kept].setY(crossing.y());
+                    path[kept].SetSABefore(start_point.GetSABefore());
+                    path[kept].SetSAAfter(end_point.GetSAAfter());
+                }
+                path.remove(kept == i ? end : i);
+                collapsed = true;
+            }
+        }
+    }
+    return path;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief openAtFoldLine removes the part of a closed seam line that lies on the fold line.
  * @param points closed polyline that repeats its first point at the end.
  * @param fold fold line of the piece.
@@ -822,9 +899,11 @@ QVector<QPointF> VPiece::builtInSeamLinePoints(const VContainer *data, QVector<Q
         setFoldLineWidths(points, clockwise ? fold.p2() : fold.p1(), clockwise ? fold.p1() : fold.p2());
     }
 
-    // An inward offset makes a loop at a corner next to short curve chords. CheckLoops() cuts the wrong side of a
-    // loop that spans the path start, so the offset starts in the middle of the longest edge, where none forms.
-    QVector<QPointF> seamLine = Equidistant(startAtLongestEdge(points), width, nodeVertices);
+    // An inward offset makes a loop at a corner next to short curve chords. CheckLoops() misses a loop that only
+    // touches the next seam allowance line, so consumed edges collapse first. CheckLoops() also cuts the wrong side
+    // of a loop that spans the path start, so the offset starts in the middle of the longest edge.
+    QVector<QPointF> seamLine = Equidistant(startAtLongestEdge(removeConsumedEdges(points, width)), width,
+                                            nodeVertices);
     removeStartPoint(seamLine);
     if (clockwise)
     {

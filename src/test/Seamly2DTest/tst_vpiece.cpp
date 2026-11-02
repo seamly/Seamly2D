@@ -1869,6 +1869,95 @@ void TST_VPiece::BuiltInSeamLineStopsAtFoldLineAfterCurve() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief BuiltInSeamLineMeetsAtAcuteCorner checks that the seam line has no spike where a curve meets a straight edge
+ * at an acute corner.
+ *
+ * The fixture is the front of a collar half, with the fold line on the right. Both curves meet the front edge at
+ * about 76 degrees. The inward offset of the last curve chord then lies past the seam line of the front edge.
+ */
+void TST_VPiece::BuiltInSeamLineMeetsAtAcuteCorner() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    // Point at x, y in mm.
+    const auto at = [unit](qreal x, qreal y) { return QPointF(ToPixel(x, unit), ToPixel(y, unit)); };
+    // Control point at a distance in mm and an angle in degrees from a curve end.
+    const auto control = [unit](const QPointF& end, qreal length, qreal angle)
+    {
+        return end + QLineF::fromPolar(ToPixel(length, unit), angle).p2();
+    };
+
+    VPointF* front_top = new VPointF(at(0, 0), "D11", 0, 0);
+    data->UpdateGObject(1, front_top);
+    VPointF* front_bottom = new VPointF(at(0, 80), "D12", 0, 0);
+    data->UpdateGObject(2, front_bottom);
+    VPointF* fold_bottom = new VPointF(at(199.03, 60.72), "D13", 0, 0);
+    data->UpdateGObject(3, fold_bottom);
+    VPointF* fold_top = new VPointF(at(199.03, 12.72), "D1", 0, 0);
+    data->UpdateGObject(4, fold_top);
+    data->UpdateGObject(5, new VSpline(*fold_bottom, control(fold_bottom->toQPointF(), 78.3283, 179.805),
+                                       control(front_bottom->toQPointF(), 50.2128, 14.9825), *front_bottom));
+    data->UpdateGObject(6, new VSpline(*front_top, control(front_top->toQPointF(), 40.169, -15),
+                                       control(fold_top->toQPointF(), 40.169, 180), *fold_top));
+
+    VPieceNode fold_start(4, Tool::NodePoint);
+    fold_start.setFoldLine(true);
+    VPieceNode fold_end(3, Tool::NodePoint);
+    fold_end.setFoldLine(true);
+
+    VPiece piece;
+    piece.SetSeamAllowance(true);
+    piece.SetSeamAllowanceBuiltIn(true);
+    piece.SetSAWidth(10);
+    piece.GetPath().Append(VPieceNode(5, Tool::NodeSpline));
+    piece.GetPath().Append(VPieceNode(2, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(1, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(6, Tool::NodeSpline));
+    piece.GetPath().Append(fold_start);
+    piece.GetPath().Append(fold_end);
+
+    const QVector<QPointF> seam_line = piece.builtInSeamLinePoints(data.data());
+    QVERIFY2(seam_line.size() > 4, qPrintable(QString::number(seam_line.size())));
+
+    // Distance to the sewn edges: the cut line without its fold line edge, the closing segment.
+    const QVector<QPointF> cut_line = piece.mainPathPoints(data.data());
+    const auto distance_to_sewn_edges = [&cut_line](const QPointF& point)
+    {
+        qreal distance = std::numeric_limits<qreal>::infinity();
+        for (int i = 1; i < cut_line.size(); ++i)
+        {
+            const QPointF start = cut_line.at(i - 1);
+            const QPointF edge = cut_line.at(i) - start;
+            const qreal length_squared = QPointF::dotProduct(edge, edge);
+            const qreal t = length_squared > 0
+                            ? qBound(0.0, QPointF::dotProduct(point - start, edge) / length_squared, 1.0) : 0;
+            distance = qMin(distance, QLineF(point, start + t * edge).length());
+        }
+        return distance;
+    };
+
+    const qreal w = ToPixel(10, unit);
+    const QPolygonF cut_polygon(cut_line);
+    for (int i = 1; i < seam_line.size() - 1; ++i)
+    {
+        const QPointF p = seam_line.at(i);
+        const QString where = QStringLiteral("%1, %2").arg(p.x()).arg(p.y());
+        QVERIFY2(cut_polygon.containsPoint(p, Qt::OddEvenFill), qPrintable(where + QStringLiteral(" is outside")));
+        const qreal distance = distance_to_sewn_edges(p);
+        QVERIFY2(qAbs(distance - w) < w * 0.01, qPrintable(where + QStringLiteral(" is %1 from the cut line")
+                                                               .arg(distance)));
+
+        // A spike turns the seam line back on itself; the front corners turn about 104 degrees.
+        const qreal turn = QLineF(seam_line.at(i - 1), p).angleTo(QLineF(p, seam_line.at(i + 1)));
+        QVERIFY2(qMin(turn, 360 - turn) < 150, qPrintable(where + QStringLiteral(" turns back %1 degrees")
+                                                              .arg(qMin(turn, 360 - turn))));
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief CurveEndInNodePixelEndsAtNode checks that a curve whose end lies past the next node, in the same pixel,
  * ends at that node, so neither the seam line nor the cut line turns back.
  */
