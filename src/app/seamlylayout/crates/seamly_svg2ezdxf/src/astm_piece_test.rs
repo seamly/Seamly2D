@@ -686,16 +686,24 @@ mod tests {
 
     // @brief A built-in seam allowance with a fold line: Seamly2D sends the seam line open, both ends on the
     // fold line. It stays an open sew line that ends on the mirror line; the cut line is the boundary.
+    // The cut line is open, from the fold line end to its start; an older handoff sends it closed.
     #[test]
     fn built_in_seam_line_stops_on_the_fold_line() {
-        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480" viewBox="0 0 480 480">
+        for cut_d in ["M 0,0 L 480,0 L 480,480 L 0,480", "M 0,0 L 480,0 L 480,480 L 0,480 Z"] {
+            built_in_seam_line_stops_on_the_fold_line_with(cut_d);
+        } // for open and closed cut line
+    }
+
+    // @brief One case of `built_in_seam_line_stops_on_the_fold_line`.
+    fn built_in_seam_line_stops_on_the_fold_line_with(cut_d: &str) {
+        let svg = format!(r#"<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480" viewBox="0 0 480 480">
           <g id="piece_Back" data-type="piece" data-name="Back" data-on-fold="true">
             <g data-type="seamline" data-turn-points="0 1 2 3"><path d="M 0,48 L 432,48 L 432,432 L 0,432"/></g>
-            <g data-type="cutline" data-turn-points="0 1 2 3"><path d="M 0,0 L 480,0 L 480,480 L 0,480 Z"/></g>
+            <g data-type="cutline" data-turn-points="0 1 2 3"><path d="{cut_d}"/></g>
             <g id="fold_line_Back" data-type="fold_line"><path d="M 0,480 L 0,0"/></g>
           </g>
-        </svg>"#;
-        let doc = Document::parse(svg).expect("fixture parses");
+        </svg>"#);
+        let doc = Document::parse(&svg).expect("fixture parses");
         let mut drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
         assert!(crate::align_mirror_lines(&mut drawing).is_empty(), "the fold line is on the cut line");
 
@@ -714,6 +722,48 @@ mod tests {
             assert!((end.x - m1.x).abs() < 1e-6 && (end.x - m2.x).abs() < 1e-6, "sew line end {end:?} on the mirror line");
         }
         assert!(sew.dense[1..sew.dense.len() - 1].iter().all(|p| p.x > 1.0), "only the ends touch the fold line");
+    }
+
+    // @brief Piece "Back" on the fold: a cut line drawn by `cut_d`, a closed seam line, and a fold line from
+    // (0, 470) to (0, 10).
+    fn back_on_fold(cut_d: &str) -> String {
+        format!(r#"<svg xmlns="http://www.w3.org/2000/svg" width="960" height="960" viewBox="0 0 960 960">
+          <g id="piece_Back" data-type="piece" data-name="Back" data-on-fold="true">
+            <g data-type="seamline"><path d="M 0,10 L 86,10 L 86,470 L 0,470 Z"/></g>
+            <g data-type="cutline" data-turn-points="0 1 2 3"><path d="{cut_d}"/></g>
+            <g id="fold_line_Back" data-type="fold_line"><path d="M 0,470 L 0,10"/></g>
+          </g>
+        </svg>"#)
+    }
+
+    // @brief The open cut line and the fold line make the outer edge: the boundary closes along the fold line,
+    // and the mirror line is its first edge. The seam line is the sew line.
+    #[test]
+    fn open_cut_line_closes_along_the_fold_line() {
+        let doc = Document::parse(&back_on_fold("M 0,10 L 96,10 L 96,470 L 0,470")).expect("fixture parses");
+        let mut drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        assert!(crate::align_mirror_lines(&mut drawing).is_empty(), "the fold line connects with the cut line");
+
+        let back = &drawing.blocks[0];
+        let boundary = back.boundary.as_ref().expect("the cut line is the boundary");
+        assert!(boundary.closed);
+        assert_eq!(boundary.reduced.len(), 4, "{:?}", boundary.reduced);
+        let max_x = boundary.dense.iter().map(|p| p.x).fold(f64::MIN, f64::max);
+        assert!((max_x - 96.0 * MM_PER_PX).abs() < 1e-6, "the cut line, not the seam line: max x {max_x}");
+        let (m1, m2) = back.mirror_line.expect("aligned mirror line");
+        assert_eq!((boundary.reduced[0], boundary.reduced[1]), (m1, m2));
+        assert!(m1.x.abs() < 1e-9 && m2.x.abs() < 1e-9, "on the fold line");
+        assert_eq!(back.sew_lines.len(), 1, "the seam line is the sew line");
+    }
+
+    // @brief An open cut line whose ends miss the fold line is not the boundary: the seam line is.
+    #[test]
+    fn open_cut_line_off_the_fold_line_is_not_the_boundary() {
+        let doc = Document::parse(&back_on_fold("M 5,10 L 96,10 L 96,470 L 5,470")).expect("fixture parses");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        let boundary = drawing.blocks[0].boundary.as_ref().expect("the seam line is the boundary");
+        let max_x = boundary.dense.iter().map(|p| p.x).fold(f64::MIN, f64::max);
+        assert!((max_x - 86.0 * MM_PER_PX).abs() < 1e-6, "max x {max_x}");
     }
 
     #[test]

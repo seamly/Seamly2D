@@ -146,6 +146,17 @@ fn closed_path_returns_to_its_start() {
 } // closed_path_returns_to_its_start
 
 #[test]
+fn open_cut_line_on_the_fold_line_is_cut_open() {
+    // The cut line runs from the fold line end to its start; the fold line is not cut.
+    let body = [typed_path("cutline", "M0 0 L96 0 L96 96 L0 96"), typed_path("fold_line", "M0 96 L0 0")].concat();
+    let options = HpglOptions { mode: HpglMode::Cut, pens: PenMap::default() };
+    let program = svg_to_hpgl(&page(&body), &options).unwrap();
+    assert!(program.contains("PU0,1016;"), "{program}");
+    assert!(program.contains("PD1016,1016,1016,0,0,0;"), "no return to the start: {program}");
+    assert!(!program.contains("PD0,1016;"), "the fold line is not cut: {program}");
+} // open_cut_line_on_the_fold_line_is_cut_open
+
+#[test]
 fn curve_stays_within_tolerance() {
     // Circle of radius 48 px (508 units) centred on the page.
     let svg = page(r#"<g data-type="cutline"><circle cx="48" cy="48" r="48" stroke="black" fill="none"/></g>"#);
