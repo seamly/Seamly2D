@@ -51,6 +51,13 @@ Rotation, arrow line, label, extended fold line, SeamlyLayout fold placement and
 
 - [ ] Seamly2D.71.9 Next MSI: Qt suites (`nmake check` in `local_build_msi.ps1`). A scratch harness passed `TST_VPiece` and `TST_SvgComponentTags` with the changed sources.
 - [ ] Seamly2D.71.10 Verify (User): `AGENT_CHECKLIST.md` §29.
+- [ ] Seamly2D.71.11 Fix - A piece with a fold line: the cut line is an open path and does not run along the fold line.
+  - Rule (user decision): the fold line begins at the cut line end and ends at the cut line begin. The cut line and the fold line make the outer edge.
+  - A cut line that runs along the fold line means an improperly defined piece.
+  - A piece without a fold line keeps a closed cut line. A mirrored piece has no fold line.
+  - Now: Piece mode draws the cut line closed (`PatternPieceTool::refreshFoldLine()`). The handoff sends `cutline` closed (`handoff_piece.cpp`).
+  - Proposed: Piece mode and the handoff `cutline` stop at the fold line ends. Also with a built-in seam allowance, where the cut line is the seam line.
+  - SeamlyLayout side: Layout.112. Change both sides together: handoff contract, `SVG-DATA-ATTRIBUTES.md` `fold_line`.
 
 ## Not required for SeamlyLayout release
 
