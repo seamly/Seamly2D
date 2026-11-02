@@ -17,9 +17,9 @@
 //
 // Per part:
 //   - outline (`cutline`, else `seamline`) and `cut_path`: closed, with new
-//     edges on the cut lines. An open cut line whose ends lie on the fold line
-//     closes along it, so it makes parts; each part's cut line stays open at the
-//     fold line;
+//     edges on the cut lines. With a fold line, Seamly2D sends the outline
+//     without its edge on the fold line. The divider adds that edge back, so the
+//     outline makes parts; each part's outline again has no edge on the fold line;
 //   - `seamline` beside a cutline, `internal_path`, `grainline`, `fold_line`: open
 //     lines that end at the cut lines; a part the fold line misses has none. The
 //     fold line arrow line and label (`fold_line_arrow`, `fold_line_label`) go
@@ -921,8 +921,8 @@ fn divide_piece(piece: &Element, columns: usize, rows: usize, uu_per_px: f64) ->
     path_ds(outline, &mut outline_ds);
     let mut outline_paths: Vec<Vec<Subpath>> = outline_ds.iter().map(|d| straight_subpaths(d)).collect::<Option<_>>()?;
 
-    // Seamly2D sends the cut line of a piece with a fold line open: the cut line and the fold line
-    // make the outer edge. Such a subpath closes along the fold line, so it makes parts.
+    // With a fold line, Seamly2D sends the outline without its edge on the fold line: the outline
+    // and the fold line make the outer edge. Such a subpath closes along the fold line, so it makes parts.
     let fold = fold_line_ends(piece);
     let fold_tolerance = FOLD_LINE_TOLERANCE_IN * uu_per_in;
     let mut joined: HashSet<(usize, usize)> = HashSet::new();
@@ -1416,35 +1416,43 @@ mod tests {
         assert_eq!(stretches, vec!["M0,200 L0,0".to_string(), "M0,400 L0,200".to_string()]);
     } // fold_line_is_clipped_per_part
 
-    // @brief An open cut line that ends on the fold line makes parts like a closed one. A part on the fold
-    // line keeps its cut line open there; a part off the fold line has a closed cut line.
+    // @brief An outline without its fold line edge makes parts like a closed one. A part on the fold line
+    // has no outline edge on the fold line; a part off the fold line has a closed outline. The outline is
+    // the cut line, or the seam line of a piece without a seam allowance.
     #[test]
-    fn open_cut_line_on_the_fold_line_splits_and_stays_open() {
-        // Fold line on the left edge, 400..0; the cut line runs from the fold line end to its start.
-        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-1" data-type="piece" data-name="Back" data-on-fold="true">
-            <g data-type="cutline" data-turn-points="0 1 2 3"><path d="M0,0 L400,0 L400,400 L0,400"/></g>
-            <g id="fold_line_Back" data-type="fold_line"><path d="M0,400 L0,0"/></g></g></svg>"#;
-        let mut doc = Document::parse(svg).expect("parses");
+    fn open_outline_on_the_fold_line_splits_and_stays_open() {
+        for outline_type in ["cutline", "seamline"] {
+            open_outline_on_the_fold_line_splits_and_stays_open_with(outline_type);
+        } // for each outline type
+    } // open_outline_on_the_fold_line_splits_and_stays_open
+
+    // @brief One case of `open_outline_on_the_fold_line_splits_and_stays_open`.
+    fn open_outline_on_the_fold_line_splits_and_stays_open_with(outline_type: &str) {
+        // Fold line on the left edge, 400..0; the outline runs from the fold line end to its start.
+        let svg = format!(r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-1" data-type="piece" data-name="Back" data-on-fold="true">
+            <g data-type="{outline_type}" data-turn-points="0 1 2 3"><path d="M0,0 L400,0 L400,400 L0,400"/></g>
+            <g id="fold_line_Back" data-type="fold_line"><path d="M0,400 L0,0"/></g></g></svg>"#);
+        let mut doc = Document::parse(&svg).expect("parses");
         let divided = divide_oversized_pieces(&mut doc, &spec(250, 250, true));
-        assert_eq!(divided, vec![DividedPiece { label: "Back".to_string(), parts: 4 }]);
+        assert_eq!(divided, vec![DividedPiece { label: "Back".to_string(), parts: 4 }], "{outline_type}");
 
         let mut open = 0;
         for part in part_groups(&doc) {
-            let cutline = component(part, "cutline").expect("cutline");
-            let d = ds(cutline);
+            let outline = component(part, outline_type).expect("outline");
+            let d = ds(outline);
             let (x0, _, _, _) = part_bbox(part);
             if x0 < 1.0 {
                 // On the fold line: one open run, ends on the fold line, both ends turn points.
-                assert!(!d.contains('Z') && d.matches('M').count() == 1, "{d}");
-                assert!(d.starts_with("M0,") && d.contains(" L0,"), "{d}");
-                assert_eq!(attr(cutline, "data-turn-points"), "0 1 2 3", "{d}");
+                assert!(!d.contains('Z') && d.matches('M').count() == 1, "{outline_type}: {d}");
+                assert!(d.starts_with("M0,") && d.contains(" L0,"), "{outline_type}: {d}");
+                assert_eq!(attr(outline, "data-turn-points"), "0 1 2 3", "{outline_type}: {d}");
                 open += 1;
             } else {
-                assert!(d.ends_with('Z'), "{d}");
+                assert!(d.ends_with('Z'), "{outline_type}: {d}");
             } // if on the fold line
         } // for each part
-        assert_eq!(open, 2);
-    } // open_cut_line_on_the_fold_line_splits_and_stays_open
+        assert_eq!(open, 2, "{outline_type}");
+    } // fn open_outline_on_the_fold_line_splits_and_stays_open_with
 
     // @brief An open cut line without a fold line is not an outline region: the piece is not divided.
     #[test]

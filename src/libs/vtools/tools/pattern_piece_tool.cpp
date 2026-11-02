@@ -100,11 +100,12 @@ namespace
 {
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief open_cut_line_path draws a cut line without the part on the fold line.
- * @param points closed cut line; the first point may repeat at the end.
+ * @brief open_at_fold_line_path draws a seam line or a cut line without its edge on the fold line.
+ * @details The drawn line starts at the fold line end and ends at the fold line start.
+ * @param points closed line; the first point may repeat at the end.
  * @param fold fold line of the piece.
  */
-QPainterPath open_cut_line_path(const QVector<QPointF>& points, const QLineF& fold)
+QPainterPath open_at_fold_line_path(const QVector<QPointF>& points, const QLineF& fold)
 {
     QPainterPath path;
     path.addPolygon(QPolygonF(VPiece::openAtFoldLine(points, fold)));
@@ -1580,17 +1581,19 @@ void PatternPieceTool::RefreshGeometry()
     QPainterPath path = piece.mainPath(this->getData());
     QVector<QPointF> seamAllowancePoints;
 
-    // The cut line and the fold line make the outer edge, so the drawn cut line stops at the fold line. The cut path
-    // stays closed for the item shape and the seam allowance fill.
+    // The drawn seam line and cut line have no edge on the fold line; the fold line completes the outer edge. The cut
+    // path and the hidden main path keep the fold line edge for the item shape. A fill adds the fold line edge back.
     const QLineF fold_line = piece.foldLine(this->getData());
+    const QPainterPath open_main_path = fold_line.isNull()
+                                        ? path
+                                        : open_at_fold_line_path(piece.mainPathPoints(this->getData()), fold_line);
 
     if (piece.hasSeamAllowance() && piece.hasSeamAllowanceBuiltIn())
     {
         // The main path is the cut line. The item draws the seam line inside it, unless the seam line is hidden.
         m_mainPath = QPainterPath();
         m_cutPath = path;
-        m_cutLine->setPath(fold_line.isNull() ? m_cutPath
-                                              : open_cut_line_path(piece.mainPathPoints(this->getData()), fold_line));
+        m_cutLine->setPath(open_main_path);
         m_pieceRect = m_cutLine->boundingRect();
 
         const QPainterPath seamLine = piece.isHideSeamLine() ? QPainterPath()
@@ -1615,6 +1618,7 @@ void PatternPieceTool::RefreshGeometry()
         if (!piece.isHideSeamLine() || !piece.hasSeamAllowance())
         {
             m_mainPath = QPainterPath();
+            path = open_main_path;
             m_allowanceFill->setBrush(QBrush(adaptColor(QColor(qApp->Settings()->getDefaultCutColor())),
                                       Qt::Dense7Pattern));
         }
@@ -1635,7 +1639,7 @@ void PatternPieceTool::RefreshGeometry()
         if (piece.hasSeamAllowance() && qApp->Settings()->showSeamAllowances())
         {
             m_cutPath = piece.seamAllowancePath(seamAllowancePoints);
-            m_cutLine->setPath(fold_line.isNull() ? m_cutPath : open_cut_line_path(seamAllowancePoints, fold_line));
+            m_cutLine->setPath(fold_line.isNull() ? m_cutPath : open_at_fold_line_path(seamAllowancePoints, fold_line));
             m_pieceRect = m_cutLine->boundingRect();
 
             QPainterPath allowancePath = path;
@@ -1672,8 +1676,8 @@ void PatternPieceTool::RefreshGeometry()
  * @param piece piece of this tool.
  * @param seam_allowance_points cut line of the piece; empty when the piece has no seam allowance or a built-in one.
  *
- * The cut line stops at the fold line, so the fold line closes the outline. A shown seam allowance meets the fold
- * line past both nodes, so the fold line is drawn out to the cut line ends.
+ * The seam line and the cut line stop at the fold line, so the fold line closes the outline. A shown seam allowance
+ * meets the fold line past both nodes, so the fold line is drawn out to the cut line ends.
  */
 void PatternPieceTool::refreshFoldLine(const VPiece& piece, const QVector<QPointF>& seam_allowance_points)
 {

@@ -726,8 +726,11 @@ fn same_contour(a: &AstmContour, b: &AstmContour) -> bool {
 // @details The boundary is the longest closed cut line; a piece without one
 //          (no seam allowance, or seam allowances not shown) uses its longest
 //          closed seam line. A built-in seam allowance has both lines: the main
-//          path is the cut line. An open cut line whose ends lie on the fold
-//          line closes along it: the cut line and the fold line make the outer edge.
+//          path is the cut line. With a fold line, Seamly2D sends the outer
+//          line without its edge on the fold line: it starts at the fold line
+//          end and ends at the fold line start. The converter adds that edge
+//          back to make the boundary. A seam line beside a cut line stays a
+//          sew line without the fold line edge.
 fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOptions, svg_height: f64) {
     let mut components = Vec::new();
     collect_components(piece, &mut components);
@@ -782,15 +785,20 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
     block.fold = Some((if on_fold { "Y" } else { "N" }).to_string());
     block.material = material_from_piece(piece);
 
-    // Seamly2D sends the cut line of a piece with a fold line open, from the fold line end to
-    // the fold line start. Close it along the fold line. An older handoff sends it closed.
-    if let Some((start, end)) = block.mirror_line {
-        let fold = ((start.x, start.y), (end.x, end.y));
-        for line in cut_lines.iter_mut().filter(|l| !l.closed) {
+    // With a fold line, Seamly2D sends the outer line without its edge on the fold line: it
+    // starts at the fold line end and ends at the fold line start. Close such a line, so the
+    // fold line edge is part of it again. An older handoff sends the line closed.
+    let fold = block.mirror_line.map(|(start, end)| ((start.x, start.y), (end.x, end.y)));
+    let close_on_fold = |lines: &mut [TaggedPolyline]| {
+        let Some(fold) = fold else {
+            return; // no fold line: an open line stays open
+        }; // fold
+        for line in lines.iter_mut().filter(|l| !l.closed) {
             let points: Vec<(f64, f64)> = line.points.iter().map(|p| (p.x, p.y)).collect();
             line.closed = geometry::fold_line_join::line_closes_on_fold(&points, fold, MIRROR_LINE_TOLERANCE_MM);
-        } // for each open cut line
-    } // if fold line
+        } // for each open line
+    }; // close_on_fold
+    close_on_fold(&mut cut_lines);
 
     // Boundary: the longest closed cut line, else the longest closed seam line.
     let longest_closed = |lines: &[TaggedPolyline]| -> Option<AstmContour> {
@@ -799,6 +807,10 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
     }; // longest_closed
     let cut_boundary = longest_closed(&cut_lines);
     let has_cut_line = cut_boundary.is_some();
+    if !has_cut_line {
+        // The seam line is the outer line. Beside a cut line it is a sew line and stays open.
+        close_on_fold(&mut seam_lines);
+    } // if no cut line
     block.boundary = cut_boundary.or_else(|| longest_closed(&seam_lines));
 
     // Sew lines: every seam line that is not the boundary itself.

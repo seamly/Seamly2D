@@ -111,6 +111,12 @@ public:
     bool                        has_seam_allowance() const;
     bool                        has_built_in_seam_allowance() const;
     bool                        is_seam_line_hidden() const;
+
+    /**
+     * @brief seam_line returns the main path.
+     * @details With a fold line the seam line has no edge on it: the seam line starts at the fold line end and ends
+     *          at the fold line start, as cut_line() does.
+     */
     const HandoffLine          &seam_line() const;
 
     /**
@@ -121,14 +127,14 @@ public:
 
     /**
      * @brief cut_line returns the seam allowance line; empty with a built-in seam allowance.
-     * @details At a fold line the cut line is open: it begins where the fold line ends and ends where the fold
-     *          line begins.
+     * @details With a fold line the cut line has no edge on it: the cut line starts at the fold line end and ends at
+     *          the fold line start.
      */
     const HandoffLine          &cut_line() const;
 
     /**
      * @brief built_in_cut_line returns the main path that a built-in seam allowance cuts along; empty without one.
-     * @details At a fold line it is open, as cut_line() is.
+     * @details With a fold line it has no edge on the fold line, as cut_line() does.
      */
     const HandoffLine          &built_in_cut_line() const;
 

@@ -2,6 +2,17 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-10-27 — Warning popup titles and size noun; merged into local `run-seamlyLayout`, not pushed
+
+- Cause: Sue saw jacket2's import warning under the title "Some pieces could not be placed". Import and layout warnings shared one fixed title.
+- Merge `3b1310115e` (commit `3aa24ea580`), skip-ci token: `.rs`, `.qml`, `.md` only.
+- Changed: `Main.qml` (titles "Import warning", "Layout warning"), `annotation_alignment.rs` (`size_list`: "in size 220"), `layout_utils.rs` test, `AGENT_CHECKLIST.md` §26.
+- Verified: `cargo test --workspace` 634 passed; `ctest --preset debug` 7 of 7. Not run: MSI.
+- User decisions: one shared place inside every size's cut line; built in `layout_handoff`, after the Dead.4.4.3 switch. Filed Task Layout.108 (commit `375954483c`, docs only).
+- Decisions 108.4 (keep base place, warn in Seamly2D) and 108.5 (keep the SeamlyLayout import move) recorded, commit `a952e29d1e` (docs only).
+- Fixed: working copies of `TODO_SEAMLYLAYOUT.md` and `TODO_REMOVE_DEAD_LAYOUT_CODE.md` dropped committed lines (stale editor buffer). Restored (user decision). Uncommitted Sue edits kept: Layout.102.5 wording, the `VPattern` question in Dead.4.4.3.
+- `run-seamlyLayout` is 6 commits ahead of `origin`.
+
 ### 2026-10-27 — `nmake check` fix: `TST_Seamly2DCommandLine::ExportMode` removed; merged into local `run-seamlyLayout`, not pushed
 
 - Cause: the MSI build stopped in `CollectionTest`. `ExportMode` ran `-p`, `-d`, `-b`, removed with the console export mode (Dead.4.1.1).
