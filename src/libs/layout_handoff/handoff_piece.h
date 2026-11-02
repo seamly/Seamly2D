@@ -119,7 +119,18 @@ public:
      */
     QRectF bounds() const;
 
+    /**
+     * @brief cut_line returns the seam allowance line; empty with a built-in seam allowance.
+     * @details At a fold line the cut line is open: it begins where the fold line ends and ends where the fold
+     *          line begins.
+     */
     const HandoffLine          &cut_line() const;
+
+    /**
+     * @brief built_in_cut_line returns the main path that a built-in seam allowance cuts along; empty without one.
+     * @details At a fold line it is open, as cut_line() is.
+     */
+    const HandoffLine          &built_in_cut_line() const;
 
     /**
      * @brief seam_allowance_corners returns the cut line corners and the ones a ByLength angle cut short.
@@ -178,6 +189,7 @@ private:
     HandoffLine          m_cut_line;
     SeamAllowanceCorners m_seam_allowance_corners;
     HandoffLine          m_built_in_seam_line;
+    HandoffLine          m_built_in_cut_line;
     HandoffNotches       m_notches;
     QVector<HandoffPath> m_internal_paths;
     QVector<HandoffPath> m_cutout_paths;

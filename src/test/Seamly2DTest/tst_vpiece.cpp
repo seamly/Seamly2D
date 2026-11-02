@@ -2801,6 +2801,79 @@ void TST_VPiece::CutLineEndsWithFoldLine() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::CutLineOpensAtFoldLine_data() const
+{
+    QTest::addColumn<QVector<int>>("foldNodes");
+
+    QTest::newRow("left edge, closing segment") << QVector<int>{0, 4};
+    QTest::newRow("bottom edge")                << QVector<int>{3, 4};
+    QTest::newRow("right edge")                 << QVector<int>{2, 3};
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief CutLineOpensAtFoldLine checks that the open cut line begins where the extended fold line ends and ends where
+ * it begins, and that no cut line edge stays on the fold line.
+ */
+void TST_VPiece::CutLineOpensAtFoldLine() const
+{
+    QFETCH(QVector<int>, foldNodes);
+
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    const VPiece piece = squareFoldPiece(data.data(), foldNodes);
+    const QLineF fold = piece.foldLine(data.data());
+    const QVector<QPointF> cut_line = piece.seamAllowancePoints(data.data());
+    const QLineF extended = VPiece::foldLineOnCutLine(cut_line, fold);
+    const QVector<QPointF> open = VPiece::openAtFoldLine(cut_line, fold);
+
+    const QString text = pointsText(open);
+    QVERIFY2(open.size() >= 4, qPrintable(text));
+    QVERIFY2(QLineF(open.first(), extended.p2()).length() < 0.01, qPrintable(text));
+    QVERIFY2(QLineF(open.last(), extended.p1()).length() < 0.01, qPrintable(text));
+    for (int i = 0; i + 1 < open.size(); ++i)
+    {
+        const bool on_fold = VGObject::IsPointOnLineviaPDP(open.at(i), fold.p1(), fold.p2())
+                             && VGObject::IsPointOnLineviaPDP(open.at(i + 1), fold.p1(), fold.p2());
+        QVERIFY2(!on_fold, qPrintable(text));
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief OpenAtFoldLineKeepsLineWithoutRun checks that a line with no edge on the fold line stays closed and repeats
+ * its first point at the end.
+ */
+void TST_VPiece::OpenAtFoldLineKeepsLineWithoutRun() const
+{
+    const QLineF fold(QPointF(0, 400), QPointF(0, 0));
+    const QVector<QPointF> offset{QPointF(-10, -10), QPointF(410, -10), QPointF(410, 410), QPointF(-10, 410)};
+    const QVector<QPointF> closed = offset + QVector<QPointF>{offset.first()};
+
+    QCOMPARE(VPiece::openAtFoldLine(offset, fold), closed);
+    QCOMPARE(VPiece::openAtFoldLine(closed, fold), closed);
+    QCOMPARE(VPiece::openAtFoldLine(closed, QLineF()), closed);
+    QCOMPARE(VPiece::openAtFoldLine(QVector<QPointF>(), fold), QVector<QPointF>());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief OpenAtFoldLineRemovesLongestRun checks that of two runs on the fold line only the longer one goes.
+ */
+void TST_VPiece::OpenAtFoldLineRemovesLongestRun() const
+{
+    // Runs on the line x = 0: (0, 0) to (0, 100), and the longer (0, 200) to (0, 400).
+    const QVector<QPointF> ring{QPointF(0, 0), QPointF(0, 100), QPointF(20, 150), QPointF(0, 200), QPointF(0, 400),
+                                QPointF(100, 400), QPointF(100, 0), QPointF(0, 0)};
+    const QVector<QPointF> expected{QPointF(0, 400), QPointF(100, 400), QPointF(100, 0), QPointF(0, 0),
+                                    QPointF(0, 100), QPointF(20, 150), QPointF(0, 200)};
+
+    QCOMPARE(VPiece::openAtFoldLine(ring, QLineF(QPointF(0, 0), QPointF(0, 400))), expected);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 void TST_VPiece::FoldLineGraphicPlacesArrowAndLabel_data() const
 {
     QTest::addColumn<QLineF>("fold");

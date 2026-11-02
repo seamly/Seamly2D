@@ -96,6 +96,22 @@
 #include <QPainterPathStroker>
 #include <QPolygonF>
 
+namespace
+{
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief open_cut_line_path draws a cut line without the part on the fold line.
+ * @param points closed cut line; the first point may repeat at the end.
+ * @param fold fold line of the piece.
+ */
+QPainterPath open_cut_line_path(const QVector<QPointF>& points, const QLineF& fold)
+{
+    QPainterPath path;
+    path.addPolygon(QPolygonF(VPiece::openAtFoldLine(points, fold)));
+    return path;
+}
+} // namespace
+
 // Current version of seam allowance tag need for backward compatibility
 const quint8 PatternPieceTool::pieceVersion = 2;
 
@@ -1564,12 +1580,17 @@ void PatternPieceTool::RefreshGeometry()
     QPainterPath path = piece.mainPath(this->getData());
     QVector<QPointF> seamAllowancePoints;
 
+    // The cut line and the fold line make the outer edge, so the drawn cut line stops at the fold line. The cut path
+    // stays closed for the item shape and the seam allowance fill.
+    const QLineF fold_line = piece.foldLine(this->getData());
+
     if (piece.hasSeamAllowance() && piece.hasSeamAllowanceBuiltIn())
     {
         // The main path is the cut line. The item draws the seam line inside it, unless the seam line is hidden.
         m_mainPath = QPainterPath();
         m_cutPath = path;
-        m_cutLine->setPath(m_cutPath);
+        m_cutLine->setPath(fold_line.isNull() ? m_cutPath
+                                              : open_cut_line_path(piece.mainPathPoints(this->getData()), fold_line));
         m_pieceRect = m_cutLine->boundingRect();
 
         const QPainterPath seamLine = piece.isHideSeamLine() ? QPainterPath()
@@ -1614,7 +1635,7 @@ void PatternPieceTool::RefreshGeometry()
         if (piece.hasSeamAllowance() && qApp->Settings()->showSeamAllowances())
         {
             m_cutPath = piece.seamAllowancePath(seamAllowancePoints);
-            m_cutLine->setPath(m_cutPath);
+            m_cutLine->setPath(fold_line.isNull() ? m_cutPath : open_cut_line_path(seamAllowancePoints, fold_line));
             m_pieceRect = m_cutLine->boundingRect();
 
             QPainterPath allowancePath = path;
@@ -1651,8 +1672,8 @@ void PatternPieceTool::RefreshGeometry()
  * @param piece piece of this tool.
  * @param seam_allowance_points cut line of the piece; empty when the piece has no seam allowance or a built-in one.
  *
- * The fold line is drawn over the outline segment it marks; the outline stays closed for the cut line. A shown cut
- * line runs along the fold line past both nodes, so the fold line is drawn out to the cut line.
+ * The cut line stops at the fold line, so the fold line closes the outline. A shown seam allowance meets the fold
+ * line past both nodes, so the fold line is drawn out to the cut line ends.
  */
 void PatternPieceTool::refreshFoldLine(const VPiece& piece, const QVector<QPointF>& seam_allowance_points)
 {

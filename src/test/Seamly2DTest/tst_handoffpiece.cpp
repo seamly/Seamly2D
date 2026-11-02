@@ -213,10 +213,11 @@ void show_grainline(VPiece *piece, const QString &length, ArrowType type)
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief square_piece_on_fold flags the first and last main path nodes as the fold line: the left side of the square.
+ * @param built_in whether the seam allowance is built into the main path.
  */
-VPiece square_piece_on_fold(VContainer *data)
+VPiece square_piece_on_fold(VContainer *data, bool built_in)
 {
-    VPiece piece = square_piece_with_slit(data, true, false);
+    VPiece piece = square_piece_with_slit(data, true, built_in);
     QVector<VPieceNode> nodes = piece.GetPath().getNodes();
     nodes.first().setFoldLine(true);
     nodes.last().setFoldLine(true);
@@ -343,7 +344,7 @@ void TST_HandoffPiece::foldLineMatchesOldWriter() const
     const Unit unit = Unit::Mm;
     QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
     qApp->setPatternUnit(unit);
-    const VPiece piece = square_piece_on_fold(data.data());
+    const VPiece piece = square_piece_on_fold(data.data(), false);
 
     const VLayoutPiece old_piece = VLayoutPiece::Create(piece, data.data());
     const HandoffPiece new_piece = HandoffPiece::create(piece, data.data());
@@ -387,6 +388,92 @@ void TST_HandoffPiece::pieceWithoutFoldLineHasNoFoldData() const
     QVERIFY(handoff.fold_line_on_cut_line().isNull());
     QVERIFY(handoff.fold_line_graphic().isNull());
     QVERIFY(!handoff.is_on_fold());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_HandoffPiece::cutLineOpensAtFoldLine_data() const
+{
+    QTest::addColumn<bool>("built_in");
+
+    QTest::newRow("seam allowance") << false;
+    QTest::newRow("built in")       << true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief At a fold line the cut line is open: the fold line begins at the cut line end and ends at its begin.
+ */
+void TST_HandoffPiece::cutLineOpensAtFoldLine() const
+{
+    QFETCH(bool, built_in);
+
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+    const VPiece piece = square_piece_on_fold(data.data(), built_in);
+
+    const HandoffPiece handoff = HandoffPiece::create(piece, data.data());
+
+    // With a built-in seam allowance the main path is the cut line and the fold line runs from node to node.
+    const HandoffLine &line = built_in ? handoff.built_in_cut_line() : handoff.cut_line();
+    const QLineF       fold = built_in ? handoff.fold_line() : handoff.fold_line_on_cut_line();
+    QVERIFY(built_in ? handoff.cut_line().points.isEmpty() : handoff.built_in_cut_line().points.isEmpty());
+    QVERIFY(!fold.isNull());
+    QVERIFY(!line.closed);
+    QVERIFY(line.points.size() >= 4);
+    QVERIFY(QLineF(line.points.first(), fold.p2()).length() < 0.01);
+    QVERIFY(QLineF(line.points.last(), fold.p1()).length() < 0.01);
+
+    // The open ends are turn points.
+    QVERIFY(line.turn_points.has_value());
+    QVERIFY(line.turn_points->contains(0));
+    QVERIFY(line.turn_points->contains(line.points.size() - 1));
+
+    // No cut line edge runs along the fold line.
+    for (int i = 0; i + 1 < line.points.size(); ++i)
+    {
+        QVERIFY(qAbs(line.points.at(i).x()) > 0.01 || qAbs(line.points.at(i + 1).x()) > 0.01);
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_HandoffPiece::cutLineWithoutFoldLineStaysClosed_data() const
+{
+    QTest::addColumn<bool>("built_in");
+
+    QTest::newRow("seam allowance") << false;
+    QTest::newRow("built in")       << true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Without a fold line the cut line stays closed; with a built-in seam allowance it is the seam line.
+ */
+void TST_HandoffPiece::cutLineWithoutFoldLineStaysClosed() const
+{
+    QFETCH(bool, built_in);
+
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+    const VPiece piece = square_piece_with_slit(data.data(), true, built_in);
+
+    const HandoffPiece handoff = HandoffPiece::create(piece, data.data());
+
+    const HandoffLine &line = built_in ? handoff.built_in_cut_line() : handoff.cut_line();
+    QVERIFY(line.closed);
+    QVERIFY(line.points.size() >= 4);
+    if (built_in)
+    {
+        QVERIFY(handoff.cut_line().points.isEmpty());
+        QCOMPARE(line.points, handoff.seam_line().points);
+        QCOMPARE(line.turn_points, handoff.seam_line().turn_points);
+        QCOMPARE(line.node_indices, handoff.seam_line().node_indices);
+    }
+    else
+    {
+        QVERIFY(handoff.built_in_cut_line().points.isEmpty());
+    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------

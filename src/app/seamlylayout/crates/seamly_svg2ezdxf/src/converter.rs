@@ -10,6 +10,7 @@ use crate::error::Result;
 use crate::units::PatternUnit;
 use crate::layers::map_svg_to_astm_layer;
 use crate::astm_contour::{build_contour_tagged, AstmContour};
+use crate::astm_mirror::MIRROR_LINE_TOLERANCE_MM;
 use crate::astm_notch::build_notches;
 use crate::drawing::Annotation;
 use crate::layers::{piece_component, PieceComponent};
@@ -725,7 +726,8 @@ fn same_contour(a: &AstmContour, b: &AstmContour) -> bool {
 // @details The boundary is the longest closed cut line; a piece without one
 //          (no seam allowance, or seam allowances not shown) uses its longest
 //          closed seam line. A built-in seam allowance has both lines: the main
-//          path is the cut line.
+//          path is the cut line. An open cut line whose ends lie on the fold
+//          line closes along it: the cut line and the fold line make the outer edge.
 fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOptions, svg_height: f64) {
     let mut components = Vec::new();
     collect_components(piece, &mut components);
@@ -779,6 +781,16 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
     // D6673 §4.3.1.2: `Fold:Y` says the piece may be placed on the fold of tubular fabric.
     block.fold = Some((if on_fold { "Y" } else { "N" }).to_string());
     block.material = material_from_piece(piece);
+
+    // Seamly2D sends the cut line of a piece with a fold line open, from the fold line end to
+    // the fold line start. Close it along the fold line. An older handoff sends it closed.
+    if let Some((start, end)) = block.mirror_line {
+        let fold = ((start.x, start.y), (end.x, end.y));
+        for line in cut_lines.iter_mut().filter(|l| !l.closed) {
+            let points: Vec<(f64, f64)> = line.points.iter().map(|p| (p.x, p.y)).collect();
+            line.closed = geometry::fold_line_join::line_closes_on_fold(&points, fold, MIRROR_LINE_TOLERANCE_MM);
+        } // for each open cut line
+    } // if fold line
 
     // Boundary: the longest closed cut line, else the longest closed seam line.
     let longest_closed = |lines: &[TaggedPolyline]| -> Option<AstmContour> {

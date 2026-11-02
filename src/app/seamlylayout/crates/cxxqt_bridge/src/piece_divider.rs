@@ -17,7 +17,9 @@
 //
 // Per part:
 //   - outline (`cutline`, else `seamline`) and `cut_path`: closed, with new
-//     edges on the cut lines;
+//     edges on the cut lines. An open cut line whose ends lie on the fold line
+//     closes along it, so it makes parts; each part's cut line stays open at the
+//     fold line;
 //   - `seamline` beside a cutline, `internal_path`, `grainline`, `fold_line`: open
 //     lines that end at the cut lines; a part the fold line misses has none. The
 //     fold line arrow line and label (`fold_line_arrow`, `fold_line_label`) go
@@ -33,6 +35,7 @@
 
 use std::collections::{HashMap, HashSet};
 
+use geometry::fold_line_join::{distance_to_segment, line_closes_on_fold};
 use geometry::half_plane_clip::{cut_closed, cut_open, CutLine, CutVertex};
 use geometry::{Path, PathSegment};
 use packing::Rect;
@@ -49,6 +52,8 @@ const PART_LABEL_FONT_IN: f64 = 0.25;
 const MIN_PART_AREA_UU: f64 = 1.0;
 // Upper limit of parts along one side; tiny media must not explode a piece.
 const MAX_PARTS_PER_SIDE: usize = 50;
+// Largest distance, in inches, of a cut line point from the fold line for it to lie on the fold (0.1 mm).
+const FOLD_LINE_TOLERANCE_IN: f64 = 0.1 / 25.4;
 
 // @brief Media a piece must fit, in layout pixels.
 #[derive(Debug, Clone, PartialEq)]
@@ -437,26 +442,41 @@ fn cut_edge(a: CutVertex, b: CutVertex) -> Option<(CutLine, f64, f64)> {
 // @brief Break a clipped loop into open runs at its edges on cut lines.
 // @return The loop itself, closed, when no edge lies on a cut line.
 fn open_runs(polygon: Vec<CutVertex>) -> Vec<(Vec<CutVertex>, bool)> {
+    break_loop(polygon, |a, b| cut_edge(a, b).is_some())
+} // fn open_runs
+
+// @brief Break a loop into open runs at its break edges.
+// @param is_break True for the edge from its first vertex to its second where the loop breaks.
+// @return The loop itself, closed, when it has no break edge.
+fn break_loop(polygon: Vec<CutVertex>, is_break: impl Fn(CutVertex, CutVertex) -> bool) -> Vec<(Vec<CutVertex>, bool)> {
     let n = polygon.len();
-    let on_cut = |i: usize| cut_edge(polygon[i], polygon[(i + 1) % n]).is_some();
-    let Some(first_cut) = (0..n).find(|&i| on_cut(i)) else {
+    let breaks_at = |i: usize| is_break(polygon[i], polygon[(i + 1) % n]);
+    let Some(first_break) = (0..n).find(|&i| breaks_at(i)) else {
         return vec![(polygon, true)];
     };
-    // Start after a cut edge; each cut edge ends one run.
+    // Start after a break edge; each break edge ends one run.
     let mut runs = Vec::new();
     let mut run: Vec<CutVertex> = Vec::new();
     for step in 1..=n {
-        let i = (first_cut + step) % n;
+        let i = (first_break + step) % n;
         run.push(polygon[i]);
-        if on_cut(i) {
+        if breaks_at(i) {
             let done = std::mem::take(&mut run);
             if done.len() >= 2 {
                 runs.push((done, false));
             }
-        } // if cut edge
+        } // if break edge
     } // for each vertex
     runs
-} // fn open_runs
+} // fn break_loop
+
+// @brief Start and end of a piece's fold line, from the first subpath of its `fold_line` path.
+// @return None when the piece has no straight fold line.
+fn fold_line_ends(piece: &Element) -> Option<((f64, f64), (f64, f64))> {
+    let subpaths = straight_subpaths(svg_dom::fold_line_d(piece)?)?;
+    let points = &subpaths.first()?.points;
+    (points.len() >= 2).then(|| (points[0], points[points.len() - 1]))
+} // fn fold_line_ends
 
 // @brief Index of the part nearest to `p`, among the parts of `cell` when it has any.
 fn nearest_part(parts: &[Part], cell: Option<usize>, p: (f64, f64)) -> usize {
@@ -899,7 +919,24 @@ fn divide_piece(piece: &Element, columns: usize, rows: usize, uu_per_px: f64) ->
     // Outline paths: the bounding box sets the cut lines.
     let mut outline_ds = Vec::new();
     path_ds(outline, &mut outline_ds);
-    let outline_paths: Vec<Vec<Subpath>> = outline_ds.iter().map(|d| straight_subpaths(d)).collect::<Option<_>>()?;
+    let mut outline_paths: Vec<Vec<Subpath>> = outline_ds.iter().map(|d| straight_subpaths(d)).collect::<Option<_>>()?;
+
+    // Seamly2D sends the cut line of a piece with a fold line open: the cut line and the fold line
+    // make the outer edge. Such a subpath closes along the fold line, so it makes parts.
+    let fold = fold_line_ends(piece);
+    let fold_tolerance = FOLD_LINE_TOLERANCE_IN * uu_per_in;
+    let mut joined: HashSet<(usize, usize)> = HashSet::new();
+    if let Some(fold) = fold {
+        for (p, subpaths) in outline_paths.iter_mut().enumerate() {
+            for (s, subpath) in subpaths.iter_mut().enumerate() {
+                if !subpath.closed && line_closes_on_fold(&subpath.points, fold, fold_tolerance) {
+                    subpath.closed = true;
+                    joined.insert((p, s));
+                } // if the open subpath ends on the fold line
+            } // for each subpath
+        } // for each outline path
+    } // if fold line
+    let on_fold = |v: CutVertex| fold.is_some_and(|(a, b)| distance_to_segment(v.point, a, b) <= fold_tolerance);
     let outline_points: Vec<(f64, f64)> = outline_paths.iter().flatten().flat_map(|s| s.points.iter().copied()).collect();
     let (x0, y0, x1, y1) = outline_points.iter().fold(
         (f64::INFINITY, f64::INFINITY, f64::NEG_INFINITY, f64::NEG_INFINITY),
@@ -962,7 +999,7 @@ fn divide_piece(piece: &Element, columns: usize, rows: usize, uu_per_px: f64) ->
     }
     let count = parts.len();
 
-    // Outline: each part is exactly its own region.
+    // Outline: each part is exactly its own region. A joined outline opens again at the fold line.
     let outline_split: Vec<SplitPath> = outline_paths
         .iter()
         .enumerate()
@@ -972,7 +1009,14 @@ fn divide_piece(piece: &Element, columns: usize, rows: usize, uu_per_px: f64) ->
                 .iter()
                 .enumerate()
                 .filter(|(_, part)| part.path == p)
-                .map(|(i, part)| Clipped { part: i, subpath: part.subpath, vertices: part.polygon.clone(), closed: true })
+                .flat_map(|(i, part)| {
+                    let runs = if joined.contains(&(part.path, part.subpath)) {
+                        break_loop(part.polygon.clone(), |a, b| on_fold(a) && on_fold(b)) // open at the fold line
+                    } else {
+                        vec![(part.polygon.clone(), true)] // closed region
+                    }; // if joined
+                    runs.into_iter().map(move |(vertices, closed)| Clipped { part: i, subpath: part.subpath, vertices, closed })
+                })
                 .collect(),
         })
         .collect();
@@ -1371,6 +1415,45 @@ mod tests {
         } // for each part
         assert_eq!(stretches, vec!["M0,200 L0,0".to_string(), "M0,400 L0,200".to_string()]);
     } // fold_line_is_clipped_per_part
+
+    // @brief An open cut line that ends on the fold line makes parts like a closed one. A part on the fold
+    // line keeps its cut line open there; a part off the fold line has a closed cut line.
+    #[test]
+    fn open_cut_line_on_the_fold_line_splits_and_stays_open() {
+        // Fold line on the left edge, 400..0; the cut line runs from the fold line end to its start.
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-1" data-type="piece" data-name="Back" data-on-fold="true">
+            <g data-type="cutline" data-turn-points="0 1 2 3"><path d="M0,0 L400,0 L400,400 L0,400"/></g>
+            <g id="fold_line_Back" data-type="fold_line"><path d="M0,400 L0,0"/></g></g></svg>"#;
+        let mut doc = Document::parse(svg).expect("parses");
+        let divided = divide_oversized_pieces(&mut doc, &spec(250, 250, true));
+        assert_eq!(divided, vec![DividedPiece { label: "Back".to_string(), parts: 4 }]);
+
+        let mut open = 0;
+        for part in part_groups(&doc) {
+            let cutline = component(part, "cutline").expect("cutline");
+            let d = ds(cutline);
+            let (x0, _, _, _) = part_bbox(part);
+            if x0 < 1.0 {
+                // On the fold line: one open run, ends on the fold line, both ends turn points.
+                assert!(!d.contains('Z') && d.matches('M').count() == 1, "{d}");
+                assert!(d.starts_with("M0,") && d.contains(" L0,"), "{d}");
+                assert_eq!(attr(cutline, "data-turn-points"), "0 1 2 3", "{d}");
+                open += 1;
+            } else {
+                assert!(d.ends_with('Z'), "{d}");
+            } // if on the fold line
+        } // for each part
+        assert_eq!(open, 2);
+    } // open_cut_line_on_the_fold_line_splits_and_stays_open
+
+    // @brief An open cut line without a fold line is not an outline region: the piece is not divided.
+    #[test]
+    fn open_cut_line_without_fold_line_is_not_divided() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-1" data-type="piece" data-name="Back">
+            <g data-type="cutline"><path d="M0,0 L400,0 L400,400 L0,400"/></g></g></svg>"#;
+        let mut doc = Document::parse(svg).expect("parses");
+        assert!(divide_oversized_pieces(&mut doc, &spec(250, 250, true)).is_empty());
+    } // open_cut_line_without_fold_line_is_not_divided
 
     // @brief The fold line arrow line and label are not clipped: each goes whole into the fold line group
     // of the part nearest to it, after that part's stretch of fold line.

@@ -117,6 +117,10 @@ pub fn extract_cutline_polygons(svg_root: &Element) -> Vec<PiecePolygon> {
 // fixtures that haven't been re-exported through Seamly2D's flatten pass
 // still extract).
 //
+// An open cut line (a piece with a fold line: the cut line and the fold line
+// make the outer edge) gives the same polygon: its implicit closing edge runs
+// along the fold line.
+//
 // Returns None when the piece has no usable outline group, the path doesn't
 // parse, or the result has fewer than three distinct vertices.
 //
@@ -352,6 +356,22 @@ mod tests {
         assert_eq!(pieces[0].polygon.vertices[0], (0.0, 0.0));
         assert_eq!(pieces[0].polygon.vertices[2], (10.0, 5.0));
     } // extracts_simple_cutline_square
+
+    // @brief An open cut line on the fold line gives the closed outer edge: the
+    // implicit closing edge runs along the fold line.
+    #[test]
+    fn open_cut_line_closes_along_the_fold_line() {
+        let svg = r#"<?xml version="1.0"?>
+            <svg xmlns="http://www.w3.org/2000/svg">
+                <g id="Back" data-type="piece">
+                    <g id="cutline_Back" data-type="cutline"><path d="M 0,0 L 10,0 L 10,5 L 0,5"/></g>
+                    <g id="fold_line_Back" data-type="fold_line"><path d="M 0,5 L 0,0"/></g>
+                </g>
+            </svg>"#;
+        let pieces = extract_cutline_polygons(&parse_svg(svg));
+        assert_eq!(pieces.len(), 1);
+        assert_eq!(pieces[0].polygon.vertices, vec![(0.0, 0.0), (10.0, 0.0), (10.0, 5.0), (0.0, 5.0)]);
+    } // open_cut_line_closes_along_the_fold_line
 
     // @brief When no cutline group is present, fall back to the seamline.
     #[test]

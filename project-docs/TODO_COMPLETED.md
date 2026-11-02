@@ -1759,3 +1759,14 @@ The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`sr
 - The warning named the old CollarTopInterface half piece: its outline lay on both sides of its fold line.
 - A mirrored piece has no fold line, so `fold_line_edge.rs` does not plan it on the fold edge and gives no warning.
 - Screenshot: `test-seamly-layout\layouts\male_shirt\20261030_male_shirt\Layoutwarning-Screenshot 2026-11-01 191530.png`.
+
+## Task Layout.112 — Read an open cut line that ends on the fold line
+
+- Rule and Seamly2D side: Seamly2D.71.11. A piece with a fold line sends an open `cutline`; its `fold_line` runs from the cut line end to the cut line begin.
+- Layout.112.1: new `geometry::fold_line_join` (`line_closes_on_fold`, `distance_to_segment`, 0.1 mm). DXF-ASTM `converter` closes an open cut line along the fold line before it picks the boundary. `piece_divider` makes parts from it; a part on the fold line keeps its cut line open there. Packing (`svg_extract`) uses the implicit closing edge; tiling reads piece rectangles only. No change needed there.
+- Layout.112.2: the display and HPGL draw the open cut line as sent. HPGL cut mode does not cut the fold line (a mark).
+- Layout.112.3: a closed cut line (older handoff, untagged SVG) still imports and exports.
+- Layout.112.4: tests `fold_line_join` (3), `astm_piece_test` `open_cut_line_closes_along_the_fold_line`, `open_cut_line_off_the_fold_line_is_not_the_boundary`, `built_in_seam_line_stops_on_the_fold_line` (open and closed), `piece_divider` `open_cut_line_on_the_fold_line_splits_and_stays_open`, `open_cut_line_without_fold_line_is_not_divided`, `hpgl_writer_tests` `open_cut_line_on_the_fold_line_is_cut_open`, `svg_extract` `open_cut_line_closes_along_the_fold_line`. Docs: `SVG-DATA-ATTRIBUTES.md` (`cutline`, `fold_line`, split parts), `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
+- Layout.112.5: export warning reworded (user decision): "the fold line doesn't connect with the cutline".
+- Verified: `cargo test --workspace` all pass (261 cxxqt_bridge); `ctest --preset debug` 7/7.
+- The open cut line reaches SeamlyLayout when Layout Mode switches to `layout_handoff` (Dead.4.4.3).

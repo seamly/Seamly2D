@@ -9,10 +9,11 @@
 //! "either the first two or the last two points of a piece boundary must match
 //! the mirror line's points".
 //!
-//! The cut line has no seam allowance along the fold, so one cut line edge lies
-//! on the fold line. Its end points become the mirror line, and the boundary
-//! starts with them. A sew line boundary (no seam allowance) holds the fold
-//! line itself.
+//! The cut line has no seam allowance along the fold, so one boundary edge lies
+//! on the fold line: the edge an open cut line closes along, or the fold edge of
+//! a closed cut line from an older handoff. Its end points become the mirror
+//! line, and the boundary starts with them. A sew line boundary (no seam
+//! allowance) holds the fold line itself.
 
 use crate::astm_contour::{distance, AstmContour};
 use crate::drawing::{Block, Drawing};

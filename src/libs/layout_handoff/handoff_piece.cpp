@@ -77,6 +77,28 @@ HandoffLine make_line(const QVector<QPointF> &points, const QVector<QPointF> &no
     }
     return line;
 }
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief make_cut_line builds a cut line; a fold line opens it.
+ * @param points        closed polyline; the first point may repeat at the end.
+ * @param node_vertices vertices that can break the tangent. Empty = turn points unknown.
+ * @param fold          fold line of the piece; a null line keeps the cut line closed.
+ */
+HandoffLine make_cut_line(const QVector<QPointF> &points, const QVector<QPointF> &node_vertices, const QLineF &fold)
+{
+    HandoffLine line;
+    if (fold.isNull())
+    {
+        line = make_line(AbstractPiece::RemoveDublicates(points, false), node_vertices, true);
+    }
+    else
+    {
+        // The open cut line begins where the fold line ends and ends where the fold line begins.
+        const QVector<QPointF> open = VPiece::openAtFoldLine(points, fold);
+        line = make_line(AbstractPiece::RemoveDublicates(open, false), node_vertices, is_closed(open));
+    }
+    return line;
+}
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
@@ -287,9 +309,12 @@ HandoffPiece HandoffPiece::create(const VPiece &piece, const VContainer *pattern
     HandoffPiece handoff;
 
     handoff.m_is_seam_line_hidden = piece.isHideSeamLine();
-    handoff.m_seam_line = make_line(AbstractPiece::RemoveDublicates(piece.mainPathPoints(pattern), false),
-                                    piece.mainPathNodeVertices(pattern), true);
+    const QVector<QPointF> main_path_points = piece.mainPathPoints(pattern);
+    const QVector<QPointF> main_path_nodes  = piece.mainPathNodeVertices(pattern);
+    handoff.m_seam_line = make_line(AbstractPiece::RemoveDublicates(main_path_points, false), main_path_nodes, true);
 
+    // The cut line and the fold line make the outer edge, so the cut line does not run along the fold line.
+    const QLineF           fold_line = piece.foldLine(pattern);
     QVector<QPointF>       cut_line_nodes;
     SeamAllowanceCorners   corners;
     const QVector<QPointF> cut_points = piece.seamAllowancePoints(pattern, &cut_line_nodes, &corners);
@@ -298,11 +323,15 @@ HandoffPiece HandoffPiece::create(const VPiece &piece, const VContainer *pattern
     {
         handoff.m_has_seam_allowance          = true;
         handoff.m_has_built_in_seam_allowance = piece.hasSeamAllowanceBuiltIn();
-        if (!cut_points.isEmpty())
+        if (handoff.m_has_built_in_seam_allowance)
         {
-            handoff.m_cut_line = make_line(AbstractPiece::RemoveDublicates(cut_points, false), cut_line_nodes, true);
+            handoff.m_built_in_cut_line = make_cut_line(main_path_points, main_path_nodes, fold_line);
         }
-        else if (!handoff.m_has_built_in_seam_allowance)
+        else if (!cut_points.isEmpty())
+        {
+            handoff.m_cut_line = make_cut_line(cut_points, cut_line_nodes, fold_line);
+        }
+        else
         {
             qWarning() << "Seam allowance is empty.";
             handoff.m_has_seam_allowance = false;
@@ -329,8 +358,7 @@ HandoffPiece HandoffPiece::create(const VPiece &piece, const VContainer *pattern
         handoff.m_notches = make_notches(lines, line_counts, widths, types);
     }
 
-    const QLineF fold_line = piece.foldLine(pattern);
-    handoff.m_is_on_fold   = piece.GetPatternPieceData().IsOnFold() || !fold_line.isNull();
+    handoff.m_is_on_fold = piece.GetPatternPieceData().IsOnFold() || !fold_line.isNull();
     if (!fold_line.isNull())
     {
         handoff.m_fold_line = fold_line;
@@ -338,7 +366,7 @@ HandoffPiece HandoffPiece::create(const VPiece &piece, const VContainer *pattern
         {
             handoff.m_fold_line_on_cut_line = VPiece::foldLineOnCutLine(cut_points, fold_line);
         }
-        handoff.m_fold_line_graphic = pattern_piece::FoldLineGraphic(fold_line, piece.mainPathPoints(pattern));
+        handoff.m_fold_line_graphic = pattern_piece::FoldLineGraphic(fold_line, main_path_points);
     }
 
     const VGrainlineData &grainline = piece.GetGrainlineGeometry();
@@ -356,33 +384,33 @@ void HandoffPiece::unify_piece_turn_points(const QVector<HandoffPiece *> &sizes)
         return;
     }
 
+    // Sizes whose lines differ in closed and open keep their turn points.
     const auto unify_line = [&sizes](HandoffLine HandoffPiece::*member)
     {
-        QVector<SizeLine> lines;
-        for (const HandoffPiece *piece : sizes)
+        const bool closed     = (sizes.first()->*member).closed;
+        const bool same_shape = std::all_of(sizes.cbegin(), sizes.cend(), [closed, member](const HandoffPiece *piece)
         {
-            const HandoffLine &line = piece->*member;
-            lines.append({line.points, line.turn_points, line.node_indices});
-        }
-        const QVector<QVector<int>> turns = unify_turn_points(lines, (sizes.first()->*member).closed);
-        for (int s = 0; s < turns.size(); ++s)
+            return (piece->*member).closed == closed;
+        });
+        if (same_shape)
         {
-            (sizes.at(s)->*member).turn_points = turns.at(s);
+            QVector<SizeLine> lines;
+            for (const HandoffPiece *piece : sizes)
+            {
+                const HandoffLine &line = piece->*member;
+                lines.append({line.points, line.turn_points, line.node_indices});
+            }
+            const QVector<QVector<int>> turns = unify_turn_points(lines, closed);
+            for (int s = 0; s < turns.size(); ++s)
+            {
+                (sizes.at(s)->*member).turn_points = turns.at(s);
+            }
         }
     };
     unify_line(&HandoffPiece::m_seam_line);
     unify_line(&HandoffPiece::m_cut_line);
-
-    // Sizes whose built-in seam lines differ in closed and open keep their turn points.
-    const bool built_in_closed = sizes.first()->m_built_in_seam_line.closed;
-    const bool same_shape      = std::all_of(sizes.cbegin(), sizes.cend(), [built_in_closed](const HandoffPiece *piece)
-    {
-        return piece->m_built_in_seam_line.closed == built_in_closed;
-    });
-    if (same_shape)
-    {
-        unify_line(&HandoffPiece::m_built_in_seam_line);
-    }
+    unify_line(&HandoffPiece::m_built_in_seam_line);
+    unify_line(&HandoffPiece::m_built_in_cut_line);
 
     // Paths match by their order in the piece, so every size needs the same path count.
     const auto unify_paths = [&sizes](QVector<HandoffPath> HandoffPiece::*paths)
@@ -455,6 +483,11 @@ QRectF HandoffPiece::bounds() const
 const HandoffLine &HandoffPiece::cut_line() const
 {
     return m_cut_line;
+}
+//---------------------------------------------------------------------------------------------------------------------
+const HandoffLine &HandoffPiece::built_in_cut_line() const
+{
+    return m_built_in_cut_line;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

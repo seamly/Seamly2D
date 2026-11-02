@@ -313,14 +313,15 @@ void PieceWriter::add_seamline()
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief add_cutline writes the cut line; with a built-in seam allowance the outline is the cut line.
+ * @details At a fold line the cut line is open. The cut line and the fold line make the outer edge.
  */
 void PieceWriter::add_cutline()
 {
     const HandoffPiece &piece = m_placed.piece;
     if (piece.has_seam_allowance() && piece.has_built_in_seam_allowance())
     {
-        add_path_component(QStringLiteral("cutline"), line_data(piece.seam_line()), m_style.cut,
-                           piece.seam_line().turn_points);
+        add_path_component(QStringLiteral("cutline"), line_data(piece.built_in_cut_line()), m_style.cut,
+                           piece.built_in_cut_line().turn_points);
     }
     else if (m_style.show_seam_allowances && piece.has_seam_allowance())
     {
