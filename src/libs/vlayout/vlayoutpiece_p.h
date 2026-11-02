@@ -4,7 +4,7 @@
 //  @date   Dec 27, 2022
 //
 //  @copyright
-//  Copyright (C) 2017 - 2025 Seamly, LLC
+//  Copyright (C) 2017 - 2026 Seamly, LLC
 //  https://github.com/fashionfreedom/seamly2d
 //
 //  @brief
@@ -80,9 +80,11 @@ public:
         : contour(),
           contourTurnPoints(),
           contourNodeIndices(),
+          contour_closed(true),
           seamAllowance(),
           seamAllowanceTurnPoints(),
           seamAllowanceNodeIndices(),
+          seam_allowance_closed(true),
           seamAllowanceCorners(),
           builtInSeamLine(),
           builtInSeamLineTurnPoints(),
@@ -117,9 +119,11 @@ public:
           contour(piece.contour),
           contourTurnPoints(piece.contourTurnPoints),
           contourNodeIndices(piece.contourNodeIndices),
+          contour_closed(piece.contour_closed),
           seamAllowance(piece.seamAllowance),
           seamAllowanceTurnPoints(piece.seamAllowanceTurnPoints),
           seamAllowanceNodeIndices(piece.seamAllowanceNodeIndices),
+          seam_allowance_closed(piece.seam_allowance_closed),
           seamAllowanceCorners(piece.seamAllowanceCorners),
           builtInSeamLine(piece.builtInSeamLine),
           builtInSeamLineTurnPoints(piece.builtInSeamLineTurnPoints),
@@ -154,14 +158,16 @@ public:
     QVector<QPointF>           contour;            /// @brief contour list of contour points.
     std::optional<QVector<int>> contourTurnPoints; /// @brief turn point indices into contour; unset = unknown
     QVector<int>               contourNodeIndices; /// @brief node vertex indices into contour; empty = unknown
+    bool                       contour_closed;     ///< false when contour has no edge on the fold line
     QVector<QPointF>           seamAllowance;      /// @brief seamAllowance list of seam allowance points.
     std::optional<QVector<int>> seamAllowanceTurnPoints; /// @brief turn point indices into seamAllowance; unset = unknown
     QVector<int>               seamAllowanceNodeIndices; /// @brief node vertex indices into seamAllowance; empty = unknown
+    bool                       seam_allowance_closed; ///< false when seamAllowance has no edge on the fold line
     SeamAllowanceCorners       seamAllowanceCorners; /// @brief seam allowance corners and the ones cut short
     QVector<QPointF>           builtInSeamLine;    /// @brief seam line inside a main path with a built-in seam allowance
     std::optional<QVector<int>> builtInSeamLineTurnPoints; /// @brief turn point indices into builtInSeamLine; unset = unknown
     QVector<int>               builtInSeamLineNodeIndices; /// @brief node vertex indices into builtInSeamLine; empty = unknown
-    bool                       builtInSeamLineClosed; /// @brief false when a fold line cuts builtInSeamLine open
+    bool                       builtInSeamLineClosed; /// @brief false when builtInSeamLine has no edge on the fold line
     QVector<QPointF>           layoutAllowance;    /// @brief layoutAllowance list of layout allowance points.
     QVector<QLineF>            notches;            /// @brief notches list of notches.
     QVector<int>               notchLineCounts;    /// @brief line count per notch, in notches order; empty = unknown

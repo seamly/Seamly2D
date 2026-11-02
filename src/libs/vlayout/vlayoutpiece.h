@@ -97,13 +97,17 @@ public:
     static VLayoutPiece       Create(const VPiece &piece, const VContainer *pattern);
 
     QVector<QPointF>          getContourPoints() const;
-    void                      setMainPathPoints(const QVector<QPointF> &points, bool hideMainPath = false,
-                                                const QVector<QPointF> &nodeVertices = QVector<QPointF>());
+    void                      setMainPathPoints(const QVector<QPointF>& points, bool hide_main_path = false,
+                                                const QVector<QPointF>& node_vertices = QVector<QPointF>(),
+                                                const QLineF& fold = QLineF());
+    bool                      isContourClosed() const;
 
     QVector<QPointF>          getSeamAllowancePoints() const;
-    void                      setSeamAllowancePoints(const QVector<QPointF> &points, bool seamAllowance = true,
-                                                     bool seamAllowanceBuiltIn = false,
-                                                     const QVector<QPointF> &nodeVertices = QVector<QPointF>());
+    void                      setSeamAllowancePoints(const QVector<QPointF>& points, bool seam_allowance = true,
+                                                     bool built_in = false,
+                                                     const QVector<QPointF>& node_vertices = QVector<QPointF>(),
+                                                     const QLineF& fold = QLineF());
+    bool                      isSeamAllowanceClosed() const;
 
     SeamAllowanceCorners      seamAllowanceCorners() const;
     void                      setSeamAllowanceCorners(const SeamAllowanceCorners &corners);
