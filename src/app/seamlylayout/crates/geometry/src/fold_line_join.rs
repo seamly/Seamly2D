@@ -3,14 +3,15 @@
 // MIT License: https://opensource.org/licenses/MIT
 
 // @file fold_line_join.rs
-// @brief Join an open cut line and the fold line into one closed outer edge.
+// @brief Join an outer line and the fold line into one closed outer edge.
 //
-// Seamly2D sends the cut line of a piece with a fold line open. The fold line
-// begins where the cut line ends and ends where the cut line begins, so the cut
-// line and the fold line make the outer edge. Packing, the DXF-ASTM boundary and
-// the piece divider need that edge closed; the display and the cutter use the
-// open cut line as drawn. An older handoff sends the cut line closed, with an
-// edge along the fold line; it needs no join.
+// With a fold line, Seamly2D sends the seam line and the cut line without their
+// edge on the fold line. The fold line begins where such a line ends and ends
+// where it begins, so the outer line and the fold line make the outer edge. The
+// outer line is the cut line, or the seam line of a piece without a seam
+// allowance. Packing, the DXF-ASTM boundary and the piece divider need that edge
+// closed; the display and the cutter use the line as drawn. An older handoff
+// sends the line closed, with an edge along the fold line; it needs no join.
 
 // @brief Shortest distance from `p` to the segment `a`-`b`.
 pub fn distance_to_segment(p: (f64, f64), a: (f64, f64), b: (f64, f64)) -> f64 {

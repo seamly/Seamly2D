@@ -10,10 +10,10 @@
 //! the mirror line's points".
 //!
 //! The cut line has no seam allowance along the fold, so one boundary edge lies
-//! on the fold line: the edge an open cut line closes along, or the fold edge of
-//! a closed cut line from an older handoff. Its end points become the mirror
-//! line, and the boundary starts with them. A sew line boundary (no seam
-//! allowance) holds the fold line itself.
+//! on the fold line. Seamly2D sends the outer line without that edge, and the
+//! converter adds it back; an older handoff sends the line closed. The outer
+//! line is the cut line, or the seam line of a piece without a seam allowance.
+//! The edge end points become the mirror line, and the boundary starts with them.
 
 use crate::astm_contour::{distance, AstmContour};
 use crate::drawing::{Block, Drawing};
