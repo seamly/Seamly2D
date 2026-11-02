@@ -1752,3 +1752,10 @@ The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`sr
 - Fabric media size (01562ef927): the fabric canvas and packing bin come from `LayoutSettings::media_size_in()`. Fabric reads `fabricWidth` (folded: half) and `fabricHeight` (0 = no fixed length, trimmed). Fabric no longer reads the paper sheet size kept from paper media; paper no longer applies a leftover fold. Tests `trousers_on_folded_fabric_ignore_the_paper_sheet`, `media_reads_only_its_own_size_fields`. Open: user test, trousers on 36 in folded fabric (next MSI).
 
 - Layout.90, Layout.91: DXF paper space and model space. Research: `dxf-docs/seamlylayout_DXF_PAPER_AND_MODEL_SPACE.md`. User decision: P1 (no paper space viewport) and M1 (no extents or limits in the header). No code change. `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md` Decisions records them.
+
+## Task Layout.111 — Create Layout: fold line warning on male_shirt
+
+- Closed, no code change (user decision): the warning was correct.
+- The warning named the old CollarTopInterface half piece: its outline lay on both sides of its fold line.
+- A mirrored piece has no fold line, so `fold_line_edge.rs` does not plan it on the fold edge and gives no warning.
+- Screenshot: `test-seamly-layout\layouts\male_shirt\20261030_male_shirt\Layoutwarning-Screenshot 2026-11-01 191530.png`.

@@ -4,6 +4,8 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Implement
 
+
+
 ### [ ] Task Layout.107 — Implement - Seamly2D: remove the `SEAMLY_HANDOFF_COMPARE_DIR` developer switch
 
 Layout.106 added the switch for the Dead.4.4.3 compare. Remove it when that compare passes, at the latest with Dead.4.5. Requires a build containing Layout.106.
@@ -29,6 +31,9 @@ Layout.106 added the switch for the Dead.4.4.3 compare. Remove it when that comp
 - [ ] Layout.108.7 Docs: `SVG-DATA-ATTRIBUTES.md` "Multisize grainline and label positions", `AGENT_CHECKLIST.md` section 26.
 - [ ] Layout.108.8 Verify: MSI. jacket2 Layout Mode: no import warning; Size 220 tab: Back's piece label inside the cut line.
 
+### [ ] Task Layout.110 - Implement - Fix "| Layout.98.6 | 24 | S2D > male_shirt > Piece Properties: Flip radio buttons, Flip submenu | FAIL --> Flip selection appears in piece context menu but without a checkbox, and the submenu appears when 'Flip' is selected, but the piece isn't flipped."
+
+When the user clicks 'Horizontal', 'Vertical', or 'Both' then the piece is flipped in the direction(s) selected then displayed on the piece Mode canvas.
 
 ## VERIFY
 
@@ -411,6 +416,9 @@ Export > DXF > "DXF-AAMA (R11)": ANSI/AAMA-292 content in a DXF R11 (AC1009) fil
   - Label placeholder `%pFoldPosition%`: removed from the label editor Insert menu; an old template prints nothing for it. No sample or template uses it.
 - [x] Layout.97.4 Tests: `TST_VPiece::ConverterRemovesFoldPosition` (3 rows). Harness: 16 passed. `cl /Zs` on every changed `.cpp`. Fusion render: the page fits again. Not run: Qt suites (next MSI).
 - [ ] Layout.97.5 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
+- [x] Layout.97.6 Fix: removing the fold line in the piece dialog left "On fold" checked. The box now returns to the user choice; a saved piece with a fold line has none (unchecked). `cl` compile check; no dialog test.
+  - Probable cause of `onFold="true"` on male_shirt "CollarTopInterface Mirrored": the Piece Mirror tool writes `false`, and only the dialog sets `true`.
+- [ ] Layout.97.7 Verify (User), next MSI: mark two fold line nodes, then unmark them: "On fold" unchecks. male_shirt "CollarTopInterface Mirrored": uncheck "On fold", export: `Fold:N` (user decision: a mirrored piece is not on the fold).
 - DXF `Fold:Y` / `Fold:N`: Layout.93.5.
 
 ### [ ] Task Layout.98 - Verify - Seamly2D Piece Properties - Flip: change Flip to radio buttons 'None', 'Horizontal', 'Vertical', and 'Both' are enabled. (Default is 'None'); create test.

@@ -25,7 +25,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 | Layout.95.6 | 24 | S2D > male_shirt > Piece Properties: Rotation radio buttons | PASS
 | Layout.96.6 | 24 | S2D > male_shirt > Piece Properties: Tilt radio buttons and degrees | PASS
 | Layout.97.5 | 24 | S2D > male_shirt, jacket2 > Piece Properties: On fold check box, no fold position |PASS
-| Seamly2D.11.9 | 27 | S2D > male_shirt > Built-in seam line in Piece mode, at a fold line | PASS. Add a task to TODO_LAYOUT.md to improve the seamline for 'Built in Seam Allowance'
+| Seamly2D.11.9 | 27 | S2D > male_shirt > Built-in seam line in Piece mode, at a fold line | FAIL --> Seamly2D.11.10: seam line overshoots at D11 and D12 (CollarTopInterface-Built-in-SA)
 | Dead.4.1.5, Dead.4.2 | 28 | S2D > jacket2, male_shirt > Old layout, print, console export and Export Pieces removed | PASS. When I select the Layout icon then seamlyLayout application appears.
 | Layout.83.4 | 15 | SL > male_shirt > Nested legend squares | PASS
 | Layout.82.3 | 16 | SL > male_shirt > Nested size colors: dark and pastel | PASS
@@ -40,11 +40,11 @@ JACKET_2
 | Layout.93.7 | 23 | SL > jacket_2 > DXF piece properties: Material, Missing Piece Data, Rotation, Flip, Tilt, Fold | --> export DXF (R13), upload to https://aw.fyi/dxf
 
 MALE_SHIRT
-| Layout.98.6 | 24 | S2D > male_shirt > Piece Properties: Flip radio buttons, Flip submenu | FAIL --> Flip selection appears in piece context menu but without a checkbox, and the submenu appears when 'Flip' is selected, but the piece isn't flipped.
+| Layout.98.6 | 24 | S2D > male_shirt > Piece Properties: Flip radio buttons, Flip submenu | FAIL --> Flip selection appears in piece context menu but without a checkbox, and the submenu appears when 'Flip' is selected, but the piece isn't flipped. The fix for this problem is Layout.110.
 | Layout.88.2 | 3 | SL > male_shirt > Export menu: DXF-ASTM note reads in full | FAIL --> Note did not appear
 
 Check in aw.fyi/dxf
-| Layout.80.6.6 | 21 | SL > Export > DXF-ASTM (R13): mirror line | ?
+| Layout.80.6.6 | 21 | SL > Export > DXF-ASTM (R13): mirror line | PASS
 | Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Fabric | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Lining | ?

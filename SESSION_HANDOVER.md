@@ -2,6 +2,20 @@
 
 ## Current status
 
+### 2026-11-01 — male_shirt DXF review: Flip Both, seam line corner, On fold box; merged into local `run-seamlyLayout`, not pushed
+
+- Checked DXF exports 1931 and 2029 (aw.fyi reports). `AGENT_CHECKLIST.md`: Layout.80.6.6 PASS; §27 FAIL → Seamly2D.11.10 (user).
+- User decision: Flip Both writes `Flip:Y` with a `Rotation:` step that reaches 180. Merge `35b6ce1b7b` (`31752f8e20`). cargo 639 pass, ctest 7/7.
+- Seamly2D.11.10 done. Merge `572ed0f74b` (`0a8954905a`): `removeConsumedEdges()` in `vpiece.cpp` collapses a reversed offset edge before `Equidistant()`. Harness: new test FAIL before, `TST_VPiece` 129/129 after.
+- User decision: a mirrored piece is not on the fold (`Fold:N`). male_shirt "CollarTopInterface Mirrored" has `onFold="true"`; the mirror tool writes `false`.
+- Layout.97.6 done. Merge `28741addb9` (`dc26eeeded`): removing the fold line no longer leaves "On fold" checked. `cl` compile only.
+- Layout.111 closed (user decision: the warning was correct); moved to `TODO_COMPLETED.md`.
+- Harness: `%TEMP%\seam_corner_harness\` (`build.bat [fix]`, `run.bat`; xerces DLL directory on PATH).
+- Open question, not answered: FrontPanel has `onFold="true"` and no fold line, so it writes `Fold:Y`.
+- User action: uncheck "On fold" on "CollarTopInterface Mirrored" in both male_shirt copies.
+- Next: MSI build (ask): Seamly2D.11.8, Seamly2D.11.9, Layout.97.7.
+- `run-seamlyLayout` is 26 commits ahead of `origin`.
+
 ### 2026-11-01 — `develop` merge (14 upstream commits); merged into local `run-seamlyLayout`, not built, not pushed
 
 - Added remote `upstream` (fetch only, push URL `DISABLED`). Local `develop` already equals `upstream/develop` and `origin/develop`.
@@ -45,16 +59,6 @@
 - Open user decision: test mode ignores a bad `--gsize`/`--gheight` (exit 0). The 4 gradation rows of the old test are not ported. `glimited/*.sm2d` and `issue_372.sm2d` are now unused.
 - `run-seamlyLayout` is 2 commits ahead of `origin`.
 - Next: MSI build (ask).
-
-### 2026-10-27 — Layout.106.1–106.8: handoff pieces built with `layout_handoff` too; merged into local `run-seamlyLayout`, not pushed
-
-- User decisions: Option A (old and new lists filled in one size loop; SeamlyLayout keeps the old SVG until the Dead.4.4.3 compare passes). Compare switch: env `SEAMLY_HANDOFF_COMPARE_DIR=<absolute dir>` writes `<pattern>_old.svg` and `<pattern>_new.svg`. Removal filed as Task Layout.107.
-- Merge `d7526a1ee6` (commits `9b509372c6`, `b2484d7dd8`). No skip-ci token: `.pri` and `.pro` changed.
-- New: `layout_handoff/handoff_corner_cuts.h/.cpp` (`compare_corner_cuts`), `TST_HandoffCornerCuts`.
-- Changed: `mainwindowsnogui.h/.cpp` (`handoff_pieces`, `createPlacedPiece`, `generateHandoffSvgDocument`, `writeHandoffCompareFiles`; corner cuts and node counts read the new lists), `mainwindow.cpp` (clears, compare call), size briefs in `handoff_document.h`, `handoff_ids.h`.
-- Verified: `cl /Zs` of `mainwindowsnogui.cpp`, `mainwindow.cpp`, `handoff_corner_cuts.cpp`; scratch harness `TST_HandoffCornerCuts` 4 passed. Not run: MSI, Qt suites (`TST_HandoffPiece`, `TST_HandoffDocument`), GUI.
-- Next: MSI build (ask). Then user test 106.9, then the compare with the env switch (Dead.4.4.3).
-- `run-seamlyLayout` is 28 commits ahead of `origin`.
 
 Older entries: `project-docs/SESSION_HANDOVER_ARCHIVE.md`. Do not Read it at session start.
 

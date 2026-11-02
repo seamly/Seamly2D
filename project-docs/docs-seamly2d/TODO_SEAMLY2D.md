@@ -28,11 +28,18 @@ A piece with a built-in seam allowance erroneously:
 1) displays only the main path (cutline) and hides the seamline,
 2) creates the seamline on top of the cutline,
 3) sends the seamline but not the cutline or foldline to SeamlyLayout and to piece exports (`VPiece::builtInSeamLinePoints()`).
+4) Is calculated incorrectly - it enters into the seam allowance margin
 
 Display, calculation, fold line, handoff, tests and schema are done: `TODO_COMPLETED.md`, "Completed subtasks from Task Seamly2D.11". Open:
-
-- [ ] Seamly2D.11.8 Next MSI: Qt suites (`nmake check` in `local_build_msi.ps1`). A scratch harness passed every Seamly2D suite with the changed sources.
-- [ ] Seamly2D.11.9 Verify (User): `AGENT_CHECKLIST.md` §27.
+- [x] Seamly2D.11.10 Fix - The built-in seamline crosses the seam allowance. For example in male_shirt.sm2d, piece 'CollarTopInterface-Built-in-SA', the seamline is incorrect at D11 and D12.
+  - Evidence, `male_shirt_R13_202611012029.dxf` (mm): cut edge x=199.23, seam line x=189.23.
+    - D12: seam vertex (197.06, 1251.52), spike to (189.23, 1249.46). Correct corner ~(189.23, 1249.77).
+    - D11: spike from (189.23, 1195.39) to seam vertex (199.11, 1192.79). Correct corner ~(189.23, 1194.93).
+  - Cause: the inward offset turns a short spline chord around at the 76 degree corner. `CheckLoops()` misses the spike: it only touches the front edge seam line.
+  - Fix: `removeConsumedEdges()` in `vpiece.cpp` collapses each such edge to the crossing of its neighbour edge lines, before `Equidistant()`. Seam line only; the seam allowance is unchanged.
+  - Test `TST_VPiece::BuiltInSeamLineMeetsAtAcuteCorner`. Harness: FAIL before the fix (2.17 mm from the cut line), 129/129 PASS after.
+- [ ] Seamly2D.11.8 Verify: Next MSI -  Qt suites (`nmake check` in `local_build_msi.ps1`). A scratch harness passed every Seamly2D suite with the changed sources.
+- [ ] Seamly2D.11.9 Verify (User): `AGENT_CHECKLIST.md` §27. Last result: FAIL (Seamly2D.11.10). Check again after the next MSI: no spike at D11 and D12.
 
 ### [ ] Task Seamly2D.71 - Implement - Piece Mode - Foldline processing, graphic and text
 
@@ -81,20 +88,23 @@ Rotation, arrow line, label, extended fold line, SeamlyLayout fold placement and
 
 ### [ ] Task Seamly2D.62 - Implement - Piece Mode - 'Flip Piece' tool
 
-- [ ] User selects radio button for flipping horizontally or vertically
-- [ ] Flip the entire piece including labels, grainlines, etc.
-- [ ] After flipping the entire piece then flip the labels, in place, in the same direction (vertical or horizontal) so that text isn't backwards or upside down.
-- [ ] The new piece should be flattened (except for text) to remove transform strings.
-- [ ] 'Flip Piece' tool can be applied to any piece in Piece Mode, including pieces created by 'Union', 'Flip Piece', 'Copy Piece', and 'Mirror on Foldline' tools.
-- [ ] Create test
-- [ ] Update Schema with conversion from previous version
-- [ ] Test/Verify - check flipping:
-  - [ ] Single piece
-  - [ ] Copied piece
-  - [ ] Flipped piece vertical
-  - [ ] Flipped piece horizontal
+The 'Flip Piece' tool can be applied to any piece in Piece Mode, including pieces created by 'Union', 'Flip Piece', 'Copy Piece', and 'Mirror on Foldline' tools.
 
-### [ ] Task Seamly2D.61 - Piece Mode - 'Copy Piece' tool
+- [ ] In Piece Tool Properties, User selects a 'Flip' checkbox which shows a submenu of radio buttons for None, Horizontal, Vertical, Both
+- [ ] Based on the Flip submenu selection, the entire piece is flipped including labels, grainlines, etc.
+- [ ] After flipping the entire piece, flip the labels again in the same direction(s) so that text isn't backwards or upside down.
+- [ ] Flatten the entire flipped piece (except for text) to remove transform strings.
+- [ ] Create test
+- [ ] Update Schema
+- [ ] Create schema conversion from previous version
+- [ ] Test/Verify - check flipping:
+  - [ ] Single piece - vertical & horizontal & both
+  - [ ] Copied piece (requires Seamly2D.61) - vertical & horizontal & both
+  - [ ] Flip a piece that was previously Flipped - vertical
+  - [ ] Flip a piece that was previously Flipped - horizontal
+  - [ ] Flip a piece that was previously Flipped - both
+
+### [ ] Task Seamly2D.61 - Implement - Piece Mode - 'Copy Piece' tool
 
 - [ ] Copy an entire piece - resulting piece is a separate piece linked to draft objects (not linked to original piece).
 - [ ] Update piece name with a suffix, e.g. Collar-1. If a copy of 'Collar-1' is made, then the updated piece name is 'Collar-1-1'

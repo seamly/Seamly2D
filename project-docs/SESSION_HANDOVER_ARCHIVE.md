@@ -2,6 +2,16 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-10-27 — Layout.106.1–106.8: handoff pieces built with `layout_handoff` too; merged into local `run-seamlyLayout`, not pushed
+
+- User decisions: Option A (old and new lists filled in one size loop; SeamlyLayout keeps the old SVG until the Dead.4.4.3 compare passes). Compare switch: env `SEAMLY_HANDOFF_COMPARE_DIR=<absolute dir>` writes `<pattern>_old.svg` and `<pattern>_new.svg`. Removal filed as Task Layout.107.
+- Merge `d7526a1ee6` (commits `9b509372c6`, `b2484d7dd8`). No skip-ci token: `.pri` and `.pro` changed.
+- New: `layout_handoff/handoff_corner_cuts.h/.cpp` (`compare_corner_cuts`), `TST_HandoffCornerCuts`.
+- Changed: `mainwindowsnogui.h/.cpp` (`handoff_pieces`, `createPlacedPiece`, `generateHandoffSvgDocument`, `writeHandoffCompareFiles`; corner cuts and node counts read the new lists), `mainwindow.cpp` (clears, compare call), size briefs in `handoff_document.h`, `handoff_ids.h`.
+- Verified: `cl /Zs` of `mainwindowsnogui.cpp`, `mainwindow.cpp`, `handoff_corner_cuts.cpp`; scratch harness `TST_HandoffCornerCuts` 4 passed. Not run: MSI, Qt suites (`TST_HandoffPiece`, `TST_HandoffDocument`), GUI.
+- Next: MSI build (ask). Then user test 106.9, then the compare with the env switch (Dead.4.4.3).
+- `run-seamlyLayout` is 28 commits ahead of `origin`.
+
 ### 2026-10-27 — `layout_handoff` release build fix, docs, Task Layout.106 filed; merged into local `run-seamlyLayout`, not pushed
 
 - Build fix (merge `22bcc09a30`): `layout_handoff.pro` sets `CONFIG -= precompile_header` (the lib has no `stable.h`) and `QT += widgets printsupport` (`vmisc/def.h` includes `QColorDialog`, `QPrinter`). Linux and macOS release builds had the same fault.
