@@ -99,7 +99,7 @@ pub struct Block {
     pub quantity: Option<String>,
     // `Rotation:` system text: the rotation step in degrees, from `data-rotation`. None writes no line.
     pub rotation: Option<String>,
-    // `Flip:` system text: X, Y or XY, from `data-flip`. None writes no line.
+    // `Flip:` system text: X or Y, from `data-flip` (Both is Y with a 180 degree `Rotation:`). None writes no line.
     pub flip: Option<String>,
     // `Tilt:` system text: the largest tilt in degrees with its sign, from `data-tilt`. None writes no line.
     pub tilt: Option<String>,

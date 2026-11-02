@@ -637,20 +637,39 @@ fn quantity_from_piece(piece: &Element) -> Option<String> {
 // @brief `Rotation:` value for a piece: the rotation step in degrees, from `data-rotation`.
 // @details D6673 §4.3.1.2: the piece may rotate in this step up to 360 degrees. Seamly2D sends
 //          360 (1-Way), 180 (2-Way), 90 (4-Way) or 1 (Any), and no attribute for None.
-// @return None when `data-rotation` is absent or not a step from 1 to 360.
+//          A Both flip is written `Flip:Y` with a 180 degree turn, because an X flip is a Y flip
+//          turned 180 degrees. Its step is the largest step that reaches the piece step and 180.
+// @return None when `data-rotation` is absent or not a step from 1 to 360, and the flip is not Both.
 fn rotation_from_piece(piece: &Element) -> Option<String> {
-    piece
+    let step = piece
         .attributes
         .get("data-rotation")
         .and_then(|v| v.trim().parse::<u32>().ok())
-        .filter(|step| (1..=360).contains(step))
-        .map(|step| step.to_string())
+        .filter(|step| (1..=360).contains(step));
+    // No rotation attribute allows only 0 degrees, the same turns as a 360 step.
+    let step = if flip_is_both(piece) { Some(greatest_common_divisor(step.unwrap_or(360), 180)) } else { step };
+    step.map(|step| step.to_string())
 } // fn rotation_from_piece
+
+// @brief Greatest common divisor of two positive numbers (Euclid).
+fn greatest_common_divisor(a: u32, b: u32) -> u32 {
+    let (mut a, mut b) = (a, b);
+    while b != 0 {
+        (a, b) = (b, a % b);
+    } // while b
+    a
+} // fn greatest_common_divisor
+
+// @brief True when the piece has `data-flip="Both"`.
+fn flip_is_both(piece: &Element) -> bool {
+    piece.attributes.get("data-flip").is_some_and(|v| v.trim() == "Both")
+} // fn flip_is_both
 
 // @brief `Flip:` value for a piece, from `data-flip`.
 // @details D6673 §4.3.1.2: X flips the piece about the horizontal axis, Y about the vertical axis.
 //          Seamly2D's Horizontal flip mirrors left to right, about the vertical axis, so it is Y;
-//          Vertical is X; Both allows either and is written XY.
+//          Vertical is X. D6673 has no value for Both: Both is Y, and `rotation_from_piece`
+//          adds the 180 degree turn that gives the X flip.
 // @return None when `data-flip` is absent or not one of Horizontal, Vertical, Both.
 fn flip_from_piece(piece: &Element) -> Option<String> {
     piece
@@ -659,7 +678,7 @@ fn flip_from_piece(piece: &Element) -> Option<String> {
         .and_then(|v| match v.trim() {
             "Horizontal" => Some("Y"),
             "Vertical"   => Some("X"),
-            "Both"       => Some("XY"),
+            "Both"       => Some("Y"),
             _            => None,
         }) // and_then
         .map(str::to_string)
