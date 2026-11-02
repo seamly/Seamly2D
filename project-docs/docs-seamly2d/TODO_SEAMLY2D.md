@@ -56,14 +56,20 @@ Rotation, arrow line, label, extended fold line, SeamlyLayout fold placement and
   - A cut line that runs along the fold line means an improperly defined piece.
   - A piece without a fold line keeps a closed cut line. A mirrored piece has no fold line.
   - Done: `VPiece::openAtFoldLine()` (public static). Piece mode draws the cut line without its fold line edge (`open_at_fold_line_path`, `pattern_piece_tool.cpp`). `HandoffPiece` sends `cutline` the same way, also the built-in seam allowance main path (`built_in_cut_line()`).
-  - Not changed (decision): the current Layout Mode writer (`VLayoutPiece`) still sends a closed cut line. The new cut line reaches SeamlyLayout with the `layout_handoff` switch (Dead.4.4.3). SeamlyLayout reads both (Layout.112).
+  - Superseded by Seamly2D.71.14 (user decision): Layout Mode (`VLayoutPiece`) sends the cut line the same way.
   - Tests: `TST_VPiece` (open at the fold line), `TST_HandoffPiece`, `TST_HandoffDocument`. Scratch harness: 134/134, 20/20, 16/16 PASS. `pattern_piece_tool.cpp` builds.
 - [x] Seamly2D.71.13 Fix - A piece with a fold line: the seam line does not run along the fold line either.
   - Rule (user decision): neither the seam line nor the cut line has an edge on the fold line. Each starts at the fold line end and ends at the fold line start.
   - Done: `make_line_open_at_fold` (`handoff_piece.cpp`) builds `seamline` and `cutline`. Piece mode draws the shown seam line the same way (`open_at_fold_line_path`). A hidden main path stays closed for the item shape.
   - SeamlyLayout: an outer `seamline` (no `cutline`) gets its fold line edge back for the DXF-ASTM boundary (`converter::extract_astm_piece`). A `seamline` beside a `cutline` stays as sent (layer 14). Packing and the piece divider already read it.
-  - Not changed (decision): `VLayoutPiece` still sends a closed seam line, as for the cut line.
+  - Superseded by Seamly2D.71.14 (user decision): `VLayoutPiece` sends the seam line the same way.
   - Tests: `TST_HandoffPiece::seamLineOpensAtFoldLine` (3 rows), `TST_HandoffDocument::foldPieceSendsOpenLines` (3 rows), `astm_piece_test` `open_seam_line_without_cut_line_closes_along_the_fold_line`, `piece_divider` `open_outline_on_the_fold_line_splits_and_stays_open` (cutline and seamline). Scratch harness: 134/134, 23/23, 17/17 PASS. `cargo test --workspace` and `ctest --preset debug` (7/7) pass.
+- [x] Seamly2D.71.14 Fix - Layout Mode (`VLayoutPiece`) sends the seam line and the cut line without an edge on the fold line, as `HandoffPiece` does.
+  - Done: `make_line_open_at_fold` is public (`handoff_piece.h`). `VLayoutPiece::setMainPathPoints()` and `setSeamAllowancePoints()` take the node vertices and the fold line and call it. Also the built-in seam allowance main path.
+  - `isContourClosed()` and `isSeamAllowanceClosed()` give the result. `createMainPath()` and `createAllowancePath()` add no closing edge when the line has no fold line edge.
+  - `unifyTurnPoints()`: a line that is closed in one size and has no fold line edge in another keeps the turn points of each size.
+  - Tests: `TST_HandoffPiece::seamAndCutLinesMatchOldWriter` (4 rows, closed flags); `TST_HandoffDocument::pieceMatchesOldWriter` and `sheetMatchesOldScene` (new row "built in on the fold"; the fold rows now compare `seamline` and `cutline`); `TST_SvgComponentTags::FoldLinePieceSendsLinesWithoutFoldEdge`. Scratch harness (`TST_HandoffPiece`, `TST_HandoffDocument`, `TST_SvgComponentTags`): 25/25, 19/19, 51/51 PASS.
+- [ ] Seamly2D.71.15 Verify (User): Layout Mode, piece with a fold line, sent to SeamlyLayout: the cut line and the seam line stop at both fold line ends; no line along the fold line. Also with a built-in seam allowance.
 - [ ] Seamly2D.71.12 Verify (User): Piece mode, piece with a fold line: the cut line and the seam line stop at both fold line ends; no line along the fold line. Also with a built-in seam allowance, and with no seam allowance. `AGENT_CHECKLIST.md` §34.
 
 ## Not required for SeamlyLayout release
