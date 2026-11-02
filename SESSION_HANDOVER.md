@@ -10,11 +10,11 @@
 - Verified: temporary test program `TST_HandoffPiece` 25/25, `TST_HandoffDocument` 19/19, `TST_SvgComponentTags` 51/51. With the fold line not passed in `Create`, the 4 fold rows fail (expected). Not run: MSI.
 - Seamly2D.71.14 done; new Seamly2D.71.15 (user check, Layout Mode).
 - `AGENT_CHECKLIST.md`: new §35 and OPEN rows (Seamly2D.71.15); §34 points to it. Not committed (Sue edits it).
-- Feedback (user): no jargon. The docs now say "temporary test program", not "temporary test program".
+- Feedback (user): no jargon; use accurate terms. The docs now say "temporary test program": a test exe built outside the repository from the changed sources and the built libs.
 - Docs: superseded notes for the old fold line decisions (`TODO_SEAMLYLAYOUT.md` Layout.80.1.3, `TODO_COMPLETED.md` Layout.112).
 - Merge subject has no skip-ci token: the pending push holds `.pri` and `packaging/` changes. Task branch deleted.
 - Next: MSI build (ask): Seamly2D.71.9, 71.12, 71.15, 11.8, 11.9, Layout.97.7.
-- `run-seamlyLayout` is 50 commits ahead of `origin`.
+- `run-seamlyLayout` is 51 commits ahead of `origin`.
 
 ### 2026-11-01 — Seam line stops at the fold line (Seamly2D.71.13); merged into local `run-seamlyLayout`, not pushed
 
