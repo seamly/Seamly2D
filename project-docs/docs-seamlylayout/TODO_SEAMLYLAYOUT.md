@@ -35,6 +35,16 @@ Layout.106 added the switch for the Dead.4.4.3 compare. Remove it when that comp
 
 When the user clicks 'Horizontal', 'Vertical', or 'Both' then the piece is flipped in the direction(s) selected then displayed on the piece Mode canvas.
 
+### [ ] Task Layout.112 - Implement - Read an open cut line that ends on the fold line
+
+Rule and Seamly2D side: Seamly2D.71.11. A piece with a fold line sends an open `cutline`. Its `fold_line` runs from the cut line end to the cut line begin.
+
+- [ ] Layout.112.1 Import: join `cutline` and `fold_line` into one closed outer edge. Packing, the DXF-ASTM boundary, tiling and `piece_divider` use it.
+- [ ] Layout.112.2 Display and HPGL: draw and cut only the open cut line; the fold line stays a mark. Check first whether the HPGL cut path includes the fold edge now.
+- [ ] Layout.112.3 A closed `cutline` (older handoff, untagged SVG) still imports.
+- [ ] Layout.112.4 Tests. Docs: `SVG-DATA-ATTRIBUTES.md` `fold_line`, `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
+- [x] Layout.112.5 Export warning reworded (user decision): "the fold line doesn't connect with the cutline". A mirrored piece has no fold line, so it gets no warning.
+
 ## VERIFY
 
 ### [ ] Task Layout.6 — Verify - DXF-ASTM grading

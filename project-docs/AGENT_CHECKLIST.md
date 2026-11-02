@@ -354,7 +354,7 @@ Needs the next MSI. jacket2 Back has a fold line.
   - [ ] The Back block has one `LINE` on layer `6`.
   - [ ] Its two points are the first two `VERTEX` points of the layer `1` `POLYLINE`.
   - [ ] No other block has layer `6`.
-  - [ ] No export warning "the fold line is not on the cut line".
+  - [ ] No export warning "the fold line doesn't connect with the cutline".
 - [ ] Upload the `.dxf` to https://aw.fyi/dxf: no departure for the Back mirror line. Back is graded.
 
 ## 22. jacket2: DXF-AAMA (R11)

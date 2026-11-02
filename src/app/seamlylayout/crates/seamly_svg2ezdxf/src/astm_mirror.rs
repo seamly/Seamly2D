@@ -25,7 +25,7 @@ pub const MIRROR_LINE_TOLERANCE_MM: f64 = 0.1;
 /// @details Call after grading: grading rebuilds the boundary. A block whose
 ///          boundary has no edge on its fold line loses its mirror line.
 /// @param drawing Drawing whose blocks are changed in place.
-/// @return One warning per block whose fold line is not on its boundary.
+/// @return One warning per block whose fold line does not connect with its boundary. A block without a fold line (a mirrored piece) gets none.
 pub fn align_mirror_lines(drawing: &mut Drawing) -> Vec<String> {
     let mut warnings = Vec::new();
     for block in &mut drawing.blocks {
@@ -35,7 +35,7 @@ pub fn align_mirror_lines(drawing: &mut Drawing) -> Vec<String> {
         if !align_block(block) {
             block.mirror_line = None;
             warnings.push(format!(
-                "{}: the fold line is not on the cut line; no mirror line written.",
+                "{}: the fold line doesn't connect with the cutline; no mirror line written.",
                 block.display_name
             ));
         } // if not aligned
@@ -172,7 +172,7 @@ mod tests {
         let mut drawing = half_piece((Point::new(50.0, 0.0), Point::new(50.0, 200.0)));
         let before = drawing.blocks[0].boundary.clone();
         let warnings = align_mirror_lines(&mut drawing);
-        assert_eq!(warnings, vec!["Back: the fold line is not on the cut line; no mirror line written.".to_string()]);
+        assert_eq!(warnings, vec!["Back: the fold line doesn't connect with the cutline; no mirror line written.".to_string()]);
         assert!(drawing.blocks[0].mirror_line.is_none());
         assert_eq!(drawing.blocks[0].boundary, before, "boundary unchanged");
     } // fold_line_off_the_boundary_is_reported
