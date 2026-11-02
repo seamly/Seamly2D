@@ -130,6 +130,7 @@ PatternPieceDialog::PatternPieceDialog(const VContainer *data, const quint32 &to
     , m_my(0)
     , m_inLayout(true)
     , m_isLocked(false)
+    , m_user_on_fold(false)
     , m_dialog()
     , m_anchorPoints()
     , m_oldData()
@@ -333,7 +334,8 @@ void PatternPieceDialog::SetPiece(const VPiece &piece)
     ui->tiltDegrees_SpinBox->setValue(m_oldData.getTiltDegrees());
 
     ui->quantity_SpinBox->setValue(m_oldData.GetQuantity());
-    ui->fold_CheckBox->setChecked(m_oldData.IsOnFold());
+    // A saved piece with a fold line is on the fold because of the fold line, not because of a user choice.
+    m_user_on_fold = m_oldData.IsOnFold() && !piece.hasFoldLine();
     updateFoldCheckBox();
     m_pieceLabelLines = m_oldData.GetLabelTemplate();
 
@@ -3399,6 +3401,9 @@ void PatternPieceDialog::initializePropertiesTab()
     });
     ui->tiltNone_RadioButton->setChecked(true);
 
+    // Only a click records the user choice; updateFoldCheckBox() sets the box without one.
+    connect(ui->fold_CheckBox, &QCheckBox::clicked, this, [this](bool checked) { m_user_on_fold = checked; });
+
     // Each flip button id is its PieceFlip value.
     ui->flip_ButtonGroup->setId(ui->flipNone_RadioButton, static_cast<int>(PieceFlip::None));
     ui->flip_ButtonGroup->setId(ui->flipHorizontal_RadioButton, static_cast<int>(PieceFlip::Horizontal));
@@ -3948,16 +3953,16 @@ void PatternPieceDialog::setFoldLineNode(QListWidgetItem *rowItem, bool foldLine
 
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief Checks and locks the "on fold" box while the main path has a valid fold line.
+///
+/// Without a fold line, the box shows the user choice again, so a removed fold line does not leave the piece on
+/// the fold.
 //---------------------------------------------------------------------------------------------------------------------
 void PatternPieceDialog::updateFoldCheckBox()
 {
-    const bool hasFoldLine =
+    const bool has_fold_line =
         !VPiece::foldLineNodeIndexes(GetListInternals<VPieceNode>(ui->mainPath_ListWidget)).isEmpty();
-    if (hasFoldLine)
-    {
-        ui->fold_CheckBox->setChecked(true);
-    }
-    ui->fold_CheckBox->setEnabled(!hasFoldLine);
+    ui->fold_CheckBox->setChecked(has_fold_line || m_user_on_fold);
+    ui->fold_CheckBox->setEnabled(!has_fold_line);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

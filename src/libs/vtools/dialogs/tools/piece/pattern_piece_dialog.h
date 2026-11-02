@@ -199,6 +199,7 @@ private:
     qreal                       m_my;
     bool                        m_inLayout;
     bool                        m_isLocked;
+    bool                        m_user_on_fold; ///< "On fold" box state the user chose; a fold line overrides it.
 
     QPointer<DialogTool>             m_dialog;
     QPointer<PieceAnchorPointVisual> m_anchorPoints;
