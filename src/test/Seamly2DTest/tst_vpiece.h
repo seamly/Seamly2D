@@ -124,6 +124,7 @@ private slots:
     void BuiltInSeamLineStopsAtFoldLine_data() const;
     void BuiltInSeamLineStopsAtFoldLine() const;
     void BuiltInSeamLineStopsAtFoldLineAfterCurve() const;
+    void BuiltInSeamLineMeetsAtAcuteCorner() const;
     void CurveEndInNodePixelEndsAtNode() const;
     void ForcedCornerCutCutsShortMiter() const;
     void SplineNodeVertices_data() const;
