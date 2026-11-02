@@ -3,6 +3,8 @@
 User tests from `AGENT_STATE.json` `needs_user_test`.
 Mark each box. Write FAIL and a short note beside a failed step.
 
+## PASSED
+
 | Task | Sections | Check |
 |---|---|---|
 | Layout.38.6 | 1 | Multisize pattern: Nested and Marker tabs | PASS
@@ -35,16 +37,20 @@ Mark each box. Write FAIL and a short note beside a failed step.
 | Layout.80.6.3 | 21 | SL > male_shirt > Adjust Mode: fold line moves with its piece | PASS
 | Layout.89.3 | 12 | SL > trousers > Settings > B0 sheet: Oversized pieces dialog: light text | PASS
 | Layout.70.5 | 12 | SL > trousers > Left-out pieces warning | PASS --> this warning appears when pieces couldn't be placed
+| Layout.80.6.6 | 21 | SL > male_shirt > Export > DXF-ASTM (R13): mirror line | PASS
+
+## OPEN
 
 JACKET_2
 | Layout.93.7 | 23 | SL > jacket_2 > DXF piece properties: Material, Missing Piece Data, Rotation, Flip, Tilt, Fold | --> export DXF (R13), upload to https://aw.fyi/dxf
+| Seamly2D.71.12 | 34 | S2D > jacket2 > Piece mode, Back: seam line and cut line stop at the fold line | ?
+| Seamly2D.71.15 | 35 | S2D > jacket2 > Layout > SL, Back: seam line and cut line stop at the fold line | ?
 
 MALE_SHIRT
+| Seamly2D.71.12 | 34 | S2D > male_shirt > Piece mode, BackPanel and CollarTopInterface-Built-in-SA: seam line and cut line stop at the fold line | ?
+| Seamly2D.71.15 | 35 | S2D > male_shirt > Layout > SL, BackPanel and CollarTopInterface-Built-in-SA: seam line and cut line stop at the fold line | ?
 | Layout.98.6 | 24 | S2D > male_shirt > Piece Properties: Flip radio buttons, Flip submenu | FAIL --> Flip selection appears in piece context menu but without a checkbox, and the submenu appears when 'Flip' is selected, but the piece isn't flipped. The fix for this problem is Layout.110.
 | Layout.88.2 | 3 | SL > male_shirt > Export menu: DXF-ASTM note reads in full | FAIL --> Note did not appear
-
-Check in aw.fyi/dxf
-| Layout.80.6.6 | 21 | SL > Export > DXF-ASTM (R13): mirror line | PASS
 | Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Fabric | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Lining | ?
@@ -52,7 +58,6 @@ Check in aw.fyi/dxf
 TROUSERS
 | Layout.71.6 | 11 | SL > trousers > Media grows in width | ?
 | Layout.72.8 | 12 | SL > trousers > Settings > B0 sheet: Oversized pieces - split or enlarge | FAIL -- 'Some pieces could not be placed' error
-
 
 ## [x] 0. Install
 
@@ -455,8 +460,8 @@ Needs the next MSI. Do not save the pattern changes.
 - [ ] Piece Properties > Path: mark two neighbouring point nodes as Fold Line. OK.
   - [ ] Both ends of the seam line lie on the fold line. No seam line runs along the fold line or crosses it.
 - [ ] Piece tool: draw a new piece with Built in checked. The preview shows the seam line inside the path; changing the width moves it.
-- [ ] Press Layout. SeamlyLayout shows the cut line, the open seam line and the fold line.
-- [ ] SeamlyLayout Export > DXF > DXF-ASTM (R13). Layer 1 is the cut line. Layer 14 is the seam line, open; its ends lie on the layer 6 mirror line.
+- [ ] Press Layout. SeamlyLayout shows the cut line, the seam line and the fold line. The seam line starts and ends on the fold line. No seam line along the fold line.
+- [ ] SeamlyLayout Export > DXF > DXF-ASTM (R13). Layer 1 is the cut line. Layer 14 is the seam line: no edge on the fold line; both ends lie on the layer 6 mirror line.
 - Removed step: Seamly2D Export Pieces As DXF AAMA. Dead.4.2 deleted Export Pieces and `vdxf`; SeamlyLayout writes DXF-AAMA.
 
 ## 28. Old Seamly2D layout, print, console export and Export Pieces removed
@@ -533,3 +538,31 @@ Needs the next MSI. (Layout.109)
 - [ ] Layout is trimmed to the pieces (not 500 in long). Left margin is 0; fold lines lie on the left edge.
 - [ ] Fabric width 10 in so a piece cannot fit: the popup says "wider fabric, a longer fabric length", not "larger sheet size".
 - [ ] Media Paper with an oversize piece: the popup still says "Try a larger sheet size".
+
+## 34. Seam line and cut line stop at the fold line
+
+Needs the next MSI. (Seamly2D.71.12) Do not save the pattern changes.
+
+- [ ] male_shirt, Piece mode, BackPanel:
+  - [ ] The cut line starts at one end of the dashed fold line and ends at the other end. No cut line along the fold line.
+  - [ ] The seam line starts at one fold line node and ends at the other node. No seam line along the fold line.
+  - [ ] The dashed fold line completes the outline. The piece fill reaches the fold line.
+  - [ ] Click inside the piece beside the fold line: the piece is selected.
+  - [ ] View > Seam Allowance off: the seam line still stops at both fold line nodes. Turn it on again.
+- [ ] CollarTopInterface-Built-in-SA: the cut line and the seam line both start and end on the fold line. Neither line runs along it.
+- [ ] BackPanel > Piece Properties > Seam allowance: uncheck Seam allowance. OK: the seam line stops at both fold line nodes.
+- [ ] jacket2, Piece mode, Back: the same checks as BackPanel.
+- Layout Mode: §35.
+
+## 35. Layout Mode: seam line and cut line stop at the fold line
+
+Needs the next MSI. (Seamly2D.71.15) Do not save the pattern changes.
+
+- [ ] Open male_shirt. Press Layout. SeamlyLayout shows the pieces.
+  - [ ] BackPanel: the cut line starts at one end of the dashed fold line and ends at the other end. No cut line along the fold line.
+  - [ ] BackPanel: the seam line starts at one fold line node and ends at the other node. No seam line along the fold line.
+  - [ ] CollarTopInterface-Built-in-SA: the cut line and the seam line both start and end on the fold line. Neither line runs along it.
+- [ ] `capture_handoff_*.bat`: the `d` of each BackPanel `cutline` and `seamline` path has no `Z`.
+- [ ] Create Layout: no piece overlaps BackPanel or CollarTopInterface-Built-in-SA at the fold line.
+- [ ] Export > DXF > DXF-ASTM (R13), upload to https://aw.fyi/dxf: the BackPanel layer 1 boundary is closed. The layer 6 line lies on its fold line edge.
+- [ ] jacket2, Layout, Back: the same checks as BackPanel.
