@@ -85,9 +85,11 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 ## Boundary and sew lines
 
 - Boundary = longest closed `cutline` path.
-- With a fold line Seamly2D sends the `cutline` open: it begins at the fold line end and ends at the fold line start. When both ends lie on the fold line (0.1 mm tolerance), the converter closes it along the fold line, and it is a boundary candidate. An open cut line with an end off the fold line is not. An older handoff sends a closed cut line; it needs no join (`converter::extract_astm_piece`, `geometry::fold_line_join`).
-- No cut line (no seam allowance, or seam allowances not shown): the longest closed `seamline` is the boundary.
-- Built-in seam allowance: the `cutline` is the main path, so it is the boundary (layer 1). The `seamline` is the line Seamly2D computes inside it, a sew line (layer 14). With a fold line the sew line is open: both ends lie on the layer 6 mirror line.
+- With a fold line Seamly2D sends the `cutline` and the `seamline` without an edge on the fold line. Each starts at the fold line end and ends at the fold line start.
+- When both ends of a `cutline` lie on the fold line (0.1 mm tolerance), the converter adds the fold line edge, and the cut line is a boundary candidate. A cut line with an end off the fold line is not. An older handoff sends a closed cut line; it needs no join (`converter::extract_astm_piece`, `geometry::fold_line_join`).
+- No cut line (no seam allowance, or seam allowances not shown): the longest closed `seamline` is the boundary. The converter adds the fold line edge to a `seamline` the same way.
+- Beside a cut line the `seamline` is a sew line (layer 14). It keeps no edge on the fold line: both ends lie on the layer 6 mirror line.
+- Built-in seam allowance: the `cutline` is the main path, so it is the boundary (layer 1). The `seamline` is the line Seamly2D computes inside it, a sew line (layer 14).
 - A seam line equal to the boundary is not repeated on layer 14.
 
 ## Mirror line (`astm_mirror.rs`)
@@ -95,7 +97,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 D6673 §4.3.6: a two-point line on layer 6; its points are boundary points, and the first two or the last two boundary points match it.
 
 - Source: the piece's `fold_line` group (`PieceComponent::FoldLine`).
-- The cut line has no seam allowance along the fold, so one boundary edge lies on the fold line (0.1 mm tolerance): the edge an open cut line closes along, or the fold edge of a closed cut line. Its two key points are the mirror line; they can lie past the fold line's own ends.
+- The cut line has no seam allowance along the fold, so one boundary edge lies on the fold line (0.1 mm tolerance): the edge the converter adds, or the fold edge of a closed cut line. Its two key points are the mirror line; they can lie past the fold line's own ends.
 - The boundary key points and validation points start at the first mirror line point. Key points inside that edge are dropped, with their rule texts.
 - `do_export_dxf` aligns after grading, which rebuilds the boundary.
 - A fold line with no boundary edge on it writes no layer 6. The export dialog names the piece.
@@ -172,4 +174,4 @@ The jacket2 files come from MSI 26.10.1115, before Layout.26 and Layout.27.9. Ad
 - `cxxqt_bridge/src/layout_utils.rs` `base_size_tab_exports_grade_rules`, `jacket2_base_size_export_names_and_grades_each_piece` — Base Size and size tabs, end to end.
 - `cxxqt_bridge/src/layout_views.rs` — tab order, which tabs each format exports.
 - `seamly_svg2ezdxf/src/astm_mirror.rs`, `cxxqt_bridge/src/exports.rs` `do_export_dxf_writes_the_mirror_line` — layer 6 and the boundary start.
-- `seamly_svg2ezdxf/src/astm_piece_test.rs` `open_cut_line_closes_along_the_fold_line`, `open_cut_line_off_the_fold_line_is_not_the_boundary`, `built_in_seam_line_stops_on_the_fold_line` — the open cut line boundary.
+- `seamly_svg2ezdxf/src/astm_piece_test.rs` `open_cut_line_closes_along_the_fold_line`, `open_cut_line_off_the_fold_line_is_not_the_boundary`, `built_in_seam_line_stops_on_the_fold_line`, `open_seam_line_without_cut_line_closes_along_the_fold_line` — a boundary from a line without its fold line edge.

@@ -2,6 +2,20 @@
 
 ## Current status
 
+### 2026-11-01 — Seam line stops at the fold line (Seamly2D.71.13); merged into local `run-seamlyLayout`, not pushed
+
+- Rule (user): neither the seam line nor the cut line has an edge on the fold line. Each starts at the fold line end and ends at the fold line start.
+- Seamly2D: `make_line_open_at_fold` (`handoff_piece.cpp`) builds `seamline` and `cutline`. Piece mode draws the shown seam line the same way (`open_at_fold_line_path`). A hidden main path stays closed for the item shape.
+- SeamlyLayout: DXF-ASTM `converter` adds the fold line edge to an outer `seamline` (no `cutline`). A `seamline` beside a `cutline` stays as sent. Docs and test names cover both lines.
+- Decision kept: `VLayoutPiece` still sends both lines closed until the Dead.4.4.3 switch.
+- Feedback (user): do not write "open" or "opens" alone. Say where the line starts and ends.
+- Verified: harness `TST_VPiece` 134/134, `TST_HandoffPiece` 23/23, `TST_HandoffDocument` 17/17; `cargo test --workspace` all pass; `ctest --preset debug` 7/7. Not run: MSI.
+- Seamly2D.71.13 done. The Seamly2D.71.12 user check now covers the seam line.
+- Merge subject has no skip-ci token: the pending push holds `.pri` and `packaging/` changes. Task branch deleted.
+- Not committed: `project-docs/AGENT_CHECKLIST.md` (Sue edits it).
+- Next: MSI build (ask): Seamly2D.71.9, 71.12, 11.8, 11.9, Layout.97.7.
+- `run-seamlyLayout` is 43 commits ahead of `origin`.
+
 ### 2026-11-01 — Open cut line at the fold line (Seamly2D.71.11, Layout.112); merged into local `run-seamlyLayout`, not pushed
 
 - Rule (user): with a fold line the cut line is open; the fold line runs from the cut line end to its begin. Built-in seam allowance too.
@@ -53,17 +67,6 @@
 - CLAUDE.md vcvars path: VS 2022 → VS 18 (user decision: local builds use VS 18; `local_build_msi.ps1` already does).
 - Next: MSI build (ask). User test: trousers on 36 in folded fabric place all 12 pieces inside the fold half.
 - `run-seamlyLayout` is 8 commits ahead of `origin`.
-
-### 2026-10-27 — Warning popup titles and size noun; merged into local `run-seamlyLayout`, not pushed
-
-- Cause: Sue saw jacket2's import warning under the title "Some pieces could not be placed". Import and layout warnings shared one fixed title.
-- Merge `3b1310115e` (commit `3aa24ea580`), skip-ci token: `.rs`, `.qml`, `.md` only.
-- Changed: `Main.qml` (titles "Import warning", "Layout warning"), `annotation_alignment.rs` (`size_list`: "in size 220"), `layout_utils.rs` test, `AGENT_CHECKLIST.md` §26.
-- Verified: `cargo test --workspace` 634 passed; `ctest --preset debug` 7 of 7. Not run: MSI.
-- User decisions: one shared place inside every size's cut line; built in `layout_handoff`, after the Dead.4.4.3 switch. Filed Task Layout.108 (commit `375954483c`, docs only).
-- Decisions 108.4 (keep base place, warn in Seamly2D) and 108.5 (keep the SeamlyLayout import move) recorded, commit `a952e29d1e` (docs only).
-- Fixed: working copies of `TODO_SEAMLYLAYOUT.md` and `TODO_REMOVE_DEAD_LAYOUT_CODE.md` dropped committed lines (stale editor buffer). Restored (user decision). Uncommitted Sue edits kept: Layout.102.5 wording, the `VPattern` question in Dead.4.4.3.
-- `run-seamlyLayout` is 6 commits ahead of `origin`.
 
 Older entries: `project-docs/SESSION_HANDOVER_ARCHIVE.md`. Do not Read it at session start.
 

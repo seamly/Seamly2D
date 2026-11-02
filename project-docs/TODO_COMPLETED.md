@@ -1770,3 +1770,12 @@ The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`sr
 - Layout.112.5: export warning reworded (user decision): "the fold line doesn't connect with the cutline".
 - Verified: `cargo test --workspace` all pass (261 cxxqt_bridge); `ctest --preset debug` 7/7.
 - The open cut line reaches SeamlyLayout when Layout Mode switches to `layout_handoff` (Dead.4.4.3).
+
+## Task Layout.112 follow-on — Read a seam line that ends on the fold line
+
+- Rule (user decision, Seamly2D.71.13): neither the `seamline` nor the `cutline` has an edge on the fold line. Each starts at the fold line end and ends at the fold line start.
+- DXF-ASTM `converter::extract_astm_piece` adds the fold line edge to the outer line: the `cutline`, or the `seamline` of a piece without a `cutline`. A `seamline` beside a `cutline` is a sew line (layer 14) and stays as sent.
+- Packing (`svg_extract`) and `piece_divider` already read any outline without its fold line edge. `piece_divider` test renamed `open_outline_on_the_fold_line_splits_and_stays_open`; it runs for `cutline` and `seamline`.
+- New test: `astm_piece_test` `open_seam_line_without_cut_line_closes_along_the_fold_line`. Fixture `back_on_fold` seam line now has no fold line edge.
+- Docs: `SVG-DATA-ATTRIBUTES.md` (`seamline`, `cutline`, `fold_line`, split parts), `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, module docs in `fold_line_join.rs`, `astm_mirror.rs`, `svg_extract.rs`, `piece_divider.rs`.
+- Verified: `cargo test --workspace` all pass; `ctest --preset debug` 7/7.
