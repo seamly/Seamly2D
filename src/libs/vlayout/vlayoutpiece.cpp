@@ -79,6 +79,7 @@
 #include "../vmisc/vcommonsettings.h"
 #include "../vpatterndb/calculator.h"
 #include "../vgeometry/vpointf.h"
+#include "../layout_handoff/handoff_piece.h"
 #include "../layout_handoff/handoff_turn_points.h"
 #include "vlayoutdef.h"
 #include "vlayoutpiece_p.h"
@@ -494,8 +495,11 @@ VLayoutPiece VLayoutPiece::Create(const VPiece &piece, const VContainer *pattern
 
     layoutPiece.SetMx(piece.GetMx());
     layoutPiece.SetMy(piece.GetMy());
+    // With a fold line, neither the seam line nor the cut line has an edge on the fold line. Each starts at the fold
+    // line end and ends at the fold line start.
+    const QLineF fold_line = piece.foldLine(pattern);
     layoutPiece.setMainPathPoints(piece.mainPathPoints(pattern), piece.isHideSeamLine(),
-                                  piece.mainPathNodeVertices(pattern));
+                                  piece.mainPathNodeVertices(pattern), fold_line);
     QVector<QPointF> seamAllowanceNodes;
     SeamAllowanceCorners seamAllowanceCorners;
     const QVector<QPointF> seamAllowance = piece.seamAllowancePoints(pattern, &seamAllowanceNodes,
@@ -503,11 +507,11 @@ VLayoutPiece VLayoutPiece::Create(const VPiece &piece, const VContainer *pattern
     layoutPiece.setSeamAllowancePoints(seamAllowance,
                                        piece.hasSeamAllowance(),
                                        piece.hasSeamAllowanceBuiltIn(),
-                                       seamAllowanceNodes);
+                                       seamAllowanceNodes, fold_line);
     layoutPiece.setSeamAllowanceCorners(seamAllowanceCorners);
     QVector<QPointF> builtInSeamLineNodes;
     const QVector<QPointF> builtInSeamLine = piece.builtInSeamLinePoints(pattern, &builtInSeamLineNodes);
-    // A closed seam line repeats its first point; one that a fold line cut open ends elsewhere.
+    // A closed seam line repeats its first point; one with no edge on the fold line ends elsewhere.
     const bool builtInSeamLineClosed = builtInSeamLine.size() < 2 || builtInSeamLine.first() == builtInSeamLine.last();
     layoutPiece.setBuiltInSeamLinePoints(builtInSeamLine, builtInSeamLineNodes, builtInSeamLineClosed);
     layoutPiece.setInternalPaths(convertInternalPaths (piece, pattern, false));
@@ -523,16 +527,15 @@ VLayoutPiece VLayoutPiece::Create(const VPiece &piece, const VContainer *pattern
     // Keep the piece letter, cut count and fold flag for the SVG exporter's data-* attributes.
     layoutPiece.setPieceLetter(piece.GetPatternPieceData().GetLetter());
     layoutPiece.setQuantity(piece.GetPatternPieceData().GetQuantity());
-    // A fold line puts the piece on the fold, whatever the label data says. A sent cut line runs along the fold line
-    // past both nodes, so the fold line is sent out to the cut line.
-    const QLineF foldLine = piece.foldLine(pattern);
-    layoutPiece.setOnFold(piece.GetPatternPieceData().IsOnFold() || !foldLine.isNull());
-    if (!foldLine.isNull())
+    // A fold line puts the piece on the fold, whatever the label data says. The cut line ends on the fold line, past
+    // both fold line nodes, so the sent fold line runs from the cut line end to the cut line start.
+    layoutPiece.setOnFold(piece.GetPatternPieceData().IsOnFold() || !fold_line.isNull());
+    if (!fold_line.isNull())
     {
         const bool cut_line_sent = qApp->Settings()->showSeamAllowances() && !seamAllowance.isEmpty();
-        const QLineF sent_fold_line = cut_line_sent ? VPiece::foldLineOnCutLine(seamAllowance, foldLine) : foldLine;
+        const QLineF sent_fold_line = cut_line_sent ? VPiece::foldLineOnCutLine(seamAllowance, fold_line) : fold_line;
         layoutPiece.setFoldLine(QVector<QPointF>{sent_fold_line.p1(), sent_fold_line.p2()});
-        layoutPiece.setFoldLineGraphic(pattern_piece::FoldLineGraphic(foldLine, piece.mainPathPoints(pattern)));
+        layoutPiece.setFoldLineGraphic(pattern_piece::FoldLineGraphic(fold_line, piece.mainPathPoints(pattern)));
     }
     layoutPiece.setMaterial(piece.getMaterial());
     layoutPiece.setPieceProperties(piece.GetPatternPieceData());
@@ -701,22 +704,30 @@ QVector<QPointF> VLayoutPiece::getContourPoints() const
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief setMainPathPoints stores the main path (seam line) polyline.
- * @param nodeVertices vertices that can break the tangent, from VPiece::mainPathNodeVertices().
+ * @param node_vertices vertices that can break the tangent, from VPiece::mainPathNodeVertices().
  *        Empty = turn points unknown, so the seam line gets no data-turn-points attribute.
+ * @param fold fold line from VPiece::foldLine(). A null line keeps the main path closed. Otherwise the main path has
+ *        no edge on the fold line: it starts at the fold line end and ends at the fold line start.
  */
-void VLayoutPiece::setMainPathPoints(const QVector<QPointF> &points, bool hideMainPath,
-                                     const QVector<QPointF> &nodeVertices)
+void VLayoutPiece::setMainPathPoints(const QVector<QPointF>& points, bool hide_main_path,
+                                     const QVector<QPointF>& node_vertices, const QLineF& fold)
 {
-    d->contour = RemoveDublicates(points, false);
-    d->contourTurnPoints.reset();
-    d->contourNodeIndices.clear();
-    if (!nodeVertices.isEmpty())
-    {
-        d->contour = snapNodeVertices(d->contour, nodeVertices, true);
-        d->contourTurnPoints = turnPointIndices(d->contour, nodeVertices, true);
-        d->contourNodeIndices = nodeVertexIndices(d->contour, nodeVertices, true);
-    }
-    setHideSeamLine(hideMainPath);
+    const layout_handoff::HandoffLine line = layout_handoff::make_line_open_at_fold(points, node_vertices, fold);
+    d->contour            = line.points;
+    d->contourTurnPoints  = line.turn_points;
+    d->contourNodeIndices = line.node_indices;
+    d->contour_closed     = line.closed;
+    setHideSeamLine(hide_main_path);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief isContourClosed tells whether the main path (seam line) is a closed loop.
+ * @return false when the main path has no edge on the fold line: then both ends lie on the fold line.
+ */
+bool VLayoutPiece::isContourClosed() const
+{
+    return d->contour_closed;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -729,28 +740,30 @@ QVector<QPointF> VLayoutPiece::getSeamAllowancePoints() const
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief setSeamAllowancePoints stores the seam allowance (cut line) polyline.
- * @param nodeVertices vertices that can break the tangent, from VPiece::seamAllowancePoints().
+ * @param node_vertices vertices that can break the tangent, from VPiece::seamAllowancePoints().
  *        Empty = turn points unknown, so the cut line gets no data-turn-points attribute.
+ * @param fold fold line from VPiece::foldLine(). A null line keeps the cut line closed. Otherwise the cut line has
+ *        no edge on the fold line: it starts at the fold line end and ends at the fold line start.
  */
-void VLayoutPiece::setSeamAllowancePoints(const QVector<QPointF> &points, bool seamAllowance, bool seamAllowanceBuiltIn,
-                                          const QVector<QPointF> &nodeVertices)
+void VLayoutPiece::setSeamAllowancePoints(const QVector<QPointF>& points, bool seam_allowance, bool built_in,
+                                          const QVector<QPointF>& node_vertices, const QLineF& fold)
 {
     d->seamAllowanceTurnPoints.reset();
     d->seamAllowanceNodeIndices.clear();
-    if (seamAllowance)
+    d->seam_allowance_closed = true;
+    if (seam_allowance)
     {
-        SetSeamAllowance(seamAllowance);
-        SetSeamAllowanceBuiltIn(seamAllowanceBuiltIn);
+        SetSeamAllowance(seam_allowance);
+        SetSeamAllowanceBuiltIn(built_in);
         d->seamAllowance = points;
         if (!d->seamAllowance.isEmpty())
         {
-            d->seamAllowance = RemoveDublicates(d->seamAllowance, false);
-            if (!nodeVertices.isEmpty())
-            {
-                d->seamAllowance = snapNodeVertices(d->seamAllowance, nodeVertices, true);
-                d->seamAllowanceTurnPoints = turnPointIndices(d->seamAllowance, nodeVertices, true);
-                d->seamAllowanceNodeIndices = nodeVertexIndices(d->seamAllowance, nodeVertices, true);
-            }
+            const layout_handoff::HandoffLine line = layout_handoff::make_line_open_at_fold(points, node_vertices,
+                                                                                            fold);
+            d->seamAllowance            = line.points;
+            d->seamAllowanceTurnPoints  = line.turn_points;
+            d->seamAllowanceNodeIndices = line.node_indices;
+            d->seam_allowance_closed    = line.closed;
         }
         else if (!hasSeamAllowanceBuiltIn())
         {
@@ -758,6 +771,16 @@ void VLayoutPiece::setSeamAllowancePoints(const QVector<QPointF> &points, bool s
             SetSeamAllowance(false);
         }
     }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief isSeamAllowanceClosed tells whether the seam allowance (cut line) is a closed loop.
+ * @return false when the cut line has no edge on the fold line: then both ends lie on the fold line.
+ */
+bool VLayoutPiece::isSeamAllowanceClosed() const
+{
+    return d->seam_allowance_closed;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -798,7 +821,7 @@ QVector<QPointF> VLayoutPiece::getBuiltInSeamLinePoints() const
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief isBuiltInSeamLineClosed tells whether the built-in seam line is a closed loop.
- * @return false when a fold line cuts it open: then both ends lie on the fold line.
+ * @return false when the line has no edge on the fold line: then both ends lie on the fold line.
  */
 bool VLayoutPiece::isBuiltInSeamLineClosed() const
 {
@@ -811,7 +834,7 @@ bool VLayoutPiece::isBuiltInSeamLineClosed() const
  * @param points from VPiece::builtInSeamLinePoints(). Used only while the seam allowance is built in.
  * @param nodeVertices vertices that can break the tangent. Empty = turn points unknown, so the seam line gets no
  *        data-turn-points attribute.
- * @param closed false for a line that a fold line cut open: its ends are not joined.
+ * @param closed false for a line with no edge on the fold line: its ends are not joined.
  */
 void VLayoutPiece::setBuiltInSeamLinePoints(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices,
                                             bool closed)
@@ -835,7 +858,8 @@ void VLayoutPiece::setBuiltInSeamLinePoints(const QVector<QPointF> &points, cons
  * @details turnPointIndices() tests the tangent break at a node against a fixed angle, so a node near that angle
  *          is a turn point in some sizes only. Grading needs the same turn points in every size. Applies to the
  *          seam line, the cut line, the built-in seam line, internal paths and cutout paths. A line whose node
- *          count differs between sizes keeps its turn points.
+ *          count differs between sizes keeps its turn points, as does a line that is closed in one size and has no
+ *          edge on the fold line in another.
  * @param sizes the same piece in every size, in size order.
  */
 void VLayoutPiece::unifyTurnPoints(const QVector<VLayoutPiece *> &sizes)
@@ -845,39 +869,38 @@ void VLayoutPiece::unifyTurnPoints(const QVector<VLayoutPiece *> &sizes)
         return;
     }
 
-    // Seam line, cut line and built-in seam line: one per piece; closed loops, except a built-in seam line that a
-    // fold line cuts open.
-    const auto unifyLoop = [&sizes](QVector<QPointF> VLayoutPieceData::*points,
-                                    std::optional<QVector<int>> VLayoutPieceData::*turnPoints,
-                                    QVector<int> VLayoutPieceData::*nodeIndices, bool closed)
+    // Seam line, cut line and built-in seam line: one per piece. A line that is closed in one size and has no edge on
+    // the fold line in another size keeps its turn points.
+    const auto unify_line = [&sizes](QVector<QPointF> VLayoutPieceData::*points,
+                                     std::optional<QVector<int>> VLayoutPieceData::*turn_points,
+                                     QVector<int> VLayoutPieceData::*node_indices, bool VLayoutPieceData::*closed)
     {
-        QVector<layout_handoff::SizeLine> lines;
-        for (const VLayoutPiece *piece : sizes)
+        const bool is_closed  = sizes.first()->d.constData()->*closed;
+        const bool same_shape = std::all_of(sizes.cbegin(), sizes.cend(), [is_closed, closed](const VLayoutPiece* piece)
         {
-            const VLayoutPieceData *data = piece->d.constData();
-            lines.append({data->*points, data->*turnPoints, data->*nodeIndices});
-        }
-        const QVector<QVector<int>> turns = layout_handoff::unify_turn_points(lines, closed);
-        for (int s = 0; s < turns.size(); ++s)
+            return piece->d.constData()->*closed == is_closed;
+        });
+        if (same_shape)
         {
-            sizes.at(s)->d.data()->*turnPoints = turns.at(s);
+            QVector<layout_handoff::SizeLine> lines;
+            for (const VLayoutPiece* piece : sizes)
+            {
+                const VLayoutPieceData* data = piece->d.constData();
+                lines.append({data->*points, data->*turn_points, data->*node_indices});
+            }
+            const QVector<QVector<int>> turns = layout_handoff::unify_turn_points(lines, is_closed);
+            for (int s = 0; s < turns.size(); ++s)
+            {
+                sizes.at(s)->d.data()->*turn_points = turns.at(s);
+            }
         }
     };
-    unifyLoop(&VLayoutPieceData::contour, &VLayoutPieceData::contourTurnPoints,
-              &VLayoutPieceData::contourNodeIndices, true);
-    unifyLoop(&VLayoutPieceData::seamAllowance, &VLayoutPieceData::seamAllowanceTurnPoints,
-              &VLayoutPieceData::seamAllowanceNodeIndices, true);
-    // Sizes whose built-in seam lines differ in closed and open keep their turn points.
-    const bool builtInClosed = sizes.first()->d.constData()->builtInSeamLineClosed;
-    const bool sameBuiltInShape = std::all_of(sizes.cbegin(), sizes.cend(), [builtInClosed](const VLayoutPiece *piece)
-    {
-        return piece->d.constData()->builtInSeamLineClosed == builtInClosed;
-    });
-    if (sameBuiltInShape)
-    {
-        unifyLoop(&VLayoutPieceData::builtInSeamLine, &VLayoutPieceData::builtInSeamLineTurnPoints,
-                  &VLayoutPieceData::builtInSeamLineNodeIndices, builtInClosed);
-    }
+    unify_line(&VLayoutPieceData::contour, &VLayoutPieceData::contourTurnPoints,
+               &VLayoutPieceData::contourNodeIndices, &VLayoutPieceData::contour_closed);
+    unify_line(&VLayoutPieceData::seamAllowance, &VLayoutPieceData::seamAllowanceTurnPoints,
+               &VLayoutPieceData::seamAllowanceNodeIndices, &VLayoutPieceData::seam_allowance_closed);
+    unify_line(&VLayoutPieceData::builtInSeamLine, &VLayoutPieceData::builtInSeamLineTurnPoints,
+               &VLayoutPieceData::builtInSeamLineNodeIndices, &VLayoutPieceData::builtInSeamLineClosed);
 
     // Internal and cutout paths match by their order in the piece, so every size needs the same path count.
     const auto unifyPaths = [&sizes](QVector<VLayoutPiecePath> VLayoutPieceData::*paths)
@@ -1487,26 +1510,27 @@ QVector<T> VLayoutPiece::Map(const QVector<T> &points) const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief createMainPath draws the main path: the seam line, or the cut line of a built-in seam allowance.
+ * @details The path is empty when a hidden seam line has a separate cut line. With a fold line the main path has no
+ *          edge on the fold line.
+ */
 QPainterPath VLayoutPiece::createMainPath() const
 {
     QPainterPath path;
-
-    // contour
-    QVector<QPointF> points = getContourPoints();
-
-    if (!isHideSeamLine() || not hasSeamAllowance() || hasSeamAllowanceBuiltIn())
+    if (!isHideSeamLine() || !hasSeamAllowance() || hasSeamAllowanceBuiltIn())
     {
-        path.moveTo(points.at(0));
-        for (qint32 i = 1; i < points.count(); ++i)
-        {
-            path.lineTo(points.at(i));
-        }
-        path.lineTo(points.at(0));
+        const QVector<QPointF> points = getContourPoints();
+        path = d->contour_closed ? closedPath(points) : openPath(points);
     }
     return path;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief createAllowancePath draws the cut line of a piece with a separate seam allowance; otherwise the path is empty.
+ * @details With a fold line the cut line has no edge on the fold line.
+ */
 QPainterPath VLayoutPiece::createAllowancePath() const
 {
     QPainterPath path;
@@ -1517,11 +1541,13 @@ QPainterPath VLayoutPiece::createAllowancePath() const
         if (!hasSeamAllowanceBuiltIn())
         {
             // Draw seam allowance
-            QVector<QPointF>points = getSeamAllowancePoints();
+            QVector<QPointF> points = getSeamAllowancePoints();
 
-            if (points.last().toPoint() != points.first().toPoint())
+            // A cut line with no edge on the fold line ends at the fold line start; it does not return to its first
+            // point.
+            if (d->seam_allowance_closed && points.last().toPoint() != points.first().toPoint())
             {
-                points.append(points.at(0));// Should be always closed
+                points.append(points.at(0));
             }
 
             QPainterPath ekv;
@@ -1992,6 +2018,7 @@ QVector<QPointF> VLayoutPiece::piecePath() const
  * of the piece container so the SVG exporter can render it independently.
  * The seamline is the main path, or the line inside a main path with a
  * built-in seam allowance. A hidden seam line draws nothing in both cases.
+ * With a fold line the seamline has no edge on the fold line.
  *
  * @param parent piece root item the seamline item is added to.
  */
@@ -2018,7 +2045,7 @@ void VLayoutPiece::createSeamlineItem(QGraphicsItem *parent) const
     item->setData(PieceItemData::ItemType, QStringLiteral("seamline"));
     if (hasSeamAllowance() && hasSeamAllowanceBuiltIn())
     {
-        // A seam line that a fold line cuts open ends on the fold line; it is not closed along it.
+        // With a fold line the built-in seam line has no edge on the fold line: both ends lie on the fold line.
         const QVector<QPointF> seamLine = getBuiltInSeamLinePoints();
         QPainterPath path;
         if (!isHideSeamLine())
@@ -2042,6 +2069,7 @@ void VLayoutPiece::createSeamlineItem(QGraphicsItem *parent) const
  *
  * A built-in seam allowance makes the main path the cutline. It is the piece
  * outline, so it is created whatever the seam allowance view setting.
+ * With a fold line the cutline has no edge on the fold line.
  *
  * @param parent piece root item the cutline item is added to.
  */

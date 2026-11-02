@@ -77,31 +77,6 @@ HandoffLine make_line(const QVector<QPointF> &points, const QVector<QPointF> &no
     }
     return line;
 }
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief make_line_open_at_fold builds a seam line or a cut line that has no edge on the fold line.
- * @details Without a fold line the line is closed: its last point connects back to its first point. With a fold line
- *          the line starts at the fold line end and ends at the fold line start.
- * @param points        closed polyline; the first point may repeat at the end.
- * @param node_vertices vertices that can break the tangent. Empty = turn points unknown.
- * @param fold          fold line of the piece; a null line keeps the line closed.
- */
-HandoffLine make_line_open_at_fold(const QVector<QPointF> &points, const QVector<QPointF> &node_vertices,
-                                   const QLineF &fold)
-{
-    HandoffLine line;
-    if (fold.isNull())
-    {
-        line = make_line(AbstractPiece::RemoveDublicates(points, false), node_vertices, true);
-    }
-    else
-    {
-        // The line starts where the fold line ends and ends where the fold line starts.
-        const QVector<QPointF> open = VPiece::openAtFoldLine(points, fold);
-        line = make_line(AbstractPiece::RemoveDublicates(open, false), node_vertices, is_closed(open));
-    }
-    return line;
-}
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
@@ -305,6 +280,24 @@ void read_grainline(const VGrainlineData &data, const VContainer *pattern, const
     *axis << start << QPointF(start.x() + qCos(axis_angle), start.y() - qSin(axis_angle));
 }
 } // namespace
+
+//---------------------------------------------------------------------------------------------------------------------
+HandoffLine make_line_open_at_fold(const QVector<QPointF>& points, const QVector<QPointF>& node_vertices,
+                                   const QLineF& fold)
+{
+    HandoffLine line;
+    if (fold.isNull())
+    {
+        line = make_line(AbstractPiece::RemoveDublicates(points, false), node_vertices, true);
+    }
+    else
+    {
+        // The line starts where the fold line ends and ends where the fold line starts.
+        const QVector<QPointF> open = VPiece::openAtFoldLine(points, fold);
+        line = make_line(AbstractPiece::RemoveDublicates(open, false), node_vertices, is_closed(open));
+    }
+    return line;
+}
 
 //---------------------------------------------------------------------------------------------------------------------
 HandoffPiece HandoffPiece::create(const VPiece &piece, const VContainer *pattern)

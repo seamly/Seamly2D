@@ -1318,6 +1318,50 @@ void TST_SvgComponentTags::BuiltInPieceWithFoldLineSendsOpenSeamline() const
     QVERIFY2(qAbs(values.at(0) - cut.left()) < 0.01 && qAbs(values.at(6) - cut.left()) < 0.01, qPrintable(d));
 }
 
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief FoldLinePieceSendsLinesWithoutFoldEdge checks that the seamline and the cutline of a piece with a fold line
+ * have no edge on the fold line: each starts at the fold line end and ends at the fold line start.
+ */
+void TST_SvgComponentTags::FoldLinePieceSendsLinesWithoutFoldEdge() const
+{
+    // The fold line is the left side of the 180 square, from bottom to top. The cut line runs on past both fold line
+    // nodes to the extended fold line.
+    const QLineF           fold(QPointF(10, 190), QPointF(10, 10));
+    const QVector<QPointF> cut_points{QPointF(10, 5), QPointF(195, 5), QPointF(195, 195), QPointF(10, 195)};
+    VLayoutPiece piece;
+    piece.SetName(QStringLiteral("Fold"));
+    piece.setMainPathPoints(squarePoints(10, 10, 180), false, squarePoints(10, 10, 180), fold);
+    piece.setSeamAllowancePoints(cut_points, true, false, cut_points, fold);
+    piece.setFoldLine(QVector<QPointF>{QPointF(10, 195), QPointF(10, 5)});
+    QVERIFY(!piece.isContourClosed());
+    QVERIFY(!piece.isSeamAllowanceClosed());
+
+    const QDomDocument doc = exportPieceSvg(piece);
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+    const QVector<QDomElement> cutlines  = groupsOfType(doc, QStringLiteral("cutline"));
+    const QVector<QDomElement> seamlines = groupsOfType(doc, QStringLiteral("seamline"));
+    QCOMPARE(cutlines.size(), 1);
+    QCOMPARE(seamlines.size(), 1);
+    const qreal fold_x = pathBounds(cutlines.at(0)).left();
+
+    for (const QDomElement& line : {seamlines.at(0), cutlines.at(0)})
+    {
+        // Four vertices and no closing one: the line does not return along the fold line.
+        const QDomNodeList paths = line.elementsByTagName(QStringLiteral("path"));
+        QCOMPARE(paths.size(), 1);
+        const QString        d      = paths.at(0).toElement().attribute(QStringLiteral("d"));
+        const QVector<qreal> values = pathNumbers(line);
+        QVERIFY2(!d.contains(QLatin1Char('Z'), Qt::CaseInsensitive), qPrintable(d));
+        QCOMPARE(values.size(), 8);
+        QCOMPARE(line.attribute(QStringLiteral("data-turn-points")), QStringLiteral("0 1 2 3"));
+
+        // The line starts at the fold line end, at the top, and ends at the fold line start, at the bottom.
+        QVERIFY2(qAbs(values.at(0) - fold_x) < 0.01 && qAbs(values.at(6) - fold_x) < 0.01, qPrintable(d));
+        QVERIFY2(values.at(1) < values.at(7), qPrintable(d));
+    }
+}
+
 namespace
 {
 //---------------------------------------------------------------------------------------------------------------------

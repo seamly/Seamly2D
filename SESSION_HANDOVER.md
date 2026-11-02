@@ -2,12 +2,24 @@
 
 ## Current status
 
+### 2026-11-02 — Layout Mode sends the lines without the fold line edge (Seamly2D.71.14); merged into local `run-seamlyLayout`, not pushed
+
+- Request (user): change the old writer now. `VLayoutPiece` sends `seamline` and `cutline` as `HandoffPiece` does: start at the fold line end, end at the fold line start, no `Z`.
+- `make_line_open_at_fold` is public (`handoff_piece.h`). `VLayoutPiece` setters take node vertices and the fold line; new `isContourClosed()`, `isSeamAllowanceClosed()`.
+- `unifyTurnPoints()` compares closed flags. The Dead.4.4.3 compare expects no fold line difference now.
+- Verified: scratch harness `TST_HandoffPiece` 25/25, `TST_HandoffDocument` 19/19, `TST_SvgComponentTags` 51/51. With the fold line not passed in `Create`, the 4 fold rows fail (expected). Not run: MSI.
+- Seamly2D.71.14 done; new Seamly2D.71.15 (user check, Layout Mode).
+- Not changed: `AGENT_CHECKLIST.md` §34 still says Layout Mode is not in the check (Sue edits the file).
+- Merge subject has no skip-ci token: the pending push holds `.pri` and `packaging/` changes. Task branch deleted.
+- Next: MSI build (ask): Seamly2D.71.9, 71.12, 71.15, 11.8, 11.9, Layout.97.7.
+- `run-seamlyLayout` is 49 commits ahead of `origin`.
+
 ### 2026-11-01 — Seam line stops at the fold line (Seamly2D.71.13); merged into local `run-seamlyLayout`, not pushed
 
 - Rule (user): neither the seam line nor the cut line has an edge on the fold line. Each starts at the fold line end and ends at the fold line start.
 - Seamly2D: `make_line_open_at_fold` (`handoff_piece.cpp`) builds `seamline` and `cutline`. Piece mode draws the shown seam line the same way (`open_at_fold_line_path`). A hidden main path stays closed for the item shape.
 - SeamlyLayout: DXF-ASTM `converter` adds the fold line edge to an outer `seamline` (no `cutline`). A `seamline` beside a `cutline` stays as sent. Docs and test names cover both lines.
-- Decision kept: `VLayoutPiece` still sends both lines closed until the Dead.4.4.3 switch.
+- Superseded by Seamly2D.71.14: `VLayoutPiece` sends both lines without the fold line edge.
 - Feedback (user): do not write "open" or "opens" alone. Say where the line starts and ends.
 - Verified: harness `TST_VPiece` 134/134, `TST_HandoffPiece` 23/23, `TST_HandoffDocument` 17/17; `cargo test --workspace` all pass; `ctest --preset debug` 7/7. Not run: MSI.
 - Seamly2D.71.13 done. The Seamly2D.71.12 user check now covers the seam line.
@@ -56,21 +68,6 @@
 - User decision: `<images>` in every draft block comes with a new schema version and converter. Filed Task Seamly2D.72 (`TODO_SEAMLY2D.md`, Required for SeamlyLayout release).
 - User decision: merge without the MSI build. Merge subject has no skip-ci token (`.pri`, `packaging/`, `Q_OS_MAC`).
 - Next: MSI build (ask); Task Seamly2D.72; after the push, `gh workflow run ci.yml --ref run-seamlyLayout`.
-
-### 2026-10-28 — Fabric media size fix; merged into local `run-seamlyLayout`, not pushed
-
-- Cause: Sue's trousers on fabric (folded, 36 in, selvedge 0.5 in) left 4 pieces out. The fabric canvas used the B0 paper sheet size that the settings keep from paper media; fabric width, fold and open length were ignored.
-- Fix: `LayoutSettings::media_size_in()` gives the canvas (`page_w_px`, `page_h_px`) and the bin (`effective_bin_px`). Fabric: `fabricWidth` (0 = `pageWidth`; folded: half), `fabricHeight` (0 = 500 in, trimmed). Paper ignores the fabric fields.
-- Commit `01562ef927`. Changed: `layout_settings.rs`, `layout_utils.rs`, `material_split.rs`, `size_labels.rs` (fabric fixtures use `fabricWidth`/`fabricHeight`), the layout and settings workflow docs.
-- Verified: `cargo test --workspace` 636 passed; `ctest --preset debug` 7 of 7. Not run: MSI, GUI.
-- Sue's popup had the old title, so her MSI predates `3b1310115e`.
-- CLAUDE.md vcvars path: VS 2022 → VS 18 (user decision: local builds use VS 18; `local_build_msi.ps1` already does).
-- Next: MSI build (ask). User test: trousers on 36 in folded fabric place all 12 pieces inside the fold half.
-- `run-seamlyLayout` is 8 commits ahead of `origin`.
-
-Older entries: `project-docs/SESSION_HANDOVER_ARCHIVE.md`. Do not Read it at session start.
-
-## TODO by priority and owner
 
 ### Next items — Developer
 

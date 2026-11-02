@@ -485,6 +485,7 @@ void TST_HandoffDocument::pieceMatchesOldWriter_data() const
     QTest::newRow("cut line")             << true  << false << false;
     QTest::newRow("cut line on the fold") << true  << false << true;
     QTest::newRow("built in")             << true  << true  << false;
+    QTest::newRow("built in on the fold") << true  << true  << true;
     QTest::newRow("no seam allowance")    << false << false << false;
 }
 
@@ -523,15 +524,6 @@ void TST_HandoffDocument::pieceMatchesOldWriter() const
     QCOMPARE(count_type(actual, QStringLiteral("pattern_label")), 1);
     QCOMPARE(count_type(actual, QStringLiteral("grainline")), 1);
 
-    // The old writer closes the seam line and the cut line along the fold line. foldPieceSendsOpenLines() checks the
-    // open lines.
-    if (on_fold)
-    {
-        take_component(&expected, QStringLiteral("seamline"));
-        take_component(&actual, QStringLiteral("seamline"));
-        take_component(&expected, QStringLiteral("cutline"));
-        take_component(&actual, QStringLiteral("cutline"));
-    }
     compare_entries(actual, expected);
 }
 
