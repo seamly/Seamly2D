@@ -44,7 +44,7 @@ Older entries: `project-docs/SESSION_HANDOVER_ARCHIVE.md`. Do not Read it at ses
 - Merge `d7526a1ee6` (commits `9b509372c6`, `b2484d7dd8`). No skip-ci token: `.pri` and `.pro` changed.
 - New: `layout_handoff/handoff_corner_cuts.h/.cpp` (`compare_corner_cuts`), `TST_HandoffCornerCuts`.
 - Changed: `mainwindowsnogui.h/.cpp` (`handoff_pieces`, `createPlacedPiece`, `generateHandoffSvgDocument`, `writeHandoffCompareFiles`; corner cuts and node counts read the new lists), `mainwindow.cpp` (clears, compare call), size briefs in `handoff_document.h`, `handoff_ids.h`.
-- Verified: `cl /Zs` of `mainwindowsnogui.cpp`, `mainwindow.cpp`, `handoff_corner_cuts.cpp`; scratch harness `TST_HandoffCornerCuts` 4 passed. Not run: MSI, Qt suites (`TST_HandoffPiece`, `TST_HandoffDocument`), GUI.
+- Verified: `cl /Zs` of `mainwindowsnogui.cpp`, `mainwindow.cpp`, `handoff_corner_cuts.cpp`; temporary test program `TST_HandoffCornerCuts` 4 passed. Not run: MSI, Qt suites (`TST_HandoffPiece`, `TST_HandoffDocument`), GUI.
 - Next: MSI build (ask). Then user test 106.9, then the compare with the env switch (Dead.4.4.3).
 - `run-seamlyLayout` is 28 commits ahead of `origin`.
 
@@ -97,7 +97,7 @@ Older entries: `project-docs/SESSION_HANDOVER_ARCHIVE.md`. Do not Read it at ses
 - Restyle: briefs, snake_case, one exit; `LabelTextManager::min_font_size` replaces `MIN_FONT_SIZE` (`MAX_FONT_SIZE` was unused, gone); `TextLine` members `text`, `font_size_increment`, `bold`, `italic`, `alignment`.
 - Build files: vpatterndb `QT += xml`; vlayout links before vpatterndb in 4 `.pro` files. Translation context `VAbstractPieceData` → `AbstractPieceData` in the `.ts` files.
 - Tests: `TST_AbstractPiece` (new `SeamAllowancePointWidths`), `TST_LabelTextManager`.
-- Verified: `cl /Zs` on every changed `.cpp` and their includers. Scratch harness (session scratchpad `223c6375-…/harness`): `TST_AbstractPiece` 58 passed, `TST_LabelTextManager` 7 passed; old/new differential, 30 000 random paths and 200 000 random corners, label fits: no output difference. Not run: Qt suites, MSI (ask first), Linux link (CI), GUI.
+- Verified: `cl /Zs` on every changed `.cpp` and their includers. Temporary test program (session scratchpad `223c6375-…/harness`): `TST_AbstractPiece` 58 passed, `TST_LabelTextManager` 7 passed; old/new differential, 30 000 random paths and 200 000 random corners, label fits: no output difference. Not run: Qt suites, MSI (ask first), Linux link (CI), GUI.
 - User check: `AGENT_CHECKLIST.md` §30.
 - Next: Dead.4.4 (`layout_handoff`).
 - Work done in worktree `C:\Users\susan\Projects\s2d-abstract-piece` (removed after the merge).
@@ -124,7 +124,7 @@ Older entries: `project-docs/SESSION_HANDOVER_ARCHIVE.md`. Do not Read it at ses
 - Changed expectation: jacket2 import warning is now "Back: piece label past the cut line in sizes 220" (`AGENT_CHECKLIST.md` §26 updated).
 - Risk: a custom seam allowance that starts at the fold line end node wraps after the rotation and is dropped.
 - Code style: new code follows `README-CODE-STYLES.md` and the `AGENTS.md` note (snake_case, `Type*`, one exit, briefs, namespace, GPL link).
-- Verified: scratch harness `TST_VPiece` 128, `TST_SvgComponentTags` 49 passed; `cargo test --workspace` 621 passed; `cl /Zs` clean. Not run: Qt suites (next MSI, ask first), ctest (no QML or C++ frontend change), GUI.
+- Verified: temporary test program `TST_VPiece` 128, `TST_SvgComponentTags` 49 passed; `cargo test --workspace` 621 passed; `cl /Zs` clean. Not run: Qt suites (next MSI, ask first), ctest (no QML or C++ frontend change), GUI.
 - User check: `AGENT_CHECKLIST.md` §29; §21 Nested step changed.
 - Port note added to Dead.4.4 (`layout_handoff` must write the nested fold line parts).
 - Scratch tools (session scratchpad `18654feb-…`): `harness/make_build.py` (two suites, changed lib sources rebuilt), `make_zs.py`.
@@ -148,7 +148,7 @@ Older entries: `project-docs/SESSION_HANDOVER_ARCHIVE.md`. Do not Read it at ses
 - Fold line: the seam line stops on the fold line at both ends, open, not along it (`VPiece::builtInSeamLinePoints`). Handoff `seamline` is an open path; SeamlyLayout DXF-ASTM keeps it open (no Rust code change).
 - Decisions to confirm: Automatic tab (widths) stays enabled for Built in, Custom tab and Angle disabled; View > Seam Allowance off keeps both lines.
 - User (2026-10-24): `src/libs/vlayout` is deprecated and goes at the SeamlyLayout release; the layout algorithm is Rust. Edits there were limited to the handoff path (`VLayoutPiece` open seam line) and the DXF-AAMA layer 8 fix in `vdxf`.
-- Verified: scratch harness (HEAD test objects + in-tree libs, changed sources rebuilt) passed every Seamly2D suite; `cargo test -p seamly_svg2ezdxf` 68 passed; `cl /Zs` clean. Not run: MSI (ask first), GUI.
+- Verified: temporary test program (HEAD test objects + in-tree libs, changed sources rebuilt) passed every Seamly2D suite; `cargo test -p seamly_svg2ezdxf` 68 passed; `cl /Zs` clean. Not run: MSI (ask first), GUI.
 - Open: Seamly2D.11.8 (Qt suites in the next MSI), Seamly2D.11.9 user check `AGENT_CHECKLIST.md` §27.
 - Scratch tools (session scratchpad `3348cfb9-…`): `harness/make_build.py` builds the full Seamly2DTests exe from main tree objects plus worktree sources; `make_zs.py`.
 - Uncommitted user files left untouched: both `jacket2_40-146.sm2d` copies, the `TODO_SEAMLYLAYOUT.md` reorder, `test-seamly-layout/foldline_arrowline.*`, `test-seamly-layout/layouts/jacket2/2026102*/`. `TODO_SEAMLY2D.md` user edits are committed (they hold the Seamly2D.11 text).
@@ -163,7 +163,7 @@ Older entries: `project-docs/SESSION_HANDOVER_ARCHIVE.md`. Do not Read it at ses
 - Layout.94: `annotation_alignment.rs` moves each size's grainline and labels to the base size's offset from the outline centre; `center_piece_sets` centres on the outline. jacket2: Back's pattern label leaves sizes 220–280 (import warning).
 - Layout.90/91: research only, `dxf-docs/seamlylayout_DXF_PAPER_AND_MODEL_SPACE.md`. User decision needed (P1/P2, M1/M2/M3).
 - Layout.27.13.4: MSI 26.10.2023 capture is now `jacket2_40-146_handoff.svg`; 7 of 8 graded, Detail 4 not. Seamly2D fix `snapNodeVertices` for node vertices that `RemoveDublicates` erased (node counts differ by size). Two Detail 4 geometry differences stay open (27.13.6).
-- Verified: `cargo test --workspace` 611 passed; `ctest --preset debug` 6 of 6; scratch QtTest harness 21 passed (new `TST_VPiece` cases); `cl /Zs` on every changed `.cpp`; 8 samples and 13 CollectionTest patterns convert to 0.7.7 and validate. Not run: Qt suites, MSI (ask first), GUI.
+- Verified: `cargo test --workspace` 611 passed; `ctest --preset debug` 6 of 6; temporary test program 21 passed (new `TST_VPiece` cases); `cl /Zs` on every changed `.cpp`; 8 samples and 13 CollectionTest patterns convert to 0.7.7 and validate. Not run: Qt suites, MSI (ask first), GUI.
 - User checks: `AGENT_CHECKLIST.md` §23 (extended), §24 (Rotation, Tilt, Fold, Flip), §25 (material tabs), §26 (grainline and label places); Layout.27.13.6.2 needs a new jacket2 capture.
 - Scratch tools in the session scratchpad: `harness/` (QtTest harness for new `TST_VPiece` tests), `uirender/` (renders a `.ui` to PNG), `make_zs.py` (`cl /Zs`), `cargo.cmd`, `ctest_debug.cmd`.
 - Uncommitted user files left untouched: both `jacket2_40-146.sm2d` copies, `test-seamly-layout/layouts/jacket2/2026102*/`.
@@ -308,7 +308,7 @@ Older entries: `project-docs/SESSION_HANDOVER_ARCHIVE.md`. Do not Read it at ses
 - Strict `pack_maxrects*` (sheets, tiled scan, oversized): start orders only. Lenient and extending: full search, about 1 s at most.
 - Progress status: "Packing <n> pieces... <p>%".
 - Removed from the earlier uncommitted draft: unused `snap_to_exact_gap`, `rotated_exact_dims`.
-- Verified: `cargo test --workspace` 559 passed. Scratch harness with the sample layouts' piece sizes: Marker 16,944 → 14,840 px, side-gap excess 1,009 → 0 px; 208-piece jacket2 74,605 → 73,165 px. Not run: ctest (no C++/QML change), GUI, MSI (ask first).
+- Verified: `cargo test --workspace` 559 passed. Temporary test program with the sample layouts' piece sizes: Marker 16,944 → 14,840 px, side-gap excess 1,009 → 0 px; 208-piece jacket2 74,605 → 73,165 px. Not run: ctest (no C++/QML change), GUI, MSI (ask first).
 - Not done (user decision): 1/100 px packing. Boxes round up to whole px, so a gap on the media is 5–6 px; 1 px is within tolerance.
 - User check: next MSI, Marker of the jacket2 Lining handoff.
 
@@ -329,7 +329,7 @@ Older entries: `project-docs/SESSION_HANDOVER_ARCHIVE.md`. Do not Read it at ses
 - After the SeamlyLayout release build: `ctest --preset release` (new test preset in `CMakePresets.json`), then `cargo test --workspace`. `-SkipTests` skips both.
 - The script finds cargo on PATH or in `%USERPROFILE%\.cargo\bin`; sets `QT_FORCE_STDERR_LOGGING=1` for ctest, so a failed suite prints its QtTest output.
 - Release tests found a defect: `StartupOptionsTests::makeFile` opened its file inside `Q_ASSERT`; 5 tests failed. Fixed with `qFatal`. Header changed to MIT (qt-style rule).
-- Verified: `ctest --preset release` on the last release build ran 6 suites, StartupOptionsTests failed (old binary); fixed test passed in a release-mode scratch harness (28 passed, 1 skipped); `cargo test --workspace` under vcvars 549 passed; batch text rendered for both modes. Not run: full `local_build_msi.ps1` (ask first).
+- Verified: `ctest --preset release` on the last release build ran 6 suites, StartupOptionsTests failed (old binary); fixed test passed in a release-mode temporary test program (28 passed, 1 skipped); `cargo test --workspace` under vcvars 549 passed; batch text rendered for both modes. Not run: full `local_build_msi.ps1` (ask first).
 - Full CI rule: `packaging/**` changed; the merge commit has no skip-ci token.
 
 ### 2026-10-19 — Multisize height selection rolled back, merged into local `run-seamlyLayout`, not pushed
@@ -359,7 +359,7 @@ Older entries: `project-docs/SESSION_HANDOVER_ARCHIVE.md`. Do not Read it at ses
 - `Tool::PieceMirror` added; tool-count checks 54 → 55. `VAbstractTool::PrepareNode(s)` now public; `VAbstractOperation::getDestination()` added.
 - Also fixed: `v0.7.6.xsd` `unionPiece` nodes allow `foldLine`.
 - Agent decisions (in the TODO): draft operation, not a piece tool element; half piece kept; record across the fold dropped; full piece 2 cm right of the half.
-- Verified: 14 piece mirror test cases passed in a scratch QtTest harness (current vpatterndb sources linked with the 2026-10-17 in-tree libs); a mutation (no curve reverse) failed 2 of them. `cl /Zs` on every changed `.cpp`; uic, moc, rcc on the new files. Not run: Qt suites, GUI. User check: Layout.80.3.1.
+- Verified: 14 piece mirror test cases passed in a temporary test program (current vpatterndb sources linked with the 2026-10-17 in-tree libs); a mutation (no curve reverse) failed 2 of them. `cl /Zs` on every changed `.cpp`; uic, moc, rcc on the new files. Not run: Qt suites, GUI. User check: Layout.80.3.1.
 - Full CI rule: `.pri` files changed; the merge commit has no skip-ci token.
 - `.gitignore` (user's staged edit) ignores `*.png` and `*.json`: the icons were added with `-f`; `project-docs/AGENT_STATE.json` is untracked.
 - User edited the Layout.80.3 line during the session; committed with the task.

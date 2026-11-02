@@ -241,6 +241,7 @@ A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. 
   - [x] Layout.80.1.2 - Piece Mode - Implement a 'Foldline' check option in 'Piece Properties > Path > node context menu'; user may select two adjacent nodes along the path --> must be two (not one, not three). Point node menu "Fold Line"; the row shows "(fold line)". `VPiece::foldLineNodeIndexes`: two point nodes, neighbours when excluded nodes are skipped; the closing segment counts. Any other choice: "A fold line needs two neighbouring points!", OK disabled.
   - [x] Layout.80.1.3 - Canvas - draw the foldline with its line style; a foldline is not part of the cutline or the seamline; no seam allowance can be added to this line; the "on fold" flag follows the foldline. `PatternPieceTool::m_foldLine`. Seam allowance width 0 along the fold line. A valid fold line checks and locks "On fold".
     - Decision taken: the outline stays closed, so the seam line and cut line still run along the fold segment; the fold line is drawn over it. A built-in seam allowance: the seam line stops on the fold line and does not run along it (Seamly2D.11, `TODO_COMPLETED.md`).
+    - Superseded (user decisions, Seamly2D.71.11, 71.13, 71.14): neither the seam line nor the cut line has an edge on the fold line, in Piece mode and in the SVG that Layout Mode sends.
 - [x] Layout.80.2 Update Schema:
   - [x] Layout.80.2.1 - Create a new `.sm2d` schema: fold line node ids, schema version bump. Decision taken: a main path node attribute `foldLine="true"` on each end node, in `v0.7.6.xsd` (0.7.6 is not released, so no second bump).
   - [x] Layout.80.2.2 - Create a converter for older files. `toVersion0_7_6` needs no change: an older node has no fold line.
@@ -253,7 +254,7 @@ A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. 
   - Full piece: internal paths, anchors and custom seam allowance records on both halves; pins on the anchor copies; no fold line, not on fold; 2 cm right of the half piece. One undo step.
   - Decisions taken: the mirror is a draft operation, not a new piece tool element, so the full piece follows draft changes and the file format does not change. The half piece stays; dialog option "Take the half piece out of the layout", checked by default. A custom seam allowance record across the fold line is left out.
   - Also fixed: `v0.7.6.xsd` allows `foldLine` on `unionPiece` nodes; a union of a piece with a fold line wrote an invalid file.
-  - Tests: `TST_VPiece` `PieceMirrorFullPathOrder` (7 rows), `PieceMirrorNodeAttributes`, `PieceMirrorFoldNodesTakeHalfWidth`, `PieceMirrorBuildsFullOutline`, `PieceMirrorRecordRanges`, `PieceMirrorDropsRecordAcrossFold`. Passed in a scratch harness against the current `vpatterndb` sources. Checked: `cl /Zs` on every changed `.cpp`. Qt suites passed in `local_build_msi.ps1` (MSI 26.10.1921).
+  - Tests: `TST_VPiece` `PieceMirrorFullPathOrder` (7 rows), `PieceMirrorNodeAttributes`, `PieceMirrorFoldNodesTakeHalfWidth`, `PieceMirrorBuildsFullOutline`, `PieceMirrorRecordRanges`, `PieceMirrorDropsRecordAcrossFold`. Passed in a temporary test program against the current `vpatterndb` sources. Checked: `cl /Zs` on every changed `.cpp`. Qt suites passed in `local_build_msi.ps1` (MSI 26.10.1921).
   - [ ] Layout.80.3.1 Next MSI (`AGENT_CHECKLIST.md` §20): mark a fold line on a half piece; Piece mode > Piece Mirror, click the piece, OK. Check: full piece right of the half; symmetric outline; seam allowance all round; no fold line; half piece out of the layout. Draft mode shows the Mirror by Line operation; move a draft point: both halves follow. Undo removes the full piece and the operation. Save, reopen. Click a piece without a fold line: status bar message, no dialog. In a pattern with several draft blocks, mirror a piece of the first block; undo, redo, save, reopen.
 - [x] Layout.80.4 Handoff SVG: `data-on-fold` on the piece `<g>`, a `fold_line` component group with the two points; update `SVG-DATA-ATTRIBUTES.md` and `NEW-ATTRIBUTES.csv`. `VLayoutPiece::createFoldLineItem`; id `fold_line_<name>`. HPGL draws it as a mark; DXF-ASTM writes layer 6 (Layout.80.6.4).
 - [x] Layout.80.5 Unit tests: schema round-trip, handoff attributes. Written: `TST_VPiece` `FoldLineNodeIndexes` (8 rows), `FoldLineHasNoSeamAllowance`, `LayoutPieceTakesFoldLine`, `FoldLineNodeAttributeIsRead`; `TST_SvgComponentTags::FoldLineSendsFoldLineGroup`. Checked: `cl /Zs` on every changed `.cpp`. Qt suites passed in `local_build_msi.ps1` (MSI 26.10.1921).
@@ -393,7 +394,7 @@ Export > DXF > "DXF-AAMA (R11)": ANSI/AAMA-292 content in a DXF R11 (AC1009) fil
   - Decision taken: a new format 0.7.7, not a change to 0.7.6. Builds already wrote 0.7.6 files (jacket2, trousers samples) with free-text values; a 0.7.6 file is not converted again.
   - Layout.96–98 add to the same 0.7.7 format.
 - [x] Layout.95.4 Converter: `VPatternConverter::toVersion0_7_7`, `rotationWayToV0_7_7`. An empty, unknown or translated value becomes `None`.
-- [x] Layout.95.5 Tests: `TST_VPiece::PieceRotationValuesRoundTrip`, `ConverterSetsRotationWay` (3 rows). Passed in a scratch harness (in-tree libs, current `vpatternconverter.cpp`, `vpiecelabeldata.cpp`, `schema.qrc`); the converted file validates against `v0.7.7.xsd`. `cl /Zs` on every changed `.cpp`. Fusion render of the dialog: the page fits. Not run: Qt suites (next MSI).
+- [x] Layout.95.5 Tests: `TST_VPiece::PieceRotationValuesRoundTrip`, `ConverterSetsRotationWay` (3 rows). Passed in a temporary test program (in-tree libs, current `vpatternconverter.cpp`, `vpiecelabeldata.cpp`, `schema.qrc`); the converted file validates against `v0.7.7.xsd`. `cl /Zs` on every changed `.cpp`. Fusion render of the dialog: the page fits. Not run: Qt suites (next MSI).
 - [ ] Layout.95.6 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
 - DXF `Rotation:` line and the handoff attribute: Layout.93.4, 93.5.
 
@@ -403,7 +404,7 @@ Export > DXF > "DXF-AAMA (R11)": ANSI/AAMA-292 content in a DXF R11 (AC1009) fil
 - [x] Layout.96.2 Data: `PieceTilt`; `VPieceLabelData::GetTilt`, `getTiltDegrees` (clamped 0–90), `tiltToString`, `stringToTilt`, `tiltDisplayText`. Label `%pTilt%` shows "CCW 15"; None shows "None".
 - [x] Layout.96.3 Schema 0.7.7: `tilt` type `pieceTilt` (`None`, `CCW`, `CW`); new attribute `tiltDegrees` type `tiltDegrees` (0–90). `VAbstractPattern::AttrTiltDegrees`.
 - [x] Layout.96.4 Converter `tiltToV0_7_7`: old "CW X" / "CCW X" → direction, 0 degrees; "CCW 15" → CCW, 15; a number past 90 → 0; any other value → None without `tiltDegrees`.
-- [x] Layout.96.5 Tests: `TST_VPiece::PieceTiltValuesRoundTrip`, `ConverterSplitsTilt` (6 rows). Passed in the scratch harness, with the rotation tests (13 passed). `cl /Zs` on every changed `.cpp`. Fusion render of the dialog. Not run: Qt suites (next MSI).
+- [x] Layout.96.5 Tests: `TST_VPiece::PieceTiltValuesRoundTrip`, `ConverterSplitsTilt` (6 rows). Passed in the temporary test program, with the rotation tests (13 passed). `cl /Zs` on every changed `.cpp`. Fusion render of the dialog. Not run: Qt suites (next MSI).
 - [ ] Layout.96.6 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
 - DXF `Tilt:` line and the handoff attribute: Layout.93.4, 93.5.
 
@@ -577,7 +578,7 @@ Closes Gap 2 of Dead.4.4.3 (`TODO_REMOVE_DEAD_LAYOUT_CODE.md`). After it, Dead.4
 - [x] Layout.106.7 Add a function that builds the SVG from the new lists: `HandoffStyle::from_settings()`, `set_units()`, `set_sample_size()` or `set_multisize()`, `piece_extent()` and `arrange_flat()` for the sheet and offsets, `add_piece()`, `to_svg_string()`. Layout Mode does not call it until the Dead.4.4.3 compare passes.
   - Done: `generateHandoffSvgDocument()`. `writeHandoffCompareFiles()` writes `<pattern>_old.svg` and `<pattern>_new.svg` when `SEAMLY_HANDOFF_COMPARE_DIR` is set. `exportPiecesToSeamlyLayout()` calls it; SeamlyLayout still gets the old SVG.
 - [x] Layout.106.8 Tests: the corner compare (same cuts; different cuts, same corner count; different corner count). Run `TST_HandoffPiece` and `TST_HandoffDocument` again.
-  - Done: new `TST_HandoffCornerCuts` (4 cases pass in a scratch harness). `TST_HandoffPiece` and `TST_HandoffDocument` run in 106.9.
+  - Done: new `TST_HandoffCornerCuts` (4 cases pass in a temporary test program). `TST_HandoffPiece` and `TST_HandoffDocument` run in 106.9.
   - `cl /Zs` of `mainwindowsnogui.cpp`, `mainwindow.cpp` and `handoff_corner_cuts.cpp`: no errors.
 - [ ] Layout.106.9 Verify: MSI build and Qt suites (ask first). NEEDS_USER_TEST: Layout Mode on an individual pattern and on a multisize pattern opens SeamlyLayout with the same pieces as before.
 

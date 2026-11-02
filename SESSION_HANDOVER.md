@@ -7,12 +7,14 @@
 - Request (user): change the old writer now. `VLayoutPiece` sends `seamline` and `cutline` as `HandoffPiece` does: start at the fold line end, end at the fold line start, no `Z`.
 - `make_line_open_at_fold` is public (`handoff_piece.h`). `VLayoutPiece` setters take node vertices and the fold line; new `isContourClosed()`, `isSeamAllowanceClosed()`.
 - `unifyTurnPoints()` compares closed flags. The Dead.4.4.3 compare expects no fold line difference now.
-- Verified: scratch harness `TST_HandoffPiece` 25/25, `TST_HandoffDocument` 19/19, `TST_SvgComponentTags` 51/51. With the fold line not passed in `Create`, the 4 fold rows fail (expected). Not run: MSI.
+- Verified: temporary test program `TST_HandoffPiece` 25/25, `TST_HandoffDocument` 19/19, `TST_SvgComponentTags` 51/51. With the fold line not passed in `Create`, the 4 fold rows fail (expected). Not run: MSI.
 - Seamly2D.71.14 done; new Seamly2D.71.15 (user check, Layout Mode).
-- Not changed: `AGENT_CHECKLIST.md` §34 still says Layout Mode is not in the check (Sue edits the file).
+- `AGENT_CHECKLIST.md`: new §35 and OPEN rows (Seamly2D.71.15); §34 points to it. Not committed (Sue edits it).
+- Feedback (user): no jargon. The docs now say "temporary test program", not "temporary test program".
+- Docs: superseded notes for the old fold line decisions (`TODO_SEAMLYLAYOUT.md` Layout.80.1.3, `TODO_COMPLETED.md` Layout.112).
 - Merge subject has no skip-ci token: the pending push holds `.pri` and `packaging/` changes. Task branch deleted.
 - Next: MSI build (ask): Seamly2D.71.9, 71.12, 71.15, 11.8, 11.9, Layout.97.7.
-- `run-seamlyLayout` is 49 commits ahead of `origin`.
+- `run-seamlyLayout` is 50 commits ahead of `origin`.
 
 ### 2026-11-01 — Seam line stops at the fold line (Seamly2D.71.13); merged into local `run-seamlyLayout`, not pushed
 
@@ -32,9 +34,9 @@
 
 - Rule (user): with a fold line the cut line is open; the fold line runs from the cut line end to its begin. Built-in seam allowance too.
 - Seamly2D: `VPiece::openAtFoldLine` (public static); `HandoffPiece` open `cutline` and `built_in_cut_line()`; Piece mode draws the cut line open (`pattern_piece_tool.cpp`).
-- Decision: the live Layout Mode writer (`VLayoutPiece`) keeps the closed cut line until the Dead.4.4.3 switch. Noted there as an expected compare difference.
+- Superseded by Seamly2D.71.14: Layout Mode sends the cut line without the fold line edge.
 - SeamlyLayout: new `geometry::fold_line_join`; DXF-ASTM `converter` and `piece_divider` close an open cut line along the fold line (0.1 mm). Packing, display, HPGL: no change (tests added).
-- Verified: scratch harness `TST_VPiece` 134/134, `TST_HandoffPiece` 20/20, `TST_HandoffDocument` 16/16; `cargo test --workspace` all pass; `ctest --preset debug` 7/7. Not run: MSI.
+- Verified: temporary test program `TST_VPiece` 134/134, `TST_HandoffPiece` 20/20, `TST_HandoffDocument` 16/16; `cargo test --workspace` all pass; `ctest --preset debug` 7/7. Not run: MSI.
 - Layout.112 moved to `TODO_COMPLETED.md`. Seamly2D.71.11 done; new Seamly2D.71.12 (user check, Piece mode).
 - Merge subject has the skip-ci token (`.cpp`, `.h`, `.rs`, `.md` only). Task branch deleted.
 - Not committed: `project-docs/AGENT_CHECKLIST.md` (Sue edits it). No checklist row added for Seamly2D.71.12.
