@@ -2,7 +2,7 @@
 
 ## Current status
 
-### 2026-11-01 — male_shirt DXF review: Flip Both, seam line corner, On fold box; merged into local `run-seamlyLayout`, not pushed
+### 2026-11-01 — male_shirt DXF review: Flip Both, seam line corner, On fold box, Fold needs a fold line; merged into local `run-seamlyLayout`, not pushed
 
 - Checked DXF exports 1931 and 2029 (aw.fyi reports). `AGENT_CHECKLIST.md`: Layout.80.6.6 PASS; §27 FAIL → Seamly2D.11.10 (user).
 - User decision: Flip Both writes `Flip:Y` with a `Rotation:` step that reaches 180. Merge `35b6ce1b7b` (`31752f8e20`). cargo 639 pass, ctest 7/7.
@@ -11,10 +11,10 @@
 - Layout.97.6 done. Merge `28741addb9` (`dc26eeeded`): removing the fold line no longer leaves "On fold" checked. `cl` compile only.
 - Layout.111 closed (user decision: the warning was correct); moved to `TODO_COMPLETED.md`.
 - Harness: `%TEMP%\seam_corner_harness\` (`build.bat [fix]`, `run.bat`; xerces DLL directory on PATH).
-- Open question, not answered: FrontPanel has `onFold="true"` and no fold line, so it writes `Fold:Y`.
-- User action: uncheck "On fold" on "CollarTopInterface Mirrored" in both male_shirt copies.
-- Next: MSI build (ask): Seamly2D.11.8, Seamly2D.11.9, Layout.97.7.
-- `run-seamlyLayout` is 26 commits ahead of `origin`.
+- Layout.97.8 done (user decision: no fold line → `Fold:N`, also with `onFold="true"`; FrontPanel case). Merge `2171bf01dc` (`a8e5d348a6`): `converter::piece_is_on_fold`; the `Quantity:` split follows. cargo 639 pass.
+- User action (agreed): uncheck "On fold" on "CollarTopInterface Mirrored" in both male_shirt copies.
+- Next: MSI build, not yet approved (ask): Seamly2D.11.8, Seamly2D.11.9, Layout.97.7. Then the user checks `AGENT_CHECKLIST.md`, then pushes (user decision; the push will start CI).
+- `run-seamlyLayout` is 29 commits ahead of `origin`.
 
 ### 2026-11-01 — `develop` merge (14 upstream commits); merged into local `run-seamlyLayout`, not built, not pushed
 
