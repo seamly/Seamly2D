@@ -87,6 +87,7 @@ private slots:
     void BuiltInPieceSendsCutlineAndSeamline() const;
     void BuiltInPieceHiddenSeamLineSendsCutlineOnly() const;
     void BuiltInPieceWithFoldLineSendsOpenSeamline() const;
+    void FoldLinePieceSendsLinesWithoutFoldEdge() const;
     void SizesShareNodeTurnPoints() const;
     void SizesWithDifferentNodeCountsKeepTurnPoints() const;
     void LoopStartingAtAnotherNodeSharesTurnPoints() const;

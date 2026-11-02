@@ -89,6 +89,22 @@ VPiece square_piece_with_slit(VContainer *data, bool seam_allowance, bool built_
     piece.GetGrainlineGeometry().SetVisible(false);
     return piece;
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief square_piece_on_fold flags the first and last main path nodes as the fold line: the left side of the square.
+ * @param seam_allowance whether the piece has a seam allowance.
+ * @param built_in       whether the seam allowance is built into the main path.
+ */
+VPiece square_piece_on_fold(VContainer *data, bool seam_allowance, bool built_in)
+{
+    VPiece piece = square_piece_with_slit(data, seam_allowance, built_in);
+    QVector<VPieceNode> nodes = piece.GetPath().getNodes();
+    nodes.first().setFoldLine(true);
+    nodes.last().setFoldLine(true);
+    piece.GetPath().setNodes(nodes);
+    return piece;
+}
 } // namespace
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -101,23 +117,29 @@ TST_HandoffPiece::TST_HandoffPiece(QObject *parent)
 void TST_HandoffPiece::seamAndCutLinesMatchOldWriter_data() const
 {
     QTest::addColumn<bool>("built_in");
+    QTest::addColumn<bool>("on_fold");
 
-    QTest::newRow("cut line")  << false;
-    QTest::newRow("built in")  << true;
+    QTest::newRow("cut line")             << false << false;
+    QTest::newRow("cut line on the fold") << false << true;
+    QTest::newRow("built in")             << true  << false;
+    QTest::newRow("built in on the fold") << true  << true;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief Every line, node count and notch list equals what VLayoutPiece::Create gives.
+ * @brief Every line, closed flag, node count and notch list equals what VLayoutPiece::Create gives, also with a fold
+ *        line.
  */
 void TST_HandoffPiece::seamAndCutLinesMatchOldWriter() const
 {
     QFETCH(bool, built_in);
+    QFETCH(bool, on_fold);
 
     const Unit unit = Unit::Mm;
     QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
     qApp->setPatternUnit(unit);
-    const VPiece piece = square_piece_with_slit(data.data(), true, built_in);
+    const VPiece piece = on_fold ? square_piece_on_fold(data.data(), true, built_in)
+                                 : square_piece_with_slit(data.data(), true, built_in);
 
     const VLayoutPiece old_piece = VLayoutPiece::Create(piece, data.data());
     const HandoffPiece new_piece = HandoffPiece::create(piece, data.data());
@@ -127,6 +149,8 @@ void TST_HandoffPiece::seamAndCutLinesMatchOldWriter() const
     QCOMPARE(new_piece.has_built_in_seam_allowance(), old_piece.hasSeamAllowanceBuiltIn());
     QCOMPARE(new_piece.seam_line().points, old_piece.getContourPoints());
     QCOMPARE(new_piece.cut_line().points, old_piece.getSeamAllowancePoints());
+    QCOMPARE(new_piece.seam_line().closed, old_piece.isContourClosed());
+    QCOMPARE(new_piece.cut_line().closed, old_piece.isSeamAllowanceClosed());
     QCOMPARE(new_piece.built_in_seam_line().points, old_piece.getBuiltInSeamLinePoints());
     QCOMPARE(new_piece.built_in_seam_line().closed, old_piece.isBuiltInSeamLineClosed());
     QCOMPARE(new_piece.notches().lines, old_piece.getNotches());
@@ -143,6 +167,8 @@ void TST_HandoffPiece::seamAndCutLinesMatchOldWriter() const
     QVERIFY(new_piece.seam_line().turn_points.has_value());
     QCOMPARE(new_piece.seam_line().node_indices.size(), 5);
     QCOMPARE(new_piece.cut_line().points.isEmpty(), built_in);
+    QCOMPARE(old_piece.isContourClosed(), !on_fold);
+    QCOMPARE(old_piece.isSeamAllowanceClosed(), built_in || !on_fold);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -208,22 +234,6 @@ void show_grainline(VPiece *piece, const QString &length, ArrowType type)
     grainline.setLength(length);
     grainline.setArrowLength(QStringLiteral("20"));
     grainline.setArrowType(type);
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief square_piece_on_fold flags the first and last main path nodes as the fold line: the left side of the square.
- * @param seam_allowance whether the piece has a seam allowance.
- * @param built_in       whether the seam allowance is built into the main path.
- */
-VPiece square_piece_on_fold(VContainer *data, bool seam_allowance, bool built_in)
-{
-    VPiece piece = square_piece_with_slit(data, seam_allowance, built_in);
-    QVector<VPieceNode> nodes = piece.GetPath().getNodes();
-    nodes.first().setFoldLine(true);
-    nodes.last().setFoldLine(true);
-    piece.GetPath().setNodes(nodes);
-    return piece;
 }
 } // namespace
 
