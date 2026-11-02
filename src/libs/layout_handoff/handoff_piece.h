@@ -58,6 +58,17 @@ struct HandoffLine
 };
 
 /**
+ * @brief make_line_open_at_fold builds a seam line or a cut line that has no edge on the fold line.
+ * @details Without a fold line, or without an edge on it, the line is closed: its last point connects back to its
+ *          first point. Otherwise the line starts at the fold line end and ends at the fold line start.
+ * @param points        closed polyline; the first point may repeat at the end.
+ * @param node_vertices vertices that can break the tangent. Empty = turn points unknown.
+ * @param fold          fold line of the piece; a null line keeps the line closed.
+ */
+HandoffLine make_line_open_at_fold(const QVector<QPointF>& points, const QVector<QPointF>& node_vertices,
+                                   const QLineF& fold);
+
+/**
  * @brief HandoffPath is an internal path or a cutout path of a piece.
  */
 struct HandoffPath
