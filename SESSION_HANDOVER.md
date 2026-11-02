@@ -2,6 +2,19 @@
 
 ## Current status
 
+### 2026-11-01 — Open cut line at the fold line (Seamly2D.71.11, Layout.112); merged into local `run-seamlyLayout`, not pushed
+
+- Rule (user): with a fold line the cut line is open; the fold line runs from the cut line end to its begin. Built-in seam allowance too.
+- Seamly2D: `VPiece::openAtFoldLine` (public static); `HandoffPiece` open `cutline` and `built_in_cut_line()`; Piece mode draws the cut line open (`pattern_piece_tool.cpp`).
+- Decision: the live Layout Mode writer (`VLayoutPiece`) keeps the closed cut line until the Dead.4.4.3 switch. Noted there as an expected compare difference.
+- SeamlyLayout: new `geometry::fold_line_join`; DXF-ASTM `converter` and `piece_divider` close an open cut line along the fold line (0.1 mm). Packing, display, HPGL: no change (tests added).
+- Verified: scratch harness `TST_VPiece` 134/134, `TST_HandoffPiece` 20/20, `TST_HandoffDocument` 16/16; `cargo test --workspace` all pass; `ctest --preset debug` 7/7. Not run: MSI.
+- Layout.112 moved to `TODO_COMPLETED.md`. Seamly2D.71.11 done; new Seamly2D.71.12 (user check, Piece mode).
+- Merge subject has the skip-ci token (`.cpp`, `.h`, `.rs`, `.md` only). Task branch deleted.
+- Not committed: `project-docs/AGENT_CHECKLIST.md` (Sue edits it). No checklist row added for Seamly2D.71.12.
+- Next: MSI build (ask): Seamly2D.71.9, 71.12, 11.8, 11.9, Layout.97.7.
+- `run-seamlyLayout` is 36 commits ahead of `origin`.
+
 ### 2026-11-01 — male_shirt DXF review: Flip Both, seam line corner, On fold box, Fold needs a fold line; merged into local `run-seamlyLayout`, not pushed
 
 - Checked DXF exports 1931 and 2029 (aw.fyi reports). `AGENT_CHECKLIST.md`: Layout.80.6.6 PASS; §27 FAIL → Seamly2D.11.10 (user).
@@ -51,16 +64,6 @@
 - Decisions 108.4 (keep base place, warn in Seamly2D) and 108.5 (keep the SeamlyLayout import move) recorded, commit `a952e29d1e` (docs only).
 - Fixed: working copies of `TODO_SEAMLYLAYOUT.md` and `TODO_REMOVE_DEAD_LAYOUT_CODE.md` dropped committed lines (stale editor buffer). Restored (user decision). Uncommitted Sue edits kept: Layout.102.5 wording, the `VPattern` question in Dead.4.4.3.
 - `run-seamlyLayout` is 6 commits ahead of `origin`.
-
-### 2026-10-27 — `nmake check` fix: `TST_Seamly2DCommandLine::ExportMode` removed; merged into local `run-seamlyLayout`, not pushed
-
-- Cause: the MSI build stopped in `CollectionTest`. `ExportMode` ran `-p`, `-d`, `-b`, removed with the console export mode (Dead.4.1.1).
-- Merge `8813562a51` (commit `899adb914a`), skip-ci token: test and doc change only.
-- Changed: `tst_seamly2dcommandline.cpp/.h`, `TODO_REMOVE_DEAD_LAYOUT_CODE.md` Dead.4.1.1.
-- Verified: in-tree `CollectionTest` rebuilt and run: 51 passed, 0 failed, 4 skipped (read-only checks, Windows ACLs). `ParserTest`, `TranslationsTest` exit 0. Not run: MSI.
-- Open user decision: test mode ignores a bad `--gsize`/`--gheight` (exit 0). The 4 gradation rows of the old test are not ported. `glimited/*.sm2d` and `issue_372.sm2d` are now unused.
-- `run-seamlyLayout` is 2 commits ahead of `origin`.
-- Next: MSI build (ask).
 
 Older entries: `project-docs/SESSION_HANDOVER_ARCHIVE.md`. Do not Read it at session start.
 

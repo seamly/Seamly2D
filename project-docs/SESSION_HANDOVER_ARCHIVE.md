@@ -2,6 +2,16 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-10-27 — `nmake check` fix: `TST_Seamly2DCommandLine::ExportMode` removed; merged into local `run-seamlyLayout`, not pushed
+
+- Cause: the MSI build stopped in `CollectionTest`. `ExportMode` ran `-p`, `-d`, `-b`, removed with the console export mode (Dead.4.1.1).
+- Merge `8813562a51` (commit `899adb914a`), skip-ci token: test and doc change only.
+- Changed: `tst_seamly2dcommandline.cpp/.h`, `TODO_REMOVE_DEAD_LAYOUT_CODE.md` Dead.4.1.1.
+- Verified: in-tree `CollectionTest` rebuilt and run: 51 passed, 0 failed, 4 skipped (read-only checks, Windows ACLs). `ParserTest`, `TranslationsTest` exit 0. Not run: MSI.
+- Open user decision: test mode ignores a bad `--gsize`/`--gheight` (exit 0). The 4 gradation rows of the old test are not ported. `glimited/*.sm2d` and `issue_372.sm2d` are now unused.
+- `run-seamlyLayout` is 2 commits ahead of `origin`.
+- Next: MSI build (ask).
+
 ### 2026-10-27 — Layout.106.1–106.8: handoff pieces built with `layout_handoff` too; merged into local `run-seamlyLayout`, not pushed
 
 - User decisions: Option A (old and new lists filled in one size loop; SeamlyLayout keeps the old SVG until the Dead.4.4.3 compare passes). Compare switch: env `SEAMLY_HANDOFF_COMPARE_DIR=<absolute dir>` writes `<pattern>_old.svg` and `<pattern>_new.svg`. Removal filed as Task Layout.107.

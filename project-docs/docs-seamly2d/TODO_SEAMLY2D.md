@@ -49,15 +49,16 @@ Fix this by reorganizing the main path nodes and creating the foldline's arrowed
 
 Rotation, arrow line, label, extended fold line, SeamlyLayout fold placement and nesting, tests and conversion are done: `TODO_COMPLETED.md`, "Completed subtasks from Task Seamly2D.71". Open:
 
-- [ ] Seamly2D.71.9 Next MSI: Qt suites (`nmake check` in `local_build_msi.ps1`). A scratch harness passed `TST_VPiece` and `TST_SvgComponentTags` with the changed sources.
+- [ ] Seamly2D.71.9 Next MSI: Qt suites (`nmake check` in `local_build_msi.ps1`). A scratch harness passed `TST_VPiece`, `TST_SvgComponentTags`, `TST_HandoffPiece` and `TST_HandoffDocument` with the changed sources.
 - [ ] Seamly2D.71.10 Verify (User): `AGENT_CHECKLIST.md` §29.
-- [ ] Seamly2D.71.11 Fix - A piece with a fold line: the cut line is an open path and does not run along the fold line.
+- [x] Seamly2D.71.11 Fix - A piece with a fold line: the cut line is an open path and does not run along the fold line.
   - Rule (user decision): the fold line begins at the cut line end and ends at the cut line begin. The cut line and the fold line make the outer edge.
   - A cut line that runs along the fold line means an improperly defined piece.
   - A piece without a fold line keeps a closed cut line. A mirrored piece has no fold line.
-  - Now: Piece mode draws the cut line closed (`PatternPieceTool::refreshFoldLine()`). The handoff sends `cutline` closed (`handoff_piece.cpp`).
-  - Proposed: Piece mode and the handoff `cutline` stop at the fold line ends. Also with a built-in seam allowance, where the cut line is the seam line.
-  - SeamlyLayout side: Layout.112. Change both sides together: handoff contract, `SVG-DATA-ATTRIBUTES.md` `fold_line`.
+  - Done: `VPiece::openAtFoldLine()` (public static). Piece mode draws the cut line open (`open_cut_line_path`, `pattern_piece_tool.cpp`). `HandoffPiece` sends `cutline` open, also the built-in seam allowance main path (`built_in_cut_line()`).
+  - Not changed (decision): the current Layout Mode writer (`VLayoutPiece`) still sends a closed cut line. The open cut line reaches SeamlyLayout with the `layout_handoff` switch (Dead.4.4.3). SeamlyLayout reads both (Layout.112).
+  - Tests: `TST_VPiece` (open at the fold line), `TST_HandoffPiece`, `TST_HandoffDocument`. Scratch harness: 134/134, 20/20, 16/16 PASS. `pattern_piece_tool.cpp` builds.
+- [ ] Seamly2D.71.12 Verify (User): Piece mode, piece with a fold line: the cut line stops at both fold line ends; no cut line along the fold line. Also with a built-in seam allowance.
 
 ## Not required for SeamlyLayout release
 
