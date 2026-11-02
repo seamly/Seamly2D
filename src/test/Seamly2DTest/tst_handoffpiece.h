@@ -53,6 +53,8 @@ private slots:
     void pieceWithoutFoldLineHasNoFoldData() const;
     void cutLineOpensAtFoldLine_data() const;
     void cutLineOpensAtFoldLine() const;
+    void seamLineOpensAtFoldLine_data() const;
+    void seamLineOpensAtFoldLine() const;
     void cutLineWithoutFoldLineStaysClosed_data() const;
     void cutLineWithoutFoldLineStaysClosed() const;
     void cornerCutsMatchOldWriter() const;

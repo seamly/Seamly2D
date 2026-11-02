@@ -49,8 +49,8 @@ private slots:
     void sheetMatchesOldScene() const;
     void emptySheetKeepsPositions() const;
     void hiddenItemsAreNotDrawn() const;
-    void foldPieceSendsOpenCutline_data() const;
-    void foldPieceSendsOpenCutline() const;
+    void foldPieceSendsOpenLines_data() const;
+    void foldPieceSendsOpenLines() const;
     void labelLinesElideAndAlign() const;
 
 };

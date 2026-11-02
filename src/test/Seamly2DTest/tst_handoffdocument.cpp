@@ -523,9 +523,12 @@ void TST_HandoffDocument::pieceMatchesOldWriter() const
     QCOMPARE(count_type(actual, QStringLiteral("pattern_label")), 1);
     QCOMPARE(count_type(actual, QStringLiteral("grainline")), 1);
 
-    // The old writer closes the cut line along the fold line. foldPieceSendsOpenCutline() checks the open cut line.
+    // The old writer closes the seam line and the cut line along the fold line. foldPieceSendsOpenLines() checks the
+    // open lines.
     if (on_fold)
     {
+        take_component(&expected, QStringLiteral("seamline"));
+        take_component(&actual, QStringLiteral("seamline"));
         take_component(&expected, QStringLiteral("cutline"));
         take_component(&actual, QStringLiteral("cutline"));
     }
@@ -632,20 +635,25 @@ void TST_HandoffDocument::hiddenItemsAreNotDrawn() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_HandoffDocument::foldPieceSendsOpenCutline_data() const
+void TST_HandoffDocument::foldPieceSendsOpenLines_data() const
 {
+    QTest::addColumn<bool>("seam_allowance");
     QTest::addColumn<bool>("built_in");
 
-    QTest::newRow("cut line") << false;
-    QTest::newRow("built in") << true;
+    QTest::newRow("cut line")          << true  << false;
+    QTest::newRow("built in")          << true  << true;
+    QTest::newRow("no seam allowance") << false << false;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief A piece with a fold line sends an open cut line. The fold line runs from the cut line end to its begin.
+ * @brief A piece with a fold line sends an open seam line and an open cut line. Both end on the fold line.
+ * @details The fold line runs from the outer line end to its begin: the cut line, or the seam line without a seam
+ *          allowance.
  */
-void TST_HandoffDocument::foldPieceSendsOpenCutline() const
+void TST_HandoffDocument::foldPieceSendsOpenLines() const
 {
+    QFETCH(bool, seam_allowance);
     QFETCH(bool, built_in);
 
     const Unit unit = Unit::Mm;
@@ -655,7 +663,7 @@ void TST_HandoffDocument::foldPieceSendsOpenCutline() const
     VAbstractPattern   *previous = qApp->getCurrentDocument();
     qApp->setCurrentDocument(&document);
 
-    VPiece piece = make_piece(data.data(), true, built_in, true);
+    VPiece piece = make_piece(data.data(), seam_allowance, built_in, true);
     set_label_templates(&document, &piece);
     const HandoffPlacedPiece placed = placed_piece(piece, data.data(), &document, QString(), QString());
     qApp->setCurrentDocument(previous);
@@ -670,15 +678,30 @@ void TST_HandoffDocument::foldPieceSendsOpenCutline() const
     dom.setContent(handoff.to_svg_string());
 
     QVector<Entry> entries   = flatten_document(dom);
+    const Entry    seam_line = take_component(&entries, QStringLiteral("seamline"));
     const Entry    cut_line  = take_component(&entries, QStringLiteral("cutline"));
     const Entry    fold_line = take_component(&entries, QStringLiteral("fold_line"));
-    QVERIFY(cut_line.points.size() >= 4);
     QCOMPARE(fold_line.points.size(), 2);
+    QVERIFY(seam_line.points.size() >= 3);
+    QCOMPARE(cut_line.points.isEmpty(), !seam_allowance);
 
-    // A closepath would bring the cut line back to its begin.
-    QVERIFY(QLineF(cut_line.points.first(), cut_line.points.last()).length() > 1);
-    QVERIFY(QLineF(cut_line.points.last(), fold_line.points.first()).length() < 0.02);
-    QVERIFY(QLineF(cut_line.points.first(), fold_line.points.last()).length() < 0.02);
+    // A closepath would bring the line back to its begin.
+    const Entry &outer = seam_allowance ? cut_line : seam_line;
+    QVERIFY(outer.points.size() >= 4);
+    QVERIFY(QLineF(outer.points.first(), outer.points.last()).length() > 1);
+    QVERIFY(QLineF(outer.points.last(), fold_line.points.first()).length() < 0.02);
+    QVERIFY(QLineF(outer.points.first(), fold_line.points.last()).length() < 0.02);
+
+    // Both seam line ends lie on the fold line.
+    const QLineF fold(fold_line.points.first(), fold_line.points.last());
+    const auto   distance_to_fold = [&fold](const QPointF &point)
+    {
+        const QPointF to_point = point - fold.p1();
+        return qAbs(to_point.x() * fold.dy() - to_point.y() * fold.dx()) / fold.length();
+    };
+    QVERIFY(QLineF(seam_line.points.first(), seam_line.points.last()).length() > 1);
+    QVERIFY(distance_to_fold(seam_line.points.first()) < 0.02);
+    QVERIFY(distance_to_fold(seam_line.points.last()) < 0.02);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

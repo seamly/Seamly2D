@@ -79,12 +79,15 @@ HandoffLine make_line(const QVector<QPointF> &points, const QVector<QPointF> &no
 }
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief make_cut_line builds a cut line; a fold line opens it.
+ * @brief make_line_open_at_fold builds a seam line or a cut line that has no edge on the fold line.
+ * @details Without a fold line the line is closed: its last point connects back to its first point. With a fold line
+ *          the line starts at the fold line end and ends at the fold line start.
  * @param points        closed polyline; the first point may repeat at the end.
  * @param node_vertices vertices that can break the tangent. Empty = turn points unknown.
- * @param fold          fold line of the piece; a null line keeps the cut line closed.
+ * @param fold          fold line of the piece; a null line keeps the line closed.
  */
-HandoffLine make_cut_line(const QVector<QPointF> &points, const QVector<QPointF> &node_vertices, const QLineF &fold)
+HandoffLine make_line_open_at_fold(const QVector<QPointF> &points, const QVector<QPointF> &node_vertices,
+                                   const QLineF &fold)
 {
     HandoffLine line;
     if (fold.isNull())
@@ -93,7 +96,7 @@ HandoffLine make_cut_line(const QVector<QPointF> &points, const QVector<QPointF>
     }
     else
     {
-        // The open cut line begins where the fold line ends and ends where the fold line begins.
+        // The line starts where the fold line ends and ends where the fold line starts.
         const QVector<QPointF> open = VPiece::openAtFoldLine(points, fold);
         line = make_line(AbstractPiece::RemoveDublicates(open, false), node_vertices, is_closed(open));
     }
@@ -311,10 +314,11 @@ HandoffPiece HandoffPiece::create(const VPiece &piece, const VContainer *pattern
     handoff.m_is_seam_line_hidden = piece.isHideSeamLine();
     const QVector<QPointF> main_path_points = piece.mainPathPoints(pattern);
     const QVector<QPointF> main_path_nodes  = piece.mainPathNodeVertices(pattern);
-    handoff.m_seam_line = make_line(AbstractPiece::RemoveDublicates(main_path_points, false), main_path_nodes, true);
 
-    // The cut line and the fold line make the outer edge, so the cut line does not run along the fold line.
-    const QLineF           fold_line = piece.foldLine(pattern);
+    // The fold line closes the outer edge, so neither the seam line nor the cut line runs along the fold line.
+    const QLineF fold_line = piece.foldLine(pattern);
+    handoff.m_seam_line    = make_line_open_at_fold(main_path_points, main_path_nodes, fold_line);
+
     QVector<QPointF>       cut_line_nodes;
     SeamAllowanceCorners   corners;
     const QVector<QPointF> cut_points = piece.seamAllowancePoints(pattern, &cut_line_nodes, &corners);
@@ -325,11 +329,11 @@ HandoffPiece HandoffPiece::create(const VPiece &piece, const VContainer *pattern
         handoff.m_has_built_in_seam_allowance = piece.hasSeamAllowanceBuiltIn();
         if (handoff.m_has_built_in_seam_allowance)
         {
-            handoff.m_built_in_cut_line = make_cut_line(main_path_points, main_path_nodes, fold_line);
+            handoff.m_built_in_cut_line = handoff.m_seam_line;
         }
         else if (!cut_points.isEmpty())
         {
-            handoff.m_cut_line = make_cut_line(cut_points, cut_line_nodes, fold_line);
+            handoff.m_cut_line = make_line_open_at_fold(cut_points, cut_line_nodes, fold_line);
         }
         else
         {
