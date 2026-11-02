@@ -620,17 +620,16 @@ fn collect_annotations(element: &Element, options: &SvgToEzdxfOptions, svg_heigh
 // @details Piece Properties are the source; label text only displays them, so a
 //          "Cut N" label line is never read. D6673 quantity is "R,L". Seamly2D
 //          states only a total, so an even total is split into mirrored pairs.
-//          An odd total, or a piece cut on the fold (`data-on-fold="true"`),
+//          An odd total, or a piece cut on the fold (`piece_is_on_fold`),
 //          counts as right pieces: a folded piece unfolds to one symmetric
 //          piece, never a left and right pair.
 // @return None when `data-quantity` is absent, 0 or not a number.
-fn quantity_from_piece(piece: &Element) -> Option<String> {
+fn quantity_from_piece(piece: &Element, on_fold: bool) -> Option<String> {
     let total = piece
         .attributes
         .get("data-quantity")
         .and_then(|v| v.trim().parse::<u32>().ok())
         .filter(|&n| n > 0)?;
-    let on_fold = piece.attributes.get("data-on-fold").is_some_and(|v| v.trim() == "true");
     Some(if total % 2 == 0 && !on_fold { format!("{},{}", total / 2, total / 2) } else { format!("{},0", total) })
 } // fn quantity_from_piece
 
@@ -697,12 +696,13 @@ fn tilt_from_piece(piece: &Element) -> Option<String> {
         .map(|degrees| format!("{degrees:+}"))
 } // fn tilt_from_piece
 
-// @brief `Fold:` value for a piece: Y when `data-on-fold="true"`, else N.
-// @details D6673 §4.3.1.2: Fold says the piece may be placed on the fold of tubular fabric.
-fn fold_from_piece(piece: &Element) -> String {
-    let on_fold = piece.attributes.get("data-on-fold").is_some_and(|v| v.trim() == "true");
-    (if on_fold { "Y" } else { "N" }).to_string()
-} // fn fold_from_piece
+// @brief True when the piece is cut on the fold: `data-on-fold="true"` and a fold line.
+// @details A piece without a fold line has no edge to fold on, so it is not on the fold,
+//          whatever its `data-on-fold`. This sets `Fold:` and the `Quantity:` split.
+// @param has_fold_line True when the piece has a FoldLine component (the block mirror line).
+fn piece_is_on_fold(piece: &Element, has_fold_line: bool) -> bool {
+    has_fold_line && piece.attributes.get("data-on-fold").is_some_and(|v| v.trim() == "true")
+} // fn piece_is_on_fold
 
 // @brief `Material:` value for a piece: its `data-material`, else `DEFAULT_MATERIAL`.
 fn material_from_piece(piece: &Element) -> String {
@@ -770,11 +770,14 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
 
     // Seamly2D prints "<empty>" for unset label fields; it carries no information.
     block.annotations.retain(|a| !a.text.is_empty() && a.text != "<empty>");
-    block.quantity = quantity_from_piece(piece);
+    // The component loop set the mirror line from the fold line.
+    let on_fold = piece_is_on_fold(piece, block.mirror_line.is_some());
+    block.quantity = quantity_from_piece(piece, on_fold);
     block.rotation = rotation_from_piece(piece);
     block.flip = flip_from_piece(piece);
     block.tilt = tilt_from_piece(piece);
-    block.fold = Some(fold_from_piece(piece));
+    // D6673 §4.3.1.2: `Fold:Y` says the piece may be placed on the fold of tubular fabric.
+    block.fold = Some((if on_fold { "Y" } else { "N" }).to_string());
     block.material = material_from_piece(piece);
 
     // Boundary: the longest closed cut line, else the longest closed seam line.

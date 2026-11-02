@@ -277,7 +277,7 @@ A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. 
     - `astm_mirror::align_mirror_lines`, after grading: the cut line edge on the fold line (0.1 mm) is the mirror line, and the boundary starts with it. Key points inside that edge are dropped, with their rule texts.
     - Fold line off the cut line: no layer 6, export warning names the piece. Piece Mirror full pieces have no fold line, so no layer 6.
   - [x] Layout.80.6.5 Tests: Rust import, left-edge placement, split, layer 6 and boundary order.
-    - `astm_piece_test::piece_on_fold_counts_every_cut_as_right`, `fold_line_becomes_the_mirror_line_at_the_boundary_start`, `fold_line_group_maps_to_layer_6`; `astm_mirror` (3); `writer_astm_test::mirror_line_is_a_layer_6_line_on_the_boundary_start`; `exports::do_export_dxf_writes_the_mirror_line`.
+    - `astm_piece_test::piece_on_fold_needs_a_fold_line`, `fold_line_becomes_the_mirror_line_at_the_boundary_start`, `fold_line_group_maps_to_layer_6`; `astm_mirror` (3); `writer_astm_test::mirror_line_is_a_layer_6_line_on_the_boundary_start`; `exports::do_export_dxf_writes_the_mirror_line`.
     - `piece_extractor::fold_line_is_a_component_group`; `svg_extract::find_outline_group_skips_fold_line_at_structural_position_1`; `piece_divider::fold_line_is_clipped_per_part`.
     - `fold_line_edge` (5); `layout_utils::fold_line_lies_on_the_left_edge` (fabric and paper), `sheet_export_pins_fold_line_pieces`; `layout_views::fold_line_warning_lists_one_piece_per_line`; `layout_engine` `left_edge_pieces_touch_the_left_edge`, `left_edge_piece_is_not_turned_to_fit`; `layout_settings::fold_lines_on_left_edge_drop_the_left_margin_of_fabric_only`; `SettingsModelTests::foldLinesOnLeftEdge_defaultsOffAndRoundtrips`.
     - Checked: `cargo test --workspace` 597 passed. `cl /Zs` on `SettingsModel.cpp` and `SettingsModelTests.cpp`. `qmllint SettingsDialog.qml`: no new kind of warning. Not run: ctest, MSI.
@@ -418,7 +418,10 @@ Export > DXF > "DXF-AAMA (R11)": ANSI/AAMA-292 content in a DXF R11 (AC1009) fil
 - [ ] Layout.97.5 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
 - [x] Layout.97.6 Fix: removing the fold line in the piece dialog left "On fold" checked. The box now returns to the user choice; a saved piece with a fold line has none (unchecked). `cl` compile check; no dialog test.
   - Probable cause of `onFold="true"` on male_shirt "CollarTopInterface Mirrored": the Piece Mirror tool writes `false`, and only the dialog sets `true`.
-- [ ] Layout.97.7 Verify (User), next MSI: mark two fold line nodes, then unmark them: "On fold" unchecks. male_shirt "CollarTopInterface Mirrored": uncheck "On fold", export: `Fold:N` (user decision: a mirrored piece is not on the fold).
+- [ ] Layout.97.7 Verify (User), next MSI: mark two fold line nodes, then unmark them: "On fold" unchecks. male_shirt "CollarTopInterface Mirrored": uncheck "On fold", export: `Fold:N` (user decision: a mirrored piece is not on the fold). male_shirt "FrontPanel" (`onFold="true"`, no fold line): `Fold:N` (Layout.97.8).
+- [x] Layout.97.8 DXF-ASTM `Fold:Y` needs `data-on-fold="true"` and a fold line. User decision: no fold line → `Fold:N`. The `Quantity:` split follows: such a piece with N=2 writes `1,1`, not `2,0`.
+  - `converter::piece_is_on_fold` (`seamly_svg2ezdxf`). Test `astm_piece_test::piece_on_fold_needs_a_fold_line` replaces `piece_on_fold_counts_every_cut_as_right`.
+  - A fold line off the cut line keeps `Fold:Y`; `align_mirror_lines` drops only the mirror line and warns.
 - DXF `Fold:Y` / `Fold:N`: Layout.93.5.
 
 ### [ ] Task Layout.98 - Verify - Seamly2D Piece Properties - Flip: change Flip to radio buttons 'None', 'Horizontal', 'Vertical', and 'Both' are enabled. (Default is 'None'); create test.
@@ -465,10 +468,10 @@ This information should be tracked in the layout data even if it's not shown in 
   - Done: `data-rotation` (step: 360, 180, 90, 1), `data-tilt` (degrees, negative clockwise), `data-flip` (Horizontal, Vertical, Both), `data-orientation` (Left, Right), `data-annotation`. A value that allows nothing writes no attribute. `VLayoutPiece::setPieceProperties` keeps the Piece Properties, also with a hidden label; `VPieceLabelData::rotationStepDegrees`.
   - Fold position is gone (Layout.97): `data-on-fold` carries the fold. Forbid flipping is now Flip (Layout.98): `data-flip`.
 - [x] Layout.93.5 DXF piece system text from them: `Rotation:`, `Tilt:`, `Fold:`, `Flip:` (D6673 §4.3.1.2). Values: Layout.95 (Rotation), Layout.96 (Tilt), Layout.97 (Fold), Layout.98 (Flip).
-  - Done: after `Quantity:`, in D6673 order: `Rotation:180`, `Flip:Y`, `Tilt:-15`, `Fold:N`, then `Material:`. Rotation, Flip or Tilt None writes no line. `converter::rotation_from_piece`, `flip_from_piece`, `tilt_from_piece`, `fold_from_piece`; `write_astm_block`.
+  - Done: after `Quantity:`, in D6673 order: `Rotation:180`, `Flip:Y`, `Tilt:-15`, `Fold:N`, then `Material:`. Rotation, Flip or Tilt None writes no line. `converter::rotation_from_piece`, `flip_from_piece`, `tilt_from_piece`, `piece_is_on_fold`; `write_astm_block`.
   - Decision taken: Flip Horizontal (left to right) is `Y`, Vertical is `X` (D6673: X flips about the horizontal axis). Both is `Flip:Y` with a `Rotation:` step that reaches 180 (user decision; replaces `XY`, which D6673 does not define).
   - Decision taken: Tilt has its sign: `+15` counterclockwise, `-15` clockwise. A direction with 0 degrees writes no line.
-  - Decision taken: every tagged piece writes `Fold:Y` or `Fold:N`.
+  - Decision taken: every tagged piece writes `Fold:Y` or `Fold:N`. `Fold:Y` needs a fold line (Layout.97.8).
   - Decision taken: DXF-AAMA writes none of the four: AAMA piece text has no such identifiers.
 - [x] Layout.93.6 Tests: `TST_SvgComponentTags`; Rust converter and writer tests with hidden labels and grainlines.
   - `TST_SvgComponentTags::PieceCarriesPieceProperties` (hidden label); `TST_VPiece::LayoutPieceKeepsPieceProperties`, `RotationStepDegrees` (harness: passed); `astm_piece_test::layout_rules_come_from_piece_properties`; `writer_astm_test::layout_rule_text_follows_quantity_in_d6673_order`; `graded_sample_blocks_follow_d6673` expects `Fold:N`. Hidden labels and grainlines: Layout.93.1–93.3 tests.
