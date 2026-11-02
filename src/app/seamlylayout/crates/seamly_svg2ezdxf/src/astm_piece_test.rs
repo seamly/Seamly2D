@@ -583,7 +583,7 @@ mod tests {
         );
         assert_eq!(front_layout_rules(r#"data-flip="Vertical" data-tilt="5""#), (None, some("X"), some("+5"), some("N")));
         assert_eq!(front_layout_rules(r#"data-flip="Both" data-rotation="1""#).0, some("1"));
-        assert_eq!(front_layout_rules(r#"data-flip="Both""#).1, some("XY"));
+        assert_eq!(front_layout_rules(r#"data-flip="Both""#).1, some("Y"));
         // No attribute: no Rotation, Flip or Tilt line; Fold is N.
         assert_eq!(front_layout_rules(""), (None, None, None, some("N")));
         // Values outside the D6673 ranges write no line.
@@ -592,6 +592,22 @@ mod tests {
             (None, None, None, some("N"))
         );
         assert_eq!(front_layout_rules(r#"data-rotation="720" data-tilt="0""#), (None, None, None, some("N")));
+    }
+
+    // @brief A Both flip writes `Flip:Y` and a rotation step that reaches 180 degrees.
+    #[test]
+    fn both_flip_is_y_flip_turned_180() {
+        let some = |s: &str| Some(s.to_string());
+        // (data-rotation, expected Rotation:): the step keeps every turn the piece allows, and 180.
+        let cases = [("", "180"), (r#"data-rotation="360""#, "180"), (r#"data-rotation="180""#, "180"),
+                     (r#"data-rotation="90""#, "90"), (r#"data-rotation="1""#, "1"), (r#"data-rotation="0""#, "180")];
+        for (rotation, step) in cases {
+            let rules = front_layout_rules(&format!(r#"data-flip="Both" {rotation}"#));
+            assert_eq!((rules.0, rules.1), (some(step), some("Y")), "{rotation}");
+        } // for each case
+        // Horizontal and Vertical flips leave the rotation step as it is.
+        assert_eq!(front_layout_rules(r#"data-flip="Horizontal""#).0, None);
+        assert_eq!(front_layout_rules(r#"data-flip="Vertical" data-rotation="360""#).0, some("360"));
     }
 
     #[test]
