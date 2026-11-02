@@ -729,7 +729,7 @@ pub const NO_PIECE_GRADED_WARNING: &str = "No piece graded: no .rul file written
 #[derive(Debug, Default)]
 pub struct DxfExportReport {
     // One line per piece a graded export could not grade, then NO_PIECE_GRADED_WARNING when none graded,
-    // then one line per piece whose fold line is not on its cut line.
+    // then one line per piece whose fold line does not connect with its cut line.
     pub warnings: Vec<String>,
     // The grade rule file beside the DXF. None when the export is ungraded or no piece graded.
     pub rule_file: Option<String>,
@@ -2396,7 +2396,7 @@ mod tests {
         assert_eq!(mirror_xy, vertex_xy);
 
         let (report, lines) = export(150, "off");
-        assert_eq!(report.warnings, vec!["Back: the fold line is not on the cut line; no mirror line written.".to_string()]);
+        assert_eq!(report.warnings, vec!["Back: the fold line doesn't connect with the cutline; no mirror line written.".to_string()]);
         assert!(!lines.windows(3).any(|w| w[0] == "LINE" && w[1] == "8" && w[2] == "6"), "no layer 6");
     } // do_export_dxf_writes_the_mirror_line
 
