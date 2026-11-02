@@ -344,90 +344,6 @@ QVector<SeamAllowancePoint> removeConsumedEdges(const QVector<SeamAllowancePoint
     }
     return path;
 }
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief openAtFoldLine removes the part of a closed seam line that lies on the fold line.
- * @param points closed polyline that repeats its first point at the end.
- * @param fold fold line of the piece.
- * @return the open seam line, from one end on the fold line around the piece to the other end; @p points when no
- *         edge lies on the fold line.
- *
- * Where several runs of edges lie on the fold line, the longest run goes.
- */
-QVector<QPointF> openAtFoldLine(const QVector<QPointF> &points, const QLineF &fold)
-{
-    QVector<QPointF> ring = points;
-    if (ring.size() > 1 && samePoint(ring.first(), ring.last()))
-    {
-        ring.removeLast();
-    }
-    const int count = ring.size();
-    if (count < 3 || fold.isNull())
-    {
-        return points;
-    }
-
-    // Edge i runs from vertex i to vertex i + 1.
-    QVector<bool> onFold(count, false);
-    int firstOff = -1;
-    for (int i = 0; i < count; ++i)
-    {
-        onFold[i] = VGObject::IsPointOnLineviaPDP(ring.at(i), fold.p1(), fold.p2())
-                    && VGObject::IsPointOnLineviaPDP(ring.at((i + 1) % count), fold.p1(), fold.p2());
-        if (!onFold.at(i) && firstOff < 0)
-        {
-            firstOff = i;
-        }
-    }
-    if (firstOff < 0)
-    {
-        return points;
-    }
-
-    // Runs of fold edges, searched from an edge off the fold line so that no run wraps past the search start.
-    int bestStart = -1;
-    int bestCount = 0;
-    qreal bestLength = 0;
-    int runStart = -1;
-    int runCount = 0;
-    qreal runLength = 0;
-    for (int k = 1; k <= count; ++k)
-    {
-        const int i = (firstOff + k) % count;
-        if (onFold.at(i))
-        {
-            if (runCount == 0)
-            {
-                runStart = i;
-            }
-            ++runCount;
-            runLength += QLineF(ring.at(i), ring.at((i + 1) % count)).length();
-            continue;
-        }
-        if (runCount > 0 && runLength > bestLength)
-        {
-            bestStart = runStart;
-            bestCount = runCount;
-            bestLength = runLength;
-        }
-        runCount = 0;
-        runLength = 0;
-    }
-    if (bestStart < 0)
-    {
-        return points;
-    }
-
-    // The open line starts at the vertex after the run and ends at the vertex where the run starts.
-    const int start = (bestStart + bestCount) % count;
-    QVector<QPointF> open;
-    for (int k = 0; k <= count - bestCount; ++k)
-    {
-        open.append(ring.at((start + k) % count));
-    }
-    return open;
-}
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -698,6 +614,88 @@ QLineF VPiece::foldLineOnCutLine(const QVector<QPointF>& cut_line, const QLineF&
                           fold.p1() + direction * qMax(best_last, length));
     }
     return extended;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief openAtFoldLine removes the part of a closed line that lies on the fold line.
+ * @param points closed polyline; the first point may repeat at the end.
+ * @param fold fold line of the piece.
+ * @return the open line, from the vertex after the removed run around the piece to the vertex where the run starts;
+ *         @p points with the first point repeated at the end when no edge lies on the fold line.
+ *
+ * Where several runs of edges lie on the fold line, the longest run goes. The fold line runs in the direction of the
+ * line, so an opened cut line begins where the fold line ends and ends where the fold line begins.
+ */
+QVector<QPointF> VPiece::openAtFoldLine(const QVector<QPointF>& points, const QLineF& fold)
+{
+    QVector<QPointF> ring = points;
+    if (ring.size() > 1 && samePoint(ring.first(), ring.last()))
+    {
+        ring.removeLast();
+    }
+    const int count = ring.size();
+
+    // Edge i runs from vertex i to vertex i + 1. A run starts after an edge off the fold line, so that no run
+    // wraps past the search start.
+    QVector<bool> on_fold(count, false);
+    int first_off = -1;
+    for (int i = 0; count >= 3 && !fold.isNull() && i < count; ++i)
+    {
+        on_fold[i] = VGObject::IsPointOnLineviaPDP(ring.at(i), fold.p1(), fold.p2())
+                     && VGObject::IsPointOnLineviaPDP(ring.at((i + 1) % count), fold.p1(), fold.p2());
+        if (!on_fold.at(i) && first_off < 0)
+        {
+            first_off = i;
+        }
+    }
+
+    // The longest run of edges on the fold line.
+    int best_start = -1;
+    int best_count = 0;
+    qreal best_length = 0;
+    int run_start = -1;
+    int run_count = 0;
+    qreal run_length = 0;
+    for (int k = 1; first_off >= 0 && k <= count; ++k)
+    {
+        const int i = (first_off + k) % count;
+        if (on_fold.at(i))
+        {
+            run_start = run_count == 0 ? i : run_start;
+            ++run_count;
+            run_length += QLineF(ring.at(i), ring.at((i + 1) % count)).length();
+        }
+        else
+        {
+            // An edge off the fold line ends the run before it.
+            if (run_count > 0 && run_length > best_length)
+            {
+                best_start = run_start;
+                best_count = run_count;
+                best_length = run_length;
+            }
+            run_count = 0;
+            run_length = 0;
+        }
+    }
+
+    // The open line starts at the vertex after the run and ends at the vertex where the run starts.
+    QVector<QPointF> line;
+    if (best_start >= 0)
+    {
+        const int start = (best_start + best_count) % count;
+        for (int k = 0; k <= count - best_count; ++k)
+        {
+            line.append(ring.at((start + k) % count));
+        }
+    }
+    else if (!ring.isEmpty())
+    {
+        line = ring;
+        line.append(ring.first());
+    }
+    return line;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

@@ -104,6 +104,10 @@ private slots:
     void FoldLineOnCutLine() const;
     void FoldLineOnCutLineKeepsFoldLineWithoutRun() const;
     void CutLineEndsWithFoldLine() const;
+    void CutLineOpensAtFoldLine_data() const;
+    void CutLineOpensAtFoldLine() const;
+    void OpenAtFoldLineKeepsLineWithoutRun() const;
+    void OpenAtFoldLineRemovesLongestRun() const;
     void FoldLineGraphicPlacesArrowAndLabel_data() const;
     void FoldLineGraphicPlacesArrowAndLabel() const;
     void FoldLineGraphicNeedsFoldLineAndOutline() const;

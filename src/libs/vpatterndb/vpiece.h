@@ -114,6 +114,7 @@ public:
     bool                     hasFoldLine() const;
     QLineF                   foldLine(const VContainer *data) const;
     static QLineF            foldLineOnCutLine(const QVector<QPointF>& cut_line, const QLineF& fold);
+    static QVector<QPointF>  openAtFoldLine(const QVector<QPointF>& points, const QLineF& fold);
     QVector<QPointF>         seamAllowancePoints(const VContainer *data,
                                                  QVector<QPointF> *nodeVertices = nullptr,
                                                  SeamAllowanceCorners *corners = nullptr) const;

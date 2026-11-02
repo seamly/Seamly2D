@@ -446,6 +446,27 @@ int count_type(const QVector<Entry> &entries, const QString &type)
     }
     return count;
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief take_component removes the first group of a type and the path after it from a flattened document.
+ * @return the path entry; an empty entry when no group has the type.
+ */
+Entry take_component(QVector<Entry> *entries, const QString &type)
+{
+    Entry path;
+    for (int i = 0; i + 1 < entries->size() && path.tag.isEmpty(); ++i)
+    {
+        const Entry &entry = entries->at(i);
+        if (entry.tag.startsWith(QLatin1String("group|")) &&
+            entry.tag.contains(QStringLiteral("|data-type=") + type + QLatin1Char('|')))
+        {
+            path = entries->at(i + 1);
+            entries->remove(i, 2);
+        }
+    }
+    return path;
+}
 } // namespace
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -493,14 +514,21 @@ void TST_HandoffDocument::pieceMatchesOldWriter() const
     qApp->setCurrentDocument(previous);
     const QDomDocument new_dom = make_new_document(pieces, {});
 
-    const QVector<Entry> expected = flatten_document(old_dom);
-    const QVector<Entry> actual   = flatten_document(new_dom);
+    QVector<Entry> expected = flatten_document(old_dom);
+    QVector<Entry> actual   = flatten_document(new_dom);
     QCOMPARE(count_type(expected, QStringLiteral("piece")), 1);
     QCOMPARE(count_type(actual, QStringLiteral("seamline")), 1);
     QCOMPARE(count_type(actual, QStringLiteral("fold_line")), on_fold ? 1 : 0);
     QCOMPARE(count_type(actual, QStringLiteral("piece_label")), 1);
     QCOMPARE(count_type(actual, QStringLiteral("pattern_label")), 1);
     QCOMPARE(count_type(actual, QStringLiteral("grainline")), 1);
+
+    // The old writer closes the cut line along the fold line. foldPieceSendsOpenCutline() checks the open cut line.
+    if (on_fold)
+    {
+        take_component(&expected, QStringLiteral("cutline"));
+        take_component(&actual, QStringLiteral("cutline"));
+    }
     compare_entries(actual, expected);
 }
 
@@ -601,6 +629,56 @@ void TST_HandoffDocument::hiddenItemsAreNotDrawn() const
     QCOMPARE(count_type(off_entries, QStringLiteral("cutline")), 0);
     QCOMPARE(count_type(off_entries, QStringLiteral("seamline")), 1);
     QVERIFY(dom.toString().contains(QStringLiteral("data-grainline-angle=")));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_HandoffDocument::foldPieceSendsOpenCutline_data() const
+{
+    QTest::addColumn<bool>("built_in");
+
+    QTest::newRow("cut line") << false;
+    QTest::newRow("built in") << true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief A piece with a fold line sends an open cut line. The fold line runs from the cut line end to its begin.
+ */
+void TST_HandoffDocument::foldPieceSendsOpenCutline() const
+{
+    QFETCH(bool, built_in);
+
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+    TestPatternDocument document;
+    VAbstractPattern   *previous = qApp->getCurrentDocument();
+    qApp->setCurrentDocument(&document);
+
+    VPiece piece = make_piece(data.data(), true, built_in, true);
+    set_label_templates(&document, &piece);
+    const HandoffPlacedPiece placed = placed_piece(piece, data.data(), &document, QString(), QString());
+    qApp->setCurrentDocument(previous);
+
+    HandoffStyle style         = HandoffStyle::from_settings(*qApp->Settings());
+    style.show_seam_allowances = true;
+    HandoffDocument handoff;
+    handoff.set_style(style);
+    handoff.set_sheet(QRectF(0, 0, 1000, 1000), 96);
+    handoff.add_piece(placed);
+    QDomDocument dom;
+    dom.setContent(handoff.to_svg_string());
+
+    QVector<Entry> entries   = flatten_document(dom);
+    const Entry    cut_line  = take_component(&entries, QStringLiteral("cutline"));
+    const Entry    fold_line = take_component(&entries, QStringLiteral("fold_line"));
+    QVERIFY(cut_line.points.size() >= 4);
+    QCOMPARE(fold_line.points.size(), 2);
+
+    // A closepath would bring the cut line back to its begin.
+    QVERIFY(QLineF(cut_line.points.first(), cut_line.points.last()).length() > 1);
+    QVERIFY(QLineF(cut_line.points.last(), fold_line.points.first()).length() < 0.02);
+    QVERIFY(QLineF(cut_line.points.first(), fold_line.points.last()).length() < 0.02);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

@@ -51,6 +51,10 @@ private slots:
     void hiddenGrainlineKeepsItsData() const;
     void foldLineMatchesOldWriter() const;
     void pieceWithoutFoldLineHasNoFoldData() const;
+    void cutLineOpensAtFoldLine_data() const;
+    void cutLineOpensAtFoldLine() const;
+    void cutLineWithoutFoldLineStaysClosed_data() const;
+    void cutLineWithoutFoldLineStaysClosed() const;
     void cornerCutsMatchOldWriter() const;
     void unifyTurnPointsMatchesOldWriter() const;
     void unifySkipsLineWithDifferentNodeCount() const;
