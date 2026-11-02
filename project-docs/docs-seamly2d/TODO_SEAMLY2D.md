@@ -64,7 +64,7 @@ Rotation, arrow line, label, extended fold line, SeamlyLayout fold placement and
   - SeamlyLayout: an outer `seamline` (no `cutline`) gets its fold line edge back for the DXF-ASTM boundary (`converter::extract_astm_piece`). A `seamline` beside a `cutline` stays as sent (layer 14). Packing and the piece divider already read it.
   - Not changed (decision): `VLayoutPiece` still sends a closed seam line, as for the cut line.
   - Tests: `TST_HandoffPiece::seamLineOpensAtFoldLine` (3 rows), `TST_HandoffDocument::foldPieceSendsOpenLines` (3 rows), `astm_piece_test` `open_seam_line_without_cut_line_closes_along_the_fold_line`, `piece_divider` `open_outline_on_the_fold_line_splits_and_stays_open` (cutline and seamline). Scratch harness: 134/134, 23/23, 17/17 PASS. `cargo test --workspace` and `ctest --preset debug` (7/7) pass.
-- [ ] Seamly2D.71.12 Verify (User): Piece mode, piece with a fold line: the cut line and the seam line stop at both fold line ends; no line along the fold line. Also with a built-in seam allowance, and with no seam allowance.
+- [ ] Seamly2D.71.12 Verify (User): Piece mode, piece with a fold line: the cut line and the seam line stop at both fold line ends; no line along the fold line. Also with a built-in seam allowance, and with no seam allowance. `AGENT_CHECKLIST.md` §34.
 
 ## Not required for SeamlyLayout release
 

@@ -12,9 +12,9 @@
 - Verified: harness `TST_VPiece` 134/134, `TST_HandoffPiece` 23/23, `TST_HandoffDocument` 17/17; `cargo test --workspace` all pass; `ctest --preset debug` 7/7. Not run: MSI.
 - Seamly2D.71.13 done. The Seamly2D.71.12 user check now covers the seam line.
 - Merge subject has no skip-ci token: the pending push holds `.pri` and `packaging/` changes. Task branch deleted.
-- Not committed: `project-docs/AGENT_CHECKLIST.md` (Sue edits it).
+- Not committed: `project-docs/AGENT_CHECKLIST.md` (Sue edits it). Added §34 (Seamly2D.71.12) and OPEN rows; reworded §27 Layout steps.
 - Next: MSI build (ask): Seamly2D.71.9, 71.12, 11.8, 11.9, Layout.97.7.
-- `run-seamlyLayout` is 43 commits ahead of `origin`.
+- `run-seamlyLayout` is 44 commits ahead of `origin`.
 
 ### 2026-11-01 — Open cut line at the fold line (Seamly2D.71.11, Layout.112); merged into local `run-seamlyLayout`, not pushed
 
