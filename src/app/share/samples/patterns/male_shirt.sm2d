@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pattern>
-    <!--Pattern created with Seamly2D v26.10.2719 (https://seamly.io).-->
+    <!--Pattern created with Seamly2D v26.11.115 (https://seamly.io).-->
     <version>0.7.7</version>
     <unit>cm</unit>
     <description>This a male shirt pattern.
@@ -207,7 +207,7 @@ Delete layouts which are not needed.</description>
             </path>
         </modeling>
         <pieces>
-            <piece closed="1" color="white" fill="nobrush" flip="Vertical" hideMainPath="false" id="174" inLayout="true" locked="false" material="Fabric" mx="-5.13004" my="1.76972" name="Yoke" seamAllowance="true" united="false" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" flip="Horizontal" hideMainPath="false" id="174" inLayout="true" locked="false" material="Fabric" mx="-4.96527" my="-1.85528" name="Yoke" seamAllowance="true" united="false" version="2" width="1">
                 <data annotation="" fontSize="0" height="5" letter="" mx="-647.856" my="160.016" onFold="true" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" tiltDegrees="0" visible="true" width="5">
                     <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
                     <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
@@ -228,7 +228,7 @@ Delete layouts which are not needed.</description>
                     <node foldLine="true" idObject="173" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" color="white" fill="nobrush" flip="None" hideMainPath="false" id="401" inLayout="true" locked="false" material="Fabric" mx="-11.0934" my="6.43098" name="FrontPanel" seamAllowance="true" united="false" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" flip="Horizontal" hideMainPath="false" id="401" inLayout="true" locked="false" material="Fabric" mx="-11.0934" my="6.43098" name="FrontPanel" seamAllowance="true" united="false" version="2" width="1">
                 <data annotation="" fontSize="0" height="5" letter="" mx="-1978.87" my="1374.66" onFold="true" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" tiltDegrees="0" visible="true" width="5">
                     <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
                     <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
@@ -254,7 +254,7 @@ Delete layouts which are not needed.</description>
                     <node idObject="390" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" color="white" fill="nobrush" flip="None" hideMainPath="false" id="441" inLayout="true" locked="false" material="Fabric" mx="-8.35324" my="6.27021" name="BackPanel" seamAllowance="true" united="false" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" flip="Horizontal" hideMainPath="false" id="441" inLayout="true" locked="false" material="Fabric" mx="-8.35324" my="6.27021" name="BackPanel" seamAllowance="true" united="false" version="2" width="1">
                 <data annotation="" fontSize="0" height="5" letter="" mx="-196.658" my="1386.27" onFold="true" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" tiltDegrees="0" visible="true" width="5">
                     <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
                     <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
@@ -286,6 +286,7 @@ Delete layouts which are not needed.</description>
             </piece>
         </pieces>
         <groups/>
+        <images/>
     </draftBlock>
     <draftBlock name="Pocket">
         <calculation>
@@ -434,6 +435,7 @@ Delete layouts which are not needed.</description>
             </piece>
         </pieces>
         <groups/>
+        <images/>
     </draftBlock>
     <draftBlock name="Sleeve">
         <calculation>
@@ -618,14 +620,15 @@ Delete layouts which are not needed.</description>
             </piece>
         </pieces>
         <groups/>
+        <images/>
     </draftBlock>
     <draftBlock name="Collar">
         <calculation>
             <point id="140" mx="0.492706" my="-0.381989" name="D" type="single" x="71.6812" y="8.99461"/>
-            <point angle="90" basePoint="140" id="141" length="#CollarHeight*2+1.5" lineColor="black" lineType="solidLine" mx="0.344194" my="-0.441756" name="D1" type="endLine"/>
+            <point angle="90" basePoint="140" id="141" length="#CollarHeight*2+1.5" lineColor="black" lineType="solidLine" mx="-0.468549" my="-2.06724" name="D1" type="endLine"/>
             <point firstPoint="140" id="142" length="1" lineColor="black" lineType="none" mx="0.344194" my="-0.794926" name="D2" secondPoint="141" type="alongLine"/>
-            <point firstPoint="142" id="143" length="#CollarHeight-0.5" lineColor="black" lineType="none" mx="0.344194" my="-0.441756" name="D3" secondPoint="141" type="alongLine"/>
-            <point firstPoint="141" id="144" length="#CollarHeight" lineColor="black" lineType="none" mx="0.27356" my="-0.583024" name="D4" secondPoint="140" type="alongLine"/>
+            <point firstPoint="142" id="143" length="#CollarHeight-0.5" lineColor="black" lineType="none" mx="0.414867" my="0.123631" name="D3" secondPoint="141" type="alongLine"/>
+            <point firstPoint="141" id="144" length="#CollarHeight" lineColor="black" lineType="none" mx="0.308897" my="-1.57245" name="D4" secondPoint="140" type="alongLine"/>
             <point angle="0" firstPoint="140" id="145" length="Spl_A15_A28+Spl_A20_A22" lineColor="black" lineType="dotLine" mx="0.132292" my="0.264583" name="D5" secondPoint="141" type="normal"/>
             <point angle="90" firstPoint="145" id="146" length="#CollarButton" lineColor="black" lineType="dotLine" mx="0.132292" my="0.264583" name="D6" secondPoint="140" type="normal"/>
             <point firstPoint="145" id="147" length="Line_D_D5/4" lineColor="black" lineType="none" mx="0.132292" my="0.264583" name="D7" secondPoint="140" type="alongLine"/>
@@ -636,14 +639,14 @@ Delete layouts which are not needed.</description>
                 <pathPoint angle1="180.144" angle2="0.144483" length1="2.38305" length2="3.25434" pSpline="147"/>
                 <pathPoint angle1="179.147" angle2="359.147" length1="6.56058" length2="0.513557" pSpline="142"/>
             </spline>
-            <spline angle1="179.937" angle2="16.5873" color="black" id="151" length1="17.1667" length2="3.5551" point1="143" point4="149" type="simpleInteractive"/>
-            <point id="152" length="Spl_D3_D9-#CollarUpperButtonLength" mx="-2.0247" my="-1.19285" name="D10" spline="151" type="cutSpline"/>
-            <point angle="120-#CollarAngle/4" basePoint="152" id="153" length="#CollarFrontHeight" lineColor="black" lineType="solidLine" mx="0.132292" my="0.264583" name="D11" type="endLine"/>
-            <spline angle1="179.851" angle2="23.7671" color="black" id="154" length1="4.50186" length2="4.34589" point1="144" point4="152" type="simpleInteractive"/>
-            <spline angle1="307.984" angle2="202.24" color="black" id="155" length1="0.892797" length2="0.50213" point1="153" point4="141" type="simpleInteractive"/>
-            <point firstPoint="152" id="246" length="-1" lineColor="black" lineType="solidLine" mx="0.132292" my="0.264583" name="D12" secondPoint="153" type="alongLine"/>
-            <point firstPoint="144" id="247" length="-1" lineColor="black" lineType="none" mx="0.132292" my="0.264583" name="D13" secondPoint="141" type="alongLine"/>
-            <spline angle1="179.804" angle2="14.73" color="black" id="248" length1="7.80754" length2="5.10539" point1="247" point4="246" type="simpleInteractive"/>
+            <spline angle1="179.937" angle2="17.7127" color="black" id="151" length1="17.1667" length2="3.33579" point1="143" point4="149" type="simpleInteractive"/>
+            <point id="152" length="Spl_D3_D9-#CollarUpperButtonLength" mx="-2.33015" my="-2.29848" name="D10" spline="151" type="cutSpline"/>
+            <point angle="120-#CollarAngle/4" basePoint="152" id="153" length="#CollarFrontHeight" lineColor="black" lineType="solidLine" mx="0.660127" my="-1.8851" name="D11" type="endLine"/>
+            <spline angle1="180" angle2="15" color="black" id="154" length="20.0836" length1="Spl_D3_D9/4" length2="Spl_D3_D9/4" lineWeight="0.35" penStyle="solidLine" point1="144" point4="152" type="simpleInteractive"/>
+            <spline angle1="-15" angle2="180" color="blue" id="155" length="19.9729" length1="Spl_D3_D9/4" length2="Spl_D3_D9/4" lineWeight="0.35" penStyle="solidLine" point1="153" point4="141" type="simpleInteractive"/>
+            <point firstPoint="152" id="246" length="-1" lineColor="black" lineType="solidLine" mx="0.204246" my="-3.26115" name="D12" secondPoint="153" type="alongLine"/>
+            <point firstPoint="144" id="247" length="-1" lineColor="black" lineType="none" mx="-2.34127" my="0.123236" name="D13" secondPoint="141" type="alongLine"/>
+            <spline angle1="179.805" angle2="14.9825" color="blue" id="248" length="20.0375" length1="7.83283" length2="5.02128" lineWeight="0.35" penStyle="solidLine" point1="247" point4="246" type="simpleInteractive"/>
             <operation id="452" p1Line="141" p2Line="247" suffix="_d1" type="flippingByLine">
                 <source>
                     <item alias="" color="black" idObject="248" lineType="solidLine"/>
@@ -653,7 +656,7 @@ Delete layouts which are not needed.</description>
                 </source>
                 <destination>
                     <item idObject="453"/>
-                    <item idObject="454" mx="0.132292" my="0.264583" showPointName="true"/>
+                    <item idObject="454" mx="-4.10811" my="-0.12412" showPointName="true"/>
                     <item idObject="455" mx="0.132292" my="0.264583" showPointName="true"/>
                     <item idObject="456"/>
                 </destination>
@@ -667,8 +670,8 @@ Delete layouts which are not needed.</description>
                 </source>
                 <destination>
                     <item idObject="469"/>
-                    <item idObject="470" mx="-2.3399" my="-1.00683" showPointName="true"/>
-                    <item idObject="471" mx="0.132292" my="0.264583" showPointName="true"/>
+                    <item idObject="470" mx="0.8404" my="0.335963" showPointName="true"/>
+                    <item idObject="471" mx="-0.185738" my="-2.31499" showPointName="true"/>
                     <item idObject="472"/>
                 </destination>
             </operation>
@@ -770,8 +773,8 @@ Delete layouts which are not needed.</description>
                     <node before="0" foldLine="true" idObject="232" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" color="white" fill="nobrush" flip="Horizontal" hideMainPath="false" id="255" inLayout="true" locked="false" material="Fabric" mx="29.5167" my="-0.612919" name="CollarTopInterface" seamAllowance="true" seamAllowanceBuiltIn="true" united="false" version="2" width="1">
-                <data annotation="" fontSize="0" height="1" letter="" mx="0" my="0" onFold="true" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" tiltDegrees="0" visible="false" width="1"/>
+            <piece closed="1" color="white" fill="nobrush" flip="Horizontal" hideMainPath="false" id="255" inLayout="true" locked="false" material="Fabric" mx="29.5167" my="-0.612919" name="CollarTopInterface-Built-in-SA" seamAllowance="true" seamAllowanceBuiltIn="true" united="false" version="2" width="1">
+                <data annotation="" fontSize="0" height="1" letter="Z" mx="0" my="0" onFold="true" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" tiltDegrees="0" visible="false" width="1"/>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="1.27" arrows="0" length="5.08" mx="0" my="0" rotation="90" visible="false"/>
                 <nodes>
@@ -779,8 +782,8 @@ Delete layouts which are not needed.</description>
                     <node idObject="249" type="NodePoint"/>
                     <node idObject="250" type="NodePoint"/>
                     <node idObject="251" reverse="0" type="NodeSpline"/>
-                    <node foldLine="true" idObject="252" type="NodePoint"/>
-                    <node foldLine="true" idObject="253" type="NodePoint"/>
+                    <node after="0" foldLine="true" idObject="252" type="NodePoint"/>
+                    <node before="0" foldLine="true" idObject="253" type="NodePoint"/>
                 </nodes>
             </piece>
             <piece color="white" fill="nobrush" flip="None" hideMainPath="false" id="467" inLayout="true" locked="false" material="Fabric" mx="27.1172" my="-11.6605" name="CollarTopInterface Mirrored" seamAllowance="false" united="false" version="2" width="1">
@@ -826,6 +829,7 @@ Delete layouts which are not needed.</description>
             </piece>
         </pieces>
         <groups/>
+        <images/>
     </draftBlock>
     <draftBlock name="Placket">
         <calculation>
@@ -899,5 +903,6 @@ Delete layouts which are not needed.</description>
             </piece>
         </pieces>
         <groups/>
+        <images/>
     </draftBlock>
 </pattern>
