@@ -579,7 +579,8 @@ mod tests {
         let some = |s: &str| Some(s.to_string());
         assert_eq!(
             front_layout_rules(r#"data-rotation="180" data-flip="Horizontal" data-tilt="-15" data-on-fold="true""#),
-            (some("180"), some("Y"), some("-15"), some("Y"))
+            (some("180"), some("Y"), some("-15"), some("N")),
+            "the fixture Front has no fold line, so Fold is N"
         );
         assert_eq!(front_layout_rules(r#"data-flip="Vertical" data-tilt="5""#), (None, some("X"), some("+5"), some("N")));
         assert_eq!(front_layout_rules(r#"data-flip="Both" data-rotation="1""#).0, some("1"));
@@ -610,13 +611,27 @@ mod tests {
         assert_eq!(front_layout_rules(r#"data-flip="Vertical" data-rotation="360""#).0, some("360"));
     }
 
+    // @brief `Fold:Y` and the all-right quantity need `data-on-fold="true"` and a fold line.
     #[test]
-    fn piece_on_fold_counts_every_cut_as_right() {
-        let front = r#"data-name="Front">"#;
-        let folded = [(front, r#"data-name="Front" data-quantity="2" data-on-fold="true">"#)];
-        assert_eq!(front_quantity(&folded).as_deref(), Some("2,0"));
-        let not_folded = [(front, r#"data-name="Front" data-quantity="2" data-on-fold="false">"#)];
-        assert_eq!(front_quantity(&not_folded).as_deref(), Some("1,1"));
+    fn piece_on_fold_needs_a_fold_line() {
+        // (data-on-fold, fold line, expected Fold:, expected Quantity:)
+        let cases = [("true", true, "Y", "2,0"), ("true", false, "N", "1,1"), ("false", true, "N", "1,1")];
+        for (on_fold, has_fold_line, fold, quantity) in cases {
+            let attributes = format!(r#"data-name="Front" data-quantity="2" data-on-fold="{on_fold}">"#);
+            let mut svg = TAGGED.replace(r#"data-name="Front">"#, &attributes);
+            if has_fold_line {
+                // The fold line lies on the left cut line edge.
+                let fold_line = r#"<g data-type="fold_line"><path d="M 0,960 L 0,0"/></g><g data-type="internal_path">"#;
+                svg = svg.replace(r#"<g data-type="internal_path">"#, fold_line);
+            } // if fold line
+            let doc = Document::parse(&svg).expect("fixture parses");
+            let block = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts").blocks.remove(0);
+            assert_eq!(
+                (block.fold.as_deref(), block.quantity.as_deref()),
+                (Some(fold), Some(quantity)),
+                "data-on-fold={on_fold}, fold line {has_fold_line}"
+            );
+        } // for each case
     }
 
     // @brief The fold line becomes the mirror line; aligned, it is the first boundary edge.

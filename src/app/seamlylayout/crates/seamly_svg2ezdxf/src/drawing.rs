@@ -103,7 +103,7 @@ pub struct Block {
     pub flip: Option<String>,
     // `Tilt:` system text: the largest tilt in degrees with its sign, from `data-tilt`. None writes no line.
     pub tilt: Option<String>,
-    // `Fold:` system text: Y or N, from `data-on-fold`. None for a piece of an untagged SVG.
+    // `Fold:` system text: Y for `data-on-fold="true"` with a fold line, else N. None for a piece of an untagged SVG.
     pub fold: Option<String>,
     // `Size Name:` system text: the piece `data-size`, else the pattern sample size.
     pub size: Option<String>,
