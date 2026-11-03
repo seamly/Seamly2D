@@ -1664,10 +1664,46 @@ void PatternPieceTool::RefreshGeometry()
 
     refreshFoldLine(piece, seamAllowancePoints);
 
+    applyFlipToGeometry(piece.getFlip());
+
     updatePieceDetails();
 
     this->setPos(piece.GetMx(), piece.GetMy());
     this->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief applyFlipToGeometry mirrors the drawn outline of the piece on the Piece Mode canvas.
+ * @param flip mirror to show.
+ *
+ * The mirror runs about the center of the drawn outline. Labels and the grainline keep their place and stay readable.
+ */
+void PatternPieceTool::applyFlipToGeometry(PieceFlip flip)
+{
+    if (flip == PieceFlip::None)
+    {
+        return;
+    }
+
+    // The outline is the seam line plus the cut line.
+    const QRectF outline = this->path().united(m_cutLine->path()).boundingRect();
+    if (outline.isNull())
+    {
+        return;
+    }
+    const QTransform mirror = pieceFlipTransform(flip, outline.center());
+
+    this->setPath(mirror.map(this->path()));
+    m_cutLine->setPath(mirror.map(m_cutLine->path()));
+    m_allowanceFill->setPath(mirror.map(m_allowanceFill->path()));
+    m_notches->setPath(mirror.map(m_notches->path()));
+    m_foldLine->setPath(mirror.map(m_foldLine->path()));
+    m_fold_line_arrow->setPath(mirror.map(m_fold_line_arrow->path()));
+    m_fold_line_arrow_heads->setPath(mirror.map(m_fold_line_arrow_heads->path()));
+    m_cutPath = mirror.map(m_cutPath);
+    m_mainPath = mirror.map(m_mainPath);
+    m_pieceRect = mirror.mapRect(m_pieceRect);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

@@ -799,6 +799,22 @@ PieceFlip stringToPieceFlip(const QString &value)
     return index < 0 ? PieceFlip::None : static_cast<PieceFlip>(index);
 }
 
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Mirror that shows a piece flip about a center point.
+/// @param flip Horizontal mirrors left to right (x axis), Vertical top to bottom (y axis), Both does both.
+/// @param center point that stays in place.
+QTransform pieceFlipTransform(PieceFlip flip, const QPointF &center)
+{
+    const qreal scale_x = (flip == PieceFlip::Horizontal || flip == PieceFlip::Both) ? -1.0 : 1.0;
+    const qreal scale_y = (flip == PieceFlip::Vertical || flip == PieceFlip::Both) ? -1.0 : 1.0;
+
+    QTransform transform;
+    transform.translate(center.x(), center.y());
+    transform.scale(scale_x, scale_y);
+    transform.translate(-center.x(), -center.y());
+    return transform;
+}
+
 
 //---------------------------------------------------------------------------------------------------------------------
 Unit StrToUnits(const QString &unit)

@@ -35,6 +35,11 @@ Layout.106 added the switch for the Dead.4.4.3 compare. Remove it when that comp
 
 When the user clicks 'Horizontal', 'Vertical', or 'Both' then the piece is flipped in the direction(s) selected then displayed on the piece Mode canvas.
 
+- [x] Layout.110.1 Cause: the Flip choice only set the `flip` attribute for the layout; Piece Mode drew no mirror.
+- [x] Layout.110.2 `PatternPieceTool::applyFlipToGeometry` mirrors the drawn outline (seam line, cut line, allowance fill, notches, fold line) about the outline center, using `pieceFlipTransform` (`def.cpp`). Horizontal mirrors left to right, Vertical top to bottom. Labels and grainline keep their place and stay readable. Decision: the mirror is a display of the choice; the stored piece path does not change.
+- [x] Layout.110.3 Test: `TST_VPiece::PieceFlipTransformMirrorsAboutCenter`. `cl /Zs` OK on `def.cpp`, `pattern_piece_tool.cpp`, `tst_vpiece.cpp`. Not run: Qt suites (next build).
+- [ ] Layout.110.4 Next MSI: build check, then user check `AGENT_CHECKLIST.md` §24 (Layout.110 row). Also note whether the Flip submenu items show a check mark; the menu code makes them checkable in an exclusive group.
+
 ## VERIFY
 
 ### [ ] Task Layout.6 — Verify - DXF-ASTM grading

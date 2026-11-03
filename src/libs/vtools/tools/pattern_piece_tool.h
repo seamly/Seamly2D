@@ -202,6 +202,7 @@ private:
 
     void                  updateExcludeState();
     void                  refreshFoldLine(const VPiece& piece, const QVector<QPointF>& seam_allowance_points);
+    void                  applyFlipToGeometry(PieceFlip flip);
     void                  updateInternalPaths();
 
     VPieceItem::MoveTypes findLabelGeometry(const VPatternLabelData &labelData, qreal &rotationAngle, qreal &labelWidth,
