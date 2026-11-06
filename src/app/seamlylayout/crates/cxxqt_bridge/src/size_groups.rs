@@ -169,6 +169,65 @@ mod tests {
         assert_eq!(group.attributes.get("data-size").map(String::as_str), Some("36"));
     } // nested_pieces_regroup_by_size_largest_first
 
+    // @brief Nested export groups use `data-size` and preserve piece source attributes.
+    #[test]
+    fn nested_size_groups_follow_data_size_not_piece_ids() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg">
+  <g id="piece-set-source" data-type="piece-set">
+    <g id="piece_with_36_in_id" data-type="piece" data-size="34" data-parent="piece-set-source" data-name="Front">
+      <path d="M0,0 L10,0 L10,10 Z"/>
+    </g>
+    <g id="piece_with_34_in_id" data-type="piece" data-size="36" data-parent="piece-set-source" data-name="Back">
+      <path d="M0,0 L12,0 L12,12 Z"/>
+    </g>
+  </g>
+</svg>"#;
+        let mut doc = svg_dom::Document::parse(svg).expect("valid SVG");
+        assert_eq!(group_pieces_by_size(&mut doc), 2);
+        assert_eq!(piece_ids(&doc, "size_36"), vec!["piece_with_34_in_id"]);
+        assert_eq!(piece_ids(&doc, "size_34"), vec!["piece_with_36_in_id"]);
+
+        for (size, piece_id, name) in [
+            ("34", "piece_with_36_in_id", "Front"),
+            ("36", "piece_with_34_in_id", "Back"),
+        ] {
+            let group_id = format!("size_{size}");
+            let group = doc
+                .root
+                .children
+                .iter()
+                .filter_map(|n| n.as_element())
+                .find(|group| group.attributes.get("id").is_some_and(|id| id == &group_id))
+                .expect("size group");
+            let piece = group
+                .children
+                .iter()
+                .filter_map(|n| n.as_element())
+                .next()
+                .expect("piece");
+            assert_eq!(
+                piece.attributes.get("id").map(String::as_str),
+                Some(piece_id)
+            );
+            assert_eq!(
+                piece.attributes.get("data-type").map(String::as_str),
+                Some("piece")
+            );
+            assert_eq!(
+                piece.attributes.get("data-size").map(String::as_str),
+                Some(size)
+            );
+            assert_eq!(
+                piece.attributes.get("data-parent").map(String::as_str),
+                Some("piece-set-source")
+            );
+            assert_eq!(
+                piece.attributes.get("data-name").map(String::as_str),
+                Some(name)
+            );
+        } // for each authoritative size
+    } // nested_size_groups_follow_data_size_not_piece_ids
+
     // @brief A piece keeps its position: the piece-set transform is baked, and no
     // transform is left except on text.
     #[test]

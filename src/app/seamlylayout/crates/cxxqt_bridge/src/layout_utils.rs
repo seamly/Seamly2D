@@ -1524,8 +1524,17 @@ mod tests {
             assert_eq!(report.outside, expected_outside, "material {}", part.name);
 
             let nested = process_jacket2_input(&input, true, 60.0, 300.0);
-            for set in nested.output_doc.root.children.iter().filter_map(|n| n.as_element())
-                .filter(|e| e.attributes.get("data-type").is_some_and(|t| t == "piece-set"))
+            for set in nested
+                .output_doc
+                .root
+                .children
+                .iter()
+                .filter_map(|n| n.as_element())
+                .filter(|e| {
+                    e.attributes
+                        .get("data-type")
+                        .is_some_and(|t| t == "piece-set")
+                })
             {
                 for data_type in ["grainline", "piece_label", "pattern_label"] {
                     // Reference point of each size, in the piece-set frame.
@@ -1695,6 +1704,7 @@ mod tests {
     #[test]
     fn jacket2_nested_colors_sizes_and_adds_legend() {
         let nested = process_jacket2(true, 60.0, 300.0);
+        let (_, expected_sizes) = jacket2_handoff();
         let (lowest, legend_top, legend_bottom) = legend_below_pieces(&nested, 26);
         assert!(legend_top > lowest, "legend top {legend_top} above lowest piece {lowest}");
         let content_bottom: f32 = ["y", "height"].iter()
@@ -1704,6 +1714,8 @@ mod tests {
 
         // One stroke color per size, the same on every piece of that size.
         let mut colors: std::collections::BTreeMap<String, std::collections::BTreeSet<String>> = Default::default();
+        let expected_sizes: std::collections::BTreeSet<&str> = expected_sizes.iter().map(String::as_str).collect();
+        let mut actual_sizes = std::collections::BTreeSet::new();
         fn strokes(elem: &xmltree::Element, out: &mut std::collections::BTreeSet<String>) {
             if let Some(s) = elem.attributes.get("stroke").filter(|s| *s != "none") {
                 out.insert(s.clone());
@@ -1715,16 +1727,54 @@ mod tests {
         for set in nested.output_doc.root.children.iter().filter_map(|n| n.as_element())
             .filter(|e| e.attributes.get("data-type").is_some_and(|t| t == "piece-set"))
         {
+            let set_id = set.attributes.get("id").expect("piece-set source id");
             for piece in set.children.iter().filter_map(|n| n.as_element())
                 .filter(|e| e.attributes.get("data-type").is_some_and(|t| t == "piece"))
             {
-                strokes(piece, colors.entry(piece.attributes["data-size"].clone()).or_default());
+                let size = piece
+                    .attributes
+                    .get("data-size")
+                    .expect("piece source size");
+                assert!(
+                    expected_sizes.contains(size.as_str()),
+                    "unexpected data-size {size}"
+                );
+                assert_eq!(
+                    piece.attributes.get("data-parent"),
+                    Some(set_id),
+                    "piece-set source identity"
+                );
+                actual_sizes.insert(size.as_str());
+                strokes(piece, colors.entry(size.clone()).or_default());
             } // for piece
         } // for set
+        assert_eq!(
+            actual_sizes, expected_sizes,
+            "piece data-size values match the pattern's data-sizes"
+        );
         assert_eq!(colors.len(), 26);
-        assert!(colors.values().all(|c| c.len() == 1), "one color per size: {colors:?}");
+        assert!(
+            colors.values().all(|c| c.len() == 1),
+            "one color per size: {colors:?}"
+        );
         let distinct: std::collections::BTreeSet<&String> = colors.values().flatten().collect();
         assert_eq!(distinct.len(), 26, "every size its own color");
+        let legend = top_group(&nested.output_doc, "size_legend").expect("Nested size legend");
+        let legend_sizes: Vec<String> = legend
+            .children
+            .iter()
+            .filter_map(|n| n.as_element())
+            .filter(|e| e.name == "text")
+            .filter_map(|e| e.get_text().map(|text| text.into_owned()))
+            .collect();
+        assert_eq!(
+            legend_sizes,
+            expected_sizes
+                .iter()
+                .map(|size| format!("Size {size}"))
+                .collect::<Vec<_>>(),
+            "legend entries follow pattern size attributes"
+        );
 
         // Marker and a size tab keep the drafted colors and have no legend.
         let marker = process_jacket2(false, 60.0, 1500.0);
