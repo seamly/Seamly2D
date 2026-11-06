@@ -25,6 +25,14 @@ def main():
         shutil.copytree(Path(__file__).parent / "share" / issue, fixtures, dirs_exist_ok=True)
     (fixtures / "txt.sm2d").write_text("", encoding="utf-8")
     environment = os.environ.copy()
+    if not environment.get("QT_PLUGIN_PATH"):
+        qmake = shutil.which("qmake")
+        if not qmake:
+            parser.error("Set QT_PLUGIN_PATH or put the matching Qt qmake on PATH.")
+        query = subprocess.run([qmake, "-query", "QT_INSTALL_PLUGINS"],
+                               capture_output=True, text=True, timeout=10, check=True)
+        environment["QT_PLUGIN_PATH"] = query.stdout.strip()
+    print("QT_PLUGIN_PATH=" + environment["QT_PLUGIN_PATH"], flush=True)
     environment["SEAMLY_DATA_DIR"] = str(directory / "data")
     environment["QT_QPA_PLATFORM"] = "offscreen"
     environment.pop("HANDOFF_CAPTURE_DIRECTORY", None)

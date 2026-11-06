@@ -46,6 +46,13 @@ namespace
 void attachParentConsoleForCommandLine(const QStringList &arguments)
 {
 #ifdef Q_OS_WIN
+    const HANDLE standard_output = GetStdHandle(STD_OUTPUT_HANDLE);
+    const HANDLE standard_error = GetStdHandle(STD_ERROR_HANDLE);
+    if ((standard_output != nullptr && standard_output != INVALID_HANDLE_VALUE) ||
+        (standard_error != nullptr && standard_error != INVALID_HANDLE_VALUE))
+    {
+        return;
+    }
     for (const QString &argument : arguments)
     {
         if (argument.startsWith(QStringLiteral("--layout-"))

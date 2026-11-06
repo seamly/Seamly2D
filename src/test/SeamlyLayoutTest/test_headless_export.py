@@ -9,6 +9,7 @@ import math
 import os
 from pathlib import Path
 import re
+import shutil
 import struct
 import subprocess
 import xml.etree.ElementTree as xml
@@ -138,6 +139,14 @@ def main():
     directory = arguments.output_directory.resolve()
     directory.mkdir(parents=True, exist_ok=True)
     environment = os.environ.copy()
+    if not environment.get("QT_PLUGIN_PATH"):
+        qmake = shutil.which("qmake")
+        if not qmake:
+            parser.error("Set QT_PLUGIN_PATH or put the matching Qt qmake on PATH.")
+        query = subprocess.run([qmake, "-query", "QT_INSTALL_PLUGINS"],
+                               capture_output=True, text=True, timeout=10, check=True)
+        environment["QT_PLUGIN_PATH"] = query.stdout.strip()
+    print("QT_PLUGIN_PATH=" + environment["QT_PLUGIN_PATH"], flush=True)
     environment["QT_QPA_PLATFORM"] = "offscreen"
     environment["SEAMLY_DATA_DIR"] = str(directory / "data")
     fixture = directory / "pieces.svg"

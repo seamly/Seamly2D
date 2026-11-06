@@ -81,6 +81,9 @@ python src\test\SeamlyLayoutTest\test_headless_export.py <seamlylayout-executabl
 ```
 
 The runner uses an isolated data directory and Qt's offscreen platform.
+Set the matching Qt `bin` directory on `PATH`.
+The runners preserve `QT_PLUGIN_PATH`, or discover it through `qmake -query QT_INSTALL_PLUGINS`.
+Qt DLLs beside an executable do not ensure that its platform plugins are discoverable.
 It checks public formats, file signatures, SVG piece count, stdin transport,
 diagnostics, and exit statuses. G-Code and 3MF must report unavailable in the
 standard build. Tiled PDF uses an explicit `paperType: tiled` settings file.
