@@ -97,6 +97,22 @@ Each piece is a `piece-set` group holding that piece once per size.
 - Missing anchors, non-point objects, and IDs outside the piece's anchors invalidate the entire document.
 - Markings may lie outside the outline. They never enlarge packing bounds.
 
+Capture the five marked-pattern fixtures with the test-only application:
+
+```powershell
+python src\test\Seamly2DTest\verify_handoff_markings.py build\marked-writer-captures --executable build\handoff-writer-comparison\application\bin\handoff_capture.exe --fixtures build\marking-fixtures
+```
+
+The fixture directory contains `marked-original`, `marked-horizontal`, `marked-vertical`, `marked-both`, and `marked-multisize` `.sm2d` files.
+The verifier checks live centers, constant diameter, reference direction, grading, shared transforms, and unchanged legacy geometry.
+It also verifies that annotation alignment preserves every marking and records resolved coordinates in `marking-results.json`.
+The four individual fixtures use centimetres; the multisize fixture uses millimetres. They do not verify English-unit downstream export.
+Actual parser captures passed for all five fixtures without warnings.
+Each individual fixture preserved one drill, one stripe, and one plaid.
+The multisize capture preserved all three markings in 26 Back sizes, from 220 through 720.
+Centers graded while every diameter remained 7.559055118110237 pixels.
+Legacy shapes, labels, and grainlines matched within 0.01 pixels after excluding the new marking groups.
+
 ### Materials
 
 Seamly2D hands off one pattern group per material, in the order the materials first appear: `<g id="pattern-1" data-type="pattern" data-material="Fabric">`, `<g id="pattern-2" ... data-material="Lining">`. Each piece sits in the group of its material, and its `data-parent` names that group. A pattern with one material keeps the single `pattern-1` group. The stdin contract is unchanged: one SVG document.
