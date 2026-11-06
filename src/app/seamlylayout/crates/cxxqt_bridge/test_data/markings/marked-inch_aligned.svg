@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<!-- Author: slspencer; Copyright: 2026 Seamly2D Project; MIT License: https://opensource.org/licenses/MIT -->
+<svg baseProfile="tiny" height="100.277mm" version="1.2" viewBox="0 0 379 379" width="100.277mm" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs/>
+ <g data-material="Fabric" data-measurements="individual" data-type="pattern" data-type-number="1" data-units="inch" id="pattern-1">
+  <g data-grainline-angle="90.0000" data-material="Fabric" data-name="MarkedHalf" data-on-fold="true" data-parent="pattern-1" data-quantity="1" data-type="piece" data-type-number="1" id="piece_MarkedHalf">
+   <g data-parent="MarkedHalf" data-turn-points="0 1 2 3" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="seamline_MarkedHalf" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,1,1)">
+     <path d="M0,0 L377.953,0 L377.953,377.953 L0,377.953" fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="MarkedHalf" data-type="fold_line" data-type-number="1" fill="none" fill-rule="evenodd" id="fold_line_MarkedHalf" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" stroke="#000000" stroke-dasharray="5.29134,2.64567,1.32283,2.64567" stroke-dashoffset="0" stroke-linecap="butt" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,1,1)">
+     <path d="M0,377.953 L0,0" fill-rule="evenodd" vector-effect="none"/>
+    </g>
+    <g data-parent="MarkedHalf" data-type="fold_line_arrow" data-type-number="1" fill="none" fill-rule="evenodd" id="fold_line_arrow_MarkedHalf" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+     <g fill="none" stroke="#000000" stroke-dasharray="5.29134,2.64567,1.32283,2.64567" stroke-dashoffset="0" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,1,1)">
+      <path d="M4.72441,264.567 L18.8976,264.567 L18.8976,113.386 L4.72441,113.386" fill-rule="evenodd" vector-effect="none"/>
+     </g>
+     <g fill="#000000" stroke="none" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" transform="matrix(1,0,0,1,1,1)">
+      <path d="M0,264.567 L4.72441,261.827 L4.72441,267.307 L0,264.567 Z M0,113.386 L4.72441,110.646 L4.72441,116.126 L0,113.386 Z" fill-rule="evenodd" vector-effect="none"/>
+     </g>
+    </g>
+    <g data-parent="MarkedHalf" data-type="fold_line_label" data-type-number="1" fill="none" fill-rule="evenodd" id="fold_line_label_MarkedHalf" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+     <g fill="none" stroke="#000000" transform="matrix(0,1,-1,0,14.9488,153.976)">
+      <text fill="#000000" fill-opacity="1" font-family="Sans Serif" font-size="9" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9">Foldline</text>
+     </g>
+    </g>
+   </g>
+   <g data-diameter="7.559055118110236" data-parent="MarkedHalf" data-type="drill" data-type-number="1" fill="none" fill-rule="evenodd" id="drill_MarkedHalf" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" stroke="#000000" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,1,1)">
+     <circle cx="0" cy="0" r="3.779527559055118"/>
+    </g>
+   </g>
+   <g data-diameter="7.559055118110236" data-parent="MarkedHalf" data-type="drill" data-type-number="2" fill="none" fill-rule="evenodd" id="drill_MarkedHalf-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" stroke="#000000" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,1,1)">
+     <circle cx="377.9527559055118" cy="377.9527559055118" r="3.779527559055118"/>
+    </g>
+   </g>
+   <g data-parent="MarkedHalf" data-type="stripe" data-type-number="1" fill="none" fill-rule="evenodd" id="stripe_MarkedHalf" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" stroke="#000000" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,1,1)">
+     <path d="M0,0 L377.9527559055118,377.9527559055118" fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="MarkedHalf" data-type="plaid" data-type-number="1" fill="none" fill-rule="evenodd" id="plaid_MarkedHalf" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" stroke="#000000" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,1,1)">
+     <path d="M0,0 L0,377.9527559055118" fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+ </g>
+</svg>

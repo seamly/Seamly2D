@@ -2067,7 +2067,7 @@ mod tests {
     use super::*;
     use svg_dom::Document;
 
-    const MARKED_PRODUCER_CAPTURES: [(&str, &str, &str); 5] = [
+    const MARKED_PRODUCER_CAPTURES: [(&str, &str, &str); 6] = [
         (
             "marked-original",
             "cm",
@@ -2092,6 +2092,11 @@ mod tests {
             "marked-multisize",
             "mm",
             include_str!("../test_data/markings/marked_multisize.svg"),
+        ),
+        (
+            "marked-inch",
+            "inch",
+            include_str!("../test_data/markings/marked-inch_aligned.svg"),
         ),
     ];
 
@@ -2272,6 +2277,10 @@ mod tests {
                 !expected_drills.is_empty() || !expected_references.is_empty(),
                 "{name} contains real markings"
             );
+            if expected_unit == "inch" {
+                assert_eq!(expected_drills.len(), 2, "inch capture drills");
+                assert_eq!(expected_references.len(), 2, "inch capture stripe and plaid");
+            } // if inch capture
             saw_drill |= !expected_drills.is_empty();
             saw_stripe |= expected_references.iter().any(|mark| mark.layer == "9");
             saw_plaid |= expected_references.iter().any(|mark| mark.layer == "10");
@@ -2297,11 +2306,18 @@ mod tests {
             let _ = std::fs::remove_file(&path);
             assert!(text.contains("AC1012"), "{name}: DXF R13 output");
 
+            let english = expected_unit == "inch";
+            let expected_dxf_units = if english {
+                "Units:ENGLISH"
+            } else {
+                "Units:METRIC"
+            };
             assert!(
-                text.contains("Units:METRIC"),
-                "{name}: cm/mm patterns export metric units"
+                text.contains(expected_dxf_units),
+                "{name}: expected {expected_dxf_units}"
             );
-            let tolerance = 0.0051;
+            let scale = if english { 1.0 / 25.4 } else { 1.0 };
+            let tolerance = if english { 0.000051 } else { 0.0051 };
             let entities = dxf_entities(&text);
             let mut points: Vec<_> = entities
                 .iter()
@@ -2322,9 +2338,9 @@ mod tests {
                         dxf_value(entity, code).and_then(|value| value.parse::<f64>().ok())
                     };
                     [10, 20, 30].iter().all(|code| number(*code).is_some())
-                        && (number(10).unwrap() - expected.center_x_mm).abs() <= tolerance
-                        && (number(20).unwrap() - expected.center_y_mm).abs() <= tolerance
-                        && (number(30).unwrap() - expected.diameter_mm).abs() <= tolerance
+                        && (number(10).unwrap() - expected.center_x_mm * scale).abs() <= tolerance
+                        && (number(20).unwrap() - expected.center_y_mm * scale).abs() <= tolerance
+                        && (number(30).unwrap() - expected.diameter_mm * scale).abs() <= tolerance
                 }).unwrap_or_else(|| {
                     panic!("{name}: missing drill point {expected:?}; remaining {points:?}")
                 });
@@ -2345,10 +2361,10 @@ mod tests {
                                         .and_then(|value| value.parse::<f64>().ok())
                                         .unwrap_or(f64::NAN)
                                 };
-                                (number(10) - expected.start_x_mm).abs() <= tolerance
-                                    && (number(20) - expected.start_y_mm).abs() <= tolerance
-                                    && (number(11) - expected.end_x_mm).abs() <= tolerance
-                                    && (number(21) - expected.end_y_mm).abs() <= tolerance
+                                (number(10) - expected.start_x_mm * scale).abs() <= tolerance
+                                    && (number(20) - expected.start_y_mm * scale).abs() <= tolerance
+                                    && (number(11) - expected.end_x_mm * scale).abs() <= tolerance
+                                    && (number(21) - expected.end_y_mm * scale).abs() <= tolerance
                             }
                     })
                     .unwrap_or_else(|| {
