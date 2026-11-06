@@ -28,6 +28,7 @@ PieceMarkingsEditor::PieceMarkingsEditor(bool drill_holes, QWidget *parent)
     , m_type(new QComboBox(this))
     , m_diameter(new QLineEdit(this))
     , m_list(new QListWidget(this))
+    , m_error(new QLabel(this))
 {
     auto *layout = new QVBoxLayout(this);
     auto *note = new QLabel(drill_holes
@@ -63,19 +64,12 @@ PieceMarkingsEditor::PieceMarkingsEditor(bool drill_holes, QWidget *parent)
     buttons->addWidget(remove);
     layout->addLayout(buttons);
     layout->addWidget(m_list);
-    auto validate = [this, add]()
-    {
-        bool number = false;
-        const qreal diameter = locale().toDouble(m_diameter->text(), &number);
-        add->setEnabled(m_start->currentData().toUInt() != 0
-            && (m_drill ? number && qIsFinite(diameter) && diameter > 0
-                        : m_end->currentData().toUInt() != 0 && m_start->currentData() != m_end->currentData()
-                            && m_points.value(m_start->currentData().toUInt())
-                                != m_points.value(m_end->currentData().toUInt())));
-    };
-    connect(m_start, &QComboBox::currentIndexChanged, this, validate);
-    connect(m_end, &QComboBox::currentIndexChanged, this, validate);
-    connect(m_diameter, &QLineEdit::textChanged, this, validate);
+    m_error->setObjectName(QStringLiteral("markingError"));
+    m_error->setWordWrap(true);
+    layout->addWidget(m_error);
+    connect(m_start, &QComboBox::currentIndexChanged, this, &PieceMarkingsEditor::updateValidation);
+    connect(m_end, &QComboBox::currentIndexChanged, this, &PieceMarkingsEditor::updateValidation);
+    connect(m_diameter, &QLineEdit::textChanged, this, &PieceMarkingsEditor::updateValidation);
     connect(add, &QPushButton::clicked, this, [this]()
     {
         if (m_drill)
@@ -103,7 +97,7 @@ PieceMarkingsEditor::PieceMarkingsEditor(bool drill_holes, QWidget *parent)
         refresh();
         emit changed();
     });
-    validate();
+    updateValidation();
 }
 
 void PieceMarkingsEditor::setPoints(const QVector<quint32> &anchors, const VContainer *data)
@@ -176,4 +170,32 @@ void PieceMarkingsEditor::refresh()
             m_list->addItem(tr("%1: %2 → %3").arg(line.type, name(line.start), name(line.end)));
         }
     }
+    updateValidation();
+}
+
+void PieceMarkingsEditor::updateValidation()
+{
+    bool number = false;
+    const qreal diameter = locale().toDouble(m_diameter->text(), &number);
+    const quint32 start = m_start->currentData().toUInt();
+    const quint32 end = m_end->currentData().toUInt();
+    const bool positive_diameter = number && qIsFinite(diameter) && diameter > 0;
+    const bool distinct_endpoints = end != 0 && start != end && m_points.value(start) != m_points.value(end);
+    findChild<QPushButton *>(QStringLiteral("addMarking"))->setEnabled(
+        start != 0 && (m_drill ? positive_diameter : distinct_endpoints));
+    QString error;
+    if (!markingsValid())
+    {
+        error = tr("A saved marking has a missing anchor or coincident endpoints. Remove or replace that marking.");
+    }
+    else if (m_drill && !m_diameter->text().isEmpty() && !positive_diameter)
+    {
+        error = tr("Enter a finite diameter greater than zero in pattern units.");
+    }
+    else if (!m_drill && start != 0 && end != 0 && !distinct_endpoints)
+    {
+        error = tr("Reference endpoints must have different positions.");
+    }
+    m_error->setText(error);
+    m_error->setVisible(!error.isEmpty());
 }

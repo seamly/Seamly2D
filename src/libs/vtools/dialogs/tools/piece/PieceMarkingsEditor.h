@@ -18,6 +18,7 @@
 class QComboBox;
 class QLineEdit;
 class QListWidget;
+class QLabel;
 class VContainer;
 
 /// @brief Requires an explicit positive drill diameter or two different live reference endpoints.
@@ -45,7 +46,9 @@ private:
     QComboBox *m_type;
     QLineEdit *m_diameter;
     QListWidget *m_list;
+    QLabel *m_error;
     void refresh();
+    void updateValidation();
 };
 
 #endif // PIECE_MARKINGS_EDITOR_H

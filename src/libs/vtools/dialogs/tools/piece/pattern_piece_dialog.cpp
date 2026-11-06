@@ -1324,6 +1324,9 @@ void PatternPieceDialog::showAnchorsContextMenu(const QPoint &pos)
     {
         delete ui->anchorPoints_ListWidget->item(row);
         initAnchorPointComboboxes();
+        const auto anchors = GetListInternals<quint32>(ui->anchorPoints_ListWidget);
+        m_drill_editor->setPoints(anchors, data);
+        m_reference_editor->setPoints(anchors, data);
         CheckState();
     }
 }

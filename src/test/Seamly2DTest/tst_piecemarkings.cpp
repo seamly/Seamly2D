@@ -23,6 +23,7 @@
 #include <QDir>
 #include <QFile>
 #include <QLineEdit>
+#include <QLabel>
 #include <QListWidget>
 #include <QPushButton>
 #include <QTemporaryDir>
@@ -145,6 +146,76 @@ void TST_PieceMarkings::currentSchemaAndCopy()
     QCOMPARE(PieceMarkings::readDrillHoles(copied.piece).first().center, copied.ids.value(100000));
     QCOMPARE(PieceMarkings::readDrillHoles(copied.piece).first().diameter, 0.2);
     QCOMPARE(PieceMarkings::readReferenceLines(copied.piece).first().end, copied.ids.value(100001));
+    const QDomElement original = piece.cloneNode().toElement();
+    QVector<QDomNode> source_modeling;
+    for (QDomNode node = modeling.firstChild(); !node.isNull(); node = node.nextSibling())
+    {
+        source_modeling.append(node);
+    }
+    const auto append_copy = [&document](const PatternPieceCopyResult &copy)
+    {
+        for (const CopiedModelingElement &model : copy.modeling)
+        {
+            const QDomNodeList blocks = document.elementsByTagName(QStringLiteral("draftBlock"));
+            for (int index = 0; index < blocks.size(); ++index)
+            {
+                const QDomElement draft = blocks.at(index).toElement();
+                if (draft.attribute(QStringLiteral("name")) == model.block_name)
+                {
+                    draft.firstChildElement(QStringLiteral("modeling")).appendChild(model.element);
+                }
+            }
+        }
+        const QDomNodeList blocks = document.elementsByTagName(QStringLiteral("draftBlock"));
+        for (int index = 0; index < blocks.size(); ++index)
+        {
+            const QDomElement draft = blocks.at(index).toElement();
+            if (draft.attribute(QStringLiteral("name")) == copy.block_name)
+            {
+                draft.firstChildElement(QStringLiteral("pieces")).appendChild(copy.piece);
+            }
+        }
+    };
+    append_copy(copied);
+    const auto recopied = PatternPieceCopy::reconstruct(
+        document, copied.piece.attribute(QStringLiteral("id")).toUInt(), [&id] { return ++id; });
+    QVERIFY2(recopied.error.isEmpty(), qPrintable(recopied.error));
+    append_copy(recopied);
+    QCOMPARE(PieceMarkings::readDrillHoles(recopied.piece).first().center,
+             recopied.ids.value(copied.ids.value(100000)));
+    QCOMPARE(PieceMarkings::readDrillHoles(recopied.piece).first().diameter, 0.2);
+    QVERIFY(PieceMarkings::valid(PieceMarkings::readDrillHoles(recopied.piece),
+        PieceMarkings::readReferenceLines(recopied.piece),
+        VAbstractPattern::ParsePieceAnchors(recopied.piece.firstChildElement(QStringLiteral("anchors")))));
+    piece.parentNode().removeChild(piece);
+    for (const QDomNode &source_node : source_modeling)
+    {
+        source_node.parentNode().removeChild(source_node);
+    }
+    const QDomNodeList remaining_pieces = document.elementsByTagName(QStringLiteral("piece"));
+    for (int index = remaining_pieces.size() - 1; index >= 0; --index)
+    {
+        const QDomNode candidate = remaining_pieces.at(index);
+        if (candidate != copied.piece && candidate != recopied.piece)
+        {
+            candidate.parentNode().removeChild(candidate);
+        }
+    }
+    QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::Truncate));
+    file.write(document.toByteArray());
+    file.close();
+    VDomDocument::ValidateXML(VPatternConverter::CurrentSchema, file_path);
+    const QString fixture_directory = qEnvironmentVariable("SEAMLY_MARKING_FIXTURES");
+    if (!fixture_directory.isEmpty())
+    {
+        QVERIFY(QDir().mkpath(fixture_directory));
+        QFile fixture(QDir(fixture_directory).filePath(QStringLiteral("marked-copy-recopy-independent.sm2d")));
+        QVERIFY(fixture.open(QIODevice::WriteOnly));
+        fixture.write(document.toByteArray());
+    }
+    // Restore the source only for the malformed-diameter validation below.
+    block.firstChildElement(QStringLiteral("pieces")).appendChild(original);
+    piece = original;
     for (const QString &diameter : {QStringLiteral("0"), QStringLiteral("-1"),
                                    QStringLiteral("INF"), QStringLiteral("NaN")})
     {
@@ -174,6 +245,7 @@ void TST_PieceMarkings::editorRequiresExplicitInput()
     QVERIFY(!add->isEnabled());
     diameter->setText(QStringLiteral("-1"));
     QVERIFY(!add->isEnabled());
+    QVERIFY(!drill.findChild<QLabel *>(QStringLiteral("markingError"))->text().isEmpty());
     diameter->setText(drill.locale().toString(0.2));
     QVERIFY(add->isEnabled());
     add->click();
@@ -195,8 +267,10 @@ void TST_PieceMarkings::editorRequiresExplicitInput()
     reference.setPoints({7, 8}, &data);
     QVERIFY(!add_line->isEnabled());
     QVERIFY(!reference.markingsValid());
+    QVERIFY(!reference.findChild<QLabel *>(QStringLiteral("markingError"))->text().isEmpty());
     drill.setPoints({8}, &data);
     QVERIFY(!drill.markingsValid());
+    QVERIFY(!drill.findChild<QLabel *>(QStringLiteral("markingError"))->text().isEmpty());
 }
 
 void TST_PieceMarkings::pieceDialogHasSeparateMarkingPages()
