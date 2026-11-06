@@ -11,6 +11,8 @@
 #include <QDomDocument>
 #include <QFile>
 #include <QLineF>
+#include <QPolygonF>
+#include <QRegularExpression>
 #include <QTransform>
 #include <QtTest>
 
@@ -69,6 +71,71 @@ void close(const QPointF &actual, const QPointF &expected)
     QVERIFY2(QLineF(actual, expected).length() < 0.00002,
              qPrintable(QStringLiteral("(%1,%2) != (%3,%4)")
                             .arg(actual.x()).arg(actual.y()).arg(expected.x()).arg(expected.y())));
+}
+
+// @brief Reads generated SVG coordinates independently of the alignment implementation.
+QVector<QPointF> coordinates(const QDomElement &element, bool text, QTransform parent = {})
+{
+    QTransform transform;
+    QString matrix = element.attribute(QStringLiteral("transform"));
+    if (!matrix.isEmpty())
+    {
+        matrix.remove(QStringLiteral("matrix("));
+        matrix.remove(QLatin1Char(')'));
+        const QStringList values = matrix.split(QLatin1Char(','));
+        if (values.size() == 6)
+        {
+            transform = QTransform(values[0].toDouble(), values[1].toDouble(), values[2].toDouble(),
+                                   values[3].toDouble(), values[4].toDouble(), values[5].toDouble());
+        }
+    }
+    transform *= parent;
+    QVector<QPointF> result;
+    if (text && element.tagName() == QLatin1String("text"))
+    {
+        result.append(transform.map(QPointF(element.attribute(QStringLiteral("x")).toDouble(),
+                                            element.attribute(QStringLiteral("y")).toDouble())));
+    }
+    if (!text && element.tagName() == QLatin1String("path"))
+    {
+        QString path = element.attribute(QStringLiteral("d"));
+        path.replace(QRegularExpression(QStringLiteral("[MLZ,]")), QStringLiteral(" "));
+        const QStringList values = path.split(QRegularExpression(QStringLiteral("\\s+")), Qt::SkipEmptyParts);
+        for (int i = 0; i + 1 < values.size(); i += 2)
+        {
+            result.append(transform.map(QPointF(values[i].toDouble(), values[i + 1].toDouble())));
+        }
+    }
+    for (QDomElement child = element.firstChildElement(); !child.isNull(); child = child.nextSiblingElement())
+    {
+        if (!child.hasAttribute(QStringLiteral("data-type")))
+        {
+            result += coordinates(child, text, transform);
+        }
+    }
+    return result;
+}
+
+// @brief Measures distance to polygon edges when an anchor lies exactly on the cut line.
+bool contains(const QPolygonF &polygon, const QPointF &point)
+{
+    if (polygon.containsPoint(point, Qt::OddEvenFill))
+    {
+        return true;
+    }
+    for (int i = 0; i < polygon.size(); ++i)
+    {
+        const QPointF start = polygon[i];
+        const QPointF direction = polygon[(i + 1) % polygon.size()] - start;
+        const qreal length_squared = QPointF::dotProduct(direction, direction);
+        const qreal fraction = length_squared == 0 ? 0
+            : qBound(qreal(0), QPointF::dotProduct(point - start, direction) / length_squared, qreal(1));
+        if (QLineF(point, start + fraction * direction).length() < 0.00002)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 }
 
@@ -177,6 +244,105 @@ void TestHandoffAnnotationAlignment::jacketCaptureFitsEverySize() const
     QVERIFY(doc.setContent(file.readAll()));
     const QStringList warnings = layout_handoff::align_handoff_annotations(doc);
     QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join(QLatin1Char('\n'))));
+    int verified_anchors = 0;
+    for (int i = 0; !group(doc, QStringLiteral("piece"), i).isNull(); ++i)
+    {
+        const QDomElement piece = group(doc, QStringLiteral("piece"), i);
+        QPolygonF cut;
+        for (QDomElement child = piece.firstChildElement(); !child.isNull(); child = child.nextSiblingElement())
+        {
+            if (child.attribute(QStringLiteral("data-type")) == QLatin1String("cutline"))
+            {
+                cut = QPolygonF(coordinates(child, false));
+            }
+        }
+        QVERIFY(cut.size() >= 3);
+        for (QDomElement child = piece.firstChildElement(); !child.isNull(); child = child.nextSiblingElement())
+        {
+            const QString type = child.attribute(QStringLiteral("data-type"));
+            if (type != QLatin1String("grainline") && type != QLatin1String("piece_label")
+                && type != QLatin1String("pattern_label"))
+            {
+                continue;
+            }
+            QVector<QPointF> points = coordinates(child, type != QLatin1String("grainline"));
+            if (type == QLatin1String("grainline") && points.size() >= 2)
+            {
+                points = {points.first(), points.last()};
+            }
+            QVERIFY(!points.isEmpty());
+            for (const QPointF &point : points)
+            {
+                QVERIFY2(contains(cut, point),
+                         qPrintable(QStringLiteral("%1 size %2: %3 anchor (%4,%5) outside cut line")
+                                        .arg(piece.attribute(QStringLiteral("data-name")),
+                                             piece.attribute(QStringLiteral("data-size")), type)
+                                        .arg(point.x()).arg(point.y())));
+                ++verified_anchors;
+            }
+        }
+    }
+    QVERIFY(verified_anchors > 500);
+    for (int i = 0; !group(doc, QStringLiteral("piece-set"), i).isNull(); ++i)
+    {
+        const QDomElement set = group(doc, QStringLiteral("piece-set"), i);
+        QVector<QDomElement> pieces;
+        QVector<QPointF> stack_points;
+        QVector<QPointF> fold_starts;
+        bool folded = true;
+        for (QDomElement piece = set.firstChildElement(); !piece.isNull(); piece = piece.nextSiblingElement())
+        {
+            QVector<QPointF> cut;
+            QVector<QPointF> fold;
+            for (QDomElement child = piece.firstChildElement(); !child.isNull(); child = child.nextSiblingElement())
+            {
+                if (child.attribute(QStringLiteral("data-type")) == QLatin1String("cutline"))
+                {
+                    cut = coordinates(child, false);
+                }
+                if (child.attribute(QStringLiteral("data-type")) == QLatin1String("fold_line"))
+                {
+                    fold = coordinates(child, false);
+                }
+            }
+            pieces.append(piece);
+            stack_points.append(QPolygonF(cut).boundingRect().center());
+            fold_starts.append(fold.isEmpty() ? QPointF() : fold.first());
+            folded = folded && !fold.isEmpty();
+        }
+        for (const QString &type : {QStringLiteral("grainline"), QStringLiteral("piece_label"),
+                                    QStringLiteral("pattern_label")})
+        {
+            QPointF reference;
+            bool found = false;
+            for (int size = 0; size < pieces.size(); ++size)
+            {
+                const QDomElement piece = pieces[size];
+                for (QDomElement child = piece.firstChildElement(); !child.isNull();
+                     child = child.nextSiblingElement())
+                {
+                    if (child.attribute(QStringLiteral("data-type")) != type)
+                    {
+                        continue;
+                    }
+                    const QVector<QPointF> points = coordinates(child, type != QLatin1String("grainline"));
+                    QVERIFY(!points.isEmpty());
+                    const QPointF anchor = type == QLatin1String("grainline")
+                        ? (points.first() + points.last()) / 2 : points.first();
+                    const QPointF offset = anchor - (folded ? fold_starts[size] : stack_points[size]);
+                    if (found)
+                    {
+                        close(offset, reference);
+                    }
+                    else
+                    {
+                        reference = offset;
+                        found = true;
+                    }
+                }
+            }
+        }
+    }
     QVector<QPointF> first;
     for (const QString &type : {QStringLiteral("grainline"), QStringLiteral("piece_label"),
                                 QStringLiteral("pattern_label")})
