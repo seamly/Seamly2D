@@ -8,6 +8,8 @@
 //---------------------------------------------------------------------------------------------------------------------
 
 #include "PieceMarkings.h"
+#include <QDomDocument>
+#include <QDomElement>
 #include <QtMath>
 
 QVector<PieceDrillHole> PieceMarkings::readDrillHoles(const QDomElement &piece)

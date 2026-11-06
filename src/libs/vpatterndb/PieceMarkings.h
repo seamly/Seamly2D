@@ -10,8 +10,10 @@
 #ifndef PIECE_MARKINGS_H
 #define PIECE_MARKINGS_H
 
-#include <QDomElement>
+#include <QString>
 #include <QVector>
+
+class QDomElement;
 
 /// @brief A graded center point and a positive diameter in pattern units, constant across sizes.
 struct PieceDrillHole
