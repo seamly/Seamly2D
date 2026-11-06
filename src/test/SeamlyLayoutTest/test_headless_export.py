@@ -5,6 +5,7 @@
 
 import argparse
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -82,6 +83,38 @@ def hpgl_polylines(content):
             points.extend(coordinates)
     polylines.append(points)
     return polylines
+
+
+def pdf_calibration_edges(content):
+    """Measure 192-pixel horizontal edges after the PDF graphics-state transforms."""
+    measurements = []
+    for stream in re.findall(rb"stream\r?\n(.*?)\r?\nendstream", content, re.DOTALL):
+        try:
+            drawing = zlib.decompress(stream).decode("latin-1")
+        except zlib.error:
+            continue
+        matrix = (1, 0, 0, 1, 0, 0)
+        stack = []
+        previous = None
+        for line in drawing.splitlines():
+            fields = line.split()
+            if fields == ["q"]:
+                stack.append(matrix)
+            elif fields == ["Q"] and stack:
+                matrix = stack.pop()
+            elif len(fields) == 7 and fields[-1] == "cm":
+                a, b, c, d, e, f = matrix
+                g, h, i, j, k, l = map(float, fields[:6])
+                matrix = (a*g+c*h, b*g+d*h, a*i+c*j, b*i+d*j, a*k+c*l+e, b*k+d*l+f)
+            elif len(fields) == 3 and fields[-1] in ("m", "l"):
+                point = tuple(map(float, fields[:2]))
+                if fields[-1] == "l" and previous:
+                    dx, dy = point[0] - previous[0], point[1] - previous[1]
+                    if abs(abs(dx) - 192) < 0.02 and abs(dy) < 0.02:
+                        a, b, c, d, _, _ = matrix
+                        measurements.append(math.hypot(a*dx+c*dy, b*dx+d*dy))
+                previous = point
+    return measurements
 
 
 def main():
@@ -234,6 +267,31 @@ def main():
     for format_name in ("gcode", "3mf"):
         run(format_name, ["--export", format_name, "--settings", str(format_settings),
                          "--output", str(directory / format_name), str(fixture)], 69)
+    if richmond_fixture:
+        for paper, expected in (("Letter", (612, 792)), ("A4", (210*72/25.4, 297*72/25.4))):
+            paper_settings = directory / (paper + "-exact.json")
+            paper_settings.write_text(json.dumps({
+                **settings_object, "paperType": "tiled", "tileSize": paper,
+            }), encoding="utf-8")
+            paper_output = directory / (paper + "-exact.pdf")
+            result = run("physical-" + paper, [
+                "--export", "pdf-tiled", "--settings", str(paper_settings),
+                "--output", str(paper_output), str(fixture),
+            ])
+            if result.returncode != 0:
+                continue
+            content = paper_output.read_bytes()
+            boxes = re.findall(rb"/MediaBox\s*\[0 0 ([\d.]+) ([\d.]+)\]", content)
+            # PDF decimal serialization rounds A4 dimensions to five decimal places.
+            if not boxes or any(abs(float(x)-expected[0]) > 0.0001
+                                or abs(float(y)-expected[1]) > 0.0001 for x, y in boxes):
+                failures.append(paper + "-exact-media-size")
+            edges = pdf_calibration_edges(content)
+            full_scale_edges = [edge for edge in edges if abs(edge-144) < 0.01]
+            if not full_scale_edges:
+                failures.append(paper + "-two-inch-pdf-gauge")
+            print(f"{paper}: {len(boxes)} pages, MediaBox={sorted(set(boxes))}, "
+                  f"144pt gauge edges={len(full_scale_edges)}")
     unplaced_fixture = directory / "unplaced.svg"
     unplaced_fixture.write_text(
         '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">'
