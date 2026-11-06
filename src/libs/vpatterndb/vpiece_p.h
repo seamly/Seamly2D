@@ -1,3 +1,6 @@
+// @author slspencer
+// Copyright (C) 2026 Seamly2D Project
+// SPDX-License-Identifier: GPL-3.0-or-later
 /***************************************************************************
  *                                                                         *
  *   Copyright (C) 2017  Seamly, LLC                                       *
@@ -78,6 +81,8 @@ public:
         , m_customSARecords()
         , m_internalPaths()
         , m_anchors()
+        , m_drill_holes()
+        , m_reference_lines()
         , m_ppData()
         , m_piPatternInfo()
         , m_glGrainline()
@@ -94,6 +99,8 @@ public:
         , m_customSARecords(piece.m_customSARecords)
         , m_internalPaths(piece.m_internalPaths)
         , m_anchors(piece.m_anchors)
+        , m_drill_holes(piece.m_drill_holes)
+        , m_reference_lines(piece.m_reference_lines)
         , m_ppData(piece.m_ppData)
         , m_piPatternInfo(piece.m_piPatternInfo)
         , m_glGrainline(piece.m_glGrainline)
@@ -110,6 +117,8 @@ public:
     QVector<CustomSARecord> m_customSARecords;
     QVector<quint32>        m_internalPaths;
     QVector<quint32>        m_anchors;
+    QVector<PieceDrillHole> m_drill_holes;
+    QVector<PieceReferenceLine> m_reference_lines;
     VPieceLabelData         m_ppData;        //! @brief Pattern piece data
     VPatternLabelData       m_piPatternInfo; //! @brief Pattern info coordinates
     VGrainlineData          m_glGrainline;   //! @brief m_glGrainline grainline geometry object

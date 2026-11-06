@@ -31,6 +31,7 @@
 #include "../layout_handoff/handoff_sheet.h"
 #include "../ifc/xml/vabstractpattern.h"
 #include "../vformat/svg_generator.h"
+#include "../vgeometry/varc.h"
 #include "../vgeometry/vpointf.h"
 #include "../vlayout/vlayoutpiece.h"
 #include "../vmisc/vabstractapplication.h"
@@ -48,6 +49,7 @@
 #include <QGraphicsRectItem>
 #include <QGraphicsScene>
 #include <QRegularExpression>
+#include <limits>
 
 using namespace layout_handoff;
 
@@ -567,6 +569,178 @@ void TST_HandoffDocument::multisizePiecesMatchOldWriter() const
     QCOMPARE(count_type(actual, QStringLiteral("piece-set")), 2);
     QCOMPARE(count_type(actual, QStringLiteral("piece")), 3);
     compare_entries(actual, expected);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Opt-in alignment leaves the comparison document and its cut geometry unchanged.
+ */
+void TST_HandoffDocument::alignedDocumentKeepsComparisonUnchanged() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+    TestPatternDocument document;
+    VAbstractPattern *previous = qApp->getCurrentDocument();
+    qApp->setCurrentDocument(&document);
+    VPiece base = make_piece(data.data(), true, false, false);
+    set_label_templates(&document, &base);
+    VPiece smaller = base;
+    smaller.GetPatternInfo().SetPos(QPointF(40, 40));
+    HandoffDocument handoff;
+    handoff.set_style(HandoffStyle::from_settings(*qApp->Settings()));
+    handoff.set_multisize({QStringLiteral("220"), QStringLiteral("500")}, QStringLiteral("500"), QString());
+    handoff.set_sheet(QRectF(0, 0, 1000, 1000), 96);
+    handoff.add_piece(placed_piece(smaller, data.data(), &document, QStringLiteral("220"), QStringLiteral("1")));
+    handoff.add_piece(placed_piece(base, data.data(), &document, QStringLiteral("500"), QStringLiteral("1")));
+    qApp->setCurrentDocument(previous);
+
+    const QString comparison = handoff.to_svg_string();
+    QStringList warnings;
+    const QDomDocument aligned = handoff.to_aligned_dom(warnings);
+    QVERIFY(warnings.isEmpty());
+    QCOMPARE(handoff.to_svg_string(), comparison);
+    QVERIFY(aligned.toString() != comparison);
+    QVector<Entry> before = flatten_document(handoff.to_dom());
+    QVector<Entry> after = flatten_document(aligned);
+    compare_entries({take_component(&after, QStringLiteral("cutline"))},
+                    {take_component(&before, QStringLiteral("cutline"))});
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Empty placeholder lines keep their spacing but emit no label text in either writer.
+ */
+void TST_HandoffDocument::emptyLabelLinesMatchOldWriter() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+    TestPatternDocument document;
+    VAbstractPattern *previous = qApp->getCurrentDocument();
+    qApp->setCurrentDocument(&document);
+    VPiece piece = make_piece(data.data(), true, false, false);
+    set_label_templates(&document, &piece);
+    piece.GetPatternPieceData().SetLabelTemplate({label_line(QString(), false, Qt::AlignLeft, 0)});
+    const QDomDocument old_dom = make_old_document({piece}, data.data(), {}, {}, {});
+    const HandoffPlacedPiece placed = placed_piece(piece, data.data(), &document, QString(), QString());
+    qApp->setCurrentDocument(previous);
+    const QDomDocument new_dom = make_new_document({placed}, {});
+    QCOMPARE(count_type(flatten_document(new_dom), QStringLiteral("piece_label")), 0);
+    compare_entries(flatten_document(new_dom), flatten_document(old_dom));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Marks preserve pixel dimensions and placement without changing the piece extent.
+ */
+void TST_HandoffDocument::markingsKeepTheirGeometryAndRejectInvalidData() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+    TestPatternDocument document;
+    VAbstractPattern *previous = qApp->getCurrentDocument();
+    qApp->setCurrentDocument(&document);
+    VPiece piece = make_piece(data.data(), true, false, false);
+    set_label_templates(&document, &piece);
+    HandoffPlacedPiece placed = placed_piece(piece, data.data(), &document, QString(), QString());
+    qApp->setCurrentDocument(previous);
+    const HandoffStyle style = HandoffStyle::from_settings(*qApp->Settings());
+    const QRectF extent = piece_extent(placed.piece, style);
+    QVERIFY(placed.piece.set_markings({{QPointF(120, 130), 8}},
+        {{QLineF(20, 30, 240, 250), QStringLiteral("stripe")},
+         {QLineF(30, 40, 260, 270), QStringLiteral("plaid")}}));
+    QCOMPARE(piece_extent(placed.piece, style), extent);
+    placed.offset = QPointF(11, 12);
+    HandoffDocument handoff;
+    handoff.set_style(style);
+    handoff.add_piece(placed);
+    const QDomDocument dom = handoff.to_dom();
+    const QDomNodeList circles = dom.elementsByTagName(QStringLiteral("circle"));
+    QCOMPARE(circles.size(), 1);
+    const QDomElement circle = circles.at(0).toElement();
+    QCOMPARE(circle.attribute(QStringLiteral("cx")), QStringLiteral("120"));
+    QCOMPARE(circle.attribute(QStringLiteral("cy")), QStringLiteral("130"));
+    QCOMPARE(circle.attribute(QStringLiteral("r")), QStringLiteral("4"));
+    QCOMPARE(circle.parentNode().parentNode().toElement().attribute(QStringLiteral("data-diameter")),
+             QStringLiteral("8"));
+    QCOMPARE(parse_matrix(circle.parentNode().toElement().attribute(QStringLiteral("transform")))
+                 .map(QPointF(120, 130)), QPointF(131, 142));
+    const QVector<Entry> flattened = flatten_document(dom);
+    QCOMPARE(count_type(flattened, QStringLiteral("drill")), 1);
+    QCOMPARE(count_type(flattened, QStringLiteral("stripe")), 1);
+    QCOMPARE(count_type(flattened, QStringLiteral("plaid")), 1);
+    QVERIFY(!placed.piece.set_markings({{QPointF(120, 130), 0}}, {}));
+    HandoffDocument invalid;
+    invalid.add_piece(placed);
+    QVERIFY(invalid.to_dom().isNull());
+    QVERIFY(invalid.to_svg_string().isEmpty());
+    QVERIFY(!placed.piece.set_markings({}, {{QLineF(1, 1, 1, 1), QStringLiteral("stripe")}}));
+    QVERIFY(!placed.piece.set_markings({}, {{QLineF(1, 1, 2, 2), QStringLiteral("other")}}));
+    QVERIFY(!placed.piece.set_markings({{QPointF(), std::numeric_limits<qreal>::infinity()}}, {}));
+    QVERIFY(!placed.piece.set_markings({{QPointF(std::numeric_limits<qreal>::quiet_NaN(), 1), 2}}, {}));
+    QVERIFY(placed.piece.set_markings({{QPointF(1200, 1300), 8}},
+        {{QLineF(20.000001, 30, 20.000002, 30), QStringLiteral("stripe")}}));
+    QCOMPARE(piece_extent(placed.piece, style), extent);
+    HandoffDocument precise;
+    precise.add_piece(placed);
+    const QDomDocument precise_dom = precise.to_dom();
+    const QDomElement precise_circle = precise_dom.elementsByTagName(QStringLiteral("circle")).at(0).toElement();
+    QCOMPARE(precise_circle.attribute(QStringLiteral("cx")), QStringLiteral("1200"));
+    QVERIFY(precise_dom.toString().contains(QStringLiteral("M20.000001,30 L20.000002,30")));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Each size resolves live anchors while the pattern-unit drill diameter stays constant.
+ */
+void TST_HandoffDocument::liveMarkingAnchorsGradeWithConstantDiameter() const
+{
+    for (const Unit unit : {Unit::Mm, Unit::Cm, Unit::Inch})
+    {
+        QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+        VPiece piece = make_piece(data.data(), true, false, false);
+        piece.getAnchors() = {20, 21, 22};
+        data->UpdateGObject(20, new VPointF(120, 130, "Drill", 0, 0));
+        data->UpdateGObject(21, new VPointF(30, 40, "Start", 0, 0));
+        data->UpdateGObject(22, new VPointF(230, 240, "End", 0, 0));
+        piece.setDrillHoles({{20, 2}});
+        piece.setReferenceLines({{21, 22, QStringLiteral("stripe")}, {20, 22, QStringLiteral("plaid")}});
+        const HandoffPiece first = HandoffPiece::create(piece, data.data());
+        QVERIFY(first.marking_error().isEmpty());
+        QCOMPARE(first.drill_holes().size(), 1);
+        QCOMPARE(first.drill_holes().first().center, QPointF(120, 130));
+        QCOMPARE(first.drill_holes().first().diameter, ToPixel(2, unit));
+        QCOMPARE(first.reference_lines().size(), 2);
+        data->UpdateGObject(20, new VPointF(150, 160, "Drill", 0, 0));
+        data->UpdateGObject(22, new VPointF(260, 270, "End", 0, 0));
+        const HandoffPiece graded = HandoffPiece::create(piece, data.data());
+        QVERIFY(graded.marking_error().isEmpty());
+        QCOMPARE(graded.drill_holes().first().center, QPointF(150, 160));
+        QCOMPARE(graded.drill_holes().first().diameter, first.drill_holes().first().diameter);
+        QCOMPARE(graded.reference_lines().first().line, QLineF(30, 40, 260, 270));
+        QCOMPARE(first.drill_holes().first().center, QPointF(120, 130));
+
+        piece.setDrillHoles({{1, 2}});
+        QVERIFY(!HandoffPiece::create(piece, data.data()).marking_error().isEmpty());
+        piece.setDrillHoles({{23, 2}});
+        piece.getAnchors().append(23);
+        QVERIFY(!HandoffPiece::create(piece, data.data()).marking_error().isEmpty());
+        data->UpdateGObject(23, new VArc());
+        QVERIFY(!HandoffPiece::create(piece, data.data()).marking_error().isEmpty());
+        piece.setDrillHoles({{20, 2}});
+        piece.setReferenceLines({{1, 22, QStringLiteral("stripe")}});
+        QVERIFY(!HandoffPiece::create(piece, data.data()).marking_error().isEmpty());
+        piece.setReferenceLines({{21, 24, QStringLiteral("stripe")}});
+        piece.getAnchors().append(24);
+        QVERIFY(!HandoffPiece::create(piece, data.data()).marking_error().isEmpty());
+        piece.setReferenceLines({{21, 23, QStringLiteral("stripe")}});
+        QVERIFY(!HandoffPiece::create(piece, data.data()).marking_error().isEmpty());
+        piece.setReferenceLines({{21, 22, QStringLiteral("stripe")}});
+        data->UpdateGObject(22, new VPointF(30, 40, "End", 0, 0));
+        QVERIFY(!HandoffPiece::create(piece, data.data()).marking_error().isEmpty());
+    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------

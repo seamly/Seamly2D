@@ -729,7 +729,9 @@ mod tests {
     fn unplaced_warnings_list_one_piece_per_line() {
         let lines = sizes(&["Detail (3): 220, 240", "Front: 220"]);
         let single = unplaced_warning(&lines, false);
-        assert!(unplaced_warning(&lines, true).contains("wider fabric"), "fabric advice");
+        let fabric = unplaced_warning(&lines, true);
+        assert!(fabric.contains("wider fabric, a longer fabric length"), "fabric advice: {fabric}");
+        assert!(!fabric.contains("sheet size"), "fabric warning must not suggest a larger sheet: {fabric}");
         assert!(single.starts_with("2 piece(s) could not be placed"), "{single}");
         assert!(single.contains("\n\n\u{2022} Detail (3): 220, 240\n\u{2022} Front: 220\n\n"), "{single}");
 
@@ -739,5 +741,18 @@ mod tests {
             tabs.contains("Marker:\n\u{2022} Detail (3): 220, 240\n\u{2022} Front: 220\nSize 220: not laid out (no room)"),
             "{tabs}"
         );
+        assert!(tabs.contains("Try a larger sheet size"), "{tabs}");
+
+        let mut fabric_queue = TabLayoutQueue::new(
+            r#"{"mediaType":"fabric"}"#.to_string(),
+            0,
+            Vec::new(),
+            Vec::new(),
+            false,
+        );
+        fabric_queue.problems.push(tab_unplaced_problem(MARKER_LABEL, &lines));
+        let fabric_tabs = fabric_queue.final_warning().expect("unplaced fabric pieces");
+        assert!(fabric_tabs.contains("Try a wider fabric, a longer fabric length"), "{fabric_tabs}");
+        assert!(!fabric_tabs.contains("larger sheet"), "{fabric_tabs}");
     } // unplaced_warnings_list_one_piece_per_line
 } // mod tests

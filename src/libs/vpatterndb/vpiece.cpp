@@ -1,10 +1,13 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  @file   vpiece.cpp
 //  @author Douglas S Caskey
+//  @author slspencer
 //  @date   17 Sep, 2023
 //
 //  @copyright
 //  Copyright (C) 2017 - 2026 Seamly, LLC
+//  Copyright (C) 2026 Seamly2D Project
+//  SPDX-License-Identifier: GPL-3.0-or-later
 //  https://github.com/fashionfreedom/seamly2d
 //
 //  @brief
@@ -1203,6 +1206,11 @@ void VPiece::setAnchors(const QVector<quint32> &anchors)
 {
     d->m_anchors = anchors;
 }
+
+QVector<PieceDrillHole> VPiece::drillHoles() const { return d->m_drill_holes; }
+void VPiece::setDrillHoles(const QVector<PieceDrillHole> &holes) { d->m_drill_holes = holes; }
+QVector<PieceReferenceLine> VPiece::referenceLines() const { return d->m_reference_lines; }
+void VPiece::setReferenceLines(const QVector<PieceReferenceLine> &lines) { d->m_reference_lines = lines; }
 
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief MissingNodes find missing nodes in piece. When we deleted object in piece and return this piece need

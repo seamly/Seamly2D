@@ -370,6 +370,39 @@ HandoffPiece HandoffPiece::create(const VPiece &piece, const VContainer *pattern
     handoff.m_is_grainline_visible  = grainline.IsVisible();
     read_grainline(grainline, pattern, handoff.m_seam_line.points, &handoff.m_grainline_points,
                    &handoff.m_grain_axis);
+
+    if (!PieceMarkings::valid(piece.drillHoles(), piece.referenceLines(), piece.getAnchors()))
+    {
+        handoff.m_marking_error = QStringLiteral("A piece marking does not reference a valid modeling anchor.");
+        return handoff;
+    }
+    QVector<HandoffDrillHole> holes;
+    QVector<HandoffReferenceLine> references;
+    for (const PieceDrillHole &hole : piece.drillHoles())
+    {
+        const auto center = qSharedPointerDynamicCast<VPointF>(pattern->DataGObjects()->value(hole.center));
+        if (center.isNull())
+        {
+            handoff.m_marking_error = QStringLiteral("A drill hole's modeling anchor is missing or is not a point.");
+            return handoff;
+        }
+        holes.append({static_cast<QPointF>(*center), ToPixel(hole.diameter, *pattern->GetPatternUnit())});
+    }
+    for (const PieceReferenceLine &line : piece.referenceLines())
+    {
+        const auto start = qSharedPointerDynamicCast<VPointF>(pattern->DataGObjects()->value(line.start));
+        const auto end = qSharedPointerDynamicCast<VPointF>(pattern->DataGObjects()->value(line.end));
+        if (start.isNull() || end.isNull())
+        {
+            handoff.m_marking_error = QStringLiteral("A reference line's modeling anchor is missing or is not a point.");
+            return handoff;
+        }
+        references.append({QLineF(static_cast<QPointF>(*start), static_cast<QPointF>(*end)), line.type});
+    }
+    if (!handoff.set_markings(holes, references))
+    {
+        return handoff;
+    }
     return handoff;
 }
 
@@ -444,6 +477,53 @@ void HandoffPiece::unify_piece_turn_points(const QVector<HandoffPiece *> &sizes)
 bool HandoffPiece::has_shape() const
 {
     return !m_seam_line.points.isEmpty() || !m_cut_line.points.isEmpty();
+}
+
+bool HandoffPiece::set_markings(const QVector<HandoffDrillHole> &drill_holes,
+                               const QVector<HandoffReferenceLine> &reference_lines)
+{
+    m_drill_holes.clear();
+    m_reference_lines.clear();
+    m_marking_error.clear();
+    const auto finite = [](const QPointF &point)
+    {
+        return qIsFinite(point.x()) && qIsFinite(point.y());
+    };
+    for (const HandoffDrillHole &hole : drill_holes)
+    {
+        if (!finite(hole.center) || !qIsFinite(hole.diameter) || hole.diameter <= 0)
+        {
+            m_marking_error = QStringLiteral("A drill hole needs a finite centre and a positive finite diameter.");
+            return false;
+        }
+    }
+    for (const HandoffReferenceLine &reference : reference_lines)
+    {
+        if ((reference.type != QLatin1String("stripe") && reference.type != QLatin1String("plaid"))
+            || !finite(reference.line.p1()) || !finite(reference.line.p2()) || reference.line.isNull())
+        {
+            m_marking_error = QStringLiteral("A stripe or plaid line needs two distinct finite endpoints.");
+            return false;
+        }
+    }
+    m_drill_holes = drill_holes;
+    m_reference_lines = reference_lines;
+    return true;
+}
+
+const QVector<HandoffDrillHole> &HandoffPiece::drill_holes() const
+{
+    return m_drill_holes;
+}
+
+const QVector<HandoffReferenceLine> &HandoffPiece::reference_lines() const
+{
+    return m_reference_lines;
+}
+
+const QString &HandoffPiece::marking_error() const
+{
+    return m_marking_error;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

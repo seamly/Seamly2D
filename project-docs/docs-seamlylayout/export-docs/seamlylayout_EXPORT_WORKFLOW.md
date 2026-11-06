@@ -156,7 +156,7 @@ ExportMenu EPS / PostScript (PS) → exportPostscriptRequested("eps" | "ps")
 - An empty layout is an error. No file is written.
 - The View menu has no PS or EPS item. The system viewer opens the file.
 - Not covered: tiled multi-page PS.
-- Seamly2D exports no PS or EPS, and ships no `pdftops`. CLI formats 8 and 9 are rejected; other format numbers do not change.
+- Seamly2D does not write PS or EPS itself. Its headless export route passes these formats to SeamlyLayout.
 
 ## PDF export — true size
 
@@ -167,7 +167,7 @@ ExportMenu EPS / PostScript (PS) → exportPostscriptRequested("eps" | "ps")
 - A page side longer than 200 in gets `/UserUnit` n, the smallest whole number that keeps the MediaBox within 14 400. A reader multiplies the MediaBox by n / 72 in. A 48 in × 500 in roll: MediaBox `1152 × 12000`, `/UserUnit 3`.
 - Reason: a fabric cut layout can be longer than 500 in (user decision).
 - A reader that ignores `/UserUnit` shows such a page at 1/n size.
-- Tiled pages are the paper size; Letter is `612 × 792` pt.
+- Tiled PDF pages preserve the exact selected paper size, independent of rounded layout-grid pixels; Letter is `612 × 792` pt.
 
 ## PDF (Tiled) — not for the Marker tab
 
@@ -256,3 +256,35 @@ Stubs only. No module ships yet.
 - Export all tabs: the save dialog offers the name without a tab. Each file gets its tab before the timestamp (`exports::tab_export_path`).
   - `male_shirt_cutlines_202610031234.plt` → `male_shirt_cutlines_Size40_202610031234.plt`, `male_shirt_cutlines_Marker_202610031234.plt`.
   - A name without a timestamp gets the tab before the extension: `jacket.plt` → `jacket_Size40.plt`.
+
+## Headless command-line export
+
+The command line uses the same AppController import, layout, and export methods as
+the QML workflow. It does not construct the QML engine or show a window.
+
+```text
+SeamlyLayout --export svg --svg-text-mode hersheyStrokes \
+  --output C:\exports\shirt.svg C:\patterns\shirt.pieces.svg
+```
+
+For a document supplied by Seamly2D:
+
+```text
+SeamlyLayout --svg-stdin --document-name shirt --export pdf \
+  --output C:\exports\shirt.pdf
+```
+
+| Option | Contract |
+|---|---|
+| `--export <format>` / `--format <format>` | Required headless mode. Supports `svg`, `pdf`, `pdf-tiled`, `png`, `jpg`/`jpeg`, `dxf`, `hpgl`, `ps`, `eps`, `gcode`, and `3mf`. |
+| `--output <path>` / `--destination <path>` | Required output file. Relative paths resolve before startup changes the working directory. |
+| `--settings <path>` / `--layout-settings <path>` | Optional layout settings JSON; otherwise the configured default settings are loaded. |
+| `--export-options <path>` | Optional format-specific JSON. DXF and HP-GL use the same camelCase keys as their QML export requests. |
+| `--svg-text-mode <mode>` / `--text-mode <mode>` | SVG only: `designerFont`, `singleLineFont`, `hersheyStrokes`, or `asSupplied`. |
+| `--scale <factor>` | PNG only; positive finite scale, default `1.0`. |
+
+Input is one positional SVG file or `--svg-stdin`, never both. The parser
+validates required paths and formats before the layout runs. The process returns
+0 after creating a non-empty output file; import, layout, export, and unavailable
+paid-format failures return non-zero and write a diagnostic to standard error.
+G-Code and 3MF return an unavailable status unless their paid modules are present.

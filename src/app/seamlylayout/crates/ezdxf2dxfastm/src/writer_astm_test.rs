@@ -8,7 +8,7 @@
 mod tests {
     use crate::writer::{export_dxf_astm, DxfAstmExportOptions};
     use seamly_svg2ezdxf::{
-        build_contour, spline_deviation, svg_to_ezdxf, Annotation, AstmContour, Block, Drawing, DxfVersion, Notch, NotchKind, Point, SvgToEzdxfOptions, CURVE_TOLERANCE_MM,
+        build_contour, spline_deviation, svg_to_ezdxf, Annotation, AstmContour, Block, DrillHole, Drawing, DxfVersion, Notch, NotchKind, Point, ReferenceLine, SvgToEzdxfOptions, CURVE_TOLERANCE_MM,
     };
     use std::collections::HashMap;
 
@@ -91,11 +91,18 @@ mod tests {
 
     // @brief Export a drawing to a temp file and return the DXF text.
     fn export_to_string(drawing: &Drawing, tag: &str, options: &DxfAstmExportOptions) -> String {
-        let path = std::env::temp_dir().join(format!("seamly_astm_{}_{}.dxf", tag, std::process::id()));
+        let path = test_output_path(&format!("seamly_astm_{tag}"));
         export_dxf_astm(drawing, &path, options).expect("export succeeds");
         let text = std::fs::read_to_string(&path).expect("read back");
         let _ = std::fs::remove_file(&path);
         text
+    }
+
+    // @brief Put test exports under the Cargo workspace instead of an external temporary directory.
+    fn test_output_path(name: &str) -> std::path::PathBuf {
+        let directory = std::path::Path::new("target").join("writer-test-output");
+        std::fs::create_dir_all(&directory).expect("create test output directory");
+        directory.join(format!("{name}_{}.dxf", std::process::id()))
     }
 
     // @brief One piece with every ASTM feature, built directly.
@@ -552,7 +559,7 @@ mod tests {
     #[test]
     fn graded_export_writes_the_rule_file() {
         let (drawing, _) = graded_drawing(DxfVersion::R11);
-        let path = std::env::temp_dir().join(format!("seamly_astm_rul_{}.dxf", std::process::id()));
+        let path = test_output_path("seamly_astm_rul");
         export_dxf_astm(&drawing, &path, &dated_options()).expect("export succeeds");
         let rul_path = path.with_extension("rul");
         let text = std::fs::read_to_string(&rul_path).expect("rule file beside the DXF");
@@ -827,7 +834,7 @@ mod tests {
     #[test]
     fn aama_graded_export_writes_rule_ids_and_aama_rule_file() {
         let (drawing, _) = graded_drawing(DxfVersion::R11);
-        let path = std::env::temp_dir().join(format!("seamly_aama_rul_{}.dxf", std::process::id()));
+        let path = test_output_path("seamly_aama_rul");
         export_dxf_astm(&drawing, &path, &aama_options()).expect("export succeeds");
         let dxf = parse_dxf(&std::fs::read_to_string(&path).expect("DXF written"));
         let rul_path = path.with_extension("rul");
@@ -849,7 +856,7 @@ mod tests {
     // @brief The annotated version of a DXF-AAMA file names DXF-AAMA in its title line.
     #[test]
     fn aama_annotated_version_names_dxf_aama() {
-        let path = std::env::temp_dir().join(format!("seamly_aama_annotated_{}.dxf", std::process::id()));
+        let path = test_output_path("seamly_aama_annotated");
         let options = DxfAstmExportOptions { create_annotated_version: true, ..aama_options() };
         export_dxf_astm(&sample_r11_drawing(), &path, &options).expect("export succeeds");
         let txt_path = path.with_extension("txt");
@@ -893,6 +900,80 @@ mod tests {
         drawing.pattern_unit = unit;
         drawing
     }
+
+    // @brief Drill points retain diameter and reference lines retain their ASTM layers.
+    #[test]
+    fn writes_markings_in_metric_english_and_aama_exports() {
+        for (unit, version, aama, expected_diameter) in [
+            (seamly_svg2ezdxf::PatternUnit::Mm, DxfVersion::R13, false, "6.35"),
+            (seamly_svg2ezdxf::PatternUnit::Inch, DxfVersion::R13, false, "0.2500"),
+            (seamly_svg2ezdxf::PatternUnit::Mm, DxfVersion::R11, true, "6.35"),
+            (seamly_svg2ezdxf::PatternUnit::Inch, DxfVersion::R11, true, "0.2500"),
+        ] {
+            let mut drawing = sample_drawing_in(unit, version);
+            drawing.blocks[0].drill_holes.push(DrillHole {
+                center: Point::new(12.7, 25.4),
+                diameter: 6.35,
+            });
+            drawing.blocks[0].reference_lines.extend([
+                ReferenceLine {
+                    layer: "9",
+                    start: Point::new(1.0, 2.0),
+                    end: Point::new(3.0, 4.0),
+                },
+                ReferenceLine {
+                    layer: "10",
+                    start: Point::new(5.0, 6.0),
+                    end: Point::new(7.0, 8.0),
+                },
+            ]);
+            let options = DxfAstmExportOptions { aama, ..dated_options() };
+            let dxf = parse_dxf(&export_to_string(&drawing, "markings", &options));
+            if version == DxfVersion::R13 {
+                for layer in ["9", "10", "13"] {
+                    assert!(dxf.all_pairs.iter().any(|(code, value)| *code == 2 && value == layer),
+                        "R13 layer table lacks layer {layer}");
+                }
+            } // if R13 layer table
+            let (block_name, block) = dxf.blocks.iter().find(|(name, _)| name.contains("Front"))
+                .unwrap_or_else(|| panic!("piece block missing: {:?}", dxf.blocks.iter().map(|(name, _)| name).collect::<Vec<_>>()));
+            let drill = block.iter().find(|entity| entity.kind == "POINT" && entity.layer() == "13");
+            assert!(drill.is_some(), "{block_name} entities: {:?}", block.iter().map(|entity| (entity.kind.as_str(), entity.layer())).collect::<Vec<_>>());
+            let drill = drill.expect("asserted drill point");
+            assert_eq!(drill.get(30), Some(expected_diameter));
+            assert_eq!(drill.get(10), Some(if unit == seamly_svg2ezdxf::PatternUnit::Inch { "0.5000" } else { "12.70" }));
+            assert_eq!(drill.get(20), Some(if unit == seamly_svg2ezdxf::PatternUnit::Inch { "1.0000" } else { "25.40" }));
+            for layer in ["9", "10"] {
+                assert!(block.iter().any(|entity| entity.kind == "LINE" && entity.layer() == layer),
+                    "missing reference line on layer {layer}; AAMA={aama}");
+            }
+            let stripe = block.iter().find(|entity| entity.kind == "LINE" && entity.layer() == "9").expect("stripe line");
+            let plaid = block.iter().find(|entity| entity.kind == "LINE" && entity.layer() == "10").expect("plaid line");
+            let (start, end) = if unit == seamly_svg2ezdxf::PatternUnit::Inch {
+                (["0.0394", "0.0787"], ["0.1181", "0.1575"])
+            } else {
+                (["1.00", "2.00"], ["3.00", "4.00"])
+            };
+            assert_eq!([stripe.get(10), stripe.get(20)], [Some(start[0]), Some(start[1])]);
+            assert_eq!([stripe.get(11), stripe.get(21)], [Some(end[0]), Some(end[1])]);
+            assert_eq!([plaid.get(10), plaid.get(20)], [Some(if unit == seamly_svg2ezdxf::PatternUnit::Inch { "0.1969" } else { "5.00" }), Some(if unit == seamly_svg2ezdxf::PatternUnit::Inch { "0.2362" } else { "6.00" })]);
+            assert_eq!([plaid.get(11), plaid.get(21)], [Some(if unit == seamly_svg2ezdxf::PatternUnit::Inch { "0.2756" } else { "7.00" }), Some(if unit == seamly_svg2ezdxf::PatternUnit::Inch { "0.3150" } else { "8.00" })]);
+        } // for each unit/format
+    } // writes_markings_in_metric_english_and_aama_exports
+
+    // @brief Reject markings when a boundary-less block would otherwise omit them.
+    #[test]
+    fn rejects_markings_without_piece_boundary() {
+        let mut drawing = sample_drawing();
+        drawing.blocks[0].boundary = None;
+        drawing.blocks[0].drill_holes.push(DrillHole {
+            center: Point::new(12.7, 25.4),
+            diameter: 6.35,
+        });
+        let error = export_dxf_astm(&drawing, test_output_path("no_marking_boundary"), &dated_options())
+            .expect_err("markings without a boundary must be rejected");
+        assert!(error.to_string().contains("markings but no boundary"));
+    } // rejects_markings_without_piece_boundary
 
     // @brief An inch pattern writes `Units:ENGLISH` and every length in inches to four places;
     //        angles keep two places.

@@ -32,6 +32,26 @@ pub struct Annotation {
     pub text: String,
 }
 
+// @brief Drill center and diameter in DXF units.
+#[derive(Debug, Clone, PartialEq)]
+pub struct DrillHole {
+    // Graded center point.
+    pub center: Point,
+    // Positive diameter.
+    pub diameter: f64,
+}
+
+// @brief Reference-only stripe or plaid line in DXF units.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ReferenceLine {
+    // DXF layer: "9" for stripe or "10" for plaid.
+    pub layer: &'static str,
+    // First graded endpoint.
+    pub start: Point,
+    // Second graded endpoint.
+    pub end: Point,
+}
+
 // @brief `Material:` value for a piece without `data-material`.
 pub const DEFAULT_MATERIAL: &str = "Fabric";
 
@@ -128,6 +148,10 @@ pub struct Block {
     pub mirror_line: Option<(Point, Point)>,
     // Notches (layers 4, 80, 81, 83).
     pub notches: Vec<Notch>,
+    // Drill hole centers and diameters (layer 13).
+    pub drill_holes: Vec<DrillHole>,
+    // Stripe and plaid reference lines (layers 9 and 10).
+    pub reference_lines: Vec<ReferenceLine>,
     // Annotation text (layer 15).
     pub annotations: Vec<Annotation>,
     // Grade data; None for an ungraded piece.
@@ -161,6 +185,8 @@ impl Block {
             grainline: None,
             mirror_line: None,
             notches: Vec::new(),
+            drill_holes: Vec::new(),
+            reference_lines: Vec::new(),
             annotations: Vec::new(),
             grading: None,
         }

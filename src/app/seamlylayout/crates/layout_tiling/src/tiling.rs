@@ -29,13 +29,13 @@ use crate::layout_settings::{LayoutSettings, LAYOUT_PPI};
 // @details Columns: (name, imperial_w_in, imperial_h_in, metric_w_mm, metric_h_mm)
 const TILE_SIZES_DATA: &[(&str, f64, f64, f64, f64)] = &[
     // (name,    imp_w,  imp_h,  met_w,  met_h)
-    ("None",     0.0,    0.0,    0.0,    0.0),
-    ("Letter",   8.5,   11.0,  216.0,  279.0),
-    ("Legal",    8.5,   14.0,  216.0,  356.0),
-    ("Ledger",  11.0,   17.0,  279.0,  432.0),
-    ("A3",      11.69,  16.54, 297.0,  420.0),
-    ("A4",       8.27,  11.69, 210.0,  297.0),
-    ("A5",       5.83,   8.27, 148.0,  210.0),
+    ("None", 0.0, 0.0, 0.0, 0.0),
+    ("Letter", 8.5, 11.0, 215.9, 279.4),
+    ("Legal", 8.5, 14.0, 215.9, 355.6),
+    ("Ledger", 11.0, 17.0, 279.4, 431.8),
+    ("A3", 11.69, 16.54, 297.0, 420.0),
+    ("A4", 8.27, 11.69, 210.0, 297.0),
+    ("A5", 5.83, 8.27, 148.0, 210.0),
 ]; // TILE_SIZES_DATA
 
 // ---------------------------------------------------------------------------
@@ -129,7 +129,7 @@ fn tile_size_px(name: &str, unit: &str) -> Option<(f64, f64)> {
 // @brief Computed tile grid dimensions passed from `compute_tile_dims` to
 //        `create_initial_tiled_layout_dom`.
 //
-// All pixel values are f64 at 96 px/in.
+// Grid values use rounded pixels; paper dimensions preserve their exact pixel size.
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct TileDimensions {
     // Number of tile columns and rows needed to cover the input DOM area.
@@ -139,6 +139,10 @@ pub struct TileDimensions {
     // Usable area of one tile page (paper size minus margins).
     pub trim_tile_w_px: u32,
     pub trim_tile_h_px: u32,
+
+    // Exact physical page size in pixels before integer grid rounding.
+    pub paper_w_px: f64,
+    pub paper_h_px: f64,
 
     // Input DOM pixel dimensions — used for SVG root, backgroundRect, contentRect.
     pub input_dom_w_px: u32,
@@ -274,6 +278,8 @@ pub fn compute_tile_dims(
         tile_rows,
         trim_tile_w_px,
         trim_tile_h_px,
+        paper_w_px: tile_w_px_f,
+        paper_h_px: tile_h_px_f,
         input_dom_w_px: input_w_px,
         input_dom_h_px: input_h_px,
         layout_w_px,
@@ -884,12 +890,20 @@ mod tests {
     #[test]
     fn tiled_svg_root_dimensions() {
         let td = TileDimensions {
-            tile_cols: 2, tile_rows: 3,
-            trim_tile_w_px: 768, trim_tile_h_px: 1008, // Letter size minus margins
-            input_dom_w_px: 1000, input_dom_h_px: 1500, // input is just slightly larger than one tile to force tiling
-            layout_w_px: 1584, layout_h_px: 3072, // expected layout is multiple of letter width and letter height, plus margins
-            margin_left_px: 24, margin_right_px: 24,
-            margin_top_px: 24,  margin_bottom_px: 24,
+            tile_cols: 2,
+            tile_rows: 3,
+            trim_tile_w_px: 768,
+            trim_tile_h_px: 1008, // Letter size minus margins
+            paper_w_px: 816.0,
+            paper_h_px: 1056.0,
+            input_dom_w_px: 1000,
+            input_dom_h_px: 1500, // input is just slightly larger than one tile to force tiling
+            layout_w_px: 1584,
+            layout_h_px: 3072, // expected layout is multiple of letter width and letter height, plus margins
+            margin_left_px: 24,
+            margin_right_px: 24,
+            margin_top_px: 24,
+            margin_bottom_px: 24,
         };
         // create_initial_tiled_layout_dom() will recalculate layout_w_px & layout_h_px and update <svg> root
         let doc = create_initial_tiled_layout_dom(&td);
@@ -905,12 +919,20 @@ mod tests {
     #[test]
     fn tiled_svg_path_count() {
         let td = TileDimensions {
-            tile_cols: 2, tile_rows: 3,
-            trim_tile_w_px: 768, trim_tile_h_px: 1008,
-            input_dom_w_px: 1000, input_dom_h_px: 1500,
-            layout_w_px: 1584, layout_h_px: 3072,
-            margin_left_px: 24, margin_right_px: 24,
-            margin_top_px: 24,  margin_bottom_px: 24,
+            tile_cols: 2,
+            tile_rows: 3,
+            trim_tile_w_px: 768,
+            trim_tile_h_px: 1008,
+            paper_w_px: 816.0,
+            paper_h_px: 1056.0,
+            input_dom_w_px: 1000,
+            input_dom_h_px: 1500,
+            layout_w_px: 1584,
+            layout_h_px: 3072,
+            margin_left_px: 24,
+            margin_right_px: 24,
+            margin_top_px: 24,
+            margin_bottom_px: 24,
         };
         let doc = create_initial_tiled_layout_dom(&td);
         let svg_str = doc.to_string();
@@ -927,12 +949,20 @@ mod tests {
     #[test]
     fn tiled_svg_row_ids() {
         let td = TileDimensions {
-            tile_cols: 2, tile_rows: 2,
-            trim_tile_w_px: 768, trim_tile_h_px: 1008,
-            input_dom_w_px: 1000, input_dom_h_px: 1500,
-            layout_w_px: 1584, layout_h_px: 2064,
-            margin_left_px: 24, margin_right_px: 24,
-            margin_top_px: 24,  margin_bottom_px: 24,
+            tile_cols: 2,
+            tile_rows: 2,
+            trim_tile_w_px: 768,
+            trim_tile_h_px: 1008,
+            paper_w_px: 816.0,
+            paper_h_px: 1056.0,
+            input_dom_w_px: 1000,
+            input_dom_h_px: 1500,
+            layout_w_px: 1584,
+            layout_h_px: 2064,
+            margin_left_px: 24,
+            margin_right_px: 24,
+            margin_top_px: 24,
+            margin_bottom_px: 24,
         };
         let doc = create_initial_tiled_layout_dom(&td);
         let svg_str = doc.to_string();
@@ -1043,12 +1073,20 @@ mod tests {
     #[test]
     fn tiled_svg_col_resets_per_row() {
         let td = TileDimensions {
-            tile_cols: 2, tile_rows: 2,
-            trim_tile_w_px: 500, trim_tile_h_px: 500,
-            input_dom_w_px: 1100, input_dom_h_px: 1100,
-            layout_w_px: 1048, layout_h_px: 1048,
-            margin_left_px: 24, margin_right_px: 24,
-            margin_top_px: 24,  margin_bottom_px: 24,
+            tile_cols: 2,
+            tile_rows: 2,
+            trim_tile_w_px: 500,
+            trim_tile_h_px: 500,
+            paper_w_px: 548.0,
+            paper_h_px: 548.0,
+            input_dom_w_px: 1100,
+            input_dom_h_px: 1100,
+            layout_w_px: 1048,
+            layout_h_px: 1048,
+            margin_left_px: 24,
+            margin_right_px: 24,
+            margin_top_px: 24,
+            margin_bottom_px: 24,
         };
         let doc = create_initial_tiled_layout_dom(&td);
         // row_2 d attribute must start with "M 24," (minX=24), not "M 524," —

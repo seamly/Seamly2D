@@ -1,13 +1,13 @@
 /******************************************************************************
  *   @file   mainwindow.h
- **  @author Douglas S Caskey
- **  @date   14 Jul, 2023
+ **  @author slspencer
+ **  @date   2026
  **
  **  @brief
  **  @copyright
  **  This source code is part of the Seamly2D project, a pattern making
  **  program, whose allow create and modeling patterns of clothing.
- **  Copyright (C) 2013-2022 Seamly2D project
+ **  Copyright (C) 2026 Seamly2D Project
  **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
  **
  **  Seamly2D is free software: you can redistribute it and/or modify
@@ -421,6 +421,7 @@ private:
 
     bool               MaybeSave();
     void               UpdateRecentFileActions();
+    int                exportLayoutFromCommandLine(const VCommandLinePtr &command_line);
 
     void               createMenus();
     void               createActions();

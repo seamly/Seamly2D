@@ -143,9 +143,9 @@ fn build_tiled_pdf_thumbnail_doc(
         return Err("Tiled PDF: cannot build thumbnail from zero-sized layout.".to_string());
     }
 
-    // Physical page dimensions in px.
-    let paper_w = tile_dims.trim_tile_w_px + tile_dims.margin_left_px + tile_dims.margin_right_px;
-    let paper_h = tile_dims.trim_tile_h_px + tile_dims.margin_top_px + tile_dims.margin_bottom_px;
+    // Keep the PDF page at the selected paper's physical size, not the rounded tile grid size.
+    let paper_w = tile_dims.paper_w_px;
+    let paper_h = tile_dims.paper_h_px;
 
     // Trim area where the thumbnail must fit.
     let trim_w = tile_dims.trim_tile_w_px as f64;
@@ -317,8 +317,8 @@ fn build_tiled_pdf_tile_doc(
     let tile_content_x = tile_dims.margin_left_px + col * tile_dims.trim_tile_w_px;
     let tile_content_y = tile_dims.margin_top_px + row * tile_dims.trim_tile_h_px;
 
-    let paper_w = tile_dims.trim_tile_w_px + tile_dims.margin_left_px + tile_dims.margin_right_px;
-    let paper_h = tile_dims.trim_tile_h_px + tile_dims.margin_top_px + tile_dims.margin_bottom_px;
+    let paper_w = tile_dims.paper_w_px;
+    let paper_h = tile_dims.paper_h_px;
 
     let mut tile_doc = doc.clone();
     let existing_children = std::mem::take(&mut tile_doc.root.children);
@@ -988,9 +988,9 @@ pub(crate) fn collect_tiled_pdf_page_bytes(
     let tile_dims: TileDimensions = compute_tile_dims(layout_w_px, layout_h_px, settings)
         .map_err(|e| format!("Tiled PDF: invalid tile dimensions: {e}"))?;
 
-    // Physical paper page size in pixels (trim area + margins).
-    let paper_w = tile_dims.trim_tile_w_px + tile_dims.margin_left_px + tile_dims.margin_right_px;
-    let paper_h = tile_dims.trim_tile_h_px + tile_dims.margin_top_px + tile_dims.margin_bottom_px;
+    // Keep the PDF page at the selected paper's physical size, not the rounded tile grid size.
+    let paper_w = tile_dims.paper_w_px;
+    let paper_h = tile_dims.paper_h_px;
 
     // First page: full-layout thumbnail scaled to fit inside page margins.
     let thumb_doc = build_tiled_pdf_thumbnail_doc(doc, &tile_dims, layout_w_px, layout_h_px)?;
@@ -2067,6 +2067,318 @@ mod tests {
     use super::*;
     use svg_dom::Document;
 
+    const MARKED_PRODUCER_CAPTURES: [(&str, &str, &str); 6] = [
+        (
+            "marked-original",
+            "cm",
+            include_str!("../test_data/markings/marked_original.svg"),
+        ),
+        (
+            "marked-horizontal",
+            "cm",
+            include_str!("../test_data/markings/marked_horizontal.svg"),
+        ),
+        (
+            "marked-vertical",
+            "cm",
+            include_str!("../test_data/markings/marked_vertical.svg"),
+        ),
+        (
+            "marked-both",
+            "cm",
+            include_str!("../test_data/markings/marked_both.svg"),
+        ),
+        (
+            "marked-multisize",
+            "mm",
+            include_str!("../test_data/markings/marked_multisize.svg"),
+        ),
+        (
+            "marked-inch",
+            "inch",
+            include_str!("../test_data/markings/marked-inch_aligned.svg"),
+        ),
+    ];
+
+    // @brief One drill marker center and diameter in millimetres.
+    #[derive(Debug)]
+    struct ExpectedDrill {
+        center_x_mm: f64,
+        center_y_mm: f64,
+        diameter_mm: f64,
+    }
+
+    // @brief One stripe or plaid segment in millimetres.
+    #[derive(Debug)]
+    struct ExpectedReference {
+        layer: &'static str,
+        start_x_mm: f64,
+        start_y_mm: f64,
+        end_x_mm: f64,
+        end_y_mm: f64,
+    }
+
+    // @brief Collect descendants with the requested SVG element name.
+    fn descendants<'a>(
+        element: &'a xmltree::Element,
+        name: &str,
+        found: &mut Vec<&'a xmltree::Element>,
+    ) {
+        for child in &element.children {
+            if let xmltree::XMLNode::Element(child) = child {
+                if child.name == name {
+                    found.push(child);
+                } // if matching element
+                descendants(child, name, found);
+            } // if element
+        } // for each child
+    } // fn descendants
+
+    // @brief Read the marks from a flattened producer SVG in DXF millimetres.
+    fn producer_mark_geometry(doc: &Document) -> (Vec<ExpectedDrill>, Vec<ExpectedReference>) {
+        let view_box: Vec<f64> = doc.root.attributes["viewBox"]
+            .split(|c: char| c == ',' || c.is_whitespace())
+            .filter(|value| !value.is_empty())
+            .map(|value| value.parse().expect("viewBox number"))
+            .collect();
+        let svg_height = *view_box.get(3).expect("viewBox height");
+        let px_to_mm = 25.4 / 96.0;
+        let mut drills = Vec::new();
+        let mut references = Vec::new();
+
+        // @brief Collect marked geometry from the flattened SVG tree.
+        fn walk(
+            element: &xmltree::Element,
+            svg_height: f64,
+            px_to_mm: f64,
+            drills: &mut Vec<ExpectedDrill>,
+            references: &mut Vec<ExpectedReference>,
+        ) {
+            match element.attributes.get("data-type").map(String::as_str) {
+                Some("drill") => {
+                    let mut circles = Vec::new();
+                    descendants(element, "circle", &mut circles);
+                    assert_eq!(circles.len(), 1, "one circle per producer drill mark");
+                    let circle = circles[0];
+                    let number = |name: &str| {
+                        circle.attributes[name]
+                            .parse::<f64>()
+                            .expect("circle number")
+                    };
+                    let diameter_px = element.attributes["data-diameter"]
+                        .parse::<f64>()
+                        .expect("drill diameter");
+                    assert!(diameter_px > 0.0);
+                    assert!((number("r") * 2.0 - diameter_px).abs() < 1.0e-5);
+                    drills.push(ExpectedDrill {
+                        center_x_mm: number("cx") * px_to_mm,
+                        center_y_mm: (svg_height - number("cy")) * px_to_mm,
+                        diameter_mm: diameter_px * px_to_mm,
+                    });
+                } // drill
+                Some("stripe") | Some("plaid") => {
+                    let mut paths = Vec::new();
+                    descendants(element, "path", &mut paths);
+                    assert_eq!(paths.len(), 1, "one straight path per reference mark");
+                    let d = paths[0].attributes.get("d").expect("reference path data");
+                    let path =
+                        geometry::Path::parse_path_attribute(d).expect("reference path parses");
+                    let [geometry::PathSegment::MoveTo(start), geometry::PathSegment::LineTo(end)] =
+                        path.segments.as_slice()
+                    else {
+                        panic!("reference path has exactly two endpoints: {d}");
+                    };
+                    let layer = if element.attributes["data-type"] == "stripe" {
+                        "9"
+                    } else {
+                        "10"
+                    };
+                    references.push(ExpectedReference {
+                        layer,
+                        start_x_mm: start.x as f64 * px_to_mm,
+                        start_y_mm: (svg_height - start.y as f64) * px_to_mm,
+                        end_x_mm: end.x as f64 * px_to_mm,
+                        end_y_mm: (svg_height - end.y as f64) * px_to_mm,
+                    });
+                } // stripe or plaid
+                _ => {} // other SVG element
+            } // match data type
+            for child in &element.children {
+                if let xmltree::XMLNode::Element(child) = child {
+                    walk(child, svg_height, px_to_mm, drills, references);
+                } // if element
+            } // for each child
+        } // fn walk
+
+        walk(&doc.root, svg_height, px_to_mm, &mut drills, &mut references);
+        (drills, references)
+    } // fn producer_mark_geometry
+
+    // @brief Parse DXF text into entity records for the marking integration test.
+    fn dxf_entities(text: &str) -> Vec<(String, Vec<(i32, String)>)> {
+        let lines: Vec<&str> = text.lines().collect();
+        assert_eq!(lines.len() % 2, 0, "DXF is a sequence of group-code pairs");
+        let mut entities = Vec::<(String, Vec<(i32, String)>)>::new();
+        for pair in lines.chunks_exact(2) {
+            let code = pair[0].trim().parse::<i32>().expect("DXF group code");
+            if code == 0 {
+                entities.push((pair[1].trim().to_string(), Vec::new()));
+            } else if let Some((_, groups)) = entities.last_mut() {
+                groups.push((code, pair[1].trim().to_string()));
+            } // if entity group
+        } // for each pair
+        entities
+    } // fn dxf_entities
+
+    // @brief Read the first value for one DXF group code.
+    fn dxf_value<'a>(entity: &'a (String, Vec<(i32, String)>), code: i32) -> Option<&'a str> {
+        entity
+            .1
+            .iter()
+            .find(|(group, _)| *group == code)
+            .map(|(_, value)| value.as_str())
+    } // fn dxf_value
+
+    // @brief Collect units from producer pattern groups.
+    fn pattern_units(element: &xmltree::Element, units: &mut Vec<String>) {
+        if element.attributes.get("data-type").is_some_and(|kind| kind == "pattern") {
+            if let Some(unit) = element.attributes.get("data-units") {
+                units.push(unit.clone());
+            } // if units attribute
+        } // if pattern group
+        for child in &element.children {
+            if let xmltree::XMLNode::Element(child) = child {
+                pattern_units(child, units);
+            } // if element
+        } // for each child
+    } // fn pattern_units
+
+    // @brief Export each real producer capture and compare every DXF marking with its SVG source.
+    #[test]
+    fn producer_marking_captures_export_through_full_dxf_pipeline() {
+        let output = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("output");
+        std::fs::create_dir_all(&output).expect("create output directory");
+        let mut saw_drill = false;
+        let mut saw_stripe = false;
+        let mut saw_plaid = false;
+
+        for (name, expected_unit, svg) in MARKED_PRODUCER_CAPTURES {
+            let doc = Document::parse(svg).expect("producer capture parses");
+            let mut units = Vec::new();
+            pattern_units(&doc.root, &mut units);
+            assert!(
+                !units.is_empty() && units.iter().all(|unit| unit.as_str() == expected_unit),
+                "{name}: pattern units {units:?}"
+            );
+            let mut flat = doc.clone();
+            svg_dom::flatten_dom(&mut flat);
+            let (expected_drills, expected_references) = producer_mark_geometry(&flat);
+            assert!(
+                !expected_drills.is_empty() || !expected_references.is_empty(),
+                "{name} contains real markings"
+            );
+            if expected_unit == "inch" {
+                assert_eq!(expected_drills.len(), 2, "inch capture drills");
+                assert_eq!(expected_references.len(), 2, "inch capture stripe and plaid");
+            } // if inch capture
+            saw_drill |= !expected_drills.is_empty();
+            saw_stripe |= expected_references.iter().any(|mark| mark.layer == "9");
+            saw_plaid |= expected_references.iter().any(|mark| mark.layer == "10");
+
+            let path = output.join(format!("{name}_{}.dxf", std::process::id()));
+            let path_str = path.to_string_lossy().to_string();
+            let report = do_export_dxf(
+                &doc,
+                &path_str,
+                false,
+                &DxfStyleInfo {
+                    dxf_version: DxfVersion::R13,
+                    ..DxfStyleInfo::default()
+                },
+                &mut |_| {},
+            ).expect("producer capture exports");
+            assert!(
+                report.warnings.is_empty(),
+                "{name}: {:?}",
+                report.warnings
+            );
+            let text = std::fs::read_to_string(&path).expect("DXF file exists");
+            let _ = std::fs::remove_file(&path);
+            assert!(text.contains("AC1012"), "{name}: DXF R13 output");
+
+            let english = expected_unit == "inch";
+            let expected_dxf_units = if english {
+                "Units:ENGLISH"
+            } else {
+                "Units:METRIC"
+            };
+            assert!(
+                text.contains(expected_dxf_units),
+                "{name}: expected {expected_dxf_units}"
+            );
+            let scale = if english { 1.0 / 25.4 } else { 1.0 };
+            let tolerance = if english { 0.000051 } else { 0.0051 };
+            let entities = dxf_entities(&text);
+            let mut points: Vec<_> = entities
+                .iter()
+                .filter(|entity| entity.0 == "POINT" && dxf_value(entity, 8) == Some("13"))
+                .collect();
+            let mut lines: Vec<_> = entities
+                .iter()
+                .filter(|entity| {
+                    entity.0 == "LINE" && matches!(dxf_value(entity, 8), Some("9" | "10"))
+                })
+                .collect();
+            assert_eq!(points.len(), expected_drills.len(), "{name}: drill points");
+            assert_eq!(lines.len(), expected_references.len(), "{name}: stripe/plaid lines");
+
+            for expected in expected_drills {
+                let index = points.iter().position(|entity| {
+                    let number = |code| {
+                        dxf_value(entity, code).and_then(|value| value.parse::<f64>().ok())
+                    };
+                    [10, 20, 30].iter().all(|code| number(*code).is_some())
+                        && (number(10).unwrap() - expected.center_x_mm * scale).abs() <= tolerance
+                        && (number(20).unwrap() - expected.center_y_mm * scale).abs() <= tolerance
+                        && (number(30).unwrap() - expected.diameter_mm * scale).abs() <= tolerance
+                }).unwrap_or_else(|| {
+                    panic!("{name}: missing drill point {expected:?}; remaining {points:?}")
+                });
+                points.remove(index);
+            } // for each expected drill
+
+            for expected in expected_references {
+                let index = lines
+                    .iter()
+                    .position(|entity| {
+                        dxf_value(entity, 8) == Some(expected.layer)
+                            && [10, 20, 11, 21]
+                                .iter()
+                                .all(|code| dxf_value(entity, *code).is_some())
+                            && {
+                                let number = |code| {
+                                    dxf_value(entity, code)
+                                        .and_then(|value| value.parse::<f64>().ok())
+                                        .unwrap_or(f64::NAN)
+                                };
+                                (number(10) - expected.start_x_mm * scale).abs() <= tolerance
+                                    && (number(20) - expected.start_y_mm * scale).abs() <= tolerance
+                                    && (number(11) - expected.end_x_mm * scale).abs() <= tolerance
+                                    && (number(21) - expected.end_y_mm * scale).abs() <= tolerance
+                            }
+                    })
+                    .unwrap_or_else(|| {
+                        panic!(
+                            "{name}: missing reference line {expected:?}; remaining {lines:?}"
+                        )
+                    });
+                lines.remove(index);
+            } // for each expected reference
+            assert!(points.is_empty() && lines.is_empty(), "{name}: unverified marking entities");
+        } // for each producer capture
+        assert!(saw_drill && saw_stripe && saw_plaid, "real captures cover drill, stripe, and plaid");
+    } // producer_marking_captures_export_through_full_dxf_pipeline
+
     // @brief The variant segment goes before the stamp; "_tiled" stays after it.
     #[test]
     fn default_export_file_name_places_segment_before_stamp() {
@@ -2903,24 +3215,109 @@ mod tests {
         assert!((h * unit - 36000.0).abs() < 0.01, "height at true size is 500 in, got {} pt", h * unit);
     } // pdf_page_longer_than_200_in_sets_user_unit
 
-    // @brief Every tiled page, the thumbnail included, is one Letter sheet: 612 × 792 pt in either orientation.
+    // @brief Tiled Letter and A4 pages keep exact paper dimensions and source geometry scale.
     #[test]
-    fn tiled_pdf_pages_are_paper_size() {
+    fn tiled_pdf_paper_sizes_and_geometry_scale_are_exact() {
         let doc = Document::parse(
             r#"<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600">
-                <g id="piece0"><rect x="0" y="0" width="1100" height="1500"/></g>
+                <rect x="50" y="50" width="192" height="192" fill="black"/>
             </svg>"#,
         )
         .expect("fixture SVG should parse");
-        let pages = collect_tiled_pdf_page_bytes(&doc, &test_tiled_settings()).expect("tiled pages should render");
-        assert!(pages.len() > 1, "thumbnail plus tiles");
-        for page in &pages {
-            let (w, h, unit) = pdf_page_sizes(page)[0];
-            let (short, long) = (w.min(h), w.max(h));
-            assert!((short - 612.0).abs() < 0.5 && (long - 792.0).abs() < 0.5, "tiled page is Letter, got {w} x {h}");
-            assert_eq!(unit, 1.0);
-        } // for each page
-    } // tiled_pdf_pages_are_paper_size
+        let settings_for = |tile_size: &str| {
+            LayoutSettings::from_json(&format!(
+                r#"{{
+                    "unit": "mm",
+                    "mediaType": "paper",
+                    "paperType": "tiled",
+                    "pageWidth": 1500.0,
+                    "pageHeight": 2000.0,
+                    "marginLeft": 10.0,
+                    "marginRight": 10.0,
+                    "marginTop": 10.0,
+                    "marginBottom": 10.0,
+                    "pieceGap": 0.0,
+                    "layoutMode": "alongGrainline",
+                    "rotationStep": 180,
+                    "tileSize": "{tile_size}",
+                    "tileOrientation": "portrait"
+                }}"#
+            ))
+            .expect("metric tiled settings parse")
+        };
+        let cases = [("Letter", 612.0, 792.0), ("A4", 595.2756, 841.8898)];
+
+        for (tile_size, expected_width, expected_height) in cases {
+            let pages = collect_tiled_pdf_page_bytes(&doc, &settings_for(tile_size))
+                .expect("tiled pages should render");
+            assert!(pages.len() > 1, "{tile_size}: thumbnail plus tiles");
+            for page in &pages {
+                let (width, height, unit) = pdf_page_sizes(page)[0];
+                assert!(
+                    (width - expected_width).abs() < 0.01
+                        && (height - expected_height).abs() < 0.01,
+                    "{tile_size} page should be {expected_width} x {expected_height} pt, got {width} x {height}"
+                );
+                assert_eq!(unit, 1.0);
+            } // for each page
+
+            if tile_size == "Letter" {
+                let pdf = lopdf::Document::load_mem(&pages[1]).expect("tile PDF parses");
+                let page_id = *pdf.get_pages().values().next().expect("tile page");
+                let contents = pdf.get_page_content(page_id);
+                let parsed =
+                    lopdf::content::Content::decode(&contents).expect("tile PDF content parses");
+                let number = |value: &lopdf::Object| match value {
+                    lopdf::Object::Integer(value) => *value as f32,
+                    lopdf::Object::Real(value) => *value,
+                    other => panic!("unexpected PDF number: {other:?}"),
+                };
+                let mut scale = 1.0_f32;
+                let mut saved_scales = Vec::new();
+                let mut move_to = None;
+                let mut found_two_inch_edge = false;
+                for operation in parsed.operations {
+                    match operation.operator.as_str() {
+                        "q" => saved_scales.push(scale),
+                        "Q" => scale = saved_scales.pop().expect("balanced PDF graphics state"),
+                        "cm" => {
+                            let a = number(&operation.operands[0]);
+                            let b = number(&operation.operands[1]);
+                            scale *= (a * a + b * b).sqrt();
+                        }
+                        "m" => {
+                            move_to = Some((
+                                number(&operation.operands[0]),
+                                number(&operation.operands[1]),
+                            ));
+                        }
+                        "l" => {
+                            if let Some((start_x, start_y)) = move_to {
+                                let end_x = number(&operation.operands[0]);
+                                let end_y = number(&operation.operands[1]);
+                                if (end_y - start_y).abs() < 0.001
+                                    && ((end_x - start_x).abs() - 192.0).abs() < 0.001
+                                {
+                                    assert!(
+                                        (192.0 * scale - 144.0).abs() < 0.01,
+                                        "192 px must remain 144 pt at PDF scale, got {} pt",
+                                        192.0 * scale
+                                    );
+                                    found_two_inch_edge = true;
+                                } // if two-inch rectangle edge
+                            } // if path has a move point
+                        }
+                        "S" | "f" | "F" | "B" | "b" | "n" => move_to = None,
+                        _ => {} // unrelated PDF operator
+                    } // match operator
+                } // for each PDF operator
+                assert!(
+                    found_two_inch_edge,
+                    "tile PDF retains the 192 px calibration edge"
+                );
+            } // if Letter
+        } // for each tile size
+    } // tiled_pdf_paper_sizes_and_geometry_scale_are_exact
 
     // @brief do_export_png produces a file that begins with the PNG magic bytes.
     //

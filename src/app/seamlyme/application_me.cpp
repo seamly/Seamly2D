@@ -1,13 +1,13 @@
 //-----------------------------------------------------------------------------
-//  @file   application_2d.cpp
-//  @author Douglas S Caskey
-//  @date   7 Mar, 2024
+//  @file   application_me.cpp
+//  @author slspencer
+//  @date   2026
 //
 //  @brief
 //  @copyright
 //  This source code is part of the Seamly2D project, a pattern making
 //  program to create and model patterns of clothing.
-//  Copyright (C) 2017-2026 Seamly2D project
+//  Copyright (C) 2026 Seamly2D Project
 //  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
 //
 //  Seamly2D is free software: you can redistribute it and/or modify
@@ -819,7 +819,35 @@ void ApplicationME::parseCommandLine(const SocketConnection &connection, const Q
                "Alternatively you can use the %1 environment variable.").arg("QT_AUTO_SCREEN_SCALE_FACTOR=0"));
     parser.addOption(scalingOption);
     //-----
-    parser.process(arguments);
+    const int positional_separator = arguments.indexOf(QStringLiteral("--"));
+    const int test_option_index = arguments.indexOf(QStringLiteral("--test"));
+    m_testMode = test_option_index >= 0 &&
+                 (positional_separator < 0 || test_option_index < positional_separator);
+    if (m_testMode)
+    {
+        if (!parser.parse(arguments))
+        {
+            vStdErr() << parser.errorText() << Qt::endl;
+            qApp->exit(V_EX_USAGE);
+            return;
+        }
+        if (parser.isSet(QStringLiteral("help")) || parser.isSet(QStringLiteral("help-all")))
+        {
+            vStdOut() << parser.helpText() << Qt::endl;
+            qApp->exit(V_EX_OK);
+            return;
+        }
+        if (parser.isSet(QStringLiteral("version")))
+        {
+            vStdOut() << applicationName() << QLatin1Char(' ') << applicationVersion() << Qt::endl;
+            qApp->exit(V_EX_OK);
+            return;
+        }
+    }
+    else
+    {
+        parser.process(arguments);
+    }
 
     bool flagHeight = false;
     bool flagSize = false;
@@ -842,6 +870,11 @@ void ApplicationME::parseCommandLine(const SocketConnection &connection, const Q
             qCCritical(mApp, "%s\n",
                     qPrintable(tr("Invalid base height argument. Must be %1cm.")
                                .arg(MeasurementVariable::WholeListHeights(Unit::Cm).join(", "))));
+            if (m_testMode)
+            {
+                qApp->exit(V_EX_USAGE);
+                return;
+            }
             parser.showHelp(V_EX_USAGE);
         }
     }
@@ -859,6 +892,11 @@ void ApplicationME::parseCommandLine(const SocketConnection &connection, const Q
             qCCritical(mApp, "%s\n",
                     qPrintable(tr("Invalid base size argument. Must be %1cm.")
                                .arg(MeasurementVariable::WholeListSizes(Unit::Cm).join(", "))));
+            if (m_testMode)
+            {
+                qApp->exit(V_EX_USAGE);
+                return;
+            }
             parser.showHelp(V_EX_USAGE);
         }
     }
@@ -876,7 +914,12 @@ void ApplicationME::parseCommandLine(const SocketConnection &connection, const Q
         }
         else
         {
-            qCCritical(mApp, "%s\n", qPrintable(tr("Invalid base size argument. Must be cm, mm or inch.")));
+            qCCritical(mApp, "%s\n", qPrintable(tr("Invalid unit argument. Must be cm, mm or inch.")));
+            if (m_testMode)
+            {
+                qApp->exit(V_EX_USAGE);
+                return;
+            }
             parser.showHelp(V_EX_USAGE);
         }
     }
@@ -926,7 +969,8 @@ void ApplicationME::parseCommandLine(const SocketConnection &connection, const Q
         if (m_testMode && args.count() > 1)
         {
             qCCritical(mApp, "%s\n", qPrintable(tr("Test mode doesn't support Opening several files.")));
-            parser.showHelp(V_EX_USAGE);
+            qApp->exit(V_EX_USAGE);
+            return;
         }
 
         for (int i = 0; i < args.size(); ++i)
@@ -967,7 +1011,8 @@ void ApplicationME::parseCommandLine(const SocketConnection &connection, const Q
         else
         {
             qCCritical(mApp, "%s\n", qPrintable(tr("Please, provide one input file.")));
-            parser.showHelp(V_EX_USAGE);
+            qApp->exit(V_EX_USAGE);
+            return;
         }
     }
 

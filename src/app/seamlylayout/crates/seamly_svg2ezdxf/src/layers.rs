@@ -12,8 +12,10 @@
 //! | 6     | Mirror line | `fold_line` |
 //! | 7     | Grainline | `grainline` |
 //! | 8     | Internal lines (also the default) | `internal_path`, `fold_line_arrow` |
+//! | 9     | Stripe reference lines | `stripe` |
+//! | 10    | Plaid reference lines | `plaid` |
 //! | 11    | Internal cutouts | `cut_path` |
-//! | 13    | Drill holes | id hint only |
+//! | 13    | Drill holes | `drill` |
 //! | 14    | Sew lines | `seamline` |
 //! | 15    | Annotation text | `piece_label`, `pattern_label`, `size_label`, `fold_line_label`, `<text>` |
 //! | 84–87 | Quality validation curves | generated from contours |
@@ -27,6 +29,8 @@ pub enum PieceComponent {
     Grainline,
     FoldLine,
     InternalPath,
+    Stripe,
+    Plaid,
     CutPath,
     Label,
     DrillHole,
@@ -41,6 +45,8 @@ impl PieceComponent {
             PieceComponent::FoldLine => "6",
             PieceComponent::Grainline => "7",
             PieceComponent::InternalPath => "8",
+            PieceComponent::Stripe => "9",
+            PieceComponent::Plaid => "10",
             PieceComponent::CutPath => "11",
             PieceComponent::DrillHole => "13",
             PieceComponent::Seamline => "14",
@@ -63,7 +69,10 @@ pub fn piece_component(element: &xmltree::Element) -> Option<PieceComponent> {
             "grainline" => Some(PieceComponent::Grainline),
             "fold_line" => Some(PieceComponent::FoldLine),
             "internal_path" | "fold_line_arrow" => Some(PieceComponent::InternalPath),
+            "stripe" => Some(PieceComponent::Stripe),
+            "plaid" => Some(PieceComponent::Plaid),
             "cut_path" => Some(PieceComponent::CutPath),
+            "drill" => Some(PieceComponent::DrillHole),
             "piece_label" | "pattern_label" | "size_label" | "fold_line_label" => Some(PieceComponent::Label),
             _ => None,
         }; // match data-type
@@ -84,6 +93,10 @@ pub fn piece_component(element: &xmltree::Element) -> Option<PieceComponent> {
         Some(PieceComponent::Seamline)
     } else if id.contains("drill") || id.contains("hole") {
         Some(PieceComponent::DrillHole)
+    } else if id.contains("stripe") {
+        Some(PieceComponent::Stripe)
+    } else if id.contains("plaid") {
+        Some(PieceComponent::Plaid)
     } else if id.contains("tuck") || id.contains("internal_path") {
         Some(PieceComponent::InternalPath)
     } else if id.contains("label") {

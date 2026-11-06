@@ -19,8 +19,8 @@ use serde::Deserialize;
 pub const LAYOUT_PPI: f64 = 96.0;
 
 // Full roll length sentinel in inches: 500 in = one standard fabric bolt.
-// Used for any roll-form media (media_type == "roll", or paper_type == "roll")
-// because roll length is unbounded at layout time.  Trimmed after packing.
+// Used for fabric, legacy `media_type == "roll"`, and paper `paper_type == "roll"`.
+// Roll length is unbounded at layout time. Trimmed after packing.
 const ROLL_DEFAULT_LENGTH_IN: f64 = 500.0;
 
 // Minimum bin dimension in pixels; prevents zero-size bins on bad settings.
@@ -38,7 +38,7 @@ pub struct LayoutSettings {
     #[serde(default = "default_unit")]
     pub unit: String,
 
-    // Media type: "paper" | "roll".
+    // Media type: "paper" | "fabric" | "roll" (legacy).
     #[serde(default = "default_media_type")]
     pub media_type: String,
 

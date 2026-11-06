@@ -1,10 +1,13 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  @file   pattern_piece_dialog.cpp
 //  @author Douglas S Caskey
+//  @author slspencer
 //  @date   17 Sep, 2023
 //
 //  @copyright
 //  Copyright (C) 2017 - 2026 Seamly, LLC
+//  Copyright (C) 2026 Seamly2D Project
+//  SPDX-License-Identifier: GPL-3.0-or-later
 //  https://github.com/fashionfreedom/seamly2d
 //
 //  @brief
@@ -59,7 +62,8 @@
 
 #include <QSoundEffect>
 
-enum TabOrder {Properties=0, Paths=1, SeamAllowance= 2, Labels=3, AnchorPoints=4, Grainline=5, Notches=6, Count=7};
+enum TabOrder {Properties=0, Paths=1, SeamAllowance=2, Labels=3, AnchorPoints=4, Grainline=5, Notches=6,
+               DrillHoles=7, ReferenceLines=8, Count=9};
 
 namespace Ui
 {
@@ -179,6 +183,8 @@ private slots:
 
 private:
     Q_DISABLE_COPY(PatternPieceDialog)
+    class PieceMarkingsEditor *m_drill_editor = nullptr;
+    class PieceMarkingsEditor *m_reference_editor = nullptr;
 
     Ui::PatternPieceDialog     *ui;
     bool                        applyAllowed;
@@ -213,6 +219,8 @@ private:
     qreal                       m_saWidth;
     QVector<VLabelTemplateLine> m_patternLabelLines;
     QVector<VLabelTemplateLine> m_pieceLabelLines;
+    QString                     m_piece_template_file;
+    QString                     m_pattern_template_file;
     QSoundEffect               *m_beep;
     QVector<QPointer<VUndoCommand>> m_undoStack;
 
@@ -266,6 +274,7 @@ private:
     void                        initializeInternalPathsTab();
     void                        initializePropertiesTab();
     void                        initializeLabelsTab();
+    void                        refreshTemplateFileLabels() const;
     void                        initializeGrainlineTab();
     void                        initializeAnchorsTab();
     void                        initializeNotchesTab();

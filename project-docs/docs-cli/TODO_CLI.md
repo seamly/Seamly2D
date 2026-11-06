@@ -16,12 +16,12 @@ Go through every command-line option seamly2d advertises (defined in `src/libs/v
 
 These tasks are not numbered in the order they should be implemented -- analyze and update these tasks tersely to form a step-by-step implementation plan.
 
-- [ ] CLI.1.1 Add a seamly2d CLI option (export mode) that triggers the Layout Mode handoff from the console: generate `<basename>.pieces.svg` and invoke seamlyLayout on it, resolving the app path the same way as the GUI (`paths/seamlyLayoutApp` setting)
-- [ ] CLI.1.2 Add a headless CLI export mode to seamlyLayout: input `.pieces.svg`, run the layout/nesting, export to a chosen format and output path without showing the QML UI, exit with a meaningful status code
-- [ ] CLI.1.3 Pass the seamlyLayout export options through the seamly2d command line (export format incl. the Task 21 SVG text modes, output destination), and document the option mapping
-- [ ] CLI.1.4 Make the seamly2d invocation wait for seamlyLayout (unlike the GUI's `QProcess::startDetached`), propagate its exit status and stderr so scripted callers see failures
+- [x] CLI.1.1 Add `--layout-export`, resolve `paths/seamlyLayoutApp`, and send the generated handoff through stdin without an intermediate file.
+- [x] CLI.1.2 Headless SeamlyLayout reads a file or stdin, lays out pieces, exports the selected format, and reports meaningful status without QML UI.
+- [x] CLI.1.3 Forward format, SVG text modes, output, and settings; document the option mapping.
+- [x] CLI.1.4 Wait for SeamlyLayout and propagate stderr/status. Incomplete layouts fail before writing partial output.
 - [ ] CLI.1.5 Tests: seamly2d CLI option parsing (extend `tst_vcommandline`), seamlyLayout headless-export tests (Rust/Qt side), and an end-to-end check with the richmond test pattern
-- [ ] CLI.1.6 Document the workflow (command-line examples) in the repo docs / `--help` output
+- [x] CLI.1.6 Document workflow examples, options, statuses, and `--help` behavior.
 - [ ] CLI.1.7 Inventory all options and build a test matrix: expected behavior, required companions (e.g. `--basename` enabling export mode), valid values
 - [ ] CLI.1.8 Exercise each option against the richmond test pattern (all export formats, gradation size/height, page options, `--text2paths`, measurement overrides, etc.) and record which are broken, ignored, or misdocumented
 - [ ] CLI.1.9 Fix the broken/ignored options; make error messages reach the console reliably (the GUI-subsystem exe detaches from the console — evaluate `AttachConsole`/subsystem handling on Windows so `--help` and errors print without redirection)
@@ -30,3 +30,5 @@ These tasks are not numbered in the order they should be implemented -- analyze 
 - [ ] CLI.1.12 Update `--help` text and repo docs with the verified behavior
 
 ## Task CLI.2 - run seamly2d/seamlyme/seamlylayout from the command line with an input .sm2d file and an input measurement file to create exports for each of seamlyLayout's export options; validate outputs to validate the CLI parameters
+
+Implemented validation covers ten public formats, paid-format rejection, measurement/gradation overrides, omitted-piece failures, and physical PDF/DXF/HPGL calibration. SeamlyMe validates measurement inputs; it does not read `.sm2d` patterns or export layouts. Exact Richmond pattern-and-measurement verification remains blocked: only the cached handoff SVG is present. The exhaustive older-option audit and user/CAD import checks remain open. Integrated individual and multisize-input export checks, 19 pattern-status checks, and 13 SeamlyMe checks pass with matching Qt plugins.

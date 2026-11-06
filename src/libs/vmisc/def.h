@@ -36,8 +36,10 @@
 #include <QFileDialog>
 #include <QLineF>
 #include <QPalette>
+#include <QPointF>
 #include <QString>
 #include <QStringList>
+#include <QTransform>
 #include <Qt>
 #include <QtGlobal>
 #include <QPrinter>
@@ -253,6 +255,7 @@ enum class PieceFlip : unsigned char
 
 QString   pieceFlipToString(PieceFlip flip);
 PieceFlip stringToPieceFlip(const QString &value);
+QTransform pieceFlipTransform(PieceFlip flip, const QPointF &center);
 
 
 Unit         StrToUnits(const QString &unit);

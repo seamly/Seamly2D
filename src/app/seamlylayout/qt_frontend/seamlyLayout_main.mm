@@ -1,6 +1,6 @@
 // project: SeamlyLayout
 // author: slspencer, copyright 2026
-// LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
+// MIT License: https://opensource.org/licenses/MIT
 
 // @file seamlyLayout_main.mm
 // @brief Application entry point for the SeamlyLayout Qt 6.11 + QML frontend.
@@ -30,6 +30,9 @@
 #include <QVariant>
 #include <QQuickWindow>
 #include <QtWebEngineQuick>
+#include <QStringList>
+
+#include <cstdio>
 
 // CXX-Qt generated AppController — moc output is compiled into cxxqt_bridge
 // staticlib; this header is NOT listed as a cmake SOURCE so AUTOMOC will not
@@ -65,6 +68,7 @@ extern "C" bool seamly_layout_set_log_sink(void (*sink)(const char *text, std::s
 // optional positional <svg-file> (Task 49) and the --svg-stdin SVG document
 // Seamly2D's Layout Mode sends on standard input (Seamly2D.5).
 #include "src/StartupOptions.h"
+#include "src/HeadlessExport.h"
 
 // ---------------------------------------------------------------------------
 // Platform-specific title bar color customization
@@ -124,6 +128,49 @@ void setMacOSTitleBarColor(QQuickWindow *window, int r, int g, int b)
 } // setMacOSTitleBarColor
 #endif // Q_OS_MACOS
 
+namespace
+{
+// @brief Identify CLI export options before initializing WebEngine.
+bool hasHeadlessExportOption(int argc, char *argv[])
+{
+    const QStringList optionNames{
+        QStringLiteral("--export"), QStringLiteral("--format"),
+        QStringLiteral("--output"), QStringLiteral("--destination"),
+        QStringLiteral("--settings"), QStringLiteral("--layout-settings"),
+        QStringLiteral("--export-options"), QStringLiteral("--svg-text-mode"),
+        QStringLiteral("--text-mode"), QStringLiteral("--scale")
+    };
+
+    for (int index = 1; index < argc; ++index) {
+        const QString argument = QString::fromLocal8Bit(argv[index]);
+        for (const QString &optionName : optionNames) {
+            if (argument == optionName || argument.startsWith(optionName + QLatin1Char('='))) {
+                return true;
+            } // if export option is present
+        } // for each export option
+    } // for each argument
+
+    return false;
+} // hasHeadlessExportOption
+
+// @brief Attach direct CLI launches to a parent console without replacing redirected pipes.
+void attachParentConsoleForHeadlessExport()
+{
+#ifdef Q_OS_WIN
+    const HANDLE standardOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+    const HANDLE standardError = GetStdHandle(STD_ERROR_HANDLE);
+    const bool hasRedirectedStreams =
+        (standardOutput != nullptr && standardOutput != INVALID_HANDLE_VALUE)
+        || (standardError != nullptr && standardError != INVALID_HANDLE_VALUE);
+    if (!hasRedirectedStreams && AttachConsole(ATTACH_PARENT_PROCESS)) {
+        FILE *consoleStream = nullptr;
+        freopen_s(&consoleStream, "CONOUT$", "w", stdout);
+        freopen_s(&consoleStream, "CONOUT$", "w", stderr);
+    } // if the parent console is available
+#endif
+} // attachParentConsoleForHeadlessExport
+} // namespace
+
 // Note: Linux title bar color cannot be set programmatically in a portable way.
 // The appearance depends on the desktop environment (GNOME, KDE, XFCE, etc.)
 // and its theme settings. For consistent branding on Linux, users should:
@@ -136,6 +183,10 @@ void setMacOSTitleBarColor(QQuickWindow *window, int r, int g, int b)
 // @return Exit code: 0 on clean exit, non-zero on error.
 int main(int argc, char *argv[])
 {
+    if (hasHeadlessExportOption(argc, argv)) {
+        attachParentConsoleForHeadlessExport();
+    } // if headless export was requested
+
     // SEAMLY_DATA_DIR: check before any Qt application object or settings exist.
     // 78 = relative path, 73 = unwritable folder (same codes as Seamly2D).
     const int dataDirectoryResult = DataDirectory::configure();
@@ -143,8 +194,11 @@ int main(int argc, char *argv[])
         return dataDirectoryResult;
     } // if SEAMLY_DATA_DIR rejected
 
-    // Initialise Qt WebEngine — must be called before QApplication
-    QtWebEngineQuick::initialize();
+    // Initialise Qt WebEngine only for the GUI path; headless export does not
+    // create QML or WebEngine views and must not require their runtime.
+    if (!hasHeadlessExportOption(argc, argv)) {
+        QtWebEngineQuick::initialize();
+    } // if GUI startup
 
     // Initialise the Qt application; QApplication is a subclass of QGuiApplication
     // and supports both QML Quick windows and QtWidgets windows (e.g. AdjustWindow)
@@ -215,11 +269,31 @@ int main(int argc, char *argv[])
     const StartupOptions startupOptions = StartupOptions::parse(app.arguments(), &standardInput);
 
     if (startupOptions.status() == StartupOptions::Status::ShowInformation) {
+        if (startupOptions.hasHeadlessRequest()) {
+            std::fprintf(stdout, "%s\n", qPrintable(startupOptions.message()));
+            return 0;
+        } // if headless help or version
         // --help / --version. This is a WIN32-subsystem binary with no console
         // to print to, so the text goes in a dialog on every platform.
         QMessageBox::information(nullptr, QStringLiteral("SeamlyLayout"), startupOptions.message());
         return 0;
     } // if information requested
+
+    if (startupOptions.hasHeadlessRequest()) {
+        if (!startupOptions.hasHeadlessExport()) {
+            std::fprintf(stderr, "%s\n", qPrintable(startupOptions.message()));
+            return 64;
+        } // if invalid CLI export request
+
+        QString errorMessage;
+        const int exitCode = HeadlessExport::run(startupOptions, errorMessage);
+        if (!errorMessage.isEmpty()) {
+            std::fprintf(stderr, "SeamlyLayout: %s\n", qPrintable(errorMessage));
+        } else if (exitCode == 0) {
+            std::fprintf(stdout, "SeamlyLayout: exported %s\n", qPrintable(startupOptions.outputPath()));
+        } // if export failed or succeeded
+        return exitCode;
+    } // if headless export requested
 
     Logger::log(QStringLiteral("main(): startup file = '%1', message = '%2'")
                     .arg(startupOptions.filePath(), startupOptions.message()));

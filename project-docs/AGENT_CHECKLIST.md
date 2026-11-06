@@ -421,6 +421,7 @@ Needs the next MSI. Pattern: `male_shirt.sm2d`, an older format. Save it under a
 - [ ] Attributes: "Flip:" shows None, Horizontal, Vertical, Both. None is selected. No "Forbid" check box.
 - [ ] Select Vertical. OK. Save: the `piece` element has `flip="Vertical"` and no `forbidFlipping`. Reopen: Vertical.
 - [ ] Right-click the piece: "Flip" submenu, Vertical checked. Choose Both. Undo: back to Vertical.
+- [ ] Layout.110 re-test, Piece Mode, male_shirt: right-click a piece > Flip > Horizontal. The outline mirrors left to right. Vertical mirrors top to bottom. Both does both. None restores it. Labels and grainline stay in place. Undo restores the last choice. Reopen the saved pattern: the flip shows. Note whether the Flip submenu items show a check mark or bullet.
 - [ ] Preferences > Pattern: no "Forbid flipping" check box. Help > Shortcuts: no "Forbid Flipping F" row.
 
 ## 25. jacket2: material tabs over the layout

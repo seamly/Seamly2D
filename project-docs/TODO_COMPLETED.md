@@ -1779,3 +1779,9 @@ The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`sr
 - New test: `astm_piece_test` `open_seam_line_without_cut_line_closes_along_the_fold_line`. Fixture `back_on_fold` seam line now has no fold line edge.
 - Docs: `SVG-DATA-ATTRIBUTES.md` (`seamline`, `cutline`, `fold_line`, split parts), `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, module docs in `fold_line_join.rs`, `astm_mirror.rs`, `svg_extract.rs`, `piece_divider.rs`.
 - Verified: `cargo test --workspace` all pass; `ctest --preset debug` 7/7.
+
+### [x] Task Layout.107 — Remove the production handoff comparison switch
+
+- [x] Removed the production comparison writer and unused file-writing helper after all 25 real-pattern comparisons passed at 0.01 px.
+- [x] Updated active documentation to use the reproducible test-only capture application.
+- [x] GUI and CLI use the fitted handoff writer. Integrated Windows Qt suites, CTest 8/8, Rust workspace tests, and MSI validation passed.

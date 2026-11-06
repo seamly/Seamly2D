@@ -1,11 +1,9 @@
 // project: SeamlyLayout
 // author: slspencer, copyright 2026
-// LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
+// MIT License: https://opensource.org/licenses/MIT
 //
 // @file StartupOptions.h
-// @brief Command-line parsing for SeamlyLayout's two startup transports — an
-//        optional positional <svg-file>, or an SVG document read from standard
-//        input — plus the validation of each.
+// @brief Command-line parsing for SeamlyLayout's SVG transports and export mode.
 //
 // This is the SeamlyLayout half of the Seamly2D Layout Mode handoff.
 //
@@ -19,6 +17,8 @@
 // Transport 2 — a document on standard input (Seamly2D.5, the handoff):
 //
 //     SeamlyLayout --svg-stdin [--document-name <name>]
+//     SeamlyLayout --export <format> --output <path> <svg-file>
+//     SeamlyLayout --svg-stdin --export <format> --output <path>
 //
 // Seamly2D serialises piece mode to one stringified SVG, launches SeamlyLayout
 // with --svg-stdin, writes that string to the child's standard input and closes
@@ -40,6 +40,7 @@
 //   SeamlyLayout                       start with an empty canvas
 //   SeamlyLayout <file.svg>            open that file
 //   SeamlyLayout --svg-stdin           open the SVG document on standard input
+//   SeamlyLayout --export svg --output out.svg input.svg
 //   SeamlyLayout -h | --help           show usage, exit 0
 //   SeamlyLayout -v | --version        show the version, exit 0
 //
@@ -56,13 +57,14 @@
 #include <QStringList>
 
 class QIODevice;
+class QCommandLineParser;
 
 // @brief Parsed and validated SeamlyLayout command line.
 //
 // Produced by the static parse() factories; the private members are set once
 // there and only read afterwards.  status() says what the caller must do;
 // filePath(), svgDocument() and message() are the payload for the respective
-// statuses.
+// statuses. Export options are validated before the normal QML startup path.
 class StartupOptions
 {
 public:
@@ -114,6 +116,30 @@ public:
     //        OpenDocument, and only when --document-name was given.
     QString documentName() const { return m_documentName; }
 
+    // @brief True when an input SVG must be laid out and exported without QML.
+    bool hasHeadlessExport() const { return m_headlessExport; }
+
+    // @brief True when export CLI options were present, including invalid requests.
+    bool hasHeadlessRequest() const { return m_headlessRequest; }
+
+    // @brief Requested SeamlyLayout export format.
+    QString exportFormat() const { return m_exportFormat; }
+
+    // @brief Absolute destination path for a headless export.
+    QString outputPath() const { return m_outputPath; }
+
+    // @brief Optional absolute path to the layout settings JSON.
+    QString settingsPath() const { return m_settingsPath; }
+
+    // @brief Optional absolute path to format-specific export options JSON.
+    QString exportOptionsPath() const { return m_exportOptionsPath; }
+
+    // @brief SVG label text mode for SVG export.
+    QString svgTextMode() const { return m_svgTextMode; }
+
+    // @brief PNG scale factor.
+    double exportScale() const { return m_exportScale; }
+
     // @brief Text to show the user. Empty unless status() is ShowInformation or Failed.
     QString message() const { return m_message; }
 
@@ -135,6 +161,12 @@ private:
     static StartupOptions parseStandardInput(const QString &documentName,
                                              QIODevice *standardInput);
 
+    // @brief Validate export arguments and store their absolute paths.
+    static StartupOptions parseExportOptions(StartupOptions options,
+                                             const QCommandLineParser &parser,
+                                             const QStringList &positional,
+                                             bool hasDocument);
+
     // Result of the parse; NoFile is the "nothing was asked of us" default.
     Status m_status = Status::NoFile;
 
@@ -146,6 +178,16 @@ private:
 
     // Pattern base name for default export names; set only for OpenDocument.
     QString m_documentName;
+
+    // Headless export arguments are populated only after validation succeeds.
+    bool m_headlessRequest = false;
+    bool m_headlessExport = false;
+    QString m_exportFormat;
+    QString m_outputPath;
+    QString m_settingsPath;
+    QString m_exportOptionsPath;
+    QString m_svgTextMode = QStringLiteral("designerFont");
+    double m_exportScale = 1.0;
 
     // User-visible text; set only for Status::ShowInformation and Status::Failed.
     QString m_message;

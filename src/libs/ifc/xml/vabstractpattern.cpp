@@ -1,11 +1,14 @@
 //---------------------------------------------------------------------------------------------------------------------
 /// @file   vabstractpattern.cpp
 /// @author Douglas S Caskey
+/// @author slspencer
 /// @date   17 Sep, 2023
 ///
 /// @copyright
 /// Copyright (C) 2017 - 2026 Seamly, LLC
+/// Copyright (C) 2026 Seamly2D Project
 /// https://github.com/fashionfreedom/seamly2d
+/// License: GPL-3.0-or-later
 ///
 /// @brief
 /// Seamly2D is free software: you can redistribute it and/or modify
@@ -57,6 +60,7 @@
 //---------------------------------------------------------------------------------------------------------------------
 
 #include "vabstractpattern.h"
+#include "PatternDocumentWriter.h"
 
 #include "vdomdocument.h"
 #include "vpatternconverter.h"
@@ -2412,15 +2416,7 @@ QDomElement VAbstractPattern::createDraftImages()
     QDomElement draftBlock;
     if (getActiveDraftElement(draftBlock))
     {
-        QDomElement backgroundImages = draftBlock.firstChildElement(TagDraftImages);
-
-        if (backgroundImages.isNull())
-        {
-            backgroundImages = createElement(TagDraftImages);
-            draftBlock.appendChild(backgroundImages);
-        }
-
-        return backgroundImages;
+        return PatternDocumentWriter::createDraftImages(*this, draftBlock);
     }
     return QDomElement();
 }

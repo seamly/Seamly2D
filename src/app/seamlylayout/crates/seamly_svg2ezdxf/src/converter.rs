@@ -4,7 +4,7 @@
 
 //! @brief SVG to ezdxf conversion logic.
 
-use crate::drawing::{Block, Drawing, DxfVersion, DEFAULT_MATERIAL};
+use crate::drawing::{Block, DrillHole, Drawing, DxfVersion, ReferenceLine, DEFAULT_MATERIAL};
 use crate::entities::{Circle, Entity, Line, Point, Polyline, Text};
 use crate::error::Result;
 use crate::units::PatternUnit;
@@ -345,7 +345,7 @@ fn add_piece_block(
         } // if element
     } // for each child
 
-    extract_astm_piece(piece, &mut block, options, svg_height);
+    extract_astm_piece(piece, &mut block, options, svg_height)?;
     drawing.add_block(block);
     Ok(())
 } // fn add_piece_block
@@ -361,6 +361,12 @@ fn convert_elements_to_modelspace(
     options: &SvgToEzdxfOptions,
     svg_height: f64,
 ) -> Result<()> {
+    if contains_dedicated_marking(root) {
+        return Err(crate::error::SvgToEzdxfError::Geometry(
+            "drill, stripe and plaid markings require piece blocks".to_string(),
+        ));
+    } // if marks need piece blocks
+
     println!("[CONVERTER] convert_elements_to_modelspace: Starting conversion");
     println!("  └─ Root element: '{}'", root.name);
     println!("  └─ Children count: {}", root.children.len());
@@ -381,6 +387,21 @@ fn convert_elements_to_modelspace(
     Ok(())
 }
 
+// @brief True when an SVG contains markings that need their dedicated DXF representation.
+fn contains_dedicated_marking(element: &Element) -> bool {
+    if element.name == "g"
+        && matches!(
+            piece_component(element),
+            Some(PieceComponent::DrillHole | PieceComponent::Stripe | PieceComponent::Plaid)
+        )
+    {
+        return true;
+    } // if dedicated marking
+    element.children.iter().any(|child| {
+        matches!(child, XMLNode::Element(child_element) if contains_dedicated_marking(child_element))
+    })
+} // fn contains_dedicated_marking
+
 // @brief Recursively convert SVG elements to DXF entities.
 // @param element SVG element to convert.
 // @param target Target to add entities to (Block or Drawing).
@@ -394,6 +415,15 @@ fn convert_element_tree(
     svg_height: f64,
     parent_layer: Option<&str>,
 ) -> Result<()> {
+    if element.name == "g"
+        && matches!(
+            piece_component(element),
+            Some(PieceComponent::DrillHole | PieceComponent::Stripe | PieceComponent::Plaid)
+        )
+    {
+        return Ok(());
+    } // if dedicated feature is written from its typed representation
+
     // Geometry converts to one entity; a component group's layer overrides the element's own.
     let entity: Option<Box<dyn Entity>> = match element.name.as_str() {
         "line" => convert_line(element, options, svg_height)?.map(|mut e| {
@@ -731,7 +761,7 @@ fn same_contour(a: &AstmContour, b: &AstmContour) -> bool {
 //          end and ends at the fold line start. The converter adds that edge
 //          back to make the boundary. A seam line beside a cut line stays a
 //          sew line without the fold line edge.
-fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOptions, svg_height: f64) {
+fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOptions, svg_height: f64) -> Result<()> {
     let mut components = Vec::new();
     collect_components(piece, &mut components);
 
@@ -748,6 +778,10 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
             PieceComponent::Seamline => seam_lines.extend(tagged()),
             PieceComponent::Notch => notch_lines.extend(notch_polylines(element, lines())),
             PieceComponent::InternalPath => block.internal_lines.extend(tagged().iter().filter_map(contour)),
+            PieceComponent::Stripe | PieceComponent::Plaid => {
+                let layer = if component == PieceComponent::Stripe { "9" } else { "10" };
+                block.reference_lines.push(extract_reference_line(element, layer, options, svg_height)?);
+            } // Stripe or Plaid
             PieceComponent::CutPath => block.cutouts.extend(tagged().iter().filter_map(contour)),
             PieceComponent::Grainline => {
                 if block.grainline.is_none() {
@@ -769,7 +803,7 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
                 } // if first fold line
             } // FoldLine
             PieceComponent::Label => collect_annotations(element, options, svg_height, &mut block.annotations),
-            PieceComponent::DrillHole => {} // Seamly2D exports no drill holes
+            PieceComponent::DrillHole => block.drill_holes.push(extract_drill_hole(element, options, svg_height)?),
         } // match component
     } // for each component
 
@@ -831,7 +865,105 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
     // Seam allowance: cut line to sew line. A seam line boundary has none.
     let sew_lines: &[AstmContour] = if has_cut_line { &block.sew_lines } else { &[] };
     block.notches = build_notches(&segments, &seam_allowances, &boundary_dense, sew_lines);
+    Ok(())
 } // fn extract_astm_piece
+
+// @brief Parse one finite number from an SVG component attribute.
+fn required_component_number(element: &Element, attribute: &str, component: &str) -> Result<f64> {
+    let value = element
+        .attributes
+        .get(attribute)
+        .ok_or_else(|| crate::error::SvgToEzdxfError::Geometry(format!("{component} is missing {attribute}")))?;
+    let parsed = value.parse::<f64>()
+        .map_err(|_| crate::error::SvgToEzdxfError::Geometry(format!("{component} has invalid {attribute}: {value}")))?;
+    if !parsed.is_finite() {
+        return Err(crate::error::SvgToEzdxfError::Geometry(format!("{component} has non-finite {attribute}")));
+    } // if non-finite
+    Ok(parsed)
+} // fn required_component_number
+
+// @brief Collect descendants with the requested SVG element name.
+fn component_descendants<'a>(element: &'a Element, name: &str, out: &mut Vec<&'a Element>) {
+    for child in &element.children {
+        if let XMLNode::Element(child) = child {
+            if child.name == name {
+                out.push(child);
+            } // if matching element
+            component_descendants(child, name, out);
+        } // if element
+    } // for each child
+} // fn component_descendants
+
+// @brief Parse a drill circle into its ASTM center and positive diameter.
+fn extract_drill_hole(element: &Element, options: &SvgToEzdxfOptions, svg_height: f64) -> Result<DrillHole> {
+    let diameter_px = required_component_number(element, "data-diameter", "drill hole")?;
+    if diameter_px <= 0.0 {
+        return Err(crate::error::SvgToEzdxfError::Geometry("drill hole diameter must be positive".to_string()));
+    } // if non-positive diameter
+    let mut circles = Vec::new();
+    component_descendants(element, "circle", &mut circles);
+    if circles.len() != 1 {
+        return Err(crate::error::SvgToEzdxfError::Geometry(format!(
+            "drill hole must contain exactly one circle, found {}",
+            circles.len()
+        )));
+    } // if circle count
+    let circle = circles[0];
+    let cx = required_component_number(circle, "cx", "drill circle")?;
+    let cy = required_component_number(circle, "cy", "drill circle")?;
+    let radius = required_component_number(circle, "r", "drill circle")?;
+    if radius <= 0.0 {
+        return Err(crate::error::SvgToEzdxfError::Geometry("drill circle radius must be positive".to_string()));
+    } // if non-positive radius
+    if (radius * 2.0 - diameter_px).abs() > diameter_px.max(1.0) * 1.0e-5 {
+        return Err(crate::error::SvgToEzdxfError::Geometry(format!(
+            "drill circle radius {radius} does not match data-diameter {diameter_px}"
+        )));
+    } // if inconsistent diameter
+    Ok(DrillHole {
+        center: to_dxf(Point::new(cx, cy), options, svg_height),
+        diameter: diameter_px * options.unit_scale,
+    })
+} // fn extract_drill_hole
+
+// @brief Parse a stripe or plaid's one straight, two-point reference path.
+fn extract_reference_line(
+    element: &Element,
+    layer: &'static str,
+    options: &SvgToEzdxfOptions,
+    svg_height: f64,
+) -> Result<ReferenceLine> {
+    let mut paths = Vec::new();
+    component_descendants(element, "path", &mut paths);
+    if paths.len() != 1 {
+        return Err(crate::error::SvgToEzdxfError::Geometry(format!(
+            "reference line must contain exactly one path, found {}",
+            paths.len()
+        )));
+    } // if path count
+    let d = paths[0].attributes.get("d")
+        .ok_or_else(|| crate::error::SvgToEzdxfError::Geometry("reference path is missing d".to_string()))?;
+    let path = Path::parse_path_attribute(d)
+        .map_err(|error| crate::error::SvgToEzdxfError::Geometry(format!("invalid reference path: {error}")))?;
+    let [geometry::PathSegment::MoveTo(start), geometry::PathSegment::LineTo(end)] = path.segments.as_slice() else {
+        return Err(crate::error::SvgToEzdxfError::Geometry(
+            "reference path must contain one move and one line".to_string()
+        ));
+    }; // if not a two-endpoint straight line
+    let start = Point::new(start.x as f64, start.y as f64);
+    let end = Point::new(end.x as f64, end.y as f64);
+    if ![start.x, start.y, end.x, end.y].iter().all(|coordinate| coordinate.is_finite()) {
+        return Err(crate::error::SvgToEzdxfError::Geometry("reference endpoints must be finite".to_string()));
+    } // if non-finite endpoint
+    if start == end {
+        return Err(crate::error::SvgToEzdxfError::Geometry("reference endpoints must be distinct".to_string()));
+    } // if zero-length line
+    Ok(ReferenceLine {
+        layer,
+        start: to_dxf(start, options, svg_height),
+        end: to_dxf(end, options, svg_height),
+    })
+} // fn extract_reference_line
 
 // @brief Pair each notch subpath with its notch's `data-seam-allowances` width (mm).
 // @details `data-seam-allowances` holds one width per notch; `data-notch-segments`

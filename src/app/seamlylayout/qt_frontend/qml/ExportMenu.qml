@@ -234,6 +234,7 @@ Menu {
     // The submenu stays enabled on Marker and Nested, so the note inside it can be read.
     Menu {
         id: dxfSubmenu
+        objectName: "dxfSubmenu"
         title: "DXF"
         enabled: root.layoutReady
         width: root.fittedWidth(dxfSubmenu)
@@ -241,6 +242,7 @@ Menu {
         // Hidden Menu items keep their height, so collapse them when hidden.
         // A disabled item shows no tooltip, so this note explains the disabled DXF items.
         MenuItem {
+            objectName: "dxfDisabledNote"
             text: "DXF: select Base Size or a size tab"
             visible: !root.dxfEnabled
             height: visible ? implicitHeight : 0
@@ -248,18 +250,21 @@ Menu {
         } // MenuItem DXF note
 
         MenuItem {
+            objectName: "dxfAstmR13Item"
             text: "DXF-ASTM (R13)"
             enabled: root.layoutReady && root.dxfEnabled
             onTriggered: root.exportDxfAstmR13Requested()
         } // MenuItem DXF-ASTM (R13)
 
         MenuItem {
+            objectName: "dxfAstmClo3dItem"
             text: "DXF-ASTM (CLO3D)"
             enabled: root.layoutReady && root.dxfEnabled
             onTriggered: root.exportDxfAstmClo3dRequested()
         } // MenuItem DXF-ASTM (CLO3D)
 
         MenuItem {
+            objectName: "dxfAamaItem"
             text: "DXF-AAMA (R11)"
             enabled: root.layoutReady && root.dxfEnabled
             onTriggered: root.exportDxfAamaRequested()
@@ -273,6 +278,7 @@ Menu {
     } // MenuItem PDF
 
     MenuItem {
+        objectName: "pdfTiledItem"
         // A disabled item gets no hover events, so the hint is in the text, not a tooltip.
         // Tiled PDF pages take their size from the tile size, which exists only for tiled paper.
         text: !root.pdfTiledEnabled    ? "PDF (Tiled): set Paper Type to Tiled"

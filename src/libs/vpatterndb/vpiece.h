@@ -1,10 +1,13 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  @file   vpiece.h
 //  @author Douglas S Caskey
+//  @author slspencer
 //  @date   17 Sep, 2023
 //
 //  @copyright
 //  Copyright (C) 2017 - 2026 Seamly, LLC
+//  Copyright (C) 2026 Seamly2D Project
+//  SPDX-License-Identifier: GPL-3.0-or-later
 //  https://github.com/fashionfreedom/seamly2d
 //
 //  @brief
@@ -50,6 +53,7 @@
 
 #ifndef VPIECE_H
 #define VPIECE_H
+#include "PieceMarkings.h"
 
 #include <QtGlobal>
 #include <QLineF>
@@ -161,6 +165,10 @@ public:
     QVector<quint32>         getAnchors() const;
     QVector<quint32>        &getAnchors();
     void                     setAnchors(const QVector<quint32> &anchors);
+    QVector<PieceDrillHole>   drillHoles() const;
+    void                     setDrillHoles(const QVector<PieceDrillHole> &holes);
+    QVector<PieceReferenceLine> referenceLines() const;
+    void                     setReferenceLines(const QVector<PieceReferenceLine> &lines);
 
     QVector<quint32>         MissingNodes(const VPiece &piece) const;
     QVector<quint32>         MissingCSAPath(const VPiece &piece) const;

@@ -515,17 +515,19 @@ pub fn do_process_layout(
             + initial_td.margin_top_px + initial_td.margin_bottom_px;
 
         let winning_td = TileDimensions {
-            tile_cols:        choice.tile_cols,
+            tile_cols: choice.tile_cols,
             tile_rows,
-            trim_tile_w_px:   trim_w,
-            trim_tile_h_px:   trim_h,
-            input_dom_w_px:   new_layout_w_px,
-            input_dom_h_px:   new_layout_h_px,
-            layout_w_px:      new_layout_w_px,
-            layout_h_px:      new_layout_h_px,
-            margin_left_px:   initial_td.margin_left_px,
-            margin_right_px:  initial_td.margin_right_px,
-            margin_top_px:    initial_td.margin_top_px,
+            trim_tile_w_px: trim_w,
+            trim_tile_h_px: trim_h,
+            paper_w_px: initial_td.paper_w_px,
+            paper_h_px: initial_td.paper_h_px,
+            input_dom_w_px: new_layout_w_px,
+            input_dom_h_px: new_layout_h_px,
+            layout_w_px: new_layout_w_px,
+            layout_h_px: new_layout_h_px,
+            margin_left_px: initial_td.margin_left_px,
+            margin_right_px: initial_td.margin_right_px,
+            margin_top_px: initial_td.margin_top_px,
             margin_bottom_px: initial_td.margin_bottom_px,
         }; // TileDimensions
 
@@ -1188,8 +1190,8 @@ mod tests {
     } // trousers_long_pieces_extend_a_sheet
 
     // @brief 36 in fabric folded to 18 in: the trousers go on the fabric, not on the
-    // B0 paper sheet that the settings keep from paper media.  The fabric has no fixed
-    // length, so no piece is left out, and every piece lies inside the 17.5 in content.
+    // B0 paper sheet that the settings keep from paper media.  The initial 500 in
+    // length trims to the packed pieces, all inside the 17.5 in content.
     #[test]
     fn trousers_on_folded_fabric_ignore_the_paper_sheet() {
         let settings_json = serde_json::json!({
@@ -1202,12 +1204,22 @@ mod tests {
         }).to_string();
         let input_dom = Document::parse(TROUSERS_HANDOFF_SVG).expect("trousers fixture should parse");
         let init = do_initialize_layout(&settings_json, Some(&input_dom)).expect("initialize_layout should succeed");
+        assert_eq!(init.h_px, 500 * 96, "initial fabric layout uses the 500 in sentinel");
+        assert_eq!(
+            init.initial_dom.root.attributes.get("height").map(String::as_str),
+            Some("48000"),
+            "initial fabric canvas is 500 in long"
+        );
         // (18 - 0.5) * 96 = 1680: no left margin on the fold, the selvedge on the right.
         assert_eq!(init.initial_dom.get_attr_by_id("contentRect", "width"), Some("1680"));
 
         let result = process_trousers_sheet(&settings_json, false, false);
         assert!(result.unplaced_labels.is_empty(), "unplaced: {:?}", result.unplaced_labels);
         assert_eq!(placed_count(&result), 12, "every piece placed whole");
+        let trimmed_height = result.output_doc.root.attributes.get("height")
+            .and_then(|height| height.parse::<u32>().ok())
+            .expect("layout output height");
+        assert!(trimmed_height < init.h_px, "fabric should trim below 500 in: {trimmed_height} px");
         let bbox: serde_json::Value = serde_json::from_str(&result.bbox_json).expect("valid JSON");
         for piece in bbox["pieces"].as_array().expect("pieces array") {
             let right = piece["x"].as_u64().unwrap_or(0) + piece["w"].as_u64().unwrap_or(0);
@@ -1504,18 +1516,21 @@ mod tests {
         for part in crate::material_split::split_by_material(doc) {
             let mut input = part.doc;
             let report = crate::annotation_alignment::align_size_annotations(&mut input);
-            assert!(report.moved > 0, "material {}: sizes take the base size's places", part.name);
-            // Back's sizes stack on their fold line start; its piece label leaves the smallest size.
-            let expected_outside: Vec<String> = if part.name == "Fabric" {
-                vec!["Back: piece label past the cut line in size 220".to_string()]
-            } else {
-                Vec::new()
-            }; // expected_outside
-            assert_eq!(report.outside, expected_outside, "material {}", part.name);
+            assert_eq!(report.moved, 0, "material {}: producer already aligns annotation positions", part.name);
+            assert!(report.outside.is_empty(), "material {}: producer keeps annotations inside every cut line", part.name);
 
             let nested = process_jacket2_input(&input, true, 60.0, 300.0);
-            for set in nested.output_doc.root.children.iter().filter_map(|n| n.as_element())
-                .filter(|e| e.attributes.get("data-type").is_some_and(|t| t == "piece-set"))
+            for set in nested
+                .output_doc
+                .root
+                .children
+                .iter()
+                .filter_map(|n| n.as_element())
+                .filter(|e| {
+                    e.attributes
+                        .get("data-type")
+                        .is_some_and(|t| t == "piece-set")
+                })
             {
                 for data_type in ["grainline", "piece_label", "pattern_label"] {
                     // Reference point of each size, in the piece-set frame.
@@ -1685,6 +1700,7 @@ mod tests {
     #[test]
     fn jacket2_nested_colors_sizes_and_adds_legend() {
         let nested = process_jacket2(true, 60.0, 300.0);
+        let (_, expected_sizes) = jacket2_handoff();
         let (lowest, legend_top, legend_bottom) = legend_below_pieces(&nested, 26);
         assert!(legend_top > lowest, "legend top {legend_top} above lowest piece {lowest}");
         let content_bottom: f32 = ["y", "height"].iter()
@@ -1694,6 +1710,8 @@ mod tests {
 
         // One stroke color per size, the same on every piece of that size.
         let mut colors: std::collections::BTreeMap<String, std::collections::BTreeSet<String>> = Default::default();
+        let expected_sizes: std::collections::BTreeSet<&str> = expected_sizes.iter().map(String::as_str).collect();
+        let mut actual_sizes = std::collections::BTreeSet::new();
         fn strokes(elem: &xmltree::Element, out: &mut std::collections::BTreeSet<String>) {
             if let Some(s) = elem.attributes.get("stroke").filter(|s| *s != "none") {
                 out.insert(s.clone());
@@ -1705,16 +1723,54 @@ mod tests {
         for set in nested.output_doc.root.children.iter().filter_map(|n| n.as_element())
             .filter(|e| e.attributes.get("data-type").is_some_and(|t| t == "piece-set"))
         {
+            let set_id = set.attributes.get("id").expect("piece-set source id");
             for piece in set.children.iter().filter_map(|n| n.as_element())
                 .filter(|e| e.attributes.get("data-type").is_some_and(|t| t == "piece"))
             {
-                strokes(piece, colors.entry(piece.attributes["data-size"].clone()).or_default());
+                let size = piece
+                    .attributes
+                    .get("data-size")
+                    .expect("piece source size");
+                assert!(
+                    expected_sizes.contains(size.as_str()),
+                    "unexpected data-size {size}"
+                );
+                assert_eq!(
+                    piece.attributes.get("data-parent"),
+                    Some(set_id),
+                    "piece-set source identity"
+                );
+                actual_sizes.insert(size.as_str());
+                strokes(piece, colors.entry(size.clone()).or_default());
             } // for piece
         } // for set
+        assert_eq!(
+            actual_sizes, expected_sizes,
+            "piece data-size values match the pattern's data-sizes"
+        );
         assert_eq!(colors.len(), 26);
-        assert!(colors.values().all(|c| c.len() == 1), "one color per size: {colors:?}");
+        assert!(
+            colors.values().all(|c| c.len() == 1),
+            "one color per size: {colors:?}"
+        );
         let distinct: std::collections::BTreeSet<&String> = colors.values().flatten().collect();
         assert_eq!(distinct.len(), 26, "every size its own color");
+        let legend = top_group(&nested.output_doc, "size_legend").expect("Nested size legend");
+        let legend_sizes: Vec<String> = legend
+            .children
+            .iter()
+            .filter_map(|n| n.as_element())
+            .filter(|e| e.name == "text")
+            .filter_map(|e| e.get_text().map(|text| text.into_owned()))
+            .collect();
+        assert_eq!(
+            legend_sizes,
+            expected_sizes
+                .iter()
+                .map(|size| format!("Size {size}"))
+                .collect::<Vec<_>>(),
+            "legend entries follow pattern size attributes"
+        );
 
         // Marker and a size tab keep the drafted colors and have no legend.
         let marker = process_jacket2(false, 60.0, 1500.0);

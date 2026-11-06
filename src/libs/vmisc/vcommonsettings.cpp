@@ -1,13 +1,13 @@
 //-----------------------------------------------------------------------------
 //  @file   vcommonsettings.cpp
-//  @author Douglas S Caskey
+//  @author slspencer
 //  @date   17 Sep, 2023
 //
 //  @brief
 //  @copyright
 //  This source code is part of the Seamly2D project, a pattern making
 //  program to create and model patterns of clothing.
-//  Copyright (C) 2017-2026 Seamly2D project
+//  Copyright (C) 2026 Seamly2D Project
 //  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
 //
 //  Seamly2D is free software: you can redistribute it and/or modify
@@ -692,10 +692,10 @@ void seedLabelTemplate(const QString &builtInFile, const QString &directory)
  * Purely additive: QDir::mkpath() leaves any directory that already exists alone, so an
  * existing data tree — including one adopted from the legacy ~/seamly2d location — keeps
  * every file it holds. A root on a disconnected or read-only volume simply fails to be
- * created; the caller carries on, exactly as the app already does for a missing folder.
+ * created, and no success is reported while a required subfolder is still missing.
  *
  * @param root data root to populate; the configured root when empty.
- * @return true if the root directory exists (or was created) afterwards.
+ * @return true if the root and every standard subfolder exist (or were created) afterwards.
  */
 bool VCommonSettings::ensureDataRootTree(const QString &root)
 {
@@ -725,7 +725,12 @@ bool VCommonSettings::ensureDataRootTree(const QString &root)
 
     for (const QString &subdirectory : subdirectories)
     {
-        directory.mkpath(subdirectory);
+        if (!directory.mkpath(subdirectory))
+        {
+            qWarning() << "Could not create the Seamly data subfolder"
+                       << QDir::toNativeSeparators(directory.filePath(subdirectory));
+            return false;
+        }
     }
 
     // New pieces read their label text from these files. Seed them so the defaults work without a Preferences visit.

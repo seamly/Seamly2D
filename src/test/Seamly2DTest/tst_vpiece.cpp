@@ -2434,6 +2434,22 @@ void TST_VPiece::PieceFlipValuesRoundTrip() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief PieceFlipTransformMirrorsAboutCenter checks the mirror each flip choice draws on the canvas.
+ */
+void TST_VPiece::PieceFlipTransformMirrorsAboutCenter() const
+{
+    const QPointF center(10, 20);
+    const QPointF point(14, 23);
+
+    QCOMPARE(pieceFlipTransform(PieceFlip::None, center).map(point), point);
+    QCOMPARE(pieceFlipTransform(PieceFlip::Horizontal, center).map(point), QPointF(6, 23));
+    QCOMPARE(pieceFlipTransform(PieceFlip::Vertical, center).map(point), QPointF(14, 17));
+    QCOMPARE(pieceFlipTransform(PieceFlip::Both, center).map(point), QPointF(6, 17));
+    QCOMPARE(pieceFlipTransform(PieceFlip::Both, center).map(center), center);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief LayoutPieceKeepsFlip checks that the layout piece keeps the flip choice of the piece.
  */
 void TST_VPiece::LayoutPieceKeepsFlip() const

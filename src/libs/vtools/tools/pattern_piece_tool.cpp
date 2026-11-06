@@ -1,10 +1,13 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  @file   pattern_piece_dialog.cpp
 //  @author Douglas S Caskey
+//  @author slspencer
 //  @date   Dec 11, 2022
 //
 //  @copyright
 //  Copyright (C) 2017 - 2026 Seamly, LLC
+//  Copyright (C) 2026 Seamly2D Project
+//  SPDX-License-Identifier: GPL-3.0-or-later
 //  https://github.com/fashionfreedom/seamly2d
 //
 //  @brief
@@ -92,6 +95,7 @@
 #include <QKeyEvent>
 #include <QActionGroup>
 #include <QMenu>
+#include "../undocommands/CopyPatternPiece.h"
 #include <QMessageBox>
 #include <QPainterPathStroker>
 #include <QPolygonF>
@@ -940,6 +944,7 @@ void PatternPieceTool::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 
     m_notches->setPen(QPen(color, scaleWidth(lineWeight, sceneScale(scene())),
                            Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    m_markings->setPen(m_notches->pen());
 
     //set fold line pen
     color      = adaptColor(QColor(qApp->Settings()->getDefaultFoldLineColor()));
@@ -1015,6 +1020,7 @@ void PatternPieceTool::AddToFile()
     addCSARecords(doc, domElement, piece.getCustomSARecords());
     addInternalPaths(doc, domElement, piece.getInternalPaths());
     addAnchors(doc, domElement, piece.getAnchors());
+    PieceMarkings::write(domElement, piece.drillHoles(), piece.referenceLines());
 
     AddPiece *cmd = new AddPiece(domElement, doc, piece, m_blockName);
     connect(cmd, &AddPiece::NeedFullParsing, doc, &VAbstractPattern::NeedFullParsing);
@@ -1048,6 +1054,7 @@ void PatternPieceTool::RefreshDataInFile()
                 addCSARecords(doc, domElement, piece.getCustomSARecords());
                 addInternalPaths(doc, domElement, piece.getInternalPaths());
                 addAnchors(doc, domElement, piece.getAnchors());
+                PieceMarkings::write(domElement, piece.drillHoles(), piece.referenceLines());
             }
         }
     }
@@ -1192,6 +1199,8 @@ void PatternPieceTool::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     QMenu menu;
     QAction *editProperties = menu.addAction(QIcon::fromTheme("preferences-other"), tr("Properties") + "\tP");
     editProperties->setEnabled(lock);
+    QAction *copyPiece = menu.addAction(QIcon::fromTheme("edit-copy"), tr("Copy Piece"));
+    copyPiece->setEnabled(lock);
 
     QAction *actionLockPiece = menu.addAction(tr("Lock Pattern Piece") + "\tCtrl + L");
     actionLockPiece->setCheckable(true);
@@ -1268,6 +1277,21 @@ void PatternPieceTool::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     if (selectedAction == editProperties)
     {
         editPieceProperties();
+    }
+    else if (selectedAction == copyPiece)
+    {
+        PatternPieceCopyResult copy = PatternPieceCopy::reconstruct(*doc, m_id, &VContainer::getNextId);
+        if (!copy.error.isEmpty())
+        {
+            QMessageBox::warning(nullptr, tr("Copy Piece"), copy.error);
+            return;
+        }
+        // Copy numeric geometry and formulas; place the separate piece beside its source.
+        const qreal offset = qApp->fromPixel(boundingRect().width() + ToPixel(2, Unit::Cm));
+        copy.piece.setAttribute(AttrMx, copy.piece.attribute(AttrMx).toDouble() + offset);
+        CopyPatternPiece *command = new CopyPatternPiece(copy, doc);
+        connect(command, &VUndoCommand::NeedFullParsing, doc, &VAbstractPattern::NeedFullParsing);
+        qApp->getUndoStack()->push(command);
     }
     else if (selectedAction == actionLockPiece)
     {
@@ -1471,6 +1495,7 @@ PatternPieceTool::PatternPieceTool(VAbstractPattern *doc, VContainer *data, cons
     , m_patternInfo(new VTextGraphicsItem(this))
     , m_grainLine(new VGrainlineItem(this))
     , m_notches(new QGraphicsPathItem(this))
+    , m_markings(new QGraphicsPathItem(this))
     , m_foldLine(new QGraphicsPathItem(this))
     , m_fold_line_arrow(new QGraphicsPathItem(this))
     , m_fold_line_arrow_heads(new QGraphicsPathItem(this))
@@ -1661,13 +1686,65 @@ void PatternPieceTool::RefreshGeometry()
     }
 
     m_notches->setPath(piece.getNotchesPath(this->getData(), seamAllowancePoints));
+    QPainterPath markings;
+    for (const PieceDrillHole &hole : piece.drillHoles())
+    {
+        const QPointF center = static_cast<QPointF>(*getData()->GeometricObject<VPointF>(hole.center));
+        const qreal radius = ToPixel(hole.diameter, *getData()->GetPatternUnit()) / 2;
+        markings.addEllipse(center, radius, radius);
+    }
+    for (const PieceReferenceLine &line : piece.referenceLines())
+    {
+        markings.moveTo(static_cast<QPointF>(*getData()->GeometricObject<VPointF>(line.start)));
+        markings.lineTo(static_cast<QPointF>(*getData()->GeometricObject<VPointF>(line.end)));
+    }
+    m_markings->setPath(markings);
+    m_markings->setPen(m_notches->pen());
+    m_markings->setBrush(Qt::NoBrush);
 
     refreshFoldLine(piece, seamAllowancePoints);
+
+    applyFlipToGeometry(piece.getFlip());
 
     updatePieceDetails();
 
     this->setPos(piece.GetMx(), piece.GetMy());
     this->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief applyFlipToGeometry mirrors the drawn outline of the piece on the Piece Mode canvas.
+ * @param flip mirror to show.
+ *
+ * The mirror runs about the center of the drawn outline. Labels and the grainline keep their place and stay readable.
+ */
+void PatternPieceTool::applyFlipToGeometry(PieceFlip flip)
+{
+    if (flip == PieceFlip::None)
+    {
+        return;
+    }
+
+    // The outline is the seam line plus the cut line.
+    const QRectF outline = this->path().united(m_cutLine->path()).boundingRect();
+    if (outline.isNull())
+    {
+        return;
+    }
+    const QTransform mirror = pieceFlipTransform(flip, outline.center());
+
+    this->setPath(mirror.map(this->path()));
+    m_cutLine->setPath(mirror.map(m_cutLine->path()));
+    m_allowanceFill->setPath(mirror.map(m_allowanceFill->path()));
+    m_notches->setPath(mirror.map(m_notches->path()));
+    m_markings->setPath(mirror.map(m_markings->path()));
+    m_foldLine->setPath(mirror.map(m_foldLine->path()));
+    m_fold_line_arrow->setPath(mirror.map(m_fold_line_arrow->path()));
+    m_fold_line_arrow_heads->setPath(mirror.map(m_fold_line_arrow_heads->path()));
+    m_cutPath = mirror.map(m_cutPath);
+    m_mainPath = mirror.map(m_mainPath);
+    m_pieceRect = mirror.mapRect(m_pieceRect);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

@@ -185,6 +185,12 @@ public:
      */
     QDomDocument to_dom() const;
 
+    /**
+     * @brief Builds an opt-in aligned document while preserving the unaligned writer comparison.
+     * @param warnings receives components with no shared fit; callers must warn before launching SeamlyLayout.
+     */
+    QDomDocument to_aligned_dom(QStringList &warnings) const;
+
     QString to_svg_string() const;
 
 private:

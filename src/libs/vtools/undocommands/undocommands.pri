@@ -1,3 +1,4 @@
+# Author: slspencer; Copyright: 2026 Seamly2D Project; License: GPL-3.0-or-later
 # ADD TO EACH PATH $$PWD VARIABLE!!!!!!
 # This need for corect working file translations.pro
 
@@ -28,6 +29,7 @@ HEADERS += \
     $$PWD/delgroup.h \
     $$PWD/label/moveabstractlabel.h \
     $$PWD/addpiece.h \
+    $$PWD/CopyPatternPiece.h \
     $$PWD/addimage.h \
     $$PWD/deletepiece.h \
     $$PWD/movepiece.h \
@@ -62,10 +64,10 @@ SOURCES += \
     $$PWD/delgroup.cpp \
     $$PWD/label/moveabstractlabel.cpp \
     $$PWD/addpiece.cpp \
+    $$PWD/CopyPatternPiece.cpp \
     $$PWD/addimage.cpp \
     $$PWD/deletepiece.cpp \
     $$PWD/movepiece.cpp \
     $$PWD/savepieceoptions.cpp \
     $$PWD/togglepieceinlayout.cpp \
     $$PWD/savepiecepathoptions.cpp
-

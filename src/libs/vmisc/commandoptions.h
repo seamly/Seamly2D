@@ -24,14 +24,14 @@
  ************************************************************************
  **
  **  @file   commandoptions.h
- **  @author Roman Telezhynskyi <dismine(at)gmail.com>
- **  @date   9 11, 2015
+ **  @author slspencer
+ **  @date   2026
  **
  **  @brief
  **  @copyright
  **  This source code is part of the Valentine project, a pattern making
  **  program, whose allow create and modeling patterns of clothing.
- **  Copyright (C) 2015 Seamly2D project
+ **  Copyright (C) 2026 Seamly2D Project
  **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
  **
  **  Seamly2D is free software: you can redistribute it and/or modify
@@ -65,6 +65,14 @@ extern const QString SINGLE_OPTION_GRADATIONSIZE;
 
 extern const QString LONG_OPTION_GRADATIONHEIGHT;
 extern const QString SINGLE_OPTION_GRADATIONHEIGHT;
+
+extern const QString LONG_OPTION_LAYOUT_EXPORT;
+extern const QString LONG_OPTION_LAYOUT_FORMAT;
+extern const QString LONG_OPTION_LAYOUT_OUTPUT;
+extern const QString LONG_OPTION_LAYOUT_SETTINGS;
+extern const QString LONG_OPTION_LAYOUT_EXPORT_OPTIONS;
+extern const QString LONG_OPTION_SVG_TEXT_MODE;
+extern const QString LONG_OPTION_LAYOUT_SCALE;
 
 QStringList AllKeys();
 

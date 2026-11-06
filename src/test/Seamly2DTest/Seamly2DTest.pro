@@ -1,6 +1,13 @@
 #-------------------------------------------------
+# @author slspencer
+# Copyright (C) 2026 Seamly2D Project
+# SPDX-License-Identifier: GPL-3.0-or-later
+# License: https://www.gnu.org/licenses/gpl-3.0.html
 #
 # Project created by QtCreator 2015-03-31T17:27:03
+# Author: slspencer
+# Copyright: 2026 Seamly2D Project
+# License: GPL-3.0-or-later
 #
 #-------------------------------------------------
 
@@ -33,7 +40,9 @@ OBJECTS_DIR = obj
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 SOURCES += \
+    TestHandoffAnnotationAlignment.cpp \
     qttestmainlambda.cpp \
+    ../../app/seamly2d/core/vcmdexport.cpp \
     tst_vspline.cpp \
     tst_nameregexp.cpp \
     tst_vlayoutdetail.cpp \
@@ -67,11 +76,16 @@ SOURCES += \
     tst_handoffcornercuts.cpp \
     tst_handoffpiece.cpp \
     tst_handofflabel.cpp \
-    tst_handoffdocument.cpp
+    tst_handoffdocument.cpp \
+    tst_vpatternconverter.cpp \
+    tst_labeltemplatefilename.cpp \
+    tst_patternpiececopy.cpp \
+    tst_piecemarkings.cpp
 
 *msvc*:SOURCES += stable.cpp
 
 HEADERS += \
+    TestHandoffAnnotationAlignment.h \
     tst_vspline.h \
     tst_nameregexp.h \
     tst_vlayoutdetail.h \
@@ -106,7 +120,11 @@ HEADERS += \
     tst_handoffcornercuts.h \
     tst_handoffpiece.h \
     tst_handofflabel.h \
-    tst_handoffdocument.h
+    tst_handoffdocument.h \
+    tst_vpatternconverter.h \
+    tst_labeltemplatefilename.h \
+    tst_patternpiececopy.h \
+    tst_piecemarkings.h
 
 include(warnings.pri)
 
@@ -187,6 +205,9 @@ unix|win32: LIBS += -L$$OUT_PWD/../../libs/vmisc/$${DESTDIR}/ -lvmisc
 
 INCLUDEPATH += $$PWD/../../libs/vmisc
 DEPENDPATH += $$PWD/../../libs/vmisc
+
+INCLUDEPATH += $$PWD/../../app/seamly2d/core
+DEPENDPATH += $$PWD/../../app/seamly2d/core
 
 win32:!win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vmisc/$${DESTDIR}/vmisc.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vmisc/$${DESTDIR}/libvmisc.a

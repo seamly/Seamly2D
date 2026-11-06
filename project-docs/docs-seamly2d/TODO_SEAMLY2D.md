@@ -12,13 +12,13 @@ Upstream `85c36c0bcc` changed `VPatternConverter::fixGroupsOrder()`. It adds mis
 
 User decision: every draft block gets `<images>` in a new schema version. Seamly2D opens a pattern in its own schema version, then saves it in the new version.
 
-- [ ] Seamly2D.72.1 Find the newest upstream pattern schema. Use the next free version number (v0.7.8 if free). Our v0.7.6 and v0.7.7 differ from upstream.
-- [ ] Seamly2D.72.2 Add `src/libs/ifc/schema/pattern/v0.7.8.xsd`: a copy of v0.7.7, with `images` required in `draftBlock` (`minOccurs="1"`), after `groups`. Add it to `src/libs/ifc/schema.qrc`.
-- [ ] Seamly2D.72.3 `VPatternConverter`: update `PatternMaxVerStr`, `CurrentSchema`, `PatternMaxVer`, `getSchema()`, `ApplyPatches()`. Add `toVersion0_7_8()`: it adds the missing `<groups>` and `<images>` in each draft block, in schema order.
-- [ ] Seamly2D.72.4 `fixGroupsOrder()`: only move `<groups>` in front of `<images>`. It must not add tags before validation.
-- [ ] Seamly2D.72.5 Writer: each new draft block gets `<images>` (`VAbstractPattern::appendDraftBlock()`, `createDraftImages()`, `createGroups()`).
-- [ ] Seamly2D.72.6 Unit tests: each pattern in `src/app/share/samples/patterns/` opens in its own schema version and converts to the new version. Cases: v0.6.8 with `<groups>` (`jacket1_52-176.sm2d`); `<groups>` after `<images>`; no `<groups>` and no `<images>`.
-- [ ] Seamly2D.72.7 Next MSI: Qt suites (`nmake check` in `local_build_msi.ps1`).
+- [x] Seamly2D.72.1 Find the newest upstream pattern schema. Use the next free version number (v0.7.8 if free). Our v0.7.6 and v0.7.7 differ from upstream.
+- [x] Seamly2D.72.2 Add `src/libs/ifc/schema/pattern/v0.7.8.xsd`: a copy of v0.7.7, with `images` required in `draftBlock` (`minOccurs="1"`), after `groups`. Add it to `src/libs/ifc/schema.qrc`.
+- [x] Seamly2D.72.3 `VPatternConverter`: update `PatternMaxVerStr`, `CurrentSchema`, `PatternMaxVer`, `getSchema()`, `ApplyPatches()`. Add `toVersion0_7_8()`: it adds the missing `<groups>` and `<images>` in each draft block, in schema order.
+- [x] Seamly2D.72.4 `fixGroupsOrder()`: only move `<groups>` in front of `<images>`. It must not add tags before validation.
+- [x] Seamly2D.72.5 Writer: each new draft block gets `<images>` (`VAbstractPattern::appendDraftBlock()`, `createDraftImages()`, `createGroups()`).
+- [x] Seamly2D.72.6 Unit tests: all eight bundled patterns validate before conversion and convert to v0.7.8. Reordered/missing groups and images, empty documents, and new-block ordering are covered. `PatternConverterTests`: 9 passed.
+- [x] Seamly2D.72.7 Integrated Windows suite passed `nmake check`, CTest 8/8, Cargo workspace tests, and MSI validation.
 - [ ] Seamly2D.72.8 Verify (User): open `jacket1_52-176.sm2d`, save, reopen. The file has the new version, and each draft block has `<images>`.
 
 ### [ ] Task Seamly2D.11 — Implement - Piece mode: Fix Built-in seam allowance calculation, display, and export of built-in seam allowance
@@ -38,7 +38,7 @@ Display, calculation, fold line, handoff, tests and schema are done: `TODO_COMPL
   - Cause: the inward offset turns a short spline chord around at the 76 degree corner. `CheckLoops()` misses the spike: it only touches the front edge seam line.
   - Fix: `removeConsumedEdges()` in `vpiece.cpp` collapses each such edge to the crossing of its neighbour edge lines, before `Equidistant()`. Seam line only; the seam allowance is unchanged.
   - Test `TST_VPiece::BuiltInSeamLineMeetsAtAcuteCorner`. Harness: FAIL before the fix (2.17 mm from the cut line), 129/129 PASS after.
-- [ ] Seamly2D.11.8 Verify: Next MSI -  Qt suites (`nmake check` in `local_build_msi.ps1`). A temporary test program passed every Seamly2D suite with the changed sources.
+- [x] Seamly2D.11.8 Integrated Windows suite passed `nmake check`.
 - [ ] Seamly2D.11.9 Verify (User): `AGENT_CHECKLIST.md` §27. Last result: FAIL (Seamly2D.11.10). Check again after the next MSI: no spike at D11 and D12.
 
 ### [ ] Task Seamly2D.71 - Implement - Piece Mode - Foldline processing, graphic and text
@@ -49,7 +49,7 @@ Fix this by reorganizing the main path nodes and creating the foldline's arrowed
 
 Rotation, arrow line, label, extended fold line, SeamlyLayout fold placement and nesting, tests and conversion are done: `TODO_COMPLETED.md`, "Completed subtasks from Task Seamly2D.71". Open:
 
-- [ ] Seamly2D.71.9 Next MSI: Qt suites (`nmake check` in `local_build_msi.ps1`). A temporary test program passed `TST_VPiece`, `TST_SvgComponentTags`, `TST_HandoffPiece` and `TST_HandoffDocument` with the changed sources.
+- [x] Seamly2D.71.9 Integrated Windows suite passed `nmake check`, including piece, SVG component, and handoff tests.
 - [ ] Seamly2D.71.10 Verify (User): `AGENT_CHECKLIST.md` §29.
 - [x] Seamly2D.71.11 Fix - A piece with a fold line: the cut line is an open path and does not run along the fold line.
   - Rule (user decision): the fold line begins at the cut line end and ends at the cut line begin. The cut line and the fold line make the outer edge.
@@ -78,45 +78,43 @@ Rotation, arrow line, label, extended fold line, SeamlyLayout fold placement and
 
 `Pattern preferences > Label data > Label template:` has only the `Edit template` button (`pushButtonEditPatternLabel`, `src/app/seamly2d/dialogs/dialogpatternproperties.ui`). The user cannot see which template file the pattern label uses without opening the editor.
 
-- [ ] In Pattern Piece Tool > Properties > Labels > Piece Label tab, add text to the right of `Edit template` button that displays the label file name <labelbasename.ext>
-  - [ ] Get the label file name from `NewPieceDefaults::pieceLabelTemplateFile(lines)`, the same call `DialogPatternProperties` passes to `EditLabelTemplateDialog::setTemplateFile`
-  - [ ]If no file name then display the Preferences default; else "none" (the pattern stores lines, not a file), to match the Edit Label Template dialog
-  - [ ] Repeat for Pattern Piece Tool > Properties > Labels > Pattern Label tab by getting the pattern label file name from NewPieceDefaults::patternLabelTemplateFile()
-- [ ] Refresh the label after `Edit template` closes with new lines (`templateDataChanged`)
-- [ ] Tooltip shows the full absolute path
-- [ ] Unit test: file name shown for selected, default, and no-file cases
-- [ ] Update Schema with conversion from previous version
+- [x] Display the label template filename beside `Edit template` in Piece Properties and Pattern Preferences.
+  - [x] Resolve piece defaults through `NewPieceDefaults::pieceLabelTemplateFile(lines)`.
+  - [x] Show the matching default or selected filename; show "none" when stored lines have no known file.
+  - [x] Resolve and display the pattern-label template filename.
+- [x] Refresh the filename after template editing.
+- [x] Tooltip shows the full absolute path.
+- [x] Selected/default/no-file tests pass; integrated Qt suites pass.
+- [x] Schema conversion is unnecessary: template provenance is dialog state; the existing format stores label lines.
 - [ ] Verify (User)
 
 ### [ ] Task Seamly2D.50 - Implement - Piece Mode - Drill Holes
 
-- [ ] Implement Drill holes -- not as a notch type, as a separate tab in Piece Properties
-  - [ ] Implement Drill Holes in Piece Mode
-  - [ ] SeamlyLayout - Implement Drill Holes in DXF R13 (layer 13), with diameter (group 30)
-  - [ ] Create test
-- [ ] Update Schema with conversion from previous version
+- [x] Implement Drill holes as a dedicated Piece Properties page, separate from notches.
+  - [x] Resolve live drill centers in Piece Mode; require positive constant diameters and valid anchors.
+  - [x] Export DXF R13 layer 13 with group 30 diameter.
+  - [x] Model, editor, mirror/union/copy, real producer, DXF, inch-unit, and packing-invariance tests pass.
+- [x] Schema v0.7.9 and conversion preserve markings. Integrated Qt and Rust suites pass.
 - [ ] Verify (User)
 
 ### Task Seamly2D.60 - Implement - Strip & plaid reference lines
 
-- [ ] Seamly2D.60 - Implement Stripe and plaid reference lines
-  - [ ] Seamly2D.60.1 - Implement Stripe and plaid reference lines in piece mode
-  - [ ] Seamly2D.60.2 - SeamlyLayout - Implement Stripe and plaid reference lines in DXF R13 export (layers 9, 10)
-- [ ] Create test
-- [ ] Update Schema with conversion from previous version
+- [x] Seamly2D.60 - Implement Stripe and plaid reference lines.
+  - [x] Seamly2D.60.1 Live, distinct endpoints define reference-only lines in Piece Mode.
+  - [x] Seamly2D.60.2 DXF R13 writes stripe/plaid lines on layers 9/10 without changing packing bounds.
+- [x] Real producer, transformation, DXF, and packing-invariance tests pass.
+- [x] Schema v0.7.9 and conversion preserve reference lines.
 - [ ] Verify (User)
 
 ### [ ] Task Seamly2D.62 - Implement - Piece Mode - 'Flip Piece' tool
 
 The 'Flip Piece' tool can be applied to any piece in Piece Mode, including pieces created by 'Union', 'Flip Piece', 'Copy Piece', and 'Mirror on Foldline' tools.
 
-- [ ] In Piece Tool Properties, User selects a 'Flip' checkbox which shows a submenu of radio buttons for None, Horizontal, Vertical, Both
-- [ ] Based on the Flip submenu selection, the entire piece is flipped including labels, grainlines, etc.
-- [ ] After flipping the entire piece, flip the labels again in the same direction(s) so that text isn't backwards or upside down.
-- [ ] Flatten the entire flipped piece (except for text) to remove transform strings.
-- [ ] Create test
-- [ ] Update Schema
-- [ ] Create schema conversion from previous version
+- [x] Piece Properties and the Piece Mode context menu select None, Horizontal, Vertical, or Both.
+- [x] Follow the newer Layout.110 decision: mirror displayed geometry; labels and grainline retain their place and readability.
+- [x] Do not flatten or rewrite stored geometry. The flip is a display of the stored choice.
+- [x] Centered flip-transform tests and integrated Qt suites pass.
+- [x] Existing flip schema and conversion remain in use; no additional schema change is needed.
 - [ ] Test/Verify - check flipping:
   - [ ] Single piece - vertical & horizontal & both
   - [ ] Copied piece (requires Seamly2D.61) - vertical & horizontal & both
@@ -126,19 +124,19 @@ The 'Flip Piece' tool can be applied to any piece in Piece Mode, including piece
 
 ### [ ] Task Seamly2D.61 - Implement - Piece Mode - 'Copy Piece' tool
 
-- [ ] Copy an entire piece - resulting piece is a separate piece linked to draft objects (not linked to original piece).
-- [ ] Update piece name with a suffix, e.g. Collar-1. If a copy of 'Collar-1' is made, then the updated piece name is 'Collar-1-1'
-- [ ] Update piece letter with a suffix, e.g. A-2.
-- [ ] The new piece should be flattened (except for text) to remove transform strings.
-- [ ] The new piece can be edited with Pattern Piece Tool
-- [ ] Create test
-- [ ] Update Schema with conversion from previous version
+- [x] Reconstruct independent private modeling nodes and paths while retaining live draft links, including Union producers.
+- [x] Add piece-name suffixes, including copies of copies.
+- [x] Add piece-letter suffixes.
+- [x] Reconstruct native modeling records rather than storing flattened rendering transforms.
+- [x] Copies remain editable with Pattern Piece Tool; placement and one-step undo/redo are implemented.
+- [x] Copy/recopy, source deletion, live draft updates, and marked-piece tests pass; integrated Qt suites pass.
+- [x] Existing schema records represent independent copies; no conversion is needed.
 - [ ] Verify - 'Copy' tool can be applied to any piece in Piece Mode, including pieces created by:
-  - [ ] Union
+  - [x] Union
   - [ ] Flip Piece - Vertical
   - [ ] Flip Piece - Horizontal
-  - [ ] Copy Piece
-  - [ ] Mirror on Foldline
+  - [x] Copy Piece
+  - [x] Mirror on Foldline
 
 ## Verify
 

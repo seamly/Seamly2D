@@ -24,14 +24,14 @@
  ************************************************************************
  **
  **  @file   tst_vcommandline.h
- **  @author Roman Telezhynskyi <dismine(at)gmail.com>
- **  @date   9 11, 2015
+ **  @author slspencer
+ **  @date   2026
  **
  **  @brief
  **  @copyright
  **  This source code is part of the Valentine project, a pattern making
  **  program, whose allow create and modeling patterns of clothing.
- **  Copyright (C) 2015 Seamly2D project
+ **  Copyright (C) 2026 Seamly2D Project
  **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
  **
  **  Seamly2D is free software: you can redistribute it and/or modify
@@ -62,6 +62,16 @@ public:
 
 private slots:
     void UniqueKeys();
+    void LayoutExportOptions();
+    void LayoutExportOptionsAppearInHelp();
+    void LayoutExportUsesDefaultSvgFormat();
+    void LayoutExportRequiresOutput();
+    void LayoutExportRequiresOneInput();
+    void LayoutExportRejectsUnsupportedFormat();
+    void LayoutExportRejectsSvgTextModeForOtherFormats();
+    void LayoutExportScale();
+    void LayoutExportRejectsInvalidScale();
+    void LayoutExportOptionsRequireExportMode();
 
 private:
     Q_DISABLE_COPY(TST_VCommandLine)

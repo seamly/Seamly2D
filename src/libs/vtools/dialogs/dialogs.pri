@@ -1,3 +1,7 @@
+# Author: slspencer
+# Copyright (C) 2026 Seamly2D Project
+# SPDX-License-Identifier: GPL-3.0-or-later
+# https://www.gnu.org/licenses/gpl-3.0.html
 # ADD TO EACH PATH $$PWD VARIABLE!!!!!!
 # This need for corect working file translations.pro
 
@@ -46,6 +50,7 @@ HEADERS += \
     $$PWD/tools/intersect_circletangent_dialog.h \
     $$PWD/tools/piece/internal_path_dialog.h \
     $$PWD/tools/piece/pattern_piece_dialog.h \
+    $$PWD/tools/piece/PieceMarkingsEditor.h \
     $$PWD/tools/piece/PieceMirrorDialog.h \
     $$PWD/tools/point_intersectxy_dialog.h \
     $$PWD/tools/union_dialog.h
@@ -94,6 +99,7 @@ SOURCES += \
     $$PWD/tools/intersect_circletangent_dialog.cpp \
     $$PWD/tools/piece/internal_path_dialog.cpp \
     $$PWD/tools/piece/pattern_piece_dialog.cpp \
+    $$PWD/tools/piece/PieceMarkingsEditor.cpp \
     $$PWD/tools/piece/PieceMirrorDialog.cpp \
     $$PWD/tools/point_intersectxy_dialog.cpp \
     $$PWD/tools/union_dialog.cpp

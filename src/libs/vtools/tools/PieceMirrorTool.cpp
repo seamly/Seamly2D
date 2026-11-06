@@ -414,6 +414,7 @@ PatternPieceTool* createFullPiece(PieceMirrorContext& context, const VPiece& hal
     // Anchors: a copy of each, and a mirrored copy unless the anchor is a fold line point.
     QVector<quint32> anchors;
     QHash<quint32, quint32> anchor_copies;
+    QHash<quint32, quint32> mirrored_anchors;
     for (quint32 anchor : half.getAnchors())
     {
         const quint32 draft_id = context.draft_ids.value(anchor);
@@ -424,7 +425,13 @@ PatternPieceTool* createFullPiece(PieceMirrorContext& context, const VPiece& hal
         const quint32 mirror_id = context.mirror_ids.value(draft_id, draft_id);
         if (mirror_id != draft_id)
         {
-            anchors.append(copyAnchor(context, mirror_id));
+            const quint32 mirrored_anchor = copyAnchor(context, mirror_id);
+            anchors.append(mirrored_anchor);
+            mirrored_anchors.insert(anchor, mirrored_anchor);
+        }
+        else
+        {
+            mirrored_anchors.insert(anchor, copy_id);
         }
     }
 
@@ -434,6 +441,34 @@ PatternPieceTool* createFullPiece(PieceMirrorContext& context, const VPiece& hal
     full.SetInternalPaths(internal_paths);
     full.SetCustomSARecords(full_records);
     full.setAnchors(anchors);
+    QVector<PieceDrillHole> holes;
+    for (PieceDrillHole hole : half.drillHoles())
+    {
+        const quint32 original = hole.center;
+        hole.center = anchor_copies.value(original);
+        holes.append(hole);
+        if (mirrored_anchors.value(original) != hole.center)
+        {
+            hole.center = mirrored_anchors.value(original);
+            holes.append(hole);
+        }
+    }
+    QVector<PieceReferenceLine> lines;
+    for (PieceReferenceLine line : half.referenceLines())
+    {
+        const PieceReferenceLine original = line;
+        line.start = anchor_copies.value(original.start);
+        line.end = anchor_copies.value(original.end);
+        lines.append(line);
+        if (mirrored_anchors.value(original.start) != line.start || mirrored_anchors.value(original.end) != line.end)
+        {
+            line.start = mirrored_anchors.value(original.start);
+            line.end = mirrored_anchors.value(original.end);
+            lines.append(line);
+        }
+    }
+    full.setDrillHoles(holes);
+    full.setReferenceLines(lines);
     remapAnchors(full, anchor_copies);
     full.SetName(PieceMirrorTool::tr("%1 Mirrored").arg(half.GetName()));
     full.GetPatternPieceData().SetOnFold(false);

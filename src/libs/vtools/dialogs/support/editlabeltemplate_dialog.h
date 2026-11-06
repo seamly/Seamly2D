@@ -1,10 +1,13 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  @file   editlabeltemplate_dialog.h
 //  @author Douglas S Caskey
+//  @author slspencer
 //  @date   17 Sep, 2023
 //
 //  @copyright
 //  Copyright (C) 2017 - 2022 Seamly, LLC
+//  Copyright (C) 2026 Seamly2D Project
+//  SPDX-License-Identifier: GPL-3.0-or-later
 //  https://github.com/fashionfreedom/seamly2d
 //
 //  @brief
@@ -81,6 +84,8 @@ public:
     void SetPiece(const VPiece &piece);
 
     void setTemplateFile(const QString &filePath);
+    /// @brief Returns the file imported or exported in this editing session; patterns store only its label lines.
+    QString templateFile() const;
 
 private slots:
     void ShowLineDetails();

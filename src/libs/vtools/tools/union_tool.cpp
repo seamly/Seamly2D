@@ -1,6 +1,9 @@
 /***************************************************************************
  **  @file   union_tool.cpp
- **  @author Douglas S Caskey
+ **  @author slspencer
+ **  Copyright (C) 2026 Seamly2D Project
+ **  SPDX-License-Identifier: GPL-3.0-or-later
+ **  https://www.gnu.org/licenses/gpl-3.0.html
  **  @date   17 Sep, 2023
  **
  **  @copyright
@@ -1321,6 +1324,26 @@ void createUnion(quint32 id, const UnionToolInitData &initData, qreal dx, qreal 
     CreateUnitedCSA(newPiece, piece1, piece2, id, blockName, initData, dx, dy, pRotate, angle);
     CreateUnitedInternalPaths(newPiece, piece1, piece2, id, blockName, initData, dx, dy, pRotate, angle);
     createUnitedAnchors(newPiece, piece1, piece2, id, blockName, initData, dx, dy, pRotate, angle);
+    QVector<PieceDrillHole> holes = piece1.drillHoles();
+    QVector<PieceReferenceLine> lines = piece1.referenceLines();
+    QHash<quint32, quint32> anchors;
+    for (int i = 0; i < piece2.getAnchors().size(); ++i)
+    {
+        anchors.insert(piece2.getAnchors().at(i), newPiece.getAnchors().at(piece1.getAnchors().size() + i));
+    }
+    for (PieceDrillHole hole : piece2.drillHoles())
+    {
+        hole.center = anchors.value(hole.center);
+        holes.append(hole);
+    }
+    for (PieceReferenceLine line : piece2.referenceLines())
+    {
+        line.start = anchors.value(line.start);
+        line.end = anchors.value(line.end);
+        lines.append(line);
+    }
+    newPiece.setDrillHoles(holes);
+    newPiece.setReferenceLines(lines);
 
     VPiecePath path = newPiece.GetPath();
     const QRectF rect = QPolygonF(path.PathPoints(initData.data)).boundingRect();

@@ -711,7 +711,7 @@ fn is_non_outline_group(e: &xmltree::Element) -> bool {
         if matches!(
             data_type.as_str(),
             "notch" | "tuck" | "grainline" | "fold_line" | "internal_path" | "drill" | "hole"
-                | "piece_label" | "pattern_label" | "size_label"
+                | "stripe" | "plaid" | "piece_label" | "pattern_label" | "size_label"
         ) {
             return true;
         } // if known decoration type
@@ -771,7 +771,7 @@ fn collect_all_path_points(element: &xmltree::Element, points: &mut Vec<Point>) 
     // Recurse into children, skipping non-outline decoration groups.
     for child in &element.children {
         if let XMLNode::Element(child_elem) = child {
-            // Tuck, notch, grainline, ip, drill, and hole groups are decorations;
+            // Tuck, notch, grainline, ip, drill, hole, stripe, and plaid groups are decorations;
             // their coordinates must not expand the piece's bounding box.
             if is_non_outline_group(child_elem) { continue; }
             collect_all_path_points(child_elem, points);
@@ -967,6 +967,96 @@ fn parse_viewbox_width_px(root: &xmltree::Element) -> Option<u32> {
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
+
+    const MARKED_PRODUCER_CAPTURES: [(&str, &str); 5] = [
+        (
+            "marked-original",
+            include_str!("../test_data/markings/marked_original.svg"),
+        ),
+        (
+            "marked-horizontal",
+            include_str!("../test_data/markings/marked_horizontal.svg"),
+        ),
+        (
+            "marked-vertical",
+            include_str!("../test_data/markings/marked_vertical.svg"),
+        ),
+        (
+            "marked-both",
+            include_str!("../test_data/markings/marked_both.svg"),
+        ),
+        (
+            "marked-multisize",
+            include_str!("../test_data/markings/marked_multisize.svg"),
+        ),
+    ];
+
+    // @brief Remove typed markings while retaining all other producer geometry.
+    fn remove_markings(element: &mut xmltree::Element) {
+        element.children.retain_mut(|node| {
+            let XMLNode::Element(child) = node else {
+                return true;
+            };
+            if matches!(
+                child.attributes.get("data-type").map(String::as_str),
+                Some("drill" | "stripe" | "plaid")
+            ) {
+                return false;
+            } // if mark group
+            remove_markings(child);
+            true
+        });
+    } // fn remove_markings
+
+    // @brief Real producer captures keep the same packed geometry with marks removed.
+    #[test]
+    fn producer_markings_do_not_change_pack_geometry() {
+        for (name, svg) in MARKED_PRODUCER_CAPTURES {
+            let mut marked = svg_dom::Document::parse(svg).expect("producer SVG parses");
+            svg_dom::flatten_dom(&mut marked);
+            hoist_layout_units(&mut marked, false);
+            let mut without_markings = marked.clone();
+            remove_markings(&mut without_markings.root);
+
+            let (marked_pieces, marked_polygons) = extract_piece_rects_and_polygons(&marked);
+            let (plain_pieces, plain_polygons) = extract_piece_rects_and_polygons(&without_markings);
+            assert!(!marked_pieces.is_empty(), "{name}: producer pieces");
+            assert_eq!(marked_pieces.len(), plain_pieces.len(), "{name}: piece count");
+            assert_eq!(marked_polygons.len(), plain_polygons.len(), "{name}: polygon count");
+            for (index, (marked_piece, plain_piece)) in
+                marked_pieces.iter().zip(&plain_pieces).enumerate()
+            {
+                assert_eq!(marked_piece.id, plain_piece.id, "{name} piece {index}: id");
+                assert_eq!(
+                    (marked_piece.rect.w, marked_piece.rect.h),
+                    (plain_piece.rect.w, plain_piece.rect.h),
+                    "{name} piece {index}: packed size"
+                );
+                assert_eq!(
+                    (marked_piece.origin_x, marked_piece.origin_y),
+                    (plain_piece.origin_x, plain_piece.origin_y),
+                    "{name} piece {index}: packed origin"
+                );
+                assert_eq!(
+                    marked_polygons[index].vertices.len(),
+                    plain_polygons[index].vertices.len(),
+                    "{name} piece {index}: cut vertices"
+                );
+                for (vertex_index, (marked_vertex, plain_vertex)) in marked_polygons[index]
+                    .vertices
+                    .iter()
+                    .zip(&plain_polygons[index].vertices)
+                    .enumerate()
+                {
+                    assert!(
+                        (marked_vertex.0 - plain_vertex.0).abs() < 1.0e-6
+                            && (marked_vertex.1 - plain_vertex.1).abs() < 1.0e-6,
+                        "{name} piece {index} vertex {vertex_index}: mark changed cut polygon"
+                    );
+                } // for each cut vertex
+            } // for each piece
+        } // for each producer capture
+    } // producer_markings_do_not_change_pack_geometry
 
     // @brief Two <g> pieces with path data are extracted with correct dimensions.
     #[test]
@@ -1274,6 +1364,25 @@ pub(crate) mod tests {
         assert_eq!(pieces[0].rect.h, 30,
             "height inflated by tuck groups: got {} expected 30", pieces[0].rect.h);
     } // tuck_sibling_bbox_not_inflated
+
+    // @brief Stripe and plaid reference paths do not change packed piece bounds.
+    #[test]
+    fn reference_line_siblings_do_not_inflate_piece_bbox() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <g id="Back">
+    <g id="cutline_Back" data-type="cutline">
+      <path d="M 0 0 L 50 0 L 50 30 L 0 30 Z"/>
+    </g>
+    <g id="stripe_Back" data-type="stripe"><path d="M 5 5 L 500 5"/></g>
+    <g id="plaid_Back" data-type="plaid"><path d="M 5 6 L 5 500"/></g>
+  </g>
+</svg>"#;
+        let doc = svg_dom::Document::parse(svg).expect("parse ok");
+        let pieces = extract_piece_rects(&doc);
+        assert_eq!(pieces.len(), 1);
+        assert_eq!(pieces[0].rect.w, 50);
+        assert_eq!(pieces[0].rect.h, 30);
+    } // reference_line_siblings_do_not_inflate_piece_bbox
 
     // @brief Notch sibling groups must not inflate the piece bounding box.
     //

@@ -1,6 +1,9 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  @file   pattern_piece_dialog.cpp
-//  @author Douglas S Caskey
+//  @author slspencer
+//  Copyright (C) 2026 Seamly2D Project
+//  SPDX-License-Identifier: GPL-3.0-or-later
+//  https://www.gnu.org/licenses/gpl-3.0.html
 //  @date   Dec 11, 2022
 //
 //  Copyright (C) 2017 - 2022 Seamly, LLC
@@ -191,6 +194,7 @@ private:
     VTextGraphicsItem      *m_patternInfo;
     VGrainlineItem         *m_grainLine;
     QGraphicsPathItem      *m_notches;
+    QGraphicsPathItem      *m_markings;
     QGraphicsPathItem      *m_foldLine;
     QGraphicsPathItem*       m_fold_line_arrow;       ///< Arrow line that points at the fold line.
     QGraphicsPathItem*       m_fold_line_arrow_heads; ///< Filled arrow heads of m_fold_line_arrow.
@@ -202,6 +206,7 @@ private:
 
     void                  updateExcludeState();
     void                  refreshFoldLine(const VPiece& piece, const QVector<QPointF>& seam_allowance_points);
+    void                  applyFlipToGeometry(PieceFlip flip);
     void                  updateInternalPaths();
 
     VPieceItem::MoveTypes findLabelGeometry(const VPatternLabelData &labelData, qreal &rotationAngle, qreal &labelWidth,

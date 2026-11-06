@@ -1,14 +1,14 @@
 /************************************************************************
  **
  **  @file   vcmdexport.h
- **  @author Alex Zaharov <alexzkhr@gmail.com>
- **  @date   25 8, 2015
+ **  @author slspencer
+ **  @date   2026
  **
  **  @brief
  **  @copyright
  **  This source code is part of the Valentine project, a pattern making
  **  program, whose allow create and modeling patterns of clothing.
- **  Copyright (C) 2015 Seamly2D project
+ **  Copyright (C) 2026 Seamly2D Project
  **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
  **
  **  Seamly2D is free software: you can redistribute it and/or modify
@@ -56,6 +56,15 @@ public:
     bool                   IsSetGradationHeight() const;
     QString                OptGradationSize() const;
     QString                OptGradationHeight() const;
+    bool                   IsLayoutExportEnabled() const;
+    QString                OptLayoutFormat() const;
+    QString                OptLayoutOutput() const;
+    QString                OptLayoutSettings() const;
+    QString                OptLayoutExportOptions() const;
+    QString                OptSvgTextMode() const;
+    QString                OptLayoutScale() const;
+    bool                   IsSetSvgTextMode() const;
+    bool                   IsSetLayoutScale() const;
 
 protected:
     VCommandLine();
@@ -74,6 +83,8 @@ private:
 
     static void            initOptions(VCommandLineOptions &options,
                                        QMap<QString, int> &optionsIndex);
+    QString                layoutExportError() const;
+    friend class           TST_VCommandLine;
 };
 
 #endif // VCMDEXPORT_H

@@ -1,6 +1,6 @@
 # project: SeamlyLayout
 # author: slspencer, copyright 2026
-# LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
+# MIT License: https://opensource.org/licenses/MIT
 #
 # CMakeLists.txt — Qt 6.11 + QML frontend for SeamlyLayout.
 # Links against libseamly_core (Rust FFI bridge) once Phase 2g is complete.
@@ -135,6 +135,7 @@ qt_add_executable(SeamlyLayout
     src/Platform.cpp
     src/SettingsModel.cpp
     src/StartupOptions.cpp
+    src/HeadlessExport.cpp
     src/PreferencesModel.cpp
     src/PreferencesController.cpp
     src/PreferencesWindow.cpp
@@ -461,10 +462,32 @@ target_link_libraries(SettingsModelTests PRIVATE
 
 add_test(NAME SettingsModelTests COMMAND SettingsModelTests)
 
-# Both use QTEST_MAIN (a real QGuiApplication) and link Qt6::Widgets, so like
-# AdjustSceneTests/AdjustControllerTests above they need a platform plugin
+# Export-menu guards depend on the selected layout view and paper type.
+add_executable(ExportMenuTests
+    ${SEAMLYLAYOUT_TEST_DIR}/ExportMenuTests.cpp
+)
+
+qt_add_resources(ExportMenuTests "export-menu"
+    PREFIX "/qml"
+    BASE "${CMAKE_CURRENT_SOURCE_DIR}/qml"
+    FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/qml/ExportMenu.qml"
+)
+
+target_link_libraries(ExportMenuTests PRIVATE
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Qml
+    Qt6::Quick
+    Qt6::QuickControls2
+    Qt6::Test
+)
+
+add_test(NAME ExportMenuTests COMMAND ExportMenuTests)
+
+# These suites use QTEST_MAIN and need a platform plugin
 # that works without a display on a CI runner.
-set_tests_properties(PreferencesModelTests SettingsModelTests PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+set_tests_properties(PreferencesModelTests SettingsModelTests ExportMenuTests PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 
 # Layout.10 — where the session log file is written. Logger touches the file
 # system, so the suite runs under QStandardPaths test mode and never reaches the
@@ -545,6 +568,7 @@ if(WIN32)
         AdjustControllerTests
         PreferencesModelTests
         SettingsModelTests
+        ExportMenuTests
         StartupOptionsTests
         LoggerTests
         DataDirectoryTests

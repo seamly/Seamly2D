@@ -2,6 +2,21 @@
 
 ## Current status
 
+### Active implementation batch
+
+- Batch integrates locally into `run-seamlyLayout`, including the earlier committed Flip context-menu work; no push is authorized.
+- Implemented schema v0.7.8/v0.7.9, template filenames, independent Copy Piece, drill holes, stripe/plaid references, fitted handoff, and headless exports.
+- Fixed incomplete-layout success, invalid-argument dialogs, redirected stderr, and tiled PDF page-size rounding.
+- Build6 passed `nmake check`, CTest 8/8, Cargo workspace tests, and MSI validation. Log: `build/batch-suite-build-6.log`.
+- Actual CLI checks pass individual and multisize-input exports across ten public formats, pattern statuses 19/19, and SeamlyMe 13/13.
+- Handoff comparisons pass all 25 real patterns at 0.01 px. Real marking fixtures cover transforms, grading, metric/English DXF, and unchanged packing bounds.
+- Production uses the fitted handoff; the comparison switch is removed. Layout.107 moved to completed; other checkboxes reflect only verified portions.
+- Open: installed-app/CAD checks, exhaustive older CLI-option audit, flipped-source copy fixtures, and exact Richmond `.sm2d` plus measurements (absent).
+- Final cached Richmond tests pass both Letter/A4 orientations and 144 pt calibration; input files are copied before CLI validation.
+- Next: finish open TODO verification and exhaustive CLI audit before declaring the entire backlog complete; then proceed to Linux/macOS pipelines.
+- All five isolated worktrees were clean before cleanup; their changes are integrated. Build outputs and detailed logs remain under `build/`.
+- Qt source-tree executables require matching `QT_PLUGIN_PATH`; validation scripts discover plugins from qmake. Generated version stamps were restored.
+
 ### 2026-11-02 — Layout Mode sends the lines without the fold line edge (Seamly2D.71.14); merged into local `run-seamlyLayout`, not pushed
 
 - Request (user): change the old writer now. `VLayoutPiece` sends `seamline` and `cutline` as `HandoffPiece` does: start at the fold line end, end at the fold line start, no `Z`.

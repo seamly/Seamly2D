@@ -1,10 +1,13 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  @file   pattern_piece_dialog.cpp
 //  @author Douglas S Caskey
+//  @author slspencer
 //  @date   17 Sep, 2023
 //
 //  @copyright
 //  Copyright (C) 2017 - 2026 Seamly, LLC
+//  Copyright (C) 2026 Seamly2D Project
+//  SPDX-License-Identifier: GPL-3.0-or-later
 //  https://github.com/fashionfreedom/seamly2d
 //
 //  @brief
@@ -52,6 +55,7 @@
 #include "ui_pattern_piece_dialog.h"
 
 #include "internal_path_dialog.h"
+#include "PieceMarkingsEditor.h"
 #include "vpointf.h"
 #include "visualization/path/pieceanchorpoint_visual.h"
 #include "visualization/path/pattern_piece_visual.h"
@@ -142,6 +146,8 @@ PatternPieceDialog::PatternPieceDialog(const VContainer *data, const quint32 &to
     , m_saWidth(0)
     , m_patternLabelLines()
     , m_pieceLabelLines()
+    , m_piece_template_file()
+    , m_pattern_template_file()
     , m_beep(new QSoundEffect())
     , m_undoStack()
 {
@@ -168,6 +174,15 @@ PatternPieceDialog::PatternPieceDialog(const VContainer *data, const quint32 &to
     initializeGrainlineTab();
     initializeAnchorsTab();
     initializeNotchesTab();
+    m_drill_editor = new PieceMarkingsEditor(true, this);
+    m_reference_editor = new PieceMarkingsEditor(false, this);
+    ui->pages_StackedWidget->addWidget(m_drill_editor);
+    ui->pages_StackedWidget->addWidget(m_reference_editor);
+    ui->menuTab_ListWidget->addItem(tr("Drill holes"));
+    ui->menuTab_ListWidget->addItem(tr("Reference lines"));
+    enableApply(applyAllowed);
+    connect(m_drill_editor, &PieceMarkingsEditor::changed, this, &PatternPieceDialog::CheckState);
+    connect(m_reference_editor, &PieceMarkingsEditor::changed, this, &PatternPieceDialog::CheckState);
 
     flagName = true;
     ChangeColor(ui->editName_Label, okColor);
@@ -211,6 +226,12 @@ void PatternPieceDialog::pageChanged(QListWidgetItem *current, QListWidgetItem *
     }
     int rowIndex = ui->menuTab_ListWidget->row(current);
     ui->pages_StackedWidget->setCurrentIndex(rowIndex);
+    if (m_drill_editor != nullptr && m_reference_editor != nullptr)
+    {
+        const auto anchors = GetListInternals<quint32>(ui->anchorPoints_ListWidget);
+        m_drill_editor->setPoints(anchors, data);
+        m_reference_editor->setPoints(anchors, data);
+    }
 
     if (rowIndex == TabOrder::Labels || rowIndex == TabOrder::AnchorPoints || rowIndex == TabOrder::Grainline)
     {
@@ -236,7 +257,7 @@ void PatternPieceDialog::enableApply(bool enable)
     if (applyAllowed == true)
     {
         qCDebug(pattern_piece_dialog, "PatternPieceDialog applyAllowed = True");
-        for (int i = TabOrder::SeamAllowance; i < TabOrder::Count; ++i)
+        for (int i = TabOrder::SeamAllowance; i < ui->menuTab_ListWidget->count(); ++i)
         {
             auto flags = ui->menuTab_ListWidget->item(i)->flags();
             ui->menuTab_ListWidget->item(i)->setFlags(flags | Qt::ItemIsEnabled);
@@ -245,7 +266,7 @@ void PatternPieceDialog::enableApply(bool enable)
     else
     {
         qCDebug(pattern_piece_dialog, "PatternPieceDialog applyAllowed = False");
-        for (int i = TabOrder::SeamAllowance; i < TabOrder::Count; ++i)
+        for (int i = TabOrder::SeamAllowance; i < ui->menuTab_ListWidget->count(); ++i)
         {
             auto flags = ui->menuTab_ListWidget->item(i)->flags();
             ui->menuTab_ListWidget->item(i)->setFlags(flags & ~Qt::ItemIsEnabled);
@@ -290,6 +311,10 @@ void PatternPieceDialog::SetPiece(const VPiece &piece)
     }
 
     initAnchorPointComboboxes();
+    m_drill_editor->setPoints(piece.getAnchors(), data);
+    m_reference_editor->setPoints(piece.getAnchors(), data);
+    m_drill_editor->setMarkings(piece.drillHoles(), {});
+    m_reference_editor->setMarkings({}, piece.referenceLines());
 
     ui->startPoint_ComboBox->blockSignals(true);
     ui->startPoint_ComboBox->clear();
@@ -338,6 +363,8 @@ void PatternPieceDialog::SetPiece(const VPiece &piece)
     m_user_on_fold = m_oldData.IsOnFold() && !piece.hasFoldLine();
     updateFoldCheckBox();
     m_pieceLabelLines = m_oldData.GetLabelTemplate();
+    m_piece_template_file = NewPieceDefaults::pieceLabelTemplateFile(m_pieceLabelLines);
+    refreshTemplateFileLabels();
 
     ui->arrow_ComboBox->setCurrentIndex(int(piece.GetGrainlineGeometry().getArrowType()));
 
@@ -588,7 +615,11 @@ void PatternPieceDialog::CheckState()
                     && flagMainPath
                     && flagGrainlineArrow && (flagGrainlineFormula || flagGrainlineAnchor)
                     && flagPieceLabelAngle && (flagPieceLabelFormula || flagPieceLabelAnchor)
-                    && flagPatternLabelAngle && (flagPatternLabelFormula || flagPatternLabelAnchor));
+                    && flagPatternLabelAngle && (flagPatternLabelFormula || flagPatternLabelAnchor)
+                    && (m_drill_editor == nullptr || (m_drill_editor->markingsValid()
+                        && m_reference_editor->markingsValid() && PieceMarkings::valid(m_drill_editor->drillHoles(),
+                        m_reference_editor->referenceLines(),
+                        GetListInternals<quint32>(ui->anchorPoints_ListWidget)))));
 
     if (applyAllowed)
     {
@@ -1293,6 +1324,10 @@ void PatternPieceDialog::showAnchorsContextMenu(const QPoint &pos)
     {
         delete ui->anchorPoints_ListWidget->item(row);
         initAnchorPointComboboxes();
+        const auto anchors = GetListInternals<quint32>(ui->anchorPoints_ListWidget);
+        m_drill_editor->setPoints(anchors, data);
+        m_reference_editor->setPoints(anchors, data);
+        CheckState();
     }
 }
 
@@ -2710,13 +2745,15 @@ void PatternPieceDialog::editPatternLabel()
     QVector<VLabelTemplateLine> patternLabelLines = qApp->getCurrentDocument()->getPatternLabelTemplate();
     EditLabelTemplateDialog editor(qApp->getCurrentDocument());
     editor.SetTemplate(patternLabelLines);
-    editor.setTemplateFile(NewPieceDefaults::patternLabelTemplateFile(patternLabelLines));
+    editor.setTemplateFile(m_pattern_template_file);
     editor.SetPiece(GetPiece());
 
     if (QDialog::Accepted == editor.exec())
     {
         patternLabelLines = editor.GetTemplate();
         qApp->getCurrentDocument()->setPatternLabelTemplate(patternLabelLines);
+        m_pattern_template_file = editor.templateFile();
+        refreshTemplateFileLabels();
         emit qApp->getCurrentDocument()->updatePatternLabel();
     }
 }
@@ -2726,12 +2763,14 @@ void PatternPieceDialog::editPieceLabel()
 {
     EditLabelTemplateDialog editor(qApp->getCurrentDocument());
     editor.SetTemplate(m_pieceLabelLines);
-    editor.setTemplateFile(NewPieceDefaults::pieceLabelTemplateFile(m_pieceLabelLines));
+    editor.setTemplateFile(m_piece_template_file);
     editor.SetPiece(GetPiece());
 
     if (QDialog::Accepted == editor.exec())
     {
         m_pieceLabelLines = editor.GetTemplate();
+        m_piece_template_file = editor.templateFile();
+        refreshTemplateFileLabels();
     }
 }
 
@@ -2743,6 +2782,11 @@ VPiece PatternPieceDialog::CreatePiece() const
     piece.SetCustomSARecords(GetListInternals<CustomSARecord>(ui->customSeamAllowance_ListWidget));
     piece.SetInternalPaths(GetListInternals<quint32>(ui->internalPaths_ListWidget));
     piece.setAnchors(GetListInternals<quint32>(ui->anchorPoints_ListWidget));
+    if (m_drill_editor != nullptr && m_reference_editor != nullptr)
+    {
+        piece.setDrillHoles(m_drill_editor->drillHoles());
+        piece.setReferenceLines(m_reference_editor->referenceLines());
+    }
     piece.setFlip(static_cast<PieceFlip>(ui->flip_ButtonGroup->checkedId()));
     piece.SetSeamAllowance(ui->seams_CheckBox->isChecked());
     piece.SetSeamAllowanceBuiltIn(ui->builtIn_CheckBox->isChecked());
@@ -3518,7 +3562,19 @@ void PatternPieceDialog::initializeLabelsTab()
 
     enabledPatternLabel();
 
+    m_piece_template_file = NewPieceDefaults::pieceLabelTemplateFile(m_pieceLabelLines);
+    m_pattern_template_file = NewPieceDefaults::patternLabelTemplateFile(m_patternLabelLines);
+    refreshTemplateFileLabels();
+
     ui->pieceName_LineEdit->setText(createPieceName());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Shows the known label template files, or none for lines without a known source file.
+void PatternPieceDialog::refreshTemplateFileLabels() const
+{
+    NewPieceDefaults::showLabelTemplateFile(ui->pieceTemplateFile_Label, m_piece_template_file);
+    NewPieceDefaults::showLabelTemplateFile(ui->patternTemplateFile_Label, m_pattern_template_file);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

@@ -145,6 +145,7 @@ private slots:
     void ConverterRemovesFoldPosition_data() const;
     void ConverterRemovesFoldPosition() const;
     void PieceFlipValuesRoundTrip() const;
+    void PieceFlipTransformMirrorsAboutCenter() const;
     void LayoutPieceKeepsFlip() const;
     void LayoutPieceKeepsPieceProperties() const;
     void RotationStepDegrees() const;
