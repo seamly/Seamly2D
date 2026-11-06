@@ -48,6 +48,7 @@
 #include <QGraphicsRectItem>
 #include <QGraphicsScene>
 #include <QRegularExpression>
+#include <limits>
 
 using namespace layout_handoff;
 
@@ -626,6 +627,67 @@ void TST_HandoffDocument::emptyLabelLinesMatchOldWriter() const
     const QDomDocument new_dom = make_new_document({placed}, {});
     QCOMPARE(count_type(flatten_document(new_dom), QStringLiteral("piece_label")), 0);
     compare_entries(flatten_document(new_dom), flatten_document(old_dom));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Marks preserve pixel dimensions and placement without changing the piece extent.
+ */
+void TST_HandoffDocument::markingsKeepTheirGeometryAndRejectInvalidData() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+    TestPatternDocument document;
+    VAbstractPattern *previous = qApp->getCurrentDocument();
+    qApp->setCurrentDocument(&document);
+    VPiece piece = make_piece(data.data(), true, false, false);
+    set_label_templates(&document, &piece);
+    HandoffPlacedPiece placed = placed_piece(piece, data.data(), &document, QString(), QString());
+    qApp->setCurrentDocument(previous);
+    const HandoffStyle style = HandoffStyle::from_settings(*qApp->Settings());
+    const QRectF extent = piece_extent(placed.piece, style);
+    QVERIFY(placed.piece.set_markings({{QPointF(120, 130), 8}},
+        {{QLineF(20, 30, 240, 250), QStringLiteral("stripe")},
+         {QLineF(30, 40, 260, 270), QStringLiteral("plaid")}}));
+    QCOMPARE(piece_extent(placed.piece, style), extent);
+    placed.offset = QPointF(11, 12);
+    HandoffDocument handoff;
+    handoff.set_style(style);
+    handoff.add_piece(placed);
+    const QDomDocument dom = handoff.to_dom();
+    const QDomNodeList circles = dom.elementsByTagName(QStringLiteral("circle"));
+    QCOMPARE(circles.size(), 1);
+    const QDomElement circle = circles.at(0).toElement();
+    QCOMPARE(circle.attribute(QStringLiteral("cx")), QStringLiteral("120"));
+    QCOMPARE(circle.attribute(QStringLiteral("cy")), QStringLiteral("130"));
+    QCOMPARE(circle.attribute(QStringLiteral("r")), QStringLiteral("4"));
+    QCOMPARE(circle.parentNode().parentNode().toElement().attribute(QStringLiteral("data-diameter")),
+             QStringLiteral("8"));
+    QCOMPARE(parse_matrix(circle.parentNode().toElement().attribute(QStringLiteral("transform")))
+                 .map(QPointF(120, 130)), QPointF(131, 142));
+    const QVector<Entry> flattened = flatten_document(dom);
+    QCOMPARE(count_type(flattened, QStringLiteral("drill")), 1);
+    QCOMPARE(count_type(flattened, QStringLiteral("stripe")), 1);
+    QCOMPARE(count_type(flattened, QStringLiteral("plaid")), 1);
+    QVERIFY(!placed.piece.set_markings({{QPointF(120, 130), 0}}, {}));
+    HandoffDocument invalid;
+    invalid.add_piece(placed);
+    QVERIFY(invalid.to_dom().isNull());
+    QVERIFY(invalid.to_svg_string().isEmpty());
+    QVERIFY(!placed.piece.set_markings({}, {{QLineF(1, 1, 1, 1), QStringLiteral("stripe")}}));
+    QVERIFY(!placed.piece.set_markings({}, {{QLineF(1, 1, 2, 2), QStringLiteral("other")}}));
+    QVERIFY(!placed.piece.set_markings({{QPointF(), std::numeric_limits<qreal>::infinity()}}, {}));
+    QVERIFY(!placed.piece.set_markings({{QPointF(std::numeric_limits<qreal>::quiet_NaN(), 1), 2}}, {}));
+    QVERIFY(placed.piece.set_markings({{QPointF(1200, 1300), 8}},
+        {{QLineF(20.000001, 30, 20.000002, 30), QStringLiteral("stripe")}}));
+    QCOMPARE(piece_extent(placed.piece, style), extent);
+    HandoffDocument precise;
+    precise.add_piece(placed);
+    const QDomDocument precise_dom = precise.to_dom();
+    const QDomElement precise_circle = precise_dom.elementsByTagName(QStringLiteral("circle")).at(0).toElement();
+    QCOMPARE(precise_circle.attribute(QStringLiteral("cx")), QStringLiteral("1200"));
+    QVERIFY(precise_dom.toString().contains(QStringLiteral("M20.000001,30 L20.000002,30")));
 }
 
 //---------------------------------------------------------------------------------------------------------------------

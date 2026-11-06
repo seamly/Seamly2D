@@ -186,6 +186,7 @@ private:
     void        add_paths(const QVector<HandoffPath> &paths, const QString &type);
     void        add_label(const HandoffLabel &label, const QString &type);
     void        add_grainline();
+    void        add_markings();
     QTransform  placement() const;
 
     QDomDocument              m_doc;
@@ -580,6 +581,39 @@ void PieceWriter::write_components()
     add_label(m_placed.piece_label, QStringLiteral("piece_label"));
     add_label(m_placed.pattern_label, QStringLiteral("pattern_label"));
     add_grainline();
+    add_markings();
+}
+
+/**
+ * @brief Writes drill circles and reference lines in the same piece frame as internal paths.
+ */
+void PieceWriter::add_markings()
+{
+    // New markings have no legacy rounding contract; retain distinct live endpoints.
+    const auto coordinate = [](qreal value) { return QString::number(value, 'g', 16); };
+    for (const HandoffDrillHole &hole : m_placed.piece.drill_holes())
+    {
+        QDomElement group = make_group(QStringLiteral("drill"));
+        group.setAttribute(QStringLiteral("data-diameter"), coordinate(hole.diameter));
+        QDomElement styled = add_path(group, QString(), m_style.seam, Qt::FlatCap, QStringLiteral("miter"));
+        styled.removeChild(styled.firstChild());
+        QDomElement circle = m_doc.createElement(QStringLiteral("circle"));
+        circle.setAttribute(QStringLiteral("cx"), coordinate(hole.center.x()));
+        circle.setAttribute(QStringLiteral("cy"), coordinate(hole.center.y()));
+        circle.setAttribute(QStringLiteral("r"), coordinate(hole.diameter / 2));
+        styled.appendChild(circle);
+        m_piece_group.appendChild(group);
+    }
+    for (const HandoffReferenceLine &reference : m_placed.piece.reference_lines())
+    {
+        QDomElement group = make_group(reference.type);
+        const QString path = QStringLiteral("M%1,%2 L%3,%4")
+            .arg(coordinate(reference.line.x1()), coordinate(reference.line.y1()),
+                 coordinate(reference.line.x2()), coordinate(reference.line.y2()));
+        add_path(group, path,
+                 m_style.seam, Qt::FlatCap, QStringLiteral("miter"));
+        m_piece_group.appendChild(group);
+    }
 }
 } // namespace
 
@@ -684,6 +718,13 @@ void HandoffDocument::add_piece(const HandoffPlacedPiece &placed)
 //---------------------------------------------------------------------------------------------------------------------
 QDomDocument HandoffDocument::to_dom() const
 {
+    for (const HandoffPlacedPiece &placed : m_pieces)
+    {
+        if (!placed.piece.marking_error().isEmpty())
+        {
+            return {};
+        }
+    }
     QDomDocument doc;
     doc.appendChild(doc.createProcessingInstruction(QStringLiteral("xml"),
                                                     QStringLiteral("version='1.0' encoding='UTF-8' standalone='no'")));

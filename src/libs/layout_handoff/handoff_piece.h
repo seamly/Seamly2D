@@ -94,6 +94,24 @@ struct HandoffNotches
 };
 
 /**
+ * @brief A drill hole keeps a live size's resolved centre and a positive diameter in pixels.
+ */
+struct HandoffDrillHole
+{
+    QPointF center;
+    qreal diameter = 0;
+};
+
+/**
+ * @brief A stripe or plaid reference line is decoration, not a packing constraint.
+ */
+struct HandoffReferenceLine
+{
+    QLineF line;
+    QString type; ///< Exactly "stripe" or "plaid".
+};
+
+/**
  * @brief HandoffPiece holds the geometry of one piece, in the piece's own pixel coordinates.
  */
 class HandoffPiece
@@ -105,6 +123,17 @@ public:
      * @param pattern pattern data; must not be null.
      */
     static HandoffPiece create(const VPiece &piece, const VContainer *pattern);
+
+    /**
+     * @brief Replaces resolved piece markings and validates their coordinates and dimensions.
+     * @return False invalidates the entire handoff document; no malformed marking is silently dropped.
+     */
+    bool set_markings(const QVector<HandoffDrillHole> &drill_holes,
+                      const QVector<HandoffReferenceLine> &reference_lines);
+
+    const QVector<HandoffDrillHole> &drill_holes() const;
+    const QVector<HandoffReferenceLine> &reference_lines() const;
+    const QString &marking_error() const;
 
     /**
      * @brief unify_piece_turn_points makes a node that is a turn point in one size a turn point in every size.
@@ -208,6 +237,9 @@ private:
     HandoffLine          m_built_in_seam_line;
     HandoffLine          m_built_in_cut_line;
     HandoffNotches       m_notches;
+    QVector<HandoffDrillHole> m_drill_holes;
+    QVector<HandoffReferenceLine> m_reference_lines;
+    QString m_marking_error;
     QVector<HandoffPath> m_internal_paths;
     QVector<HandoffPath> m_cutout_paths;
     QVector<QPointF>     m_grainline_points;

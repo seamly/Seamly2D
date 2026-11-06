@@ -47,6 +47,7 @@ private slots:
     void multisizePiecesMatchOldWriter() const;
     void alignedDocumentKeepsComparisonUnchanged() const;
     void emptyLabelLinesMatchOldWriter() const;
+    void markingsKeepTheirGeometryAndRejectInvalidData() const;
     void sheetMatchesOldScene_data() const;
     void sheetMatchesOldScene() const;
     void emptySheetKeepsPositions() const;

@@ -446,6 +446,53 @@ bool HandoffPiece::has_shape() const
     return !m_seam_line.points.isEmpty() || !m_cut_line.points.isEmpty();
 }
 
+bool HandoffPiece::set_markings(const QVector<HandoffDrillHole> &drill_holes,
+                               const QVector<HandoffReferenceLine> &reference_lines)
+{
+    m_drill_holes.clear();
+    m_reference_lines.clear();
+    m_marking_error.clear();
+    const auto finite = [](const QPointF &point)
+    {
+        return qIsFinite(point.x()) && qIsFinite(point.y());
+    };
+    for (const HandoffDrillHole &hole : drill_holes)
+    {
+        if (!finite(hole.center) || !qIsFinite(hole.diameter) || hole.diameter <= 0)
+        {
+            m_marking_error = QStringLiteral("A drill hole needs a finite centre and a positive finite diameter.");
+            return false;
+        }
+    }
+    for (const HandoffReferenceLine &reference : reference_lines)
+    {
+        if ((reference.type != QLatin1String("stripe") && reference.type != QLatin1String("plaid"))
+            || !finite(reference.line.p1()) || !finite(reference.line.p2()) || reference.line.isNull())
+        {
+            m_marking_error = QStringLiteral("A stripe or plaid line needs two distinct finite endpoints.");
+            return false;
+        }
+    }
+    m_drill_holes = drill_holes;
+    m_reference_lines = reference_lines;
+    return true;
+}
+
+const QVector<HandoffDrillHole> &HandoffPiece::drill_holes() const
+{
+    return m_drill_holes;
+}
+
+const QVector<HandoffReferenceLine> &HandoffPiece::reference_lines() const
+{
+    return m_reference_lines;
+}
+
+const QString &HandoffPiece::marking_error() const
+{
+    return m_marking_error;
+}
+
 //---------------------------------------------------------------------------------------------------------------------
 bool HandoffPiece::has_seam_allowance() const
 {

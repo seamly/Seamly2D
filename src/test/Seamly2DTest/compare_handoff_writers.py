@@ -99,6 +99,12 @@ def entries(filename):
             metadata["text"] = "".join(element.itertext())
             result.append(("text", metadata, [("anchor", point(matrix, float(element.get("x", 0)),
                                                              float(element.get("y", 0))))]))
+        elif name == "circle":
+            x, y, radius = (float(element.get(key, 0)) for key in ("cx", "cy", "r"))
+            result.append(("circle", dict(styles),
+                           [("center", point(matrix, x, y)),
+                            ("axis-x", point(matrix, x+radius, y)),
+                            ("axis-y", point(matrix, x, y+radius))]))
         for child in element:
             visit(child, matrix, styles)
 

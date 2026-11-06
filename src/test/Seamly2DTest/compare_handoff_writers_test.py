@@ -53,6 +53,11 @@ class HandoffComparisonTests(unittest.TestCase):
         with self.assertRaises(Exception):
             self.check("", "<svg/>")
 
+    def test_circle_radius_is_not_ignored(self):
+        old = "<svg><circle cx='10' cy='20' r='3'/></svg>"
+        self.assertIsNone(self.check(old, old))
+        self.assertIn("point", self.check(old, old.replace("r='3'", "r='4'")))
+
 
 if __name__ == "__main__":
     unittest.main()

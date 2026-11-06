@@ -83,6 +83,16 @@ Each piece is a `piece-set` group holding that piece once per size.
 - Each size keeps its drafted position. The Nested tab stacks the sizes on the centre of each outline's bounding box: the `cutline` groups, else the `seamline` groups (`svg_dom::center_piece_sets`). When every size has a `fold_line`, the sizes stack on the first point of the fold line instead, so the fold lines lie on top of each other; Settings > "Place fold lines on the left edge" then lays the whole stack on the left edge (`fold_line_edge.rs`). Sizes whose fold lines do not share one line stay off the edge with a warning.
 - Tests: `TST_SvgComponentTags::Multisize*` (producer), `piece_extractor` and `layout_utils` `multisize` tests (consumer).
 
+### Drill holes and reference lines
+
+- Each `drill` component has `data-diameter` in pixels and one `<circle cx="…" cy="…" r="…">`.
+- The circle radius is half the diameter. Its centre uses the current size's resolved modeling anchor.
+- Each `stripe` or `plaid` component contains one absolute `M… L…` path with two distinct endpoints.
+- A styled child group applies the same sheet placement matrix as an internal path.
+- Markings do not change cut outlines, packing bounds, grain direction, or rotation constraints.
+- Non-finite coordinates, non-positive diameters, unknown line types, and coincident endpoints invalidate the entire document.
+- Piece sizes retain the same drill diameter; only the live anchor positions grade.
+
 ### Materials
 
 Seamly2D hands off one pattern group per material, in the order the materials first appear: `<g id="pattern-1" data-type="pattern" data-material="Fabric">`, `<g id="pattern-2" ... data-material="Lining">`. Each piece sits in the group of its material, and its `data-parent` names that group. A pattern with one material keeps the single `pattern-1` group. The stdin contract is unchanged: one SVG document.
