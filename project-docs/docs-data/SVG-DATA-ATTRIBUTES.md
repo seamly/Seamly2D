@@ -141,6 +141,19 @@ The comparator checks tagged tree order, attributes, effective styles, text, top
 It ignores untagged wrappers and serialization formatting, but never relaxes the 0.01 px coordinate tolerance.
 Set `HANDOFF_ANNOTATION_FIXTURE` to a new jacket capture to run its independent Qt containment and stacking checks.
 
+The verified capture manifest contains these patterns:
+
+| Set | Patterns, each loaded and compared |
+|---|---|
+| Eight bundled samples | `jacket1_52-176`, `jacket2_40-146`, `jacket3_40-146`, `jacket4_40-146`, `jacket5_30-110`, `jacket6_30-110`, `male_shirt`, `trousers` |
+| Thirteen CollectionTest patterns | `bra`, `pants1_52-176`, `pants2_40-146`, `pants7`, `tshirt_test`, `test_dart`, `basic_block_women-2016`, `gent_jacket_with_tummy`, `steampunk_trousers`, `patron_blusa`, `pajama_top_wrap2`, `keiko_skirt`, `pantalon_base_Eli` |
+| Four additional CollectionTest patterns | `modell_2`, `imk_zhaketa_poluprilegayuschego_silueta`, `moulage_05_armhole_neckline`, `07_armhole_adjustment_010` |
+
+`capture-results.json` records every input path, process exit status, and capture completeness.
+Every process exited zero. Every old/new comparison passed, and all aligned-document warning files were empty.
+The empty pairs were `bra`, `moulage_05_armhole_neckline`, and `pantalon_base_Eli`.
+These results verify writer parity and generated geometry, not MSI interaction or downstream CAD import.
+
 ### Size labels
 
 At import, SeamlyLayout adds a label to every multisize piece (`data-size` set): `<g id="size_label_<piece id>" data-type="size_label" data-type-number="1" data-parent="<piece name>">`, the last child of the piece, with one `<text>` "Size <size>" (Arial, 24 px, `text-anchor="middle"`).
