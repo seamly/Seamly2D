@@ -639,7 +639,7 @@ void StartupOptionsTests::headlessExport_validatesPngScale()
     QVERIFY(directory.isValid());
     const QString svgPath = makeFile(directory, QStringLiteral("pattern.svg"));
 
-    for (const QString &scale : {QStringLiteral("nan"), QStringLiteral("1e100")}) {
+    for (const QString &scale : {QStringLiteral("nan"), QStringLiteral("1e100"), QStringLiteral("1e-100")}) {
         const StartupOptions options = StartupOptions::parse(QStringList{
             QStringLiteral("SeamlyLayout"), QStringLiteral("--export"), QStringLiteral("png"),
             QStringLiteral("--output"), directory.filePath(QStringLiteral("out.png")),

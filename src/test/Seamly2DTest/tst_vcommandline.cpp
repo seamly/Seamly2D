@@ -235,7 +235,7 @@ void TST_VCommandLine::LayoutExportScale()
 //---------------------------------------------------------------------------------------------------------------------
 void TST_VCommandLine::LayoutExportRejectsInvalidScale()
 {
-    for (const QString &scale : {QStringLiteral("0"), QStringLiteral("1e100")}) {
+    for (const QString &scale : {QStringLiteral("0"), QStringLiteral("1e100"), QStringLiteral("1e-100")}) {
         VCommandLine command_line;
         const QStringList arguments{
             QStringLiteral("seamly2d"),

@@ -504,7 +504,7 @@ QString VCommandLine::layoutExportError() const
         const double scale = OptLayoutScale().toDouble(&scale_ok);
         if (!scale_ok || !std::isfinite(scale) || scale <= 0.0 ||
             scale > static_cast<double>((std::numeric_limits<float>::max)()) ||
-            format != QStringLiteral("png"))
+            static_cast<float>(scale) <= 0.0F || format != QStringLiteral("png"))
         {
             return translate("VCommandLine", "--layout-scale requires a positive PNG export scale.");
         }

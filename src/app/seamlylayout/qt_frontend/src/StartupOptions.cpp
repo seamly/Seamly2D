@@ -390,7 +390,7 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
         ? parser.value(scaleOption).toDouble(&scaleOk)
         : 1.0;
     if (!scaleOk || !std::isfinite(scale) || scale <= 0.0 ||
-        scale > static_cast<double>((std::numeric_limits<float>::max)())) {
+        scale > static_cast<double>((std::numeric_limits<float>::max)()) || static_cast<float>(scale) <= 0.0F) {
         return fail(QStringLiteral("--scale must be a positive number."));
     } // if scale is invalid
 

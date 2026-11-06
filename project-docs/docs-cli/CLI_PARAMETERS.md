@@ -71,3 +71,28 @@ The old Seamly2D writer options remain removed: `-b`/`--basename`,
 `-c`/`--crop`, `-u`/`--unite`, `-S`/`--savelen`, `-l`/`--layounits`,
 `-s`/`--shiftlen`, `-G`/`--gapwidth`, and `-g`/`--groups`. The
 `--layout-*` options above map only to SeamlyLayout exports.
+
+## Automated headless validation
+
+Run from the repository root after building SeamlyLayout:
+
+```text
+python src\test\SeamlyLayoutTest\test_headless_export.py <seamlylayout-executable> build\cli-validation
+```
+
+The runner uses an isolated data directory and Qt's offscreen platform.
+It checks public formats, file signatures, SVG piece count, stdin transport,
+diagnostics, and exit statuses. G-Code and 3MF must report unavailable in the
+standard build. Tiled PDF uses an explicit `paperType: tiled` settings file.
+Each process has a timeout. Any failed check returns a nonzero runner status.
+
+Add `--seamly2d <executable> --pattern <pattern.sm2d>` to validate waiting
+pass-through for every format and child-error propagation.
+Add `--measurements <file.smis-or-smms>`, `--size <cm>`, and `--height <cm>`
+to exercise measurement and gradation overrides.
+The runner sets the SeamlyLayout executable path only in its isolated settings.
+
+The synthetic two-piece smoke test does not replace geometry-fidelity checks.
+Real-pattern coverage requires the optional Seamly2D arguments.
+Use a short shadow-build path on Windows; generated CXX-Qt wrapper paths can
+otherwise exceed the compiler's path-length limit.
