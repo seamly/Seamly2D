@@ -121,3 +121,8 @@ An input `.sm2d` pattern returns status 66 because it is not a measurement file.
 ```text
 python src\test\Seamly2DTest\test_measurement_cli.py <seamlyme-executable> build\measurement-cli --individual <measurements.smis> --multisize <measurements.smms> --pattern <pattern.sm2d>
 ```
+
+Pattern load failures retain the loader's status: 66 for unreadable inputs or
+measurements, and 65 for invalid formulas.
+Run `python src\test\CollectionTest\test_pattern_input_status.py <seamly2d-executable> build\pattern-status`
+to check valid inputs and these failures in both CLI modes.

@@ -8184,8 +8184,7 @@ void MainWindow::processCommandLine()
 
         if (!loaded && not Application2D::isGUIMode())
         {
-            qApp->exit(V_EX_DATAERR);
-            return; // process only one input file
+            return; // LoadPattern already selected the input-error or measurement-forwarding exit status.
         }
 
         if (loaded && (cmd->IsTestModeEnabled() || layout_export))
