@@ -1,13 +1,13 @@
 /******************************************************************************
  *   @file   tmainwindow.cpp
- **  @author Douglas S Caskey
+ **  @author slspencer
  **  @date   25 Jan, 2024
  **
  **  @brief
  **  @copyright
  **  This source code is part of the Seamly2D project, a pattern making
  **  program to create and model patterns of clothing.
- **  Copyright (C) 2017-2024 Seamly2D project
+ **  Copyright (C) 2026 Seamly2D Project
  **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
  **
  **  Seamly2D is free software: you can redistribute it and/or modify
@@ -82,6 +82,7 @@
 #include <QClipboard>
 #include <QComboBox>
 #include <QDesktopServices>
+#include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QLabel>
@@ -451,39 +452,29 @@ void TMainWindow::FileNew()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief OpenIndividual opens the individual-measurement picker in its configured directory.
+ */
 void TMainWindow::OpenIndividual()
 {
     const QString filter = tr("Individual measurements") + QLatin1String(" (*.") + smisExt +
                                                            QLatin1String(" *.") + vitExt  + QLatin1String(");;") +
                            tr("All files") + QLatin1String(" (*.*)");
 
-	//Use standard path to individual measurements
 	const QString dir = qApp->seamlyMeSettings()->getIndividualSizePath();
-
-	bool usedNotExistedDir = false;
-	QDir directory(dir);
-	if (!directory.exists())
-	{
-		usedNotExistedDir = directory.mkpath(".");
-	}
-
 	Open(dir, filter);
-
-	if (usedNotExistedDir)
-	{
-		QDir directory(dir);
-		directory.rmpath(".");
-	}
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief OpenMultisize opens the multisize-measurement picker in its configured directory.
+ */
 void TMainWindow::OpenMultisize()
 {
     const QString filter = tr("Multisize measurements")  + QLatin1String(" (*.") + smmsExt +
                                                            QLatin1String(" *.") + vstExt  + QLatin1String(");;") +
                            tr("All files") + QLatin1String(" (*.*)");
 
-	//Use standard path to multisize measurements
 	QString dir = qApp->seamlyMeSettings()->getMultisizePath();
 	dir = VCommonSettings::prepareMultisizeTables(dir);
 
@@ -491,6 +482,9 @@ void TMainWindow::OpenMultisize()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief OpenTemplate opens the template picker in its configured directory.
+ */
 void TMainWindow::OpenTemplate()
 {
     const QString filter = tr("Measurements") + QLatin1String(" (*.") + smisExt + QLatin1String(" *.") + smmsExt +
@@ -498,7 +492,6 @@ void TMainWindow::OpenTemplate()
                                                 QLatin1String(");;") +
                            tr("All files")    + QLatin1String(" (*.*)");
 
-	//Use standard path to template files
 	QString dir = qApp->seamlyMeSettings()->getTemplatePath();
 	dir = VCommonSettings::PrepareStandardTemplates(dir);
 	Open(dir, filter);
@@ -3056,8 +3049,18 @@ bool TMainWindow::EvalFormula(const QString &formula, bool fromUser, VContainer 
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Open prepares the picker directory before showing the non-native file dialog.
+ */
 void TMainWindow::Open(const QString &dir, const QString &filter)
 {
+    if (!QDir().mkpath(dir))
+    {
+        QMessageBox::warning(this, tr("Open file"),
+                             tr("Could not create the folder:\n%1").arg(QDir::toNativeSeparators(dir)));
+        return;
+    }
+
     // Windows' native picker keeps one process-wide "last visited folder" and silently
     // ignores the requested start folder once any native dialog has been shown before, so
     // OpenIndividual()/OpenMultisize()/OpenTemplate() would stop opening in the correct

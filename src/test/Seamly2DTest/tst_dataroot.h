@@ -72,11 +72,13 @@ private slots:
     void DefaultDataRootIsSeamly2dUnderHome() const;
     void UnconfiguredRootFallsBackToTheDefault() const;
     void EveryDefaultPathDerivesFromTheDataRoot() const;
+    void SeamlyMePickerDirectoriesFollowConfiguredRoot() const;
     void DataRootAcceptsAnyDriveOrPath() const;
     void AConfiguredRootIsNeverOverwritten() const;
     void InstallerDataRootIsCleanOrEmpty() const;
     void AConfiguredRootOutranksTheInstaller() const;
     void EnsureDataRootTreeCreatesTheSubfolders() const;
+    void EnsureDataRootTreeReportsMissingSubfolderFailure() const;
     void EnsureDataRootTreeKeepsExistingFiles() const;
     void StartupResolvesThenSeedsTheConfiguredRoot() const;
     void EnsureDataRootTreeSeedsLabelTemplates() const;

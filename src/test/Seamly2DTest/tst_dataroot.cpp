@@ -317,6 +317,44 @@ void TST_DataRoot::EveryDefaultPathDerivesFromTheDataRoot() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief SeamlyMePickerDirectoriesFollowConfiguredRoot checks the three picker paths
+ * follow a renamed data root and that missing standard directories are created there.
+ */
+void TST_DataRoot::SeamlyMePickerDirectoriesFollowConfiguredRoot() const
+{
+    const QString root = scratchPath(QStringLiteral("renamed-data-root"));
+    writeDataRoot(root);
+
+    VCommonSettings settings(QSettings::IniFormat, QSettings::UserScope,
+                             QCoreApplication::organizationName(), QStringLiteral("SeamlyMe"));
+    const QStringList paths
+    {
+        settings.getIndividualSizePath(),
+        settings.getMultisizePath(),
+        settings.getTemplatePath()
+    };
+    const QStringList expected
+    {
+        root + QStringLiteral("/measurements/individual"),
+        root + QStringLiteral("/measurements/multisize"),
+        root + QStringLiteral("/templates")
+    };
+
+    QCOMPARE(paths, expected);
+    for (const QString &path : paths)
+    {
+        QVERIFY(!QFileInfo::exists(path));
+    }
+
+    QVERIFY(VCommonSettings::ensureDataRootTree(root));
+    for (const QString &path : paths)
+    {
+        QVERIFY2(QFileInfo(path).isDir(), qPrintable(QStringLiteral("'%1' was not created").arg(path)));
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief DataRootAcceptsAnyDriveOrPath covers the cloud/external-volume use case — the
  * root is honoured as written, with no requirement that it already exist.
  */
@@ -438,6 +476,23 @@ void TST_DataRoot::EnsureDataRootTreeCreatesTheSubfolders() const
         QVERIFY2(QFileInfo(root + QLatin1Char('/') + subdirectory).isDir(),
                  qPrintable(QStringLiteral("'%1' was not created under the data root").arg(subdirectory)));
     }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief EnsureDataRootTreeReportsMissingSubfolderFailure checks that a blocked subfolder
+ * prevents the tree initializer from reporting success.
+ */
+void TST_DataRoot::EnsureDataRootTreeReportsMissingSubfolderFailure() const
+{
+    const QString root = scratchPath(QStringLiteral("blocked-tree"));
+    QVERIFY(QDir().mkpath(root));
+
+    QFile blocker(root + QStringLiteral("/measurements"));
+    QVERIFY(blocker.open(QIODevice::WriteOnly));
+    blocker.close();
+
+    QVERIFY(!VCommonSettings::ensureDataRootTree(root));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
