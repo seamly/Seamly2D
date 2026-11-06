@@ -85,8 +85,8 @@ Q_LOGGING_CATEGORY(PatternConverter, "patternConverter")
  */
 
 const QString VPatternConverter::PatternMinVerStr = QStringLiteral("0.1.0");
-const QString VPatternConverter::PatternMaxVerStr = QStringLiteral("0.7.8");
-const QString VPatternConverter::CurrentSchema    = QStringLiteral("://schema/pattern/v0.7.8.xsd");
+const QString VPatternConverter::PatternMaxVerStr = QStringLiteral("0.7.9");
+const QString VPatternConverter::CurrentSchema    = QStringLiteral("://schema/pattern/v0.7.9.xsd");
 
 //VPatternConverter::PatternMinVer; // <== DON'T FORGET TO UPDATE TOO!!!!
 //VPatternConverter::PatternMaxVer; // <== DON'T FORGET TO UPDATE TOO!!!!
@@ -402,7 +402,9 @@ QString VPatternConverter::getSchema(int ver) const
         case (0x000707):
             return QStringLiteral("://schema/pattern/v0.7.7.xsd");
         case (0x000708):
-            qCDebug(PatternConverter, "Current schema - ://schema/pattern/v0.7.8.xsd");
+            return QStringLiteral("://schema/pattern/v0.7.8.xsd");
+        case (0x000709):
+            qCDebug(PatternConverter, "Current schema - ://schema/pattern/v0.7.9.xsd");
             return CurrentSchema;
         default:
             InvalidVersion(ver);
@@ -625,6 +627,10 @@ void VPatternConverter::applyPatches()
             ValidateXML(getSchema(0x000708), m_convertedFileName);
             V_FALLTHROUGH
         case (0x000708):
+            toVersion0_7_9();
+            ValidateXML(getSchema(0x000709), m_convertedFileName);
+            V_FALLTHROUGH
+        case (0x000709):
             break;
         default:
             InvalidVersion(m_ver);
@@ -643,7 +649,7 @@ void VPatternConverter::downgradeToCurrentMaxVersion()
 bool VPatternConverter::isReadOnly() const
 {
     // Check if attribute readOnly was not changed in file format
-    Q_STATIC_ASSERT_X(VPatternConverter::PatternMaxVer == CONVERTER_VERSION_CHECK(0, 7, 8),
+    Q_STATIC_ASSERT_X(VPatternConverter::PatternMaxVer == CONVERTER_VERSION_CHECK(0, 7, 9),
                       "Check attribute readOnly.");
 
     // Possibly in future attribute readOnly will change position etc.
@@ -1561,6 +1567,13 @@ void VPatternConverter::toVersion0_7_7()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/// @brief Advances optional drill holes and reference lines without changing existing pieces.
+void VPatternConverter::toVersion0_7_9()
+{
+    setVersion(QStringLiteral("0.7.9"));
+    Save();
+}
+
 /// @brief Version 0.7.8 ensures every draft block has groups and images.
 void VPatternConverter::toVersion0_7_8()
 {

@@ -1,7 +1,9 @@
+# Author: slspencer; Copyright: 2026 Seamly2D Project; License: GPL-3.0-or-later
 # ADD TO EACH PATH $$PWD VARIABLE!!!!!!
 # This need for corect working file translations.pro
 
 SOURCES += \
+    $$PWD/PieceMarkings.cpp \
     $$PWD/variables/custom_variable.cpp \
     $$PWD/variables/measurement_variable.cpp \
     $$PWD/vcontainer.cpp \
@@ -35,6 +37,7 @@ SOURCES += \
 *msvc*:SOURCES += $$PWD/stable.cpp
 
 HEADERS += \
+    $$PWD/PieceMarkings.h \
     $$PWD/variables/custom_variable.h \
     $$PWD/variables/custom_variable_p.h \
     $$PWD/variables/measurement_variable.h \
