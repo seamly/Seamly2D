@@ -1514,14 +1514,8 @@ mod tests {
         for part in crate::material_split::split_by_material(doc) {
             let mut input = part.doc;
             let report = crate::annotation_alignment::align_size_annotations(&mut input);
-            assert!(report.moved > 0, "material {}: sizes take the base size's places", part.name);
-            // Back's sizes stack on their fold line start; its piece label leaves the smallest size.
-            let expected_outside: Vec<String> = if part.name == "Fabric" {
-                vec!["Back: piece label past the cut line in size 220".to_string()]
-            } else {
-                Vec::new()
-            }; // expected_outside
-            assert_eq!(report.outside, expected_outside, "material {}", part.name);
+            assert_eq!(report.moved, 0, "material {}: producer already aligns annotation positions", part.name);
+            assert!(report.outside.is_empty(), "material {}: producer keeps annotations inside every cut line", part.name);
 
             let nested = process_jacket2_input(&input, true, 60.0, 300.0);
             for set in nested
