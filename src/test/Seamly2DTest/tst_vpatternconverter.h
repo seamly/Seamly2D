@@ -20,6 +20,10 @@ private slots:
     void samplePatternsConvertToCurrentSchema();
     void repairsGroupsAfterImages();
     void addsMissingGroupsAndImages();
+    void emptyDocumentUsesCurrentSchema();
+    void newDraftBlockCreatesImages();
+    void currentSchemaRequiresImages();
+    void previousSchemaGetsRequiredImages();
 };
 
 #endif // TST_VPATTERNCONVERTER_H

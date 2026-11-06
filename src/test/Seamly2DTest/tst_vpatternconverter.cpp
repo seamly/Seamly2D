@@ -21,6 +21,7 @@
 
 #include "xml/vpatternconverter.h"
 #include "xml/vdomdocument.h"
+#include "xml/PatternDocumentWriter.h"
 #include "exception/vexception.h"
 
 namespace
@@ -147,6 +148,94 @@ void TST_VPatternConverter::samplePatternsConvertToCurrentSchema()
 
     QVERIFY(converted_count > 0);
     QVERIFY(converted_names.contains(QStringLiteral("jacket1_52-176.sm2d")));
+}
+
+void TST_VPatternConverter::emptyDocumentUsesCurrentSchema()
+{
+    QTemporaryDir test_files;
+    QVERIFY(test_files.isValid());
+    QDomDocument document;
+    PatternDocumentWriter::createEmptyPattern(document, Unit::Cm, QStringLiteral("Empty pattern"));
+    const QString file_path = QDir(test_files.path()).filePath(QStringLiteral("empty.sm2d"));
+    QString error;
+    QVERIFY2(writeDocument(file_path, document, error), qPrintable(error));
+    QCOMPARE(document.documentElement().firstChildElement(QStringLiteral("version")).text(),
+             VPatternConverter::PatternMaxVerStr);
+    VDomDocument::ValidateXML(VPatternConverter::CurrentSchema, file_path);
+}
+
+void TST_VPatternConverter::newDraftBlockCreatesImages()
+{
+    QTemporaryDir test_files;
+    QVERIFY(test_files.isValid());
+    QDomDocument document;
+    PatternDocumentWriter::createEmptyPattern(document, Unit::Cm, QStringLiteral("New pattern"));
+    QDomElement block = document.createElement(QStringLiteral("draftBlock"));
+    block.setAttribute(QStringLiteral("name"), QStringLiteral("New block"));
+    block.appendChild(document.createElement(QStringLiteral("calculation")));
+    block.appendChild(document.createElement(QStringLiteral("modeling")));
+    block.appendChild(document.createElement(QStringLiteral("pieces")));
+    document.documentElement().appendChild(block);
+    const QDomElement images = PatternDocumentWriter::createDraftImages(document, block);
+    QVERIFY(!images.isNull());
+    QCOMPARE(images.previousSiblingElement().tagName(), QStringLiteral("groups"));
+    QCOMPARE(PatternDocumentWriter::createDraftImages(document, block), images);
+    QCOMPARE(block.elementsByTagName(QStringLiteral("images")).count(), 1);
+    block.appendChild(images.previousSiblingElement());
+    QCOMPARE(PatternDocumentWriter::createDraftImages(document, block).previousSiblingElement().tagName(),
+             QStringLiteral("groups"));
+
+    const QString file_path = QDir(test_files.path()).filePath(QStringLiteral("new_block.sm2d"));
+    QString error;
+    QVERIFY2(writeDocument(file_path, document, error), qPrintable(error));
+    VDomDocument::ValidateXML(VPatternConverter::CurrentSchema, file_path);
+}
+
+void TST_VPatternConverter::previousSchemaGetsRequiredImages()
+{
+    QTemporaryDir test_files;
+    QVERIFY(test_files.isValid());
+    const QString file_path = QDir(test_files.path()).filePath(QStringLiteral("previous_schema.sm2d"));
+    const QString source_path = QDir(samplePatternsDirectory()).filePath(QStringLiteral("male_shirt.sm2d"));
+    QVERIFY(QFile::copy(source_path, file_path));
+    QDomDocument document;
+    QString error;
+    QVERIFY2(readDocument(file_path, document, error), qPrintable(error));
+    document.documentElement().setAttribute(QStringLiteral("readOnly"), true);
+    QVERIFY2(writeDocument(file_path, document, error), qPrintable(error));
+    VPatternConverter initial_converter(file_path);
+    const QString current_path = initial_converter.Convert();
+    QVERIFY2(readDocument(current_path, document, error), qPrintable(error));
+    document.documentElement().firstChildElement(QStringLiteral("version")).firstChild()
+            .setNodeValue(QStringLiteral("0.7.7"));
+    const QDomNodeList blocks = document.elementsByTagName(QStringLiteral("draftBlock"));
+    for (int i = 0; i < blocks.size(); ++i)
+    {
+        QDomElement block = blocks.at(i).toElement();
+        block.removeChild(block.firstChildElement(QStringLiteral("images")));
+    }
+    QVERIFY2(writeDocument(file_path, document, error), qPrintable(error));
+    VDomDocument::ValidateXML(QStringLiteral("://schema/pattern/v0.7.7.xsd"), file_path);
+    QVERIFY2(convertAndCheck(file_path, error), qPrintable(error));
+}
+
+void TST_VPatternConverter::currentSchemaRequiresImages()
+{
+    QTemporaryDir test_files;
+    QVERIFY(test_files.isValid());
+    QDomDocument document;
+    PatternDocumentWriter::createEmptyPattern(document, Unit::Cm, QStringLiteral("New pattern"));
+    QDomElement block = document.createElement(QStringLiteral("draftBlock"));
+    block.setAttribute(QStringLiteral("name"), QStringLiteral("New block"));
+    block.appendChild(document.createElement(QStringLiteral("calculation")));
+    block.appendChild(document.createElement(QStringLiteral("modeling")));
+    block.appendChild(document.createElement(QStringLiteral("pieces")));
+    block.appendChild(document.createElement(QStringLiteral("groups")));
+    document.documentElement().appendChild(block);
+    const QString file_path = QDir(test_files.path()).filePath(QStringLiteral("missing_current_images.sm2d"));
+    QString error;
+    QVERIFY2(writeDocument(file_path, document, error), qPrintable(error));
+    QVERIFY_EXCEPTION_THROWN(VDomDocument::ValidateXML(VPatternConverter::CurrentSchema, file_path), VException);
 }
 
 void TST_VPatternConverter::repairsGroupsAfterImages()

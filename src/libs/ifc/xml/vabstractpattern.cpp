@@ -60,6 +60,7 @@
 //---------------------------------------------------------------------------------------------------------------------
 
 #include "vabstractpattern.h"
+#include "PatternDocumentWriter.h"
 
 #include "vdomdocument.h"
 #include "vpatternconverter.h"
@@ -2415,23 +2416,7 @@ QDomElement VAbstractPattern::createDraftImages()
     QDomElement draftBlock;
     if (getActiveDraftElement(draftBlock))
     {
-        const QDomElement groups = createGroups();
-        QDomElement backgroundImages = draftBlock.firstChildElement(TagDraftImages);
-
-        if (backgroundImages.isNull())
-        {
-            backgroundImages = createElement(TagDraftImages);
-            if (groups.isNull())
-            {
-                draftBlock.appendChild(backgroundImages);
-            }
-            else
-            {
-                draftBlock.insertAfter(backgroundImages, groups);
-            }
-        }
-
-        return backgroundImages;
+        return PatternDocumentWriter::createDraftImages(*this, draftBlock);
     }
     return QDomElement();
 }

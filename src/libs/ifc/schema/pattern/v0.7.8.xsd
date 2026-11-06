@@ -150,7 +150,8 @@
             <xs:field xpath="@name"/>
           </xs:unique>
         </xs:element>
-        <xs:element name="draftBlock" minOccurs="1" maxOccurs="unbounded">
+        <!-- A new document has no draft blocks before its first base point. -->
+        <xs:element name="draftBlock" minOccurs="0" maxOccurs="unbounded">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="calculation" minOccurs="1" maxOccurs="unbounded">

@@ -1,10 +1,13 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  @file   vpattern.cpp
 //  @author Douglas S Caskey
+//  @author slspencer
 //  @date   17 Sep, 2023
 //
 //  @copyright
 //  Copyright (C) 2017 - 2022 Seamly, LLC
+//  Copyright (C) 2026 Seamly2D Project
+//  SPDX-License-Identifier: GPL-3.0-or-later
 //  https://github.com/fashionfreedom/seamly2d
 //
 //  @brief
@@ -49,6 +52,7 @@
 //---------------------------------------------------------------------------------------------------------------------
 
 #include "vpattern.h"
+#include "../ifc/xml/PatternDocumentWriter.h"
 #include "../vwidgets/vabstractmainwindow.h"
 #include "../vtools/tools/vdatatool.h"
 #include "../vtools/tools/pattern_piece_tool.h"
@@ -118,29 +122,7 @@ VPattern::VPattern(VContainer *data, VMainGraphicsScene *draftScene, VMainGraphi
 
 void VPattern::CreateEmptyFile()
 {
-    this->clear();
-    QDomElement patternElement = this->createElement(TagPattern);
-
-    patternElement.appendChild(createComment(FileComment()));
-
-    QDomElement version = createElement(TagVersion);
-    QDomText newNodeText = createTextNode(VPatternConverter::PatternMaxVerStr);
-    version.appendChild(newNodeText);
-    patternElement.appendChild(version);
-
-    QDomElement unit = createElement(TagUnit);
-    newNodeText = createTextNode(UnitsToStr(qApp->patternUnit()));
-    unit.appendChild(newNodeText);
-    patternElement.appendChild(unit);
-
-    patternElement.appendChild(createElement(TagDescription));
-    patternElement.appendChild(createElement(TagNotes));
-
-    patternElement.appendChild(createElement(TagMeasurements));
-    patternElement.appendChild(createElement(TagVariables));
-
-    this->appendChild(patternElement);
-    insertBefore(createProcessingInstruction("xml", "version=\"1.0\" encoding=\"UTF-8\""), this->firstChild());
+    PatternDocumentWriter::createEmptyPattern(*this, qApp->patternUnit(), FileComment());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
