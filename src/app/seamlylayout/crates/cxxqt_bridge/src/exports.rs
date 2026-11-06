@@ -143,9 +143,9 @@ fn build_tiled_pdf_thumbnail_doc(
         return Err("Tiled PDF: cannot build thumbnail from zero-sized layout.".to_string());
     }
 
-    // Physical page dimensions in px.
-    let paper_w = tile_dims.trim_tile_w_px + tile_dims.margin_left_px + tile_dims.margin_right_px;
-    let paper_h = tile_dims.trim_tile_h_px + tile_dims.margin_top_px + tile_dims.margin_bottom_px;
+    // Keep the PDF page at the selected paper's physical size, not the rounded tile grid size.
+    let paper_w = tile_dims.paper_w_px;
+    let paper_h = tile_dims.paper_h_px;
 
     // Trim area where the thumbnail must fit.
     let trim_w = tile_dims.trim_tile_w_px as f64;
@@ -317,8 +317,8 @@ fn build_tiled_pdf_tile_doc(
     let tile_content_x = tile_dims.margin_left_px + col * tile_dims.trim_tile_w_px;
     let tile_content_y = tile_dims.margin_top_px + row * tile_dims.trim_tile_h_px;
 
-    let paper_w = tile_dims.trim_tile_w_px + tile_dims.margin_left_px + tile_dims.margin_right_px;
-    let paper_h = tile_dims.trim_tile_h_px + tile_dims.margin_top_px + tile_dims.margin_bottom_px;
+    let paper_w = tile_dims.paper_w_px;
+    let paper_h = tile_dims.paper_h_px;
 
     let mut tile_doc = doc.clone();
     let existing_children = std::mem::take(&mut tile_doc.root.children);
@@ -988,9 +988,9 @@ pub(crate) fn collect_tiled_pdf_page_bytes(
     let tile_dims: TileDimensions = compute_tile_dims(layout_w_px, layout_h_px, settings)
         .map_err(|e| format!("Tiled PDF: invalid tile dimensions: {e}"))?;
 
-    // Physical paper page size in pixels (trim area + margins).
-    let paper_w = tile_dims.trim_tile_w_px + tile_dims.margin_left_px + tile_dims.margin_right_px;
-    let paper_h = tile_dims.trim_tile_h_px + tile_dims.margin_top_px + tile_dims.margin_bottom_px;
+    // Keep the PDF page at the selected paper's physical size, not the rounded tile grid size.
+    let paper_w = tile_dims.paper_w_px;
+    let paper_h = tile_dims.paper_h_px;
 
     // First page: full-layout thumbnail scaled to fit inside page margins.
     let thumb_doc = build_tiled_pdf_thumbnail_doc(doc, &tile_dims, layout_w_px, layout_h_px)?;
@@ -3215,24 +3215,109 @@ mod tests {
         assert!((h * unit - 36000.0).abs() < 0.01, "height at true size is 500 in, got {} pt", h * unit);
     } // pdf_page_longer_than_200_in_sets_user_unit
 
-    // @brief Every tiled page, the thumbnail included, is one Letter sheet: 612 × 792 pt in either orientation.
+    // @brief Tiled Letter and A4 pages keep exact paper dimensions and source geometry scale.
     #[test]
-    fn tiled_pdf_pages_are_paper_size() {
+    fn tiled_pdf_paper_sizes_and_geometry_scale_are_exact() {
         let doc = Document::parse(
             r#"<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600">
-                <g id="piece0"><rect x="0" y="0" width="1100" height="1500"/></g>
+                <rect x="50" y="50" width="192" height="192" fill="black"/>
             </svg>"#,
         )
         .expect("fixture SVG should parse");
-        let pages = collect_tiled_pdf_page_bytes(&doc, &test_tiled_settings()).expect("tiled pages should render");
-        assert!(pages.len() > 1, "thumbnail plus tiles");
-        for page in &pages {
-            let (w, h, unit) = pdf_page_sizes(page)[0];
-            let (short, long) = (w.min(h), w.max(h));
-            assert!((short - 612.0).abs() < 0.5 && (long - 792.0).abs() < 0.5, "tiled page is Letter, got {w} x {h}");
-            assert_eq!(unit, 1.0);
-        } // for each page
-    } // tiled_pdf_pages_are_paper_size
+        let settings_for = |tile_size: &str| {
+            LayoutSettings::from_json(&format!(
+                r#"{{
+                    "unit": "mm",
+                    "mediaType": "paper",
+                    "paperType": "tiled",
+                    "pageWidth": 1500.0,
+                    "pageHeight": 2000.0,
+                    "marginLeft": 10.0,
+                    "marginRight": 10.0,
+                    "marginTop": 10.0,
+                    "marginBottom": 10.0,
+                    "pieceGap": 0.0,
+                    "layoutMode": "alongGrainline",
+                    "rotationStep": 180,
+                    "tileSize": "{tile_size}",
+                    "tileOrientation": "portrait"
+                }}"#
+            ))
+            .expect("metric tiled settings parse")
+        };
+        let cases = [("Letter", 612.0, 792.0), ("A4", 595.2756, 841.8898)];
+
+        for (tile_size, expected_width, expected_height) in cases {
+            let pages = collect_tiled_pdf_page_bytes(&doc, &settings_for(tile_size))
+                .expect("tiled pages should render");
+            assert!(pages.len() > 1, "{tile_size}: thumbnail plus tiles");
+            for page in &pages {
+                let (width, height, unit) = pdf_page_sizes(page)[0];
+                assert!(
+                    (width - expected_width).abs() < 0.01
+                        && (height - expected_height).abs() < 0.01,
+                    "{tile_size} page should be {expected_width} x {expected_height} pt, got {width} x {height}"
+                );
+                assert_eq!(unit, 1.0);
+            } // for each page
+
+            if tile_size == "Letter" {
+                let pdf = lopdf::Document::load_mem(&pages[1]).expect("tile PDF parses");
+                let page_id = *pdf.get_pages().values().next().expect("tile page");
+                let contents = pdf.get_page_content(page_id);
+                let parsed =
+                    lopdf::content::Content::decode(&contents).expect("tile PDF content parses");
+                let number = |value: &lopdf::Object| match value {
+                    lopdf::Object::Integer(value) => *value as f32,
+                    lopdf::Object::Real(value) => *value,
+                    other => panic!("unexpected PDF number: {other:?}"),
+                };
+                let mut scale = 1.0_f32;
+                let mut saved_scales = Vec::new();
+                let mut move_to = None;
+                let mut found_two_inch_edge = false;
+                for operation in parsed.operations {
+                    match operation.operator.as_str() {
+                        "q" => saved_scales.push(scale),
+                        "Q" => scale = saved_scales.pop().expect("balanced PDF graphics state"),
+                        "cm" => {
+                            let a = number(&operation.operands[0]);
+                            let b = number(&operation.operands[1]);
+                            scale *= (a * a + b * b).sqrt();
+                        }
+                        "m" => {
+                            move_to = Some((
+                                number(&operation.operands[0]),
+                                number(&operation.operands[1]),
+                            ));
+                        }
+                        "l" => {
+                            if let Some((start_x, start_y)) = move_to {
+                                let end_x = number(&operation.operands[0]);
+                                let end_y = number(&operation.operands[1]);
+                                if (end_y - start_y).abs() < 0.001
+                                    && ((end_x - start_x).abs() - 192.0).abs() < 0.001
+                                {
+                                    assert!(
+                                        (192.0 * scale - 144.0).abs() < 0.01,
+                                        "192 px must remain 144 pt at PDF scale, got {} pt",
+                                        192.0 * scale
+                                    );
+                                    found_two_inch_edge = true;
+                                } // if two-inch rectangle edge
+                            } // if path has a move point
+                        }
+                        "S" | "f" | "F" | "B" | "b" | "n" => move_to = None,
+                        _ => {} // unrelated PDF operator
+                    } // match operator
+                } // for each PDF operator
+                assert!(
+                    found_two_inch_edge,
+                    "tile PDF retains the 192 px calibration edge"
+                );
+            } // if Letter
+        } // for each tile size
+    } // tiled_pdf_paper_sizes_and_geometry_scale_are_exact
 
     // @brief do_export_png produces a file that begins with the PNG magic bytes.
     //

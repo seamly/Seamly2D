@@ -167,7 +167,7 @@ ExportMenu EPS / PostScript (PS) → exportPostscriptRequested("eps" | "ps")
 - A page side longer than 200 in gets `/UserUnit` n, the smallest whole number that keeps the MediaBox within 14 400. A reader multiplies the MediaBox by n / 72 in. A 48 in × 500 in roll: MediaBox `1152 × 12000`, `/UserUnit 3`.
 - Reason: a fabric cut layout can be longer than 500 in (user decision).
 - A reader that ignores `/UserUnit` shows such a page at 1/n size.
-- Tiled pages are the paper size; Letter is `612 × 792` pt.
+- Tiled PDF pages preserve the exact selected paper size, independent of rounded layout-grid pixels; Letter is `612 × 792` pt.
 
 ## PDF (Tiled) — not for the Marker tab
 

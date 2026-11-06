@@ -515,17 +515,19 @@ pub fn do_process_layout(
             + initial_td.margin_top_px + initial_td.margin_bottom_px;
 
         let winning_td = TileDimensions {
-            tile_cols:        choice.tile_cols,
+            tile_cols: choice.tile_cols,
             tile_rows,
-            trim_tile_w_px:   trim_w,
-            trim_tile_h_px:   trim_h,
-            input_dom_w_px:   new_layout_w_px,
-            input_dom_h_px:   new_layout_h_px,
-            layout_w_px:      new_layout_w_px,
-            layout_h_px:      new_layout_h_px,
-            margin_left_px:   initial_td.margin_left_px,
-            margin_right_px:  initial_td.margin_right_px,
-            margin_top_px:    initial_td.margin_top_px,
+            trim_tile_w_px: trim_w,
+            trim_tile_h_px: trim_h,
+            paper_w_px: initial_td.paper_w_px,
+            paper_h_px: initial_td.paper_h_px,
+            input_dom_w_px: new_layout_w_px,
+            input_dom_h_px: new_layout_h_px,
+            layout_w_px: new_layout_w_px,
+            layout_h_px: new_layout_h_px,
+            margin_left_px: initial_td.margin_left_px,
+            margin_right_px: initial_td.margin_right_px,
+            margin_top_px: initial_td.margin_top_px,
             margin_bottom_px: initial_td.margin_bottom_px,
         }; // TileDimensions
 
