@@ -1,10 +1,13 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  @file   pattern_piece_dialog.cpp
 //  @author Douglas S Caskey
+//  @author slspencer
 //  @date   Dec 11, 2022
 //
 //  @copyright
 //  Copyright (C) 2017 - 2026 Seamly, LLC
+//  Copyright (C) 2026 Seamly2D Project
+//  SPDX-License-Identifier: GPL-3.0-or-later
 //  https://github.com/fashionfreedom/seamly2d
 //
 //  @brief
@@ -92,6 +95,7 @@
 #include <QKeyEvent>
 #include <QActionGroup>
 #include <QMenu>
+#include "../undocommands/CopyPatternPiece.h"
 #include <QMessageBox>
 #include <QPainterPathStroker>
 #include <QPolygonF>
@@ -1192,6 +1196,8 @@ void PatternPieceTool::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     QMenu menu;
     QAction *editProperties = menu.addAction(QIcon::fromTheme("preferences-other"), tr("Properties") + "\tP");
     editProperties->setEnabled(lock);
+    QAction *copyPiece = menu.addAction(QIcon::fromTheme("edit-copy"), tr("Copy Piece"));
+    copyPiece->setEnabled(lock);
 
     QAction *actionLockPiece = menu.addAction(tr("Lock Pattern Piece") + "\tCtrl + L");
     actionLockPiece->setCheckable(true);
@@ -1268,6 +1274,21 @@ void PatternPieceTool::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     if (selectedAction == editProperties)
     {
         editPieceProperties();
+    }
+    else if (selectedAction == copyPiece)
+    {
+        PatternPieceCopyResult copy = PatternPieceCopy::reconstruct(*doc, m_id, &VContainer::getNextId);
+        if (!copy.error.isEmpty())
+        {
+            QMessageBox::warning(nullptr, tr("Copy Piece"), copy.error);
+            return;
+        }
+        // Copy numeric geometry and formulas; place the separate piece beside its source.
+        const qreal offset = qApp->fromPixel(boundingRect().width() + ToPixel(2, Unit::Cm));
+        copy.piece.setAttribute(AttrMx, copy.piece.attribute(AttrMx).toDouble() + offset);
+        CopyPatternPiece *command = new CopyPatternPiece(copy, doc);
+        connect(command, &VUndoCommand::NeedFullParsing, doc, &VAbstractPattern::NeedFullParsing);
+        qApp->getUndoStack()->push(command);
     }
     else if (selectedAction == actionLockPiece)
     {

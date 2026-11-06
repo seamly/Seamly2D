@@ -9,6 +9,7 @@ HEADERS += \
     $$PWD/vdomdocument.h \
     $$PWD/vpatternconverter.h \
     $$PWD/PatternDocumentWriter.h \
+    $$PWD/PatternPieceCopy.h \
     $$PWD/vtoolrecord.h \
     $$PWD/vabstractpattern.h \
     $$PWD//abstract_m_converter.h \
@@ -21,6 +22,7 @@ SOURCES += \
     $$PWD/vdomdocument.cpp \
     $$PWD/vpatternconverter.cpp \
     $$PWD/PatternDocumentWriter.cpp \
+    $$PWD/PatternPieceCopy.cpp \
     $$PWD/vtoolrecord.cpp \
     $$PWD/vabstractpattern.cpp \
     $$PWD//abstract_m_converter.cpp \

@@ -92,6 +92,7 @@
 #include "tst_handoffdocument.h"
 #include "tst_vpatternconverter.h"
 #include "tst_labeltemplatefilename.h"
+#include "tst_patternpiececopy.h"
 
 #include "../vmisc/def.h"
 #include "../qmuparser/qmudef.h"
@@ -256,6 +257,7 @@ int main(int argc, char** argv)
     ASSERT_TEST(new TST_HandoffDocument());
     ASSERT_TEST(new TST_VPatternConverter());
     ASSERT_TEST(new TST_LabelTemplateFileName());
+    ASSERT_TEST(new TST_PatternPieceCopy());
 
     return status;
 }
