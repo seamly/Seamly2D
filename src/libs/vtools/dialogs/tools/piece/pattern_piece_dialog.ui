@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Author: slspencer; Copyright: 2026 Seamly2D Project; License: GPL-3.0-or-later -->
 <ui version="4.0">
  <class>PatternPieceDialog</class>
  <widget class="QDialog" name="PatternPieceDialog">
@@ -2627,6 +2628,13 @@ QListWidget::item:selected {
                 </widget>
                </item>
                <item>
+                <widget class="QLabel" name="pieceTemplateFile_Label">
+                 <property name="text">
+                  <string>none</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
                 <spacer name="horizontalSpacer_5">
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
@@ -3476,6 +3484,13 @@ QListWidget::item:selected {
                  </property>
                  <property name="text">
                   <string>Edit template</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="patternTemplateFile_Label">
+                 <property name="text">
+                  <string>none</string>
                  </property>
                 </widget>
                </item>

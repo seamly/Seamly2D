@@ -39,6 +39,8 @@
 #include "../ifc/ifcdef.h"
 #include "../vmisc/def.h"
 
+class QLabel;
+
 /// @brief NewPieceDefaults gives the Add New Pattern Piece dialog and the Union tool one source of default values.
 namespace NewPieceDefaults
 {
@@ -96,6 +98,9 @@ QString pieceLabelTemplateFile(const QVector<VLabelTemplateLine> &lines);
  * @return the file path, or an empty string when @p lines are empty or differ from the default.
  */
 QString patternLabelTemplateFile(const QVector<VLabelTemplateLine> &lines);
+
+/// @brief Displays the template basename and its full path without claiming provenance for stored label lines.
+void showLabelTemplateFile(QLabel* label, const QString &file_path);
 }
 
 #endif // NEW_PIECE_DEFAULTS_H

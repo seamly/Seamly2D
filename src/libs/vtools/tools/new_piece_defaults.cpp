@@ -32,6 +32,8 @@
 #include "new_piece_defaults.h"
 
 #include <QFileInfo>
+#include <QDir>
+#include <QLabel>
 
 #include "../ifc/xml/vlabeltemplateconverter.h"
 #include "../vformat/vlabeltemplate.h"
@@ -168,6 +170,20 @@ QString NewPieceDefaults::patternLabelTemplateFile(const QVector<VLabelTemplateL
     {
         return QString();
     }
+
     return labelTemplateFile(qApp->Settings()->getDefaultPatternTemplate(),
                              VCommonSettings::builtInPatternLabelTemplate());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void NewPieceDefaults::showLabelTemplateFile(QLabel *label, const QString &file_path)
+{
+    label->setText(file_path.isEmpty() ? QCoreApplication::translate("NewPieceDefaults", "none")
+                                      : QFileInfo(file_path).fileName());
+    QString full_path;
+    if (!file_path.isEmpty())
+    {
+        full_path = file_path.startsWith(QLatin1Char(':')) ? file_path : QFileInfo(file_path).absoluteFilePath();
+    }
+    label->setToolTip(QDir::toNativeSeparators(full_path));
 }

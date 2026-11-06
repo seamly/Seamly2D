@@ -1,3 +1,7 @@
+// @author slspencer
+// Copyright (C) 2026 Seamly2D Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+// https://www.gnu.org/licenses/gpl-3.0.html
 /***************************************************************************
  *                                                                         *
  *   Copyright (C) 2017  Seamly, LLC                                       *
@@ -108,6 +112,7 @@ private:
     QAction                *showImageAction;
 
     QVector<VLabelTemplateLine> templateLines;
+    QString                m_template_file;
 
     void         SetHeightsChecked(bool enabled);
     void         SetSizesChecked(bool enabled);

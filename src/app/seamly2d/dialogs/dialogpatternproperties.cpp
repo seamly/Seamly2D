@@ -1,5 +1,6 @@
 //  @file   dialogpatternproperties.cpp
 //  @author Douglas S Caskey
+//  @author slspencer
 //  @date   3 Sep, 2023
 //
 //  @brief
@@ -7,6 +8,8 @@
 //  This source code is part of the Seamly2D project, a pattern making
 //  program to create and model patterns of clothing.
 //  Copyright (C) 2017-2024 Seamly2D project
+//  Copyright (C) 2026 Seamly2D Project
+//  SPDX-License-Identifier: GPL-3.0-or-later
 //  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
 //
 //  Seamly2D is free software: you can redistribute it and/or modify
@@ -96,6 +99,7 @@ DialogPatternProperties::DialogPatternProperties(VPattern *doc,  VContainer *pat
     , saveImageAction(nullptr)
     , showImageAction(nullptr)
     , templateLines()
+    , m_template_file()
 {
     ui->setupUi(this);
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -213,6 +217,8 @@ DialogPatternProperties::DialogPatternProperties(VPattern *doc,  VContainer *pat
     connect(ui->lineEditCompanyName, &QLineEdit::editingFinished, this, &DialogPatternProperties::LabelDataChanged);
     connect(ui->lineEditCustomerName, &QLineEdit::editingFinished, this, &DialogPatternProperties::LabelDataChanged);
     connect(ui->pushButtonEditPatternLabel, &QPushButton::clicked, this, &DialogPatternProperties::EditLabel);
+    m_template_file = NewPieceDefaults::patternLabelTemplateFile(doc->getPatternLabelTemplate());
+    NewPieceDefaults::showLabelTemplateFile(ui->templateFile_Label, m_template_file);
 
     initComboBoxFormats(ui->comboBoxDateFormat,
                         VSettings::PredefinedDateFormats() + settings->GetUserDefinedDateFormats(),
@@ -926,11 +932,13 @@ void DialogPatternProperties::EditLabel()
 
     const QVector<VLabelTemplateLine> lines = templateDataChanged ? templateLines : doc->getPatternLabelTemplate();
     editor.SetTemplate(lines);
-    editor.setTemplateFile(NewPieceDefaults::patternLabelTemplateFile(lines));
+    editor.setTemplateFile(m_template_file);
 
     if (QDialog::Accepted == editor.exec())
     {
         templateLines = editor.GetTemplate();
         templateDataChanged = true;
+        m_template_file = editor.templateFile();
+        NewPieceDefaults::showLabelTemplateFile(ui->templateFile_Label, m_template_file);
     }
 }

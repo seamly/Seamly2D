@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Author: slspencer; Copyright: 2026 Seamly2D Project; License: GPL-3.0-or-later -->
 <ui version="4.0">
  <class>DialogPatternProperties</class>
  <widget class="QDialog" name="DialogPatternProperties">
@@ -1210,6 +1211,13 @@
            </property>
            <property name="text">
             <string>Edit template</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="templateFile_Label">
+           <property name="text">
+            <string>none</string>
            </property>
           </widget>
          </item>

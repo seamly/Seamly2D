@@ -1,10 +1,13 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  @file   pattern_piece_dialog.cpp
 //  @author Douglas S Caskey
+//  @author slspencer
 //  @date   17 Sep, 2023
 //
 //  @copyright
 //  Copyright (C) 2017 - 2026 Seamly, LLC
+//  Copyright (C) 2026 Seamly2D Project
+//  SPDX-License-Identifier: GPL-3.0-or-later
 //  https://github.com/fashionfreedom/seamly2d
 //
 //  @brief
@@ -142,6 +145,8 @@ PatternPieceDialog::PatternPieceDialog(const VContainer *data, const quint32 &to
     , m_saWidth(0)
     , m_patternLabelLines()
     , m_pieceLabelLines()
+    , m_piece_template_file()
+    , m_pattern_template_file()
     , m_beep(new QSoundEffect())
     , m_undoStack()
 {
@@ -338,6 +343,8 @@ void PatternPieceDialog::SetPiece(const VPiece &piece)
     m_user_on_fold = m_oldData.IsOnFold() && !piece.hasFoldLine();
     updateFoldCheckBox();
     m_pieceLabelLines = m_oldData.GetLabelTemplate();
+    m_piece_template_file = NewPieceDefaults::pieceLabelTemplateFile(m_pieceLabelLines);
+    refreshTemplateFileLabels();
 
     ui->arrow_ComboBox->setCurrentIndex(int(piece.GetGrainlineGeometry().getArrowType()));
 
@@ -2710,13 +2717,15 @@ void PatternPieceDialog::editPatternLabel()
     QVector<VLabelTemplateLine> patternLabelLines = qApp->getCurrentDocument()->getPatternLabelTemplate();
     EditLabelTemplateDialog editor(qApp->getCurrentDocument());
     editor.SetTemplate(patternLabelLines);
-    editor.setTemplateFile(NewPieceDefaults::patternLabelTemplateFile(patternLabelLines));
+    editor.setTemplateFile(m_pattern_template_file);
     editor.SetPiece(GetPiece());
 
     if (QDialog::Accepted == editor.exec())
     {
         patternLabelLines = editor.GetTemplate();
         qApp->getCurrentDocument()->setPatternLabelTemplate(patternLabelLines);
+        m_pattern_template_file = editor.templateFile();
+        refreshTemplateFileLabels();
         emit qApp->getCurrentDocument()->updatePatternLabel();
     }
 }
@@ -2726,12 +2735,14 @@ void PatternPieceDialog::editPieceLabel()
 {
     EditLabelTemplateDialog editor(qApp->getCurrentDocument());
     editor.SetTemplate(m_pieceLabelLines);
-    editor.setTemplateFile(NewPieceDefaults::pieceLabelTemplateFile(m_pieceLabelLines));
+    editor.setTemplateFile(m_piece_template_file);
     editor.SetPiece(GetPiece());
 
     if (QDialog::Accepted == editor.exec())
     {
         m_pieceLabelLines = editor.GetTemplate();
+        m_piece_template_file = editor.templateFile();
+        refreshTemplateFileLabels();
     }
 }
 
@@ -3518,7 +3529,19 @@ void PatternPieceDialog::initializeLabelsTab()
 
     enabledPatternLabel();
 
+    m_piece_template_file = NewPieceDefaults::pieceLabelTemplateFile(m_pieceLabelLines);
+    m_pattern_template_file = NewPieceDefaults::patternLabelTemplateFile(m_patternLabelLines);
+    refreshTemplateFileLabels();
+
     ui->pieceName_LineEdit->setText(createPieceName());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Shows the known label template files, or none for lines without a known source file.
+void PatternPieceDialog::refreshTemplateFileLabels() const
+{
+    NewPieceDefaults::showLabelTemplateFile(ui->pieceTemplateFile_Label, m_piece_template_file);
+    NewPieceDefaults::showLabelTemplateFile(ui->patternTemplateFile_Label, m_pattern_template_file);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

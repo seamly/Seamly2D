@@ -71,7 +71,8 @@ SOURCES += \
     tst_handoffpiece.cpp \
     tst_handofflabel.cpp \
     tst_handoffdocument.cpp \
-    tst_vpatternconverter.cpp
+    tst_vpatternconverter.cpp \
+    tst_labeltemplatefilename.cpp
 
 *msvc*:SOURCES += stable.cpp
 
@@ -111,7 +112,8 @@ HEADERS += \
     tst_handoffpiece.h \
     tst_handofflabel.h \
     tst_handoffdocument.h \
-    tst_vpatternconverter.h
+    tst_vpatternconverter.h \
+    tst_labeltemplatefilename.h
 
 include(warnings.pri)
 

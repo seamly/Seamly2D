@@ -1,10 +1,13 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  @file   pattern_piece_dialog.cpp
 //  @author Douglas S Caskey
+//  @author slspencer
 //  @date   17 Sep, 2023
 //
 //  @copyright
 //  Copyright (C) 2017 - 2026 Seamly, LLC
+//  Copyright (C) 2026 Seamly2D Project
+//  SPDX-License-Identifier: GPL-3.0-or-later
 //  https://github.com/fashionfreedom/seamly2d
 //
 //  @brief
@@ -213,6 +216,8 @@ private:
     qreal                       m_saWidth;
     QVector<VLabelTemplateLine> m_patternLabelLines;
     QVector<VLabelTemplateLine> m_pieceLabelLines;
+    QString                     m_piece_template_file;
+    QString                     m_pattern_template_file;
     QSoundEffect               *m_beep;
     QVector<QPointer<VUndoCommand>> m_undoStack;
 
@@ -266,6 +271,7 @@ private:
     void                        initializeInternalPathsTab();
     void                        initializePropertiesTab();
     void                        initializeLabelsTab();
+    void                        refreshTemplateFileLabels() const;
     void                        initializeGrainlineTab();
     void                        initializeAnchorsTab();
     void                        initializeNotchesTab();
