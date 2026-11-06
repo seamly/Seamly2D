@@ -197,6 +197,7 @@ fn is_non_outline_group(e: &Element) -> bool {
         if matches!(
             data_type.as_str(),
             "notch" | "tuck" | "grainline" | "fold_line" | "internal_path" | "drill" | "hole"
+                | "stripe" | "plaid"
         ) {
             return true;
         } // if known decoration type
@@ -512,6 +513,25 @@ mod tests {
         assert!((dx - 10.0).abs() < 1e-6 && (dy - 10.0).abs() < 1e-6,
             "AABB should be 10×10 (seamline); got {dx:.2}×{dy:.2} — tuck group may have been selected");
     } // find_outline_group_skips_tuck_groups
+
+    // @brief Stripe and plaid groups are never selected as packing outlines.
+    #[test]
+    fn find_outline_group_skips_reference_lines() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg">
+  <g id="Front">
+    <g id="seamline_Front"><path d="M 0,0 L 10,0 L 10,10 L 0,10 L 0,0"/></g>
+    <g id="stripe_Front" data-type="stripe"><path d="M 0,5 L 500,5"/></g>
+    <g id="plaid_Front" data-type="plaid"><path d="M 5,0 L 5,500"/></g>
+  </g>
+</svg>"#;
+        let root = parse_svg(svg);
+        let pieces = extract_cutline_polygons(&root);
+        assert_eq!(pieces.len(), 1);
+        assert_eq!(pieces[0].polygon.vertices.len(), 4);
+        let (width, height) = span(&pieces[0].polygon);
+        assert!((width - 10.0).abs() < 1e-6);
+        assert!((height - 10.0).abs() < 1e-6);
+    } // find_outline_group_skips_reference_lines
 
     // @brief Notch groups at structural position 1 must not be selected as fallback.
     //

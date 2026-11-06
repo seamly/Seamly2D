@@ -35,7 +35,8 @@ pub use astm_grading::grade_drawing;
 pub use astm_mirror::{align_mirror_lines, MIRROR_LINE_TOLERANCE_MM};
 pub use astm_notch::{build_notches, seam_allowance_at, Notch, NotchKind};
 pub use drawing::{
-    Annotation, Block, BlockGrading, Drawing, DxfVersion, GradeRule, GradeRuleTable, MissingPieceData, RuleText, DEFAULT_MATERIAL,
+    Annotation, Block, BlockGrading, DrillHole, Drawing, DxfVersion, GradeRule, GradeRuleTable, MissingPieceData, ReferenceLine,
+    RuleText, DEFAULT_MATERIAL,
 };
 pub use units::{DxfUnits, PatternUnit};
 pub use entities::{Arc, Circle, DxfPoint, Entity, Line, Point, Polyline, Text};

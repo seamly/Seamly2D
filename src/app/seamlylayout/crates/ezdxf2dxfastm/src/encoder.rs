@@ -4,7 +4,9 @@
 
 //! @brief DXF entity encoding using group codes.
 
-use seamly_svg2ezdxf::{Circle, DxfPoint, DxfUnits, Entity, Line, Notch, NotchKind, Point, Polyline, Text};
+use seamly_svg2ezdxf::{
+    Circle, DrillHole, DxfPoint, DxfUnits, Entity, Line, Notch, NotchKind, Point, Polyline, ReferenceLine, Text,
+};
 use std::any::Any;
 use std::io::Write;
 
@@ -174,6 +176,28 @@ pub fn encode_dxf_point(writer: &mut dyn Write, point: &DxfPoint, units: DxfUnit
 
     Ok(())
 } // fn encode_dxf_point
+
+// @brief Encode an ASTM drill marker as a layer-13 POINT with its diameter in group 30.
+// @details Group 30 carries the ASTM drill diameter here, not the DXF POINT's Z coordinate.
+pub fn encode_astm_drill_hole(writer: &mut dyn Write, hole: &DrillHole, units: DxfUnits) -> std::io::Result<()> {
+    write_group_code(writer, 0, "POINT")?;
+    write_group_code(writer, 8, "13")?;
+    write_group_code_length(writer, 10, hole.center.x, units)?;
+    write_group_code_length(writer, 20, hole.center.y, units)?;
+    write_group_code_length(writer, 30, hole.diameter, units)?;
+    Ok(())
+} // fn encode_astm_drill_hole
+
+// @brief Encode a stripe or plaid reference line on its ASTM layer.
+pub fn encode_astm_reference_line(writer: &mut dyn Write, line: &ReferenceLine, units: DxfUnits) -> std::io::Result<()> {
+    write_group_code(writer, 0, "LINE")?;
+    write_group_code(writer, 8, line.layer)?;
+    write_group_code_length(writer, 10, line.start.x, units)?;
+    write_group_code_length(writer, 20, line.start.y, units)?;
+    write_group_code_length(writer, 11, line.end.x, units)?;
+    write_group_code_length(writer, 21, line.end.y, units)?;
+    Ok(())
+} // fn encode_astm_reference_line
 
 // @brief Encode an ASTM D6673 POLYLINE: vertices-follow flag, closed flag, VERTEXes, SEQEND.
 // @param writer   The writer to write to.

@@ -22,7 +22,10 @@
 //!
 //! An R11 file is the AC1009 file.
 
-use crate::encoder::{encode_astm_polyline, encode_astm_text, encode_dxf_point, encode_entity, encode_notch};
+use crate::encoder::{
+    encode_astm_drill_hole, encode_astm_polyline, encode_astm_reference_line, encode_astm_text, encode_dxf_point,
+    encode_entity, encode_notch,
+};
 use crate::error::{DxfAstmExportError, Result};
 use crate::grade_rule_file::write_grade_rule_file;
 use crate::r13::upgrade_to_r13;
@@ -427,6 +430,14 @@ fn write_astm_block(
             encode_notch(writer, notch, units)?;
         } // if AAMA
     } // for each notch
+
+    // ASTM/AAMA layers 9, 10 and 13 are reference markings, not packing geometry.
+    for line in &block.reference_lines {
+        encode_astm_reference_line(writer, line, units)?;
+    } // for each reference line
+    for hole in &block.drill_holes {
+        encode_astm_drill_hole(writer, hole, units)?;
+    } // for each drill hole
 
     // DXF-AAMA has no annotation layer: label text goes on layer 1, except lines that read as piece text.
     let annotation_layer = if aama { "1" } else { "15" };
@@ -903,6 +914,15 @@ pub fn export_dxf_astm(
     output_path: impl AsRef<std::path::Path>,
     options: &DxfAstmExportOptions,
 ) -> Result<()> {
+    if let Some(block) = drawing.blocks.iter().find(|block| {
+        block.boundary.is_none() && (!block.drill_holes.is_empty() || !block.reference_lines.is_empty())
+    }) {
+        return Err(DxfAstmExportError::Validation(format!(
+            "piece {} has markings but no boundary",
+            block.display_name
+        )));
+    } // if markings cannot be written without a boundary block
+
     // Validate entities if requested.
     if options.validate_entities {
         if let Err(errors) = validate_astm_compliance(drawing) {

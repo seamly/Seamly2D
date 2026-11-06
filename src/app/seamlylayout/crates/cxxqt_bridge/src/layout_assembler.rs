@@ -490,6 +490,32 @@ mod tests {
         assert!(svg_str.contains("translate("), "missing translate");
     } // assembles_two_pieces
 
+    // @brief Layout placement preserves per-piece drill and reference mark geometry.
+    #[test]
+    fn layout_keeps_piece_markings_for_display_and_export() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <g id="Front" data-type="piece">
+    <g id="cutline_Front" data-type="cutline"><path d="M 0 0 L 50 0 L 50 30 L 0 30 Z"/></g>
+    <g id="drill_Front" data-type="drill" data-diameter="4"><circle cx="10" cy="12" r="2"/></g>
+    <g id="stripe_Front" data-type="stripe"><path d="M 4 5 L 20 5"/></g>
+    <g id="plaid_Front" data-type="plaid"><path d="M 7 8 L 7 22"/></g>
+  </g>
+</svg>"#;
+        let input_doc = svg_dom::Document::parse(svg).expect("parse ok");
+        let pieces = extract_piece_rects(&input_doc);
+        assert_eq!(pieces.len(), 1);
+        let placements = packing::pack_shelves(100, 100, &[pieces[0].rect]).expect("pack ok");
+        let mut base_doc = make_base_doc(100, 100);
+        create_layout(&mut base_doc, &input_doc, &pieces, &placements, 0, 0);
+
+        let serialized = base_doc.to_string();
+        assert!(serialized.contains("data-type=\"drill\""));
+        assert!(serialized.contains("data-diameter=\"4\""));
+        assert!(serialized.contains("<circle"));
+        assert!(serialized.contains("data-type=\"stripe\""));
+        assert!(serialized.contains("data-type=\"plaid\""));
+    } // layout_keeps_piece_markings_for_display_and_export
+
     // @brief Assembler emits per-piece translate; no scale group anywhere in the output.
     #[test]
     fn assembler_sets_pixel_translate() {

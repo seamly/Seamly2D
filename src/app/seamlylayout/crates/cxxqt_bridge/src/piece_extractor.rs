@@ -711,7 +711,7 @@ fn is_non_outline_group(e: &xmltree::Element) -> bool {
         if matches!(
             data_type.as_str(),
             "notch" | "tuck" | "grainline" | "fold_line" | "internal_path" | "drill" | "hole"
-                | "piece_label" | "pattern_label" | "size_label"
+                | "stripe" | "plaid" | "piece_label" | "pattern_label" | "size_label"
         ) {
             return true;
         } // if known decoration type
@@ -771,7 +771,7 @@ fn collect_all_path_points(element: &xmltree::Element, points: &mut Vec<Point>) 
     // Recurse into children, skipping non-outline decoration groups.
     for child in &element.children {
         if let XMLNode::Element(child_elem) = child {
-            // Tuck, notch, grainline, ip, drill, and hole groups are decorations;
+            // Tuck, notch, grainline, ip, drill, hole, stripe, and plaid groups are decorations;
             // their coordinates must not expand the piece's bounding box.
             if is_non_outline_group(child_elem) { continue; }
             collect_all_path_points(child_elem, points);
@@ -1274,6 +1274,25 @@ pub(crate) mod tests {
         assert_eq!(pieces[0].rect.h, 30,
             "height inflated by tuck groups: got {} expected 30", pieces[0].rect.h);
     } // tuck_sibling_bbox_not_inflated
+
+    // @brief Stripe and plaid reference paths do not change packed piece bounds.
+    #[test]
+    fn reference_line_siblings_do_not_inflate_piece_bbox() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <g id="Back">
+    <g id="cutline_Back" data-type="cutline">
+      <path d="M 0 0 L 50 0 L 50 30 L 0 30 Z"/>
+    </g>
+    <g id="stripe_Back" data-type="stripe"><path d="M 5 5 L 500 5"/></g>
+    <g id="plaid_Back" data-type="plaid"><path d="M 5 6 L 5 500"/></g>
+  </g>
+</svg>"#;
+        let doc = svg_dom::Document::parse(svg).expect("parse ok");
+        let pieces = extract_piece_rects(&doc);
+        assert_eq!(pieces.len(), 1);
+        assert_eq!(pieces[0].rect.w, 50);
+        assert_eq!(pieces[0].rect.h, 30);
+    } // reference_line_siblings_do_not_inflate_piece_bbox
 
     // @brief Notch sibling groups must not inflate the piece bounding box.
     //

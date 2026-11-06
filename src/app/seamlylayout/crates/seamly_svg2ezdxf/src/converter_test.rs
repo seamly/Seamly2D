@@ -149,6 +149,100 @@ mod tests {
         assert_eq!(layers, vec!["6", "8", "15"]);
     }
 
+    // @brief Drill, stripe and plaid features preserve typed positions after inherited transforms.
+    #[test]
+    fn exports_drill_stripe_and_plaid_components() {
+        let svg = r#"
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <g id="piece_Front" data-type="piece">
+                <g data-type="cutline"><path d="M0,0 L80,0 L80,80 L0,80 Z"/></g>
+                <g data-type="drill" data-diameter="4">
+                  <g transform="matrix(1,0,0,1,2,3)">
+                    <circle cx="10" cy="20" r="2"/>
+                  </g>
+                </g>
+                <g data-type="stripe">
+                  <g transform="translate(5,7)"><path d="M1,2 L11,2"/></g>
+                </g>
+                <g data-type="plaid">
+                  <g transform="translate(3,4)"><path d="M1,2 L1,12"/></g>
+                </g>
+              </g>
+            </svg>
+        "#;
+        let doc = Document::parse(svg).expect("fixture parses");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        let piece = &drawing.blocks[0];
+
+        assert_eq!(piece.drill_holes.len(), 1);
+        assert!((piece.drill_holes[0].center.x - 12.0 * crate::utils::MM_PER_PX).abs() < 1e-6);
+        assert!((piece.drill_holes[0].center.y - 77.0 * crate::utils::MM_PER_PX).abs() < 1e-6);
+        assert!((piece.drill_holes[0].diameter - 4.0 * crate::utils::MM_PER_PX).abs() < 1e-6);
+
+        assert_eq!(piece.reference_lines.len(), 2);
+        assert_eq!(piece.reference_lines[0].layer, "9");
+        assert_eq!(piece.reference_lines[1].layer, "10");
+        assert!((piece.reference_lines[0].start.x - 6.0 * crate::utils::MM_PER_PX).abs() < 1e-6);
+        assert!((piece.reference_lines[0].start.y - 91.0 * crate::utils::MM_PER_PX).abs() < 1e-6);
+        assert!((piece.reference_lines[0].end.x - 16.0 * crate::utils::MM_PER_PX).abs() < 1e-6);
+        assert!((piece.reference_lines[1].start.x - 4.0 * crate::utils::MM_PER_PX).abs() < 1e-6);
+        assert!((piece.reference_lines[1].start.y - 94.0 * crate::utils::MM_PER_PX).abs() < 1e-6);
+        assert!(piece.entities.iter().all(|entity| !["9", "10", "13"].contains(&entity.layer())),
+            "dedicated marks must not be duplicated as generic DXF entities");
+    } // exports_drill_stripe_and_plaid_components
+
+    // @brief Each size keeps its graded drill center and the same drill diameter.
+    #[test]
+    fn keeps_graded_drill_centers_per_size() {
+        let svg = r#"<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <g id="piece_Front_36" data-type="piece" data-parent="Front" data-size="36">
+    <g data-type="cutline"><path d="M0,0 L40,0 L40,40 L0,40 Z"/></g>
+    <g data-type="drill" data-diameter="4"><circle cx="10" cy="15" r="2"/></g>
+  </g>
+  <g id="piece_Front_38" data-type="piece" data-parent="Front" data-size="38">
+    <g data-type="cutline"><path d="M0,0 L50,0 L50,50 L0,50 Z"/></g>
+    <g data-type="drill" data-diameter="4"><circle cx="20" cy="35" r="2"/></g>
+  </g>
+</svg>"#;
+        let doc = Document::parse(svg).expect("fixture parses");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        assert_eq!(drawing.blocks.len(), 2);
+        let first = &drawing.blocks[0].drill_holes[0];
+        let second = &drawing.blocks[1].drill_holes[0];
+        assert!((first.center.x - 10.0 * crate::utils::MM_PER_PX).abs() < 1e-6);
+        assert!((second.center.x - 20.0 * crate::utils::MM_PER_PX).abs() < 1e-6);
+        assert!((first.center.y - 85.0 * crate::utils::MM_PER_PX).abs() < 1e-6);
+        assert!((second.center.y - 65.0 * crate::utils::MM_PER_PX).abs() < 1e-6);
+        assert_eq!(first.diameter, second.diameter);
+        assert!((first.diameter - 4.0 * crate::utils::MM_PER_PX).abs() < 1e-6);
+    } // keeps_graded_drill_centers_per_size
+
+    // @brief Reject invalid drill dimensions and unsupported reference-path geometry.
+    #[test]
+    fn rejects_malformed_drill_and_reference_components() {
+        for component in [
+            r#"<g data-type="drill" data-diameter="0"><circle cx="1" cy="1" r="0"/></g>"#,
+            r#"<g data-type="stripe"><path d="M0,0 L1,1 L2,2"/></g>"#,
+        ] {
+            let svg = format!(
+                r#"<svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg"><g data-type="piece" id="Front"><g data-type="cutline"><path d="M0,0 L10,0 L10,10 L0,10 Z"/></g>{component}</g></svg>"#
+            );
+            let doc = Document::parse(&svg).expect("fixture parses");
+            let error = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).err().expect("invalid component rejected");
+            assert!(error.to_string().contains("drill hole") || error.to_string().contains("reference path"));
+        } // for each malformed component
+    } // rejects_malformed_drill_and_reference_components
+
+    // @brief Reject piece markings when conversion cannot preserve their typed DXF output.
+    #[test]
+    fn rejects_markings_without_piece_blocks() {
+        let svg = r#"<svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg"><g data-type="piece" id="Front"><g data-type="drill" data-diameter="2"><circle cx="1" cy="1" r="1"/></g></g></svg>"#;
+        let doc = Document::parse(svg).expect("fixture parses");
+        let options = SvgToEzdxfOptions { create_blocks: false, ..Default::default() };
+        let error = svg_to_ezdxf(&doc, &options).err().expect("piece mark conversion rejected");
+        assert!(error.to_string().contains("require piece blocks"));
+    } // rejects_markings_without_piece_blocks
+
     // @brief Test coordinate transformation (Y-axis inversion).
     #[test]
     fn test_coordinate_transformation() {

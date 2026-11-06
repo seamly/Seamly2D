@@ -53,7 +53,10 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | 6 | Mirror line: the fold line of a piece cut on the fold | LINE |
 | 7 | Grainline | LINE |
 | 8 | Internal lines (`internal_path`) | POLYLINE |
+| 9 | Stripe reference lines | LINE |
+| 10 | Plaid reference lines | LINE |
 | 11 | Internal cutouts (`cut_path`) | POLYLINE |
+| 13 | Drill-hole centers; group 30 carries the positive diameter in file units | POINT |
 | 14 | Sew lines (`seamline`) | POLYLINE |
 | 15 | Piece and pattern label text | TEXT |
 | 84 / 85 / 86 / 87 | Validation curves for 1 / 8 / 11 / 14 | POLYLINE |
@@ -140,7 +143,6 @@ A DXF-ASTM export of the **Base Size** tab is graded (D6673 §4.3.1.4, §4.4). T
 Seamly2D sends no source data for these. Tracked in `TODO_SEAMLYLAYOUT.md`.
 
 - Alternate grade reference lines (layer 5).
-- Stripe and plaid reference lines (layers 9, 10), drill holes (layer 13).
 - Check notch (layer 82). Notch dependency (ATTDEF).
 
 ## Known producer gaps

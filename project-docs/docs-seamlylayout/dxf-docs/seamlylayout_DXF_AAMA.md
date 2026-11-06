@@ -26,7 +26,7 @@ It uses the DXF-ASTM pipeline. `DxfAstmExportOptions::aama` selects the AAMA con
 | Style text | ends with `Curve Tolerance:` and `ASTM/D13Proposal 1 Version:` | ends with `Units:` |
 | `.rul` first line | `ASTM/D13 Proposal 1 VERSION:D6673-10` | `ANSI/AAMA VERSION:1.0.0` |
 
-Same in both: layer 1 boundary and system text, `Piece Name:`, `Quantity:`, `Material:`, layer 5 grade reference line, layer 7 grainline, `# n` grade rule texts, the `.rul` body, METRIC units.
+Same in both: layer 1 boundary and system text, `Piece Name:`, `Quantity:`, `Material:`, layer 5 grade reference line, layer 7 grainline, stripe/plaid reference lines on layers 9/10, drill markers on layer 13, `# n` grade rule texts and the `.rul` body. Units follow the pattern `data-units`. SeamlyLayout also carries the positive drill diameter in layer 13 group 30 in both formats; this is a writer extension in DXF-AAMA.
 
 ## Decisions
 
@@ -84,9 +84,11 @@ Two McNeel forum posts give AAMA practice (implementation evidence, not the norm
 | 6 | Mirror (symmetry) line | Same |
 | 7 | Grainline | Same |
 | 8 | Internal lines | Same |
-| 9, 10, 12 | Empty, optional | Empty |
+| 9 | Stripe reference lines | LINE |
+| 10 | Plaid reference lines | LINE |
+| 12 | Empty, optional | Empty |
 | 11 | Internal cut | Internal cutouts |
-| 13 | Drill and punch holes | None: Seamly2D sends no drill holes |
+| 13 | Drill and punch holes | Drill center POINT; group 30 carries diameter (SeamlyLayout extension) |
 | 14 | Net line (no seam allowance) | Sew line |
 | 15 | First post: ASTM text notes. Second post: quality lines | Not used: AAMA defines layers 1 to 14 |
 | 16 to 18 | Never | Not used |
