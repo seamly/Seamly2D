@@ -1,6 +1,7 @@
 //-----------------------------------------------------------------------------
 //  @file   qttestmainlambda.cpp
 //  @author Douglas S Caskey
+//  @author slspencer
 //  @date   13 July, 2025
 //
 //  @brief
@@ -8,7 +9,9 @@
 //  This source code is part of the Seamly2D project, a pattern making
 //  program to create and model patterns of clothing.
 //  Copyright (C) 2017-2025 Seamly2D project
+//  Copyright (C) 2026 Seamly2D Project
 //  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
+//  License: GPL-3.0-or-later
 //
 //  Seamly2D is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -87,6 +90,7 @@
 #include "tst_handoffpiece.h"
 #include "tst_handofflabel.h"
 #include "tst_handoffdocument.h"
+#include "tst_vpatternconverter.h"
 
 #include "../vmisc/def.h"
 #include "../qmuparser/qmudef.h"
@@ -249,6 +253,7 @@ int main(int argc, char** argv)
     ASSERT_TEST(new TST_HandoffPiece());
     ASSERT_TEST(new TST_HandoffLabel());
     ASSERT_TEST(new TST_HandoffDocument());
+    ASSERT_TEST(new TST_VPatternConverter());
 
     return status;
 }

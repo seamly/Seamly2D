@@ -1,6 +1,9 @@
 #-------------------------------------------------
 #
 # Project created by QtCreator 2015-03-31T17:27:03
+# Author: slspencer
+# Copyright: 2026 Seamly2D Project
+# License: GPL-3.0-or-later
 #
 #-------------------------------------------------
 
@@ -67,7 +70,8 @@ SOURCES += \
     tst_handoffcornercuts.cpp \
     tst_handoffpiece.cpp \
     tst_handofflabel.cpp \
-    tst_handoffdocument.cpp
+    tst_handoffdocument.cpp \
+    tst_vpatternconverter.cpp
 
 *msvc*:SOURCES += stable.cpp
 
@@ -106,7 +110,8 @@ HEADERS += \
     tst_handoffcornercuts.h \
     tst_handoffpiece.h \
     tst_handofflabel.h \
-    tst_handoffdocument.h
+    tst_handoffdocument.h \
+    tst_vpatternconverter.h
 
 include(warnings.pri)
 

@@ -1,11 +1,14 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  @file   vpatternconverter.cpp
 //  @author Douglas S Caskey
+//  @author slspencer
 //  @date   17 Sep, 2023
 //
 //  @copyright
 //  Copyright (C) 2017 - 2025 Seamly, LLC
+//  Copyright (C) 2026 Seamly2D Project
 //  https://github.com/fashionfreedom/seamly2d
+//  License: GPL-3.0-or-later
 //
 //  @brief
 //  Seamly2D is free software: you can redistribute it and/or modify
@@ -82,8 +85,8 @@ Q_LOGGING_CATEGORY(PatternConverter, "patternConverter")
  */
 
 const QString VPatternConverter::PatternMinVerStr = QStringLiteral("0.1.0");
-const QString VPatternConverter::PatternMaxVerStr = QStringLiteral("0.7.7");
-const QString VPatternConverter::CurrentSchema    = QStringLiteral("://schema/pattern/v0.7.7.xsd");
+const QString VPatternConverter::PatternMaxVerStr = QStringLiteral("0.7.8");
+const QString VPatternConverter::CurrentSchema    = QStringLiteral("://schema/pattern/v0.7.8.xsd");
 
 //VPatternConverter::PatternMinVer; // <== DON'T FORGET TO UPDATE TOO!!!!
 //VPatternConverter::PatternMaxVer; // <== DON'T FORGET TO UPDATE TOO!!!!
@@ -266,16 +269,12 @@ bool VPatternConverter::fixGroupsOrder()
 {
     bool fixed = false;
     const QDomNodeList blocks = elementsByTagName(strDraftBlock);
-        for (int i = 0; i < blocks.size(); ++i)
+    for (int i = 0; i < blocks.size(); ++i)
     {
         QDomElement block = blocks.at(i).toElement();
-
-        // Query elements independently from the parent block
-        const QDomElement pieces = block.firstChildElement(QStringLiteral("pieces"));
         QDomElement groups = block.firstChildElement(QStringLiteral("groups"));
         QDomElement images = block.firstChildElement(QStringLiteral("images"));
 
-        // Both elements exist -> ensure they are positioned as pieces -> groups -> images
         if (!groups.isNull() && !images.isNull())
         {
             if (images.previousSiblingElement(QStringLiteral("groups")) != groups)
@@ -283,28 +282,6 @@ bool VPatternConverter::fixGroupsOrder()
                 block.insertBefore(groups, images);
                 fixed = true;
             }
-        }
-        // Groups exists, but images is missing -> create and place after groups
-        else if (!groups.isNull() && images.isNull())
-        {
-            block.insertAfter(createElement(QStringLiteral("images")), groups);
-            fixed = true;
-        }
-        // Images exists, but groups is missing -> create and place before images
-        else if (groups.isNull() && !images.isNull())
-        {
-            block.insertBefore(createElement(QStringLiteral("groups")), images);
-            fixed = true;
-        }
-        // Neither exists -> create both sequentially after pieces
-        else if (groups.isNull() && images.isNull())
-        {
-            QDomElement newGroups = createElement(QStringLiteral("groups"));
-            QDomElement newImages = createElement(QStringLiteral("images"));
-
-            block.insertAfter(newGroups, pieces);
-            block.insertAfter(newImages, newGroups);
-            fixed = true;
         }
     }
 
@@ -423,7 +400,9 @@ QString VPatternConverter::getSchema(int ver) const
         case (0x000706):
             return QStringLiteral("://schema/pattern/v0.7.6.xsd");
         case (0x000707):
-            qCDebug(PatternConverter, "Current schema - ://schema/pattern/v0.7.7.xsd");
+            return QStringLiteral("://schema/pattern/v0.7.7.xsd");
+        case (0x000708):
+            qCDebug(PatternConverter, "Current schema - ://schema/pattern/v0.7.8.xsd");
             return CurrentSchema;
         default:
             InvalidVersion(ver);
@@ -642,6 +621,10 @@ void VPatternConverter::applyPatches()
             ValidateXML(getSchema(0x000707), m_convertedFileName);
             V_FALLTHROUGH
         case (0x000707):
+            toVersion0_7_8();
+            ValidateXML(getSchema(0x000708), m_convertedFileName);
+            V_FALLTHROUGH
+        case (0x000708):
             break;
         default:
             InvalidVersion(m_ver);
@@ -660,7 +643,7 @@ void VPatternConverter::downgradeToCurrentMaxVersion()
 bool VPatternConverter::isReadOnly() const
 {
     // Check if attribute readOnly was not changed in file format
-    Q_STATIC_ASSERT_X(VPatternConverter::PatternMaxVer == CONVERTER_VERSION_CHECK(0, 7, 7),
+    Q_STATIC_ASSERT_X(VPatternConverter::PatternMaxVer == CONVERTER_VERSION_CHECK(0, 7, 8),
                       "Check attribute readOnly.");
 
     // Possibly in future attribute readOnly will change position etc.
@@ -1574,6 +1557,49 @@ void VPatternConverter::toVersion0_7_7()
     removeForbidFlippingV0_7_7();
     endMainPathAtFoldLineV0_7_7();
     setVersion(QStringLiteral("0.7.7"));
+    Save();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Version 0.7.8 ensures every draft block has groups and images.
+void VPatternConverter::toVersion0_7_8()
+{
+    Q_STATIC_ASSERT_X(VPatternConverter::PatternMinVer < CONVERTER_VERSION_CHECK(0, 7, 8),
+                      "Time to refactor the code.");
+
+    const QDomNodeList blocks = elementsByTagName(strDraftBlock);
+    for (int i = 0; i < blocks.size(); ++i)
+    {
+        QDomElement block = blocks.at(i).toElement();
+        QDomElement groups = block.firstChildElement(QStringLiteral("groups"));
+        QDomElement images = block.firstChildElement(QStringLiteral("images"));
+        const QDomElement pieces = block.firstChildElement(QStringLiteral("pieces"));
+
+        if (groups.isNull())
+        {
+            groups = createElement(QStringLiteral("groups"));
+            if (images.isNull())
+            {
+                block.insertAfter(groups, pieces);
+            }
+            else
+            {
+                block.insertBefore(groups, images);
+            }
+        }
+
+        if (images.isNull())
+        {
+            images = createElement(QStringLiteral("images"));
+            block.insertAfter(images, groups);
+        }
+        else if (images.previousSiblingElement(QStringLiteral("groups")) != groups)
+        {
+            block.insertBefore(groups, images);
+        }
+    }
+
+    setVersion(QStringLiteral("0.7.8"));
     Save();
 }
 
