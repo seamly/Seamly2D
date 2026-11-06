@@ -48,11 +48,11 @@ namespace
 {
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief number writes a coordinate with at most eight significant digits.
+ * @brief number preserves the six significant digits emitted by QSvgGenerator.
  */
 QString number(qreal value)
 {
-    return QString::number(qFuzzyIsNull(value) ? 0.0 : value, 'g', 8);
+    return QString::number(qFuzzyIsNull(value) ? 0.0 : value, 'g', 6);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
