@@ -132,6 +132,12 @@ int HeadlessExport::run(const StartupOptions &options, QString &errorMessage)
                      [&errorMessage](const QString &message) {
         errorMessage = message;
     });
+    bool incomplete_layout = false;
+    QObject::connect(&controller, &AppController::layoutWarning, &controller,
+                     [&errorMessage, &incomplete_layout](const QString &message) {
+        errorMessage = message;
+        incomplete_layout = true;
+    });
 
     const bool imported = options.hasFile()
         ? controller.importSvg(options.filePath())
@@ -156,6 +162,9 @@ int HeadlessExport::run(const StartupOptions &options, QString &errorMessage)
         } // if no layout error was reported
         return ExitSoftware;
     } // if layout calculation failed
+    if (incomplete_layout) {
+        return ExitSoftware;
+    } // do not silently export a layout that omits input pieces
 
     const QString outputPath = options.outputPath();
     const QString format = options.exportFormat();

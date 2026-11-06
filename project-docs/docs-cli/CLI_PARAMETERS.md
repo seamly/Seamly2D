@@ -96,3 +96,28 @@ The synthetic two-piece smoke test does not replace geometry-fidelity checks.
 Real-pattern coverage requires the optional Seamly2D arguments.
 Use a short shadow-build path on Windows; generated CXX-Qt wrapper paths can
 otherwise exceed the compiler's path-length limit.
+
+Headless export rejects a layout with unplaced pieces before writing output.
+It returns status 70 and lists the omitted pieces on standard error.
+The interactive GUI still permits viewing a partial layout.
+Use `--unplaced-settings <settings.json>` with the Seamly2D runner arguments
+to assert that insufficient media returns 70 through both applications.
+
+Use `--svg-input <pieces.svg> --layout-settings <settings.json>` to validate a
+saved handoff with explicit media dimensions.
+The committed Richmond handoff has 12 pieces and a two-inch calibration square.
+The runner checks its piece/path counts and physical scale in SVG, DXF, and HP-GL.
+It also checks PDF/PostScript page sizes and PNG/JPEG image dimensions.
+The Richmond source pattern and measurement files remain necessary for a complete
+Seamly2D end-to-end check; a cached handoff is not a substitute.
+
+SeamlyMe accepts measurement files, not `.sm2d` patterns or layout-export options.
+Use `seamlyme --test <measurements.smis-or-smms>` for a noninteractive file-load check.
+Its `--height`, `--size`, and `--unit` options select measurement display inputs.
+Seamly2D consumes those measurement files when it generates a layout handoff.
+In `--test` mode, invalid arguments return status 64 without an error dialog.
+An input `.sm2d` pattern returns status 66 because it is not a measurement file.
+
+```text
+python src\test\Seamly2DTest\test_measurement_cli.py <seamlyme-executable> build\measurement-cli --individual <measurements.smis> --multisize <measurements.smms> --pattern <pattern.sm2d>
+```

@@ -7,8 +7,81 @@ import argparse
 import json
 import os
 from pathlib import Path
+import re
+import struct
 import subprocess
 import xml.etree.ElementTree as xml
+import zlib
+
+
+def jpeg_size(content):
+    """Read JPEG frame dimensions without adding an imaging dependency."""
+    offset = 2
+    while offset < len(content):
+        if content[offset] != 255:
+            return None
+        marker = content[offset + 1]
+        offset += 2
+        length = int.from_bytes(content[offset:offset + 2], "big")
+        if marker in (192, 193, 194):
+            height, width = struct.unpack(">HH", content[offset + 3:offset + 7])
+            return width, height
+        if length < 2:
+            return None
+        offset += length
+    return None
+
+
+def contains_square(polylines, side, tolerance):
+    """Find a physical calibration square irrespective of translation or quarter-turn rotation."""
+    for points in polylines:
+        if len(points) < 4:
+            continue
+        width = max(x for x, _ in points) - min(x for x, _ in points)
+        height = max(y for _, y in points) - min(y for _, y in points)
+        if abs(width - side) <= tolerance and abs(height - side) <= tolerance:
+            return True
+    return False
+
+
+def dxf_polylines(content):
+    """Read classic DXF polyline vertices, whose coordinates are millimeters."""
+    lines = content.decode("utf-8", errors="replace").splitlines()
+    current = {}
+    points = []
+    polylines = []
+    for code, value in zip(lines[::2], lines[1::2]):
+        code = code.strip()
+        if code != "0":
+            current[code] = value
+            continue
+        if current.get("type") == "VERTEX" and "10" in current and "20" in current:
+            points.append((float(current["10"]), float(current["20"])))
+        if value == "POLYLINE":
+            points = []
+        if value == "SEQEND":
+            polylines.append(points)
+            points = []
+        current = {"type": value}
+    return polylines
+
+
+def hpgl_polylines(content):
+    """Read absolute pen strokes in HP-GL units, forty units per millimeter."""
+    polylines = []
+    points = []
+    for command, arguments in re.findall(r"([A-Z]{2})([^;]*);", content.decode("ascii")):
+        if command not in ("PU", "PD"):
+            continue
+        numbers = [int(value) for value in re.findall(r"-?\d+", arguments)]
+        coordinates = list(zip(numbers[::2], numbers[1::2]))
+        if command == "PU":
+            polylines.append(points)
+            points = coordinates
+        else:
+            points.extend(coordinates)
+    polylines.append(points)
+    return polylines
 
 
 def main():
@@ -21,6 +94,10 @@ def main():
     parser.add_argument("--measurements", type=Path)
     parser.add_argument("--size")
     parser.add_argument("--height")
+    parser.add_argument("--svg-input", type=Path)
+    parser.add_argument("--layout-settings", type=Path)
+    parser.add_argument("--timeout", type=float, default=180)
+    parser.add_argument("--unplaced-settings", type=Path)
     arguments = parser.parse_args()
     if bool(arguments.seamly2d) != bool(arguments.pattern):
         parser.error("--seamly2d and --pattern must be supplied together")
@@ -37,8 +114,19 @@ def main():
         '<g id="piece-2"><path d="M0 0 L48 0 L48 48 L0 48 Z" fill="none" stroke="black"/></g></svg>',
         encoding="utf-8",
     )
+    if arguments.svg_input:
+        fixture.write_bytes(arguments.svg_input.read_bytes())
+    source_root = xml.parse(fixture).getroot()
+    expected_paths = len(source_root.findall(".//{http://www.w3.org/2000/svg}path"))
+    expected_pieces = sum(element.get("data-type") == "piece" for element in source_root.iter())
+    richmond_fixture = arguments.svg_input and "richmond" in arguments.svg_input.name.lower()
+    format_settings = directory / "layout.json"
+    settings_object = {}
+    if arguments.layout_settings:
+        settings_object = json.loads(arguments.layout_settings.read_text(encoding="utf-8"))
+    format_settings.write_text(json.dumps(settings_object), encoding="utf-8")
     settings = directory / "tiled.json"
-    settings.write_text(json.dumps({"paperType": "tiled"}), encoding="utf-8")
+    settings.write_text(json.dumps({**settings_object, "paperType": "tiled"}), encoding="utf-8")
     failures = []
 
     def run(name, options, expected_status=0, input_bytes=None, program=None):
@@ -47,7 +135,7 @@ def main():
             [str(program or executable), *options],
             input=input_bytes,
             capture_output=True,
-            timeout=60,
+            timeout=arguments.timeout,
             env=environment,
         )
         (directory / (name + ".stdout.txt")).write_bytes(result.stdout)
@@ -64,12 +152,20 @@ def main():
         "pdf": b"%PDF", "pdf-tiled": b"%PDF", "png": b"\x89PNG\r\n\x1a\n",
         "jpg": b"\xff\xd8", "jpeg": b"\xff\xd8", "ps": b"%!PS", "eps": b"%!PS",
     }
+    if richmond_fixture:
+        incomplete_output = directory / "richmond-incomplete.svg"
+        incomplete_output.unlink(missing_ok=True)
+        result = run("richmond-incomplete", [
+            "--export", "svg", "--output", str(incomplete_output), str(fixture),
+        ], 70)
+        if incomplete_output.exists() or b"Front" not in result.stderr or result.stdout.strip():
+            failures.append("richmond-incomplete-status")
+    width = height = 0
     for format_name in ("svg", "pdf", "pdf-tiled", "png", "jpg", "jpeg", "dxf", "hpgl", "ps", "eps"):
         output = directory / ("layout." + format_name)
         output.unlink(missing_ok=True)
-        options = ["--export", format_name, "--output", str(output), str(fixture)]
-        if format_name == "pdf-tiled":
-            options.extend(["--settings", str(settings)])
+        options = ["--export", format_name, "--output", str(output), str(fixture),
+                   "--settings", str(settings if format_name == "pdf-tiled" else format_settings)]
         result = run(format_name, options)
         if result.returncode != 0 or not output.exists() or output.stat().st_size == 0:
             failures.append(format_name + "-output")
@@ -79,15 +175,95 @@ def main():
             failures.append(format_name + "-signature")
         if format_name == "svg":
             root = xml.fromstring(content)
-            if len(root.findall(".//{http://www.w3.org/2000/svg}path")) != 2:
+            if len(root.findall(".//{http://www.w3.org/2000/svg}path")) != expected_paths:
+                failures.append("svg-path-count")
+            piece_count = sum(element.get("data-type") == "piece" for element in root.iter())
+            if expected_pieces and piece_count != expected_pieces:
                 failures.append("svg-piece-count")
+            width, height = float(root.get("width")), float(root.get("height"))
+            if width <= 0 or height <= 0:
+                failures.append("svg-media-size")
+            if "pageWidth" in settings_object and settings_object.get("paperType") == "sheet":
+                factor = {"mm": 96 / 25.4, "cm": 96 / 2.54, "in": 96}[settings_object.get("unit", "in")]
+                if abs(width - settings_object["pageWidth"] * factor) > 1:
+                    failures.append("svg-width-units")
+                if abs(height - settings_object["pageHeight"] * factor) > 1:
+                    failures.append("svg-height-units")
+            if richmond_fixture:
+                gauge = next((element for element in root.iter() if element.get("id") == "piece-2"), None)
+                path = gauge.find(".//{http://www.w3.org/2000/svg}path") if gauge is not None else None
+                coordinates = path.get("d", "") if path is not None else ""
+                numbers = [float(value) for value in re.findall(r"-?\d+(?:\.\d+)?", coordinates)]
+                if (not numbers or abs(max(numbers[::2]) - min(numbers[::2]) - 192) > 0.02
+                        or abs(max(numbers[1::2]) - min(numbers[1::2]) - 192) > 0.02):
+                    failures.append("richmond-two-inch-gauge")
+        if format_name == "png" and struct.unpack(">II", content[16:24]) != (round(width), round(height)):
+            failures.append("png-media-size")
+        if format_name in ("jpg", "jpeg") and jpeg_size(content) != (round(width), round(height)):
+            failures.append(format_name + "-media-size")
+        if format_name in ("pdf", "pdf-tiled"):
+            boxes = re.findall(rb"/MediaBox\s*\[0 0 ([\d.]+) ([\d.]+)\]", content)
+            if not boxes or any(float(x) <= 0 or float(y) <= 0 for x, y in boxes):
+                failures.append(format_name + "-page-size")
+            if format_name == "pdf" and boxes:
+                if abs(float(boxes[0][0]) - width * 0.75) > 1 or abs(float(boxes[0][1]) - height * 0.75) > 1:
+                    failures.append("pdf-physical-media-size")
+            drawing_streams = []
+            for stream in re.findall(rb"stream\r?\n(.*?)\r?\nendstream", content, re.DOTALL):
+                try:
+                    drawing_streams.append(zlib.decompress(stream))
+                except zlib.error:
+                    continue
+            if not any(re.search(rb"[-+\d.]+\s+[-+\d.]+\s+m\b", stream) for stream in drawing_streams):
+                failures.append(format_name + "-vector-geometry")
+        if format_name in ("ps", "eps"):
+            box = re.search(rb"%%BoundingBox: 0 0 (\d+) (\d+)", content)
+            if not box or abs(int(box[1]) - width * 0.75) > 1 or abs(int(box[2]) - height * 0.75) > 1:
+                failures.append(format_name + "-physical-media-size")
+            if not re.search(rb"[-+\d.]+\s+[-+\d.]+\s+m\b", content):
+                failures.append(format_name + "-vector-geometry")
         if format_name == "dxf" and b"ENTITIES" not in content:
             failures.append("dxf-entities")
         if format_name == "hpgl" and b"PD" not in content:
             failures.append("hpgl-geometry")
+        if richmond_fixture and format_name == "dxf" and not contains_square(dxf_polylines(content), 50.8, 0.03):
+            failures.append("dxf-two-inch-gauge")
+        if richmond_fixture and format_name == "hpgl" and not contains_square(hpgl_polylines(content), 2032, 2):
+            failures.append("hpgl-two-inch-gauge")
 
     for format_name in ("gcode", "3mf"):
-        run(format_name, ["--export", format_name, "--output", str(directory / format_name), str(fixture)], 69)
+        run(format_name, ["--export", format_name, "--settings", str(format_settings),
+                         "--output", str(directory / format_name), str(fixture)], 69)
+    unplaced_fixture = directory / "unplaced.svg"
+    unplaced_fixture.write_text(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">'
+        '<g id="piece-one"><path d="M0 0 L96 0 L96 96 L0 96 Z"/></g>'
+        '<g id="piece-two"><path d="M0 0 L96 0 L96 96 L0 96 Z"/></g></svg>',
+        encoding="utf-8",
+    )
+    insufficient_settings = directory / "insufficient.json"
+    insufficient_settings.write_text(json.dumps({
+        "unit": "mm", "mediaType": "paper", "paperType": "sheet",
+        "pageWidth": 27, "pageHeight": 27, "pieceGap": 1,
+        "marginLeft": 0, "marginRight": 0, "marginTop": 0, "marginBottom": 0,
+    }), encoding="utf-8")
+    for format_name in ("svg", "pdf", "png", "jpg", "jpeg", "dxf", "hpgl", "ps", "eps"):
+        partial_output = directory / ("partial." + format_name)
+        partial_output.unlink(missing_ok=True)
+        result = run("unplaced-" + format_name, [
+            "--export", format_name, "--settings", str(insufficient_settings),
+            "--output", str(partial_output), str(unplaced_fixture),
+        ], 70)
+        if partial_output.exists() or b"exported " in result.stdout or b"piece-two" not in result.stderr:
+            failures.append("unplaced-" + format_name + "-partial-output")
+    existing_output = directory / "existing.svg"
+    existing_output.write_bytes(b"existing output must remain intact")
+    run("unplaced-preserves-existing", [
+        "--export", "svg", "--settings", str(insufficient_settings),
+        "--output", str(existing_output), str(unplaced_fixture),
+    ], 70)
+    if existing_output.read_bytes() != b"existing output must remain intact":
+        failures.append("unplaced-overwrites-existing")
     run("scale-overflow", ["--export", "png", "--scale", "1e100", "--output",
                           str(directory / "overflow.png"), str(fixture)], 64)
     run("scale-underflow", ["--export", "png", "--scale", "1e-100", "--output",
@@ -109,7 +285,8 @@ def main():
         invalid_document.write_text(document, encoding="utf-8")
         run(name, ["--export", "svg", "--output", str(directory / (name + "-output.svg")),
                    str(invalid_document)], status)
-    run("stdin", ["--export", "svg", "--svg-stdin", "--output", str(directory / "stdin.svg")],
+    run("stdin", ["--export", "svg", "--svg-stdin", "--settings", str(format_settings),
+                  "--output", str(directory / "stdin.svg")],
         input_bytes=fixture.read_bytes())
     run("empty-stdin", ["--export", "svg", "--svg-stdin", "--output", str(directory / "empty.svg")],
         64, input_bytes=b"")
@@ -132,8 +309,8 @@ def main():
             output.unlink(missing_ok=True)
             options = ["--layout-export", "--layout-format", format_name,
                        "--layout-output", str(output), *companions, str(arguments.pattern.resolve())]
-            if format_name == "pdf-tiled":
-                options.extend(["--layout-settings", str(settings)])
+            options.extend(["--layout-settings",
+                            str(settings if format_name == "pdf-tiled" else format_settings)])
             expected_status = 69 if format_name in ("gcode", "3mf") else 0
             result = run("pass-through-" + format_name, options, expected_status,
                          program=arguments.seamly2d.resolve())
@@ -146,6 +323,15 @@ def main():
                                         str(directory / "absent" / "child.svg"), *companions,
                                         str(arguments.pattern.resolve())], 64,
             program=arguments.seamly2d.resolve())
+        if arguments.unplaced_settings:
+            output = directory / "pass-through-incomplete.svg"
+            output.unlink(missing_ok=True)
+            result = run("pass-through-unplaced", [
+                "--layout-export", "--layout-settings", str(arguments.unplaced_settings.resolve()),
+                "--layout-output", str(output), *companions, str(arguments.pattern.resolve()),
+            ], 70, program=arguments.seamly2d.resolve())
+            if output.exists() or b"exported " in result.stdout or b"piece" not in result.stderr.lower():
+                failures.append("pass-through-unplaced-partial-output")
     if failures:
         print("FAILED: " + ", ".join(failures))
         return 1
