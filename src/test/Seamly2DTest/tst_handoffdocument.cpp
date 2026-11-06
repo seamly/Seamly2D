@@ -607,6 +607,29 @@ void TST_HandoffDocument::alignedDocumentKeepsComparisonUnchanged() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief Empty placeholder lines keep their spacing but emit no label text in either writer.
+ */
+void TST_HandoffDocument::emptyLabelLinesMatchOldWriter() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+    TestPatternDocument document;
+    VAbstractPattern *previous = qApp->getCurrentDocument();
+    qApp->setCurrentDocument(&document);
+    VPiece piece = make_piece(data.data(), true, false, false);
+    set_label_templates(&document, &piece);
+    piece.GetPatternPieceData().SetLabelTemplate({label_line(QString(), false, Qt::AlignLeft, 0)});
+    const QDomDocument old_dom = make_old_document({piece}, data.data(), {}, {}, {});
+    const HandoffPlacedPiece placed = placed_piece(piece, data.data(), &document, QString(), QString());
+    qApp->setCurrentDocument(previous);
+    const QDomDocument new_dom = make_new_document({placed}, {});
+    QCOMPARE(count_type(flatten_document(new_dom), QStringLiteral("piece_label")), 0);
+    compare_entries(flatten_document(new_dom), flatten_document(old_dom));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief Hidden labels, hidden grainlines and the show settings leave out the drawn groups; the grain angle stays.
  */
 void TST_HandoffDocument::hiddenItemsAreNotDrawn() const

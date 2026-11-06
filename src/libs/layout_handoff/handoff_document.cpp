@@ -533,7 +533,11 @@ void PieceWriter::add_label(const HandoffLabel &label, const QString &type)
         }
         transform.translate(x, y);
 
-        group.appendChild(make_text(text, font, m_style.label_color, transform));
+        // QSvgGenerator emits no text element for an empty line.
+        if (!text.isEmpty())
+        {
+            group.appendChild(make_text(text, font, m_style.label_color, transform));
+        }
         y += metrics.height() + label.spacing();
     }
     if (group.hasChildNodes())
