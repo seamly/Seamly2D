@@ -18,7 +18,7 @@ const QSet<QString> reference_attributes{
     QStringLiteral("idObject"), QStringLiteral("idTool"), QStringLiteral("path"),
     QStringLiteral("start"), QStringLiteral("end"), QStringLiteral("centerAnchor"),
     QStringLiteral("topLeftAnchor"), QStringLiteral("bottomRightAnchor"),
-    QStringLiteral("topAnchor"), QStringLiteral("bottomAnchor")};
+    QStringLiteral("topAnchor"), QStringLiteral("bottomAnchor"), QStringLiteral("center")};
 
 QVector<QDomElement> descendants(const QDomElement &root)
 {

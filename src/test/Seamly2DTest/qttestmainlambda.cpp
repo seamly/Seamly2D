@@ -96,6 +96,7 @@
 #include "tst_labeltemplatefilename.h"
 #include "tst_patternpiececopy.h"
 #include "TestHandoffAnnotationAlignment.h"
+#include "tst_piecemarkings.h"
 
 #include "../vmisc/def.h"
 #include "../qmuparser/qmudef.h"
@@ -262,6 +263,7 @@ int main(int argc, char** argv)
     ASSERT_TEST(new TST_LabelTemplateFileName());
     ASSERT_TEST(new TST_PatternPieceCopy());
     ASSERT_TEST(new TestHandoffAnnotationAlignment());
+    ASSERT_TEST(new TST_PieceMarkings());
 
     return status;
 }

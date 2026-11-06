@@ -928,6 +928,12 @@ void VPattern::parsePieceElement(QDomElement &domElement, const Document &parse)
                 }
             }
         }
+        piece.setDrillHoles(PieceMarkings::readDrillHoles(domElement));
+        piece.setReferenceLines(PieceMarkings::readReferenceLines(domElement));
+        if (!PieceMarkings::valid(piece.drillHoles(), piece.referenceLines(), piece.getAnchors()))
+        {
+            throw VException(tr("Invalid drill hole or reference line in piece '%1'.").arg(piece.GetName()));
+        }
         PatternPieceTool::Create(id, piece, w, pieceScene, this, data, parse, Source::FromFile);
         //Rewrite attribute formula. Need for situation when we have wrong formula.
         if (w != width)

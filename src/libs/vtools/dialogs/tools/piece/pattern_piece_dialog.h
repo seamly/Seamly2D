@@ -62,7 +62,8 @@
 
 #include <QSoundEffect>
 
-enum TabOrder {Properties=0, Paths=1, SeamAllowance= 2, Labels=3, AnchorPoints=4, Grainline=5, Notches=6, Count=7};
+enum TabOrder {Properties=0, Paths=1, SeamAllowance=2, Labels=3, AnchorPoints=4, Grainline=5, Notches=6,
+               DrillHoles=7, ReferenceLines=8, Count=9};
 
 namespace Ui
 {
@@ -182,6 +183,8 @@ private slots:
 
 private:
     Q_DISABLE_COPY(PatternPieceDialog)
+    class PieceMarkingsEditor *m_drill_editor = nullptr;
+    class PieceMarkingsEditor *m_reference_editor = nullptr;
 
     Ui::PatternPieceDialog     *ui;
     bool                        applyAllowed;

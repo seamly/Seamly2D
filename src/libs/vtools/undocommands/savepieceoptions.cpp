@@ -1,6 +1,9 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  @file   savepieceoptions.cpp
-//  @author Douglas S Caskey
+//  @author slspencer
+//  Copyright (C) 2026 Seamly2D Project
+//  SPDX-License-Identifier: GPL-3.0-or-later
+//  https://www.gnu.org/licenses/gpl-3.0.html
 //  @date   17 Sep, 2023
 //
 //  @copyright
@@ -98,6 +101,7 @@ void SavePieceOptions::undo()
         PatternPieceTool::addCSARecords(doc, domElement, m_oldPiece.getCustomSARecords());
         PatternPieceTool::addInternalPaths(doc, domElement, m_oldPiece.getInternalPaths());
         PatternPieceTool::addAnchors(doc, domElement, m_oldPiece.getAnchors());
+        PieceMarkings::write(domElement, m_oldPiece.drillHoles(), m_oldPiece.referenceLines());
 
         IncrementReferences(m_oldPiece.MissingNodes(m_newPiece));
         IncrementReferences(m_oldPiece.MissingCSAPath(m_newPiece));
@@ -140,6 +144,7 @@ void SavePieceOptions::redo()
         PatternPieceTool::addCSARecords(doc, domElement, m_newPiece.getCustomSARecords());
         PatternPieceTool::addInternalPaths(doc, domElement, m_newPiece.getInternalPaths());
         PatternPieceTool::addAnchors(doc, domElement, m_newPiece.getAnchors());
+        PieceMarkings::write(domElement, m_newPiece.drillHoles(), m_newPiece.referenceLines());
 
         IncrementReferences(m_newPiece.MissingNodes(m_oldPiece));
         IncrementReferences(m_newPiece.MissingCSAPath(m_oldPiece));

@@ -944,6 +944,7 @@ void PatternPieceTool::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 
     m_notches->setPen(QPen(color, scaleWidth(lineWeight, sceneScale(scene())),
                            Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    m_markings->setPen(m_notches->pen());
 
     //set fold line pen
     color      = adaptColor(QColor(qApp->Settings()->getDefaultFoldLineColor()));
@@ -1019,6 +1020,7 @@ void PatternPieceTool::AddToFile()
     addCSARecords(doc, domElement, piece.getCustomSARecords());
     addInternalPaths(doc, domElement, piece.getInternalPaths());
     addAnchors(doc, domElement, piece.getAnchors());
+    PieceMarkings::write(domElement, piece.drillHoles(), piece.referenceLines());
 
     AddPiece *cmd = new AddPiece(domElement, doc, piece, m_blockName);
     connect(cmd, &AddPiece::NeedFullParsing, doc, &VAbstractPattern::NeedFullParsing);
@@ -1052,6 +1054,7 @@ void PatternPieceTool::RefreshDataInFile()
                 addCSARecords(doc, domElement, piece.getCustomSARecords());
                 addInternalPaths(doc, domElement, piece.getInternalPaths());
                 addAnchors(doc, domElement, piece.getAnchors());
+                PieceMarkings::write(domElement, piece.drillHoles(), piece.referenceLines());
             }
         }
     }
@@ -1492,6 +1495,7 @@ PatternPieceTool::PatternPieceTool(VAbstractPattern *doc, VContainer *data, cons
     , m_patternInfo(new VTextGraphicsItem(this))
     , m_grainLine(new VGrainlineItem(this))
     , m_notches(new QGraphicsPathItem(this))
+    , m_markings(new QGraphicsPathItem(this))
     , m_foldLine(new QGraphicsPathItem(this))
     , m_fold_line_arrow(new QGraphicsPathItem(this))
     , m_fold_line_arrow_heads(new QGraphicsPathItem(this))
@@ -1682,6 +1686,21 @@ void PatternPieceTool::RefreshGeometry()
     }
 
     m_notches->setPath(piece.getNotchesPath(this->getData(), seamAllowancePoints));
+    QPainterPath markings;
+    for (const PieceDrillHole &hole : piece.drillHoles())
+    {
+        const QPointF center = static_cast<QPointF>(*getData()->GeometricObject<VPointF>(hole.center));
+        const qreal radius = ToPixel(hole.diameter, *getData()->GetPatternUnit()) / 2;
+        markings.addEllipse(center, radius, radius);
+    }
+    for (const PieceReferenceLine &line : piece.referenceLines())
+    {
+        markings.moveTo(static_cast<QPointF>(*getData()->GeometricObject<VPointF>(line.start)));
+        markings.lineTo(static_cast<QPointF>(*getData()->GeometricObject<VPointF>(line.end)));
+    }
+    m_markings->setPath(markings);
+    m_markings->setPen(m_notches->pen());
+    m_markings->setBrush(Qt::NoBrush);
 
     refreshFoldLine(piece, seamAllowancePoints);
 
@@ -1719,6 +1738,7 @@ void PatternPieceTool::applyFlipToGeometry(PieceFlip flip)
     m_cutLine->setPath(mirror.map(m_cutLine->path()));
     m_allowanceFill->setPath(mirror.map(m_allowanceFill->path()));
     m_notches->setPath(mirror.map(m_notches->path()));
+    m_markings->setPath(mirror.map(m_markings->path()));
     m_foldLine->setPath(mirror.map(m_foldLine->path()));
     m_fold_line_arrow->setPath(mirror.map(m_fold_line_arrow->path()));
     m_fold_line_arrow_heads->setPath(mirror.map(m_fold_line_arrow_heads->path()));

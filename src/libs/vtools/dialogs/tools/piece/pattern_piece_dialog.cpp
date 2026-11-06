@@ -55,6 +55,7 @@
 #include "ui_pattern_piece_dialog.h"
 
 #include "internal_path_dialog.h"
+#include "PieceMarkingsEditor.h"
 #include "vpointf.h"
 #include "visualization/path/pieceanchorpoint_visual.h"
 #include "visualization/path/pattern_piece_visual.h"
@@ -173,6 +174,15 @@ PatternPieceDialog::PatternPieceDialog(const VContainer *data, const quint32 &to
     initializeGrainlineTab();
     initializeAnchorsTab();
     initializeNotchesTab();
+    m_drill_editor = new PieceMarkingsEditor(true, this);
+    m_reference_editor = new PieceMarkingsEditor(false, this);
+    ui->pages_StackedWidget->addWidget(m_drill_editor);
+    ui->pages_StackedWidget->addWidget(m_reference_editor);
+    ui->menuTab_ListWidget->addItem(tr("Drill holes"));
+    ui->menuTab_ListWidget->addItem(tr("Reference lines"));
+    enableApply(applyAllowed);
+    connect(m_drill_editor, &PieceMarkingsEditor::changed, this, &PatternPieceDialog::CheckState);
+    connect(m_reference_editor, &PieceMarkingsEditor::changed, this, &PatternPieceDialog::CheckState);
 
     flagName = true;
     ChangeColor(ui->editName_Label, okColor);
@@ -216,6 +226,12 @@ void PatternPieceDialog::pageChanged(QListWidgetItem *current, QListWidgetItem *
     }
     int rowIndex = ui->menuTab_ListWidget->row(current);
     ui->pages_StackedWidget->setCurrentIndex(rowIndex);
+    if (m_drill_editor != nullptr && m_reference_editor != nullptr)
+    {
+        const auto anchors = GetListInternals<quint32>(ui->anchorPoints_ListWidget);
+        m_drill_editor->setPoints(anchors, data);
+        m_reference_editor->setPoints(anchors, data);
+    }
 
     if (rowIndex == TabOrder::Labels || rowIndex == TabOrder::AnchorPoints || rowIndex == TabOrder::Grainline)
     {
@@ -241,7 +257,7 @@ void PatternPieceDialog::enableApply(bool enable)
     if (applyAllowed == true)
     {
         qCDebug(pattern_piece_dialog, "PatternPieceDialog applyAllowed = True");
-        for (int i = TabOrder::SeamAllowance; i < TabOrder::Count; ++i)
+        for (int i = TabOrder::SeamAllowance; i < ui->menuTab_ListWidget->count(); ++i)
         {
             auto flags = ui->menuTab_ListWidget->item(i)->flags();
             ui->menuTab_ListWidget->item(i)->setFlags(flags | Qt::ItemIsEnabled);
@@ -250,7 +266,7 @@ void PatternPieceDialog::enableApply(bool enable)
     else
     {
         qCDebug(pattern_piece_dialog, "PatternPieceDialog applyAllowed = False");
-        for (int i = TabOrder::SeamAllowance; i < TabOrder::Count; ++i)
+        for (int i = TabOrder::SeamAllowance; i < ui->menuTab_ListWidget->count(); ++i)
         {
             auto flags = ui->menuTab_ListWidget->item(i)->flags();
             ui->menuTab_ListWidget->item(i)->setFlags(flags & ~Qt::ItemIsEnabled);
@@ -295,6 +311,10 @@ void PatternPieceDialog::SetPiece(const VPiece &piece)
     }
 
     initAnchorPointComboboxes();
+    m_drill_editor->setPoints(piece.getAnchors(), data);
+    m_reference_editor->setPoints(piece.getAnchors(), data);
+    m_drill_editor->setMarkings(piece.drillHoles(), {});
+    m_reference_editor->setMarkings({}, piece.referenceLines());
 
     ui->startPoint_ComboBox->blockSignals(true);
     ui->startPoint_ComboBox->clear();
@@ -595,7 +615,11 @@ void PatternPieceDialog::CheckState()
                     && flagMainPath
                     && flagGrainlineArrow && (flagGrainlineFormula || flagGrainlineAnchor)
                     && flagPieceLabelAngle && (flagPieceLabelFormula || flagPieceLabelAnchor)
-                    && flagPatternLabelAngle && (flagPatternLabelFormula || flagPatternLabelAnchor));
+                    && flagPatternLabelAngle && (flagPatternLabelFormula || flagPatternLabelAnchor)
+                    && (m_drill_editor == nullptr || (m_drill_editor->markingsValid()
+                        && m_reference_editor->markingsValid() && PieceMarkings::valid(m_drill_editor->drillHoles(),
+                        m_reference_editor->referenceLines(),
+                        GetListInternals<quint32>(ui->anchorPoints_ListWidget)))));
 
     if (applyAllowed)
     {
@@ -1300,6 +1324,7 @@ void PatternPieceDialog::showAnchorsContextMenu(const QPoint &pos)
     {
         delete ui->anchorPoints_ListWidget->item(row);
         initAnchorPointComboboxes();
+        CheckState();
     }
 }
 
@@ -2754,6 +2779,11 @@ VPiece PatternPieceDialog::CreatePiece() const
     piece.SetCustomSARecords(GetListInternals<CustomSARecord>(ui->customSeamAllowance_ListWidget));
     piece.SetInternalPaths(GetListInternals<quint32>(ui->internalPaths_ListWidget));
     piece.setAnchors(GetListInternals<quint32>(ui->anchorPoints_ListWidget));
+    if (m_drill_editor != nullptr && m_reference_editor != nullptr)
+    {
+        piece.setDrillHoles(m_drill_editor->drillHoles());
+        piece.setReferenceLines(m_reference_editor->referenceLines());
+    }
     piece.setFlip(static_cast<PieceFlip>(ui->flip_ButtonGroup->checkedId()));
     piece.SetSeamAllowance(ui->seams_CheckBox->isChecked());
     piece.SetSeamAllowanceBuiltIn(ui->builtIn_CheckBox->isChecked());
