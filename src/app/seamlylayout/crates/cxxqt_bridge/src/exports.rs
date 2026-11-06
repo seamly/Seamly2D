@@ -2067,6 +2067,302 @@ mod tests {
     use super::*;
     use svg_dom::Document;
 
+    const MARKED_PRODUCER_CAPTURES: [(&str, &str, &str); 5] = [
+        (
+            "marked-original",
+            "cm",
+            include_str!("../test_data/markings/marked_original.svg"),
+        ),
+        (
+            "marked-horizontal",
+            "cm",
+            include_str!("../test_data/markings/marked_horizontal.svg"),
+        ),
+        (
+            "marked-vertical",
+            "cm",
+            include_str!("../test_data/markings/marked_vertical.svg"),
+        ),
+        (
+            "marked-both",
+            "cm",
+            include_str!("../test_data/markings/marked_both.svg"),
+        ),
+        (
+            "marked-multisize",
+            "mm",
+            include_str!("../test_data/markings/marked_multisize.svg"),
+        ),
+    ];
+
+    // @brief One drill marker center and diameter in millimetres.
+    #[derive(Debug)]
+    struct ExpectedDrill {
+        center_x_mm: f64,
+        center_y_mm: f64,
+        diameter_mm: f64,
+    }
+
+    // @brief One stripe or plaid segment in millimetres.
+    #[derive(Debug)]
+    struct ExpectedReference {
+        layer: &'static str,
+        start_x_mm: f64,
+        start_y_mm: f64,
+        end_x_mm: f64,
+        end_y_mm: f64,
+    }
+
+    // @brief Collect descendants with the requested SVG element name.
+    fn descendants<'a>(
+        element: &'a xmltree::Element,
+        name: &str,
+        found: &mut Vec<&'a xmltree::Element>,
+    ) {
+        for child in &element.children {
+            if let xmltree::XMLNode::Element(child) = child {
+                if child.name == name {
+                    found.push(child);
+                } // if matching element
+                descendants(child, name, found);
+            } // if element
+        } // for each child
+    } // fn descendants
+
+    // @brief Read the marks from a flattened producer SVG in DXF millimetres.
+    fn producer_mark_geometry(doc: &Document) -> (Vec<ExpectedDrill>, Vec<ExpectedReference>) {
+        let view_box: Vec<f64> = doc.root.attributes["viewBox"]
+            .split(|c: char| c == ',' || c.is_whitespace())
+            .filter(|value| !value.is_empty())
+            .map(|value| value.parse().expect("viewBox number"))
+            .collect();
+        let svg_height = *view_box.get(3).expect("viewBox height");
+        let px_to_mm = 25.4 / 96.0;
+        let mut drills = Vec::new();
+        let mut references = Vec::new();
+
+        // @brief Collect marked geometry from the flattened SVG tree.
+        fn walk(
+            element: &xmltree::Element,
+            svg_height: f64,
+            px_to_mm: f64,
+            drills: &mut Vec<ExpectedDrill>,
+            references: &mut Vec<ExpectedReference>,
+        ) {
+            match element.attributes.get("data-type").map(String::as_str) {
+                Some("drill") => {
+                    let mut circles = Vec::new();
+                    descendants(element, "circle", &mut circles);
+                    assert_eq!(circles.len(), 1, "one circle per producer drill mark");
+                    let circle = circles[0];
+                    let number = |name: &str| {
+                        circle.attributes[name]
+                            .parse::<f64>()
+                            .expect("circle number")
+                    };
+                    let diameter_px = element.attributes["data-diameter"]
+                        .parse::<f64>()
+                        .expect("drill diameter");
+                    assert!(diameter_px > 0.0);
+                    assert!((number("r") * 2.0 - diameter_px).abs() < 1.0e-5);
+                    drills.push(ExpectedDrill {
+                        center_x_mm: number("cx") * px_to_mm,
+                        center_y_mm: (svg_height - number("cy")) * px_to_mm,
+                        diameter_mm: diameter_px * px_to_mm,
+                    });
+                } // drill
+                Some("stripe") | Some("plaid") => {
+                    let mut paths = Vec::new();
+                    descendants(element, "path", &mut paths);
+                    assert_eq!(paths.len(), 1, "one straight path per reference mark");
+                    let d = paths[0].attributes.get("d").expect("reference path data");
+                    let path =
+                        geometry::Path::parse_path_attribute(d).expect("reference path parses");
+                    let [geometry::PathSegment::MoveTo(start), geometry::PathSegment::LineTo(end)] =
+                        path.segments.as_slice()
+                    else {
+                        panic!("reference path has exactly two endpoints: {d}");
+                    };
+                    let layer = if element.attributes["data-type"] == "stripe" {
+                        "9"
+                    } else {
+                        "10"
+                    };
+                    references.push(ExpectedReference {
+                        layer,
+                        start_x_mm: start.x as f64 * px_to_mm,
+                        start_y_mm: (svg_height - start.y as f64) * px_to_mm,
+                        end_x_mm: end.x as f64 * px_to_mm,
+                        end_y_mm: (svg_height - end.y as f64) * px_to_mm,
+                    });
+                } // stripe or plaid
+                _ => {} // other SVG element
+            } // match data type
+            for child in &element.children {
+                if let xmltree::XMLNode::Element(child) = child {
+                    walk(child, svg_height, px_to_mm, drills, references);
+                } // if element
+            } // for each child
+        } // fn walk
+
+        walk(&doc.root, svg_height, px_to_mm, &mut drills, &mut references);
+        (drills, references)
+    } // fn producer_mark_geometry
+
+    // @brief Parse DXF text into entity records for the marking integration test.
+    fn dxf_entities(text: &str) -> Vec<(String, Vec<(i32, String)>)> {
+        let lines: Vec<&str> = text.lines().collect();
+        assert_eq!(lines.len() % 2, 0, "DXF is a sequence of group-code pairs");
+        let mut entities = Vec::<(String, Vec<(i32, String)>)>::new();
+        for pair in lines.chunks_exact(2) {
+            let code = pair[0].trim().parse::<i32>().expect("DXF group code");
+            if code == 0 {
+                entities.push((pair[1].trim().to_string(), Vec::new()));
+            } else if let Some((_, groups)) = entities.last_mut() {
+                groups.push((code, pair[1].trim().to_string()));
+            } // if entity group
+        } // for each pair
+        entities
+    } // fn dxf_entities
+
+    // @brief Read the first value for one DXF group code.
+    fn dxf_value<'a>(entity: &'a (String, Vec<(i32, String)>), code: i32) -> Option<&'a str> {
+        entity
+            .1
+            .iter()
+            .find(|(group, _)| *group == code)
+            .map(|(_, value)| value.as_str())
+    } // fn dxf_value
+
+    // @brief Collect units from producer pattern groups.
+    fn pattern_units(element: &xmltree::Element, units: &mut Vec<String>) {
+        if element.attributes.get("data-type").is_some_and(|kind| kind == "pattern") {
+            if let Some(unit) = element.attributes.get("data-units") {
+                units.push(unit.clone());
+            } // if units attribute
+        } // if pattern group
+        for child in &element.children {
+            if let xmltree::XMLNode::Element(child) = child {
+                pattern_units(child, units);
+            } // if element
+        } // for each child
+    } // fn pattern_units
+
+    // @brief Export each real producer capture and compare every DXF marking with its SVG source.
+    #[test]
+    fn producer_marking_captures_export_through_full_dxf_pipeline() {
+        let output = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("output");
+        std::fs::create_dir_all(&output).expect("create output directory");
+        let mut saw_drill = false;
+        let mut saw_stripe = false;
+        let mut saw_plaid = false;
+
+        for (name, expected_unit, svg) in MARKED_PRODUCER_CAPTURES {
+            let doc = Document::parse(svg).expect("producer capture parses");
+            let mut units = Vec::new();
+            pattern_units(&doc.root, &mut units);
+            assert!(
+                !units.is_empty() && units.iter().all(|unit| unit.as_str() == expected_unit),
+                "{name}: pattern units {units:?}"
+            );
+            let mut flat = doc.clone();
+            svg_dom::flatten_dom(&mut flat);
+            let (expected_drills, expected_references) = producer_mark_geometry(&flat);
+            assert!(
+                !expected_drills.is_empty() || !expected_references.is_empty(),
+                "{name} contains real markings"
+            );
+            saw_drill |= !expected_drills.is_empty();
+            saw_stripe |= expected_references.iter().any(|mark| mark.layer == "9");
+            saw_plaid |= expected_references.iter().any(|mark| mark.layer == "10");
+
+            let path = output.join(format!("{name}_{}.dxf", std::process::id()));
+            let path_str = path.to_string_lossy().to_string();
+            let report = do_export_dxf(
+                &doc,
+                &path_str,
+                false,
+                &DxfStyleInfo {
+                    dxf_version: DxfVersion::R13,
+                    ..DxfStyleInfo::default()
+                },
+                &mut |_| {},
+            ).expect("producer capture exports");
+            assert!(
+                report.warnings.is_empty(),
+                "{name}: {:?}",
+                report.warnings
+            );
+            let text = std::fs::read_to_string(&path).expect("DXF file exists");
+            let _ = std::fs::remove_file(&path);
+            assert!(text.contains("AC1012"), "{name}: DXF R13 output");
+
+            assert!(
+                text.contains("Units:METRIC"),
+                "{name}: cm/mm patterns export metric units"
+            );
+            let tolerance = 0.0051;
+            let entities = dxf_entities(&text);
+            let mut points: Vec<_> = entities
+                .iter()
+                .filter(|entity| entity.0 == "POINT" && dxf_value(entity, 8) == Some("13"))
+                .collect();
+            let mut lines: Vec<_> = entities
+                .iter()
+                .filter(|entity| {
+                    entity.0 == "LINE" && matches!(dxf_value(entity, 8), Some("9" | "10"))
+                })
+                .collect();
+            assert_eq!(points.len(), expected_drills.len(), "{name}: drill points");
+            assert_eq!(lines.len(), expected_references.len(), "{name}: stripe/plaid lines");
+
+            for expected in expected_drills {
+                let index = points.iter().position(|entity| {
+                    let number = |code| {
+                        dxf_value(entity, code).and_then(|value| value.parse::<f64>().ok())
+                    };
+                    [10, 20, 30].iter().all(|code| number(*code).is_some())
+                        && (number(10).unwrap() - expected.center_x_mm).abs() <= tolerance
+                        && (number(20).unwrap() - expected.center_y_mm).abs() <= tolerance
+                        && (number(30).unwrap() - expected.diameter_mm).abs() <= tolerance
+                }).unwrap_or_else(|| {
+                    panic!("{name}: missing drill point {expected:?}; remaining {points:?}")
+                });
+                points.remove(index);
+            } // for each expected drill
+
+            for expected in expected_references {
+                let index = lines
+                    .iter()
+                    .position(|entity| {
+                        dxf_value(entity, 8) == Some(expected.layer)
+                            && [10, 20, 11, 21]
+                                .iter()
+                                .all(|code| dxf_value(entity, *code).is_some())
+                            && {
+                                let number = |code| {
+                                    dxf_value(entity, code)
+                                        .and_then(|value| value.parse::<f64>().ok())
+                                        .unwrap_or(f64::NAN)
+                                };
+                                (number(10) - expected.start_x_mm).abs() <= tolerance
+                                    && (number(20) - expected.start_y_mm).abs() <= tolerance
+                                    && (number(11) - expected.end_x_mm).abs() <= tolerance
+                                    && (number(21) - expected.end_y_mm).abs() <= tolerance
+                            }
+                    })
+                    .unwrap_or_else(|| {
+                        panic!(
+                            "{name}: missing reference line {expected:?}; remaining {lines:?}"
+                        )
+                    });
+                lines.remove(index);
+            } // for each expected reference
+            assert!(points.is_empty() && lines.is_empty(), "{name}: unverified marking entities");
+        } // for each producer capture
+        assert!(saw_drill && saw_stripe && saw_plaid, "real captures cover drill, stripe, and plaid");
+    } // producer_marking_captures_export_through_full_dxf_pipeline
+
     // @brief The variant segment goes before the stamp; "_tiled" stays after it.
     #[test]
     fn default_export_file_name_places_segment_before_stamp() {

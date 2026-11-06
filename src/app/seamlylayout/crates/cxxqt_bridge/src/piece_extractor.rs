@@ -968,6 +968,96 @@ fn parse_viewbox_width_px(root: &xmltree::Element) -> Option<u32> {
 pub(crate) mod tests {
     use super::*;
 
+    const MARKED_PRODUCER_CAPTURES: [(&str, &str); 5] = [
+        (
+            "marked-original",
+            include_str!("../test_data/markings/marked_original.svg"),
+        ),
+        (
+            "marked-horizontal",
+            include_str!("../test_data/markings/marked_horizontal.svg"),
+        ),
+        (
+            "marked-vertical",
+            include_str!("../test_data/markings/marked_vertical.svg"),
+        ),
+        (
+            "marked-both",
+            include_str!("../test_data/markings/marked_both.svg"),
+        ),
+        (
+            "marked-multisize",
+            include_str!("../test_data/markings/marked_multisize.svg"),
+        ),
+    ];
+
+    // @brief Remove typed markings while retaining all other producer geometry.
+    fn remove_markings(element: &mut xmltree::Element) {
+        element.children.retain_mut(|node| {
+            let XMLNode::Element(child) = node else {
+                return true;
+            };
+            if matches!(
+                child.attributes.get("data-type").map(String::as_str),
+                Some("drill" | "stripe" | "plaid")
+            ) {
+                return false;
+            } // if mark group
+            remove_markings(child);
+            true
+        });
+    } // fn remove_markings
+
+    // @brief Real producer captures keep the same packed geometry with marks removed.
+    #[test]
+    fn producer_markings_do_not_change_pack_geometry() {
+        for (name, svg) in MARKED_PRODUCER_CAPTURES {
+            let mut marked = svg_dom::Document::parse(svg).expect("producer SVG parses");
+            svg_dom::flatten_dom(&mut marked);
+            hoist_layout_units(&mut marked, false);
+            let mut without_markings = marked.clone();
+            remove_markings(&mut without_markings.root);
+
+            let (marked_pieces, marked_polygons) = extract_piece_rects_and_polygons(&marked);
+            let (plain_pieces, plain_polygons) = extract_piece_rects_and_polygons(&without_markings);
+            assert!(!marked_pieces.is_empty(), "{name}: producer pieces");
+            assert_eq!(marked_pieces.len(), plain_pieces.len(), "{name}: piece count");
+            assert_eq!(marked_polygons.len(), plain_polygons.len(), "{name}: polygon count");
+            for (index, (marked_piece, plain_piece)) in
+                marked_pieces.iter().zip(&plain_pieces).enumerate()
+            {
+                assert_eq!(marked_piece.id, plain_piece.id, "{name} piece {index}: id");
+                assert_eq!(
+                    (marked_piece.rect.w, marked_piece.rect.h),
+                    (plain_piece.rect.w, plain_piece.rect.h),
+                    "{name} piece {index}: packed size"
+                );
+                assert_eq!(
+                    (marked_piece.origin_x, marked_piece.origin_y),
+                    (plain_piece.origin_x, plain_piece.origin_y),
+                    "{name} piece {index}: packed origin"
+                );
+                assert_eq!(
+                    marked_polygons[index].vertices.len(),
+                    plain_polygons[index].vertices.len(),
+                    "{name} piece {index}: cut vertices"
+                );
+                for (vertex_index, (marked_vertex, plain_vertex)) in marked_polygons[index]
+                    .vertices
+                    .iter()
+                    .zip(&plain_polygons[index].vertices)
+                    .enumerate()
+                {
+                    assert!(
+                        (marked_vertex.0 - plain_vertex.0).abs() < 1.0e-6
+                            && (marked_vertex.1 - plain_vertex.1).abs() < 1.0e-6,
+                        "{name} piece {index} vertex {vertex_index}: mark changed cut polygon"
+                    );
+                } // for each cut vertex
+            } // for each piece
+        } // for each producer capture
+    } // producer_markings_do_not_change_pack_geometry
+
     // @brief Two <g> pieces with path data are extracted with correct dimensions.
     #[test]
     fn extracts_two_pieces() {
