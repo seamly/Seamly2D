@@ -4519,7 +4519,7 @@ void MainWindow::raiseSeamlyLayout() const
  *
  * Workflow: build the tagged pieces SVG (data-type / data-type-number /
  * data-parent / data-name / data-letter attributes on every group, see
- * generatePiecesSvgDocument()) as one string, launch the SeamlyLayout
+ * generateHandoffSvgDocument()) as one string, launch the SeamlyLayout
  * application with --svg-stdin, then write that string to its standard input
  * and close the channel. No file is created, so nothing is left beside the
  * pattern and an unsaved or read-only pattern no longer blocks Layout Mode
@@ -4537,9 +4537,9 @@ void MainWindow::raiseSeamlyLayout() const
  */
 bool MainWindow::exportPiecesToSeamlyLayout()
 {
-    // Render the pieces (pieceList was prepared by showLayoutMode) into the
-    // tagged SVG document. Empty means there was nothing to lay out.
-    const QString piecesSvg = generatePiecesSvgDocument();
+    // Build from the retained pattern data; no canvas items are read.
+    QStringList annotation_warnings;
+    const QString piecesSvg = generateHandoffSvgDocument(&annotation_warnings);
     if (piecesSvg.isEmpty())
     {
         QMessageBox::warning(this, tr("Layout mode"),
@@ -4548,8 +4548,13 @@ bool MainWindow::exportPiecesToSeamlyLayout()
         return false;
     }
 
-    // Developer switch: SEAMLY_HANDOFF_COMPARE_DIR writes this SVG and the HandoffDocument SVG side by side.
-    writeHandoffCompareFiles(piecesSvg);
+    if (!annotation_warnings.isEmpty())
+    {
+        QMessageBox::warning(this, tr("Layout mode"),
+                             tr("Some grainlines or labels have no shared place inside every size's cut line.\n\n%1")
+                                 .arg(annotation_warnings.join(QLatin1Char('\n'))),
+                             QMessageBox::Ok, QMessageBox::Ok);
+    }
 
     // Locate the SeamlyLayout executable (settings override first, then the install directory).
     const QString seamlyLayout = qApp->seamlyLayoutFilePath();
@@ -8034,15 +8039,18 @@ int MainWindow::exportLayoutFromCommandLine(const VCommandLinePtr &command_line)
         return V_EX_DATAERR;
     }
 
-    const QString pieces_svg = generatePiecesSvgDocument();
+    QStringList annotation_warnings;
+    const QString pieces_svg = generateHandoffSvgDocument(&annotation_warnings);
     if (pieces_svg.isEmpty())
     {
         vStdErr() << tr("Could not create the layout document from the pattern pieces.") << Qt::endl;
         return V_EX_DATAERR;
     }
 
-    // Keep the existing handoff writer and its comparison switch until its output is verified.
-    writeHandoffCompareFiles(pieces_svg);
+    for (const QString &warning : annotation_warnings)
+    {
+        vStdErr() << warning << Qt::endl;
+    }
 
     const QString seamly_layout = qApp->seamlyLayoutFilePath();
     if (seamly_layout.isEmpty())

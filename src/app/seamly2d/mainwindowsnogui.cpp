@@ -1,10 +1,12 @@
 /***************************************************************************
  **  @file   mainwindowsnogui.cpp
- **  @author Douglas S Caskey
+ **  @author slspencer
  **  @date   17 Sep, 2023
  **
  **  @copyright
- **  Copyright (C) 2017 - 2022 Seamly, LLC
+ **  Copyright (C) 2026 Seamly2D Project
+ **  SPDX-License-Identifier: GPL-3.0-or-later
+ **  License: https://www.gnu.org/licenses/gpl-3.0.html
  **  https://github.com/fashionfreedom/seamly2d
  **
  **  @brief
@@ -65,8 +67,6 @@
 #include "../layout_handoff/handoff_corner_cuts.h"
 #include "../layout_handoff/handoff_sheet.h"
 
-#include <QDir>
-#include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QGraphicsScene>
@@ -149,25 +149,6 @@ layout_handoff::HandoffPlacedPiece createPlacedPiece(const VPiece& piece, const 
     return placed;
 }
 
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief writeTextFile writes text as UTF-8 to a file and logs the result.
- * @param path absolute file path; an existing file is replaced.
- * @param text file content.
- */
-void writeTextFile(const QString& path, const QString& text)
-{
-    QFile file(path);
-    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate) && file.write(text.toUtf8()) >= 0)
-    {
-        qCInfo(vMainNoGUIWindow, "Handoff compare: wrote %s", qUtf8Printable(path));
-    }
-    else
-    {
-        qCWarning(vMainNoGUIWindow, "Handoff compare: cannot write %s: %s", qUtf8Printable(path),
-                  qUtf8Printable(file.errorString()));
-    }
-}
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -347,12 +328,15 @@ QString MainWindowsNoGUI::generateMultisizePiecesSvgDocument()
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief generateHandoffSvgDocument builds the pieces SVG with HandoffDocument, from pattern data only.
- * @details Reads handoff_pieces, or every size in sizePieceLists for a multisize pattern. Layout Mode still sends
- *          the SVG of generatePiecesSvgDocument(); this one is for the compare of the two writers.
+ * @details Reads handoff_pieces, or every size in sizePieceLists for a multisize pattern.
  * @return the complete SVG document; empty when there are no pieces.
  */
-QString MainWindowsNoGUI::generateHandoffSvgDocument() const
+QString MainWindowsNoGUI::generateHandoffSvgDocument(QStringList* warnings) const
 {
+    if (warnings != nullptr)
+    {
+        warnings->clear();
+    }
     // Collect the pieces: every size in size order for a multisize pattern, else the one list.
     QVector<layout_handoff::HandoffPlacedPiece> pieces;
     QStringList sizes;
@@ -406,43 +390,11 @@ QString MainWindowsNoGUI::generateHandoffSvgDocument() const
         {
             document.add_piece(placed);
         }
-        svg = document.to_svg_string();
+        svg = warnings != nullptr ? document.to_aligned_dom(*warnings).toString() : document.to_svg_string();
     }
     return svg;
 }
 
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief writeHandoffCompareFiles writes the SVG of both writers, so a developer can compare them.
- * @details Developer switch: runs only when the environment variable SEAMLY_HANDOFF_COMPARE_DIR names an absolute
- *          directory. Writes <pattern>_old.svg and <pattern>_new.svg there and creates the directory when missing.
- *          The handoff to SeamlyLayout does not change.
- * @param old_svg the SVG that Layout Mode sends, from generatePiecesSvgDocument().
- */
-void MainWindowsNoGUI::writeHandoffCompareFiles(const QString& old_svg) const
-{
-    const QString directory = qEnvironmentVariable("SEAMLY_HANDOFF_COMPARE_DIR");
-    if (!directory.isEmpty())
-    {
-        // A relative path would depend on the working directory of Seamly2D.
-        if (!QDir::isAbsolutePath(directory))
-        {
-            qCWarning(vMainNoGUIWindow, "Handoff compare: SEAMLY_HANDOFF_COMPARE_DIR is not an absolute path: %s",
-                      qUtf8Printable(directory));
-        }
-        else if (!QDir().mkpath(directory))
-        {
-            qCWarning(vMainNoGUIWindow, "Handoff compare: cannot create %s", qUtf8Printable(directory));
-        }
-        else
-        {
-            const QDir compare_dir(directory);
-            writeTextFile(compare_dir.absoluteFilePath(FileName() + QStringLiteral("_old.svg")), old_svg);
-            writeTextFile(compare_dir.absoluteFilePath(FileName() + QStringLiteral("_new.svg")),
-                          generateHandoffSvgDocument());
-        }
-    }
-}
 
 //---------------------------------------------------------------------------------------------------------------------
 /**

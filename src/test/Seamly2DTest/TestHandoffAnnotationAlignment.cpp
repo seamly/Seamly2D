@@ -235,8 +235,10 @@ void TestHandoffAnnotationAlignment::includesBoundaryOnlyFits() const
 
 void TestHandoffAnnotationAlignment::jacketCaptureFitsEverySize() const
 {
-    const QString fixture = QFINDTESTDATA(
-        "../../app/seamlylayout/crates/cxxqt_bridge/test_data/jacket2_40-146_handoff.svg");
+    // A fresh producer capture can run the same independent geometry checks.
+    const QString capture = qEnvironmentVariable("HANDOFF_ANNOTATION_FIXTURE");
+    const QString fixture = capture.isEmpty() ? QFINDTESTDATA(
+        "../../app/seamlylayout/crates/cxxqt_bridge/test_data/jacket2_40-146_handoff.svg") : capture;
     QVERIFY(!fixture.isEmpty());
     QFile file(fixture);
     QVERIFY(file.open(QIODevice::ReadOnly));

@@ -103,8 +103,10 @@ At import, SeamlyLayout moves the `grainline`, `piece_label` and `pattern_label`
 - Size labels follow: `add_size_labels` runs after the move, 5 px past the moved grainline.
 - Code: `cxxqt_bridge/src/annotation_alignment.rs`, called by `finish_import` before the piece names.
 
-The producer also offers opt-in alignment through `layout_handoff::HandoffDocument::to_aligned_dom(warnings)`.
-Production still uses the unaligned writer until the old/new sample-pattern comparison passes.
+Layout Mode and headless exports build the SVG from pattern data with `layout_handoff`.
+They fit multisize annotations through `HandoffDocument::to_aligned_dom(warnings)` before launching SeamlyLayout.
+The old/new comparison passed on all eight bundled samples and seventeen valid CollectionTest patterns at 0.01 px.
+The developer comparison switch is removed. The standalone comparison test remains available.
 
 - Each annotation shares the base size's offset from the stack point when it fits every size.
 - Otherwise, the producer selects the nearest offset whose grainline ends or text line anchors fit every cut outline.
@@ -112,6 +114,22 @@ Production still uses the unaligned writer until the old/new sample-pattern comp
 - If no shared offset fits, every size retains the base offset. The returned warning must appear before launch.
 - This API changes only the generated document. It does not edit pattern data or alter `to_dom()` and `to_svg_string()`.
 - `TestHandoffAnnotationAlignment` covers fitting, nearest placement, concavity, fold points, hidden components, and fallback.
+
+Writer comparison uses a test-only application probe, not a shipped environment switch.
+Run these commands from the checkout with Qt and MSVC available:
+
+```powershell
+.\src\test\Seamly2DTest\build_handoff_capture.ps1 -QtDirectory <Qt-kit> -VisualStudioEnvironment <vcvars64.bat>
+python src\test\Seamly2DTest\capture_handoff_writers.py build\handoff-writer-comparison\application\bin\handoff_capture.exe
+python src\test\Seamly2DTest\compare_handoff_writers.py build\writer-captures --expected-count 25
+python src\test\Seamly2DTest\compare_handoff_writers_test.py
+```
+
+The capture runner isolates settings and overrides missing sample measurement paths without editing the patterns.
+Three valid CollectionTest patterns contain no layout pieces; both writers correctly return empty documents.
+The comparator checks tagged tree order, attributes, effective styles, text, topology, and transformed coordinates.
+It ignores untagged wrappers and serialization formatting, but never relaxes the 0.01 px coordinate tolerance.
+Set `HANDOFF_ANNOTATION_FIXTURE` to a new jacket capture to run its independent Qt containment and stacking checks.
 
 ### Size labels
 

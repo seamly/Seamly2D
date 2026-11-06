@@ -1,10 +1,12 @@
 /***************************************************************************
  **  @file   mainwindowsnogui.h
- **  @author Douglas S Caskey
+ **  @author slspencer
  **  @date   Dec 31, 2022
  **
  **  @copyright
- **  Copyright (C) 2017 - 2022 Seamly, LLC
+ **  Copyright (C) 2026 Seamly2D Project
+ **  SPDX-License-Identifier: GPL-3.0-or-later
+ **  License: https://www.gnu.org/licenses/gpl-3.0.html
  **  https://github.com/fashionfreedom/seamly2d
  **
  **  @brief
@@ -145,8 +147,11 @@ private:
 public:
     QString generatePiecesSvgDocument();
     QString generateMultisizePiecesSvgDocument();
-    QString generateHandoffSvgDocument() const;
-    void    writeHandoffCompareFiles(const QString& old_svg) const;
+    /**
+     * @brief Builds the pattern-data handoff, optionally fitting multisize annotations.
+     * @param warnings non-null enables alignment and receives warnings the caller must show before launch.
+     */
+    QString generateHandoffSvgDocument(QStringList* warnings = nullptr) const;
 };
 
 #endif // MAINWINDOWSNOGUI_H
