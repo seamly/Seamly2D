@@ -1,9 +1,9 @@
 # SVG `data-*` Attribute Contract — Seamly2D → SeamlyLayout
 
 **Status:** implemented (Seamly2D branch `run-seamlyLayout`)
-**Producer:** Seamly2D — `SvgGenerator` (`src/libs/vformat/svg_generator.cpp`) fed by the piece item tree built in `VLayoutPiece::GetItem()` (`src/libs/vlayout/vlayoutpiece.cpp`)
+**Producer:** Seamly2D — `HandoffDocument` (`src/libs/layout_handoff/`) reads resolved `VPiece` data without a scene tree.
 **Consumer:** SeamlyLayout (SVG parsed via its `svg_dom` crate)
-**Source spec:** `project-docs/NEW-ATTRIBUTES.csv` — this document is the authoritative, expanded contract; keep both apps developing against it.
+**Source spec:** `project-docs/docs-data/NEW-ATTRIBUTES.csv` — this document is the authoritative, expanded contract; keep both apps developing against it.
 
 ## When tagged SVGs are produced
 
@@ -17,12 +17,12 @@ The handoff in (1) is a process launch, and both halves of it are pinned by test
 
 | | Producer — Seamly2D | Consumer — SeamlyLayout |
 |---|---|---|
-| Code | `MainWindow::exportPiecesToSeamlyLayout()` via `MainWindowsNoGUI::generatePiecesSvgDocument()`, `SeamlySuitePaths::patternDocumentName()` and `SeamlySuitePaths::seamlyLayoutLaunchArguments()` (`src/libs/vmisc/seamly_suite_paths.cpp`) | `StartupOptions::parse()` (`src/app/seamlylayout/qt_frontend/src/StartupOptions.cpp`), dispatched from `seamlyLayout_main.mm` into `Main.qml`'s `openSvgDocument()` |
+| Code | `MainWindow::exportPiecesToSeamlyLayout()` via `MainWindowsNoGUI::generateHandoffSvgDocument(&warnings)`, `SeamlySuitePaths::patternDocumentName()` and `SeamlySuitePaths::seamlyLayoutLaunchArguments()` (`src/libs/vmisc/seamly_suite_paths.cpp`) | `StartupOptions::parse()` (`src/app/seamlylayout/qt_frontend/src/StartupOptions.cpp`), dispatched from `seamlyLayout_main.mm` into `Main.qml`'s `openSvgDocument()` |
 | Tests | `TST_SeamlySuitePaths` (`src/test/Seamly2DTest`) | `StartupOptionsTests` (`src/test/SeamlyLayoutTest`) |
 
 **The contract:**
 
-- **Transport** — the piece-mode document is a **stringified SVG on standard input**, not a file. Seamly2D builds it with `generatePiecesSvgDocument()`, starts SeamlyLayout, writes the UTF-8 bytes to the child's standard input and closes the write channel; SeamlyLayout reads to end. Nothing is written to disk, so no handoff file is left beside the pattern and an unsaved or read-only pattern no longer blocks Layout Mode. Until Seamly2D.5 the handoff wrote `<pattern-basename>.pieces.svg` and passed its path.
+- **Transport** — the piece-mode document is a **stringified SVG on standard input**, not a file. Seamly2D builds it with `generateHandoffSvgDocument(&warnings)`, starts SeamlyLayout, writes the UTF-8 bytes to the child's standard input and closes the write channel; SeamlyLayout reads to end. Nothing is written to disk, so no handoff file is left beside the pattern and an unsaved or read-only pattern no longer blocks Layout Mode. Until Seamly2D.5 the handoff wrote `<pattern-basename>.pieces.svg` and passed its path.
 - **Command line** — `SeamlyLayout --svg-stdin [--document-name <pattern base name>]`, launched with the SeamlyLayout executable's own directory as the working directory. The launch is *not* detached: the standard-input channel needs a live `QProcess`, which is also what lets Seamly2D restore the prior mode when SeamlyLayout exits (Seamly2D.3).
 - **Document name** — `--document-name` carries the pattern's complete base name (`shirt.v2.sm2d` → `shirt.v2`), because a document with no file has no name for SeamlyLayout's default export file names. It is omitted, never passed empty, for an unsaved pattern.
 - **Still accepted** — a single positional `<file.svg>` (the CLI and any file association), `-h` / `--help` and `-v` / `--version` (shown in a dialog, exit 0), and no argument at all (empty canvas). Anything else — `--svg-stdin` with a file as well, `--svg-stdin` with empty or non-SVG input, a second positional argument, an unknown option, a missing/unreadable/non-`.svg` file — is reported to the user in SeamlyLayout's error dialog, and the application then continues with an empty canvas rather than exiting.
@@ -78,7 +78,7 @@ Each piece is a `piece-set` group holding that piece once per size.
 </g>
 ```
 
-- Producer: `MainWindow::prepareMultisizePieceLists()` → `MainWindowsNoGUI::generateMultisizePiecesSvgDocument()` → `SvgGenerator::setMultisize()` and `addSvgFromScene(..., size, pieceSetKey)`.
+- Producer: `MainWindow::prepareMultisizePieceLists()` → `MainWindowsNoGUI::generateHandoffSvgDocument(&warnings)` → `HandoffDocument::set_multisize()` and `to_aligned_dom()`.
 - The same piece is matched across sizes by its `VPiece` id.
 - Each size keeps its drafted position. The Nested tab stacks the sizes on the centre of each outline's bounding box: the `cutline` groups, else the `seamline` groups (`svg_dom::center_piece_sets`). When every size has a `fold_line`, the sizes stack on the first point of the fold line instead, so the fold lines lie on top of each other; Settings > "Place fold lines on the left edge" then lays the whole stack on the left edge (`fold_line_edge.rs`). Sizes whose fold lines do not share one line stay off the edge with a warning.
 - Tests: `TST_SvgComponentTags::Multisize*` (producer), `piece_extractor` and `layout_utils` `multisize` tests (consumer).
@@ -92,12 +92,16 @@ Each piece is a `piece-set` group holding that piece once per size.
 - Markings do not change cut outlines, packing bounds, grain direction, or rotation constraints.
 - Non-finite coordinates, non-positive diameters, unknown line types, and coincident endpoints invalidate the entire document.
 - Piece sizes retain the same drill diameter; only the live anchor positions grade.
+- `HandoffPiece::create()` resolves marking IDs from `VPiece::getAnchors()` through the current `VContainer`.
+- Drill diameters use pattern units in `VPiece`; the handoff converts them to pixels with `ToPixel`.
+- Missing anchors, non-point objects, and IDs outside the piece's anchors invalidate the entire document.
+- Markings may lie outside the outline. They never enlarge packing bounds.
 
 ### Materials
 
 Seamly2D hands off one pattern group per material, in the order the materials first appear: `<g id="pattern-1" data-type="pattern" data-material="Fabric">`, `<g id="pattern-2" ... data-material="Lining">`. Each piece sits in the group of its material, and its `data-parent` names that group. A pattern with one material keeps the single `pattern-1` group. The stdin contract is unchanged: one SVG document.
 
-- Producer: `AbstractPiece::getMaterial()` → `PieceItemData::Material` → `SvgGenerator::mergeSvgDoms()`. Tests: `TST_SvgComponentTags::PiecesOfEachMaterialShareAPatternGroup`, `OneMaterialKeepsOnePatternGroup`.
+- Producer: `VPiece::getMaterial()` → `HandoffPieceInfo::material` → `HandoffDocument::to_dom()`. Test: `TST_HandoffDocument::multisizePiecesMatchOldWriter`.
 - Consumer: `cxxqt_bridge/src/material_split.rs` splits the import into one document per material, each with the root, `<defs>` and the pattern groups of that material. `finish_import` names pieces and adds size labels per document. Several materials get one tab each above the left canvas and above the right canvas; both tab bars show the same material. The shown material's document is `input_dom`.
 - Settings Submit makes a blank canvas for every material. Create Layout lays out every material: the shown material first, then each other material in tab order, each with all its tabs. The progress popup names the material: "Laying out Lining: Size 36 (30 of 56)…".
 - A material switch keeps every layout: the controller parks the shown material's layouts, shown tab and Adjust edits in `layout_views::MaterialLayout` and takes out the new material's. Exports, Export all tabs and Adjust Mode work on the shown material.
@@ -278,7 +282,7 @@ All ids are unique and XML-valid by construction. **Breaking change vs. pre-cont
 - **`data-quantity` / `data-on-fold`** — piece data, so the DXF-ASTM export no longer parses a "Cut N" label line. Producer: `VPieceLabelData::GetQuantity()` / `IsOnFold()` via `VLayoutPiece::Create()`. Consumer: `converter::quantity_from_piece` (`seamly_svg2ezdxf`): even N → `N/2,N/2`, odd N → `N,0`, on fold with a `fold_line` → `N,0`. A piece without `data-quantity` has no `Quantity:` text; label text is never read, because Piece Properties are the source.
 - **`data-notch-type`** — the notch type Seamly2D drew. Producer: `VPiece::createNotchLines()` (type per notch), `VLayoutPiece::createNotchesItem()`. SeamlyLayout keeps it on the notch group through layout and export. DXF-ASTM ignores it: every notch is a layer 4 slit.
 - **`piece_label` / `pattern_label`** — the on-piece label text blocks. One `<text>` element per label line (or one `<path>` per line in text-as-paths mode); per-line bold/italic, alignment, middle-eliding to the label width, mirroring and rotation are preserved in either mode.
-- Counters are per SvgGenerator instance: one instance = one file = one pattern.
+- Counters are per generated document. Each material's pattern group has its own sequential pattern number.
 
 ## SeamlyLayout piece names
 
