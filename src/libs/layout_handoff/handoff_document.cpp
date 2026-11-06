@@ -26,6 +26,7 @@
 //---------------------------------------------------------------------------------------------------------------------
 
 #include "handoff_document.h"
+#include "handoff_annotation_alignment.h"
 
 #include <QFontMetrics>
 #include <QFontMetricsF>
@@ -808,5 +809,12 @@ QDomDocument HandoffDocument::to_dom() const
 QString HandoffDocument::to_svg_string() const
 {
     return to_dom().toString();
+}
+
+QDomDocument HandoffDocument::to_aligned_dom(QStringList &warnings) const
+{
+    QDomDocument document = to_dom();
+    warnings = align_handoff_annotations(document);
+    return document;
 }
 } // namespace layout_handoff

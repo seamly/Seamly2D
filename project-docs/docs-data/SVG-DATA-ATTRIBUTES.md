@@ -103,6 +103,16 @@ At import, SeamlyLayout moves the `grainline`, `piece_label` and `pattern_label`
 - Size labels follow: `add_size_labels` runs after the move, 5 px past the moved grainline.
 - Code: `cxxqt_bridge/src/annotation_alignment.rs`, called by `finish_import` before the piece names.
 
+The producer also offers opt-in alignment through `layout_handoff::HandoffDocument::to_aligned_dom(warnings)`.
+Production still uses the unaligned writer until the old/new sample-pattern comparison passes.
+
+- Each annotation shares the base size's offset from the stack point when it fits every size.
+- Otherwise, the producer selects the nearest offset whose grainline ends or text line anchors fit every cut outline.
+- Polygon edges count as inside. A missing cut line uses the seam line.
+- If no shared offset fits, every size retains the base offset. The returned warning must appear before launch.
+- This API changes only the generated document. It does not edit pattern data or alter `to_dom()` and `to_svg_string()`.
+- `TestHandoffAnnotationAlignment` covers fitting, nearest placement, concavity, fold points, hidden components, and fallback.
+
 ### Size labels
 
 At import, SeamlyLayout adds a label to every multisize piece (`data-size` set): `<g id="size_label_<piece id>" data-type="size_label" data-type-number="1" data-parent="<piece name>">`, the last child of the piece, with one `<text>` "Size <size>" (Arial, 24 px, `text-anchor="middle"`).

@@ -10,6 +10,8 @@
 //  program to create and model patterns of clothing.
 //  Copyright (C) 2017-2025 Seamly2D project
 //  Copyright (C) 2026 Seamly2D Project
+//  SPDX-License-Identifier: GPL-3.0-or-later
+//  License: https://www.gnu.org/licenses/gpl-3.0.html
 //  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
 //  License: GPL-3.0-or-later
 //
@@ -93,6 +95,7 @@
 #include "tst_vpatternconverter.h"
 #include "tst_labeltemplatefilename.h"
 #include "tst_patternpiececopy.h"
+#include "TestHandoffAnnotationAlignment.h"
 
 #include "../vmisc/def.h"
 #include "../qmuparser/qmudef.h"
@@ -258,6 +261,7 @@ int main(int argc, char** argv)
     ASSERT_TEST(new TST_VPatternConverter());
     ASSERT_TEST(new TST_LabelTemplateFileName());
     ASSERT_TEST(new TST_PatternPieceCopy());
+    ASSERT_TEST(new TestHandoffAnnotationAlignment());
 
     return status;
 }

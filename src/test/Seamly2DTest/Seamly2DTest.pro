@@ -1,4 +1,8 @@
 #-------------------------------------------------
+# @author slspencer
+# Copyright (C) 2026 Seamly2D Project
+# SPDX-License-Identifier: GPL-3.0-or-later
+# License: https://www.gnu.org/licenses/gpl-3.0.html
 #
 # Project created by QtCreator 2015-03-31T17:27:03
 # Author: slspencer
@@ -36,6 +40,7 @@ OBJECTS_DIR = obj
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 SOURCES += \
+    TestHandoffAnnotationAlignment.cpp \
     qttestmainlambda.cpp \
     tst_vspline.cpp \
     tst_nameregexp.cpp \
@@ -78,6 +83,7 @@ SOURCES += \
 *msvc*:SOURCES += stable.cpp
 
 HEADERS += \
+    TestHandoffAnnotationAlignment.h \
     tst_vspline.h \
     tst_nameregexp.h \
     tst_vlayoutdetail.h \

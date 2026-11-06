@@ -571,6 +571,42 @@ void TST_HandoffDocument::multisizePiecesMatchOldWriter() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief Opt-in alignment leaves the comparison document and its cut geometry unchanged.
+ */
+void TST_HandoffDocument::alignedDocumentKeepsComparisonUnchanged() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+    TestPatternDocument document;
+    VAbstractPattern *previous = qApp->getCurrentDocument();
+    qApp->setCurrentDocument(&document);
+    VPiece base = make_piece(data.data(), true, false, false);
+    set_label_templates(&document, &base);
+    VPiece smaller = base;
+    smaller.GetPatternInfo().SetPos(QPointF(40, 40));
+    HandoffDocument handoff;
+    handoff.set_style(HandoffStyle::from_settings(*qApp->Settings()));
+    handoff.set_multisize({QStringLiteral("220"), QStringLiteral("500")}, QStringLiteral("500"), QString());
+    handoff.set_sheet(QRectF(0, 0, 1000, 1000), 96);
+    handoff.add_piece(placed_piece(smaller, data.data(), &document, QStringLiteral("220"), QStringLiteral("1")));
+    handoff.add_piece(placed_piece(base, data.data(), &document, QStringLiteral("500"), QStringLiteral("1")));
+    qApp->setCurrentDocument(previous);
+
+    const QString comparison = handoff.to_svg_string();
+    QStringList warnings;
+    const QDomDocument aligned = handoff.to_aligned_dom(warnings);
+    QVERIFY(warnings.isEmpty());
+    QCOMPARE(handoff.to_svg_string(), comparison);
+    QVERIFY(aligned.toString() != comparison);
+    QVector<Entry> before = flatten_document(handoff.to_dom());
+    QVector<Entry> after = flatten_document(aligned);
+    compare_entries({take_component(&after, QStringLiteral("cutline"))},
+                    {take_component(&before, QStringLiteral("cutline"))});
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief Hidden labels, hidden grainlines and the show settings leave out the drawn groups; the grain angle stays.
  */
 void TST_HandoffDocument::hiddenItemsAreNotDrawn() const
