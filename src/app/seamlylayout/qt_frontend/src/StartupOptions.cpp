@@ -1,10 +1,9 @@
 // project: SeamlyLayout
 // author: slspencer, copyright 2026
-// LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
+// MIT License: https://opensource.org/licenses/MIT
 //
 // @file StartupOptions.cpp
-// @brief Implementation of the SeamlyLayout startup contract — a positional
-//        <svg-file>, or an SVG document on standard input.
+// @brief Implementation of the SeamlyLayout startup and headless export contract.
 //
 // Control flow of parse():
 //   1. Reject an empty argument list outright (nothing to parse).
@@ -31,8 +30,13 @@
 #include <QCommandLineOption>
 #include <QCommandLineParser>
 #include <QCoreApplication>
+#include <QDir>
 #include <QFileInfo>
 #include <QIODevice>
+#include <QStringList>
+
+#include <cmath>
+#include <limits>
 
 namespace
 {
@@ -51,6 +55,42 @@ const QLatin1String documentNameOptionName("document-name");
 // Checked so an empty pipe, or a stray non-SVG payload, is reported as such
 // rather than as an XML syntax error from deep inside the Rust parser.
 const QLatin1String svgRootElement("<svg");
+
+// @brief Output formats supported by the headless layout pipeline.
+const QStringList exportFormats{
+    QStringLiteral("svg"), QStringLiteral("pdf"), QStringLiteral("pdf-tiled"),
+    QStringLiteral("png"), QStringLiteral("jpg"), QStringLiteral("jpeg"),
+    QStringLiteral("dxf"), QStringLiteral("hpgl"), QStringLiteral("ps"),
+    QStringLiteral("eps"), QStringLiteral("gcode"), QStringLiteral("3mf")
+};
+
+// @brief SVG text modes accepted by the layout exporter.
+const QStringList svgTextModes{
+    QStringLiteral("designerFont"), QStringLiteral("singleLineFont"),
+    QStringLiteral("hersheyStrokes"), QStringLiteral("asSupplied")
+};
+
+// @brief Detect export options even when another argument makes parsing fail.
+bool hasHeadlessExportArgument(const QStringList &arguments)
+{
+    const QStringList optionNames{
+        QStringLiteral("--export"), QStringLiteral("--format"),
+        QStringLiteral("--output"), QStringLiteral("--destination"),
+        QStringLiteral("--settings"), QStringLiteral("--layout-settings"),
+        QStringLiteral("--export-options"), QStringLiteral("--svg-text-mode"),
+        QStringLiteral("--text-mode"), QStringLiteral("--scale")
+    };
+
+    for (const QString &argument : arguments) {
+        for (const QString &optionName : optionNames) {
+            if (argument == optionName || argument.startsWith(optionName + QLatin1Char('='))) {
+                return true;
+            } // if export option is present
+        } // for each export option
+    } // for each argument
+
+    return false;
+} // hasHeadlessExportArgument
 
 // @brief Build the text shown for --version.
 // Falls back to the product name alone when the caller has not set the
@@ -117,6 +157,42 @@ StartupOptions StartupOptions::parse(const QStringList &arguments, QIODevice *st
         QStringLiteral("name"));
     parser.addOption(documentNameOption);
 
+    const QCommandLineOption exportOption(
+        QStringList{QStringLiteral("export"), QStringLiteral("format")},
+        QStringLiteral("Lay out the input SVG and export it without showing the UI."),
+        QStringLiteral("format"));
+    parser.addOption(exportOption);
+
+    const QCommandLineOption outputOption(
+        QStringList{QStringLiteral("output"), QStringLiteral("destination")},
+        QStringLiteral("Output file path required by --export."),
+        QStringLiteral("path"));
+    parser.addOption(outputOption);
+
+    const QCommandLineOption settingsOption(
+        QStringList{QStringLiteral("settings"), QStringLiteral("layout-settings")},
+        QStringLiteral("Layout settings JSON file."),
+        QStringLiteral("path"));
+    parser.addOption(settingsOption);
+
+    const QCommandLineOption exportOptionsOption(
+        QStringList{QStringLiteral("export-options")},
+        QStringLiteral("Format-specific export options JSON file."),
+        QStringLiteral("path"));
+    parser.addOption(exportOptionsOption);
+
+    const QCommandLineOption svgTextModeOption(
+        QStringList{QStringLiteral("svg-text-mode"), QStringLiteral("text-mode")},
+        QStringLiteral("SVG label mode: designerFont, singleLineFont, hersheyStrokes, or asSupplied."),
+        QStringLiteral("mode"));
+    parser.addOption(svgTextModeOption);
+
+    const QCommandLineOption scaleOption(
+        QStringList{QStringLiteral("scale")},
+        QStringLiteral("PNG scale factor (default: 1.0)."),
+        QStringLiteral("factor"));
+    parser.addOption(scaleOption);
+
     parser.addPositionalArgument(
         QStringLiteral("svg-file"),
         QStringLiteral("SVG pattern file to open at startup (optional)."),
@@ -127,10 +203,15 @@ StartupOptions StartupOptions::parse(const QStringList &arguments, QIODevice *st
     if (!parser.parse(arguments)) {
         // Unknown option, missing option value, etc. errorText() is already a
         // complete sentence ("Unknown option 'foo'.").
+        options.m_headlessRequest = hasHeadlessExportArgument(arguments);
         options.m_status  = Status::Failed;
         options.m_message = parser.errorText();
         return options;
     } // if !parser.parse
+
+    options.m_headlessRequest = parser.isSet(exportOption) || parser.isSet(outputOption) ||
+        parser.isSet(settingsOption) || parser.isSet(exportOptionsOption) ||
+        parser.isSet(svgTextModeOption) || parser.isSet(scaleOption);
 
     if (parser.isSet(versionOption)) {
         // --version wins over everything else, matching every other CLI.
@@ -160,12 +241,18 @@ StartupOptions StartupOptions::parse(const QStringList &arguments, QIODevice *st
     } // if both transports requested
 
     if (readStandardInput) {
-        return parseStandardInput(parser.value(documentNameOption), standardInput);
+        const bool headlessRequest = options.m_headlessRequest;
+        options = parseStandardInput(parser.value(documentNameOption), standardInput);
+        options.m_headlessRequest = headlessRequest;
+        if (options.hasError()) {
+            return options;
+        } // if stdin failed validation
+        return parseExportOptions(options, parser, positional, true);
     } // if the document arrives on standard input
 
     if (positional.isEmpty()) {
         // Plain launch — the double-clicked-icon case. Empty canvas, no message.
-        return options;
+        return parseExportOptions(options, parser, positional, false);
     } // if positional.isEmpty()
 
     if (positional.size() > 1) {
@@ -218,8 +305,135 @@ StartupOptions StartupOptions::parse(const QStringList &arguments, QIODevice *st
 
     options.m_status   = Status::OpenFile;
     options.m_filePath = absolutePath;
-    return options;
+    return parseExportOptions(options, parser, positional, false);
 } // StartupOptions::parse
+
+// @brief Validate and store a headless export request.
+//
+// @param options Previously validated input transport.
+// @param parser Parsed command-line options.
+// @param positional Positional SVG file arguments.
+// @param hasDocument True when the SVG arrived on standard input.
+// @return The input options plus validated export arguments, or Failed.
+StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
+                                                  const QCommandLineParser &parser,
+                                                  const QStringList &positional,
+                                                  bool hasDocument)
+{
+    const QCommandLineOption exportOption(
+        QStringList{QStringLiteral("export"), QStringLiteral("format")});
+    const QCommandLineOption outputOption(
+        QStringList{QStringLiteral("output"), QStringLiteral("destination")});
+    const QCommandLineOption settingsOption(
+        QStringList{QStringLiteral("settings"), QStringLiteral("layout-settings")});
+    const QCommandLineOption exportOptionsOption(
+        QStringList{QStringLiteral("export-options")});
+    const QCommandLineOption svgTextModeOption(
+        QStringList{QStringLiteral("svg-text-mode"), QStringLiteral("text-mode")});
+    const QCommandLineOption scaleOption(QStringList{QStringLiteral("scale")});
+
+    const bool hasExportArguments =
+        parser.isSet(exportOption) || parser.isSet(outputOption) ||
+        parser.isSet(settingsOption) || parser.isSet(exportOptionsOption) ||
+        parser.isSet(svgTextModeOption) || parser.isSet(scaleOption);
+    if (!hasExportArguments) {
+        return options;
+    } // if no export arguments
+
+    const auto fail = [&options](const QString &message) {
+        options.m_status = Status::Failed;
+        options.m_message = message;
+        options.m_headlessExport = false;
+        return options;
+    };
+
+    if (!parser.isSet(exportOption)) {
+        return fail(QStringLiteral("Export options require --export <format>."));
+    } // if export format missing
+
+    if ((hasDocument && !positional.isEmpty()) || (!hasDocument && positional.size() != 1)) {
+        return fail(QStringLiteral("--export requires exactly one input SVG file or --svg-stdin."));
+    } // if input count is invalid
+
+    if (!parser.isSet(outputOption) || parser.value(outputOption).trimmed().isEmpty()) {
+        return fail(QStringLiteral("--export requires --output <path>."));
+    } // if output path is missing
+
+    const QString format = parser.value(exportOption).trimmed().toLower();
+    if (!exportFormats.contains(format)) {
+        return fail(QStringLiteral("Unknown export format '%1'. Supported formats: %2.")
+                        .arg(parser.value(exportOption), exportFormats.join(QStringLiteral(", "))));
+    } // if format is unsupported
+
+    const QString textMode = parser.isSet(svgTextModeOption)
+        ? parser.value(svgTextModeOption).trimmed()
+        : QStringLiteral("designerFont");
+    const QString canonicalTextMode = [&textMode]() {
+        for (const QString &mode : svgTextModes) {
+            if (mode.compare(textMode, Qt::CaseInsensitive) == 0) {
+                return mode;
+            } // if mode matches
+        } // for each text mode
+        return QString();
+    }();
+    if (canonicalTextMode.isEmpty()) {
+        return fail(QStringLiteral("Unknown SVG text mode '%1'. Supported modes: %2.")
+                        .arg(textMode, svgTextModes.join(QStringLiteral(", "))));
+    } // if text mode is unsupported
+
+    if (parser.isSet(svgTextModeOption) && format != QStringLiteral("svg")) {
+        return fail(QStringLiteral("--svg-text-mode can only be used with --export svg."));
+    } // if text mode is used with another format
+
+    bool scaleOk = true;
+    const double scale = parser.isSet(scaleOption)
+        ? parser.value(scaleOption).toDouble(&scaleOk)
+        : 1.0;
+    if (!scaleOk || !std::isfinite(scale) || scale <= 0.0 ||
+        scale > static_cast<double>((std::numeric_limits<float>::max)())) {
+        return fail(QStringLiteral("--scale must be a positive number."));
+    } // if scale is invalid
+
+    const QFileInfo outputInfo(parser.value(outputOption));
+    const QString outputPath = outputInfo.absoluteFilePath();
+    if (!outputInfo.absoluteDir().exists()) {
+        return fail(QStringLiteral("The output directory does not exist:\n%1")
+                        .arg(outputInfo.absolutePath()));
+    } // if output directory is missing
+    if (outputInfo.exists() && (!outputInfo.isFile() || !outputInfo.isWritable())) {
+        return fail(QStringLiteral("The output path is not a writable file:\n%1")
+                        .arg(outputPath));
+    } // if output cannot be written
+
+    QString settingsPath;
+    if (parser.isSet(settingsOption)) {
+        const QFileInfo settingsInfo(parser.value(settingsOption));
+        if (!settingsInfo.exists() || !settingsInfo.isFile() || !settingsInfo.isReadable()) {
+            return fail(QStringLiteral("The layout settings file cannot be read:\n%1")
+                            .arg(settingsInfo.absoluteFilePath()));
+        } // if settings file is invalid
+        settingsPath = settingsInfo.absoluteFilePath();
+    } // if explicit settings file
+
+    QString exportOptionsPath;
+    if (parser.isSet(exportOptionsOption)) {
+        const QFileInfo exportOptionsInfo(parser.value(exportOptionsOption));
+        if (!exportOptionsInfo.exists() || !exportOptionsInfo.isFile() || !exportOptionsInfo.isReadable()) {
+            return fail(QStringLiteral("The export options file cannot be read:\n%1")
+                            .arg(exportOptionsInfo.absoluteFilePath()));
+        } // if export options file is invalid
+        exportOptionsPath = exportOptionsInfo.absoluteFilePath();
+    } // if explicit format options
+
+    options.m_headlessExport = true;
+    options.m_exportFormat = format;
+    options.m_outputPath = outputPath;
+    options.m_settingsPath = settingsPath;
+    options.m_exportOptionsPath = exportOptionsPath;
+    options.m_svgTextMode = canonicalTextMode;
+    options.m_exportScale = scale;
+    return options;
+} // StartupOptions::parseExportOptions
 
 // @brief Read and validate the SVG document offered on standard input.
 //

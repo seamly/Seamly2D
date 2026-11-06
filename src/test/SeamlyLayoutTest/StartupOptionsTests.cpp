@@ -72,6 +72,17 @@ private slots:
     void svgStdin_withPositionalFile_statusIsFailed();
     void svgStdin_isNotReadWithoutTheOption();
 
+    // Headless layout and export
+    void headlessExport_storesFileArguments();
+    void headlessExport_acceptsFormatAndDestinationAliases();
+    void headlessExport_invalidFormat_statusIsFailed();
+    void headlessExport_parseErrorKeepsCliStatus();
+    void headlessExport_requiresOutputPath();
+    void headlessExport_requiresInput();
+    void headlessExport_rejectsTextModeForOtherFormats();
+    void headlessExport_acceptsSvgTextModesCaseInsensitively();
+    void headlessExport_validatesPngScale();
+
     // --help / --version
     void helpOption_statusIsShowInformation();
     void shortHelpOption_statusIsShowInformation();
@@ -489,6 +500,158 @@ void StartupOptionsTests::svgStdin_isNotReadWithoutTheOption()
 } // svgStdin_isNotReadWithoutTheOption()
 
 // ---------------------------------------------------------------------------
+// Headless layout and export
+// ---------------------------------------------------------------------------
+
+// @brief The export request carries absolute input and output paths.
+void StartupOptionsTests::headlessExport_storesFileArguments()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString svgPath = makeFile(directory, QStringLiteral("pattern.pieces.svg"));
+    const QString outputPath = directory.filePath(QStringLiteral("pattern.svg"));
+
+    const StartupOptions options = StartupOptions::parse(QStringList{
+        QStringLiteral("SeamlyLayout"), QStringLiteral("--export"), QStringLiteral("svg"),
+        QStringLiteral("--output"), outputPath, QStringLiteral("--svg-text-mode"),
+        QStringLiteral("singleLineFont"), svgPath
+    });
+
+    QVERIFY(options.hasHeadlessExport());
+    QVERIFY(options.hasFile());
+    QCOMPARE(options.status(), StartupOptions::Status::OpenFile);
+    QCOMPARE(options.exportFormat(), QStringLiteral("svg"));
+    QCOMPARE(options.outputPath(), QFileInfo(outputPath).absoluteFilePath());
+    QCOMPARE(options.svgTextMode(), QStringLiteral("singleLineFont"));
+} // headlessExport_storesFileArguments
+
+// @brief Legacy aliases select the same export format and destination values.
+void StartupOptionsTests::headlessExport_acceptsFormatAndDestinationAliases()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString svgPath = makeFile(directory, QStringLiteral("pattern.svg"));
+    const QString outputPath = directory.filePath(QStringLiteral("pattern.pdf"));
+
+    const StartupOptions options = StartupOptions::parse(QStringList{
+        QStringLiteral("SeamlyLayout"), QStringLiteral("--format"), QStringLiteral("PDF"),
+        QStringLiteral("--destination"), outputPath, svgPath
+    });
+
+    QVERIFY(options.hasHeadlessExport());
+    QCOMPARE(options.exportFormat(), QStringLiteral("pdf"));
+} // headlessExport_acceptsFormatAndDestinationAliases
+
+// @brief Unsupported formats fail during parsing rather than after UI startup.
+void StartupOptionsTests::headlessExport_invalidFormat_statusIsFailed()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString svgPath = makeFile(directory, QStringLiteral("pattern.svg"));
+
+    const StartupOptions options = StartupOptions::parse(QStringList{
+        QStringLiteral("SeamlyLayout"), QStringLiteral("--export"), QStringLiteral("unknown"),
+        QStringLiteral("--output"), directory.filePath(QStringLiteral("out.svg")), svgPath
+    });
+
+    QCOMPARE(options.status(), StartupOptions::Status::Failed);
+    QVERIFY(options.message().contains(QStringLiteral("Unknown export format")));
+    QVERIFY(!options.hasHeadlessExport());
+} // headlessExport_invalidFormat_statusIsFailed
+
+// @brief An invalid extra option still routes an export request to CLI diagnostics.
+void StartupOptionsTests::headlessExport_parseErrorKeepsCliStatus()
+{
+    const StartupOptions options = StartupOptions::parse(QStringList{
+        QStringLiteral("SeamlyLayout"), QStringLiteral("--export=svg"),
+        QStringLiteral("--unknown-option")
+    });
+
+    QCOMPARE(options.status(), StartupOptions::Status::Failed);
+    QVERIFY(options.hasHeadlessRequest());
+} // headlessExport_parseErrorKeepsCliStatus
+
+// @brief A headless export must name its destination.
+void StartupOptionsTests::headlessExport_requiresOutputPath()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString svgPath = makeFile(directory, QStringLiteral("pattern.svg"));
+
+    const StartupOptions options = StartupOptions::parse(QStringList{
+        QStringLiteral("SeamlyLayout"), QStringLiteral("--export"), QStringLiteral("svg"), svgPath
+    });
+
+    QCOMPARE(options.status(), StartupOptions::Status::Failed);
+    QVERIFY(options.message().contains(QStringLiteral("--output")));
+} // headlessExport_requiresOutputPath
+
+// @brief The export mode requires either one SVG file or --svg-stdin.
+void StartupOptionsTests::headlessExport_requiresInput()
+{
+    const StartupOptions options = StartupOptions::parse(QStringList{
+        QStringLiteral("SeamlyLayout"), QStringLiteral("--export"), QStringLiteral("svg"),
+        QStringLiteral("--output"), QStringLiteral("out.svg")
+    });
+
+    QCOMPARE(options.status(), StartupOptions::Status::Failed);
+    QVERIFY(options.message().contains(QStringLiteral("input SVG")));
+} // headlessExport_requiresInput
+
+// @brief SVG text modes do not silently apply to other formats.
+void StartupOptionsTests::headlessExport_rejectsTextModeForOtherFormats()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString svgPath = makeFile(directory, QStringLiteral("pattern.svg"));
+
+    const StartupOptions options = StartupOptions::parse(QStringList{
+        QStringLiteral("SeamlyLayout"), QStringLiteral("--export"), QStringLiteral("pdf"),
+        QStringLiteral("--output"), directory.filePath(QStringLiteral("out.pdf")),
+        QStringLiteral("--svg-text-mode"), QStringLiteral("designerFont"), svgPath
+    });
+
+    QCOMPARE(options.status(), StartupOptions::Status::Failed);
+    QVERIFY(options.message().contains(QStringLiteral("only be used with --export svg")));
+} // headlessExport_rejectsTextModeForOtherFormats
+
+// @brief SVG text mode names are canonicalized without regard to case.
+void StartupOptionsTests::headlessExport_acceptsSvgTextModesCaseInsensitively()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString svgPath = makeFile(directory, QStringLiteral("pattern.svg"));
+
+    const StartupOptions options = StartupOptions::parse(QStringList{
+        QStringLiteral("SeamlyLayout"), QStringLiteral("--export"), QStringLiteral("svg"),
+        QStringLiteral("--output"), directory.filePath(QStringLiteral("out.svg")),
+        QStringLiteral("--svg-text-mode"), QStringLiteral("HERSHEYSTROKES"), svgPath
+    });
+
+    QVERIFY(options.hasHeadlessExport());
+    QCOMPARE(options.svgTextMode(), QStringLiteral("hersheyStrokes"));
+} // headlessExport_acceptsSvgTextModesCaseInsensitively
+
+// @brief PNG scale must be finite, positive, and representable by the exporter.
+void StartupOptionsTests::headlessExport_validatesPngScale()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString svgPath = makeFile(directory, QStringLiteral("pattern.svg"));
+
+    for (const QString &scale : {QStringLiteral("nan"), QStringLiteral("1e100")}) {
+        const StartupOptions options = StartupOptions::parse(QStringList{
+            QStringLiteral("SeamlyLayout"), QStringLiteral("--export"), QStringLiteral("png"),
+            QStringLiteral("--output"), directory.filePath(QStringLiteral("out.png")),
+            QStringLiteral("--scale"), scale, svgPath
+        });
+
+        QCOMPARE(options.status(), StartupOptions::Status::Failed);
+        QVERIFY(options.message().contains(QStringLiteral("--scale")));
+    }
+} // headlessExport_validatesPngScale
+
+// ---------------------------------------------------------------------------
 // --help / --version
 // ---------------------------------------------------------------------------
 
@@ -502,6 +665,7 @@ void StartupOptionsTests::helpOption_statusIsShowInformation()
     QVERIFY(!options.message().isEmpty());
     // The documented positional argument must appear in the usage text.
     QVERIFY(options.message().contains(QStringLiteral("svg-file")));
+    QVERIFY(options.message().contains(QStringLiteral("--export")));
     QVERIFY(options.filePath().isEmpty());
 } // helpOption_statusIsShowInformation()
 

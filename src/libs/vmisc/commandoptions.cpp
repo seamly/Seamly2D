@@ -24,14 +24,14 @@
  ************************************************************************
  **
  **  @file   commandoptions.cpp
- **  @author Roman Telezhynskyi <dismine(at)gmail.com>
- **  @date   9 11, 2015
+ **  @author slspencer
+ **  @date   2026
  **
  **  @brief
  **  @copyright
  **  This source code is part of the Valentine project, a pattern making
  **  program, whose allow create and modeling patterns of clothing.
- **  Copyright (C) 2015 Seamly2D project
+ **  Copyright (C) 2026 Seamly2D Project
  **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
  **
  **  Seamly2D is free software: you can redistribute it and/or modify
@@ -67,6 +67,14 @@ const QString SINGLE_OPTION_GRADATIONSIZE   = QStringLiteral("x");
 const QString LONG_OPTION_GRADATIONHEIGHT   = QStringLiteral("gheight");
 const QString SINGLE_OPTION_GRADATIONHEIGHT = QStringLiteral("e");
 
+const QString LONG_OPTION_LAYOUT_EXPORT          = QStringLiteral("layout-export");
+const QString LONG_OPTION_LAYOUT_FORMAT          = QStringLiteral("layout-format");
+const QString LONG_OPTION_LAYOUT_OUTPUT          = QStringLiteral("layout-output");
+const QString LONG_OPTION_LAYOUT_SETTINGS        = QStringLiteral("layout-settings");
+const QString LONG_OPTION_LAYOUT_EXPORT_OPTIONS  = QStringLiteral("layout-export-options");
+const QString LONG_OPTION_SVG_TEXT_MODE           = QStringLiteral("svg-text-mode");
+const QString LONG_OPTION_LAYOUT_SCALE            = QStringLiteral("layout-scale");
+
 //---------------------------------------------------------------------------------------------------------------------
 QStringList AllKeys()
 {
@@ -75,6 +83,10 @@ QStringList AllKeys()
          << LONG_OPTION_TEST << SINGLE_OPTION_TEST
          << LONG_OPTION_GRADATIONSIZE << SINGLE_OPTION_GRADATIONSIZE
          << LONG_OPTION_GRADATIONHEIGHT << SINGLE_OPTION_GRADATIONHEIGHT
+         << LONG_OPTION_LAYOUT_EXPORT << LONG_OPTION_LAYOUT_FORMAT
+         << LONG_OPTION_LAYOUT_OUTPUT << LONG_OPTION_LAYOUT_SETTINGS
+         << LONG_OPTION_LAYOUT_EXPORT_OPTIONS << LONG_OPTION_SVG_TEXT_MODE
+         << LONG_OPTION_LAYOUT_SCALE
          << LONG_OPTION_NO_HDPI_SCALING;
 
     return list;

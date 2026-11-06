@@ -42,6 +42,7 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\"
 SOURCES += \
     TestHandoffAnnotationAlignment.cpp \
     qttestmainlambda.cpp \
+    ../../app/seamly2d/core/vcmdexport.cpp \
     tst_vspline.cpp \
     tst_nameregexp.cpp \
     tst_vlayoutdetail.cpp \
@@ -202,6 +203,9 @@ unix|win32: LIBS += -L$$OUT_PWD/../../libs/vmisc/$${DESTDIR}/ -lvmisc
 
 INCLUDEPATH += $$PWD/../../libs/vmisc
 DEPENDPATH += $$PWD/../../libs/vmisc
+
+INCLUDEPATH += $$PWD/../../app/seamly2d/core
+DEPENDPATH += $$PWD/../../app/seamly2d/core
 
 win32:!win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vmisc/$${DESTDIR}/vmisc.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vmisc/$${DESTDIR}/libvmisc.a

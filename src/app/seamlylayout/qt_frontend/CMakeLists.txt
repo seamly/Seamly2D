@@ -1,6 +1,6 @@
 # project: SeamlyLayout
 # author: slspencer, copyright 2026
-# LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
+# MIT License: https://opensource.org/licenses/MIT
 #
 # CMakeLists.txt — Qt 6.11 + QML frontend for SeamlyLayout.
 # Links against libseamly_core (Rust FFI bridge) once Phase 2g is complete.
@@ -135,6 +135,7 @@ qt_add_executable(SeamlyLayout
     src/Platform.cpp
     src/SettingsModel.cpp
     src/StartupOptions.cpp
+    src/HeadlessExport.cpp
     src/PreferencesModel.cpp
     src/PreferencesController.cpp
     src/PreferencesWindow.cpp

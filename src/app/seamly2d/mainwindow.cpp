@@ -1,13 +1,13 @@
 //-----------------------------------------------------------------------------
 //  @file   mainwindow.cpp
-//  @author Douglas S Caskey
-//  @date   17 Sep, 2023
+//  @author slspencer
+//  @date   2026
 //
 //  @brief
 //  @copyright
 //  This source code is part of the Seamly2D project, a pattern making
 //  program, whose allow create and modeling patterns of clothing.
-//  Copyright (C) 2013-2022 Seamly2D project
+//  Copyright (C) 2026 Seamly2D Project
 //  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
 //
 //  Seamly2D is free software: you can redistribute it and/or modify
@@ -8012,10 +8012,147 @@ bool MainWindow::setHeight(const QString &text)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+int MainWindow::exportLayoutFromCommandLine(const VCommandLinePtr &command_line)
+{
+    const QHash<quint32, VPiece> pieces = currentLayoutPieces();
+    if (pieces.isEmpty())
+    {
+        vStdErr() << tr("No pattern pieces are included in the layout.") << Qt::endl;
+        return V_EX_DATAERR;
+    }
+
+    pieceList.clear();
+    handoff_pieces.clear();
+    sizePieceLists.clear();
+    try
+    {
+        preparePiecesForLayout(pieces);
+    }
+    catch (VException &exception)
+    {
+        vStdErr() << exception.ErrorMessage() << Qt::endl;
+        return V_EX_DATAERR;
+    }
+
+    const QString pieces_svg = generatePiecesSvgDocument();
+    if (pieces_svg.isEmpty())
+    {
+        vStdErr() << tr("Could not create the layout document from the pattern pieces.") << Qt::endl;
+        return V_EX_DATAERR;
+    }
+
+    // Keep the existing handoff writer and its comparison switch until its output is verified.
+    writeHandoffCompareFiles(pieces_svg);
+
+    const QString seamly_layout = qApp->seamlyLayoutFilePath();
+    if (seamly_layout.isEmpty())
+    {
+        vStdErr() << tr("The SeamlyLayout application could not be found. Set its path in preferences.")
+                  << Qt::endl;
+        return V_EX_CONFIG;
+    }
+
+    QStringList arguments = SeamlySuitePaths::seamlyLayoutLaunchArguments(
+        SeamlySuitePaths::patternDocumentName(qApp->getFilePath()));
+    arguments << QStringLiteral("--export") << command_line->OptLayoutFormat()
+              << QStringLiteral("--output") << command_line->OptLayoutOutput();
+
+    if (!command_line->OptLayoutSettings().isEmpty())
+    {
+        arguments << QStringLiteral("--settings") << command_line->OptLayoutSettings();
+    }
+    if (!command_line->OptLayoutExportOptions().isEmpty())
+    {
+        arguments << QStringLiteral("--export-options") << command_line->OptLayoutExportOptions();
+    }
+    if (command_line->IsSetSvgTextMode())
+    {
+        arguments << QStringLiteral("--svg-text-mode") << command_line->OptSvgTextMode();
+    }
+    if (command_line->IsSetLayoutScale())
+    {
+        arguments << QStringLiteral("--scale") << command_line->OptLayoutScale();
+    }
+
+    QProcess process;
+    process.setWorkingDirectory(QFileInfo(seamly_layout).absolutePath());
+    process.setProcessChannelMode(QProcess::SeparateChannels);
+    process.start(seamly_layout, arguments);
+    if (!process.waitForStarted())
+    {
+        vStdErr() << tr("SeamlyLayout could not be started: %1").arg(process.errorString()) << Qt::endl;
+        return V_EX_UNAVAILABLE;
+    }
+
+    const QByteArray svg_bytes = pieces_svg.toUtf8();
+    qint64 bytes_queued = 0;
+    while (bytes_queued < svg_bytes.size())
+    {
+        const qint64 written = process.write(svg_bytes.constData() + bytes_queued,
+                                             svg_bytes.size() - bytes_queued);
+        if (written < 0)
+        {
+            vStdErr() << tr("The layout document could not be sent to SeamlyLayout: %1")
+                             .arg(process.errorString()) << Qt::endl;
+            process.kill();
+            process.waitForFinished();
+            return V_EX_IOERR;
+        }
+        if (written == 0 && !process.waitForBytesWritten())
+        {
+            vStdErr() << tr("The layout document could not be sent to SeamlyLayout: %1")
+                             .arg(process.errorString()) << Qt::endl;
+            process.kill();
+            process.waitForFinished();
+            return V_EX_IOERR;
+        }
+        bytes_queued += written;
+    }
+    while (process.bytesToWrite() > 0)
+    {
+        if (!process.waitForBytesWritten())
+        {
+            vStdErr() << tr("The layout document could not be sent to SeamlyLayout: %1")
+                             .arg(process.errorString()) << Qt::endl;
+            process.kill();
+            process.waitForFinished();
+            return V_EX_IOERR;
+        }
+    }
+    process.closeWriteChannel();
+
+    if (!process.waitForFinished(-1))
+    {
+        vStdErr() << tr("SeamlyLayout did not finish: %1").arg(process.errorString()) << Qt::endl;
+        return V_EX_SOFTWARE;
+    }
+
+    const QByteArray standard_output = process.readAllStandardOutput();
+    if (!standard_output.isEmpty())
+    {
+        vStdOut() << QString::fromLocal8Bit(standard_output) << Qt::flush;
+    }
+    const QByteArray standard_error = process.readAllStandardError();
+    if (!standard_error.isEmpty())
+    {
+        vStdErr() << QString::fromLocal8Bit(standard_error) << Qt::flush;
+    }
+
+    if (process.exitStatus() != QProcess::NormalExit)
+    {
+        vStdErr() << tr("SeamlyLayout terminated abnormally.") << Qt::endl;
+        return V_EX_SOFTWARE;
+    }
+
+    return process.exitCode();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 void MainWindow::processCommandLine()
 {
     const VCommandLinePtr cmd = qApp->commandLine();
     auto args = cmd->OptInputFileNames();
+    const bool layout_export = cmd->IsLayoutExportEnabled();
 
     isNoScaling = cmd->IsNoScalingEnabled();
 
@@ -8039,20 +8176,35 @@ void MainWindow::processCommandLine()
 
         if (!loaded && not Application2D::isGUIMode())
         {
+            qApp->exit(V_EX_DATAERR);
             return; // process only one input file
         }
 
-        if (loaded && cmd->IsTestModeEnabled())
+        if (loaded && (cmd->IsTestModeEnabled() || layout_export))
         {
             if (cmd->IsSetGradationSize())
             {
-                setSize(cmd->OptGradationSize());
+                if (!setSize(cmd->OptGradationSize()))
+                {
+                    qApp->exit(V_EX_DATAERR);
+                    return;
+                }
             }
 
             if (cmd->IsSetGradationHeight())
             {
-                setHeight(cmd->OptGradationHeight());
+                if (!setHeight(cmd->OptGradationHeight()))
+                {
+                    qApp->exit(V_EX_DATAERR);
+                    return;
+                }
             }
+        }
+
+        if (loaded && layout_export)
+        {
+            qApp->exit(exportLayoutFromCommandLine(cmd));
+            return;
         }
     }
 
