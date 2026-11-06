@@ -2,6 +2,38 @@
 
 ## Current status
 
+### Active implementation batch
+
+- Scope: remaining SeamlyLayout, Seamly2D, and CLI tasks; SeamlyMe.1 and SeamlyMe.2 only. Packaging pipelines follow this batch.
+- Branch: `task-complete-app-updates`, based on the committed `task-flip-context-menu` work. No existing changes were discarded.
+- Five isolated worktrees under `build/parallel-tasks/`: `layout-app`, `layout-handoff`, `seamly2d-app`, `seamlyme-paths`, and `cli-export`.
+- Each worktree has a matching `task-batch-*` branch. Implementers commit there; integration and shared tracking remain on the batch branch.
+- User authorizes parallel implementation and builds without permission prompts. Do not push.
+- Next: collect verified commits, integrate compatible changes, run the Windows suite build, and update task checkboxes from actual results.
+- Manual installed-app and external CAD checks remain open until performed.
+- Layout app commits `583f1f5896` and `1c547081da` add fabric-length and warning regression tests; targeted Rust tests passed.
+- SeamlyMe commit `9d2e5748b8` creates missing picker directories. Compilation passed, but its temporary test program crashed before tests ran.
+- SeamlyMe validation now passes: full `TST_DataRoot`, 29/29. The crash came from a stale primary `vmisc.lib`; rebuilding it resolved the failure.
+- Integrated commits: `eb93b5cd3d`, `fcf323f1f0`, `7c91d070de`. Full Windows suite build runs as `batch-suite-build`; log: `build/batch-suite-build.log`.
+- Seamly2D commits `8d0d40483e`, `199c68dac3`, `2feaa21374` remain isolated for next integration: schema v0.7.8 and template filenames.
+- Fresh executable tests pass: PatternConverter 9/9, LabelTemplateFile 6/6. Integrated suites and user checks remain pending.
+- Handoff comparisons, Seamly2D release fixes, CLI implementation, and additional app verification continue in their isolated worktrees.
+- SeamlyMe.1.2–1.4 checked; .1.1 remains a real GUI check. SeamlyMe.2 was already complete and is unchanged.
+- Additional Nested regression commit `ff7414c0b9` passed targeted tests; integrate after the current build finishes.
+- Handoff alignment commits `7a63eb93d1` and `8c6462412b` remain isolated. Annotation tests pass 11/11; writer tests pass 62/62.
+- Alignment remains opt-in. The production writer switch still requires the 21-pattern comparison; comparison work continues.
+- Export menu Qt regression commit `4c1afd37e4` passed its CMake build, CTest 1/1, and QML lint. Integrate with the remaining app commits after the current build.
+- Remaining copy/flip tool requirements are being reconciled against newer decisions; drill-hole and stripe/plaid contracts still need concrete implementation assessment.
+- CLI commit `68bfd88491` remains isolated: headless export and synchronous Seamly2D handoff. Parser/startup/Rust tests passed.
+- CLI app build failed on generated CXX-Qt sources; runtime scale-validation and real end-to-end exports remain pending. The implementer is resolving these failures.
+- Independent Copy Piece commit `ce32ea72c8` passes 14 tests, including 70 real-pattern copies, Union independence, and live draft updates.
+- Copy Piece remains isolated pending integrated build. Drill-hole and stripe/plaid implementations now coordinate across Seamly2D and Layout export worktrees.
+- First integrated suite passed `nmake check`, CTest, Cargo tests, and MSI validation. The running-app close check was skipped because SeamlyLayout is running.
+- Integrated remaining schema/template/copy/handoff/menu commits. Combined test registrations from both branches without dropping tests.
+- Second suite build runs as `batch-suite-build-2`; log: `build/batch-suite-build-2.log`. CLI and drill/stripe/plaid changes are not in this build.
+- Handoff comparison passed 25 real patterns at 0.01 px; fit warnings were empty. Production writer integration is committed only in the handoff worktree.
+- Next integration must include CLI prerequisites before `6039a7842b`; skip duplicate prerequisite cherry-picks. Nonduplicate handoff commits: `d9a29e1eb6`, `e374d2a72b`, `6039a7842b`, `575e09adf6`.
+
 ### 2026-11-02 — Layout Mode sends the lines without the fold line edge (Seamly2D.71.14); merged into local `run-seamlyLayout`, not pushed
 
 - Request (user): change the old writer now. `VLayoutPiece` sends `seamline` and `cutline` as `HandoffPiece` does: start at the fold line end, end at the fold line start, no `Z`.

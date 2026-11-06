@@ -14,12 +14,12 @@ Requested: the **Open Individual**, **Open Multisize**, and **Open Template** pi
 - Open Multisize → `getMultisizePath()` → default `<dataRoot>/measurements/multisize` ✓
 - Open Template → `getTemplatePath()` → default **`<dataRoot>/templates`** (NOT `measurements/template`)
 
-**Discrepancy to resolve:** the request lists the template dir as `measurements\template`, but the app's template path is `<dataRoot>/templates` (`getDefaultTemplatePath()`, `src/libs/vmisc/vcommonsettings.cpp:471`) — a sibling of `measurements/`, holding measurement *starter templates* seeded from the shipped `/tables/templates`. Decide whether to keep `<dataRoot>/templates` (current) or move measurement templates under `measurements/template`.
+**Template location retained:** use `<dataRoot>/templates`, a sibling of `measurements/`, for measurement starter templates seeded from shipped `/tables/templates`. Keeping this location preserves existing settings and avoids an unnecessary migration.
 
 - [ ] SeamlyMe.1.1 Verify on a running build that Open Individual/Multisize/Template open at the expected directories (they already consume `get*Path()`); capture any case where they don't (e.g. the dir doesn't exist yet — `OpenIndividual()` mkpath/rmpath's a temp dir around the dialog)
-- [ ] SeamlyMe.1.2 Resolve the template-location discrepancy: keep `<dataRoot>/templates`, or relocate to `<dataRoot>/measurements/template` with a `getDefaultTemplatePath()` default change + first-run migration (cross-platform; coordinate with Task 34)
-- [ ] SeamlyMe.1.3 Ensure all three paths derive from the shared relocatable data root (Task 34) so they follow a user-configured/renamed `<seamly_user_directory>` instead of the hardcoded `~/seamly2d`
-- [ ] SeamlyMe.1.4 Doxygen briefs + inline comments on any touched function(s)
+- [x] SeamlyMe.1.2 Keep `<dataRoot>/templates`; preserve the existing default and shipped-template location.
+- [x] SeamlyMe.1.3 All three paths follow the configured/renamed shared data root. Pickers retain newly created start folders and report directory-creation failures. `TST_DataRoot`: 29 passed, 0 failed.
+- [x] SeamlyMe.1.4 Updated briefs for touched functions.
 
 ## [x] Task SeamlyMe.2 — SeamlyMe: default the Open dialog to the user measurements/individual directory
 
