@@ -370,6 +370,39 @@ HandoffPiece HandoffPiece::create(const VPiece &piece, const VContainer *pattern
     handoff.m_is_grainline_visible  = grainline.IsVisible();
     read_grainline(grainline, pattern, handoff.m_seam_line.points, &handoff.m_grainline_points,
                    &handoff.m_grain_axis);
+
+    if (!PieceMarkings::valid(piece.drillHoles(), piece.referenceLines(), piece.getAnchors()))
+    {
+        handoff.m_marking_error = QStringLiteral("A piece marking does not reference a valid modeling anchor.");
+        return handoff;
+    }
+    QVector<HandoffDrillHole> holes;
+    QVector<HandoffReferenceLine> references;
+    for (const PieceDrillHole &hole : piece.drillHoles())
+    {
+        const auto center = qSharedPointerDynamicCast<VPointF>(pattern->DataGObjects()->value(hole.center));
+        if (center.isNull())
+        {
+            handoff.m_marking_error = QStringLiteral("A drill hole's modeling anchor is missing or is not a point.");
+            return handoff;
+        }
+        holes.append({static_cast<QPointF>(*center), ToPixel(hole.diameter, *pattern->GetPatternUnit())});
+    }
+    for (const PieceReferenceLine &line : piece.referenceLines())
+    {
+        const auto start = qSharedPointerDynamicCast<VPointF>(pattern->DataGObjects()->value(line.start));
+        const auto end = qSharedPointerDynamicCast<VPointF>(pattern->DataGObjects()->value(line.end));
+        if (start.isNull() || end.isNull())
+        {
+            handoff.m_marking_error = QStringLiteral("A reference line's modeling anchor is missing or is not a point.");
+            return handoff;
+        }
+        references.append({QLineF(static_cast<QPointF>(*start), static_cast<QPointF>(*end)), line.type});
+    }
+    if (!handoff.set_markings(holes, references))
+    {
+        return handoff;
+    }
     return handoff;
 }
 

@@ -31,6 +31,7 @@
 #include "../layout_handoff/handoff_sheet.h"
 #include "../ifc/xml/vabstractpattern.h"
 #include "../vformat/svg_generator.h"
+#include "../vgeometry/varc.h"
 #include "../vgeometry/vpointf.h"
 #include "../vlayout/vlayoutpiece.h"
 #include "../vmisc/vabstractapplication.h"
@@ -688,6 +689,58 @@ void TST_HandoffDocument::markingsKeepTheirGeometryAndRejectInvalidData() const
     const QDomElement precise_circle = precise_dom.elementsByTagName(QStringLiteral("circle")).at(0).toElement();
     QCOMPARE(precise_circle.attribute(QStringLiteral("cx")), QStringLiteral("1200"));
     QVERIFY(precise_dom.toString().contains(QStringLiteral("M20.000001,30 L20.000002,30")));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Each size resolves live anchors while the pattern-unit drill diameter stays constant.
+ */
+void TST_HandoffDocument::liveMarkingAnchorsGradeWithConstantDiameter() const
+{
+    for (const Unit unit : {Unit::Mm, Unit::Cm, Unit::Inch})
+    {
+        QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+        VPiece piece = make_piece(data.data(), true, false, false);
+        piece.getAnchors() = {20, 21, 22};
+        data->UpdateGObject(20, new VPointF(120, 130, "Drill", 0, 0));
+        data->UpdateGObject(21, new VPointF(30, 40, "Start", 0, 0));
+        data->UpdateGObject(22, new VPointF(230, 240, "End", 0, 0));
+        piece.setDrillHoles({{20, 2}});
+        piece.setReferenceLines({{21, 22, QStringLiteral("stripe")}, {20, 22, QStringLiteral("plaid")}});
+        const HandoffPiece first = HandoffPiece::create(piece, data.data());
+        QVERIFY(first.marking_error().isEmpty());
+        QCOMPARE(first.drill_holes().size(), 1);
+        QCOMPARE(first.drill_holes().first().center, QPointF(120, 130));
+        QCOMPARE(first.drill_holes().first().diameter, ToPixel(2, unit));
+        QCOMPARE(first.reference_lines().size(), 2);
+        data->UpdateGObject(20, new VPointF(150, 160, "Drill", 0, 0));
+        data->UpdateGObject(22, new VPointF(260, 270, "End", 0, 0));
+        const HandoffPiece graded = HandoffPiece::create(piece, data.data());
+        QVERIFY(graded.marking_error().isEmpty());
+        QCOMPARE(graded.drill_holes().first().center, QPointF(150, 160));
+        QCOMPARE(graded.drill_holes().first().diameter, first.drill_holes().first().diameter);
+        QCOMPARE(graded.reference_lines().first().line, QLineF(30, 40, 260, 270));
+        QCOMPARE(first.drill_holes().first().center, QPointF(120, 130));
+
+        piece.setDrillHoles({{1, 2}});
+        QVERIFY(!HandoffPiece::create(piece, data.data()).marking_error().isEmpty());
+        piece.setDrillHoles({{23, 2}});
+        piece.getAnchors().append(23);
+        QVERIFY(!HandoffPiece::create(piece, data.data()).marking_error().isEmpty());
+        data->UpdateGObject(23, new VArc());
+        QVERIFY(!HandoffPiece::create(piece, data.data()).marking_error().isEmpty());
+        piece.setDrillHoles({{20, 2}});
+        piece.setReferenceLines({{1, 22, QStringLiteral("stripe")}});
+        QVERIFY(!HandoffPiece::create(piece, data.data()).marking_error().isEmpty());
+        piece.setReferenceLines({{21, 24, QStringLiteral("stripe")}});
+        piece.getAnchors().append(24);
+        QVERIFY(!HandoffPiece::create(piece, data.data()).marking_error().isEmpty());
+        piece.setReferenceLines({{21, 23, QStringLiteral("stripe")}});
+        QVERIFY(!HandoffPiece::create(piece, data.data()).marking_error().isEmpty());
+        piece.setReferenceLines({{21, 22, QStringLiteral("stripe")}});
+        data->UpdateGObject(22, new VPointF(30, 40, "End", 0, 0));
+        QVERIFY(!HandoffPiece::create(piece, data.data()).marking_error().isEmpty());
+    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
