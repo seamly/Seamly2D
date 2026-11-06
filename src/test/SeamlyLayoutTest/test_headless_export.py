@@ -277,13 +277,19 @@ def main():
         run(format_name, ["--export", format_name, "--settings", str(format_settings),
                          "--output", str(directory / format_name), str(fixture)], 69)
     if richmond_fixture:
-        for paper, expected in (("Letter", (612, 792)), ("A4", (210*72/25.4, 297*72/25.4))):
-            paper_settings = directory / (paper + "-exact.json")
+        for paper, orientation, expected in (
+            ("Letter", "portrait", (612, 792)),
+            ("Letter", "landscape", (792, 612)),
+            ("A4", "portrait", (210*72/25.4, 297*72/25.4)),
+            ("A4", "landscape", (297*72/25.4, 210*72/25.4)),
+        ):
+            paper_name = paper + "-" + orientation
+            paper_settings = directory / (paper_name + "-exact.json")
             paper_settings.write_text(json.dumps({
-                **settings_object, "paperType": "tiled", "tileSize": paper,
+                **settings_object, "paperType": "tiled", "tileSize": paper, "tileOrientation": orientation,
             }), encoding="utf-8")
-            paper_output = directory / (paper + "-exact.pdf")
-            result = run("physical-" + paper, [
+            paper_output = directory / (paper_name + "-exact.pdf")
+            result = run("physical-" + paper_name, [
                 "--export", "pdf-tiled", "--settings", str(paper_settings),
                 "--output", str(paper_output), str(fixture),
             ])
@@ -294,12 +300,12 @@ def main():
             # PDF decimal serialization rounds A4 dimensions to five decimal places.
             if not boxes or any(abs(float(x)-expected[0]) > 0.0001
                                 or abs(float(y)-expected[1]) > 0.0001 for x, y in boxes):
-                failures.append(paper + "-exact-media-size")
+                failures.append(paper_name + "-exact-media-size")
             edges = pdf_calibration_edges(content)
             full_scale_edges = [edge for edge in edges if abs(edge-144) < 0.01]
             if not full_scale_edges:
-                failures.append(paper + "-two-inch-pdf-gauge")
-            print(f"{paper}: {len(boxes)} pages, MediaBox={sorted(set(boxes))}, "
+                failures.append(paper_name + "-two-inch-pdf-gauge")
+            print(f"{paper_name}: {len(boxes)} pages, MediaBox={sorted(set(boxes))}, "
                   f"144pt gauge edges={len(full_scale_edges)}")
     unplaced_fixture = directory / "unplaced.svg"
     unplaced_fixture.write_text(
@@ -359,6 +365,19 @@ def main():
         64, input_bytes=b"")
     run("help", ["--export", "svg", "--help"])
     if arguments.seamly2d:
+        input_directory = directory / "pattern-input"
+        input_directory.mkdir(parents=True, exist_ok=True)
+        isolated_pattern = input_directory / arguments.pattern.name
+        shutil.copy2(arguments.pattern, isolated_pattern)
+        isolated_measurements = None
+        measurement_source = arguments.measurements
+        if measurement_source is None:
+            measurement_path = xml.parse(arguments.pattern).getroot().findtext("measurements")
+            if measurement_path:
+                measurement_source = arguments.pattern.parent / measurement_path
+        if measurement_source is not None:
+            isolated_measurements = input_directory / measurement_source.name
+            shutil.copy2(measurement_source, isolated_measurements)
         settings_directory = directory / "data" / "settings" / "Seamly" / "Seamly2D"
         settings_directory.mkdir(parents=True, exist_ok=True)
         (settings_directory / "qt6_seamly2d.ini").write_text(
@@ -366,7 +385,7 @@ def main():
         )
         environment.pop("HANDOFF_CAPTURE_DIRECTORY", None)
         companions = []
-        for option, value in (("--mfile", arguments.measurements),
+        for option, value in (("--mfile", isolated_measurements),
                               ("--gsize", arguments.size), ("--gheight", arguments.height)):
             if value is not None:
                 companions.extend([option, str(value.resolve() if isinstance(value, Path) else value)])
@@ -375,7 +394,7 @@ def main():
             output = directory / ("pass-through." + format_name)
             output.unlink(missing_ok=True)
             options = ["--layout-export", "--layout-format", format_name,
-                       "--layout-output", str(output), *companions, str(arguments.pattern.resolve())]
+                       "--layout-output", str(output), *companions, str(isolated_pattern)]
             options.extend(["--layout-settings",
                             str(settings if format_name == "pdf-tiled" else format_settings)])
             expected_status = 69 if format_name in ("gcode", "3mf") else 0
@@ -388,14 +407,14 @@ def main():
                     failures.append("pass-through-" + format_name + "-signature")
         run("pass-through-child-error", ["--layout-export", "--layout-output",
                                         str(directory / "absent" / "child.svg"), *companions,
-                                        str(arguments.pattern.resolve())], 64,
+                                        str(isolated_pattern)], 64,
             program=arguments.seamly2d.resolve())
         if arguments.unplaced_settings:
             output = directory / "pass-through-incomplete.svg"
             output.unlink(missing_ok=True)
             result = run("pass-through-unplaced", [
                 "--layout-export", "--layout-settings", str(arguments.unplaced_settings.resolve()),
-                "--layout-output", str(output), *companions, str(arguments.pattern.resolve()),
+                "--layout-output", str(output), *companions, str(isolated_pattern),
             ], 70, program=arguments.seamly2d.resolve())
             if output.exists() or b"exported " in result.stdout or b"piece" not in result.stderr.lower():
                 failures.append("pass-through-unplaced-partial-output")

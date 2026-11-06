@@ -33,12 +33,16 @@ def main():
     print("QT_PLUGIN_PATH=" + environment["QT_PLUGIN_PATH"], flush=True)
     environment["SEAMLY_DATA_DIR"] = str(directory / "data")
     environment["QT_QPA_PLATFORM"] = "offscreen"
-    individual = str(arguments.individual.resolve())
-    multisize = str(arguments.multisize.resolve())
+    inputs = directory / "inputs"
+    inputs.mkdir(parents=True, exist_ok=True)
+    for source in (arguments.individual, arguments.multisize, arguments.pattern):
+        shutil.copy2(source, inputs / source.name)
+    individual = str(inputs / arguments.individual.name)
+    multisize = str(inputs / arguments.multisize.name)
     cases = (
         ("individual", ["--test", individual], 0, None),
         ("multisize", ["--test", "--height", "146", "--size", "40", "--unit", "mm", multisize], 0, None),
-        ("pattern-rejected", ["--test", str(arguments.pattern.resolve())], 66, b"unknown format"),
+        ("pattern-rejected", ["--test", str(inputs / arguments.pattern.name)], 66, b"unknown format"),
         ("invalid-height", ["--test", "--height", "1", multisize], 64, b"height"),
         ("invalid-size", ["--test", "--size", "1", multisize], 64, b"size"),
         ("invalid-unit", ["--test", "--unit", "invalid", multisize], 64, b"unit"),
