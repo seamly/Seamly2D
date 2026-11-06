@@ -1188,8 +1188,8 @@ mod tests {
     } // trousers_long_pieces_extend_a_sheet
 
     // @brief 36 in fabric folded to 18 in: the trousers go on the fabric, not on the
-    // B0 paper sheet that the settings keep from paper media.  The fabric has no fixed
-    // length, so no piece is left out, and every piece lies inside the 17.5 in content.
+    // B0 paper sheet that the settings keep from paper media.  The initial 500 in
+    // length trims to the packed pieces, all inside the 17.5 in content.
     #[test]
     fn trousers_on_folded_fabric_ignore_the_paper_sheet() {
         let settings_json = serde_json::json!({
@@ -1202,12 +1202,22 @@ mod tests {
         }).to_string();
         let input_dom = Document::parse(TROUSERS_HANDOFF_SVG).expect("trousers fixture should parse");
         let init = do_initialize_layout(&settings_json, Some(&input_dom)).expect("initialize_layout should succeed");
+        assert_eq!(init.h_px, 500 * 96, "initial fabric layout uses the 500 in sentinel");
+        assert_eq!(
+            init.initial_dom.root.attributes.get("height").map(String::as_str),
+            Some("48000"),
+            "initial fabric canvas is 500 in long"
+        );
         // (18 - 0.5) * 96 = 1680: no left margin on the fold, the selvedge on the right.
         assert_eq!(init.initial_dom.get_attr_by_id("contentRect", "width"), Some("1680"));
 
         let result = process_trousers_sheet(&settings_json, false, false);
         assert!(result.unplaced_labels.is_empty(), "unplaced: {:?}", result.unplaced_labels);
         assert_eq!(placed_count(&result), 12, "every piece placed whole");
+        let trimmed_height = result.output_doc.root.attributes.get("height")
+            .and_then(|height| height.parse::<u32>().ok())
+            .expect("layout output height");
+        assert!(trimmed_height < init.h_px, "fabric should trim below 500 in: {trimmed_height} px");
         let bbox: serde_json::Value = serde_json::from_str(&result.bbox_json).expect("valid JSON");
         for piece in bbox["pieces"].as_array().expect("pieces array") {
             let right = piece["x"].as_u64().unwrap_or(0) + piece["w"].as_u64().unwrap_or(0);
