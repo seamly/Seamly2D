@@ -2,6 +2,13 @@
 
 ## Current status
 
+### User validation checklist review
+
+- Updated `project-docs/TEST_APPLICATION_UPDATES.md` while preserving all user checkmarks.
+- Added remaining-check priorities, blank-evidence follow-up, relative CLI regression cases, and rebuild prerequisites.
+- Clarified split-test dependencies, folded-fabric margins, and ASTM versus AAMA layer checks.
+- No application tests were run for this documentation review; runtime checks for the newer launch-directory fix remain deferred.
+
 ### Relative command-line paths — source fix, verification deferred
 
 - Seamly2D and SeamlyMe log cleanup no longer changes the process working directory; log metadata, locks, and deletion use absolute log paths.
