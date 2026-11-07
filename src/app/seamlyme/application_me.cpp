@@ -4,6 +4,7 @@
 //  @date   2026
 //
 //  @brief
+//  SPDX-License-Identifier: GPL-3.0-or-later
 //  @copyright
 //  This source code is part of the Seamly2D project, a pattern making
 //  program to create and model patterns of clothing.
@@ -616,11 +617,11 @@ void ApplicationME::clearOldLogs() const
 {
     QDir logsDir(logDirPath());
     logsDir.setNameFilters(QStringList("*.log"));
-    logsDir.setCurrent(logDirPath());
 
     const QStringList allFiles = logsDir.entryList(QDir::NoDotAndDotDot | QDir::Files);
-    for (const QString &fn : allFiles)
+    for (const QString &filename : allFiles)
     {
+        const QString fn = logsDir.absoluteFilePath(filename);
         QFileInfo info(fn);
         if (info.birthTime().daysTo(QDateTime::currentDateTime()) >= DAYS_TO_KEEP_LOGS)
         {

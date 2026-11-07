@@ -48,6 +48,11 @@ def main():
         ("valid-measurements", "issue_256.sm2d", [], 0),
         ("valid-individual", "issue_256.sm2d", ["-m", str(fixtures / "issue_256_correct.smis")], 0),
         ("valid-multisize", "issue_256.sm2d", ["-m", str(fixtures / "issue_256_correct.smms")], 0),
+        ("relative-empty-pattern", "empty.sm2d", [], 0),
+        ("relative-measurements", "issue_256.sm2d", [], 0),
+        ("relative-individual-override", "issue_256.sm2d", ["-m", "issue_256_correct.smis"], 0),
+        ("relative-multisize-override", "issue_256.sm2d", ["-m", "issue_256_correct.smms"], 0),
+        ("relative-missing-pattern", "wrongPath.sm2d", [], 66),
         ("wrong-formula", "wrong_formula.sm2d", [], 65),
     )
     failures = []
@@ -58,9 +63,10 @@ def main():
             options = ["--test"] if mode == "test" else [
                 "--layout-export", "--layout-output", str(directory / (name + ".svg")),
             ]
+            input_path = filename if name.startswith("relative-") else str(fixtures / filename)
             result = subprocess.run(
-                [str(arguments.executable.resolve()), *options, *companions, str(fixtures / filename)],
-                capture_output=True, timeout=30, env=environment,
+                [str(arguments.executable.resolve()), *options, *companions, input_path],
+                capture_output=True, timeout=30, env=environment, cwd=fixtures,
             )
             (directory / (mode + "-" + name + ".stderr.txt")).write_bytes(result.stderr)
             valid = result.returncode == expected and (expected == 0 or bool(result.stderr.strip()))
