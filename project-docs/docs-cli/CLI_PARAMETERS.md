@@ -2,6 +2,9 @@
 
 Usage: `seamly2d [options] filename`
 
+Seamly2D and SeamlyMe resolve relative command-line filenames from the launch directory.
+Startup log cleanup does not change that directory.
+
 | Argument | Definition |
 |---|---|
 | `filename` | Pattern file (`.sm2d`) |
@@ -73,6 +76,15 @@ The old Seamly2D writer options remain removed: `-b`/`--basename`,
 `--layout-*` options above map only to SeamlyLayout exports.
 
 ## Automated headless validation
+
+After building Seamly2D and SeamlyMe, run their bounded input checks:
+
+```text
+python src\test\CollectionTest\test_pattern_input_status.py <seamly2d-executable> build\pattern-input-validation
+python src\test\Seamly2DTest\test_measurement_cli.py <seamlyme-executable> build\measurement-input-validation --individual <file.smis> --multisize <file.smms> --pattern <file.sm2d>
+```
+
+These checks cover relative input filenames, relative measurement overrides, and missing files.
 
 Run from the repository root after building SeamlyLayout:
 

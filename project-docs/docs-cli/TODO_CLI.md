@@ -25,6 +25,8 @@ These tasks are not numbered in the order they should be implemented -- analyze 
 - [ ] CLI.1.7 Inventory all options and build a test matrix: expected behavior, required companions (e.g. `--basename` enabling export mode), valid values
 - [ ] CLI.1.8 Exercise each option against the richmond test pattern (all export formats, gradation size/height, page options, `--text2paths`, measurement overrides, etc.) and record which are broken, ignored, or misdocumented
 - [ ] CLI.1.9 Fix the broken/ignored options; make error messages reach the console reliably (the GUI-subsystem exe detaches from the console — evaluate `AttachConsole`/subsystem handling on Windows so `--help` and errors print without redirection)
+  - Seamly2D and SeamlyMe log cleanup now uses absolute log paths without changing the launch directory.
+  - Added relative pattern, measurement, override, and missing-file regression checks. Build and runtime verification remain pending at the user's request.
 - [ ] CLI.1.10 Consider case-insensitive or consistently lowercase option aliases (keeping the existing names working for compatibility)
 - [ ] CLI.1.11 Unit tests: extend `tst_vcommandline` to cover every option and the failure modes found
 - [ ] CLI.1.12 Update `--help` text and repo docs with the verified behavior

@@ -5,6 +5,7 @@
  **
  **  @brief
  **  Implements the Seamly2D application lifecycle and logging.
+ **  SPDX-License-Identifier: GPL-3.0-or-later
  **
  **  @copyright
  **  This source code is part of the Seamly2D project, a pattern making
@@ -613,7 +614,6 @@ void Application2D::clearOldLogs() const
 {
     QDir logsDir(logDirPath());
     logsDir.setNameFilters(QStringList("*.log"));
-    logsDir.setCurrent(logDirPath());
 
     const QStringList allFiles = logsDir.entryList(QDir::NoDotAndDotDot | QDir::Files);
     if (allFiles.isEmpty() == false)
@@ -621,7 +621,7 @@ void Application2D::clearOldLogs() const
         qCDebug(vApp, "Clearing old logs");
         for (int i = 0, sz = allFiles.size(); i < sz; ++i)
         {
-            auto fn = allFiles.at(i);
+            const QString fn = logsDir.absoluteFilePath(allFiles.at(i));
             QFileInfo info(fn);
             if (info.birthTime().daysTo(QDateTime::currentDateTime()) >= DAYS_TO_KEEP_LOGS)
             {

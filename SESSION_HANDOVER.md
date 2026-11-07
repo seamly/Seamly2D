@@ -2,6 +2,17 @@
 
 ## Current status
 
+### Relative command-line paths — source fix, verification deferred
+
+- Seamly2D and SeamlyMe log cleanup no longer changes the process working directory; log metadata, locks, and deletion use absolute log paths.
+- Extended `src/test/CollectionTest/test_pattern_input_status.py` and `src/test/Seamly2DTest/test_measurement_cli.py` with relative filenames, measurement overrides, and missing-file checks.
+- Updated `project-docs/docs-cli/CLI_PARAMETERS.md` and the pending CLI.1.9 verification notes.
+- Python syntax, runner help, and scoped diff checks pass. The user deferred the Windows build to the next batch; runtime regression checks remain pending.
+- SeamlyLayout has no matching working-directory change; its startup parser resolves relative input and output paths to absolute paths. No SeamlyLayout fix is needed.
+- Changes are merged into local `run-seamlyLayout`, not pushed.
+- Next: run `packaging/windows/local_build_msi.ps1` with permission, then both input-check scripts against rebuilt applications.
+- Preserve unrelated edits to `project-docs/TEST_APPLICATION_UPDATES.md`, untracked `scripts/cli/`, and untracked validation patterns.
+
 ### Application implementation batch — merged locally, not pushed
 
 - Batch merged into `run-seamlyLayout` as `c1330ba021`, including earlier Flip context-menu work; no push is authorized.
