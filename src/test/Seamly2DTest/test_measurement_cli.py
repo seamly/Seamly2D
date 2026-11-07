@@ -45,7 +45,7 @@ def main():
         ("relative-individual", ["--test", arguments.individual.name], 0, None),
         ("relative-multisize", ["--test", "--height", "146", "--size", "40", "--unit", "mm",
                                arguments.multisize.name], 0, None),
-        ("relative-missing-input", ["--test", "missing.smis"], 66, b"can't open file"),
+        ("relative-missing-input", ["--test", "missing.smis"], 66, b"doesn't exist"),
         ("pattern-rejected", ["--test", str(inputs / arguments.pattern.name)], 66, b"unknown format"),
         ("invalid-height", ["--test", "--height", "1", multisize], 64, b"height"),
         ("invalid-size", ["--test", "--size", "1", multisize], 64, b"size"),
