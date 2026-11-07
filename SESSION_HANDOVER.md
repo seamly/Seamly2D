@@ -17,6 +17,7 @@
 - All five isolated worktrees and this batch's branches were removed after integration. The existing Flip task branch was preserved.
 - Local branch was 91 commits ahead of origin immediately after the merge; this handover update adds one documentation commit.
 - Qt source-tree executables require matching `QT_PLUGIN_PATH`; validation scripts discover plugins from qmake. Generated version stamps were restored.
+- User validation checklist: `project-docs/TEST_APPLICATION_UPDATES.md`, covering jacket2, male_shirt, trousers, their measurement files, GUI changes, exports, physical scale, and CLI failures. All new boxes start unchecked.
 
 ### 2026-11-02 — Layout Mode sends the lines without the fold line edge (Seamly2D.71.14); merged into local `run-seamlyLayout`, not pushed
 
