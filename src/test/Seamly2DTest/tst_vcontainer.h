@@ -1,4 +1,13 @@
 //---------------------------------------------------------------------------------------------------------------------
+// @file tst_vcontainer.h
+// @author slspencer
+// @brief Tests VContainer data scoping and tool data copies.
+// Copyright (C) 2026 Seamly2D Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+// https://www.gnu.org/licenses/gpl-3.0.html
+//---------------------------------------------------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------------------------------------------------
 //  @file   tst_vcontainer.h
 //  @author Odrnorn
 //  @date   8 Sep, 2026
@@ -36,6 +45,7 @@ public:
 private slots:
     void reparseDoesNotClearOtherBlocks() const;
     void unknownToolIsNeverCleared() const;
+    void markingPointNeedsToolDataSync() const;
 
 private:
     Q_DISABLE_COPY(TST_VContainer)
