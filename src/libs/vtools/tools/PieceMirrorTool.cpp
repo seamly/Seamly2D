@@ -378,13 +378,24 @@ PatternPieceTool* createFullPiece(PieceMirrorContext& context, const VPiece& hal
     VPiecePath full_path = half.GetPath();
     full_path.Clear();
     QVector<quint32> full_ids;
+    QHash<quint32, quint32> path_copies;
+    QHash<quint32, quint32> mirrored_path_copies;
     for (const PieceMirrorNode& entry : order)
     {
-        const quint32 draft_id  = context.draft_ids.value(nodes.at(entry.source_index).GetId());
+        const quint32 source_id = nodes.at(entry.source_index).GetId();
+        const quint32 draft_id  = context.draft_ids.value(source_id);
         const quint32 object_id = entry.mirrored ? context.mirror_ids.value(draft_id, draft_id) : draft_id;
         const VPieceNode node   = pieceNode(context, PieceMirrorPath::fullPathNode(nodes, entry, object_id));
         full_path.Append(node);
         full_ids.append(node.GetId());
+        if (entry.mirrored)
+        {
+            mirrored_path_copies.insert(source_id, node.GetId());
+        }
+        else
+        {
+            path_copies.insert(source_id, node.GetId());
+        }
     }
 
     // Internal paths: a copy on the half and a mirrored copy, unless the path lies on the fold line.
@@ -457,13 +468,29 @@ PatternPieceTool* createFullPiece(PieceMirrorContext& context, const VPiece& hal
     for (PieceReferenceLine line : half.referenceLines())
     {
         const PieceReferenceLine original = line;
-        line.start = anchor_copies.value(original.start);
-        line.end = anchor_copies.value(original.end);
-        lines.append(line);
-        if (mirrored_anchors.value(original.start) != line.start || mirrored_anchors.value(original.end) != line.end)
+        const bool legacy_anchor_line = half.getAnchors().contains(original.start)
+            && half.getAnchors().contains(original.end);
+        if (legacy_anchor_line)
         {
-            line.start = mirrored_anchors.value(original.start);
-            line.end = mirrored_anchors.value(original.end);
+            line.start = anchor_copies.value(original.start);
+            line.end = anchor_copies.value(original.end);
+        }
+        else
+        {
+            line.start = path_copies.value(original.start);
+            line.end = path_copies.value(original.end);
+        }
+        lines.append(line);
+        const quint32 mirrored_start = legacy_anchor_line
+            ? mirrored_anchors.value(original.start)
+            : mirrored_path_copies.value(original.start, line.start);
+        const quint32 mirrored_end = legacy_anchor_line
+            ? mirrored_anchors.value(original.end)
+            : mirrored_path_copies.value(original.end, line.end);
+        if (mirrored_start != line.start || mirrored_end != line.end)
+        {
+            line.start = mirrored_start;
+            line.end = mirrored_end;
             lines.append(line);
         }
     }

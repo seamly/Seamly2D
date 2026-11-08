@@ -22,7 +22,7 @@ struct PieceDrillHole
     qreal diameter = 0;
 };
 
-/// @brief Two main-path nodes defining a reference-only stripe or plaid line.
+/// @brief Two endpoint IDs for a stripe or plaid line; legacy files may use two anchor IDs.
 struct PieceReferenceLine
 {
     quint32 start = 0;
@@ -40,8 +40,11 @@ public:
                       const QVector<PieceReferenceLine> &lines);
     static bool valid(const QVector<PieceDrillHole> &holes, const QVector<PieceReferenceLine> &lines,
                       const QVector<quint32> &available_anchors, const QVector<quint32> &path_nodes);
+    /// @brief Checks whether a drill hole or legacy anchor-based line prevents anchor deletion.
+    /// @param available_anchors Current piece anchors used to identify legacy lines.
     static bool usesAnchor(quint32 anchor, const QVector<PieceDrillHole> &holes,
-                           const QVector<PieceReferenceLine> &lines);
+                           const QVector<PieceReferenceLine> &lines,
+                           const QVector<quint32> &available_anchors);
 };
 
 #endif // PIECE_MARKINGS_H

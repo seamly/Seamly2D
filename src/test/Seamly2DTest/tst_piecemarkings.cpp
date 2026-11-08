@@ -104,11 +104,13 @@ void TST_PieceMarkings::rejectsUnsafeValues()
     QVERIFY(!PieceMarkings::valid({}, {{7, 9, QStringLiteral("plaid")}}, {7}, {8, 9}));
     const QVector<PieceReferenceLine> legacy_lines{{7, 8, QStringLiteral("stripe")}};
     QVERIFY(PieceMarkings::valid({}, legacy_lines, {7, 8}, {10, 11}));
-    QVERIFY(PieceMarkings::valid({}, {{7, 10, QStringLiteral("plaid")}}, {7}, {10, 11}));
+    QVERIFY(!PieceMarkings::valid({}, {{7, 10, QStringLiteral("plaid")}}, {7}, {10, 11}));
+    QVERIFY(PieceMarkings::valid({}, {{10, 11, QStringLiteral("plaid")}}, {7}, {10, 11}));
     QVERIFY(!PieceMarkings::valid({}, {{7, 12, QStringLiteral("plaid")}}, {7}, {10, 11}));
-    QVERIFY(PieceMarkings::usesAnchor(7, {{7, 0.1}}, {}));
-    QVERIFY(PieceMarkings::usesAnchor(7, {}, legacy_lines));
-    QVERIFY(!PieceMarkings::usesAnchor(8, {}, {}));
+    QVERIFY(PieceMarkings::usesAnchor(7, {{7, 0.1}}, {}, {7}));
+    QVERIFY(PieceMarkings::usesAnchor(7, {}, legacy_lines, {7, 8}));
+    QVERIFY(!PieceMarkings::usesAnchor(7, {}, {{7, 10, QStringLiteral("plaid")}}, {7}));
+    QVERIFY(!PieceMarkings::usesAnchor(8, {}, {}, {7, 8}));
 }
 
 void TST_PieceMarkings::currentSchemaAndCopy()
@@ -163,7 +165,8 @@ void TST_PieceMarkings::currentSchemaAndCopy()
     }
     PieceMarkings::write(piece, {{100000, 0.2}},
                          {{source_path_nodes.at(0), source_path_nodes.at(1), QStringLiteral("stripe")},
-                          {source_path_nodes.at(1), source_path_nodes.at(0), QStringLiteral("plaid")}});
+                          {source_path_nodes.at(1), source_path_nodes.at(0), QStringLiteral("plaid")},
+                          {100000, 100001, QStringLiteral("stripe")}});
     QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::Truncate));
     file.write(document.toByteArray());
     file.close();
@@ -176,6 +179,7 @@ void TST_PieceMarkings::currentSchemaAndCopy()
     QCOMPARE(PieceMarkings::readDrillHoles(copied.piece).first().diameter, 0.2);
     QCOMPARE(PieceMarkings::readReferenceLines(copied.piece).first().end,
              copied.ids.value(source_path_nodes.at(1)));
+    QCOMPARE(PieceMarkings::readReferenceLines(copied.piece).last().start, copied.ids.value(100000));
     const QDomElement original = piece.cloneNode().toElement();
     QVector<QDomNode> source_modeling;
     for (QDomNode node = modeling.firstChild(); !node.isNull(); node = node.nextSibling())
@@ -266,6 +270,8 @@ void TST_PieceMarkings::editorRequiresExplicitInput()
     VContainer data(nullptr, &unit);
     data.UpdateGObject(7, new VPointF(10, 20, QStringLiteral("A"), 0, 0));
     data.UpdateGObject(8, new VPointF(30, 40, QStringLiteral("B"), 0, 0));
+    data.UpdateGObject(9, new VPointF(50, 60, QStringLiteral("C"), 0, 0));
+    data.UpdateGObject(10, new VPointF(70, 80, QStringLiteral("D"), 0, 0));
     PieceMarkingsEditor drill(true);
     drill.setPoints({7, 8}, &data);
     auto *add = drill.findChild<QPushButton *>(QStringLiteral("addMarking"));
@@ -306,6 +312,8 @@ void TST_PieceMarkings::editorRequiresExplicitInput()
     reference.findChild<QComboBox *>(QStringLiteral("endPoint"))->setCurrentIndex(2);
     QVERIFY(add_line->isEnabled());
     add_line->click();
+    QCOMPARE(reference.referenceLines().first().start, 7U);
+    QCOMPARE(reference.referenceLines().first().end, 8U);
     QCOMPARE(reference.referenceLines().first().type, QStringLiteral("stripe"));
     QVERIFY(reference.markingsValid());
     plaid_icon->click();
@@ -316,6 +324,17 @@ void TST_PieceMarkings::editorRequiresExplicitInput()
     QVERIFY(!add_line->isEnabled());
     QVERIFY(!reference.markingsValid());
     QVERIFY(!reference.findChild<QLabel *>(QStringLiteral("markingError"))->text().isEmpty());
+    PieceMarkingsEditor legacy_reference(false);
+    legacy_reference.setPoints({8, 9}, &data, {7, 10});
+    legacy_reference.setMarkings({}, {{7, 10, QStringLiteral("stripe")}});
+    QVERIFY(legacy_reference.markingsValid());
+    QCOMPARE(legacy_reference.findChild<QComboBox *>(QStringLiteral("startPoint"))->count(), 3);
+    QVERIFY(legacy_reference.findChild<QComboBox *>(QStringLiteral("startPoint"))->findData(7) < 0);
+    QVERIFY(legacy_reference.findChild<QComboBox *>(QStringLiteral("startPoint"))->findData(10) < 0);
+    QVERIFY(legacy_reference.itemsUsingPoint(7).first().contains(QStringLiteral("A")));
+    QVERIFY(legacy_reference.itemsUsingPoint(8).isEmpty());
+    legacy_reference.setMarkings({}, {{7, 8, QStringLiteral("stripe")}});
+    QVERIFY(!legacy_reference.markingsValid());
     drill.setPoints({8}, &data);
     QVERIFY(!drill.markingsValid());
     QVERIFY(!drill.findChild<QLabel *>(QStringLiteral("markingError"))->text().isEmpty());

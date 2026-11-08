@@ -212,10 +212,11 @@ void AnchorPointTool::deleteTool(bool ask)
     if (m_pieceId != NULL_ID)
     {
         const VPiece piece = VAbstractTool::data.GetPiece(m_pieceId);
-        if (PieceMarkings::usesAnchor(m_id, piece.drillHoles(), piece.referenceLines()))
+        if (PieceMarkings::usesAnchor(m_id, piece.drillHoles(), piece.referenceLines(), piece.getAnchors()))
         {
             QStringList dependencies;
             const QString anchor_name = VAbstractTool::data.GetGObject(m_id)->name();
+            const QVector<quint32> anchors = piece.getAnchors();
             for (const PieceDrillHole &hole : piece.drillHoles())
             {
                 if (hole.center == m_id)
@@ -226,7 +227,8 @@ void AnchorPointTool::deleteTool(bool ask)
             }
             for (const PieceReferenceLine &line : piece.referenceLines())
             {
-                if (line.start == m_id || line.end == m_id)
+                if (anchors.contains(line.start) && anchors.contains(line.end)
+                    && (line.start == m_id || line.end == m_id))
                 {
                     const QString marking_type = line.type == QStringLiteral("stripe")
                                                      ? tr("Stripe")
