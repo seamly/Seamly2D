@@ -39,6 +39,7 @@
 #include "../vpatterndb/floatItemData/vpiecelabeldata.h"
 #include "../vpatterndb/vcontainer.h"
 #include "../vpatterndb/vpiece.h"
+#include "../vpatterndb/vpiecenode.h"
 #include "../vpatterndb/vpiecepath.h"
 
 #include <QPainterPath>

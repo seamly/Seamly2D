@@ -6,7 +6,12 @@
 
 - Updated `project-docs/TEST_APPLICATION_UPDATES.md` while preserving all user checkmarks.
 - Recorded user evidence, DXF report findings, and remaining GUI, CAD, and user-pattern checks.
-- Built [seamly-x64.msi](packaging/windows/seamly-msi/x64/seamly-x64.msi) `26.11.718`; `nmake check`, `ctest --preset release` (8/8), `cargo test --workspace`, and MSI validation passed.
+- Application updates from five feature branches are merged locally into `run-seamlyLayout`: `task-app-data-paths`, `task-piece-markings`, `task-piece-display-dxf`, `task-layout-placement`, and `task-layout-ui`. No push.
+- The checklist includes explicit repro steps, report-version caveats, DXF swap-setting meanings, and repeatable CLI runner commands. Manual GUI, CAD, and user-pattern checks remain pending.
+- The supplied DXF reports were produced by Seamly2D `26.11.614`; re-export with the current MSI before confirming the AAMA marker fix.
+- Preserve the pre-existing untracked `scripts/cli/` and `test-seamly-layout/patterns/validation/` data.
+- Built [seamly-x64.msi](packaging/windows/seamly-msi/x64/seamly-x64.msi) `26.11.723` (166.3 MB). `nmake check`, `ctest --preset release` (8/8), `cargo test --workspace`, MSI authoring, data seeding (37 checks), and package validation passed.
+- Added the missing `VPieceNode` include required by the handoff markings implementation. The full Qt suite now passes after removing an unsafe `SetPiece` operation from its minimal test fixture.
 - Rebuilt application checks passed: Seamly2D pattern inputs 25/25, SeamlyMe measurement CLI 16/16, and all headless export checks.
 - Clarified split-test dependencies, folded-fabric margins, and ASTM versus AAMA layer checks.
 - Install the MSI before completing the pending visual, CAD-reader, and user-pattern checks. The recorded turn-point grading warnings remain unresolved.
