@@ -6,7 +6,7 @@
 
 - Updated `project-docs/TEST_APPLICATION_UPDATES.md` while preserving all user checkmarks.
 - Recorded user evidence, DXF report findings, and remaining GUI, CAD, and user-pattern checks.
-- Built Windows x64 MSI `26.11.718`; `nmake check`, `ctest --preset release` (8/8), `cargo test --workspace`, and MSI validation passed.
+- Built [seamly-x64.msi](packaging/windows/seamly-msi/x64/seamly-x64.msi) `26.11.718`; `nmake check`, `ctest --preset release` (8/8), `cargo test --workspace`, and MSI validation passed.
 - Rebuilt application checks passed: Seamly2D pattern inputs 25/25, SeamlyMe measurement CLI 16/16, and all headless export checks.
 - Clarified split-test dependencies, folded-fabric margins, and ASTM versus AAMA layer checks.
 - Install the MSI before completing the pending visual, CAD-reader, and user-pattern checks. The recorded turn-point grading warnings remain unresolved.
@@ -17,7 +17,8 @@
 - Extended `src/test/CollectionTest/test_pattern_input_status.py` and `src/test/Seamly2DTest/test_measurement_cli.py` with relative filenames, measurement overrides, and missing-file checks.
 - Runtime checks passed against MSI staging binaries with the staged DLL directory on `PATH` and Qt plugins configured.
 - SeamlyLayout has no matching working-directory change; its startup parser resolves relative input and output paths to absolute paths. No SeamlyLayout fix is needed.
-- Current branch: `task-application-updates`; no commit or push. Preserve untracked `scripts/cli/` and user validation files.
+- Changes are committed and merged into local `run-seamlyLayout`; no push. The branch is 99 commits ahead of `origin/run-seamlyLayout`.
+- Preserve untracked `scripts/cli/` and user validation files.
 
 ### Application implementation batch — merged locally, not pushed
 
