@@ -4,6 +4,8 @@
 
 #include <QQmlComponent>
 #include <QQmlEngine>
+#include <QQuickItem>
+#include <QQuickWindow>
 #include <QTest>
 #include <QUrl>
 
@@ -103,7 +105,12 @@ void ExportMenuTests::splitLayoutsAllowOnlyRegularPdfExport()
     QVERIFY(pdfItem);
     QVERIFY(splitNote);
     QVERIFY(pdfItem->property("enabled").toBool());
-    QVERIFY(splitNote->property("visible").toBool());
+    QQuickWindow window;
+    window.setGeometry(0, 0, 320, 240);
+    window.show();
+    menu->setProperty("parent", QVariant::fromValue(window.contentItem()));
+    QVERIFY(QMetaObject::invokeMethod(menu, "open"));
+    QTRY_VERIFY(splitNote->property("visible").toBool());
 
     for (const QString &name : {
              QStringLiteral("pdfTiledItem"),
@@ -125,8 +132,11 @@ void ExportMenuTests::splitLayoutsAllowOnlyRegularPdfExport()
     } // for each unsupported format
 
     QObject *dxfNote = item(QStringLiteral("dxfDisabledNote"));
+    QObject *dxfSubmenu = item(QStringLiteral("dxfSubmenu"));
     QVERIFY(dxfNote);
-    QVERIFY(dxfNote->property("visible").toBool());
+    QVERIFY(dxfSubmenu);
+    QVERIFY(QMetaObject::invokeMethod(dxfSubmenu, "open"));
+    QTRY_VERIFY(dxfNote->property("visible").toBool());
     QCOMPARE(dxfNote->property("text").toString(),
              QStringLiteral("DXF: split layouts export only as PDF"));
 
