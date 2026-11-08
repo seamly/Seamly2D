@@ -848,6 +848,38 @@ QString VCommonSettings::rebaseOntoDataRoot(const QString &path, const QString &
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief rebaseDefaultPathOntoDataRoot moves an unchanged default path only when requested.
+ *
+ * A custom path can live inside the old root and still be an independent choice. Only a
+ * path that still equals its previous default follows the root, and only after confirmation.
+ */
+QString VCommonSettings::rebaseDefaultPathOntoDataRoot(const QString &path, const QString &defaultPath,
+                                                        const QString &oldRoot, const QString &newRoot,
+                                                        bool followDefaultPaths)
+{
+    if (!followDefaultPaths)
+    {
+        return path;
+    }
+
+#ifdef Q_OS_WIN
+    const Qt::CaseSensitivity caseSensitivity = Qt::CaseInsensitive;
+#else
+    const Qt::CaseSensitivity caseSensitivity = Qt::CaseSensitive;
+#endif
+
+    const QString cleanPath = QDir::cleanPath(QDir::fromNativeSeparators(path.trimmed()));
+    const QString cleanDefaultPath = QDir::cleanPath(QDir::fromNativeSeparators(defaultPath.trimmed()));
+    if (cleanPath.compare(cleanDefaultPath, caseSensitivity) != 0)
+    {
+        return path;
+    }
+
+    return rebaseOntoDataRoot(path, oldRoot, newRoot);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief initializeDataRoot resolves the user-data root once, at application start-up.
  *
  * Called before any data path is read, from every application's openSettings(). Three cases:

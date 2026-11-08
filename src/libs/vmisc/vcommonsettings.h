@@ -105,6 +105,9 @@ public:
     static QString       builtInPieceLabelTemplate();
     static QString       builtInPatternLabelTemplate();
     static QString       rebaseOntoDataRoot(const QString &path, const QString &oldRoot, const QString &newRoot);
+    static QString       rebaseDefaultPathOntoDataRoot(const QString &path, const QString &defaultPath,
+                                                       const QString &oldRoot, const QString &newRoot,
+                                                       bool followDefaultPaths);
     QString              getDataRoot() const;
     bool                 setDataRoot(const QString &value, QString *error_message = nullptr);
 
