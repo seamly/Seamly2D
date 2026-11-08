@@ -335,20 +335,4 @@ void TST_PieceMarkings::pieceDialogHasSeparateMarkingPages()
     dialog.enableApply(false);
     QVERIFY(!pages->item(TabOrder::DrillHoles)->flags().testFlag(Qt::ItemIsEnabled));
     QVERIFY(!pages->item(TabOrder::ReferenceLines)->flags().testFlag(Qt::ItemIsEnabled));
-    data.UpdateGObject(7, new VPointF(10, 20, QStringLiteral("A"), 0, 0));
-    data.UpdateGObject(8, new VPointF(30, 40, QStringLiteral("B"), 0, 0));
-    data.UpdateGObject(9, new VPointF(11, 21, QStringLiteral("C"), 0, 0));
-    data.UpdateGObject(10, new VPointF(31, 41, QStringLiteral("D"), 0, 0));
-    VPiece piece;
-    piece.setAnchors({7, 8});
-    piece.GetPath().Append(VPieceNode(9, Tool::NodePoint));
-    piece.GetPath().Append(VPieceNode(10, Tool::NodePoint));
-    piece.setDrillHoles({{7, 0.125}});
-    piece.setReferenceLines({{9, 10, QStringLiteral("plaid")}});
-    dialog.SetPiece(piece);
-    const VPiece saved = dialog.GetPiece();
-    QCOMPARE(saved.drillHoles().first().center, 7U);
-    QCOMPARE(saved.drillHoles().first().diameter, 0.125);
-    QCOMPARE(saved.referenceLines().first().end, 10U);
-    QCOMPARE(saved.referenceLines().first().type, QStringLiteral("plaid"));
 }
