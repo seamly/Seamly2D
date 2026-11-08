@@ -41,6 +41,7 @@
 #include <QObject>
 #include <QGraphicsPathItem>
 #include <QGraphicsSimpleTextItem>
+#include <QTransform>
 
 #include "vinteractivetool.h"
 
@@ -195,6 +196,7 @@ private:
     void                  refreshFoldLine(const VPiece& piece, const QVector<QPointF>& seam_allowance_points);
     void                  applyFlipToGeometry(PieceFlip flip);
     void                  applyTiltToGeometry(int signed_degrees);
+    void                  applyDisplayTransformToDetails(const QTransform &transform);
     void                  updateInternalPaths();
 
     VPieceItem::MoveTypes findLabelGeometry(const VPatternLabelData &labelData, qreal &rotationAngle, qreal &labelWidth,

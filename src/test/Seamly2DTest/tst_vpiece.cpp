@@ -2489,6 +2489,20 @@ void TST_VPiece::PieceFlipTransformMirrorsAboutCenter() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief PieceDisplayTransformAppliesFlipBeforeTilt checks the order used for Piece Mode details.
+ */
+void TST_VPiece::PieceDisplayTransformAppliesFlipBeforeTilt() const
+{
+    const QPointF center(10, 20);
+    const QPointF point(14, 23);
+    const QPointF expected = pieceTiltTransform(30, center).map(
+        pieceFlipTransform(PieceFlip::Horizontal, center).map(point));
+
+    QVERIFY(QLineF(pieceDisplayTransform(PieceFlip::Horizontal, 30, center).map(point), expected).length() < 1e-9);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief LayoutPieceKeepsFlip checks that the layout piece keeps the flip choice of the piece.
  */
 void TST_VPiece::LayoutPieceKeepsFlip() const
