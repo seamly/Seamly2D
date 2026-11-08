@@ -1,6 +1,6 @@
 // project: SeamlyLayout
 // author: slspencer, copyright 2026
-// LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
+// MIT License: https://opensource.org/licenses/MIT
 //
 // @file SettingsDialog.qml
 // @brief Layout Settings dialog — edit all LayoutSettings fields.
@@ -43,6 +43,10 @@ Dialog {
     // Paper Size, Page Size, and the Fabric section.
     readonly property bool isTiledPaper: root.model
         ? (root.model.mediaType === "paper" && root.model.paperType === "tiled")
+        : false
+    readonly property bool isCustomPaper: root.model
+        ? (root.model.mediaType === "paper" && root.model.paperType === "sheet"
+           && root.model.sheetName === "Custom")
         : false
     readonly property bool showFabricSection: root.model
         ? root.model.mediaType === "fabric"
@@ -492,6 +496,8 @@ Dialog {
                         if (oldUnit !== newUnit) {
                             root.model.convertAllUnits(oldUnit, newUnit);
                             root.model.unit = newUnit;
+                            customPaperWidthField.text = root.model.pageWidth.toFixed(2);
+                            customPaperHeightField.text = root.model.pageHeight.toFixed(2);
                         } // if unit changed
                     } // onActivated
                 } // ComboBox unitCombo
@@ -561,7 +567,7 @@ Dialog {
                     onActivated:      if (root.model) root.model.paperType = currentText
                 } // ComboBox paperType
 
-                // Paper size — sheet only (hidden for tiled and roll)
+                // Paper size — sheet only, with dimensions on predefined labels.
                 Text {
                     visible:        root.model ? (root.model.mediaType === "paper" && root.model.paperType === "sheet") : true
                     text:           "Paper Size:"
@@ -573,22 +579,96 @@ Dialog {
                     id:               paperSizeCombo
                     visible:          root.model ? (root.model.mediaType === "paper" && root.model.paperType === "sheet") : true
                     Layout.fillWidth: true
-                    model:            root.model ? root.model.paperSizeNames : []
-                    currentIndex:     root.model ? Math.max(0, model.indexOf(root.model.sheetName)) : 0
-                    onActivated:      if (root.model) root.model.selectPaperSize(currentText)
+                    model:            root.model ? root.model.paperSizeLabels : []
+                    currentIndex:     root.model ? Math.max(0, root.model.paperSizeNames.indexOf(root.model.sheetName)) : 0
+                    onActivated: {
+                        if (root.model) root.model.selectPaperSize(root.model.paperSizeNames[currentIndex])
+                    } // onActivated
                 } // ComboBox paperSize
+
+                Text {
+                    visible:        root.isCustomPaper
+                    text:           "Custom Width (" + (root.model ? root.model.unit : "in") + "):"
+                    color:          Theme.fieldLabel
+                    font.pixelSize: Theme.fontSizeNormal
+                    Layout.preferredWidth: scrollView.labelWidth
+                } // Text customPaperWidthLabel
+                TextField {
+                    id:               customPaperWidthField
+                    objectName:       "customPaperWidthField"
+                    visible:          root.isCustomPaper
+                    Layout.fillWidth: true
+                    text:             root.model ? root.model.pageWidth.toFixed(2) : "36.00"
+                    validator:        DoubleValidator {
+                        bottom: 0.000001
+                        top: 1000000000
+                        decimals: 6
+                        notation: DoubleValidator.StandardNotation
+                        locale: Qt.locale("C")
+                    }
+                    onEditingFinished: {
+                        if (!root.model) return;
+                        var value = parseFloat(text);
+                        if (acceptableInput && isFinite(value) && value > 0) {
+                            root.model.sheetName = "Custom";
+                            root.model.pageWidth = value;
+                        } // if valid dimension
+                        text = root.model.pageWidth.toFixed(2);
+                    } // onEditingFinished
+                    color:            Theme.fieldText
+                    background:       Rectangle { color: Theme.fieldBackground; radius: 2 }
+                } // TextField customPaperWidth
+
+                Text {
+                    visible:        root.isCustomPaper
+                    text:           "Custom Height (" + (root.model ? root.model.unit : "in") + "):"
+                    color:          Theme.fieldLabel
+                    font.pixelSize: Theme.fontSizeNormal
+                    Layout.preferredWidth: scrollView.labelWidth
+                } // Text customPaperHeightLabel
+                TextField {
+                    id:               customPaperHeightField
+                    objectName:       "customPaperHeightField"
+                    visible:          root.isCustomPaper
+                    Layout.fillWidth: true
+                    text:             root.model ? root.model.pageHeight.toFixed(2) : "48.00"
+                    validator:        DoubleValidator {
+                        bottom: 0.000001
+                        top: 1000000000
+                        decimals: 6
+                        notation: DoubleValidator.StandardNotation
+                        locale: Qt.locale("C")
+                    }
+                    onEditingFinished: {
+                        if (!root.model) return;
+                        var value = parseFloat(text);
+                        if (acceptableInput && isFinite(value) && value > 0) {
+                            root.model.sheetName = "Custom";
+                            root.model.pageHeight = value;
+                        } // if valid dimension
+                        text = root.model.pageHeight.toFixed(2);
+                    } // onEditingFinished
+                    color:            Theme.fieldText
+                    background:       Rectangle { color: Theme.fieldBackground; radius: 2 }
+                } // TextField customPaperHeight
 
                 // Page dimensions (display-only, shown only for paper/sheet):
                 //   paper/sheet → pageWidth × pageHeight (user units) + pixel equivalents
                 Text {
-                    visible:        root.model ? (root.model.mediaType === "paper" && root.model.paperType === "sheet") : true
+                    visible:        root.model
+                        ? (root.model.mediaType === "paper" && root.model.paperType === "sheet"
+                           && root.model.sheetName !== "Custom")
+                        : true
                     text:           "Page Size:"
                     color:          Theme.fieldLabel
                     font.pixelSize: Theme.fontSizeNormal
                     Layout.preferredWidth: scrollView.labelWidth
                 } // Text pageSizeLabel
                 Text {
-                    visible:        root.model ? (root.model.mediaType === "paper" && root.model.paperType === "sheet") : true
+                    visible:        root.model
+                        ? (root.model.mediaType === "paper" && root.model.paperType === "sheet"
+                           && root.model.sheetName !== "Custom")
+                        : true
                     text: {
                         if (!root.model) return "\u2014"
                         return root.model.pageWidth.toFixed(2) + " \u00D7 "
@@ -1011,7 +1091,7 @@ Dialog {
             else                                        paperTypeCombo.currentIndex = 0
 
             // Paper-size, tile-size, tile-orientation, and roll-size ComboBoxes
-            paperSizeCombo.currentIndex      = Math.max(0, paperSizeCombo.model.indexOf(root.model.sheetName))
+            paperSizeCombo.currentIndex      = Math.max(0, root.model.paperSizeNames.indexOf(root.model.sheetName))
             tileSizeCombo.currentIndex       = Math.max(0, tileSizeCombo.model.indexOf(root.model.tileSize))
             tileOrientationCombo.currentIndex = Math.max(0, tileOrientationCombo.model.indexOf(root.model.tileOrientation))
             rollSizeCombo.currentIndex       = Math.max(0, rollSizeCombo.model.indexOf(root.model.rollSize))
@@ -1025,6 +1105,8 @@ Dialog {
             // Fabric TextFields
             fabricWidthField.text   = root.model.fabricWidth.toFixed(2)
             selvedgeWidthField.text  = root.model.selvedgeWidth.toFixed(2)
+            customPaperWidthField.text = root.model.pageWidth.toFixed(2)
+            customPaperHeightField.text = root.model.pageHeight.toFixed(2)
         } // onSettingsLoaded
     } // Connections settingsLoaded
 } // Dialog root

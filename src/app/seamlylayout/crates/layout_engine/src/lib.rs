@@ -52,7 +52,7 @@ pub fn pack_shelves(bin_w: u32, bin_h: u32, rects: &[Rect]) -> PackResult<Vec<Pl
         let r = rects[id];
 
         // Reject rectangles larger than the bin.
-        if r.w > bin_w || r.h > bin_h {
+        if r.w.saturating_add(r.min_left_gap_px) > bin_w || r.h > bin_h {
             return Err(PackError::TooLarge {
                 id,
                 w: r.w,
@@ -63,11 +63,12 @@ pub fn pack_shelves(bin_w: u32, bin_h: u32, rects: &[Rect]) -> PackResult<Vec<Pl
         }
 
         // Start a new shelf if it doesn't fit horizontally.
-        if shelf_x + r.w > bin_w {
+        if shelf_x.max(r.min_left_gap_px).saturating_add(r.w) > bin_w {
             shelf_y = shelf_y.saturating_add(shelf_height);
             shelf_x = 0;
             shelf_height = 0;
         }
+        let x = shelf_x.max(r.min_left_gap_px);
 
         // Update shelf height and check vertical fit.
         shelf_height = shelf_height.max(r.h);
@@ -79,13 +80,13 @@ pub fn pack_shelves(bin_w: u32, bin_h: u32, rects: &[Rect]) -> PackResult<Vec<Pl
         // pieces are always emitted upright (rotation_deg = 0).
         placements.push(Placed {
             id,
-            x: shelf_x,
+            x,
             y: shelf_y,
             w: r.w,
             h: r.h,
             rotation_deg: 0,
         });
-        shelf_x += r.w;
+        shelf_x = x.saturating_add(r.w);
     }
 
     // Return placements in original id order for convenience.
@@ -254,8 +255,8 @@ pub fn pack_maxrects_multi_angle_extending(
     (placements, free_rects, unplaced, used_h)
 } // fn pack_maxrects_multi_angle_extending
 
-// @brief Smallest bin width that holds every piece, each in its narrowest
-// trial angle.  Extended media widens to it, so no piece is too wide.
+// @brief Smallest bin width that holds every piece in its narrowest trial
+// angle and includes its minimum left-edge clearance.
 //
 // @return 0 when `rects` is empty.
 pub fn required_bin_width(rects: &[Rect], trial_angles_deg: &[u16]) -> u32 {
@@ -264,7 +265,7 @@ pub fn required_bin_width(rects: &[Rect], trial_angles_deg: &[u16]) -> u32 {
         .filter_map(|r| {
             piece_trial_set(trial_angles_deg, r)
                 .into_iter()
-                .map(|deg| rotated_rect_dims(r.w, r.h, deg).0)
+                .map(|deg| rotated_rect_dims(r.w, r.h, deg).0.saturating_add(r.min_left_gap_px))
                 .min()
         })
         .max()
@@ -276,7 +277,7 @@ pub fn fits_bin(r: Rect, bin_w: u32, bin_h: u32, trial_angles_deg: &[u16]) -> bo
     piece_trial_set(trial_angles_deg, &r)
         .into_iter()
         .map(|deg| rotated_rect_dims(r.w, r.h, deg))
-        .any(|(rw, rh)| rw <= bin_w && rh <= bin_h)
+        .any(|(rw, rh)| rw.saturating_add(r.min_left_gap_px) <= bin_w && rh <= bin_h)
 } // fn fits_bin
 
 // @brief Trial angles for one piece: the layout mode's set, then, for a
@@ -307,7 +308,7 @@ fn stacked_height(r: Rect, bin_w: u32, gap_px: u32, trial_angles_deg: &[u16]) ->
     piece_trial_set(trial_angles_deg, &r)
         .into_iter()
         .map(|deg| rotated_rect_dims(r.w, r.h, deg))
-        .filter(|&(rw, _)| rw <= bin_w)
+        .filter(|&(rw, _)| rw.saturating_add(r.min_left_gap_px) <= bin_w)
         .map(|(_, rh)| rh.saturating_add(gap_px))
         .max()
 } // fn stacked_height
@@ -457,6 +458,14 @@ mod tests {
         let rects = [Rect::new(20, 5)];
         let err = pack_shelves(10, 10, &rects).unwrap_err();
         assert!(matches!(err, PackError::TooLarge { .. }));
+    }
+
+    // @brief A shelf starts at a rectangle's required left-edge clearance.
+    #[test]
+    fn shelf_preserves_minimum_left_gap() {
+        let rects = [Rect::new(4, 4).with_min_left_gap(2)];
+        let placed = pack_shelves(10, 10, &rects).expect("piece fits");
+        assert_eq!(placed[0].x, 2);
     }
 
     // @brief Reject when shelves exceed available height.
@@ -642,6 +651,8 @@ mod tests {
         let free = [Rect::new(8, 4), Rect::new(20, 6).with_free_rotation(true)];
         assert_eq!(required_bin_width(&free, &[0, 180]), 8);
         assert_eq!(required_bin_width(&[], &[0]), 0);
+        assert_eq!(required_bin_width(&[Rect::new(20, 6).with_min_left_gap(5)], &[0]), 25);
+        assert!(!fits_bin(Rect::new(20, 6).with_min_left_gap(5), 24, 10, &[0]));
 
         // With the bin widened to it, every piece is placed.
         let w = required_bin_width(&rects, &[0]);

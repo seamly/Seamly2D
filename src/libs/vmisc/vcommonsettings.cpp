@@ -638,24 +638,57 @@ QString VCommonSettings::getDataRoot() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief setDataRoot stores a new root for the user's data tree and creates its folders.
+ * @brief setDataRoot creates the standard folder tree before storing a new data root.
  *
  * The root may be any drive, volume or path the user can write to — an external disk or a
  * cloud-synced folder such as G:/My Drive/seamlyData — so the whole data tree can be
  * relocated without moving files by hand. Existing files at the new location are never
  * touched; only missing folders are created.
  *
- * @param value new user-data root, in either native or '/' separator form.
+ * @param value absolute user-data root, in either native or '/' separator form.
+ * @param error_message receives a user-facing failure reason when provided; cleared on success.
+ * @return false if folder creation or settings persistence fails.
  */
-void VCommonSettings::setDataRoot(const QString &value)
+bool VCommonSettings::setDataRoot(const QString &value, QString *error_message)
 {
+    if (error_message != nullptr)
+    {
+        error_message->clear();
+    }
     const QString root = QDir::cleanPath(QDir::fromNativeSeparators(value.trimmed()));
+    if (value.trimmed().isEmpty() || !QDir::isAbsolutePath(root))
+    {
+        if (error_message != nullptr)
+        {
+            *error_message = tr("The data root must be an absolute directory path.");
+        }
+        return false;
+    }
+
+    QString failed_path;
+    if (!ensureDataRootTree(root, &failed_path))
+    {
+        if (error_message != nullptr)
+        {
+            *error_message = tr("Could not create the data folder:\n%1\n\nThe data root was not changed.")
+                                 .arg(QDir::toNativeSeparators(failed_path));
+        }
+        return false;
+    }
 
     QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     settings.setValue(settingPathsDataRoot, root);
     settings.sync();
-
-    ensureDataRootTree(root);
+    if (settings.status() != QSettings::NoError)
+    {
+        if (error_message != nullptr)
+        {
+            *error_message = tr("Could not save the data root in:\n%1")
+                                 .arg(QDir::toNativeSeparators(settings.fileName()));
+        }
+        return false;
+    }
+    return true;
 }
 
 namespace
@@ -695,15 +728,24 @@ void seedLabelTemplate(const QString &builtInFile, const QString &directory)
  * created, and no success is reported while a required subfolder is still missing.
  *
  * @param root data root to populate; the configured root when empty.
+ * @param failed_path receives the first directory that could not be created; cleared on success.
  * @return true if the root and every standard subfolder exist (or were created) afterwards.
  */
-bool VCommonSettings::ensureDataRootTree(const QString &root)
+bool VCommonSettings::ensureDataRootTree(const QString &root, QString *failed_path)
 {
+    if (failed_path != nullptr)
+    {
+        failed_path->clear();
+    }
     const QString target = root.isEmpty() ? dataRoot() : root;
 
     QDir directory(target);
     if (!directory.mkpath(QStringLiteral(".")))
     {
+        if (failed_path != nullptr)
+        {
+            *failed_path = target;
+        }
         qWarning() << "Could not create the Seamly data root" << QDir::toNativeSeparators(target);
         return false;
     }
@@ -727,6 +769,10 @@ bool VCommonSettings::ensureDataRootTree(const QString &root)
     {
         if (!directory.mkpath(subdirectory))
         {
+            if (failed_path != nullptr)
+            {
+                *failed_path = directory.filePath(subdirectory);
+            }
             qWarning() << "Could not create the Seamly data subfolder"
                        << QDir::toNativeSeparators(directory.filePath(subdirectory));
             return false;

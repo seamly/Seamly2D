@@ -392,12 +392,14 @@ fn write_astm_block(
         write_contour(writer, c, "11", validation("86"), None, units)?;
     } // for each cutout
 
-    // Layers 2 and 3 hold the turn and curve points of layers 1, 8, 11 and 14.
-    let contours = std::iter::once(boundary)
-        .chain(&block.sew_lines)
-        .chain(&block.internal_lines)
-        .chain(&block.cutouts)
-        .filter(|c| c.declares_points());
+    // AAMA layers 2 and 3 describe only boundary layer 1; ASTM also annotates internal contours.
+    let mut contours = vec![boundary];
+    if !aama {
+        contours.extend(&block.sew_lines);
+        contours.extend(&block.internal_lines);
+        contours.extend(&block.cutouts);
+    } // if ASTM
+    let contours = contours.into_iter().filter(|c| c.declares_points());
     for contour in contours {
         for (p, &turn) in contour.reduced.iter().zip(&contour.turn) {
             encode_dxf_point(writer, &DxfPoint::new(if turn { "2" } else { "3" }, *p), units)?;

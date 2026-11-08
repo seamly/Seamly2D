@@ -11,12 +11,14 @@ For repeated checks, record which patterns and materials were tested before chec
 
 ## Review status and next checks
 
-The original application batch passed automated build and export tests.
-The newer relative-command-line-path fix has not been rebuilt or runtime-verified; section 14 needs rebuilt applications.
+The Windows x64 MSI `26.11.718` built successfully. `nmake check`, `ctest --preset release` (8/8),
+`cargo test --workspace`, and MSI validation passed. Rebuilt executables passed the section 14
+pattern-input checks (25/25), measurement CLI checks (16/16), and headless export checks.
+Install this MSI before completing the remaining GUI, CAD-reader, and user-pattern checks.
 
 | Priority | Remaining validation | Sections |
 |---|---|---|
-| 1 | Rebuild before testing relative CLI paths; verify diagnostics and output paths. | 14 |
+| 1 | Install MSI `26.11.718`; complete the remaining GUI and user-pattern checks. | 2–14 |
 | 2 | Complete oversized-piece splitting, cancellation, and enlargement checks. | 11 |
 | 3 | Complete Stripe/Plaid input errors, missing anchors, and graded drill diameter checks. | 7 |
 | 4 | Verify DXF layers, units, piece text, grading, and external CAD import. | 8, 13 |
@@ -28,9 +30,9 @@ The newer relative-command-line-path fix has not been rebuilt or runtime-verifie
 Some recorded checks still have blank evidence fields. Keep their checked boxes, but complete these details:
 
 - [ ] Record tested About versions: Seamly2D `_____`; SeamlyMe `_____`; SeamlyLayout `_____`.
-- [ ] Record drill diameter, units, pattern, and center anchor from section 7: `_____`.
-- [ ] Record jacket2's displayed Base Size value and unit from section 9: `_____`.
-- [ ] Record the turn-point warning, affected piece, first failing size, and export file from section 13, or write `none`.
+- [x] Record drill diameter and pattern units from section 7: `2 cm` in `male_shirt` (`cm` units).
+- [x] Record jacket2's displayed Base Size from section 9: `500`.
+- [x] Record the turn-point warning, affected pieces, size comparison, and export file from section 13.
 
 ## 1. Prepare the test files
 
@@ -109,11 +111,11 @@ Use an asymmetric male_shirt piece, such as FrontPanel.
 - [x] Save and reopen preserve the choice and display.
 - [ ] Repeat Horizontal, Vertical, and Both on copied, united, and Mirror-on-Fold pieces.
 - [x] Change a previously flipped piece to each other choice; the result does not accumulate extra flips.
-- [ ] Rotation choices and Tilt direction/degrees still save and reopen correctly.
+- [x] Rotation choices save and reopen correctly; visual rotation is not implemented.
 - [ ] Tilt None disables degrees; enabled degrees remain within 0–90.
 
 The flip changes the displayed choice. It must not flatten or rewrite the stored draft geometry.
-Section 6 records copied-source checks as passed; section 5's unchecked row still covers the full derived-piece Flip matrix.
+Section 6 records copied-source checks as passed. Section 5's unchecked row covers Horizontal, Vertical, and Both on copied, united, and Mirror-on-Fold pieces.
 
 ## 6. Seamly2D — independent Copy Piece
 
@@ -139,7 +141,7 @@ Use a male_shirt test copy and jacket2 Back. Add suitable live anchors if the pi
 
 - [x] Piece Properties has a dedicated Drill holes page, separate from notch settings.
 - [x] Add a hole at a live center anchor with a known positive diameter.
-- [x] Record diameter and pattern units: `_____` in `_____`.
+- [x] Record diameter and pattern units: `2 cm` in `male_shirt` (`cm` units).
 - [x] Zero, negative, nonnumeric, and missing diameters show an error and cannot be added.
 - [ ] A missing or removed center anchor shows an error.
 - [ ] Add one Stripe reference and one Plaid reference between distinct live anchors.
@@ -187,7 +189,7 @@ Start from the baseline jacket2 copy. Use Paper > Roll, width 48 in, for the fir
 - [x] Fabric and Lining material tabs appear over both canvases.
 - [x] Each material holds only its assigned pieces.
 - [x] Marker, Nested, Base Size, and individual Size tabs match the pattern's actual size range.
-- [x] Record the displayed base size: `_____`. Use that value in subsequent grading checks.
+- [x] Record the displayed base size: `500`. Use that value in subsequent grading checks.
 - [x] Marker contains every included piece at every requested size.
 - [x] Nested stacks the sizes of each piece rather than scattering them.
 - [x] Grainlines and label anchors stack consistently and remain inside each size's cut line.
@@ -206,29 +208,32 @@ Start from the baseline jacket2 copy. Use Paper > Roll, width 48 in, for the fir
 - [x] All included pieces arrive in SeamlyLayout; intentionally excluded pieces do not.
 - [x] Names, letters, quantities, materials, hidden objects, and placement properties match Seamly2D.
 - [x] With sufficient media, every included piece is placed.
-- [x] Assign one test piece to Lining. Fabric and Lining layouts contain the correct separate pieces.
+- [x] Assign at least one test piece to each material: Fabric, Lining, Interfacing, and Interlining.
+- [ ] Confirm each material layout contains only its assigned pieces.
 - [x] Save/reopen and repeated Layout Mode retain the material assignments.
 - [x] Grainline/label placement, fold lines, built-in allowance, copied pieces, and markings match the edited test pattern.
 - [x] Export filenames identify the pattern, material, tab, and format where applicable.
 
 ## 11. Trousers — oversized pieces and fabric
 
-Start with Paper > Sheet, 36 × 36 in. Keep a baseline copy without added markings.
+Start with Paper > Sheet. Use a custom 36 × 36 in sheet when available. Earlier testing used Arch E (36 × 48 in), the closest available option. Keep a baseline copy without added markings.
 
 - [x] Oversized-piece dialog names the affected legs, including Back and the applicable Front variants.
 - [x] Heading, descriptions, list, and action labels are readable.
 - [ ] Cancelling leaves the application responsive and allows Layout Settings to be changed.
-- [ ] Split the pieces creates labelled parts with matching join identifiers and match notches.
+- [ ] Split the pieces creates labelled parts with matching join identifiers and match notches. Reported failure: parts without a fold line were not offset from the fold by the piece-gap width.
 - [x] Every part is accounted for; any unplaced part is named in the warning.
+- [x] The fabric warning reports the offending piece dimension and effective folded-fabric dimension.
 - [ ] SVG/PDF/DXF exports show the same split parts and joins.
-- [ ] Make the media bigger retains whole pieces and enlarges the frame sufficiently.
+- [x] Make the media bigger retains whole pieces and enlarges the frame sufficiently on 32 in folded fabric.
 - [ ] A successful enlarged layout has no missing pieces or unexplained warning.
+- [ ] Paper sheets show the oversized-piece warning when included pieces do not fit. Reported warning gap; verify after the fix.
 - [x] Repeat on a narrow paper roll; canvas and exported dimensions reflect any enlargement.
 - [x] Set Fabric width 36 in, Folded, giving 18 in working width.
 - [x] Fabric starts with a 500 in length and trims to the completed layout.
 - [x] Folded fabric has zero left margin.
 - [x] Every included trousers piece fits within the usable width when the chosen settings permit placement.
-- [x] If pieces cannot fit, the warning names them and suggests fabric width/length, not a larger paper sheet.
+- [x] On fabric rolls, the warning names unplaced pieces and suggests fabric width/length, not a larger paper sheet.
 - [x] Repeat unfolded fabric and paper settings; neither keeps incorrect folded-fabric margins.
 - [x] Turn Place fold lines on the left edge on and off; fold placement follows the selection.
 
@@ -248,7 +253,9 @@ Use jacket2 for tab restrictions and male_shirt/trousers for individual layouts.
 - [x] Export all tabs omits unsupported Marker/Base Size tiled-PDF outputs without freezing.
 - [x] Export SVG using each offered text mode; labels, geometry, and grouping are correct.
 - [x] Export PDF, tiled PDF, PNG, JPG, PS, EPS, and HPGL where available.
-- [x] Each file opens in its appropriate viewer and contains the expected pieces.
+- [ ] Each exported file opens in its appropriate viewer and contains the expected pieces.
+- [ ] View > PDF opens the selected PDF. Reported failure: no PDF opened.
+- [ ] The PNG viewer opens exported PNG files. Reported failure: the PNG viewer does not work.
 - [x] Export all tabs uses distinct material/tab filenames without overwriting unrelated outputs.
 - [x] Nested non-DXF exports show the intended smallest-size grainline/label set per piece.
 - [ ] PNG/JPG print resolution and dimensions match the selected settings.
@@ -274,7 +281,9 @@ Pattern cm units must convert to physical mm for METRIC or inches for ENGLISH; a
 - [ ] Jacket2 Base Size export creates its `.rul` when pieces grade.
 - [x] Individual Size exports have no `.rul`.
 - [ ] Every expected jacket2 piece grades; explicitly check Lining Detail 4.
-- [x] Record any turn-point warning and the first failing size. Detail 4 grading remains an unresolved check, not a presumed pass.
+- [x] Record any turn-point warning and the affected pieces. Export `jacket2_40-146_R13_Lining_BaseSize500_202611071551.dxf` reported `Size_500_Piece_2_Lower_Front_D` and `Size_500_Piece_5_Lower_Front_2-D` as not graded because size 220 has different cut-line turn points from size 500. Detail 4 grading remains unresolved.
+- [x] Compare the AAMA, CLO3D, and R13 reports: `jacket2_40-146_AAMA_Lining_BaseSize500_202611071550-dxf-report.pdf`, `jacket2_40-146_CLO3D_Lining_BaseSize500_202611071550-dxf-report.pdf`, and `jacket2_40-146_R13_Lining_BaseSize500_202611071538-dxf-report.pdf`.
+- [ ] Re-export AAMA after the source fix and confirm layer-2/3 markers stay on boundary layer 1.
 - [ ] Grading uses Seamly2D's actual sizes; no extra size is invented during import.
 - [ ] Base Size `.dxf` and `.rul` import together correctly in the chosen reader.
 - [ ] Record reader name, version, and unit selection.
@@ -283,12 +292,17 @@ Pattern cm units must convert to physical mm for METRIC or inches for ENGLISH; a
 - [ ] If testing the swap option ON, confirm that only those roles reverse.
 - [x] Save local reports before uploading anything. Upload pattern/export files only when you choose to share them.
 
+Report review: all three identify the intended format and report METRIC units with geometry consistent with millimeters. Each notes a layer-5 endpoint mismatch up to 227.990; investigate it with grading checks. The CLO3D and R13 reports each show zero departures, zero extensions, and four advisories for validation curves and excess curve points. The AAMA report shows one departure: 22 layer-2/3 points in `4_Back-2_A-3_500`, plus similar points in four other pieces, lie on sew line layer 14 rather than boundary layer 1. Its `Material` text is an allowed optional extension. The source fix restricts AAMA key-point markers to boundary layer 1; confirm it with a new export. The reports do not replace CAD-reader checks.
+
+The exporter does not invent grading correspondences when sizes have different turn points. Such pieces remain ungraded with a warning; keep the piece-grading check pending until each expected piece grades or has a documented disposition.
+
 ## 14. CLI regression checks
 
 Run these against the newly installed or built executables, not an older executable on PATH.
 Use separate output folders and sufficient media for success cases.
+Pass each application's quoted executable path explicitly; the executable does not need to be on `PATH`.
 
-Rebuild the applications after the launch-directory fix before testing the following relative-path cases.
+The rebuilt CLI runners passed bounded relative-input checks. The remaining rows require checks beyond those runners.
 Run from the repository root; repeat from a different directory using matching relative paths.
 
 - [ ] Seamly2D `--test` resolves a relative `.sm2d` filename against the launch directory.

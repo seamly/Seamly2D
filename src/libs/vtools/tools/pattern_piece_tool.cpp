@@ -1,28 +1,10 @@
 //---------------------------------------------------------------------------------------------------------------------
-//  @file   pattern_piece_dialog.cpp
-//  @author Douglas S Caskey
-//  @author slspencer
-//  @date   Dec 11, 2022
-//
-//  @copyright
-//  Copyright (C) 2017 - 2026 Seamly, LLC
-//  Copyright (C) 2026 Seamly2D Project
-//  SPDX-License-Identifier: GPL-3.0-or-later
-//  https://github.com/fashionfreedom/seamly2d
-//
-//  @brief
-//  Seamly2D is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  Seamly2D is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with Seamly2D. If not, see <http://www.gnu.org/licenses/>.
+// @file pattern_piece_tool.cpp
+// @author slspencer
+// @brief Displays and edits pattern pieces in Piece Mode.
+// Copyright (C) 2026 Seamly2D Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+// https://www.gnu.org/licenses/gpl-3.0.html
 //---------------------------------------------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -94,6 +76,7 @@
 #include <QInputDialog>
 #include <QKeyEvent>
 #include <QActionGroup>
+#include <QLineF>
 #include <QMenu>
 #include "../undocommands/CopyPatternPiece.h"
 #include <QMessageBox>
@@ -944,7 +927,14 @@ void PatternPieceTool::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 
     m_notches->setPen(QPen(color, scaleWidth(lineWeight, sceneScale(scene())),
                            Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    m_markings->setPen(m_notches->pen());
+    const qreal marking_width = scaleWidth(ToPixel(0.3, Unit::Mm), sceneScale(scene()));
+    m_markings->setPen(QPen(Qt::blue, marking_width, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    m_drill_holes_outline->setPen(QPen(Qt::black, scaleWidth(ToPixel(0.7, Unit::Mm), sceneScale(scene())),
+                                       Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    m_drill_holes->setPen(QPen(Qt::blue, marking_width, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    m_anchor_points_outline->setPen(QPen(Qt::black, scaleWidth(ToPixel(0.7, Unit::Mm), sceneScale(scene())),
+                                         Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    m_anchor_points->setPen(QPen(Qt::blue, marking_width, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 
     //set fold line pen
     color      = adaptColor(QColor(qApp->Settings()->getDefaultFoldLineColor()));
@@ -1496,6 +1486,10 @@ PatternPieceTool::PatternPieceTool(VAbstractPattern *doc, VContainer *data, cons
     , m_grainLine(new VGrainlineItem(this))
     , m_notches(new QGraphicsPathItem(this))
     , m_markings(new QGraphicsPathItem(this))
+    , m_drill_holes_outline(new QGraphicsPathItem(this))
+    , m_drill_holes(new QGraphicsPathItem(this))
+    , m_anchor_points_outline(new QGraphicsPathItem(this))
+    , m_anchor_points(new QGraphicsPathItem(this))
     , m_foldLine(new QGraphicsPathItem(this))
     , m_fold_line_arrow(new QGraphicsPathItem(this))
     , m_fold_line_arrow_heads(new QGraphicsPathItem(this))
@@ -1687,20 +1681,71 @@ void PatternPieceTool::RefreshGeometry()
 
     m_notches->setPath(piece.getNotchesPath(this->getData(), seamAllowancePoints));
     QPainterPath markings;
+    QPainterPath drill_holes;
+    QPainterPath drill_holes_outline;
+    QPainterPath anchor_points;
     for (const PieceDrillHole &hole : piece.drillHoles())
     {
         const QPointF center = static_cast<QPointF>(*getData()->GeometricObject<VPointF>(hole.center));
         const qreal radius = ToPixel(hole.diameter, *getData()->GetPatternUnit()) / 2;
-        markings.addEllipse(center, radius, radius);
+        drill_holes_outline.addEllipse(center, radius, radius);
+        const qreal inset = qMin(ToPixel(0.4, Unit::Mm), radius / 4);
+        drill_holes.addEllipse(center, qMax(0.0, radius - inset), qMax(0.0, radius - inset));
     }
     for (const PieceReferenceLine &line : piece.referenceLines())
     {
-        markings.moveTo(static_cast<QPointF>(*getData()->GeometricObject<VPointF>(line.start)));
-        markings.lineTo(static_cast<QPointF>(*getData()->GeometricObject<VPointF>(line.end)));
+        const QPointF start = static_cast<QPointF>(*getData()->GeometricObject<VPointF>(line.start));
+        const QPointF end = static_cast<QPointF>(*getData()->GeometricObject<VPointF>(line.end));
+        const QLineF axis(start, end);
+        const qreal length = axis.length();
+        if (length <= 0)
+        {
+            continue;
+        }
+        const QPointF direction((end.x() - start.x()) / length, (end.y() - start.y()) / length);
+        const QPointF normal(-direction.y(), direction.x());
+        const QPointF center = (start + end) / 2;
+        const qreal icon_half = qMin(ToPixel(2.0, Unit::Mm), length / 4);
+        markings.moveTo(start);
+        markings.lineTo(end);
+        if (line.type == QStringLiteral("stripe"))
+        {
+            const QPointF offset = normal * ToPixel(0.6, Unit::Mm);
+            markings.moveTo(center - direction * icon_half + offset);
+            markings.lineTo(center + direction * icon_half + offset);
+            markings.moveTo(center - direction * icon_half - offset);
+            markings.lineTo(center + direction * icon_half - offset);
+        }
+        else
+        {
+            markings.moveTo(center - direction * icon_half);
+            markings.lineTo(center + direction * icon_half);
+            markings.moveTo(center - normal * icon_half);
+            markings.lineTo(center + normal * icon_half);
+        }
+    }
+    const qreal anchor_radius = ToPixel(1.2, Unit::Mm);
+    for (quint32 anchor : piece.getAnchors())
+    {
+        const QPointF point = static_cast<QPointF>(*getData()->GeometricObject<VPointF>(anchor));
+        anchor_points.addEllipse(point, anchor_radius, anchor_radius);
+        anchor_points.moveTo(point.x() - anchor_radius, point.y());
+        anchor_points.lineTo(point.x() + anchor_radius, point.y());
+        anchor_points.moveTo(point.x(), point.y() - anchor_radius);
+        anchor_points.lineTo(point.x(), point.y() + anchor_radius);
     }
     m_markings->setPath(markings);
-    m_markings->setPen(m_notches->pen());
     m_markings->setBrush(Qt::NoBrush);
+    m_drill_holes_outline->setPath(drill_holes_outline);
+    m_drill_holes_outline->setBrush(Qt::NoBrush);
+    m_drill_holes->setPath(drill_holes);
+    m_drill_holes->setBrush(Qt::NoBrush);
+    m_anchor_points_outline->setPath(anchor_points);
+    m_anchor_points_outline->setBrush(Qt::NoBrush);
+    m_anchor_points->setPath(anchor_points);
+    m_anchor_points->setBrush(Qt::NoBrush);
+    m_anchor_points_outline->setZValue(10);
+    m_anchor_points->setZValue(11);
 
     refreshFoldLine(piece, seamAllowancePoints);
 
@@ -1739,6 +1784,10 @@ void PatternPieceTool::applyFlipToGeometry(PieceFlip flip)
     m_allowanceFill->setPath(mirror.map(m_allowanceFill->path()));
     m_notches->setPath(mirror.map(m_notches->path()));
     m_markings->setPath(mirror.map(m_markings->path()));
+    m_drill_holes_outline->setPath(mirror.map(m_drill_holes_outline->path()));
+    m_drill_holes->setPath(mirror.map(m_drill_holes->path()));
+    m_anchor_points_outline->setPath(mirror.map(m_anchor_points_outline->path()));
+    m_anchor_points->setPath(mirror.map(m_anchor_points->path()));
     m_foldLine->setPath(mirror.map(m_foldLine->path()));
     m_fold_line_arrow->setPath(mirror.map(m_fold_line_arrow->path()));
     m_fold_line_arrow_heads->setPath(mirror.map(m_fold_line_arrow_heads->path()));

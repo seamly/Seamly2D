@@ -1,27 +1,10 @@
 //---------------------------------------------------------------------------------------------------------------------
-//  @file   pattern_piece_dialog.cpp
-//  @author slspencer
-//  Copyright (C) 2026 Seamly2D Project
-//  SPDX-License-Identifier: GPL-3.0-or-later
-//  https://www.gnu.org/licenses/gpl-3.0.html
-//  @date   Dec 11, 2022
-//
-//  Copyright (C) 2017 - 2022 Seamly, LLC
-//  https://github.com/fashionfreedom/seamly2d
-//
-//  @brief
-//  Seamly2D is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  Seamly2D is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with Seamly2D. If not, see <http://www.gnu.org/licenses/>.
+// @file pattern_piece_tool.h
+// @author slspencer
+// @brief Displays and edits pattern pieces in Piece Mode.
+// Copyright (C) 2026 Seamly2D Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+// https://www.gnu.org/licenses/gpl-3.0.html
 //---------------------------------------------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -195,6 +178,10 @@ private:
     VGrainlineItem         *m_grainLine;
     QGraphicsPathItem      *m_notches;
     QGraphicsPathItem      *m_markings;
+    QGraphicsPathItem      *m_drill_holes_outline;
+    QGraphicsPathItem      *m_drill_holes;
+    QGraphicsPathItem      *m_anchor_points_outline;
+    QGraphicsPathItem      *m_anchor_points;
     QGraphicsPathItem      *m_foldLine;
     QGraphicsPathItem*       m_fold_line_arrow;       ///< Arrow line that points at the fold line.
     QGraphicsPathItem*       m_fold_line_arrow_heads; ///< Filled arrow heads of m_fold_line_arrow.

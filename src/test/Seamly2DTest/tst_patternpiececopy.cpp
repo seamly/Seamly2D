@@ -197,7 +197,7 @@ void TST_PatternPieceCopy::independentPathsAnchorsAndNestedUnion()
              QStringLiteral("A-2"));
     QCOMPARE(copy.piece.firstChildElement(QStringLiteral("data")).attribute(QStringLiteral("centerAnchor")).toUInt(),
              copy.ids.value(11));
-    QCOMPARE(copy.modeling.constLast().element.attribute(QStringLiteral("idTool")).toUInt(), copy.ids.value(13));
+    QCOMPARE(copy.modeling.constLast().element.attribute(QStringLiteral("idTool")).toUInt(), 14U);
     appendCopy(document, copy);
     const auto again = PatternPieceCopy::reconstruct(document, copy.ids.value(13), [&id] { return ++id; });
     QVERIFY2(again.error.isEmpty(), qPrintable(again.error));
@@ -239,6 +239,53 @@ void TST_PatternPieceCopy::undoRedoRestoresPrivateDependencies()
     QVERIFY(copied != original);
     QCOMPARE(stack.count(), 1);
     QCOMPARE(parse_requests.count(), 1);
+    stack.undo();
+    QCOMPARE(document.toByteArray(), original);
+    stack.redo();
+    QCOMPARE(document.toByteArray(), copied);
+    QCOMPARE(parse_requests.count(), 3);
+}
+
+void TST_PatternPieceCopy::flippedUnionCopyOrientationAndUndo()
+{
+    CopyTestDocument document;
+    QVERIFY(document.setContent(QStringLiteral(
+        "<pattern><draftBlock name=\"Original\"><calculation><point id=\"1\"/><point id=\"2\"/></calculation>"
+        "<modeling><point id=\"3\" idObject=\"1\"/><point id=\"4\" idObject=\"2\"/></modeling><pieces>"
+        "<piece id=\"8\" name=\"Original\"><nodes><node idObject=\"3\"/></nodes></piece></pieces></draftBlock>"
+        "<draftBlock name=\"Block\"><modeling><tools id=\"5\" type=\"union\"><unionPiece><nodes>"
+        "<node idObject=\"3\"/><node idObject=\"4\" reverse=\"true\"/></nodes></unionPiece>"
+        "<children><nodes><child>6</child></nodes></children></tools>"
+        "<point id=\"7\" idObject=\"6\" idTool=\"5\"/><path id=\"10\" idTool=\"8\"><nodes>"
+        "<node idObject=\"7\"/></nodes></path></modeling><pieces>"
+        "<piece id=\"9\" name=\"Flipped copy\" flip=\"Vertical\" united=\"true\">"
+        "<nodes><node idObject=\"7\" reverse=\"true\"/></nodes><iPaths><record path=\"10\"/></iPaths>"
+        "</piece></pieces></draftBlock></pattern>")));
+    const QByteArray original = document.toByteArray();
+    quint32 id = 100;
+    const auto copy = PatternPieceCopy::reconstruct(document, 9, [&id] { return ++id; });
+    QVERIFY2(copy.error.isEmpty(), qPrintable(copy.error));
+    QCOMPARE(copy.piece.attribute(QStringLiteral("flip")), QStringLiteral("Vertical"));
+    QCOMPARE(copy.piece.firstChildElement(QStringLiteral("nodes")).firstChildElement(QStringLiteral("node"))
+                 .attribute(QStringLiteral("reverse")), QStringLiteral("true"));
+    bool preserved_piece_owner = false;
+    for (const CopiedModelingElement &modeling : copy.modeling)
+    {
+        QVERIFY(modeling.element.attribute(QStringLiteral("idTool")).toUInt() != copy.ids.value(9));
+        if (modeling.element.attribute(QStringLiteral("id")).toUInt() == copy.ids.value(10))
+        {
+            QCOMPARE(modeling.element.attribute(QStringLiteral("idTool")).toUInt(), 8U);
+            preserved_piece_owner = true;
+        }
+    }
+    QVERIFY(preserved_piece_owner);
+
+    QUndoStack stack;
+    auto *command = new CopyPatternPiece(copy, &document);
+    connect(command, &VUndoCommand::NeedFullParsing, &document, &VAbstractPattern::NeedFullParsing);
+    QSignalSpy parse_requests(&document, &VAbstractPattern::UndoCommand);
+    stack.push(command);
+    const QByteArray copied = document.toByteArray();
     stack.undo();
     QCOMPARE(document.toByteArray(), original);
     stack.redo();

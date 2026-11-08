@@ -25,7 +25,9 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QListWidget>
+#include <QHBoxLayout>
 #include <QPushButton>
+#include <QToolButton>
 #include <QTemporaryDir>
 #include <QScopeGuard>
 #include <QtTest>
@@ -88,6 +90,9 @@ void TST_PieceMarkings::rejectsUnsafeValues()
     QVERIFY(!PieceMarkings::valid({}, {{7, 7, QStringLiteral("stripe")}}, {7, 8}));
     QVERIFY(!PieceMarkings::valid({}, {{7, 8, QStringLiteral("cut")}}, {7, 8}));
     QVERIFY(!PieceMarkings::valid({}, {{7, 9, QStringLiteral("plaid")}}, {7, 8}));
+    QVERIFY(PieceMarkings::usesAnchor(7, {{7, 0.1}}, {}));
+    QVERIFY(PieceMarkings::usesAnchor(8, {}, {{7, 8, QStringLiteral("stripe")}}));
+    QVERIFY(!PieceMarkings::usesAnchor(9, {{7, 0.1}}, {{7, 8, QStringLiteral("plaid")}}));
 }
 
 void TST_PieceMarkings::currentSchemaAndCopy()
@@ -254,6 +259,16 @@ void TST_PieceMarkings::editorRequiresExplicitInput()
     QVERIFY(!add->isEnabled());
     PieceMarkingsEditor reference(false);
     reference.setPoints({7, 8}, &data);
+    auto *stripe_icon = reference.findChild<QToolButton *>(QStringLiteral("stripeReferenceIcon"));
+    auto *plaid_icon = reference.findChild<QToolButton *>(QStringLiteral("plaidReferenceIcon"));
+    QVERIFY(stripe_icon != nullptr);
+    QVERIFY(plaid_icon != nullptr);
+    QVERIFY(!stripe_icon->icon().isNull());
+    QVERIFY(!plaid_icon->icon().isNull());
+    QCOMPARE(stripe_icon->parentWidget(), plaid_icon->parentWidget());
+    auto *icon_layout = qobject_cast<QHBoxLayout *>(stripe_icon->parentWidget()->layout());
+    QVERIFY(icon_layout != nullptr);
+    QCOMPARE(icon_layout->count(), 2);
     auto *add_line = reference.findChild<QPushButton *>(QStringLiteral("addMarking"));
     reference.findChild<QComboBox *>(QStringLiteral("startAnchor"))->setCurrentIndex(1);
     reference.findChild<QComboBox *>(QStringLiteral("endAnchor"))->setCurrentIndex(1);
@@ -263,6 +278,9 @@ void TST_PieceMarkings::editorRequiresExplicitInput()
     add_line->click();
     QCOMPARE(reference.referenceLines().first().type, QStringLiteral("stripe"));
     QVERIFY(reference.markingsValid());
+    plaid_icon->click();
+    add_line->click();
+    QCOMPARE(reference.referenceLines().last().type, QStringLiteral("plaid"));
     data.UpdateGObject(8, new VPointF(10, 20, QStringLiteral("B"), 0, 0));
     reference.setPoints({7, 8}, &data);
     QVERIFY(!add_line->isEnabled());

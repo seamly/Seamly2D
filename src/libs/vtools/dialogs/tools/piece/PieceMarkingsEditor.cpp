@@ -10,22 +10,50 @@
 #include "PieceMarkingsEditor.h"
 #include "../../../../vpatterndb/vcontainer.h"
 #include "../../../../vgeometry/vpointf.h"
+#include <QButtonGroup>
 #include <QComboBox>
 #include <QFormLayout>
 #include <QHBoxLayout>
+#include <QIcon>
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QPainter>
+#include <QPixmap>
 #include <QPushButton>
+#include <QToolButton>
 #include <QVBoxLayout>
 #include <QtMath>
+
+namespace
+{
+QIcon referenceIcon(bool plaid)
+{
+    QPixmap pixmap(24, 24);
+    pixmap.fill(Qt::transparent);
+    QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(QPen(Qt::blue, 2.0, Qt::SolidLine, Qt::RoundCap));
+    if (plaid)
+    {
+        painter.drawLine(4, 12, 20, 12);
+        painter.drawLine(12, 4, 12, 20);
+    }
+    else
+    {
+        painter.drawLine(4, 9, 20, 9);
+        painter.drawLine(4, 15, 20, 15);
+    }
+    return QIcon(pixmap);
+}
+}
 
 PieceMarkingsEditor::PieceMarkingsEditor(bool drill_holes, QWidget *parent)
     : QWidget(parent)
     , m_drill(drill_holes)
     , m_start(new QComboBox(this))
     , m_end(new QComboBox(this))
-    , m_type(new QComboBox(this))
+    , m_type_buttons(new QButtonGroup(this))
     , m_diameter(new QLineEdit(this))
     , m_list(new QListWidget(this))
     , m_error(new QLabel(this))
@@ -42,14 +70,30 @@ PieceMarkingsEditor::PieceMarkingsEditor(bool drill_holes, QWidget *parent)
     {
         form->addRow(tr("Diameter:"), m_diameter);
         m_end->hide();
-        m_type->hide();
     }
     else
     {
-        m_type->addItem(tr("Stripe"), QStringLiteral("stripe"));
-        m_type->addItem(tr("Plaid"), QStringLiteral("plaid"));
+        auto *reference_types = new QWidget(this);
+        auto *reference_layout = new QHBoxLayout(reference_types);
+        reference_layout->setContentsMargins(0, 0, 0, 0);
+        m_type_buttons->setExclusive(true);
+        for (const auto &type : {qMakePair(tr("Stripe"), QStringLiteral("stripe")),
+                                 qMakePair(tr("Plaid"), QStringLiteral("plaid"))})
+        {
+            auto *button = new QToolButton(reference_types);
+            button->setText(type.first);
+            button->setIcon(referenceIcon(type.second == QStringLiteral("plaid")));
+            button->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+            button->setCheckable(true);
+            button->setProperty("referenceType", type.second);
+            button->setObjectName(type.second + QStringLiteral("ReferenceIcon"));
+            button->setAccessibleName(type.first);
+            button->setChecked(type.second == QStringLiteral("stripe"));
+            m_type_buttons->addButton(button);
+            reference_layout->addWidget(button);
+        }
         form->addRow(tr("End anchor:"), m_end);
-        form->addRow(tr("Reference type:"), m_type);
+        form->addRow(tr("Reference type:"), reference_types);
         m_diameter->hide();
     }
     layout->addLayout(form);
@@ -80,7 +124,7 @@ PieceMarkingsEditor::PieceMarkingsEditor(bool drill_holes, QWidget *parent)
         else
         {
             m_lines.append({m_start->currentData().toUInt(), m_end->currentData().toUInt(),
-                            m_type->currentData().toString()});
+                            m_type_buttons->checkedButton()->property("referenceType").toString()});
         }
         refresh();
         emit changed();

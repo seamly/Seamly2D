@@ -21,6 +21,7 @@ private slots:
     void independentPathsAnchorsAndNestedUnion();
     void refusesMissingDependencies();
     void undoRedoRestoresPrivateDependencies();
+    void flippedUnionCopyOrientationAndUndo();
 };
 
 #endif // TST_PATTERN_PIECE_COPY_H

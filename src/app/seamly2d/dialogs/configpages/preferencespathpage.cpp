@@ -59,6 +59,7 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QMessageBox>
 
 //---------------------------------------------------------------------------------------------------------------------
 PreferencesPathPage::PreferencesPathPage(QWidget *parent)
@@ -95,15 +96,20 @@ void PreferencesPathPage::changeEvent(QEvent *event)
  *
  * The data root (row 0) is applied first, and every subfolder still living inside the
  * previous root follows it to the new location, so repointing the root at another drive or
- * a cloud-synced folder relocates the whole tree in one edit.
+ * a cloud-synced folder relocates the whole tree in one edit. Creation failures leave paths unchanged.
  */
 void PreferencesPathPage::Apply()
 {
     VSettings *settings = qApp->Seamly2DSettings();
 
     const QString previousRoot = settings->getDataRoot();
-    const QString dataRoot     = ui->pathTable->item(0, 1)->text();
-    settings->setDataRoot(dataRoot);
+    QString error_message;
+    if (!settings->setDataRoot(ui->pathTable->item(0, 1)->text(), &error_message))
+    {
+        QMessageBox::critical(this, tr("Cannot change data root"), error_message);
+        return;
+    }
+    const QString dataRoot = settings->getDataRoot();
 
     settings->SetPathPattern(VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(1, 1)->text(), previousRoot, dataRoot));
     settings->setTemplatePath(VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(2, 1)->text(), previousRoot, dataRoot));
@@ -117,6 +123,7 @@ void PreferencesPathPage::Apply()
 
     // Not a data path: the SeamlyLayout executable is never rebased onto the data root.
     settings->setSeamlyLayoutAppPath(ui->pathTable->item(10, 1)->text());
+    initializeTable();
 }
 
 //---------------------------------------------------------------------------------------------------------------------

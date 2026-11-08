@@ -1,13 +1,13 @@
 /******************************************************************************
 *   @file   seamlymepreferencespathpage.cpp
-**  @author Douglas S Caskey
+**  @author slspencer
 **  @date   14 Jul, 2023
 **
 **  @brief
 **  @copyright
 **  This source code is part of the Seamly2D project, a pattern making
 **  program to create and model patterns of clothing.
-**  Copyright (C) 2017-2023 Seamly2D project
+**  Copyright (C) 2026 Seamly2D Project
 **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
 **
 **  Seamly2D is free software: you can redistribute it and/or modify
@@ -60,6 +60,7 @@
 
 #include <QDir>
 #include <QFileDialog>
+#include <QMessageBox>
 
 //---------------------------------------------------------------------------------------------------------------------
 SeamlyMePreferencesPathPage::SeamlyMePreferencesPathPage(QWidget *parent)
@@ -96,15 +97,20 @@ void SeamlyMePreferencesPathPage::changeEvent(QEvent *event)
  *
  * The shared data root (row 0) is applied first, and every subfolder still living inside
  * the previous root follows it to the new location, so repointing the root at another
- * drive or a cloud-synced folder relocates the whole tree in one edit.
+ * drive or a cloud-synced folder relocates the whole tree in one edit. Creation failures leave paths unchanged.
  */
 void SeamlyMePreferencesPathPage::Apply()
 {
     VSeamlyMeSettings *settings = qApp->seamlyMeSettings();
 
     const QString previousRoot = settings->getDataRoot();
-    const QString dataRoot     = ui->pathTable->item(0, 1)->text();
-    settings->setDataRoot(dataRoot);
+    QString error_message;
+    if (!settings->setDataRoot(ui->pathTable->item(0, 1)->text(), &error_message))
+    {
+        QMessageBox::critical(this, tr("Cannot change data root"), error_message);
+        return;
+    }
+    const QString dataRoot = settings->getDataRoot();
 
     settings->setIndividualSizePath(
         VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(1, 1)->text(), previousRoot, dataRoot));
@@ -114,6 +120,7 @@ void SeamlyMePreferencesPathPage::Apply()
         VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(3, 1)->text(), previousRoot, dataRoot));
     settings->setBodyScansPath(
         VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(4, 1)->text(), previousRoot, dataRoot));
+    initializeTable();
 }
 
 //---------------------------------------------------------------------------------------------------------------------

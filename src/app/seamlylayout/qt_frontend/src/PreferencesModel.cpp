@@ -1,6 +1,6 @@
 // project: SeamlyLayout
 // author: slspencer, copyright 2026
-// LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
+// MIT License: https://opensource.org/licenses/MIT
 //
 // @file PreferencesModel.cpp
 // @brief Implementation of PreferencesModel — application preferences load/save.
@@ -1216,6 +1216,7 @@ static bool isHttpUrl(const QString &str)
 // The file path, when non-empty, is appended as the final argument. An empty
 // file path is allowed for launcher-only viewers (e.g. a projector
 // application that takes no file argument).
+// When viewerPath is empty, the file is opened with its OS default application.
 //
 // On Windows, detects UWP/Store apps (App Execution Aliases) and skips the
 // slow QProcess::startDetached failure by going straight to QDesktopServices.
@@ -1227,8 +1228,14 @@ static bool isHttpUrl(const QString &str)
 bool PreferencesModel::openInViewer(const QString &viewerPath, const QString &filePath)
 {
     if (viewerPath.isEmpty()) {
-        Logger::log(QStringLiteral("PreferencesModel::openInViewer(): empty viewer path"));
-        return false;
+        if (filePath.isEmpty()) {
+            Logger::log(QStringLiteral("PreferencesModel::openInViewer(): empty viewer and file paths"));
+            return false;
+        } // if no file to open
+        const QString nativeFile = Platform::toNativePath(filePath);
+        Logger::log(QStringLiteral("PreferencesModel::openInViewer(): opening with OS default file association=")
+                    + nativeFile);
+        return QDesktopServices::openUrl(QUrl::fromLocalFile(nativeFile));
     } // if empty viewer
 
     // Handle online viewer URLs (HTTP/HTTPS).

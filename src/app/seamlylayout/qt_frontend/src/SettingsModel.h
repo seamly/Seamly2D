@@ -1,6 +1,6 @@
 // project: SeamlyLayout
 // author: slspencer, copyright 2026
-// LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
+// MIT License: https://opensource.org/licenses/MIT
 //
 // @file SettingsModel.h
 // @brief QObject model for SeamlyLayout layout settings.
@@ -174,6 +174,9 @@ class SettingsModel : public QObject
     // @brief Paper size names for the sheet name ComboBox.
     Q_PROPERTY(QStringList paperSizeNames  READ paperSizeNames  CONSTANT)
 
+    // @brief Paper size labels with imperial and metric dimensions.
+    Q_PROPERTY(QStringList paperSizeLabels READ paperSizeLabels CONSTANT)
+
     // @brief Tile size names for the tile size ComboBox.
     Q_PROPERTY(QStringList tileSizeNames   READ tileSizeNames   CONSTANT)
 
@@ -231,6 +234,7 @@ public:
     double     selvedgeWidth() const { return m_selvedgeWidth; }
 
     QStringList paperSizeNames()  const;
+    QStringList paperSizeLabels() const;
     QStringList tileSizeNames()   const;
     QStringList tileOrientationNames() const;
     QStringList unitNames()       const;
@@ -250,7 +254,11 @@ public:
     void setMediaType(const QString &v);
     void setPaperType(const QString &v);
     void setSheetName(const QString &v);
+    // @brief Set page width in active units; invalid dimensions are ignored.
+    // @param v Positive, finite width in the selected unit.
     void setPageWidth(double v);
+    // @brief Set page height in active units; invalid dimensions are ignored.
+    // @param v Positive, finite height in the selected unit.
     void setPageHeight(double v);
     void setRollSize(const QString &v);
     void setRollWidth(double v);

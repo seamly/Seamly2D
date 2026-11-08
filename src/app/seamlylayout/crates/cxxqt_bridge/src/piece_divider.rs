@@ -68,6 +68,10 @@ pub struct DivideSpec {
     pub trial_angles_deg: Vec<u16>,
     // The user's "Rotate freely" choice for pieces without a grainline.
     pub free_rotation_without_grainline: bool,
+    // Clearance from the fold edge for pieces without a fold line.
+    pub fold_edge_gap_px: u32,
+    // Pin fold-line pieces to the fold edge while measuring and splitting.
+    pub fold_lines_on_left_edge: bool,
 }
 
 // @brief A piece that does not fit the media at any of its trial angles.
@@ -98,8 +102,7 @@ pub struct DividedPiece {
 //
 // @param doc Pre-processed DOM: pieces grain up, transforms baked.
 pub fn find_oversized_pieces(doc: &Document, spec: &DivideSpec) -> Vec<OversizedPiece> {
-    let mut pieces = extract_piece_rects(doc);
-    set_free_rotation_without_grainline(&mut pieces, spec.free_rotation_without_grainline);
+    let pieces = prepared_pieces(doc, spec);
     pieces
         .iter()
         .filter_map(|piece| {
@@ -110,7 +113,7 @@ pub fn find_oversized_pieces(doc: &Document, spec: &DivideSpec) -> Vec<Oversized
                 longer: rows > 1,
                 width_px: piece.rect.w,
                 length_px: piece.rect.h,
-                media_width_px: spec.bin_w,
+                media_width_px: spec.bin_w.saturating_sub(piece.rect.min_left_gap_px),
                 media_length_px: spec.bin_h,
             })
         })
@@ -166,8 +169,7 @@ fn unit_length(px: u32, unit: &str) -> String {
 // @return The split pieces, in document order.
 pub fn divide_oversized_pieces(doc: &mut Document, spec: &DivideSpec) -> Vec<DividedPiece> {
     let uu_per_px = svg_uu_per_px(&doc.root);
-    let mut pieces = extract_piece_rects(doc);
-    set_free_rotation_without_grainline(&mut pieces, spec.free_rotation_without_grainline);
+    let pieces = prepared_pieces(doc, spec);
 
     // Grid of each piece that does not fit, keyed by its index among the root's <g> children.
     let grids: HashMap<usize, (usize, usize)> = pieces
@@ -209,8 +211,28 @@ fn grid(rect: Rect, spec: &DivideSpec) -> (usize, usize) {
         return (1, 1);
     }
     let rows = if spec.limit_length { parts_for(rect.h, spec.bin_h) } else { 1 };
-    (parts_for(rect.w, spec.bin_w), rows)
+    let available_width = spec.bin_w.saturating_sub(rect.min_left_gap_px);
+    (parts_for(rect.w, available_width), rows)
 } // fn grid
+
+// @brief Return piece bounds with fold-edge placement rules applied.
+fn prepared_pieces(doc: &Document, spec: &DivideSpec) -> Vec<crate::piece_extractor::PieceRect> {
+    let mut measured_doc = doc.clone();
+    let fold_plan = if spec.fold_lines_on_left_edge {
+        crate::fold_line_edge::plan_fold_line_edge(&mut measured_doc, &spec.trial_angles_deg)
+    } else {
+        crate::fold_line_edge::FoldEdgePlan::default()
+    };
+    let mut pieces = extract_piece_rects(&measured_doc);
+    set_free_rotation_without_grainline(&mut pieces, spec.free_rotation_without_grainline);
+    crate::fold_line_edge::pin_fold_line_pieces(&mut pieces, &fold_plan);
+    for piece in &mut pieces {
+        if piece.rect.left_edge_angle.is_none() && spec.fold_edge_gap_px > 0 {
+            piece.rect = piece.rect.with_min_left_gap(spec.fold_edge_gap_px);
+        }
+    }
+    pieces
+} // fn prepared_pieces
 
 // @brief Smallest count of equal parts of `length` px that each fit `limit` px.
 // One pixel of slack covers rounding and the cut line nudge.
@@ -1272,7 +1294,15 @@ mod tests {
 
     // @brief Media spec in layout pixels.
     fn spec(bin_w: u32, bin_h: u32, limit_length: bool) -> DivideSpec {
-        DivideSpec { bin_w, bin_h, limit_length, trial_angles_deg: vec![0, 180], free_rotation_without_grainline: false }
+        DivideSpec {
+            bin_w,
+            bin_h,
+            limit_length,
+            trial_angles_deg: vec![0, 180],
+            free_rotation_without_grainline: false,
+            fold_edge_gap_px: 0,
+            fold_lines_on_left_edge: false,
+        }
     } // fn spec
 
     // @brief The part groups of a divided document.
@@ -1388,6 +1418,44 @@ mod tests {
         let free = DivideSpec { free_rotation_without_grainline: true, ..spec(500, 250, true) };
         assert!(find_oversized_pieces(&doc, &free).is_empty());
     } // long_piece_and_turned_piece
+
+    // @brief Fold-line pieces use the fold edge while other pieces keep its configured clearance.
+    #[test]
+    fn folded_fabric_oversize_check_uses_fold_edge_clearance() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg">
+          <g id="piece_NoFold" data-type="piece" data-name="NoFold">
+            <g data-type="cutline"><path d="M0,0 L96,0 L96,40 L0,40 Z"/></g>
+          </g>
+          <g id="piece_OnFold" data-type="piece" data-name="OnFold">
+            <g data-type="cutline"><path d="M0,0 L96,0 L96,40 L0,40 Z"/></g>
+            <g data-type="fold_line"><path d="M0,0 L0,40"/></g>
+          </g>
+        </svg>"#;
+        let mut doc = Document::parse(svg).expect("fixture parses");
+        let folded = DivideSpec {
+            fold_edge_gap_px: 5,
+            fold_lines_on_left_edge: true,
+            ..spec(100, 200, false)
+        };
+
+        assert_eq!(
+            find_oversized_pieces(&doc, &folded),
+            vec![OversizedPiece {
+                label: "NoFold".to_string(),
+                wider: true,
+                longer: false,
+                width_px: 96,
+                length_px: 40,
+                media_width_px: 95,
+                media_length_px: 200,
+            }]
+        );
+        assert_eq!(
+            divide_oversized_pieces(&mut doc, &folded),
+            vec![DividedPiece { label: "NoFold".to_string(), parts: 2 }]
+        );
+        assert_eq!(part_groups(&doc).len(), 3);
+    } // folded_fabric_oversize_check_uses_fold_edge_clearance
 
     // @brief A fold line is clipped like the seam line: each part holds the stretch
     // of fold line inside it, and a part the fold line misses holds none.

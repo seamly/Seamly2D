@@ -4,6 +4,8 @@ Tasks that add features to the Seamly2D pattern-drafting app.
 
 Tasks in this file begin with `Seamly2D.`
 
+Piece marking behavior is described in [Piece markings](piece-markings.md).
+
 ## Required for SeamlyLayout release
 
 ### [ ] Task Seamly2D.72 — Implement - Pattern schema: every draft block has `<images>`
