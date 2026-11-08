@@ -46,6 +46,9 @@ ToolBar {
     // Bound by Main.qml from settingsModel.paperType === "tiled".
     required property bool pdfTiledExportEnabled
 
+    // @brief True when the active layout split oversized pieces.
+    property bool splitLayout: false
+
     // @brief False disables Export > "PDF (Tiled)": the shown tab is Marker.
     property bool pdfTiledTabAllowed: true
 
@@ -241,6 +244,7 @@ ToolBar {
             layoutReady: root.layoutReady
             pdfTiledEnabled: root.pdfTiledExportEnabled
             pdfTiledTabAllowed: root.pdfTiledTabAllowed
+            splitLayout: root.splitLayout
             showExportAllTabs: root.hasLayoutTabs
             exportAllTabs:   root.exportAllTabs
             dxfEnabled:      root.dxfExportEnabled

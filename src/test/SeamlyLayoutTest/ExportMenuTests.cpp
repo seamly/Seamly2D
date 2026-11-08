@@ -14,6 +14,7 @@ class ExportMenuTests final : public QObject
 private slots:
     void dxfVariantsStayDisabledWhenLayoutContainsAllSizes();
     void tiledPdfStaysDisabledForMarker();
+    void splitLayoutsAllowOnlyRegularPdfExport();
 }; // class ExportMenuTests
 
 void ExportMenuTests::dxfVariantsStayDisabledWhenLayoutContainsAllSizes()
@@ -74,6 +75,63 @@ void ExportMenuTests::tiledPdfStaysDisabledForMarker()
 
     delete menu;
 } // ExportMenuTests::tiledPdfStaysDisabledForMarker
+
+void ExportMenuTests::splitLayoutsAllowOnlyRegularPdfExport()
+{
+    QQmlEngine engine;
+    QQmlComponent component(&engine, QUrl(QStringLiteral("qrc:/qml/ExportMenu.qml")));
+    QVERIFY2(component.isReady(), qPrintable(component.errorString()));
+
+    QObject *menu = component.createWithInitialProperties({
+        {QStringLiteral("layoutReady"), true},
+        {QStringLiteral("splitLayout"), true},
+        {QStringLiteral("showDxfVariants"), true},
+        {QStringLiteral("showHpgl"), true},
+        {QStringLiteral("showJpg"), true},
+        {QStringLiteral("showPostScript"), true},
+        {QStringLiteral("svgModeSubmenu"), true},
+        {QStringLiteral("gcodeExportAvailable"), true},
+        {QStringLiteral("meshExportAvailable"), true},
+    });
+    QVERIFY2(menu != nullptr, qPrintable(component.errorString()));
+
+    const auto item = [menu](const QString &name) {
+        return menu->findChild<QObject *>(name);
+    };
+    QObject *pdfItem = item(QStringLiteral("pdfItem"));
+    QObject *splitNote = item(QStringLiteral("splitLayoutDisabledNote"));
+    QVERIFY(pdfItem);
+    QVERIFY(splitNote);
+    QVERIFY(pdfItem->property("enabled").toBool());
+    QVERIFY(splitNote->property("visible").toBool());
+
+    for (const QString &name : {
+             QStringLiteral("pdfTiledItem"),
+             QStringLiteral("dxfAstmR13Item"),
+             QStringLiteral("dxfAstmClo3dItem"),
+             QStringLiteral("dxfAamaItem"),
+             QStringLiteral("pngItem"),
+             QStringLiteral("jpgItem"),
+             QStringLiteral("epsItem"),
+             QStringLiteral("psItem"),
+             QStringLiteral("svgSubmenu"),
+             QStringLiteral("hpglSubmenu"),
+             QStringLiteral("gcodeItem"),
+             QStringLiteral("meshItem"),
+         }) {
+        QObject *exportItem = item(name);
+        QVERIFY2(exportItem, qPrintable(name));
+        QVERIFY2(!exportItem->property("enabled").toBool(), qPrintable(name));
+    } // for each unsupported format
+
+    QObject *dxfNote = item(QStringLiteral("dxfDisabledNote"));
+    QVERIFY(dxfNote);
+    QVERIFY(dxfNote->property("visible").toBool());
+    QCOMPARE(dxfNote->property("text").toString(),
+             QStringLiteral("DXF: split layouts export only as PDF"));
+
+    delete menu;
+} // ExportMenuTests::splitLayoutsAllowOnlyRegularPdfExport
 
 QTEST_MAIN(ExportMenuTests)
 #include "ExportMenuTests.moc"

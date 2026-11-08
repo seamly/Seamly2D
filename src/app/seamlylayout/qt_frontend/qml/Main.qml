@@ -558,6 +558,7 @@ ApplicationWindow {
         createLayoutEnabled:  appController.isCreateLayoutEnabled
         adjustMode:           appController.isAdjustMode
         settingsOnly:         appController.isSettingsRequired
+        splitLayout:          appController.isSplitLayoutActive
         pdfTiledExportEnabled: settingsModel.paperType === "tiled"
         hasLayoutTabs:        appController.layoutViewLabels.length > 1
         exportAllTabs:        root.exportAllTabs
