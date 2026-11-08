@@ -335,6 +335,21 @@ PreferencesModel::PreferencesModel(QObject *parent)
 {
 } // PreferencesModel
 
+QString PreferencesModel::applicationVersion() const
+{
+    return QCoreApplication::applicationVersion();
+} // applicationVersion
+
+QString PreferencesModel::qtVersion() const
+{
+    return QString::fromLatin1(qVersion());
+} // qtVersion
+
+QString PreferencesModel::qtLicenseNotice() const
+{
+    return QStringLiteral("GNU Lesser General Public License version 3.0 (LGPLv3)");
+} // qtLicenseNotice
+
 // ---------------------------------------------------------------------------
 // Setters
 // ---------------------------------------------------------------------------

@@ -93,8 +93,22 @@ class PreferencesModel : public QObject
     // @brief HPGL file extension without the dot: "plt" or "hpgl".
     Q_PROPERTY(QString hpglExtension   READ hpglExtension   WRITE setHpglExtension   NOTIFY hpglExtensionChanged)
 
+    // @brief Version and Qt licensing details shown by the About dialog.
+    Q_PROPERTY(QString applicationVersion READ applicationVersion CONSTANT)
+    Q_PROPERTY(QString qtVersion READ qtVersion CONSTANT)
+    Q_PROPERTY(QString qtLicenseNotice READ qtLicenseNotice CONSTANT)
+
 public:
     explicit PreferencesModel(QObject *parent = nullptr);
+
+    /// @brief Returns the application version set by the application entry point.
+    QString applicationVersion() const;
+
+    /// @brief Returns the linked Qt runtime version.
+    QString qtVersion() const;
+
+    /// @brief Returns the Qt license name shown by the About dialog.
+    QString qtLicenseNotice() const;
 
     // Getters
     QString inputDirectory()  const { return m_inputDirectory;  }

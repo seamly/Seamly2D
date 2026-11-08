@@ -118,6 +118,20 @@ ApplicationWindow {
         errorDialog.open();
     } // reportStartupError
 
+    // @brief Open a selected export in its configured viewer or system-default application.
+    function openSelectedExportInViewer(viewerPath, filePath, formatName) {
+        if (preferencesModel.openInViewer(viewerPath, filePath)) {
+            return;
+        } // if viewer launched
+
+        var recovery = viewerPath === ""
+            ? "Check that a default application is set for this file type."
+            : "Check the configured viewer in Preferences."
+        errorDialog.errorText = "Could not open the selected " + formatName + " file:\n"
+            + filePath + "\n\n" + recovery
+        errorDialog.open()
+    } // openSelectedExportInViewer
+
     // Last successfully exported file path per format — used by the View menu.
     property string lastExportedDxfPath: ""
     property string lastExportedPdfPath: ""
@@ -600,6 +614,7 @@ ApplicationWindow {
         } // onAdjustLayoutClicked
 
         onPreferencesClicked:      preferencesController.openPreferences()
+        onAboutClicked:            aboutDialog.open()
         onExportDxfAstmR13Requested:   root.requestDxfExport(false, "R13")
         onExportDxfAstmClo3dRequested: root.requestDxfExport(true, "R13")
         onExportDxfAamaRequested:      root.requestDxfExport(false, "R11", true)
@@ -819,9 +834,8 @@ ApplicationWindow {
                 "PDF Files (*.pdf);;All Files (*)")
             console.log("[Main.qml TopMenuBar] onViewPdfRequested(): 3 path=" + path + " pdfViewerPath=" + preferencesModel.pdfViewerPath)
             if (path !== "") {
-                // Open the selected PDF file in the configured PDF viewer application.
                 console.log("[Main.qml TopMenuBar] onViewPdfRequested(): 4 opening viewer")
-                preferencesModel.openInViewer(preferencesModel.pdfViewerPath, path)
+                root.openSelectedExportInViewer(preferencesModel.pdfViewerPath, path, "PDF")
             } else if (path === "") {
                 console.log("[Main.qml TopMenuBar] onViewPdfRequested(): 4 file pick cancelled")
             } // if file selected
@@ -835,9 +849,8 @@ ApplicationWindow {
                 "PDF Files (*.pdf);;All Files (*)")
             console.log("[Main.qml TopMenuBar] onViewPdfTiledRequested(): 3 path=" + path + " pdfViewerPath=" + preferencesModel.pdfViewerPath)
             if (path !== "") {
-                // Open the selected PDF file in the configured PDF viewer application.
                 console.log("[Main.qml TopMenuBar] onViewPdfTiledRequested(): 4 opening viewer")
-                preferencesModel.openInViewer(preferencesModel.pdfViewerPath, path)
+                root.openSelectedExportInViewer(preferencesModel.pdfViewerPath, path, "PDF")
             } else if (path === "") {
                 console.log("[Main.qml TopMenuBar] onViewPdfTiledRequested(): 4 file pick cancelled")
             } // if file selected
@@ -851,9 +864,8 @@ ApplicationWindow {
                 "Image Files (*.png *.jpg *.jpeg);;PNG Files (*.png);;JPG Files (*.jpg *.jpeg);;All Files (*)")
             console.log("[Main.qml TopMenuBar] onViewPngRequested(): 3 path=" + path + " pngViewerPath=" + preferencesModel.pngViewerPath)
             if (path !== "") {
-                // Open the selected PNG or JPG file in the configured image viewer.
                 console.log("[Main.qml TopMenuBar] onViewPngRequested(): 4 opening viewer")
-                preferencesModel.openInViewer(preferencesModel.pngViewerPath, path)
+                root.openSelectedExportInViewer(preferencesModel.pngViewerPath, path, "PNG or JPG")
             } else if (path === "") {
                 console.log("[Main.qml TopMenuBar] onViewPngRequested(): 4 file pick cancelled")
             } // if file selected
@@ -1559,6 +1571,57 @@ ApplicationWindow {
 
         onAccepted: appController.initializeLayout(settingsModel.toJson())
     } // Dialog replaceLayoutWarningDialog
+
+    // -----------------------------------------------------------------------
+    // About dialog
+    // -----------------------------------------------------------------------
+    Dialog {
+        id: aboutDialog
+
+        title:    "About SeamlyLayout"
+        modal:    true
+        width:    440
+        anchors.centerIn: parent
+        standardButtons: Dialog.Ok
+
+        background: Rectangle {
+            color:        Theme.dialogBackground
+            border.color: Theme.violetDark
+            radius:       4
+        } // background Rectangle
+
+        contentItem: ColumnLayout {
+            spacing: 8
+
+            Text {
+                Layout.fillWidth: true
+                text:             "SeamlyLayout " + preferencesModel.applicationVersion
+                color:            Theme.textOnDark
+                font.pixelSize:   Theme.fontSizeNormal
+                font.bold:        true
+            } // Text application version
+
+            Text {
+                Layout.fillWidth: true
+                text:             "Qt " + preferencesModel.qtVersion + " is licensed under the "
+                                  + preferencesModel.qtLicenseNotice
+                                  + ". The Qt libraries are dynamically linked."
+                color:            Theme.textOnDark
+                font.pixelSize:   Theme.fontSizeSmall
+                wrapMode:         Text.WordWrap
+            } // Text Qt license notice
+
+            Text {
+                Layout.fillWidth: true
+                text:             "<a href=\"https://www.gnu.org/licenses/lgpl-3.0.html\">View the LGPLv3 license</a>"
+                textFormat:       Text.RichText
+                color:            Theme.textOnDark
+                linkColor:        Theme.violetLight
+                font.pixelSize:   Theme.fontSizeSmall
+                onLinkActivated: function(link) { Qt.openUrlExternally(link) }
+            } // Text LGPLv3 license link
+        } // contentItem ColumnLayout
+    } // Dialog aboutDialog
 
     // -----------------------------------------------------------------------
     // Error dialog
