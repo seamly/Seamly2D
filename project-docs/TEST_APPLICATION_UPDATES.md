@@ -9,6 +9,8 @@ Checked boxes preserve the user's recorded results; this review does not certify
 An unchecked box means pending unless a FAIL or BLOCKED note states otherwise.
 For repeated checks, record which patterns and materials were tested before checking the box.
 
+--> 'Detail 4' has been renamed, there is no 'Detail 4' piece anymore.
+
 ## Review status and next checks
 
 The Windows x64 MSI `26.11.718` built successfully. `nmake check`, `ctest --preset release` (8/8),
@@ -29,7 +31,8 @@ Install this MSI before completing the remaining GUI, CAD-reader, and user-patte
 
 Some recorded checks still have blank evidence fields. Keep their checked boxes, but complete these details:
 
-- [ ] Record tested About versions: Seamly2D `_____`; SeamlyMe `_____`; SeamlyLayout `_____`.
+- [x] Record tested About versions: Seamly2D `26.11.723_____`; SeamlyMe `26.11.723_____`; SeamlyLayout `26.11.723_____`.  
+- [x] Add an 'About' section to SeamlyLayout (button on the right side of top menu, next to the preferences icon).
 - [x] Record drill diameter and pattern units from section 7: `2 cm` in `male_shirt` (`cm` units).
 - [x] Record jacket2's displayed Base Size from section 9: `500`.
 - [x] Record the turn-point warning, affected pieces, size comparison, and export file from section 13.
@@ -49,9 +52,9 @@ Run from the repository root. Save edited patterns under new names; do not overw
 - [x] Save test copies of all three patterns in a separate validation folder.
 - [x] Relink each copy to the measurement file listed above when prompted.
 - [x] Confirm jacket2 uses the listed file, not its old link outside this repository.
-- [ ] Record the starting piece names, layout inclusion, quantities, materials, and hidden labels/grainlines.
-- [ ] Use separate export folders for jacket2, male_shirt, and trousers.
-- [ ] Keep unmodified copies for baseline comparisons and separate copies for marking, copy, and flip tests.
+- [x] Record the starting piece names, layout inclusion, quantities, materials, and hidden labels/grainlines.
+- [x] Use separate export folders for jacket2, male_shirt, and trousers.
+- [x] Keep unmodified copies for baseline comparisons and separate copies for marking, copy, and flip tests.
 
 ## 2. SeamlyMe — measurements and file pickers
 
@@ -64,8 +67,19 @@ Run from the repository root. Save edited patterns under new names; do not overw
 - [x] Open Template starts in the configured templates folder.
 - [x] Repeat after visiting another folder. Each picker still starts in its own configured folder.
 - [ ] With a separate test data root, missing picker folders are created and remain after cancelling the picker.
-- [ ] A folder-creation failure shows an error instead of silently opening another folder.
-- [ ] With a configured or renamed test data root, all three default folders follow that root.
+   - [ ] Select a different disposable data root; accept the update prompt once and decline it on a second run.
+--> I selected a new data root is selected in Application Preferences and answered the prompt to update the remaining paths, but the paths did not change in the Paths dlalog. See test-seamly-layout\screenshots\New-Data-Root-doesnt-update-remaining-paths-Screenshot 2026-11-08 072650.png.
+--> Fix this issue in a worktree as a feature branch then merge into run-seamlyLayout.
+- [x] A folder-creation failure shows an error instead of silently opening another folder.
+  - Use a disposable data root where a required child folder cannot be created. Confirm an explicit error and that the prior picker path remains selected.
+- [ ] With a configured or renamed test data root, all three default folders follow that root. 
+  - Verify Individual, Multisize, and Templates point to the three default folders under the new root.
+--> Seamly2D > File > Open opened to the prior data root's pattern directory.
+-->SeamlyMe > File > Open Individual opened previous directory
+-->SeamlyMe > File > Open Multisize opened previous directory
+-->SeamlyMe > File > Open Templace opened to the previous directory
+--> Fix this issue in a worktree as a feature branch then merge into run-seamlyLayout.
+
 - [x] Templates remain under `<dataRoot>\templates`; no migration to `measurements\template` is expected.
 
 Use a disposable data root for path tests. Do not rename or make the working measurement folders unwritable.
@@ -94,6 +108,9 @@ Use male_shirt. Repeat the pattern-label checks on jacket2.
 - [x] Cancelling template selection preserves the current label and filename.
 - [x] Matching default template lines display the default filename.
 - [ ] Custom stored lines without known file provenance display `none`, not an unrelated filename.
+  - Edit stored label lines without selecting a template file, then save and reopen the pattern. Confirm the filename displays `none`.
+  - --> Adding a new line to a label displays "\<empty>" on the new line. Then selecting a label variable from the 'Insert' dropdown list displays the variable but doesn't remove "<empty>". It should remove "\<empty>" from the line when a variable is added.
+  - --> Fix this issue in a worktree as a feature branch then merge with run-seamlyLayout
 - [x] Template edits still change the rendered label correctly.
 
 ## 5. Seamly2D — Flip and placement properties
@@ -110,9 +127,15 @@ Use an asymmetric male_shirt piece, such as FrontPanel.
 - [x] Undo and redo restore the displayed flip and its selected menu choice.
 - [x] Save and reopen preserve the choice and display.
 - [ ] Repeat Horizontal, Vertical, and Both on copied, united, and Mirror-on-Fold pieces.
+  - [ ]  some points don't flip yet they should flip.
+  --> Fix this issue in a worktree as a feature branch then merge with run-seamlyLayout. 
 - [x] Change a previously flipped piece to each other choice; the result does not accumulate extra flips.
 - [x] Rotation choices save and reopen correctly; visual rotation is not implemented.
+  - Layout Mode "Any" provides free rotation; Piece Mode does not visually apply the rotation choice.
 - [ ] Tilt None disables degrees; enabled degrees remain within 0–90.
+  - [x] Tilt with degress > 0 should visually rotate the pattern piece but not the grainline. Currently Tilt with degrees > 0 doesn't visually rotate the pattern piece.
+- [  ]  Tilt rotates the piece but doesn't rotate some of the points. 
+  - --> Fix this issue in a worktree as a feature branch then merge in run-seamlLayout.
 
 The flip changes the displayed choice. It must not flatten or rewrite the stored draft geometry.
 Section 6 records copied-source checks as passed. Section 5's unchecked row covers Horizontal, Vertical, and Both on copied, united, and Mirror-on-Fold pieces.
@@ -139,20 +162,32 @@ Use male_shirt, then a jacket2 piece.
 
 Use a male_shirt test copy and jacket2 Back. Add suitable live anchors if the piece has none.
 
+Anchor points are required to define drill holes and reference lines, so correction operations for anchor point add/edit/delete actions are essential; issues related to anchor points are included in this section.
+
 - [x] Piece Properties has a dedicated Drill holes page, separate from notch settings.
-- [x] Add a hole at a live center anchor with a known positive diameter.
+- [x] Add a Drill hole at an anchor point with a known positive diameter.
 - [x] Record diameter and pattern units: `2 cm` in `male_shirt` (`cm` units).
-- [x] Zero, negative, nonnumeric, and missing diameters show an error and cannot be added.
-- [ ] A missing or removed center anchor shows an error.
-- [ ] Add one Stripe reference and one Plaid reference between distinct live anchors.
-- [ ] Missing endpoints or coincident endpoints show an error.
+- [x] Zero, negative, nonnumeric, and missing diameters show an error and cannot be added
+- [ ] Adding an Anchor point generates error: In "C:\Users\susan\Projects\Seamly2D-private\test-seamly-layout\patterns\validation\trousers.sm2d": adding an Anchor Point to a piece generates 'Bad Id' message. 
+--> Determine why in a worktree and discuss a plan to this with me. If I agree with your plan then implement as a feature branch then merge with run-seamlyLayout. 
+- [ ] Opening "C:\Users\susan\Projects\Seamly2D-private\test-seamly-layout\patterns\validation\male_shirt.sm2d" yields error message: "Error parsing file. Exception: Invalid drill hole or reference line in piece 'Front_Panel'".
+--> Fix in worktree as a feature branch then merge into run-seamlyLayout.
+- [x] A Drill hole with a missing or removed center anchor displays an error.
+  - [x] Piece Mode: Trying to delete an anchor point that is in use will remove the anchor from the list but 'OK' and 'Apply' buttons do nothing so the deletion can't be saved. Add a display a message that the anchor point is in use and list the items where it is used, the user can click 'Close' button on this popup message to close it. Fix this in a worktree as a feature branch then merge into run-seamlyLayout. 
+  - [x] Draft Mode: Adding an anchor point to a piece when that anchor point has already been added generates a 'Bad Id' message. It should generate a popup message that the anchor point has already been added, the user can click 'Close' to close the popup message. 
+- [x] Add one Stripe reference and one Plaid reference between distinct live anchors.
+-> Stripe and Plaid reference lines should align with nodes along the path, not with anchor points. Change these reference lines to use path nodes instead of achor points. Fix this in a worktree as a feature branch then merge into run-seamlyLayout.
+- [x] Missing endpoints or coincident endpoints show an error.
+  - Try to use the same path node for both endpoints. For a missing endpoint, use a disposable pattern whose reference points to a deleted node.
 - [ ] Record separate Stripe/Plaid results; previously checked general marking tests do not complete these two unchecked cases.
+--> How to perform this test?
 - [x] Remove selected markings; only the selected marking disappears.
 - [x] Save and reopen preserve all valid markings and their types.
 - [x] Piece Mode displays the markings at their anchor positions.
 - [x] Moving a draft anchor moves its hole center or reference endpoint.
 - [x] Flip, Copy Piece, Union, and Mirror-on-Fold retain and transform the markings correctly.
-- [ ] Jacket2 size changes move hole centers with the graded geometry; diameter stays constant.
+- [x] SeamlyLayout Nested: Jacket2 size changes move hole centers with the graded geometry; diameter stays constant.
+  - [x] Drill holes for multisize pieces should be processed like grainlines so that each exists only once, and is grouped with grainlin and labels. Fix this in a worktree as a feature branch and merge into run-seamlyLayout.
 - [x] SeamlyLayout imports the same marking counts, positions, and physical diameters.
 - [x] Layout adjustment moves the markings with their piece.
 - [x] References do not enlarge packing bounds or prevent otherwise valid placement.
@@ -177,7 +212,10 @@ Check jacket2 Back, male_shirt BackPanel, and CollarTopInterface-Built-in-SA.
 - [x] A piece without a valid fold line exports `Fold:N`, including FrontPanel and mirrored full pieces.
 - [x] A correctly defined on-fold piece exports `Fold:Y`.
 - [x] DXF fold-line export does not warn that the fold line fails to connect with the cut line.
-- [ ] DXF cut/seam layers are 1/14; the mirror line is layer 6.
+- [ ] DXF cut/seam layers are 1/14; the mirror line is layer 6. 
+--> Analyze dxf report  
+- [ ] Previously, DXF R13 export of test-seamly-layout\patterns\validation\jacket2_40-146.sm2d.autosave geenerated turn point errors. see test-seamly-layout\screenshots\R13-turn-point-errors-Screenshot 2026-11-08 085423.png 
+--> Check current dxf report 
 - [x] Check varying-width notch depths and built-in seam allowance notches against the configured allowance.
 
 ## 9. Jacket2 — multisize handoff and layouts
@@ -198,8 +236,9 @@ Start from the baseline jacket2 copy. Use Paper > Roll, width 48 in, for the fir
 - [x] Nested colors differ visibly; legend squares match their sizes.
 - [x] Exported Nested SVG/PDF retains the colors, legend, and intended single annotation set.
 - [x] Switching materials preserves each material's selected size tab and layout.
-- [ ] Adjusting a piece moves its lines, labels, and markings together; saved adjustments persist.
-- [ ] Material controls are locked while layout generation or adjustment requires it.
+- [x] Adjusting a piece moves its lines, labels, and markings together; saved adjustments persist.
+- [x] Material controls are locked while layout generation or adjustment requires it.
+  - Start layout generation and confirm material controls stay disabled until it finishes. In Adjust Mode, move a piece, save, switch materials, and reopen the layout to confirm the adjustment and its lines, labels, and markings persist.
 - [x] A Marker roll may grow beyond 500 in; canvas, adjustment frame, and SVG height agree.
 - [x] No included size silently disappears. Any unplaced piece is named explicitly.
 
@@ -209,7 +248,7 @@ Start from the baseline jacket2 copy. Use Paper > Roll, width 48 in, for the fir
 - [x] Names, letters, quantities, materials, hidden objects, and placement properties match Seamly2D.
 - [x] With sufficient media, every included piece is placed.
 - [x] Assign at least one test piece to each material: Fabric, Lining, Interfacing, and Interlining.
-- [ ] Confirm each material layout contains only its assigned pieces.
+- [x] Confirm each material layout contains only its assigned pieces.
 - [x] Save/reopen and repeated Layout Mode retain the material assignments.
 - [x] Grainline/label placement, fold lines, built-in allowance, copied pieces, and markings match the edited test pattern.
 - [x] Export filenames identify the pattern, material, tab, and format where applicable.
@@ -218,16 +257,25 @@ Start from the baseline jacket2 copy. Use Paper > Roll, width 48 in, for the fir
 
 Start with Paper > Sheet. Use a custom 36 × 36 in sheet when available. Earlier testing used Arch E (36 × 48 in), the closest available option. Keep a baseline copy without added markings.
 
+- [x] Paper > Sheets > Custom implemented
 - [x] Oversized-piece dialog names the affected legs, including Back and the applicable Front variants.
 - [x] Heading, descriptions, list, and action labels are readable.
-- [ ] Cancelling leaves the application responsive and allows Layout Settings to be changed.
-- [ ] Split the pieces creates labelled parts with matching join identifiers and match notches. Reported failure: parts without a fold line were not offset from the fold by the piece-gap width.
+- [x] Cancelling leaves the application responsive and allows Layout Settings to be changed.
+  - In the "Pieces do not fit the media" dialog, choose Cancel. Confirm the dialog closes, the application remains responsive, and Layout Settings can be opened.
+- [ ] Paper > Sheet: 'Split the pieces' creates labelled parts with matching join identifiers and match notches. 
+  - [ ] 'Split the pieces' works in that it splits the pieces.
+  - [ ] 'Split the pieces' should place pieces on multiple sheets instead of expanding the media. Multiple sheets should be exported as a muti-sheet PDF file -- all other export formats are disabled.
+-> Fix this in a worktree as a feature branch then merge into run-seamlyLayout.
+   - A part without a fold line is not expected to be offset from a fold by the piece-gap width.
+    - Failure evidence: `test-seamly-layout\patterns\validation\layouts_trousers\error-split-the-pieces-pieces-could-not-be-placed-Screenshot 2026-11-07 212921.png` shows 11 unplaced parts. Add a sheet and retry placement for unplaced parts until all parts are placed or no further placement is possible.
 - [x] Every part is accounted for; any unplaced part is named in the warning.
 - [x] The fabric warning reports the offending piece dimension and effective folded-fabric dimension.
-- [ ] SVG/PDF/DXF exports show the same split parts and joins.
+- [x] SVG/PDF/DXF exports show the same split parts and joins.
 - [x] Make the media bigger retains whole pieces and enlarges the frame sufficiently on 32 in folded fabric.
-- [ ] A successful enlarged layout has no missing pieces or unexplained warning.
-- [ ] Paper sheets show the oversized-piece warning when included pieces do not fit. Reported warning gap; verify after the fix.
+- [x] A successful enlarged media layout has no missing pieces or unexplained warning.
+  - [x] display a popup message wth the new media dimensions
+  - [x]  if media=fabric then do not enlarge the width, only enlarge the height
+- [x] Paper sheets show the oversized-piece warning when included pieces do not fit. Reported warning gap; verify after the fix.
 - [x] Repeat on a narrow paper roll; canvas and exported dimensions reflect any enlargement.
 - [x] Set Fabric width 36 in, Folded, giving 18 in working width.
 - [x] Fabric starts with a 500 in length and trims to the completed layout.
@@ -253,46 +301,68 @@ Use jacket2 for tab restrictions and male_shirt/trousers for individual layouts.
 - [x] Export all tabs omits unsupported Marker/Base Size tiled-PDF outputs without freezing.
 - [x] Export SVG using each offered text mode; labels, geometry, and grouping are correct.
 - [x] Export PDF, tiled PDF, PNG, JPG, PS, EPS, and HPGL where available.
-- [ ] Each exported file opens in its appropriate viewer and contains the expected pieces.
-- [ ] View > PDF opens the selected PDF. Reported failure: no PDF opened.
-- [ ] The PNG viewer opens exported PNG files. Reported failure: the PNG viewer does not work.
+- [x] Each exported file opens in its appropriate viewer and contains the expected pieces.
+  - [x] View > PDF opens the selected PDF. Reported failure: no PDF opened.
+  -->View > PDF needs a default value that will open the file in the system default browser
+  - [x] The PNG viewer opens exported PNG files. Reported failure: the PNG viewer does not work.
+    - [x] View > PNG needs a default value that will open the file in the system default browser 
 - [x] Export all tabs uses distinct material/tab filenames without overwriting unrelated outputs.
 - [x] Nested non-DXF exports show the intended smallest-size grainline/label set per piece.
-- [ ] PNG/JPG print resolution and dimensions match the selected settings.
-- [ ] Letter tiled PDFs measure 8.5 × 11 in portrait and 11 × 8.5 in landscape.
-- [ ] A4 tiled PDFs measure 210 × 297 mm portrait and 297 × 210 mm landscape.
-- [ ] Print a calibration page at Actual size/100%, without Fit or Shrink.
-- [ ] A known 2 in line measures 50.8 mm, or a known pattern dimension measures correctly.
+- [x] PNG/JPG print resolution and dimensions match the selected settings. Check the export files' details.
+--> there are no selected settings. All exports are 96 dpi with 32 bit color depth.
+- [ ] Letter tiled PDFs measure 8.5 × 11 in portrait and 11 × 8.5 in landscape. Check the export files' details.
+- [ ] A4 tiled PDFs measure 210 × 297 mm portrait and 297 × 210 mm landscape. Check the export files' details.
+- [ ] Print a calibration page at Actual size/100%, without Fit or Shrink. 
+  - [ ] Print a tiled PDF of layout with calibration square.
+- [ ] A known 2 in line measures 50.8 mm, or a known pattern dimension measures correctly. 
+  - [ ] Print a tiled PDF of layout with calibration square.
 - [x] Scale-check grids appear only where requested and remain absent from DXF/HPGL cutter exports.
-- [ ] PDF page boundaries, overlap, grid, and joins are readable and align when assembled.
+- [ ] PDF (tiled) page boundaries, overlap, grid, and joins are readable and align when assembled. 
+  - [ ] Print a tiled PDF and join.
 
 ## 13. DXF validation
 
 Repeat on jacket2 Fabric and Lining, then male_shirt and trousers. Use an external CAD reader only after local checks.
 For ASTM, verify cut/seam/fold layers 1/14/6. Do not apply ASTM annotation-layer expectations to AAMA.
 Pattern cm units must convert to physical mm for METRIC or inches for ENGLISH; a display-unit change alone proves neither.
-
+-### Report analysis
+  - AAMA: 
+    - "C:\Users\susan\seamly2d\layouts\jacket2_40-146_AAMA_Fabric_BaseSize500_202611081029.dxf"
+    - "C:\Users\susan\seamly2d\layouts\jacket2_40-146_AAMA_Fabric_BaseSize500_202611081029.rul"
+    - "C:\Users\susan\seamly2d\layouts\jacket2_40-146_AAMA_Fabric_BaseSize500_202611081029-dxf-report.pdf"
+  - ASTM:
+    - "C:\Users\susan\seamly2d\layouts\jacket2_40-146_R13_Fabric_BaseSize500_202611081029.dxf"
+    - "C:\Users\susan\seamly2d\layouts\jacket2_40-146_R13_Fabric_BaseSize500_202611081029.rul"
+    - "C:\Users\susan\seamly2d\layouts\jacket2_40-146_CLO3D_Fabric_BaseSize500_202611081029-dxf-report.pdf"
+    - 
 - [x] Export DXF-ASTM R13, CLO3D preset, and DXF-AAMA R11 from supported tabs.
 - [ ] Declared units and measured geometry agree; compare mm, cm, and inch display/export choices.
 - [ ] Curves, corners, notches, grainlines, labels, and fold lines match the source pattern.
 - [ ] Piece text matches source names, letters, quantities, materials, rotation, flip, tilt, and fold eligibility.
 - [ ] Drill holes use ASTM layer 13 and group 30 diameter.
 - [ ] Stripe/Plaid references use layers 9/10; hole positions and diameters remain correct in metric and English exports.
-- [ ] Jacket2 Base Size export creates its `.rul` when pieces grade.
+- [x] Jacket2 Base Size export creates its `.rul` when pieces grade.
 - [x] Individual Size exports have no `.rul`.
-- [ ] Every expected jacket2 piece grades; explicitly check Lining Detail 4.
-- [x] Record any turn-point warning and the affected pieces. Export `jacket2_40-146_R13_Lining_BaseSize500_202611071551.dxf` reported `Size_500_Piece_2_Lower_Front_D` and `Size_500_Piece_5_Lower_Front_2-D` as not graded because size 220 has different cut-line turn points from size 500. Detail 4 grading remains unresolved.
+- [x] Every expected jacket2 piece grades
+- [ ] Record any turn-point warning and the affected pieces. 
+  - [x] When exporting DXF, no turn point warnings 
+  - [ ] In dxf report, no turn point warnings
 - [x] Compare the AAMA, CLO3D, and R13 reports: `jacket2_40-146_AAMA_Lining_BaseSize500_202611071550-dxf-report.pdf`, `jacket2_40-146_CLO3D_Lining_BaseSize500_202611071550-dxf-report.pdf`, and `jacket2_40-146_R13_Lining_BaseSize500_202611071538-dxf-report.pdf`.
 - [ ] Re-export AAMA after the source fix and confirm layer-2/3 markers stay on boundary layer 1.
-- [ ] Grading uses Seamly2D's actual sizes; no extra size is invented during import.
-- [ ] Base Size `.dxf` and `.rul` import together correctly in the chosen reader.
-- [ ] Record reader name, version, and unit selection.
+  - [ ] dxf report confirms
+- [x] Grading uses Seamly2D's actual sizes; no extra size is invented during import.
+- [x] Base Size `.dxf` and `.rul` import together correctly in the chosen reader.
 - [ ] AAMA and ASTM retain their distinct format headers and piece text.
+  - [ ] in dxf report, confirm AAMA is correct
+  - [ ] in dxf report, confirm ASTM is correct
 - [ ] CLO3D with Swap Cutting Line and Sewing Line OFF preserves cut/sew roles.
-- [ ] If testing the swap option ON, confirm that only those roles reverse.
-- [x] Save local reports before uploading anything. Upload pattern/export files only when you choose to share them.
+  - [ ] In the CLO3D CAD import dialog, leave "Swap Cutting Line and Sewing Line" unchecked.
+    - [ ] Confirm that only those roles reverse
+  - [ ] In the CLO3D CAD import dialog, leave "Swap Cutting Line and Sewing Line" checked.
+      - [ ] Confirm cut moves to layer 14 and sew moves to layer 1; geometry and other layer assignments stay unchanged.
+  - [ ] In dxf report, confirm cut is layer 1 and sew is layer 14.
 
-Report review: all three identify the intended format and report METRIC units with geometry consistent with millimeters. Each notes a layer-5 endpoint mismatch up to 227.990; investigate it with grading checks. The CLO3D and R13 reports each show zero departures, zero extensions, and four advisories for validation curves and excess curve points. The AAMA report shows one departure: 22 layer-2/3 points in `4_Back-2_A-3_500`, plus similar points in four other pieces, lie on sew line layer 14 rather than boundary layer 1. Its `Material` text is an allowed optional extension. The source fix restricts AAMA key-point markers to boundary layer 1; confirm it with a new export. The reports do not replace CAD-reader checks.
+The three supplied reports identify the intended formats and declare METRIC units, with geometry consistent with millimeters. Each reports a layer-5 endpoint mismatch up to 227.990; investigate it with grading checks. The CLO3D and R13 reports each show zero departures, zero extensions, and four advisories for validation curves and excess curve points. The AAMA report shows one departure for declared points off the boundary, one extension for its allowed `Material` text, and one advisory. The reports were generated by Seamly2D `26.11.614`; re-export with the current MSI to confirm the AAMA boundary-marker fix. The reports do not replace CAD-reader checks.
 
 The exporter does not invent grading correspondences when sizes have different turn points. Such pieces remain ungraded with a warning; keep the piece-grading check pending until each expected piece grades or has a documented disposition.
 
@@ -304,6 +374,14 @@ Pass each application's quoted executable path explicitly; the executable does n
 
 The rebuilt CLI runners passed bounded relative-input checks. The remaining rows require checks beyond those runners.
 Run from the repository root; repeat from a different directory using matching relative paths.
+
+Use the built executables and explicit test inputs. These commands exercise the bounded suites; add the same input paths and CLI options to any direct run:
+
+```powershell
+python src\test\CollectionTest\test_pattern_input_status.py "<Seamly2D.exe>" build\pattern-input-validation
+python src\test\Seamly2DTest\test_measurement_cli.py "<SeamlyMe.exe>" build\measurement-cli --individual test-seamly-layout\measurements\individual\male_chest_102cm.smis --multisize test-seamly-layout\measurements\multisize\gost_man_ru.smms --pattern test-seamly-layout\patterns\jacket2_40-146.sm2d
+python src\test\SeamlyLayoutTest\test_headless_export.py "<SeamlyLayout.exe>" build\cli-validation --seamly2d "<Seamly2D.exe>" --pattern test-seamly-layout\patterns\jacket2_40-146.sm2d --measurements test-seamly-layout\measurements\multisize\gost_man_ru.smms --size 40 --height 146
+```
 
 - [ ] Seamly2D `--test` resolves a relative `.sm2d` filename against the launch directory.
 - [ ] Seamly2D resolves relative `--mfile` paths against the same launch directory.
@@ -341,8 +419,8 @@ Keep measurements and test patterns as copied inputs, since older-format convers
 
 - [ ] Summarize PASS/FAIL/BLOCKED by application and pattern.
 - [ ] Attach failing exports, screenshots, piece names, and exact layout settings.
-- [ ] Leave original patterns and measurements unchanged.
-- [ ] Keep edited validation copies and exports for repeat tests.
+- [x] Leave original patterns and measurements unchanged.
+- [x] Keep edited validation copies and exports for repeat tests.
 - [ ] Do not mark the entire backlog complete while Detail 4 grading, the remaining derived-piece Flip matrix, or CAD checks remain unresolved.
 - [ ] Exact Richmond source-pattern validation remains separate; these three patterns do not replace that missing fixture.
 
