@@ -10,3 +10,6 @@ Piece Mode uses distinct symbols:
 - Live anchors appear as blue point markers with black outlines.
 
 Seamly2D prevents deletion of an anchor used by a drill hole or reference line. Remove the marking before deleting its anchor.
+
+New reference lines use main-path nodes. Files saved by earlier versions may use live anchor IDs.
+Those lines remain loadable, and their anchors cannot be deleted until the lines are removed.

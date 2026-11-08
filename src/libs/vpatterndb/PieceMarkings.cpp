@@ -83,7 +83,8 @@ bool PieceMarkings::valid(const QVector<PieceDrillHole> &holes, const QVector<Pi
     for (const PieceReferenceLine &line : lines)
     {
         if (line.start == 0 || line.end == 0 || line.start == line.end
-            || !path_nodes.contains(line.start) || !path_nodes.contains(line.end)
+            || (!path_nodes.contains(line.start) && !available_anchors.contains(line.start))
+            || (!path_nodes.contains(line.end) && !available_anchors.contains(line.end))
             || (line.type != QStringLiteral("stripe") && line.type != QStringLiteral("plaid")))
         {
             return false;
@@ -92,11 +93,19 @@ bool PieceMarkings::valid(const QVector<PieceDrillHole> &holes, const QVector<Pi
     return true;
 }
 
-bool PieceMarkings::usesAnchor(quint32 anchor, const QVector<PieceDrillHole> &holes)
+bool PieceMarkings::usesAnchor(quint32 anchor, const QVector<PieceDrillHole> &holes,
+                               const QVector<PieceReferenceLine> &lines)
 {
     for (const PieceDrillHole &hole : holes)
     {
         if (hole.center == anchor)
+        {
+            return true;
+        }
+    }
+    for (const PieceReferenceLine &line : lines)
+    {
+        if (line.start == anchor || line.end == anchor)
         {
             return true;
         }

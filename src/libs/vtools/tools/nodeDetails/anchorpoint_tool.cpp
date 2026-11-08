@@ -208,7 +208,7 @@ void AnchorPointTool::deleteTool(bool ask)
     if (m_pieceId != NULL_ID)
     {
         const VPiece piece = VAbstractTool::data.GetPiece(m_pieceId);
-        if (PieceMarkings::usesAnchor(m_id, piece.drillHoles()))
+        if (PieceMarkings::usesAnchor(m_id, piece.drillHoles(), piece.referenceLines()))
         {
             QStringList dependencies;
             const QString anchor_name = VAbstractTool::data.GetGObject(m_id)->name();
@@ -218,6 +218,16 @@ void AnchorPointTool::deleteTool(bool ask)
                 {
                     dependencies.append(tr("Drill hole at %1 (diameter %2)")
                                             .arg(anchor_name, QString::number(hole.diameter)));
+                }
+            }
+            for (const PieceReferenceLine &line : piece.referenceLines())
+            {
+                if (line.start == m_id || line.end == m_id)
+                {
+                    const QString marking_type = line.type == QStringLiteral("stripe")
+                                                     ? tr("Stripe")
+                                                     : tr("Plaid");
+                    dependencies.append(tr("%1 reference line").arg(marking_type));
                 }
             }
             QMessageBox message(QMessageBox::Warning, tr("Cannot delete anchor"),

@@ -102,8 +102,13 @@ void TST_PieceMarkings::rejectsUnsafeValues()
     QVERIFY(!PieceMarkings::valid({}, {{8, 9, QStringLiteral("cut")}}, {7}, {8, 9}));
     QVERIFY(!PieceMarkings::valid({}, {{8, 10, QStringLiteral("plaid")}}, {7}, {8, 9}));
     QVERIFY(!PieceMarkings::valid({}, {{7, 9, QStringLiteral("plaid")}}, {7}, {8, 9}));
-    QVERIFY(PieceMarkings::usesAnchor(7, {{7, 0.1}}));
-    QVERIFY(!PieceMarkings::usesAnchor(8, {}));
+    const QVector<PieceReferenceLine> legacy_lines{{7, 8, QStringLiteral("stripe")}};
+    QVERIFY(PieceMarkings::valid({}, legacy_lines, {7, 8}, {10, 11}));
+    QVERIFY(PieceMarkings::valid({}, {{7, 10, QStringLiteral("plaid")}}, {7}, {10, 11}));
+    QVERIFY(!PieceMarkings::valid({}, {{7, 12, QStringLiteral("plaid")}}, {7}, {10, 11}));
+    QVERIFY(PieceMarkings::usesAnchor(7, {{7, 0.1}}, {}));
+    QVERIFY(PieceMarkings::usesAnchor(7, {}, legacy_lines));
+    QVERIFY(!PieceMarkings::usesAnchor(8, {}, {}));
 }
 
 void TST_PieceMarkings::currentSchemaAndCopy()
