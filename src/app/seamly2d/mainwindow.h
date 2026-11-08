@@ -387,6 +387,7 @@ private:
     void               setSceneBackgroundColor();
     void               SaveCurrentScene();
     void               RestoreCurrentScene();
+    void               refreshToolData();
 
     void               MinimumScrollBar();
 
