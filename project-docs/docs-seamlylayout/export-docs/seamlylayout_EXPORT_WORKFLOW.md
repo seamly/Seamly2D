@@ -41,7 +41,7 @@ ExportMenu SvgModeItem.onTriggered → chosen(mode) → exportSvgModeRequested(m
       → preferencesModel.saveSvgTextMode(iniPath, mode)   last mode, marked next time
       → pendingExportSettings = mode; exportStartTimer
         → appController.exportSvg(path, mode)
-          → clone_export_layout_doc()                    Nested: smallest size's grainline and labels only
+          → clone_export_layout_doc()                    Nested: smallest size's drills, grainline and labels only
           → size_groups::group_pieces_by_size(doc)        Nested only
           → nested_annotations::gather_labels_and_grainlines(doc)   Nested only
           → svg_label_text::apply_text_mode(doc, mode)    skipped for "asSupplied"
@@ -178,11 +178,11 @@ ExportMenu EPS / PostScript (PS) → exportPostscriptRequested("eps" | "ps")
 - `export_pdf_tiled` refuses the Marker tab with an error dialog and writes no file.
 - The View menu keeps PDF (Tiled): it opens files already written.
 
-## Nested tab — one grainline and label set per piece
+## Nested tab — one annotation set per piece
 
-- Every export but DXF-ASTM keeps the grainline and labels of each piece-set's smallest size only.
+- Every export but DXF-ASTM keeps the drills, grainline and labels of each piece-set's smallest size only.
 - Labels: `piece_label`, `pattern_label`, `size_label`. Outlines, notches, fold lines and internal paths of every size stay.
-- Reason: a nested multisize file shows one set of labels and one grainline per piece.
+- Reason: a nested multisize file shows one drill set, one label set and one grainline per piece.
 - Smallest size: `data-size` compared as numbers; as text when a size is not a number.
 - `clone_export_layout_doc` → `nested_annotations::keep_smallest_size_annotations`. PDF, PDF (Tiled), SVG, PNG, JPG, HPGL, PS, EPS and the paid formats use it.
 - Paper-sheet PDF: `sheets::build_sheet_export_inputs` strips after the piece extraction, so the pieces pack as on the Nested tab.

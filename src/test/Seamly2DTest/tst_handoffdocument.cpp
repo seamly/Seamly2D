@@ -701,12 +701,10 @@ void TST_HandoffDocument::liveMarkingAnchorsGradeWithConstantDiameter() const
     {
         QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
         VPiece piece = make_piece(data.data(), true, false, false);
-        piece.getAnchors() = {20, 21, 22};
+        piece.getAnchors() = {20};
         data->UpdateGObject(20, new VPointF(120, 130, "Drill", 0, 0));
-        data->UpdateGObject(21, new VPointF(30, 40, "Start", 0, 0));
-        data->UpdateGObject(22, new VPointF(230, 240, "End", 0, 0));
         piece.setDrillHoles({{20, 2}});
-        piece.setReferenceLines({{21, 22, QStringLiteral("stripe")}, {20, 22, QStringLiteral("plaid")}});
+        piece.setReferenceLines({{2, 4, QStringLiteral("stripe")}, {3, 5, QStringLiteral("plaid")}});
         const HandoffPiece first = HandoffPiece::create(piece, data.data());
         QVERIFY(first.marking_error().isEmpty());
         QCOMPARE(first.drill_holes().size(), 1);
@@ -714,12 +712,12 @@ void TST_HandoffDocument::liveMarkingAnchorsGradeWithConstantDiameter() const
         QCOMPARE(first.drill_holes().first().diameter, ToPixel(2, unit));
         QCOMPARE(first.reference_lines().size(), 2);
         data->UpdateGObject(20, new VPointF(150, 160, "Drill", 0, 0));
-        data->UpdateGObject(22, new VPointF(260, 270, "End", 0, 0));
+        data->UpdateGObject(4, new VPointF(260, 270, "A4", 0, 0));
         const HandoffPiece graded = HandoffPiece::create(piece, data.data());
         QVERIFY(graded.marking_error().isEmpty());
         QCOMPARE(graded.drill_holes().first().center, QPointF(150, 160));
         QCOMPARE(graded.drill_holes().first().diameter, first.drill_holes().first().diameter);
-        QCOMPARE(graded.reference_lines().first().line, QLineF(30, 40, 260, 270));
+        QCOMPARE(graded.reference_lines().first().line, QLineF(200, 0, 260, 270));
         QCOMPARE(first.drill_holes().first().center, QPointF(120, 130));
 
         piece.setDrillHoles({{1, 2}});
@@ -732,13 +730,15 @@ void TST_HandoffDocument::liveMarkingAnchorsGradeWithConstantDiameter() const
         piece.setDrillHoles({{20, 2}});
         piece.setReferenceLines({{1, 22, QStringLiteral("stripe")}});
         QVERIFY(!HandoffPiece::create(piece, data.data()).marking_error().isEmpty());
-        piece.setReferenceLines({{21, 24, QStringLiteral("stripe")}});
+        piece.setReferenceLines({{2, 24, QStringLiteral("stripe")}});
         piece.getAnchors().append(24);
+        data->UpdateGObject(24, new VPointF(250, 250, "Anchor", 0, 0));
         QVERIFY(!HandoffPiece::create(piece, data.data()).marking_error().isEmpty());
-        piece.setReferenceLines({{21, 23, QStringLiteral("stripe")}});
+        piece.setReferenceLines({{2, 3, QStringLiteral("stripe")}});
+        data->UpdateGObject(3, new VPointF(200, 0, "A3", 0, 0));
         QVERIFY(!HandoffPiece::create(piece, data.data()).marking_error().isEmpty());
-        piece.setReferenceLines({{21, 22, QStringLiteral("stripe")}});
-        data->UpdateGObject(22, new VPointF(30, 40, "End", 0, 0));
+        piece.setReferenceLines({{2, 4, QStringLiteral("stripe")}});
+        data->UpdateGObject(4, new VPointF(200, 0, "A4", 0, 0));
         QVERIFY(!HandoffPiece::create(piece, data.data()).marking_error().isEmpty());
     }
 }

@@ -3,25 +3,27 @@
 // MIT License: https://opensource.org/licenses/MIT
 
 // @file annotation_alignment.rs
-// @brief Gives every size of a multisize piece the base size's grainline and label positions.
+// @brief Gives every size of a multisize piece the base size's annotation positions.
 //
-// A piece-set holds one piece per size. At import the grainline, piece label and
-// pattern label of each size move to the place the base size has them, measured
-// from the stack point: the start of the fold line when every size has one, else
-// the centre of the piece outline's bounding box.  The Nested tab stacks the sizes
-// of a piece-set on the same point (`svg_dom::center_piece_sets`), so their
-// grainlines and labels stack exactly; every other tab shows them in the same place
-// in each size.
+// A piece-set holds one piece per size. At import each size's drill holes,
+// grainline, piece label and pattern label move to the base size's place,
+// measured from the stack point: the start of the fold line when every size has
+// one, else the centre of the piece outline's bounding box. The Nested tab
+// stacks the sizes on the same point, so these annotations stack exactly.
 //
-// Seamly2D sends no group for a hidden grainline or label, so nothing moves for it.
-// A moved grainline or label that leaves the cut line of a smaller size is reported.
+// Seamly2D sends no group for a hidden annotation, so nothing moves for it. A
+// moved annotation that leaves the cut line of a smaller size is reported.
 
 use geometry::{Matrix2D, Path, PathSegment, Point};
 use xmltree::Element;
 
 // @brief Annotation groups that move to the base size's place, with the name a report uses.
-const ANNOTATION_TYPES: [(&str, &str); 3] =
-    [("grainline", "grainline"), ("piece_label", "piece label"), ("pattern_label", "pattern label")];
+const ANNOTATION_TYPES: [(&str, &str); 4] = [
+    ("drill", "drill hole"),
+    ("grainline", "grainline"),
+    ("piece_label", "piece label"),
+    ("pattern_label", "pattern label"),
+];
 
 // @brief Offset below which an annotation counts as in place, in px.
 const TOLERANCE_PX: f32 = 0.01;
@@ -29,7 +31,7 @@ const TOLERANCE_PX: f32 = 0.01;
 // @brief What `align_size_annotations` did.
 #[derive(Debug, Default, PartialEq)]
 pub(crate) struct AlignmentReport {
-    // Number of grainline and label groups moved.
+    // Number of drill, grainline and label groups moved.
     pub moved: usize,
     // One line per piece and annotation that lies past the cut line in some sizes:
     // "Back: pattern label past the cut line in sizes 220, 240".
@@ -40,14 +42,14 @@ pub(crate) struct AlignmentReport {
 pub(crate) fn outside_warning(lines: &[String]) -> String {
     let bullets: Vec<String> = lines.iter().map(|line| format!("\u{2022} {line}")).collect();
     format!(
-        "Every size shows its grainline and labels where the base size has them. \
+        "Every size shows its annotations where the base size has them. \
          In some sizes they now lie past the cut line:\n\n{}\n\n\
          Move them toward the middle of the piece in the base size in Seamly2D.",
         bullets.join("\n")
     )
 } // fn outside_warning
 
-// @brief Move the grainline and labels of every size to the base size's place.
+// @brief Move the annotations of every size to the base size's place.
 //
 // @param doc Imported document; changed in place.
 // @return The groups moved, and the annotations that leave a cut line.
@@ -205,9 +207,12 @@ fn cut_outline(piece: &Element) -> Vec<Point> {
 
 // @brief Point that marks where an annotation group sits, in the piece frame.
 //
-// A grainline: the middle of its line. A label: the anchor of its first text line;
-// a label drawn as paths: the centre of its points.
+// A drill hole: its circle centre. A grainline: the middle of its line. A
+// label: the anchor of its first text line, or the centre of its paths.
 pub(crate) fn reference_point(group: &Element) -> Option<Point> {
+    if is_type(group, "drill") {
+        return first_circle_centre(group, Matrix2D::IDENTITY);
+    } // if drill hole
     if is_type(group, "grainline") {
         let (rear, front) = crate::size_labels::first_path_ends(group, Matrix2D::IDENTITY)?;
         return Some(Point::new((rear.x + front.x) / 2.0, (rear.y + front.y) / 2.0));
@@ -221,6 +226,9 @@ pub(crate) fn reference_point(group: &Element) -> Option<Point> {
 
 // @brief Points that must lie inside the cut line: the grainline ends, or every text line anchor of a label.
 fn annotation_points(group: &Element) -> Vec<Point> {
+    if is_type(group, "drill") {
+        return first_circle_centre(group, Matrix2D::IDENTITY).into_iter().collect();
+    } // if drill hole
     if is_type(group, "grainline") {
         return crate::size_labels::first_path_ends(group, Matrix2D::IDENTITY)
             .map(|(rear, front)| vec![rear, front])
@@ -230,6 +238,22 @@ fn annotation_points(group: &Element) -> Vec<Point> {
     collect_text_anchors(group, Matrix2D::IDENTITY, &mut anchors);
     anchors
 } // fn annotation_points
+
+// @brief Centre of the first transformed circle in `elem`'s subtree.
+fn first_circle_centre(elem: &Element, parent: Matrix2D) -> Option<Point> {
+    let matrix = parent.mul(&own_transform(elem));
+    if elem.name == "circle" {
+        let x = elem.attributes.get("cx")?.parse::<f32>().ok()?;
+        let y = elem.attributes.get("cy")?.parse::<f32>().ok()?;
+        return Some(matrix.apply_to_point(Point::new(x, y)));
+    } // if circle
+    for child in elem.children.iter().filter_map(|n| n.as_element()) {
+        if let Some(point) = first_circle_centre(child, matrix) {
+            return Some(point);
+        } // if circle found
+    } // for each child
+    None
+} // fn first_circle_centre
 
 // @brief Anchor (x, y) of the first `<text>` in `elem`'s subtree, in the piece frame.
 fn first_text_anchor(elem: &Element, parent: Matrix2D) -> Option<Point> {
@@ -330,17 +354,19 @@ mod tests {
     use super::*;
 
     // @brief Two sizes of Front: the base size 36 and a larger size 38 drafted 50 px right and down.
-    // Size 38 has its grainline and label elsewhere; size 36 has them near the outline centre.
+    // Size 38 has its annotations elsewhere; size 36 has them near the outline centre.
     const TWO_SIZES: &str = r#"<svg xmlns="http://www.w3.org/2000/svg">
   <g id="pattern-1" data-type="pattern" data-measurements="multisize" data-sizes="36,38" data-base-size="36">
     <g id="piece-set-1" data-type="piece-set" data-name="Front">
       <g id="piece-1_s36" data-type="piece" data-size="36" data-name="Front">
         <g data-type="cutline"><path d="M0,0 L100,0 L100,200 L0,200 Z"/></g>
+        <g data-type="drill"><g transform="translate(5 10)"><circle cx="25" cy="50" r="2"/></g></g>
         <g data-type="grainline"><g transform="matrix(1,0,0,1,10,20)"><path d="M40,130 L40,30"/></g></g>
         <g data-type="piece_label"><g transform="matrix(1,0,0,1,30,40)"><text x="0" y="14">Front</text></g></g>
       </g>
       <g id="piece-1_s38" data-type="piece" data-size="38" data-name="Front">
         <g data-type="cutline"><path d="M50,50 L170,50 L170,290 L50,290 Z"/></g>
+        <g data-type="drill"><circle cx="130" cy="210" r="2"/></g>
         <g data-type="grainline"><path d="M60,250 L60,100"/></g>
         <g data-type="piece_label"><g transform="matrix(1,0,0,1,140,260)"><text x="0" y="14">Front</text></g></g>
       </g>
@@ -369,16 +395,19 @@ mod tests {
         assert!((a.x - b.x).abs() < 0.01 && (a.y - b.y).abs() < 0.01, "{a:?} != {b:?}");
     } // fn approx
 
-    // @brief Every size takes the base size's grainline and label offset from its outline centre.
+    // @brief Every size takes the base size's annotation offsets from its outline centre.
     #[test]
     fn sizes_take_the_base_size_offsets() {
         let mut doc = svg_dom::Document::parse(TWO_SIZES).expect("fixture parses");
+        let base_drill = offset(&doc, "36", "drill");
         let base_grain = offset(&doc, "36", "grainline");
         let base_label = offset(&doc, "36", "piece_label");
         let report = align_size_annotations(&mut doc);
-        assert_eq!(report.moved, 2, "size 38 grainline and label move; size 36 stays");
+        assert_eq!(report.moved, 3, "size 38 drill, grainline and label move; size 36 stays");
+        approx(offset(&doc, "38", "drill"), base_drill);
         approx(offset(&doc, "38", "grainline"), base_grain);
         approx(offset(&doc, "38", "piece_label"), base_label);
+        approx(offset(&doc, "36", "drill"), base_drill);
         approx(offset(&doc, "36", "grainline"), base_grain);
         assert!(report.outside.is_empty(), "{:?}", report.outside);
 
@@ -433,7 +462,7 @@ mod tests {
         let mut doc = svg_dom::Document::parse(&svg).expect("fixture parses");
         let before = child_of_type(piece(&doc, "38"), "grainline").and_then(reference_point).expect("grainline");
         let report = align_size_annotations(&mut doc);
-        assert_eq!(report.moved, 1, "only the label moves");
+        assert_eq!(report.moved, 2, "the drill and label move");
         approx(child_of_type(piece(&doc, "38"), "grainline").and_then(reference_point).expect("grainline"), before);
     } // hidden_base_annotation_moves_nothing
 } // mod tests

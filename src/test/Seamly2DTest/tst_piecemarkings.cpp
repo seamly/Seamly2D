@@ -9,6 +9,7 @@
 
 #include "tst_piecemarkings.h"
 #include "../../libs/vpatterndb/vpiece.h"
+#include "../../libs/vpatterndb/vpiecenode.h"
 #include "../../libs/vpatterndb/vcontainer.h"
 #include "../../libs/vgeometry/vpointf.h"
 #include "../../libs/vtools/dialogs/tools/piece/PieceMarkingsEditor.h"
@@ -47,6 +48,16 @@ public:
     void UpdateToolData(const quint32 &, VContainer *) override {}
     void LiteParseTree(const Document &) override {}
 };
+
+QVector<quint32> pathNodeIds(const QVector<VPieceNode> &nodes)
+{
+    QVector<quint32> ids;
+    for (const VPieceNode &node : nodes)
+    {
+        ids.append(node.GetId());
+    }
+    return ids;
+}
 }
 
 void TST_PieceMarkings::roundTripAndDetach()
@@ -80,19 +91,19 @@ void TST_PieceMarkings::roundTripAndDetach()
 
 void TST_PieceMarkings::rejectsUnsafeValues()
 {
-    QVERIFY(PieceMarkings::valid({{7, 0.1}}, {{7, 8, QStringLiteral("stripe")}}, {7, 8}));
+    QVERIFY(PieceMarkings::valid({{7, 0.1}}, {{8, 9, QStringLiteral("stripe")}}, {7}, {8, 9}));
     for (qreal diameter : {0.0, -0.1, std::numeric_limits<qreal>::infinity(),
                            std::numeric_limits<qreal>::quiet_NaN()})
     {
-        QVERIFY(!PieceMarkings::valid({{7, diameter}}, {}, {7}));
+        QVERIFY(!PieceMarkings::valid({{7, diameter}}, {}, {7}, {8, 9}));
     }
-    QVERIFY(!PieceMarkings::valid({{9, 0.1}}, {}, {7, 8}));
-    QVERIFY(!PieceMarkings::valid({}, {{7, 7, QStringLiteral("stripe")}}, {7, 8}));
-    QVERIFY(!PieceMarkings::valid({}, {{7, 8, QStringLiteral("cut")}}, {7, 8}));
-    QVERIFY(!PieceMarkings::valid({}, {{7, 9, QStringLiteral("plaid")}}, {7, 8}));
-    QVERIFY(PieceMarkings::usesAnchor(7, {{7, 0.1}}, {}));
-    QVERIFY(PieceMarkings::usesAnchor(8, {}, {{7, 8, QStringLiteral("stripe")}}));
-    QVERIFY(!PieceMarkings::usesAnchor(9, {{7, 0.1}}, {{7, 8, QStringLiteral("plaid")}}));
+    QVERIFY(!PieceMarkings::valid({{9, 0.1}}, {}, {7}, {8, 9}));
+    QVERIFY(!PieceMarkings::valid({}, {{8, 8, QStringLiteral("stripe")}}, {7}, {8, 9}));
+    QVERIFY(!PieceMarkings::valid({}, {{8, 9, QStringLiteral("cut")}}, {7}, {8, 9}));
+    QVERIFY(!PieceMarkings::valid({}, {{8, 10, QStringLiteral("plaid")}}, {7}, {8, 9}));
+    QVERIFY(!PieceMarkings::valid({}, {{7, 9, QStringLiteral("plaid")}}, {7}, {8, 9}));
+    QVERIFY(PieceMarkings::usesAnchor(7, {{7, 0.1}}));
+    QVERIFY(!PieceMarkings::usesAnchor(8, {}));
 }
 
 void TST_PieceMarkings::currentSchemaAndCopy()
@@ -127,6 +138,13 @@ void TST_PieceMarkings::currentSchemaAndCopy()
     const QDomNodeList source_points = block.firstChildElement(QStringLiteral("calculation"))
                                            .elementsByTagName(QStringLiteral("point"));
     QVERIFY(source_points.size() >= 2);
+    QVector<quint32> source_path_nodes;
+    for (const VPieceNode &node : VAbstractPattern::ParsePieceNodes(
+             piece.firstChildElement(QStringLiteral("nodes"))).ListNodePoint())
+    {
+        source_path_nodes.append(node.GetId());
+    }
+    QVERIFY(source_path_nodes.size() >= 2);
     for (int i = 0; i < 2; ++i)
     {
         QDomElement point = document.createElement(QStringLiteral("point"));
@@ -138,8 +156,9 @@ void TST_PieceMarkings::currentSchemaAndCopy()
         record.appendChild(document.createTextNode(QString::number(100000 + i)));
         anchors.appendChild(record);
     }
-    PieceMarkings::write(piece, {{100000, 0.2}}, {{100000, 100001, QStringLiteral("stripe")},
-                                                {100001, 100000, QStringLiteral("plaid")}});
+    PieceMarkings::write(piece, {{100000, 0.2}},
+                         {{source_path_nodes.at(0), source_path_nodes.at(1), QStringLiteral("stripe")},
+                          {source_path_nodes.at(1), source_path_nodes.at(0), QStringLiteral("plaid")}});
     QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::Truncate));
     file.write(document.toByteArray());
     file.close();
@@ -150,7 +169,8 @@ void TST_PieceMarkings::currentSchemaAndCopy()
     QVERIFY2(copied.error.isEmpty(), qPrintable(copied.error));
     QCOMPARE(PieceMarkings::readDrillHoles(copied.piece).first().center, copied.ids.value(100000));
     QCOMPARE(PieceMarkings::readDrillHoles(copied.piece).first().diameter, 0.2);
-    QCOMPARE(PieceMarkings::readReferenceLines(copied.piece).first().end, copied.ids.value(100001));
+    QCOMPARE(PieceMarkings::readReferenceLines(copied.piece).first().end,
+             copied.ids.value(source_path_nodes.at(1)));
     const QDomElement original = piece.cloneNode().toElement();
     QVector<QDomNode> source_modeling;
     for (QDomNode node = modeling.firstChild(); !node.isNull(); node = node.nextSibling())
@@ -191,7 +211,9 @@ void TST_PieceMarkings::currentSchemaAndCopy()
     QCOMPARE(PieceMarkings::readDrillHoles(recopied.piece).first().diameter, 0.2);
     QVERIFY(PieceMarkings::valid(PieceMarkings::readDrillHoles(recopied.piece),
         PieceMarkings::readReferenceLines(recopied.piece),
-        VAbstractPattern::ParsePieceAnchors(recopied.piece.firstChildElement(QStringLiteral("anchors")))));
+        VAbstractPattern::ParsePieceAnchors(recopied.piece.firstChildElement(QStringLiteral("anchors"))),
+        pathNodeIds(VAbstractPattern::ParsePieceNodes(
+            recopied.piece.firstChildElement(QStringLiteral("nodes"))).ListNodePoint())));
     piece.parentNode().removeChild(piece);
     for (const QDomNode &source_node : source_modeling)
     {
@@ -244,7 +266,7 @@ void TST_PieceMarkings::editorRequiresExplicitInput()
     auto *add = drill.findChild<QPushButton *>(QStringLiteral("addMarking"));
     QVERIFY(add != nullptr);
     QVERIFY(!add->isEnabled());
-    auto *center = drill.findChild<QComboBox *>(QStringLiteral("startAnchor"));
+    auto *center = drill.findChild<QComboBox *>(QStringLiteral("startPoint"));
     auto *diameter = drill.findChild<QLineEdit *>(QStringLiteral("drillDiameter"));
     center->setCurrentIndex(1);
     QVERIFY(!add->isEnabled());
@@ -255,6 +277,9 @@ void TST_PieceMarkings::editorRequiresExplicitInput()
     QVERIFY(add->isEnabled());
     add->click();
     QCOMPARE(drill.drillHoles().size(), 1);
+    QCOMPARE(drill.itemsUsingPoint(7).size(), 1);
+    QVERIFY(drill.itemsUsingPoint(7).first().contains(QStringLiteral("A")));
+    QVERIFY(drill.itemsUsingPoint(8).isEmpty());
     QVERIFY(diameter->text().isEmpty());
     QVERIFY(!add->isEnabled());
     PieceMarkingsEditor reference(false);
@@ -270,10 +295,10 @@ void TST_PieceMarkings::editorRequiresExplicitInput()
     QVERIFY(icon_layout != nullptr);
     QCOMPARE(icon_layout->count(), 2);
     auto *add_line = reference.findChild<QPushButton *>(QStringLiteral("addMarking"));
-    reference.findChild<QComboBox *>(QStringLiteral("startAnchor"))->setCurrentIndex(1);
-    reference.findChild<QComboBox *>(QStringLiteral("endAnchor"))->setCurrentIndex(1);
+    reference.findChild<QComboBox *>(QStringLiteral("startPoint"))->setCurrentIndex(1);
+    reference.findChild<QComboBox *>(QStringLiteral("endPoint"))->setCurrentIndex(1);
     QVERIFY(!add_line->isEnabled());
-    reference.findChild<QComboBox *>(QStringLiteral("endAnchor"))->setCurrentIndex(2);
+    reference.findChild<QComboBox *>(QStringLiteral("endPoint"))->setCurrentIndex(2);
     QVERIFY(add_line->isEnabled());
     add_line->click();
     QCOMPARE(reference.referenceLines().first().type, QStringLiteral("stripe"));
@@ -312,14 +337,18 @@ void TST_PieceMarkings::pieceDialogHasSeparateMarkingPages()
     QVERIFY(!pages->item(TabOrder::ReferenceLines)->flags().testFlag(Qt::ItemIsEnabled));
     data.UpdateGObject(7, new VPointF(10, 20, QStringLiteral("A"), 0, 0));
     data.UpdateGObject(8, new VPointF(30, 40, QStringLiteral("B"), 0, 0));
+    data.UpdateGObject(9, new VPointF(11, 21, QStringLiteral("C"), 0, 0));
+    data.UpdateGObject(10, new VPointF(31, 41, QStringLiteral("D"), 0, 0));
     VPiece piece;
     piece.setAnchors({7, 8});
+    piece.GetPath().Append(VPieceNode(9, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(10, Tool::NodePoint));
     piece.setDrillHoles({{7, 0.125}});
-    piece.setReferenceLines({{7, 8, QStringLiteral("plaid")}});
+    piece.setReferenceLines({{9, 10, QStringLiteral("plaid")}});
     dialog.SetPiece(piece);
     const VPiece saved = dialog.GetPiece();
     QCOMPARE(saved.drillHoles().first().center, 7U);
     QCOMPARE(saved.drillHoles().first().diameter, 0.125);
-    QCOMPARE(saved.referenceLines().first().end, 8U);
+    QCOMPARE(saved.referenceLines().first().end, 10U);
     QCOMPARE(saved.referenceLines().first().type, QStringLiteral("plaid"));
 }

@@ -41,7 +41,7 @@ use crate::exports::{
 // sequence used by `do_process_layout`: flatten → verticalize → flatten →
 // translate → flatten.
 //
-// A Nested piece-set keeps the grainline and labels of its smallest size only.
+// A Nested piece-set keeps the drills, grainline and labels of its smallest size only.
 //
 // @param input_dom            Raw imported SVG DOM.
 // @param free_rotation_allowed  The user's "Rotate freely" choice for pieces without a grainline.
@@ -94,7 +94,7 @@ pub(crate) fn build_sheet_export_inputs(
         );
     }
 
-    // Nested: each piece-set prints the grainline and labels of its smallest size
+    // Nested: each piece-set prints the annotations of its smallest size
     // only. Stripped after the extraction, so the pieces pack as on the Nested tab.
     if nested {
         crate::nested_annotations::keep_smallest_size_annotations(&mut flat_dom);

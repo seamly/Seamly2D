@@ -930,7 +930,12 @@ void VPattern::parsePieceElement(QDomElement &domElement, const Document &parse)
         }
         piece.setDrillHoles(PieceMarkings::readDrillHoles(domElement));
         piece.setReferenceLines(PieceMarkings::readReferenceLines(domElement));
-        if (!PieceMarkings::valid(piece.drillHoles(), piece.referenceLines(), piece.getAnchors()))
+        QVector<quint32> path_nodes;
+        for (const VPieceNode &node : piece.GetPath().ListNodePoint())
+        {
+            path_nodes.append(node.GetId());
+        }
+        if (!PieceMarkings::valid(piece.drillHoles(), piece.referenceLines(), piece.getAnchors(), path_nodes))
         {
             throw VException(tr("Invalid drill hole or reference line in piece '%1'.").arg(piece.GetName()));
         }

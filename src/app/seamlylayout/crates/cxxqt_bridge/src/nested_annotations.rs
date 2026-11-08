@@ -3,26 +3,32 @@
 // MIT License: https://opensource.org/licenses/MIT
 
 // @file nested_annotations.rs
-// @brief Keeps one grainline and one set of labels per piece in a Nested multisize export.
+// @brief Keeps one set of drills, grainlines and labels per piece in a Nested multisize export.
 //
 // A Nested piece-set stacks every size of one piece, and each size has its own
-// grainline and labels. Every export but DXF-ASTM keeps only those of the
-// smallest size in each piece-set. The SVG export also moves them into one
+// annotations. Every export but DXF-ASTM keeps only those of the smallest size
+// in each piece-set. The SVG export also moves them into one
 // `<g id="labels_and_grainlines">`, so an editor can show or hide them apart
-// from the size groups. Outlines, notches, drill holes, fold lines and other
-// components of every size stay attached to their own piece.
+// from the size groups. Outlines, notches, fold lines and other components of
+// every size stay attached to their own piece.
 
 use xmltree::{Element, XMLNode};
 
 use crate::size_groups::{compare_sizes, is_sized_piece, SIZE_GROUP_TYPE};
 
-// @brief `id` of the SVG export group that holds the kept labels and grainlines.
+// @brief `id` of the SVG export group that holds the kept annotations.
 pub(crate) const LABELS_AND_GRAINLINES_ID: &str = "labels_and_grainlines";
 
 // @brief `data-type` values of the groups this module keeps for the smallest size only.
-const ANNOTATION_TYPES: [&str; 4] = ["grainline", "piece_label", "pattern_label", "size_label"];
+const ANNOTATION_TYPES: [&str; 5] = [
+    "drill",
+    "grainline",
+    "piece_label",
+    "pattern_label",
+    "size_label",
+];
 
-// @brief Remove the grainline and label groups of every size but the smallest from each piece-set.
+// @brief Remove the annotation groups of every size but the smallest from each piece-set.
 //
 // Finds piece-sets at any depth, so it works on a layout and on the sheet
 // export DOM. A document without piece-sets (Marker, a size tab, an individual
@@ -70,7 +76,7 @@ fn strip_piece_set(set: &mut Element) -> usize {
     removed
 } // fn strip_piece_set
 
-// @brief Remove every grainline and label group in `elem`'s subtree.
+// @brief Remove every drill, grainline and label group in `elem`'s subtree.
 // @return Number of groups removed.
 fn remove_annotations(elem: &mut Element) -> usize {
     let before = elem.children.len();
@@ -82,12 +88,12 @@ fn remove_annotations(elem: &mut Element) -> usize {
     removed
 } // fn remove_annotations
 
-// @brief True for a `<g>` whose `data-type` is a grainline or a label.
+// @brief True for a `<g>` whose `data-type` is a drill, grainline or label.
 fn is_annotation(elem: &Element) -> bool {
     elem.name == "g" && elem.attributes.get("data-type").is_some_and(|t| ANNOTATION_TYPES.contains(&t.as_str()))
 } // fn is_annotation
 
-// @brief Move every grainline and label group out of the size groups into one
+// @brief Move every annotation group out of the size groups into one
 // `<g id="labels_and_grainlines">`, placed just before the first size group.
 //
 // Call after `size_groups::group_pieces_by_size`: the document is flat then, so
@@ -107,7 +113,7 @@ pub(crate) fn gather_labels_and_grainlines(doc: &mut svg_dom::Document) -> usize
         take_annotations(group, &mut moved);
     } // for size group
     if moved.is_empty() {
-        return 0; // no grainline or label to move
+        return 0; // no annotation to move
     } // if none
 
     let count = moved.len();
@@ -123,7 +129,7 @@ fn is_size_group(elem: &Element) -> bool {
     elem.attributes.get("data-type").is_some_and(|t| t == SIZE_GROUP_TYPE)
 } // fn is_size_group
 
-// @brief Move every grainline and label group in `elem`'s subtree to `moved`, in document order.
+// @brief Move every annotation group in `elem`'s subtree to `moved`, in document order.
 fn take_annotations(elem: &mut Element, moved: &mut Vec<XMLNode>) {
     let mut kept = Vec::with_capacity(elem.children.len());
     for node in std::mem::take(&mut elem.children) {
@@ -148,7 +154,7 @@ mod tests {
     use super::*;
 
     // @brief One piece-set in sizes 92 and 100, moved by its transform. Each size has a
-    // cutline, a notch, a grainline and three labels. A piece-set inside a pattern
+    // cutline, a notch, a drill, a grainline and three labels. A piece-set inside a pattern
     // group, as in the sheet export input, and a plain individual piece follow.
     const NESTED: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">
   <defs/>
@@ -199,13 +205,12 @@ mod tests {
             .collect()
     } // fn top_ids
 
-    // @brief The smallest size, by number, keeps its grainline and labels; the larger
-    // size keeps only its outline and notch.
+    // @brief The smallest size keeps its annotations; larger sizes keep only their outlines and notches.
     #[test]
-    fn only_the_smallest_size_keeps_grainline_and_labels() {
+    fn only_the_smallest_size_keeps_annotations() {
         let mut doc = svg_dom::Document::parse(NESTED).expect("valid SVG");
-        assert_eq!(keep_smallest_size_annotations(&mut doc), 4);
-        assert_eq!(child_ids(&doc, "piece_A_s100"), vec!["cutline_A_s100", "notch_A_s100", "drill_A_s100"]);
+        assert_eq!(keep_smallest_size_annotations(&mut doc), 5);
+        assert_eq!(child_ids(&doc, "piece_A_s100"), vec!["cutline_A_s100", "notch_A_s100"]);
         assert_eq!(child_ids(&doc, "piece_A_s92"), vec![
             "cutline_A_s92", "notch_A_s92", "drill_A_s92", "grainline_A_s92", "piece_label_A_s92", "pattern_label_A_s92", "size_label_A_s92",
         ]);
@@ -218,7 +223,7 @@ mod tests {
         let svg = NESTED.replace(r#"<defs/>"#, r#"<defs/><g id="pattern" data-type="pattern">"#)
             .replace(r#"<g id="size_legend""#, r#"</g><g id="size_legend""#);
         let mut doc = svg_dom::Document::parse(&svg).expect("valid SVG");
-        assert_eq!(keep_smallest_size_annotations(&mut doc), 4);
+        assert_eq!(keep_smallest_size_annotations(&mut doc), 5);
         assert!(find(&doc.root, "grainline_A_s100").is_none());
         assert!(find(&doc.root, "grainline_A_s92").is_some());
     } // piece_set_inside_a_pattern_group_is_found
@@ -236,21 +241,21 @@ mod tests {
         assert_eq!(doc.to_string(), before);
     } // layout_without_piece_sets_is_unchanged
 
-    // @brief SVG export: the kept groups move into `labels_and_grainlines`, just before
-    // the first size group, and keep their position.
+    // @brief SVG export moves the kept annotations into `labels_and_grainlines`, just before
+    // the first size group, and keeps their position.
     #[test]
-    fn svg_export_gathers_labels_and_grainlines_before_the_sizes() {
+    fn svg_export_gathers_annotations_before_the_sizes() {
         let mut doc = svg_dom::Document::parse(NESTED).expect("valid SVG");
         keep_smallest_size_annotations(&mut doc);
         assert_eq!(crate::size_groups::group_pieces_by_size(&mut doc), 2);
-        assert_eq!(gather_labels_and_grainlines(&mut doc), 4);
+        assert_eq!(gather_labels_and_grainlines(&mut doc), 5);
 
         assert_eq!(top_ids(&doc), vec!["", LABELS_AND_GRAINLINES_ID, "size_100", "size_92", "size_legend"]);
         assert_eq!(child_ids(&doc, LABELS_AND_GRAINLINES_ID), vec![
-            "grainline_A_s92", "piece_label_A_s92", "pattern_label_A_s92", "size_label_A_s92",
+            "drill_A_s92", "grainline_A_s92", "piece_label_A_s92", "pattern_label_A_s92", "size_label_A_s92",
         ]);
-        assert_eq!(child_ids(&doc, "piece_A_s100"), vec!["cutline_A_s100", "notch_A_s100", "drill_A_s100"]);
-        assert_eq!(child_ids(&doc, "piece_A_s92"), vec!["cutline_A_s92", "notch_A_s92", "drill_A_s92"]);
+        assert_eq!(child_ids(&doc, "piece_A_s100"), vec!["cutline_A_s100", "notch_A_s100"]);
+        assert_eq!(child_ids(&doc, "piece_A_s92"), vec!["cutline_A_s92", "notch_A_s92"]);
 
         // The piece-set offset (100, 50) is baked into the moved grainline.
         let grainline = find(&doc.root, "grainline_A_s92").expect("grainline");

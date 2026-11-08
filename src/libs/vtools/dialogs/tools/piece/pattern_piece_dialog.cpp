@@ -79,8 +79,10 @@
 #include <QGuiApplication>
 #include <QKeyEvent>
 #include <QMenu>
+#include <QMessageBox>
 #include <QPixmap>
 #include <QScreen>
+#include <QStringList>
 #include <QtDebug>
 #include <QSoundEffect>
 #include <QTimer>
@@ -109,6 +111,20 @@ QString getFormulaFromUser(QPlainTextEdit *textEdit)
     QString formula = textEdit->toPlainText();
     formula.replace("\n", " ");
     return qApp->translateVariables()->TryFormulaFromUser(formula, qApp->Settings()->getOsSeparator());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+QVector<quint32> pathNodeIds(const QVector<VPieceNode> &nodes)
+{
+    QVector<quint32> ids;
+    for (const VPieceNode &node : nodes)
+    {
+        if (node.GetTypeTool() == Tool::NodePoint)
+        {
+            ids.append(node.GetId());
+        }
+    }
+    return ids;
 }
 }
 
@@ -228,9 +244,8 @@ void PatternPieceDialog::pageChanged(QListWidgetItem *current, QListWidgetItem *
     ui->pages_StackedWidget->setCurrentIndex(rowIndex);
     if (m_drill_editor != nullptr && m_reference_editor != nullptr)
     {
-        const auto anchors = GetListInternals<quint32>(ui->anchorPoints_ListWidget);
-        m_drill_editor->setPoints(anchors, data);
-        m_reference_editor->setPoints(anchors, data);
+        m_drill_editor->setPoints(GetListInternals<quint32>(ui->anchorPoints_ListWidget), data);
+        m_reference_editor->setPoints(pathNodeIds(GetListInternals<VPieceNode>(ui->mainPath_ListWidget)), data);
     }
 
     if (rowIndex == TabOrder::Labels || rowIndex == TabOrder::AnchorPoints || rowIndex == TabOrder::Grainline)
@@ -312,7 +327,7 @@ void PatternPieceDialog::SetPiece(const VPiece &piece)
 
     initAnchorPointComboboxes();
     m_drill_editor->setPoints(piece.getAnchors(), data);
-    m_reference_editor->setPoints(piece.getAnchors(), data);
+    m_reference_editor->setPoints(pathNodeIds(piece.GetPath().getNodes()), data);
     m_drill_editor->setMarkings(piece.drillHoles(), {});
     m_reference_editor->setMarkings({}, piece.referenceLines());
 
@@ -619,7 +634,8 @@ void PatternPieceDialog::CheckState()
                     && (m_drill_editor == nullptr || (m_drill_editor->markingsValid()
                         && m_reference_editor->markingsValid() && PieceMarkings::valid(m_drill_editor->drillHoles(),
                         m_reference_editor->referenceLines(),
-                        GetListInternals<quint32>(ui->anchorPoints_ListWidget)))));
+                        GetListInternals<quint32>(ui->anchorPoints_ListWidget),
+                        pathNodeIds(GetListInternals<VPieceNode>(ui->mainPath_ListWidget))))));
 
     if (applyAllowed)
     {
@@ -1322,11 +1338,22 @@ void PatternPieceDialog::showAnchorsContextMenu(const QPoint &pos)
     QAction *selectedAction = menu->exec(ui->anchorPoints_ListWidget->viewport()->mapToGlobal(pos));
     if (selectedAction == actionDelete)
     {
+        const quint32 anchor = ui->anchorPoints_ListWidget->item(row)->data(Qt::UserRole).toUInt();
+        QStringList dependencies = m_drill_editor->itemsUsingPoint(anchor);
+        if (!dependencies.isEmpty())
+        {
+            QMessageBox message(QMessageBox::Warning, tr("Cannot delete anchor"),
+                                tr("This anchor is used by these piece markings:\n\n%1\n\n"
+                                   "Remove the markings before deleting the anchor.")
+                                    .arg(dependencies.join(QLatin1Char('\n'))),
+                                QMessageBox::Close, this);
+            message.exec();
+            return;
+        }
         delete ui->anchorPoints_ListWidget->item(row);
         initAnchorPointComboboxes();
-        const auto anchors = GetListInternals<quint32>(ui->anchorPoints_ListWidget);
-        m_drill_editor->setPoints(anchors, data);
-        m_reference_editor->setPoints(anchors, data);
+        m_drill_editor->setPoints(GetListInternals<quint32>(ui->anchorPoints_ListWidget), data);
+        m_reference_editor->setPoints(pathNodeIds(GetListInternals<VPieceNode>(ui->mainPath_ListWidget)), data);
         CheckState();
     }
 }
@@ -1342,6 +1369,10 @@ void PatternPieceDialog::nodeListChanged()
         visPath->RefreshGeometry();
     }
     initializeNodesList();
+    if (m_reference_editor != nullptr)
+    {
+        m_reference_editor->setPoints(pathNodeIds(GetListInternals<VPieceNode>(ui->mainPath_ListWidget)), data);
+    }
     initializeNotchesList();
     customSeamAllowanceChanged(ui->customSeamAllowance_ListWidget->currentRow());
     setMoveExclusions();

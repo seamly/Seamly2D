@@ -1936,7 +1936,7 @@ mod tests {
     // of the piece that holds it, or "" outside a sized piece.
     fn annotation_sizes(elem: &xmltree::Element, size: &str, sizes: &mut Vec<String>) {
         let data_type = elem.attributes.get("data-type").map(String::as_str).unwrap_or("");
-        if ["grainline", "piece_label", "pattern_label", "size_label"].contains(&data_type) {
+        if ["drill", "grainline", "piece_label", "pattern_label", "size_label"].contains(&data_type) {
             sizes.push(size.to_string());
             return; // a label holds no other label
         } // if annotation
@@ -1946,7 +1946,7 @@ mod tests {
         } // for child
     } // fn annotation_sizes
 
-    // @brief The Nested export copy keeps the grainline and labels of the smallest size
+    // @brief The Nested export copy keeps the annotations of the smallest size
     // only. The SVG export moves them into `labels_and_grainlines`, where the
     // `Rectangles` group was: just before the size groups.
     #[test]
@@ -1988,7 +1988,7 @@ mod tests {
         let group = doc.root.children.iter().filter_map(|n| n.as_element()).nth(at).expect("group");
         let mut gathered = Vec::new();
         annotation_sizes(group, "", &mut gathered);
-        assert_eq!(gathered.len(), kept, "every kept group is in labels_and_grainlines");
+        assert_eq!(gathered.len(), kept, "every kept annotation is in labels_and_grainlines");
         for size_group in doc.root.children.iter().filter_map(|n| n.as_element()).skip(at + 1) {
             let mut left = Vec::new();
             annotation_sizes(size_group, "", &mut left);
