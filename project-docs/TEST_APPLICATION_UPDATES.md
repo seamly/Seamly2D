@@ -112,6 +112,7 @@ Use male_shirt. Repeat the pattern-label checks on jacket2.
   - Edit stored label lines without selecting a template file, then save and reopen the pattern. Confirm the filename displays `none`.
   - --> Adding a new line to a label displays "\<empty>" on the new line. Then selecting a label variable from the 'Insert' dropdown list displays the variable but doesn't remove "<empty>". It should remove "\<empty>" from the line when a variable is added.
   - --> Fix this issue in a worktree as a feature branch then merge with run-seamlyLayout
+  - Insert now replaces the empty-line placeholder and saves the selected variable. Confirm the editor behavior with the rebuilt installer.
 - [x] Template edits still change the rendered label correctly.
 
 ## 5. Seamly2D — Flip and placement properties

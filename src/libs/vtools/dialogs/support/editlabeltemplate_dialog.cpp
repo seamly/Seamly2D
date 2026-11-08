@@ -425,7 +425,12 @@ void EditLabelTemplateDialog::InsertPlaceholder()
     QAction *action = qobject_cast<QAction *>(sender());
     if (action)
     {
+        if (ui->lineEditLine->text() == tr("<empty>"))
+        {
+            ui->lineEditLine->clear();
+        }
         ui->lineEditLine->insert(action->data().toString());
+        SaveLineText(ui->lineEditLine->text());
         ui->lineEditLine->setFocus();
         setTemplateFile(QString());
     }

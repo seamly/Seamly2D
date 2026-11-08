@@ -20,6 +20,7 @@ private slots:
     void defaultFile();
     void noFile();
     void builtInFile();
+    void insertedPlaceholderReplacesEmptyLine();
 };
 
 #endif // TST_LABELTEMPLATEFILENAME_H
