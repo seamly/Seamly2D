@@ -70,11 +70,11 @@ void PieceMarkings::write(QDomElement piece, const QVector<PieceDrillHole> &hole
 }
 
 bool PieceMarkings::valid(const QVector<PieceDrillHole> &holes, const QVector<PieceReferenceLine> &lines,
-                          const QVector<quint32> &available_points)
+                          const QVector<quint32> &available_anchors, const QVector<quint32> &path_nodes)
 {
     for (const PieceDrillHole &hole : holes)
     {
-        if (hole.center == 0 || !available_points.contains(hole.center)
+        if (hole.center == 0 || !available_anchors.contains(hole.center)
             || !qIsFinite(hole.diameter) || hole.diameter <= 0)
         {
             return false;
@@ -83,7 +83,7 @@ bool PieceMarkings::valid(const QVector<PieceDrillHole> &holes, const QVector<Pi
     for (const PieceReferenceLine &line : lines)
     {
         if (line.start == 0 || line.end == 0 || line.start == line.end
-            || !available_points.contains(line.start) || !available_points.contains(line.end)
+            || !path_nodes.contains(line.start) || !path_nodes.contains(line.end)
             || (line.type != QStringLiteral("stripe") && line.type != QStringLiteral("plaid")))
         {
             return false;
@@ -92,19 +92,11 @@ bool PieceMarkings::valid(const QVector<PieceDrillHole> &holes, const QVector<Pi
     return true;
 }
 
-bool PieceMarkings::usesAnchor(quint32 anchor, const QVector<PieceDrillHole> &holes,
-                               const QVector<PieceReferenceLine> &lines)
+bool PieceMarkings::usesAnchor(quint32 anchor, const QVector<PieceDrillHole> &holes)
 {
     for (const PieceDrillHole &hole : holes)
     {
         if (hole.center == anchor)
-        {
-            return true;
-        }
-    }
-    for (const PieceReferenceLine &line : lines)
-    {
-        if (line.start == anchor || line.end == anchor)
         {
             return true;
         }

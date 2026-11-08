@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------------------------------------------------
 // @file PieceMarkingsEditor.h
 // @author slspencer
-// @brief Edits explicit drill holes and reference-only lines through live anchor points.
+// @brief Edits drill holes on anchors and reference lines between main-path nodes.
 // Copyright (C) 2026 Seamly2D Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 // https://www.gnu.org/licenses/gpl-3.0.html
@@ -13,6 +13,7 @@
 #include <QWidget>
 #include <QHash>
 #include <QPointF>
+#include <QStringList>
 #include "../../../../vpatterndb/PieceMarkings.h"
 
 class QComboBox;
@@ -22,16 +23,17 @@ class QListWidget;
 class QLabel;
 class VContainer;
 
-/// @brief Requires an explicit positive drill diameter or two different live reference endpoints.
+/// @brief Requires an explicit positive drill diameter or two distinct reference nodes.
 class PieceMarkingsEditor : public QWidget
 {
     Q_OBJECT
 public:
     PieceMarkingsEditor(bool drill_holes, QWidget *parent = nullptr);
-    void setPoints(const QVector<quint32> &anchors, const VContainer *data);
+    void setPoints(const QVector<quint32> &point_ids, const VContainer *data);
     void setMarkings(const QVector<PieceDrillHole> &holes, const QVector<PieceReferenceLine> &lines);
     QVector<PieceDrillHole> drillHoles() const;
     QVector<PieceReferenceLine> referenceLines() const;
+    QStringList itemsUsingPoint(quint32 point_id) const;
     bool markingsValid() const;
 
 signals:

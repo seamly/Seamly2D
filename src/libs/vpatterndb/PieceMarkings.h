@@ -22,7 +22,7 @@ struct PieceDrillHole
     qreal diameter = 0;
 };
 
-/// @brief Two graded points defining a reference-only stripe or plaid line.
+/// @brief Two main-path nodes defining a reference-only stripe or plaid line.
 struct PieceReferenceLine
 {
     quint32 start = 0;
@@ -39,9 +39,8 @@ public:
     static void write(QDomElement piece, const QVector<PieceDrillHole> &holes,
                       const QVector<PieceReferenceLine> &lines);
     static bool valid(const QVector<PieceDrillHole> &holes, const QVector<PieceReferenceLine> &lines,
-                      const QVector<quint32> &available_points);
-    static bool usesAnchor(quint32 anchor, const QVector<PieceDrillHole> &holes,
-                           const QVector<PieceReferenceLine> &lines);
+                      const QVector<quint32> &available_anchors, const QVector<quint32> &path_nodes);
+    static bool usesAnchor(quint32 anchor, const QVector<PieceDrillHole> &holes);
 };
 
 #endif // PIECE_MARKINGS_H

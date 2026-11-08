@@ -62,6 +62,7 @@
 #include "../pattern_piece_tool.h"
 #include "../vgeometry/vpointf.h"
 #include <QMessageBox>
+#include <QStringList>
 
 const QString AnchorPointTool::ToolType = QStringLiteral("anchor");
 
@@ -85,6 +86,23 @@ AnchorPointTool *AnchorPointTool::Create(quint32 _id, quint32 pointId, quint32 p
     quint32 id = _id;
     if (typeCreation == Source::FromGui)
     {
+        if (pieceId != NULL_ID)
+        {
+            const VPiece piece = data->GetPiece(pieceId);
+            for (const quint32 anchor_id : piece.getAnchors())
+            {
+                const AnchorPointTool *anchor = qobject_cast<AnchorPointTool *>(
+                    VAbstractPattern::getTool(anchor_id));
+                if (anchor_id == pointId || (anchor != nullptr && anchor->idNode == pointId))
+                {
+                    QMessageBox message(QMessageBox::Warning, QObject::tr("Duplicate anchor"),
+                                        QObject::tr("This point is already added as an anchor to the selected piece."),
+                                        QMessageBox::Close, qApp->getMainWindow());
+                    message.exec();
+                    return nullptr;
+                }
+            }
+        }
         id = CreateNode<VPointF>(data, pointId);
     }
     else
@@ -190,11 +208,24 @@ void AnchorPointTool::deleteTool(bool ask)
     if (m_pieceId != NULL_ID)
     {
         const VPiece piece = VAbstractTool::data.GetPiece(m_pieceId);
-        if (PieceMarkings::usesAnchor(m_id, piece.drillHoles(), piece.referenceLines()))
+        if (PieceMarkings::usesAnchor(m_id, piece.drillHoles()))
         {
-            QMessageBox::warning(qApp->getMainWindow(), tr("Cannot delete anchor"),
-                                 tr("This anchor is used by a drill hole or stripe/plaid reference. "
-                                    "Remove the marking before deleting the anchor."));
+            QStringList dependencies;
+            const QString anchor_name = VAbstractTool::data.GetGObject(m_id)->name();
+            for (const PieceDrillHole &hole : piece.drillHoles())
+            {
+                if (hole.center == m_id)
+                {
+                    dependencies.append(tr("Drill hole at %1 (diameter %2)")
+                                            .arg(anchor_name, QString::number(hole.diameter)));
+                }
+            }
+            QMessageBox message(QMessageBox::Warning, tr("Cannot delete anchor"),
+                                tr("This anchor is used by these piece markings:\n\n%1\n\n"
+                                   "Remove the markings before deleting the anchor.")
+                                    .arg(dependencies.join(QLatin1Char('\n'))),
+                                QMessageBox::Close, qApp->getMainWindow());
+            message.exec();
             return;
         }
     }

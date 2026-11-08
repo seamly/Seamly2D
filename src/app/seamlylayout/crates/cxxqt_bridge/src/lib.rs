@@ -28,7 +28,7 @@ mod size_groups;
 // Gives each size of a Nested multisize layout its own color, with a legend.
 mod size_colors;
 
-// Keeps only the smallest size's grainline and labels in a Nested multisize export.
+// Keeps only the smallest size's drills, grainline and labels in a Nested multisize export.
 mod nested_annotations;
 
 // Puts the fold line of each piece cut on the fold on the left content edge.
@@ -37,7 +37,7 @@ mod fold_line_edge;
 // Adds a "Size <size>" label to every piece of a multisize handoff at import.
 mod size_labels;
 
-// Gives every size of a multisize piece the base size's grainline and label positions.
+// Gives every size of a multisize piece the base size's annotation positions.
 mod annotation_alignment;
 
 // Splits a handoff into one document per material.
@@ -1396,11 +1396,11 @@ impl qobject::AppController {
                 let mut naming_warning: Option<String> = None;
                 let mut annotations_outside: Vec<String> = Vec::new();
                 for part in parts.iter_mut() {
-                    // Multisize: every size shows the base size's grainline and labels in the
-                    // same place.  Before the names change, so a report names the piece as drafted.
+                    // Multisize: every size shows the base size's annotations in the same place.
+                    // Align before names change, so a report names the piece as drafted.
                     let alignment = crate::annotation_alignment::align_size_annotations(&mut part.doc);
                     log_to_file(&format!(
-                        "[finish_import] material '{}': {} grainline and label group(s) moved to the base size's place",
+                        "[finish_import] material '{}': {} annotation group(s) moved to the base size's place",
                         part.name, alignment.moved
                     ));
                     annotations_outside.extend(alignment.outside);
@@ -2637,13 +2637,13 @@ impl qobject::AppController {
     } // fn clone_stripped_layout_doc
 
     // Export copy for every format but DXF-ASTM: the stripped layout. A Nested
-    // multisize layout keeps the grainline and labels of each piece-set's smallest
-    // size only, so each piece shows one set.
+    // multisize layout keeps the annotations of each piece-set's smallest size
+    // only, so each piece shows one set.
     fn clone_export_layout_doc(&self) -> Result<svg_dom::Document, cxx_qt_lib::QString> {
         let mut doc = self.clone_stripped_layout_doc()?;
         let removed = nested_annotations::keep_smallest_size_annotations(&mut doc);
         if removed > 0 {
-            log_to_file(&format!("[lib.rs AppController] clone_export_layout_doc(): removed {removed} grainline and label groups of the larger sizes"));
+            log_to_file(&format!("[lib.rs AppController] clone_export_layout_doc(): removed {removed} annotation groups of the larger sizes"));
         } // if removed
         Ok(doc)
     } // fn clone_export_layout_doc
@@ -3118,10 +3118,10 @@ impl qobject::AppController {
             log_to_file(&format!("[lib.rs AppController] export_svg(): 2a grouped the pieces into {size_groups} size groups"));
         } // if size_groups
 
-        // The kept grainlines and labels get their own group, just before the size groups.
+        // The kept drill holes, grainlines and labels get their own group, just before the size groups.
         let gathered = nested_annotations::gather_labels_and_grainlines(&mut layout_doc);
         if gathered > 0 {
-            log_to_file(&format!("[lib.rs AppController] export_svg(): 2b moved {gathered} grainline and label groups into labels_and_grainlines"));
+            log_to_file(&format!("[lib.rs AppController] export_svg(): 2b moved {gathered} annotation groups into labels_and_grainlines"));
         } // if gathered
 
         // Rewrite label text on the export copy only; the canvas DOM is untouched.
