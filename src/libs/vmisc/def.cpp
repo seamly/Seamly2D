@@ -837,7 +837,7 @@ QTransform pieceTiltTransform(int degrees, const QPointF &center)
  */
 QTransform pieceDisplayTransform(PieceFlip flip, int tilt_degrees, const QPointF &center)
 {
-    return pieceTiltTransform(tilt_degrees, center) * pieceFlipTransform(flip, center);
+    return pieceFlipTransform(flip, center) * pieceTiltTransform(tilt_degrees, center);
 }
 
 
