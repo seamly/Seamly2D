@@ -40,7 +40,8 @@ public:
                       const QVector<PieceReferenceLine> &lines);
     static bool valid(const QVector<PieceDrillHole> &holes, const QVector<PieceReferenceLine> &lines,
                       const QVector<quint32> &available_anchors, const QVector<quint32> &path_nodes);
-    static bool usesAnchor(quint32 anchor, const QVector<PieceDrillHole> &holes);
+    static bool usesAnchor(quint32 anchor, const QVector<PieceDrillHole> &holes,
+                           const QVector<PieceReferenceLine> &lines);
 };
 
 #endif // PIECE_MARKINGS_H
