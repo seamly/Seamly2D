@@ -373,7 +373,7 @@ ApplicationWindow {
         // Layout warning — the layout succeeded with left-out pieces or fold lines
         // off the edge.  Non-blocking: the right canvas already shows the layout.
         onLayoutWarning: function(message) {
-            warningDialog.title = "Layout warning";
+            warningDialog.title = message.indexOf("Media enlarged:") === 0 ? "Media enlarged" : "Layout warning";
             warningDialog.warningText = message;
             warningDialog.open();
         } // onLayoutWarning
@@ -1735,7 +1735,8 @@ ApplicationWindow {
             } // RadioButton extendMediaRadio
 
             Text {
-                text:           "For DXF files: every piece stays whole. The media grows wider and longer."
+                text:           "For DXF files: pieces stay whole. Fabric keeps its width and grows longer. " +
+                                "Other media can grow wider and longer."
                 color:          Theme.textOnDark
                 font.pixelSize: Theme.fontSizeSmall
                 wrapMode:       Text.WordWrap

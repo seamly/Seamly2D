@@ -78,6 +78,8 @@ pub struct ProcessLayoutResult {
     /// The media the pieces were split for; None when no split was asked for.
     /// The paper-sheet PDF export splits the same way.
     pub divide_spec: Option<DivideSpec>,
+    /// User-unit dimensions when requested media enlargement changed the canvas.
+    pub media_enlargement: Option<String>,
 }
 
 /// @brief Progress callback type for do_process_layout.
@@ -156,9 +158,9 @@ pub struct ProcessLayoutArgs<'a> {
     /// Multisize only: `true` packs each piece-set (one piece in every size) as one
     /// unit (Nested tab); `false` packs every size of every piece alone (Marker tab).
     pub nested_multisize: bool,
-    /// `true` extends a sheet, roll or fabric until every piece is placed: wider
-    /// for the widest piece, then longer (multisize tabs).  `false` leaves out a
-    /// piece that does not fit.  Tiled paper ignores it.
+    /// `true` extends media in height, and in width unless it is fabric.
+    /// Fabric pieces that cannot fit the configured width remain unplaced.
+    /// `false` leaves out a piece that does not fit. Tiled paper ignores it.
     pub extend_media: bool,
     /// `true` splits each piece wider or longer than the media into parts that
     /// fit (individual pattern, the user's choice).  Tiled paper ignores it.
@@ -401,12 +403,12 @@ pub fn do_process_layout(
 
     // Tiled paper uses a candidate-width search: several bin widths (in multiples
     // of the trimmed tile width) are packed and the best result by tile-count
-    // (then unused area) wins.  Non-tiled paths use a single pack_maxrects call
-    // against the fixed bin from the initial layout DOM.  `is_tiled` is set in step 3.
+    // (then unused area) wins. Non-tiled paths pack a fixed bin, extend media,
+    // or retry remaining split parts on fresh sheets. `is_tiled` is set in step 3.
 
-    // Extended media widens to the widest piece, so no piece is too wide.
+    // Fabric width is a physical constraint, including when folded.
     // Tiled paper never extends: its candidate-width search sets the width.
-    let pack_bin_w = if args.extend_media && !is_tiled {
+    let pack_bin_w = if args.extend_media && !is_tiled && settings.media_type != "fabric" {
         bin_w.max(packing::required_bin_width(&rects, &trial_angles_deg))
     } else {
         bin_w
@@ -553,7 +555,7 @@ pub fn do_process_layout(
         // still surfaces as a hard error above.  No unplaced pieces to report here.
         (choice.placements, out_doc, new_bin_h, new_ml, new_mt, new_mb, new_layout_h_px, Vec::new())
     } else {
-        // --- 5b non-tiled branch: single pack against the fixed bin ---
+        // --- 5b non-tiled branch: fixed media, extension, or successive sheets ---
         //
         // `pack_polygons` is the dispatcher entry point that auto-routes:
         //   * orthogonal trial set ({0, 180}) → MaxRects (polygons ignored)
@@ -580,9 +582,8 @@ pub fn do_process_layout(
         // piece too large for the sheet, or one that runs out of room, no longer
         // aborts the whole layout.  The layout renders the pieces that fit and
         // the unplaced piece ids are surfaced to the user as a warning popup.
-        // Extended media is already wide enough for every piece and grows past
-        // its length instead, so it leaves no piece out; `packed_bin_h` is the
-        // height it grew to.
+        // Extended fabric keeps its width and reports pieces too wide to fit.
+        // `packed_bin_h` includes any extra height or successive sheets.
         let (placements, _created_rects, unplaced_ids, packed_bin_h) = if args.extend_media {
             packing::pack_polygons_extending(
                 pack_bin_w,
@@ -593,6 +594,12 @@ pub fn do_process_layout(
                 &trial_angles_deg,
                 Some(&mut piece_status),
             )
+        } else if args.split_oversized {
+            // Keep prior placements and retry only remaining parts on a fresh sheet.
+            let (placements, unplaced_ids, height) = packing::pack_polygons_on_sheets(
+                bin_w, bin_h, gap_px, &polygons, &rects, &trial_angles_deg, Some(&mut piece_status),
+            );
+            (placements, Vec::new(), unplaced_ids, height)
         } else {
             let (placements, created_rects, unplaced_ids) = packing::pack_polygons_lenient(
                 bin_w,
@@ -813,6 +820,12 @@ pub fn do_process_layout(
 
     progress_fn(100, None); // assembly complete
 
+    let media_enlargement = if args.extend_media && !is_tiled {
+        enlarged_media_message(&settings, args.initial_layout_dom, &output_doc)
+    } else {
+        None
+    }; // if requested enlargement
+
     Ok(ProcessLayoutResult {
         output_doc,
         bbox_json,
@@ -825,8 +838,41 @@ pub fn do_process_layout(
         vertical_dom,
         translate_dom,
         divide_spec,
+        media_enlargement,
     })
 } // fn do_process_layout
+
+/// @brief Report enlarged canvas dimensions in the active unit, using full fabric width.
+fn enlarged_media_message(
+    settings: &LayoutSettings,
+    initial: &Document,
+    output: &Document,
+) -> Option<String> {
+    let dimension = |doc: &Document, name: &str| -> f64 {
+        doc.root.attributes.get(name).and_then(|value| value.parse().ok()).unwrap_or(0.0)
+    };
+    let width_px = dimension(output, "width");
+    let height_px = dimension(output, "height");
+    if width_px <= dimension(initial, "width") && height_px <= dimension(initial, "height") {
+        return None;
+    } // if no enlargement
+    let units_per_inch = match settings.unit.as_str() {
+        "mm" => 25.4,
+        "cm" => 2.54,
+        _ => 1.0,
+    };
+    let width = if settings.media_type == "fabric" {
+        // Report the nominal bolt width, not the rounded folded pixel width.
+        if settings.fabric_width > 0.0 { settings.fabric_width } else { settings.page_width }
+    } else {
+        width_px / layout_tiling::LAYOUT_PPI * units_per_inch
+    }; // if fabric
+    Some(format!(
+        "Media enlarged: width {:.2} {}, height {:.2} {}.",
+        width, settings.unit,
+        height_px / layout_tiling::LAYOUT_PPI * units_per_inch, settings.unit,
+    ))
+} // fn enlarged_media_message
 
 /// @brief The media a piece must fit to stay whole: the content rect, limited in
 /// length only for a sheet.
@@ -1323,6 +1369,98 @@ mod tests {
             serde_json::from_str(&result.bbox_json).expect("bbox_json should be valid JSON");
         bbox["pieces"].as_array().expect("pieces array").len()
     } // fn placed_count
+
+    // @brief Process small rectangles with the user's split or enlargement choice.
+    fn process_placement_fixture(settings: serde_json::Value, split: bool, extend: bool) -> ProcessLayoutResult {
+        let input = Document::parse(
+            r#"<svg xmlns="http://www.w3.org/2000/svg" width="600" height="200">
+            <g id="long" data-type="piece" data-name="Long">
+                <g id="outline_long" data-type="cutline"><path d="M0 0 L80 0 L80 180 L0 180 Z"/></g>
+            </g>
+            <g id="wide" data-type="piece" data-name="Wide">
+                <g id="outline_wide" data-type="cutline"><path d="M0 0 L500 0 L500 80 L0 80 Z"/></g>
+            </g>
+            </svg>"#,
+        ).expect("fixture");
+        let json = settings.to_string();
+        let initial = do_initialize_layout(&json, Some(&input)).expect("initialize");
+        do_process_layout(
+            ProcessLayoutArgs {
+                settings_json: &json,
+                input_dom: &input,
+                initial_layout_dom: &initial.initial_dom,
+                layout_h_px: initial.h_px,
+                nested_multisize: false,
+                split_oversized: split,
+                extend_media: extend,
+            },
+            &mut |_, _| {},
+        ).expect("process")
+    } // fn process_placement_fixture
+
+    // @brief Split parts that exhaust one sheet retry on more sheets without disappearing.
+    #[test]
+    fn placement_split_retries_across_sheets() {
+        let settings = serde_json::json!({
+            "unit": "in", "mediaType": "paper", "paperType": "sheet",
+            "pageWidth": 1.0, "pageHeight": 1.0, "pieceGap": 0.0,
+            "marginLeft": 0.0, "marginRight": 0.0, "marginTop": 0.0, "marginBottom": 0.0,
+            "layoutMode": "alongGrainline", "scaleGrid": false
+        });
+        let result = process_placement_fixture(settings, true, false);
+        assert!(result.unplaced_labels.is_empty(), "{:?}", result.unplaced_labels);
+        assert_eq!(placed_count(&result), 8, "two length parts and six width parts");
+        assert!(result.layout_h_px > 96);
+        assert_eq!(result.output_doc.root.attributes["width"], "96");
+        assert!(result.divide_spec.is_some());
+        assert!(result.media_enlargement.is_none(), "split is not requested enlargement");
+    } // placement_split_retries_across_sheets
+
+    // @brief Fabric enlargement fixes full and folded width and reports impossible pieces.
+    #[test]
+    fn placement_fabric_enlargement_keeps_width() {
+        for folded in [false, true] {
+            let settings = serde_json::json!({
+                "unit": "in", "mediaType": "fabric", "fabricWidth": 4.0, "fabricHeight": 1.0,
+                "fabricFolded": folded, "pieceGap": 0.0,
+                "marginLeft": 0.0, "marginRight": 0.0, "marginTop": 0.0, "marginBottom": 0.0,
+                "layoutMode": "alongGrainline", "scaleGrid": false
+            });
+            let result = process_placement_fixture(settings, false, true);
+            assert_eq!(result.output_doc.root.attributes["width"], if folded { "192" } else { "384" });
+            assert_eq!(result.layout_h_px, 180);
+            assert_eq!(placed_count(&result), 1);
+            assert_eq!(result.unplaced_labels, vec!["Wide"]);
+            assert_eq!(result.media_enlargement.as_deref(),
+                       Some("Media enlarged: width 4.00 in, height 1.88 in."));
+        } // for folded and unfolded
+    } // placement_fabric_enlargement_keeps_width
+
+    // @brief Paper still widens; enlargement notices use active units and ignore unchanged media.
+    #[test]
+    fn placement_enlargement_dimensions_and_notifications() {
+        let settings = serde_json::json!({
+            "unit": "in", "mediaType": "paper", "paperType": "sheet",
+            "pageWidth": 1.0, "pageHeight": 1.0, "pieceGap": 0.0,
+            "marginLeft": 0.0, "marginRight": 0.0, "marginTop": 0.0, "marginBottom": 0.0,
+            "layoutMode": "alongGrainline", "scaleGrid": false
+        });
+        let result = process_placement_fixture(settings, false, true);
+        assert_eq!(result.output_doc.root.attributes["width"], "500");
+        assert!(result.unplaced_labels.is_empty());
+        assert_eq!(placed_count(&result), 2);
+        assert!(result.media_enlargement.as_ref().unwrap().starts_with("Media enlarged: width 5.21 in, height "));
+        let initial = Document::parse(r#"<svg width="96" height="96"/>"#).expect("initial");
+        let output = Document::parse(r#"<svg width="192" height="288"/>"#).expect("output");
+        for (unit, expected) in [
+            ("mm", "Media enlarged: width 50.80 mm, height 76.20 mm."),
+            ("cm", "Media enlarged: width 5.08 cm, height 7.62 cm."),
+        ] {
+            let settings = LayoutSettings::from_json(&serde_json::json!({"unit": unit}).to_string()).unwrap();
+            assert_eq!(enlarged_media_message(&settings, &initial, &output).as_deref(), Some(expected));
+            assert!(enlarged_media_message(&settings, &initial, &initial).is_none());
+        } // for active unit
+    } // placement_enlargement_dimensions_and_notifications
 
     // @brief Nested packs one unit per piece; Marker packs one unit per piece per size.
     #[test]

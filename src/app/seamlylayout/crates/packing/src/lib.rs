@@ -232,6 +232,48 @@ pub fn pack_polygons_extending(
     )
 } // fn pack_polygons_extending
 
+// @brief Pack remaining pieces on successive equal sheets, stacked vertically.
+// @return Placements with original ids, unplaced original ids, and total sheet height.
+pub fn pack_polygons_on_sheets(
+    bin_w: u32,
+    bin_h: u32,
+    gap_px: u32,
+    polygons: &[Polygon],
+    rects: &[Rect],
+    trial_angles_deg: &[u16],
+    mut on_progress: Option<&mut dyn FnMut(usize, usize)>,
+) -> (Vec<Placed>, Vec<usize>, u32) {
+    let mut pending: Vec<usize> = (0..rects.len()).collect();
+    let mut placements = Vec::new();
+    let mut sheet_top = 0u32;
+    let mut used_h = bin_h;
+    while !pending.is_empty() {
+        // Reject unrepresentable sheets before translating any placements.
+        let Some(sheet_bottom) = sheet_top.checked_add(bin_h) else { break };
+        let sheet_rects: Vec<Rect> = pending.iter().map(|&id| rects[id]).collect();
+        let sheet_polygons: Vec<Polygon> = pending.iter().map(|&id| polygons[id].clone()).collect();
+        let (placed, _, unplaced) = pack_polygons_lenient(
+            bin_w, bin_h, gap_px, &sheet_polygons, &sheet_rects, trial_angles_deg,
+            on_progress.as_mut().map(|callback| &mut **callback as &mut dyn FnMut(usize, usize)),
+        );
+        if placed.is_empty() {
+            // A fresh sheet cannot help these pieces; retain their original ids.
+            break;
+        } // if no progress
+        placements.extend(placed.into_iter().map(|mut placement| {
+            placement.id = pending[placement.id];
+            placement.y += sheet_top;
+            placement
+        }));
+        pending = unplaced.into_iter().map(|id| pending[id]).collect();
+        used_h = sheet_bottom;
+        let Some(next_top) = sheet_bottom.checked_add(gap_px) else { break };
+        sheet_top = next_top;
+    } // while pending pieces; every successful pass removes at least one
+    placements.sort_unstable_by_key(|placement| placement.id);
+    (placements, pending, used_h)
+} // fn pack_polygons_on_sheets
+
 // ---------------------------------------------------------------------------
 // Tests — dispatcher routing only.  Per-packer behavior is tested in each
 // packer's own crate.
@@ -240,6 +282,37 @@ pub fn pack_polygons_extending(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // @brief Repeated sheet retries preserve piece identity and sheet boundaries.
+    #[test]
+    fn sheet_retries_place_remaining_pieces() {
+        let rects = [Rect::new(16, 8); 4];
+        let polygons = vec![Polygon::new(vec![]); rects.len()];
+        let (placed, unplaced, height) =
+            pack_polygons_on_sheets(16, 8, 2, &polygons, &rects, &[0], None);
+        assert!(unplaced.is_empty());
+        assert_eq!(height, 38);
+        assert_eq!(placed.iter().map(|p| (p.id, p.y)).collect::<Vec<_>>(),
+                   vec![(0, 0), (1, 10), (2, 20), (3, 30)]);
+        assert!(validate_placements(16, height, &placed));
+    } // sheet_retries_place_remaining_pieces
+
+    // @brief Impossible pieces terminate retries without losing their original ids.
+    #[test]
+    fn sheet_retries_stop_without_progress() {
+        let rects = [Rect::new(40, 4), Rect::new(16, 8), Rect::new(16, 8)];
+        let polygons = vec![Polygon::new(vec![]); rects.len()];
+        let (placed, unplaced, height) =
+            pack_polygons_on_sheets(16, 8, 0, &polygons, &rects, &[0], None);
+        assert_eq!(unplaced, vec![0]);
+        assert_eq!(placed.iter().map(|p| p.id).collect::<Vec<_>>(), vec![1, 2]);
+        assert_eq!(height, 16);
+        let (placed, unplaced, height) =
+            pack_polygons_on_sheets(1, 1, 0, &polygons, &rects, &[0], None);
+        assert!(placed.is_empty());
+        assert_eq!(unplaced, vec![0, 1, 2]);
+        assert_eq!(height, 1);
+    } // sheet_retries_stop_without_progress
 
     // @brief Dispatcher: orthogonal-only trial set routes to MaxRects.
     #[test]

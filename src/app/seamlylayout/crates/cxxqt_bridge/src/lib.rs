@@ -1800,6 +1800,11 @@ impl qobject::AppController {
 
         match first_layout {
             Ok(result) => {
+                let media_enlargement = if oversize == OversizeChoice::Extend {
+                    result.media_enlargement.clone()
+                } else {
+                    None
+                }; // only notify for the user's enlargement choice
                 // Store results in rust state
                 {
                     let mut rust = self.as_mut().rust_mut();
@@ -1875,6 +1880,9 @@ impl qobject::AppController {
                     queue.extend_media = args_extend_media;
                     queue.split_oversized = oversize == OversizeChoice::Split;
                     let first = LayoutJob { material: shown, kind: None };
+                    if let Some(message) = &media_enlargement {
+                        queue.media_enlargements.push(format!("{message} {}", queue.job_label(&first)));
+                    } // if media enlarged
                     if !result.unplaced_labels.is_empty() {
                         queue.problems.push(layout_views::tab_unplaced_problem(&queue.job_label(&first), &result.unplaced_labels));
                     } // if unplaced pieces
@@ -1916,7 +1924,7 @@ impl qobject::AppController {
                 // Soft failure: some pieces didn't fit, or a fold line stays off
                 // the left edge.  The layout still rendered every piece that fit,
                 // so this is a warning (popup), not an error that aborts the layout.
-                let mut warnings = Vec::new();
+                let mut warnings: Vec<String> = media_enlargement.into_iter().collect();
                 if !result.unplaced_labels.is_empty() {
                     warnings.push(layout_views::unplaced_warning(&result.unplaced_labels, is_fabric_layout));
                 } // if unplaced pieces
@@ -2026,6 +2034,11 @@ impl qobject::AppController {
             match outcome {
                 Ok(result) => {
                     if let Some(queue) = rust.tab_queue.as_mut() {
+                        if queue.extend_media && !multisize {
+                            if let Some(message) = &result.media_enlargement {
+                                queue.media_enlargements.push(format!("{message} {label}"));
+                            } // if media enlarged
+                        } // if user-requested enlargement
                         if !result.unplaced_labels.is_empty() {
                             queue.problems.push(layout_views::tab_unplaced_problem(&label, &result.unplaced_labels));
                         } // if unplaced pieces
