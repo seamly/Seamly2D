@@ -42,6 +42,7 @@
 #include <QGraphicsPathItem>
 #include <QGraphicsSimpleTextItem>
 #include <QTransform>
+#include <QSet>
 
 #include "vinteractivetool.h"
 
@@ -193,6 +194,7 @@ private:
     QGraphicsPathItem*       m_fold_line_arrow;       ///< Arrow line that points at the fold line.
     QGraphicsPathItem*       m_fold_line_arrow_heads; ///< Filled arrow heads of m_fold_line_arrow.
     QGraphicsSimpleTextItem* m_fold_line_label;       ///< "Foldline" text between the fold line and its arrow line.
+    QSet<quint32>            m_reported_missing_points; ///< Missing marking points already shown to the user.
 
                            PatternPieceTool(VAbstractPattern *doc, VContainer *data, const quint32 &id,
                                               const Source &typeCreation, VMainGraphicsScene *scene,
@@ -200,6 +202,7 @@ private:
 
     void                  updateExcludeState();
     void                  refreshFoldLine(const VPiece& piece, const QVector<QPointF>& seam_allowance_points);
+    void                  reportMissingMarkingPoints(const QString &piece_name, const QVector<quint32> &point_ids);
     void                  applyFlipToGeometry(PieceFlip flip);
     void                  applyTiltToGeometry(int signed_degrees);
     void                  applyDisplayTransformToDetails(const QTransform &transform);

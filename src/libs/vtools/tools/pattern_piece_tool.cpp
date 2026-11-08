@@ -82,6 +82,8 @@
 #include <QMessageBox>
 #include <QPainterPathStroker>
 #include <QPolygonF>
+#include <QStringList>
+#include <QTimer>
 
 namespace
 {
@@ -249,6 +251,9 @@ void PatternPieceTool::insertNodes(const QVector<VPieceNode> &nodes, quint32 pie
 
             initializeNode(node, scene, data, doc, patternPiece);
         }
+
+        // The piece tool redraws from its own container copy during the push. Give it the new nodes first.
+        doc->UpdateToolData(pieceId, data);
 
         SavePieceOptions *saveCommand = new SavePieceOptions(oldPiece, newPiece, doc, pieceId);
         qApp->getUndoStack()->push(saveCommand);// First push then make a connect
@@ -1588,6 +1593,37 @@ bool PatternPieceTool::markingPoint(const VContainer &data, quint32 pieceId, qui
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Tells the user once per piece and point that piece markings were not drawn.
+ * @details The message opens after the current event, so it never opens inside a redraw.
+ */
+void PatternPieceTool::reportMissingMarkingPoints(const QString &piece_name, const QVector<quint32> &point_ids)
+{
+    QStringList new_ids;
+    for (const quint32 point_id : point_ids)
+    {
+        if (!m_reported_missing_points.contains(point_id))
+        {
+            m_reported_missing_points.insert(point_id);
+            new_ids.append(QString::number(point_id));
+        }
+    }
+    if (new_ids.isEmpty() || qApp->getMainWindow() == nullptr)
+    {
+        return;
+    }
+
+    const QString text = tr("Piece \"%1\" has markings that use points missing from the pattern: %2.\n\n"
+                            "These markings are not drawn. Open Piece Properties to review the drill holes, "
+                            "reference lines and anchors.")
+                             .arg(piece_name, new_ids.join(QStringLiteral(", ")));
+    QTimer::singleShot(0, qApp->getMainWindow(), [text]()
+    {
+        QMessageBox::warning(qApp->getMainWindow(), tr("Missing marking points"), text);
+    });
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 void PatternPieceTool::updatePiece(const VPiece &piece)
 {
     setFlag(QGraphicsItem::ItemSendsGeometryChanges, false);
@@ -1700,10 +1736,20 @@ void PatternPieceTool::RefreshGeometry()
     QPainterPath drill_holes_outline;
     QPainterPath anchor_points;
     const VContainer &piece_data = *getData();
+    QVector<quint32> missing_points;
+    const auto find_marking_point = [this, &piece_data, &missing_points](quint32 point_id, QPointF &point)
+    {
+        if (markingPoint(piece_data, m_id, point_id, point))
+        {
+            return true;
+        }
+        missing_points.append(point_id);
+        return false;
+    };
     for (const PieceDrillHole &hole : piece.drillHoles())
     {
         QPointF center;
-        if (!markingPoint(piece_data, m_id, hole.center, center))
+        if (!find_marking_point(hole.center, center))
         {
             continue;
         }
@@ -1716,7 +1762,9 @@ void PatternPieceTool::RefreshGeometry()
     {
         QPointF start;
         QPointF end;
-        if (!markingPoint(piece_data, m_id, line.start, start) || !markingPoint(piece_data, m_id, line.end, end))
+        const bool has_start = find_marking_point(line.start, start);
+        const bool has_end = find_marking_point(line.end, end);
+        if (!has_start || !has_end)
         {
             continue;
         }
@@ -1752,7 +1800,7 @@ void PatternPieceTool::RefreshGeometry()
     for (quint32 anchor : piece.getAnchors())
     {
         QPointF point;
-        if (!markingPoint(piece_data, m_id, anchor, point))
+        if (!find_marking_point(anchor, point))
         {
             continue;
         }
@@ -1762,6 +1810,7 @@ void PatternPieceTool::RefreshGeometry()
         anchor_points.moveTo(point.x(), point.y() - anchor_radius);
         anchor_points.lineTo(point.x(), point.y() + anchor_radius);
     }
+    reportMissingMarkingPoints(piece.GetName(), missing_points);
     m_markings->setPath(markings);
     m_markings->setBrush(Qt::NoBrush);
     m_drill_holes_outline->setPath(drill_holes_outline);

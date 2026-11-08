@@ -4227,6 +4227,7 @@ void MainWindow::showDraftMode(bool checked)
         doc->setDraftStage(Draw::Calculation);
         draft_block_combobox->setCurrentIndex(currentBlockIndex); //restore current draft block
         drawMode = true;
+        refreshToolData();
 
         setToolsEnabled(true);
         setWidgetsEnabled(true);
@@ -4255,6 +4256,20 @@ void MainWindow::showDraftMode(bool checked)
     {
         ui->showDraftMode->setChecked(true);
     }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Re-parses the pattern so every tool's data copy matches the pattern data.
+ * @details Mode switches call it to refresh tool copies that a command left stale.
+ */
+void MainWindow::refreshToolData()
+{
+    if (qApp->getOpeningPattern() || pattern->DataGObjects()->isEmpty())
+    {
+        return;
+    }
+    doc->LiteParseTree(Document::LiteParse);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -4299,6 +4314,7 @@ void MainWindow::showPieceMode(bool checked)
             }
         }
 
+        refreshToolData();
         piecesWidget->updateList();
 
         qCDebug(vMainWindow, "Show piece scene");
