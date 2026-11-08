@@ -235,6 +235,84 @@ mod tests {
     }
 
     #[test]
+    fn differing_cut_line_turn_points_leave_layout_geometry_unchanged() {
+        let (mut layout, mut input) = fixture_drawings("36");
+        layout.blocks.retain(|b| b.name == "piece_Front_s36_M");
+        layout.blocks[0].size = Some("500".to_string());
+
+        input
+            .blocks
+            .retain(|b| matches!(b.name.as_str(), "piece_Front_s34_M" | "piece_Front_s36_M"));
+        let size_220 = input
+            .blocks
+            .iter_mut()
+            .find(|b| b.name == "piece_Front_s34_M")
+            .expect("size 220 input");
+        size_220.size = Some("220".to_string());
+        size_220.boundary = Some(
+            build_contour(
+                &[
+                    Point::new(0.0, 0.0),
+                    Point::new(100.0, 0.0),
+                    Point::new(100.0, 100.0),
+                    Point::new(0.0, 100.0),
+                ],
+                true,
+            )
+            .expect("size 220 boundary"),
+        );
+        let size_500 = input
+            .blocks
+            .iter_mut()
+            .find(|b| b.name == "piece_Front_s36_M")
+            .expect("size 500 input");
+        size_500.size = Some("500".to_string());
+        size_500.boundary = Some(
+            build_contour(
+                &[
+                    Point::new(0.0, 0.0),
+                    Point::new(100.0, 0.0),
+                    Point::new(50.0, 80.0),
+                ],
+                true,
+            )
+            .expect("size 500 boundary"),
+        );
+
+        let layout_boundary = block(&layout, "piece_Front_s36_M")
+            .boundary
+            .clone()
+            .expect("layout boundary");
+        let warnings = grade_drawing(
+            &mut layout,
+            &input,
+            &["220".to_string(), "500".to_string()],
+            "500",
+        );
+
+        assert_eq!(
+            warnings,
+            vec![
+                "Front: not graded, size 220 has other turn points than size 500 on the cut line."
+            ]
+        );
+        let front = block(&layout, "piece_Front_s36_M");
+        assert_eq!(
+            front.boundary.as_ref(),
+            Some(&layout_boundary),
+            "keep the valid layout contour"
+        );
+        assert!(
+            front.grading.is_none(),
+            "do not invent cross-size correspondences"
+        );
+        assert!(
+            layout.grade_rule_table.is_none(),
+            "no rule table without a graded piece"
+        );
+    }
+
+    #[test]
     fn rules_move_the_sample_onto_every_size() {
         let (layout, input, _) = graded_fixture();
         let table = layout.grade_rule_table.as_ref().expect("rule table");

@@ -5,12 +5,14 @@
  **
  **  @author DS Caskey
  **  @date   Jul 31, 2022
+ **  @author slspencer
  **
  **  @brief
  **  @copyright
  **  This source code is part of the Seamly2D project, a pattern making
  **  program, whose allow create and modeling patterns of clothing.
  **  Copyright (C) 2013-2022 Seamly2D project
+ **  Copyright (C) 2026 Seamly2D Project
  **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
  **
  **  Seamly2D is free software: you can redistribute it and/or modify
@@ -811,6 +813,17 @@ QTransform pieceFlipTransform(PieceFlip flip, const QPointF &center)
     QTransform transform;
     transform.translate(center.x(), center.y());
     transform.scale(scale_x, scale_y);
+    transform.translate(-center.x(), -center.y());
+    return transform;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Rotate geometry about its center; positive values rotate counterclockwise on screen.
+QTransform pieceTiltTransform(int degrees, const QPointF &center)
+{
+    QTransform transform;
+    transform.translate(center.x(), center.y());
+    transform.rotate(-degrees);
     transform.translate(-center.x(), -center.y());
     return transform;
 }

@@ -154,25 +154,15 @@ bool NewPieceDefaults::sameLabelLines(const QVector<VLabelTemplateLine> &first,
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QString NewPieceDefaults::pieceLabelTemplateFile(const QVector<VLabelTemplateLine> &lines)
+QString NewPieceDefaults::pieceLabelTemplateFile(const QVector<VLabelTemplateLine> &)
 {
-    if (lines.isEmpty() || !sameLabelLines(lines, pieceLabelTemplate()))
-    {
-        return QString();
-    }
-    return labelTemplateFile(qApp->Settings()->getDefaultPieceTemplate(), VCommonSettings::builtInPieceLabelTemplate());
+    return QString();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QString NewPieceDefaults::patternLabelTemplateFile(const QVector<VLabelTemplateLine> &lines)
+QString NewPieceDefaults::patternLabelTemplateFile(const QVector<VLabelTemplateLine> &)
 {
-    if (lines.isEmpty() || !sameLabelLines(lines, patternLabelTemplate()))
-    {
-        return QString();
-    }
-
-    return labelTemplateFile(qApp->Settings()->getDefaultPatternTemplate(),
-                             VCommonSettings::builtInPatternLabelTemplate());
+    return QString();
 }
 
 //---------------------------------------------------------------------------------------------------------------------

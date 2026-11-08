@@ -3509,6 +3509,8 @@ void PatternPieceDialog::initializeLabelsTab()
     if (m_pieceLabelLines.isEmpty())
     {
         m_pieceLabelLines = NewPieceDefaults::pieceLabelTemplate();
+        m_piece_template_file = NewPieceDefaults::labelTemplateFile(
+            qApp->Settings()->getDefaultPieceTemplate(), VCommonSettings::builtInPieceLabelTemplate());
     }
 
     enabledPieceLabel();
@@ -3551,9 +3553,12 @@ void PatternPieceDialog::initializeLabelsTab()
     m_patternLabelLines = qApp->getCurrentDocument()->getPatternLabelTemplate();
 
     // The pattern label text belongs to the document. Give a document without one the default text.
+    m_pattern_template_file = NewPieceDefaults::patternLabelTemplateFile(m_patternLabelLines);
     if (m_patternLabelLines.isEmpty())
     {
         m_patternLabelLines = NewPieceDefaults::patternLabelTemplate();
+        m_pattern_template_file = NewPieceDefaults::labelTemplateFile(
+            qApp->Settings()->getDefaultPatternTemplate(), VCommonSettings::builtInPatternLabelTemplate());
         if (!m_patternLabelLines.isEmpty())
         {
             qApp->getCurrentDocument()->setPatternLabelTemplate(m_patternLabelLines);
@@ -3562,8 +3567,6 @@ void PatternPieceDialog::initializeLabelsTab()
 
     enabledPatternLabel();
 
-    m_piece_template_file = NewPieceDefaults::pieceLabelTemplateFile(m_pieceLabelLines);
-    m_pattern_template_file = NewPieceDefaults::patternLabelTemplateFile(m_patternLabelLines);
     refreshTemplateFileLabels();
 
     ui->pieceName_LineEdit->setText(createPieceName());
