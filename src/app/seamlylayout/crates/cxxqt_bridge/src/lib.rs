@@ -629,6 +629,8 @@ pub mod qobject {
         #[qproperty(bool, dxf_export_allowed)]
         // True when PDF (Tiled) can export the shown layout: any layout but the Marker tab.
         #[qproperty(bool, pdf_tiled_export_allowed)]
+        // True when the current layout split oversized pieces; only regular PDF can export it.
+        #[qproperty(bool, is_split_layout_active)]
         // True after Cancel in the oversized-pieces dialog: only 'Layout Settings'
         // stays active until new settings are submitted.
         #[qproperty(bool, is_settings_required)]
@@ -1090,6 +1092,9 @@ pub struct AppControllerRust {
     // True when PDF (Tiled) can export the shown layout; mirrored from `layout_views`.
     pdf_tiled_export_allowed: bool,
 
+    // True when the shown layout split oversized pieces.
+    is_split_layout_active: bool,
+
     // True after Cancel in the oversized-pieces dialog, until new settings are submitted.
     is_settings_required: bool,
 
@@ -1167,6 +1172,7 @@ impl Default for AppControllerRust {
             is_tab_layout_pending:     false,                          // no tab run queued
             dxf_export_allowed:        true,                           // no tabs: an individual layout exports DXF-ASTM
             pdf_tiled_export_allowed:  true,                           // no tabs: an individual layout exports PDF (Tiled)
+            is_split_layout_active:    false,                          // no split layout
             is_settings_required:      false,                          // no cancelled layout
             divide_spec:               None,                           // no split layout
             layout_views:              LayoutViews::default(),         // no tabs
@@ -1341,6 +1347,7 @@ impl qobject::AppController {
     fn clear_layout_state(mut self: std::pin::Pin<&mut Self>) {
         self.as_mut().set_is_layout_ready(false);
         self.as_mut().clear_layout_views(); // tabs belong to the old document
+        self.as_mut().set_is_split_layout_active(false);
         {
             let mut rust = self.as_mut().rust_mut();
             // don't clear input_dom yet - keep the current input_dom displayed (if any)
@@ -2105,6 +2112,7 @@ impl qobject::AppController {
     fn finish_tab_layouts(mut self: std::pin::Pin<&mut Self>) {
         let warning = self.as_mut().rust_mut().tab_queue.take().and_then(|q| q.final_warning());
 
+        self.as_mut().refresh_layout_view_properties();
         self.as_mut().set_is_tab_layout_pending(false);
         self.as_mut().set_is_layout_in_progress(false);
         self.as_mut().set_layout_progress(-1);
@@ -2205,8 +2213,7 @@ impl qobject::AppController {
         self.as_mut().refresh_layout_view_properties();
     } // fn clear_layout_views
 
-    // Copy the tab labels, the active index and the DXF-ASTM and PDF (Tiled) states
-    // from `layout_views` to the QML properties.
+    // Copy the tab labels, export capabilities, and split state to the QML properties.
     fn refresh_layout_view_properties(mut self: std::pin::Pin<&mut Self>) {
         let (labels, active, dxf_allowed, tiled_allowed) = {
             let views = &self.rust().layout_views;
@@ -2223,6 +2230,8 @@ impl qobject::AppController {
         self.as_mut().set_active_layout_view(active);
         self.as_mut().set_dxf_export_allowed(dxf_allowed);
         self.as_mut().set_pdf_tiled_export_allowed(tiled_allowed);
+        let split_layout_active = self.rust().divide_spec.is_some();
+        self.as_mut().set_is_split_layout_active(split_layout_active);
     } // fn refresh_layout_view_properties
 
     // Return the piece bbox JSON array built by process_layout.

@@ -112,6 +112,7 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
   - `ProcessLayoutResult::divide_spec` keeps the media; `sheets::build_sheet_export_inputs` splits the same way for the paper-sheet PDF.
   - `packing::pack_polygons_on_sheets` retries unplaced parts on fresh sheets of the configured content size.
   - The canvas stacks sheet content vertically with a piece gap between sheets. Prior placements keep their original piece ids.
+  - Export enables regular PDF only; that PDF contains the layout's pages as one multi-page file.
   - Each successful retry removes at least one remaining piece. No-progress and coordinate-limit stops preserve explicit unplaced-piece warnings.
 - "extend": `ProcessLayoutArgs::extend_media`, as below.
 - `cancel_layout` sets `is_settings_required`: QML disables every button but 'Layout Settings', Preferences and Exit. `initialize_layout` clears it.

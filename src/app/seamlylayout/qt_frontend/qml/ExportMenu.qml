@@ -38,6 +38,8 @@
 // "Export all tabs" item leads the menu.  While checked, every format writes
 // one file per tab instead of one file for the selected tab.
 //
+// With splitLayout true, regular PDF is the only enabled export format.
+//
 // With dxfEnabled false (Export menu, Marker or Nested tab shown), the DXF
 // items are disabled and a note at the top of the DXF submenu names the tabs
 // DXF exports.
@@ -70,6 +72,9 @@ Menu {
     // Export menu binds this to (settings.paperType === "tiled").
     // View menu can keep this true because it opens already-exported files.
     property bool pdfTiledEnabled: true
+
+    // @brief True when the active layout split oversized pieces; only regular PDF remains available.
+    property bool splitLayout: false
 
     // @brief False disables PDF (Tiled): the shown tab is Marker, which every size makes too large to tile.
     property bool pdfTiledTabAllowed: true
@@ -223,6 +228,14 @@ Menu {
         height: visible ? implicitHeight : 0
     } // MenuSeparator after exportAllTabsItem
 
+    MenuItem {
+        objectName: "splitLayoutDisabledNote"
+        text: "Split layouts export only as PDF"
+        visible: root.splitLayout
+        height: visible ? implicitHeight : 0
+        enabled: false
+    } // MenuItem splitLayoutDisabledNote
+
     // View menu only: the Export menu has the DXF submenu instead.
     MenuItem {
         id: viewDxfItem
@@ -243,8 +256,9 @@ Menu {
         // A disabled item shows no tooltip, so this note explains the disabled DXF items.
         MenuItem {
             objectName: "dxfDisabledNote"
-            text: "DXF: select Base Size or a size tab"
-            visible: !root.dxfEnabled
+            text: root.splitLayout ? "DXF: split layouts export only as PDF"
+                                  : "DXF: select Base Size or a size tab"
+            visible: !root.dxfEnabled || root.splitLayout
             height: visible ? implicitHeight : 0
             enabled: false
         } // MenuItem DXF note
@@ -252,26 +266,27 @@ Menu {
         MenuItem {
             objectName: "dxfAstmR13Item"
             text: "DXF-ASTM (R13)"
-            enabled: root.layoutReady && root.dxfEnabled
+            enabled: root.layoutReady && root.dxfEnabled && !root.splitLayout
             onTriggered: root.exportDxfAstmR13Requested()
         } // MenuItem DXF-ASTM (R13)
 
         MenuItem {
             objectName: "dxfAstmClo3dItem"
             text: "DXF-ASTM (CLO3D)"
-            enabled: root.layoutReady && root.dxfEnabled
+            enabled: root.layoutReady && root.dxfEnabled && !root.splitLayout
             onTriggered: root.exportDxfAstmClo3dRequested()
         } // MenuItem DXF-ASTM (CLO3D)
 
         MenuItem {
             objectName: "dxfAamaItem"
             text: "DXF-AAMA (R11)"
-            enabled: root.layoutReady && root.dxfEnabled
+            enabled: root.layoutReady && root.dxfEnabled && !root.splitLayout
             onTriggered: root.exportDxfAamaRequested()
         } // MenuItem DXF-AAMA (R11)
     } // Menu dxfSubmenu
 
     MenuItem {
+        objectName: "pdfItem"
         text: "PDF"
         enabled: root.layoutReady // Phase 10: enabled when layout is ready
         onTriggered: root.exportPdfRequested()
@@ -279,46 +294,51 @@ Menu {
 
     MenuItem {
         objectName: "pdfTiledItem"
-        // A disabled item gets no hover events, so the hint is in the text, not a tooltip.
-        // Tiled PDF pages take their size from the tile size, which exists only for tiled paper.
-        text: !root.pdfTiledEnabled    ? "PDF (Tiled): set Paper Type to Tiled"
+        // Disabled items show the split-layout reason or the setting restriction in their text.
+        text: root.splitLayout         ? "PDF (Tiled): use PDF for split layouts"
+            : !root.pdfTiledEnabled    ? "PDF (Tiled): set Paper Type to Tiled"
             : !root.pdfTiledTabAllowed ? "PDF (Tiled): select a tab other than Marker"
             :                            "PDF (Tiled)"
-        enabled: root.layoutReady && root.pdfTiledEnabled && root.pdfTiledTabAllowed
+        enabled: root.layoutReady && !root.splitLayout && root.pdfTiledEnabled && root.pdfTiledTabAllowed
         onTriggered: root.exportPdfTiledRequested()
     } // MenuItem PDF Tiled
 
     MenuItem {
+        objectName: "pngItem"
         text: root.showJpg ? "PNG" : "PNG/JPG"
-        enabled: root.layoutReady // enabled when layout is ready
+        enabled: root.layoutReady && !root.splitLayout
         onTriggered: root.exportPngRequested()
     } // MenuItem PNG
 
     MenuItem {
         id: jpgItem
+        objectName: "jpgItem"
         text: "JPG"
-        enabled: root.layoutReady // enabled when layout is ready
+        enabled: root.layoutReady && !root.splitLayout
         onTriggered: root.exportJpgRequested()
     } // MenuItem JPG
 
     MenuItem {
         id: epsItem
+        objectName: "epsItem"
         text: "EPS"
-        enabled: root.layoutReady // enabled when layout is ready
+        enabled: root.layoutReady && !root.splitLayout
         onTriggered: root.exportPostscriptRequested("eps")
     } // MenuItem EPS
 
     MenuItem {
         id: psItem
+        objectName: "psItem"
         text: "PostScript (PS)"
-        enabled: root.layoutReady // enabled when layout is ready
+        enabled: root.layoutReady && !root.splitLayout
         onTriggered: root.exportPostscriptRequested("ps")
     } // MenuItem PS
 
     MenuItem {
         id: svgItem
+        objectName: "svgItem"
         text: "SVG"
-        enabled: root.layoutReady // enabled when layout is ready
+        enabled: root.layoutReady && !root.splitLayout
         onTriggered: root.exportSvgRequested()
     } // MenuItem SVG
 
@@ -353,8 +373,9 @@ Menu {
 
     Menu {
         id: svgSubmenu
+        objectName: "svgSubmenu"
         title: "SVG"
-        enabled: root.layoutReady
+        enabled: root.layoutReady && !root.splitLayout
         width: root.fittedWidth(svgSubmenu)
 
         SvgModeItem {
@@ -459,8 +480,9 @@ Menu {
 
     Menu {
         id: hpglSubmenu
+        objectName: "hpglSubmenu"
         title: "HPGL"
-        enabled: root.layoutReady
+        enabled: root.layoutReady && !root.splitLayout
 
         MenuItem {
             text: "Plot (all lines)"
@@ -530,17 +552,19 @@ Menu {
     // Paid formats: hidden Menu items keep their height, so collapse them when hidden.
     MenuItem {
         text:    "G-Code"
+        objectName: "gcodeItem"
         visible: root.gcodeExportAvailable
         height:  visible ? implicitHeight : 0
-        enabled: root.layoutReady
+        enabled: root.layoutReady && !root.splitLayout
         onTriggered: root.exportGcodeRequested()
     } // MenuItem G-Code
 
     MenuItem {
         text:    "3D Mesh (3MF)"
+        objectName: "meshItem"
         visible: root.meshExportAvailable
         height:  visible ? implicitHeight : 0
-        enabled: root.layoutReady
+        enabled: root.layoutReady && !root.splitLayout
         onTriggered: root.exportMeshRequested()
     } // MenuItem 3D Mesh
 

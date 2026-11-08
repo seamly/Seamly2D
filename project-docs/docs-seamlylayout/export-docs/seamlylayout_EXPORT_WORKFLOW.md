@@ -161,6 +161,7 @@ ExportMenu EPS / PostScript (PS) → exportPostscriptRequested("eps" | "ps")
 
 `exports::render_tree_to_pdf_bytes` renders every PDF page: PDF, PDF (Tiled), and sheet pages.
 
+- A split layout enables regular PDF only. Sheet pages are merged into one multi-page PDF.
 - Units: 96 px per inch → 72 pt per inch. `svg2pdf` gets `PageOptions { dpi: 96 }`; its default (72) prints 4/3 too large.
 - PDF readers limit a page side to 14 400 units (Acrobat: 200 in).
 - A page side longer than 200 in gets `/UserUnit` n, the smallest whole number that keeps the MediaBox within 14 400. A reader multiplies the MediaBox by n / 72 in. A 48 in × 500 in roll: MediaBox `1152 × 12000`, `/UserUnit 3`.
