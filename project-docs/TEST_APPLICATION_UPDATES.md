@@ -130,14 +130,14 @@ Use an asymmetric male_shirt piece, such as FrontPanel.
 - [x] Save and reopen preserve the choice and display.
 - [ ] Repeat Horizontal, Vertical, and Both on copied, united, and Mirror-on-Fold pieces.
   - [ ]  some points don't flip yet they should flip.
-  --> Fix this issue in a worktree as a feature branch then merge with run-seamlyLayout. 
+  --> Piece Mode now applies the display transform to path-node markers and internal paths. Verify all derived-piece cases with the rebuilt installer.
 - [x] Change a previously flipped piece to each other choice; the result does not accumulate extra flips.
 - [x] Rotation choices save and reopen correctly; visual rotation is not implemented.
   - Layout Mode "Any" provides free rotation; Piece Mode does not visually apply the rotation choice.
 - [ ] Tilt None disables degrees; enabled degrees remain within 0–90.
   - [x] Tilt with degress > 0 should visually rotate the pattern piece but not the grainline. Currently Tilt with degrees > 0 doesn't visually rotate the pattern piece.
 - [  ]  Tilt rotates the piece but doesn't rotate some of the points. 
-  - --> Fix this issue in a worktree as a feature branch then merge in run-seamlLayout.
+  - --> Piece Mode now applies the same display transform to path-node markers and internal paths. Verify with the rebuilt installer.
 
 The flip changes the displayed choice. It must not flatten or rewrite the stored draft geometry.
 Section 6 records copied-source checks as passed. Section 5's unchecked row covers Horizontal, Vertical, and Both on copied, united, and Mirror-on-Fold pieces.
