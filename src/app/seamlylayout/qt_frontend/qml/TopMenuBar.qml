@@ -4,7 +4,7 @@
 //
 // @file TopMenuBar.qml
 // @brief Application toolbar — Import, Layout Settings, Create Layout,
-//        Adjust Layout, Export dropdown, Preferences gear, Exit.
+//        Adjust Layout, Export dropdown, Preferences, About, Exit.
 //
 // Usage:
 //   TopMenuBar {
@@ -14,6 +14,7 @@
 //       onLayoutSettingsClicked: layoutSettingsPanel.visible = !layoutSettingsPanel.visible
 //       onCreateLayoutClicked:   { /* Phase 8 */ }
 //       onPreferencesClicked:    preferencesPanel.visible = !preferencesPanel.visible
+//       onAboutClicked:          aboutDialog.open()
 //   }
 
 import QtQuick 6.11
@@ -173,6 +174,9 @@ ToolBar {
     // @brief User clicked the Preferences gear.
     signal preferencesClicked()
 
+    // @brief User clicked About.
+    signal aboutClicked()
+
     // -----------------------------------------------------------------------
     // Toolbar background
     // -----------------------------------------------------------------------
@@ -305,6 +309,13 @@ ToolBar {
             implicitWidth: 36
             onClicked: root.preferencesClicked()
         } // SeamlyButton preferencesButton
+
+        // About button — opens application and Qt licensing details
+        SeamlyButton {
+            id: aboutButton
+            text: "About"
+            onClicked: root.aboutClicked()
+        } // SeamlyButton aboutButton
 
         // Exit button
         SeamlyButton {

@@ -28,9 +28,8 @@ ExportMenu.MenuItem("PNG").onTriggered
             → self.export_finished(path_str)                 signal → QML
               → Main.qml onExportFinished(path)              handler
                 → root.lastExportedPngPath = path            store for View menu
-                → preferencesModel.openInViewer(pngViewerPath, path)  C++ static
-                  → QProcess::startDetached(viewerPath, [filePath])
-                  → (fallback) QDesktopServices::openUrl(filePath)
+                → if an image viewer is configured, openInViewer(pngViewerPath, path)
+                → otherwise show the export-success dialog
 
 ## SVG export — label text modes
 
@@ -212,6 +211,9 @@ ExportMenu JPG → exportJpgRequested()
 - Limit: 65535 px per side (about 17.3 m at 96 px/in). A larger layout is an error before render. No file is written.
 - A finished JPG export shows the success dialog. It does not open a viewer.
 - View > PNG/JPG: file picker (`*.png *.jpg *.jpeg`), then `openInViewer(pngViewerPath, file)`.
+- View > PDF and PDF (Tiled) use the same flow with `pdf_viewer_path`.
+- An empty PDF or image viewer setting opens the selected file with the system-default application.
+- If an explicit viewer or the system-default application fails, an error dialog names the file and recovery step.
 - Preferences label: "Image Viewer (PNG, JPG)". The INI key stays `png_viewer_path`.
 
 ## Paid formats — G-Code and 3D mesh (3MF)

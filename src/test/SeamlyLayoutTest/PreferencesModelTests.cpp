@@ -70,6 +70,9 @@ private slots:
     void openInViewer_emptyViewer_opensWithDefaultHandler();
     void openInViewer_emptyViewerAndFile_returnsFalse();
     void openInViewer_emptyTokens_returnsFalse();
+    void applicationVersion_exposesApplicationMetadata();
+    void qtVersion_exposesRuntimeVersion();
+    void qtLicenseNotice_namesLesserGeneralPublicLicense();
 
     void defaultPreferencesFilePath_usesAppConfigIni();
     void legacyJson_migratesToIni();
@@ -223,16 +226,19 @@ void PreferencesModelTests::isViewerUrl_rejectsLocalCommandWithArgs()
     QVERIFY(!PreferencesModel::isViewerUrl(cmd));
 }
 
+// @brief Opens the selected local file through the system-default file association.
 void PreferencesModelTests::openInViewer_emptyViewer_opensWithDefaultHandler()
 {
     UrlCapture capture;
     QDesktopServices::setUrlHandler(QStringLiteral("file"), &capture, "handle");
-    const QString filePath = QCoreApplication::applicationFilePath();
+    QTemporaryDir temporaryDirectory;
+    const QString filePath = temporaryDirectory.filePath(QStringLiteral("pattern layout.pdf"));
     const bool launched = PreferencesModel::openInViewer(QString(), filePath);
     QDesktopServices::unsetUrlHandler(QStringLiteral("file"));
 
     QVERIFY(launched);
-    QCOMPARE(capture.captured, QList<QUrl>({QUrl::fromLocalFile(filePath)}));
+    QCOMPARE(capture.captured,
+             QList<QUrl>({QUrl::fromLocalFile(Platform::toNativePath(filePath))}));
 }
 
 // @brief An empty viewer cannot launch without a file.
@@ -246,6 +252,37 @@ void PreferencesModelTests::openInViewer_emptyTokens_returnsFalse()
     // Whitespace-only viewer string parses to zero tokens — must reject without launching.
     QCOMPARE(PreferencesModel::openInViewer(QStringLiteral("   "), QString()), false);
 }
+
+// @brief Exposes the application version set by the application entry point.
+void PreferencesModelTests::applicationVersion_exposesApplicationMetadata()
+{
+    const QString previousVersion = QCoreApplication::applicationVersion();
+    const QString testVersion = QStringLiteral("4.5.6");
+    QCoreApplication::setApplicationVersion(testVersion);
+
+    PreferencesModel model;
+    const QString exposedVersion = model.property("applicationVersion").toString();
+
+    QCoreApplication::setApplicationVersion(previousVersion);
+    QCOMPARE(exposedVersion, testVersion);
+} // applicationVersion_exposesApplicationMetadata
+
+// @brief Exposes the Qt runtime version displayed in About.
+void PreferencesModelTests::qtVersion_exposesRuntimeVersion()
+{
+    const PreferencesModel model;
+
+    QCOMPARE(model.property("qtVersion").toString(), QString::fromLatin1(qVersion()));
+} // qtVersion_exposesRuntimeVersion
+
+// @brief Exposes the LGPLv3 license notice displayed in About.
+void PreferencesModelTests::qtLicenseNotice_namesLesserGeneralPublicLicense()
+{
+    const PreferencesModel model;
+
+    QCOMPARE(model.property("qtLicenseNotice").toString(),
+             QStringLiteral("GNU Lesser General Public License version 3.0 (LGPLv3)"));
+} // qtLicenseNotice_namesLesserGeneralPublicLicense
 
 // @brief The application preferences file is stored directly in AppConfigLocation.
 void PreferencesModelTests::defaultPreferencesFilePath_usesAppConfigIni()

@@ -57,6 +57,10 @@ Current features:
 - background is "violet", field background is "gray_light", field text is "soft_black", field labels are "gray_light", and any remaining dialog text is "gray_light", title bar is violet_medium and title bar text "Preferences" is "light_gray"
 7. Settings dialog
 -background is "violet", field background is "gray_light", field text is "soft_black", field labels are "gray_light", and any remaining dialog text is "gray_light", title bar is violet_medium and title bar text "Settings" is "light_gray"
+8. About dialog
+- Accessible from the About button beside Preferences on the right side of the top menu.
+- Shows the SeamlyLayout version, linked Qt runtime version, LGPLv3 notice, and license link.
+- States that the Qt libraries are dynamically linked.
 
 Future features:
 1. Sewing panel:
