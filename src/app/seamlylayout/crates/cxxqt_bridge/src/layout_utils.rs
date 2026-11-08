@@ -367,6 +367,14 @@ pub fn do_process_layout(
     let (mut pieces, polygons) = extract_piece_rects_and_polygons(&flat_dom);
     set_free_rotation_without_grainline(&mut pieces, settings.free_rotation_without_grainline());
     crate::fold_line_edge::pin_fold_line_pieces(&mut pieces, &fold_plan);
+    if settings.media_type == "fabric" && settings.fabric_folded {
+        let fold_edge_gap_px = settings.piece_gap_px();
+        for piece in &mut pieces {
+            if piece.rect.left_edge_angle.is_none() {
+                piece.rect = piece.rect.with_min_left_gap(fold_edge_gap_px);
+            }
+        }
+    }
     if pieces.is_empty() {
         return Err(
             "[ERROR] layout_utils::do_process_layout(): 8 No pattern pieces found in the imported SVG. \
@@ -829,6 +837,12 @@ pub fn layout_divide_spec(settings: &LayoutSettings, bin_w: u32, bin_h: u32) -> 
         limit_length: !settings.is_roll_form(),
         trial_angles_deg: settings.rotation_trial_set_deg(),
         free_rotation_without_grainline: settings.free_rotation_without_grainline(),
+        fold_edge_gap_px: if settings.media_type == "fabric" && settings.fabric_folded {
+            settings.piece_gap_px()
+        } else {
+            0
+        },
+        fold_lines_on_left_edge: settings.fold_lines_on_left_edge,
     }
 } // fn layout_divide_spec
 
@@ -1155,6 +1169,16 @@ mod tests {
             let line = message.lines().find(|l| l.starts_with(&format!("\u{2022} {leg}: length "))).unwrap_or_default();
             assert!(line.ends_with(" in, media 35.50 in"), "{leg} line: {message}");
         }
+
+        let narrow_settings = paper_sheet_settings_json(16.0, 100.0);
+        let narrow_init = do_initialize_layout(&narrow_settings, Some(&input_dom)).expect("initialize narrow sheet");
+        let narrow = do_find_oversized_pieces(&narrow_settings, &input_dom, &narrow_init.initial_dom)
+            .expect("narrow-sheet check runs");
+        let narrow_message = piece_divider::oversized_pieces_message(&narrow, "in");
+        assert!(
+            narrow_message.lines().any(|line| line == "\u{2022} Back: width 16.61 in, media 15.50 in"),
+            "warning uses offending and effective sheet width: {narrow_message}"
+        );
 
         let result = process_trousers_sheet(&settings_json, true, false);
         assert!(result.unplaced_labels.is_empty(), "unplaced: {:?}", result.unplaced_labels);
@@ -2323,11 +2347,23 @@ mod tests {
     // @brief Lay out FOLD_PIECES_SVG on 40 in fabric folded to 20 in, or on a 20 x 40 in
     // paper sheet, with the given layout mode.
     fn process_fold_pieces(media: &str, layout_mode: &str, rotation_step: f64, fold_lines_on_left_edge: bool) -> ProcessLayoutResult {
+        process_fold_pieces_with_options(media, layout_mode, rotation_step, fold_lines_on_left_edge, 40.0, false)
+    } // fn process_fold_pieces
+
+    // @brief Lay out the fold fixture with configurable fabric width and splitting.
+    fn process_fold_pieces_with_options(
+        media: &str,
+        layout_mode: &str,
+        rotation_step: f64,
+        fold_lines_on_left_edge: bool,
+        fabric_width: f64,
+        split_oversized: bool,
+    ) -> ProcessLayoutResult {
         let input = Document::parse(FOLD_PIECES_SVG).expect("valid SVG");
         let paper_type = if media == "paper" { "sheet" } else { "roll" };
         let settings = serde_json::json!({
             "unit": "in", "mediaType": media, "paperType": paper_type,
-            "pageWidth": 20.0, "pageHeight": 40.0, "fabricWidth": 40.0,
+            "pageWidth": 20.0, "pageHeight": 40.0, "fabricWidth": fabric_width,
             "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
             "pieceGap": 0.125, "layoutMode": layout_mode, "rotationStep": rotation_step,
             "fabricFolded": media == "fabric", "foldLinesOnLeftEdge": fold_lines_on_left_edge,
@@ -2343,11 +2379,11 @@ mod tests {
                 layout_h_px: init.h_px,
                 nested_multisize: false,
                 extend_media: false,
-                split_oversized: false,
+                split_oversized,
             },
             &mut progress,
         ).expect("layout")
-    } // fn process_fold_pieces
+    } // fn process_fold_pieces_with_options
 
     // @brief Every x of the fold line path in a layout.
     fn fold_line_xs(doc: &Document) -> Vec<f64> {
@@ -2390,6 +2426,26 @@ mod tests {
         assert_eq!(off.output_doc.get_attr_by_id("contentRect", "x"), Some("0"), "folded fabric has no left margin");
         assert!(fold_line_xs(&off.output_doc).iter().all(|x| x.abs() > 1.0), "fold line off the edge");
     } // fold_line_lies_on_the_left_edge
+
+    // @brief Split folded-fabric pieces keep the fold at x=0 and the configured fold-edge gap.
+    #[test]
+    fn split_folded_fabric_pins_fold_parts_and_clears_other_parts() {
+        let result = process_fold_pieces_with_options("fabric", "alongGrainline", 0.0, true, 4.0, true);
+        assert!(result.unplaced_labels.is_empty(), "unplaced: {:?}", result.unplaced_labels);
+        assert!(result.fold_line_warnings.is_empty(), "{:?}", result.fold_line_warnings);
+        let fold_xs = fold_line_xs(&result.output_doc);
+        assert!(fold_xs.iter().all(|x| x.abs() < 1.0), "on-fold piece stays at x=0: {fold_xs:?}");
+
+        let bbox: serde_json::Value = serde_json::from_str(&result.bbox_json).expect("valid bbox JSON");
+        let yokes: Vec<_> = bbox["pieces"].as_array().expect("pieces")
+            .iter().filter(|piece| piece["label"].as_str().is_some_and(|label| label.starts_with("Yoke ")))
+            .collect();
+        assert_eq!(yokes.len(), 3, "the wide piece splits into three parts");
+        assert!(
+            yokes.iter().all(|piece| piece["x"].as_f64().is_some_and(|x| x >= 12.0)),
+            "non-fold pieces keep the 0.125 in gap: {yokes:?}"
+        );
+    } // split_folded_fabric_pins_fold_parts_and_clears_other_parts
 
     // @brief The paper-sheet PDF input pins the fold line pieces as the layout does.
     #[test]

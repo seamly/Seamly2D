@@ -233,11 +233,12 @@ PatternPieceCopyResult PatternPieceCopy::reconstruct(const QDomDocument &documen
         if (selected.contains(i))
         {
             QDomElement clone = modeling.at(i).element.cloneNode(true).toElement();
+            const quint32 id_tool = clone.attribute(QStringLiteral("idTool")).toUInt();
             remap(clone, result.ids);
-            // Ownership of a Union input path is not a geometric dependency on its original piece.
-            if (piece_ids.contains(clone.attribute(QStringLiteral("idTool")).toUInt()))
+            if (piece_ids.contains(id_tool))
             {
-                clone.setAttribute(QStringLiteral("idTool"), result.ids.value(piece_id));
+                // Piece ownership is not a geometric dependency of the copied piece.
+                clone.setAttribute(QStringLiteral("idTool"), id_tool);
             }
             result.modeling.append({modeling.at(i).block_name, clone});
         }

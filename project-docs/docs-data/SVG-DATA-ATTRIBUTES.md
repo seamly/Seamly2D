@@ -86,6 +86,7 @@ Each piece is a `piece-set` group holding that piece once per size.
 ### Drill holes and reference lines
 
 - Each `drill` component has `data-diameter` in pixels and one `<circle cx="…" cy="…" r="…">`.
+- Nested SVG export keeps one drill component with each sized piece in its corresponding size group; drill holes are not shared across sizes.
 - The circle radius is half the diameter. Its centre uses the current size's resolved modeling anchor.
 - Each `stripe` or `plaid` component contains one absolute `M… L…` path with two distinct endpoints.
 - A styled child group applies the same sheet placement matrix as an internal path.

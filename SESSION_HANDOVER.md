@@ -5,20 +5,19 @@
 ### User validation checklist review
 
 - Updated `project-docs/TEST_APPLICATION_UPDATES.md` while preserving all user checkmarks.
-- Added remaining-check priorities, blank-evidence follow-up, relative CLI regression cases, and rebuild prerequisites.
+- Recorded user evidence, DXF report findings, and remaining GUI, CAD, and user-pattern checks.
+- Built Windows x64 MSI `26.11.718`; `nmake check`, `ctest --preset release` (8/8), `cargo test --workspace`, and MSI validation passed.
+- Rebuilt application checks passed: Seamly2D pattern inputs 25/25, SeamlyMe measurement CLI 16/16, and all headless export checks.
 - Clarified split-test dependencies, folded-fabric margins, and ASTM versus AAMA layer checks.
-- No application tests were run for this documentation review; runtime checks for the newer launch-directory fix remain deferred.
+- Install the MSI before completing the pending visual, CAD-reader, and user-pattern checks. The recorded turn-point grading warnings remain unresolved.
 
-### Relative command-line paths — source fix, verification deferred
+### Relative command-line paths — verified
 
 - Seamly2D and SeamlyMe log cleanup no longer changes the process working directory; log metadata, locks, and deletion use absolute log paths.
 - Extended `src/test/CollectionTest/test_pattern_input_status.py` and `src/test/Seamly2DTest/test_measurement_cli.py` with relative filenames, measurement overrides, and missing-file checks.
-- Updated `project-docs/docs-cli/CLI_PARAMETERS.md` and the pending CLI.1.9 verification notes.
-- Python syntax, runner help, and scoped diff checks pass. The user deferred the Windows build to the next batch; runtime regression checks remain pending.
+- Runtime checks passed against MSI staging binaries with the staged DLL directory on `PATH` and Qt plugins configured.
 - SeamlyLayout has no matching working-directory change; its startup parser resolves relative input and output paths to absolute paths. No SeamlyLayout fix is needed.
-- Changes are merged into local `run-seamlyLayout`, not pushed.
-- Next: run `packaging/windows/local_build_msi.ps1` with permission, then both input-check scripts against rebuilt applications.
-- Preserve unrelated edits to `project-docs/TEST_APPLICATION_UPDATES.md`, untracked `scripts/cli/`, and untracked validation patterns.
+- Current branch: `task-application-updates`; no commit or push. Preserve untracked `scripts/cli/` and user validation files.
 
 ### Application implementation batch — merged locally, not pushed
 

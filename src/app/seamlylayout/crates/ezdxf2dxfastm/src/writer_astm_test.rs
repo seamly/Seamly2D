@@ -676,9 +676,37 @@ mod tests {
         assert_eq!((notches[0].get(30), notches[0].get(39)), (Some("5.00"), None), "slit");
         assert_eq!((notches[1].get(30), notches[1].get(39), notches[1].get(50)), (Some("5.00"), Some("3.00"), Some("90.00")), "V");
 
+        // AAMA key-point markers must lie on the boundary, not on sew or internal lines.
+        let boundary = block.boundary.as_ref().expect("boundary");
+        let point_markers: Vec<&DxfEntity> = body
+            .iter()
+            .filter(|e| e.kind == "POINT" && matches!(e.layer(), "2" | "3"))
+            .collect();
+        assert_eq!(point_markers.len(), boundary.reduced.len());
+
+        let mut on_boundary = false;
+        let mut boundary_vertices = Vec::new();
+        for entity in body {
+            match entity.kind.as_str() {
+                "POLYLINE" => on_boundary = entity.layer() == "1",
+                "VERTEX" if on_boundary => {
+                    boundary_vertices.push((entity.get(10).unwrap(), entity.get(20).unwrap()))
+                }
+                "SEQEND" => on_boundary = false,
+                _ => {}
+            } // match entity type
+        } // for each entity
+        assert!(point_markers
+            .iter()
+            .all(|point| boundary_vertices
+                .contains(&(point.get(10).unwrap(), point.get(20).unwrap()))));
+
         // Turn points stay on layer 2, the grainline on layer 7.
-        assert_eq!(body.iter().filter(|e| e.kind == "POINT" && e.layer() == "2").count(), 11);
-        assert_eq!(body.iter().find(|e| e.kind == "LINE").map(DxfEntity::layer), Some("7"));
+        assert_eq!(point_markers.iter().filter(|e| e.layer() == "2").count(), 4);
+        assert_eq!(
+            body.iter().find(|e| e.kind == "LINE").map(DxfEntity::layer),
+            Some("7")
+        );
     }
 
     // @brief A label line that reads as piece text or a rule identifier is not written in DXF-AAMA.

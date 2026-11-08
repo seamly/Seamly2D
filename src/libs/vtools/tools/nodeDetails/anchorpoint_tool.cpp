@@ -1,4 +1,12 @@
 //---------------------------------------------------------------------------------------------------------------------
+// @file anchorpoint_tool.cpp
+// @author slspencer
+// @brief Creates and maintains piece anchor points.
+// Copyright (C) 2026 Seamly2D Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+// https://www.gnu.org/licenses/gpl-3.0.html
+//---------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------
 //  @file   anchorpoint_tool.cpp
 //  @author Douglas S Caskey
 //  @date   17 Sep, 2023
@@ -50,8 +58,10 @@
 #include "anchorpoint_tool.h"
 #include "../../dialogs/tools/anchorpoint_dialog.h"
 #include "../../undocommands/savepieceoptions.h"
+#include "../../../vpatterndb/PieceMarkings.h"
 #include "../pattern_piece_tool.h"
 #include "../vgeometry/vpointf.h"
+#include <QMessageBox>
 
 const QString AnchorPointTool::ToolType = QStringLiteral("anchor");
 
@@ -172,6 +182,23 @@ void AnchorPointTool::AddToFile()
         saveCommand->setText(tr("add anchor point"));
         qApp->getUndoStack()->push(saveCommand);// First push then make a connect
     }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void AnchorPointTool::deleteTool(bool ask)
+{
+    if (m_pieceId != NULL_ID)
+    {
+        const VPiece piece = VAbstractTool::data.GetPiece(m_pieceId);
+        if (PieceMarkings::usesAnchor(m_id, piece.drillHoles(), piece.referenceLines()))
+        {
+            QMessageBox::warning(qApp->getMainWindow(), tr("Cannot delete anchor"),
+                                 tr("This anchor is used by a drill hole or stripe/plaid reference. "
+                                    "Remove the marking before deleting the anchor."));
+            return;
+        }
+    }
+    VAbstractTool::deleteTool(ask);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

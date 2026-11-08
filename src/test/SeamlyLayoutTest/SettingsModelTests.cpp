@@ -1,6 +1,6 @@
 // project: SeamlyLayout
 // author: slspencer, copyright 2026
-// LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
+// MIT License: https://opensource.org/licenses/MIT
 //
 // @file SettingsModelTests.cpp
 // @brief Qt tests for SettingsModel load/save, defaults, and legacy schema migration.
@@ -24,6 +24,7 @@
 
 #include "SettingsModel.h"
 
+#include <QCoreApplication>
 #include <QDir>
 #include <QFile>
 #include <QJsonDocument>
@@ -31,6 +32,7 @@
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QtTest/QtTest>
+#include <limits>
 
 class SettingsModelTests : public QObject
 {
@@ -42,6 +44,10 @@ private slots:
     void defaults_mediaTypeIsPaper();
     void defaults_paperTypeIsSheet();
     void defaults_layoutModeIsAlongGrainline();
+    void paperSizeLabels_includeDimensionsAndCustom();
+    void selectPaperSize_customKeepsPageDimensions();
+    void pageDimensions_rejectInvalidValues();
+    void customPaperDimensions_roundtrip();
 
     // Legacy layoutMode migration
     void legacy_withGrainRotationEnabled_mapsToAlongGrainline();
@@ -115,6 +121,74 @@ void SettingsModelTests::defaults_layoutModeIsAlongGrainline()
 {
     SettingsModel m;
     QCOMPARE(m.layoutMode(), QStringLiteral("alongGrainline"));
+}
+
+// @brief Predefined sheet labels show imperial and metric dimensions and include Custom.
+void SettingsModelTests::paperSizeLabels_includeDimensionsAndCustom()
+{
+    SettingsModel m;
+    const QStringList names = m.paperSizeNames();
+    const QStringList labels = m.paperSizeLabels();
+
+    QCOMPARE(names.size(), labels.size());
+    QCOMPARE(labels.at(names.indexOf(QStringLiteral("Letter"))),
+             QStringLiteral("Letter (8.5 × 11 in; 216 × 279 mm)"));
+    QCOMPARE(labels.last(), QStringLiteral("Custom"));
+}
+
+// @brief Selecting Custom preserves the current dimensions for editing.
+void SettingsModelTests::selectPaperSize_customKeepsPageDimensions()
+{
+    SettingsModel m;
+    m.setPageWidth(400.5);
+    m.setPageHeight(650.25);
+
+    m.selectPaperSize(QStringLiteral("Custom"));
+
+    QCOMPARE(m.sheetName(), QStringLiteral("Custom"));
+    QCOMPARE(m.pageWidth(), 400.5);
+    QCOMPARE(m.pageHeight(), 650.25);
+}
+
+// @brief Page dimensions reject zero, negative, and non-finite values.
+void SettingsModelTests::pageDimensions_rejectInvalidValues()
+{
+    SettingsModel m;
+    const double originalWidth = m.pageWidth();
+    const double originalHeight = m.pageHeight();
+
+    m.setPageWidth(0.0);
+    m.setPageWidth(-1.0);
+    m.setPageWidth(std::numeric_limits<double>::infinity());
+    m.setPageHeight(0.0);
+    m.setPageHeight(-1.0);
+    m.setPageHeight(std::numeric_limits<double>::quiet_NaN());
+
+    QCOMPARE(m.pageWidth(), originalWidth);
+    QCOMPARE(m.pageHeight(), originalHeight);
+}
+
+// @brief Custom sheet dimensions survive a save/load cycle.
+void SettingsModelTests::customPaperDimensions_roundtrip()
+{
+    const QString fileName = QStringLiteral("custom-paper-%1.settings")
+                                 .arg(QCoreApplication::applicationPid());
+    const QString path = QDir(QCoreApplication::applicationDirPath()).filePath(fileName);
+    QFile::remove(path);
+
+    SettingsModel writer;
+    writer.setUnit(QStringLiteral("mm"));
+    writer.setSheetName(QStringLiteral("Custom"));
+    writer.setPageWidth(400.5);
+    writer.setPageHeight(650.25);
+    QVERIFY(writer.save(path));
+
+    SettingsModel reader;
+    QVERIFY(reader.load(path));
+    QCOMPARE(reader.sheetName(), QStringLiteral("Custom"));
+    QCOMPARE(reader.pageWidth(), 400.5);
+    QCOMPARE(reader.pageHeight(), 650.25);
+    QFile::remove(path);
 }
 
 // ---------------------------------------------------------------------------

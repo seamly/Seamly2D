@@ -129,6 +129,8 @@ pub(crate) struct PackJob {
     areas: Vec<u64>,
     // True per piece that must touch the left bin edge.
     left_edge: Vec<bool>,
+    // Minimum x coordinate required by each piece.
+    min_left_gap: Vec<u32>,
 } // struct PackJob
 
 impl PackJob {
@@ -151,7 +153,7 @@ impl PackJob {
                 for deg in trial_for(r) {
                     let (w, h) = rotate(r.w, r.h, deg);
                     // An orientation that does not fit the empty bin never fits later.
-                    let fits_bin = w <= bin_w && h <= bin_h;
+                    let fits_bin = w.saturating_add(r.min_left_gap_px) <= bin_w && h <= bin_h;
                     // An orientation with the size of an earlier one never wins a tie.
                     let duplicate = list.iter().any(|o| o.w == w && o.h == h);
                     if fits_bin && !duplicate {
@@ -163,7 +165,8 @@ impl PackJob {
             .collect();
         let areas = rects.iter().map(|r| r.w as u64 * r.h as u64).collect();
         let left_edge = rects.iter().map(|r| r.left_edge_angle.is_some()).collect();
-        Self { bin_w, bin_h, gap, orientations, areas, left_edge }
+        let min_left_gap = rects.iter().map(|r| r.min_left_gap_px).collect();
+        Self { bin_w, bin_h, gap, orientations, areas, left_edge, min_left_gap }
     } // fn new
 
     // @brief True when the piece fits the empty bin in one orientation.
@@ -216,7 +219,13 @@ impl PackJob {
         let mut boxes: Vec<PieceBox> = decoded
             .placements
             .iter()
-            .map(|p| PieceBox { x: p.x as f64, y: p.y as f64, w: p.w as f64, h: p.h as f64 })
+            .map(|p| PieceBox {
+                x: p.x as f64,
+                min_x: self.min_left_gap[p.id] as f64,
+                y: p.y as f64,
+                w: p.w as f64,
+                h: p.h as f64,
+            })
             .collect();
         compact_up_left(&mut boxes, self.gap as f64);
         for (p, b) in decoded.placements.iter_mut().zip(&boxes) {
@@ -256,18 +265,21 @@ impl PackJob {
         let mut best: Option<((u64, u32, u32, u64, usize), u32, u32, Orientation)> = None;
         for f in free.iter().filter(|f| !self.left_edge[id] || f.x == 0) {
             for (k, o) in self.orientations[id].iter().enumerate() {
-                if f.w < o.w.saturating_add(gap) || f.h < o.h.saturating_add(gap) {
+                let x = f.x.max(self.min_left_gap[id]);
+                if x.saturating_add(o.w).saturating_add(gap) > f.x.saturating_add(f.w)
+                    || f.h < o.h.saturating_add(gap)
+                {
                     continue;
                 } // if the box does not hold the piece
                 let score = match rule {
                     // TopLeft: topmost, then leftmost
                     PlacementRule::TopLeft => f.y as u64,
                     // WeightedTopLeft: y counts Y_WEIGHT times as much as x
-                    PlacementRule::WeightedTopLeft => f.y as u64 * Y_WEIGHT + f.x as u64,
+                    PlacementRule::WeightedTopLeft => f.y as u64 * Y_WEIGHT + x as u64,
                 }; // match rule
-                let key = (score, f.y, f.x, o.w as u64 * o.h as u64, k);
+                let key = (score, f.y, x, o.w as u64 * o.h as u64, k);
                 if best.map_or(true, |b| key < b.0) {
-                    best = Some((key, f.x, f.y, *o));
+                    best = Some((key, x, f.y, *o));
                 } // if better
             } // for orientation
         } // for free box
@@ -576,6 +588,15 @@ mod tests {
         assert_eq!(job.choose_position(0, &free, PlacementRule::TopLeft).map(|(x, y, _)| (x, y)), Some((150, 0)));
         assert_eq!(job.choose_position(0, &free, PlacementRule::WeightedTopLeft).map(|(x, y, _)| (x, y)), Some((0, 2)));
     } // weighted_rule_prefers_a_slightly_lower_box_far_left
+
+    // @brief Placement and compaction preserve a piece's left-edge clearance.
+    #[test]
+    fn minimum_left_gap_survives_placement_and_compaction() {
+        let rects = [Rect::new(10, 10).with_min_left_gap(5)];
+        let job = PackJob::new(20, 20, 0, &rects, |_| vec![0], |w, h, _| (w, h));
+        let placed = job.place_in_order(&[0], PlacementRule::TopLeft, false).placements;
+        assert_eq!(placed[0].x, 5);
+    } // minimum_left_gap_survives_placement_and_compaction
 
     // @brief The same input always gives the same layout.
     #[test]

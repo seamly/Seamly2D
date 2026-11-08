@@ -9,9 +9,10 @@
 - if media = 'paper':
     > paperType - 'sheet', 'roll', 'tiled' radio buttons; default is 'sheet'.
     > if paperType='sheet':
-      >> paperSize -- dropdown list of entries from /assets/paperSizes/paper_sizes, displaying the name, imperialDimensions, and metricDimensions values in 'Name', 'Inches', 'Millimeters' columns; default is 'Arch E'.
+      >> paperSize -- dropdown lists predefined sizes with imperial and metric dimensions, plus 'Custom'; default is 'Arch E'.
       >> paperWidth=paperSize's width converted to user's unit; default is 'Arch E' width 36.
       >> paperHeight=paperSize's height converted to user's unit; default is 'Arch E' height 48.
+      >> Custom enables positive width and height inputs in the active unit; the values use the existing pageWidth/pageHeight settings.
       >> Margins - marginLeft, marginRight, marginTop, marginBottom
         >>> if unit='cm' then default is 1 for all margins.
         >>> if unit='mm' then default is 10 for all margins.
@@ -61,8 +62,9 @@
 - if layoutMode='withNap':
   >> Nap Direction -- 'Pieces point Up' (rotationStep=0) | 'Pieces point Down' (rotationStep=180);
      default is 'Pieces point Up'.
-- A multisize pattern has no setting of its own. Create Layout makes the Marker, Nested,
-  Base Size and size tabs with the same settings. A stored `multisizeLayout` key is ignored.
+- A multisize pattern has no setting of its own. Non-tiled paper makes the Marker, Nested,
+  Base Size and size tabs with the same settings. Tiled paper omits Marker and Nested.
+  A stored `multisizeLayout` key is ignored.
 - if layoutMode is not 'any':
   >> No Grainline -- 'Keep upright' (noGrainlineRotation='upright') | 'Rotate freely' ('free');
      default is 'Keep upright'.
@@ -82,4 +84,5 @@
 # Viewer Preferences (current)
 - DXF viewer path -- optional. If empty, fall back to OS default.
 - PDF viewer path -- optional. If empty, fall back to OS default.
+- PNG/JPG viewer path -- optional. If empty, fall back to OS default.
 - 3D viewer -- optional online viewer URL. Default is https://3mfviewer.com/.

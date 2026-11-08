@@ -33,6 +33,7 @@
 #include "../vmisc/installer_record.h"
 #include "../vmisc/vcommonsettings.h"
 #include "../vmisc/vsettings.h"
+#include "../vmisc/vseamlymesettings.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -75,8 +76,8 @@ TST_DataRoot::~TST_DataRoot() = default;
  */
 void TST_DataRoot::initTestCase()
 {
-    m_scratch.reset(new QTemporaryDir());
-    m_settings.reset(new QTemporaryDir());
+    m_scratch.reset(new QTemporaryDir(QDir::currentPath() + QStringLiteral("/data-root-scratch-XXXXXX")));
+    m_settings.reset(new QTemporaryDir(QDir::currentPath() + QStringLiteral("/data-root-settings-XXXXXX")));
     QVERIFY2(m_scratch->isValid(), "Could not create the scratch directory");
     QVERIFY2(m_settings->isValid(), "Could not create the temporary settings directory");
 
@@ -492,7 +493,124 @@ void TST_DataRoot::EnsureDataRootTreeReportsMissingSubfolderFailure() const
     QVERIFY(blocker.open(QIODevice::WriteOnly));
     blocker.close();
 
-    QVERIFY(!VCommonSettings::ensureDataRootTree(root));
+    QString failed_path;
+    QVERIFY(!VCommonSettings::ensureDataRootTree(root, &failed_path));
+    QCOMPARE(failed_path, root + QStringLiteral("/measurements/individual"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief ChangingDataRootCreatesTree_data covers both application's inherited settings API.
+void TST_DataRoot::ChangingDataRootCreatesTree_data()
+{
+    QTest::addColumn<bool>("seamly_me");
+    QTest::newRow("Seamly2D") << false;
+    QTest::newRow("SeamlyMe") << true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief ChangingDataRootCreatesTree preserves existing files and custom paths while creating all standard folders.
+void TST_DataRoot::ChangingDataRootCreatesTree() const
+{
+    QFETCH(bool, seamly_me);
+    const QString app_name = seamly_me ? QStringLiteral("SeamlyMe") : QStringLiteral("Seamly2D");
+    const QString old_root = scratchPath(app_name + QStringLiteral("/old-root"));
+    const QString new_root = scratchPath(app_name + QStringLiteral("/new-root"));
+    writeDataRoot(old_root);
+
+    QScopedPointer<VCommonSettings> settings;
+    const QString settings_file = m_settings->filePath(app_name + QStringLiteral(".ini"));
+    if (seamly_me)
+    {
+        settings.reset(new VSeamlyMeSettings(settings_file, QSettings::IniFormat));
+    }
+    else
+    {
+        settings.reset(new VSettings(settings_file, QSettings::IniFormat));
+    }
+    const QString custom_path = scratchPath(QStringLiteral("custom-measurements"));
+    settings->setIndividualSizePath(custom_path);
+    QVERIFY(QDir().mkpath(new_root + QStringLiteral("/patterns")));
+    QFile existing(new_root + QStringLiteral("/patterns/existing.sm2d"));
+    QVERIFY(existing.open(QIODevice::WriteOnly));
+    QCOMPARE(existing.write("keep this pattern"), qint64(17));
+    existing.close();
+
+    QString error_message = QStringLiteral("stale error");
+    QVERIFY2(settings->setDataRoot(QDir::toNativeSeparators(new_root), &error_message),
+             qPrintable(error_message));
+    QVERIFY(error_message.isEmpty());
+    QCOMPARE(settings->getDataRoot(), new_root);
+    QCOMPARE(VCommonSettings::dataRoot(), new_root);
+    QCOMPARE(settings->getIndividualSizePath(), custom_path);
+    const QStringList subdirectories
+    {
+        QStringLiteral("measurements/individual"), QStringLiteral("measurements/multisize"),
+        QStringLiteral("templates"), QStringLiteral("bodyscans"), QStringLiteral("label templates"),
+        QStringLiteral("images"), QStringLiteral("backups"), QStringLiteral("patterns"), QStringLiteral("layouts")
+    };
+    for (const QString &subdirectory : subdirectories)
+    {
+        QVERIFY(QFileInfo(new_root + QLatin1Char('/') + subdirectory).isDir());
+    }
+    QVERIFY2(settings->setDataRoot(new_root, &error_message), qPrintable(error_message));
+    QVERIFY(existing.open(QIODevice::ReadOnly));
+    QCOMPARE(existing.readAll(), QByteArray("keep this pattern"));
+    QVERIFY(!QFileInfo::exists(custom_path));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief ChangingDataRootReportsFailure_data covers blocked roots and subfolders for both applications.
+void TST_DataRoot::ChangingDataRootReportsFailure_data()
+{
+    QTest::addColumn<bool>("seamly_me");
+    QTest::addColumn<bool>("blocked_subfolder");
+    QTest::newRow("Seamly2D-root") << false << false;
+    QTest::newRow("Seamly2D-subfolder") << false << true;
+    QTest::newRow("SeamlyMe-root") << true << false;
+    QTest::newRow("SeamlyMe-subfolder") << true << true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief ChangingDataRootReportsFailure leaves the configured root and custom paths unchanged after creation failures.
+void TST_DataRoot::ChangingDataRootReportsFailure() const
+{
+    QFETCH(bool, seamly_me);
+    QFETCH(bool, blocked_subfolder);
+    const QString row_name = QString::fromLatin1(QTest::currentDataTag());
+    const QString old_root = scratchPath(row_name + QStringLiteral("/old-root"));
+    const QString new_root = scratchPath(row_name + QStringLiteral("/new-root"));
+    writeDataRoot(old_root);
+    QVERIFY(QDir().mkpath(QFileInfo(new_root).absolutePath()));
+    if (blocked_subfolder)
+    {
+        QVERIFY(QDir().mkpath(new_root));
+    }
+    const QString blocker_path = blocked_subfolder ? new_root + QStringLiteral("/measurements") : new_root;
+    QFile blocker(blocker_path);
+    QVERIFY(blocker.open(QIODevice::WriteOnly));
+    QCOMPARE(blocker.write("keep"), qint64(4));
+    blocker.close();
+
+    QScopedPointer<VCommonSettings> settings;
+    const QString settings_file = m_settings->filePath(row_name + QStringLiteral(".ini"));
+    if (seamly_me)
+    {
+        settings.reset(new VSeamlyMeSettings(settings_file, QSettings::IniFormat));
+    }
+    else
+    {
+        settings.reset(new VSettings(settings_file, QSettings::IniFormat));
+    }
+    const QString custom_path = scratchPath(QStringLiteral("failure-custom-path"));
+    settings->setTemplatePath(custom_path);
+    QString error_message;
+    QVERIFY(!settings->setDataRoot(new_root, &error_message));
+    const QString failed_path = blocked_subfolder ? new_root + QStringLiteral("/measurements/individual") : new_root;
+    QVERIFY(error_message.contains(QDir::toNativeSeparators(failed_path)));
+    QCOMPARE(settings->getDataRoot(), old_root);
+    QCOMPARE(settings->getTemplatePath(), custom_path);
+    QVERIFY(blocker.open(QIODevice::ReadOnly));
+    QCOMPARE(blocker.readAll(), QByteArray("keep"));
 }
 
 //---------------------------------------------------------------------------------------------------------------------

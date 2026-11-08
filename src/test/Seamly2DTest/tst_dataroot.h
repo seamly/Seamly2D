@@ -83,6 +83,10 @@ private slots:
     void StartupResolvesThenSeedsTheConfiguredRoot() const;
     void EnsureDataRootTreeSeedsLabelTemplates() const;
     void EnsureDataRootTreeKeepsUserLabelTemplate() const;
+    void ChangingDataRootCreatesTree_data();
+    void ChangingDataRootCreatesTree() const;
+    void ChangingDataRootReportsFailure_data();
+    void ChangingDataRootReportsFailure() const;
 
     void SeedSamplePatternsCopiesBundledFiles() const;
     void SeedSamplePatternsNeverOverwritesAnExistingFile() const;

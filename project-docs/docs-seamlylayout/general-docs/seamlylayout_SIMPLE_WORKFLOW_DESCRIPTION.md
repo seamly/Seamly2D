@@ -19,7 +19,8 @@ The application workflow loop consists of:
   * Layout Output Directory: './output/'
   * Default Settings file: './settings/default_settings.json
   * DXF Viewer: prompt the user to open Preferences and set the DXF viewer application or URL
-  * PDF Viewer: prompt the user to open Preferences and set the PDF Viewer application or URL
+  * PDF Viewer: optional. An empty path uses the OS default application for PDF files.
+  * Image Viewer (PNG, JPG): optional. An empty path uses the OS default application.
   * Enable 'Import SVG File' button
   * Disable 'Settings' button
   * Disable 'Create Layout' button
@@ -176,9 +177,10 @@ The application workflow loop consists of:
          The paper-sheet PDF export splits the same way. See `SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout split parts".
        * "Make the media bigger" (DXF): the media widens and lengthens until every piece is placed whole, as on a multisize tab.
      * OK lays out with the choice. Cancel: no layout; only 'Layout Settings' (plus Preferences and Exit) stays active until new settings are submitted.
-   * Multisize import (data-measurements='multisize') — one tab per layout, every tab from the imported SVG:
-     * "Marker": every size of every piece packs as its own piece. Laid out first.
-     * "Nested": each piece packs once, as a group of all its sizes, centred on the largest size.
+   * Multisize import (`data-measurements='multisize'`) — one tab per layout, every tab from the imported SVG:
+     * For non-tiled paper, "Marker" packs every size of every piece as its own piece. It runs first.
+     * For non-tiled paper, "Nested" packs each piece once as a group of its sizes, centred on the largest size.
+     * For tiled paper, Marker and Nested are not generated. The first tab is the Base Size when available, then one tab covers each size.
      * "Base Size 36": the base size (`data-base-size`) alone. Left out when the base size is not in `data-sizes`.
      * "Size 34", "Size 36", …: each size alone, one unit per piece. The base size tab repeats the Base Size layout.
      * One tab per UI tick (`processNextTabLayout`); the progress popup names the tab: "Laying out Size 36 (5 of 6)…".
@@ -195,7 +197,7 @@ The application workflow loop consists of:
      * DXF-ASTM exports one size: the Base Size tab (with `# n` grade rule texts and the `.rul` file) or a size tab (ungraded, no `.rul`).
        The DXF-ASTM items are in the Export > DXF submenu.
        On the Marker and Nested tabs the DXF-ASTM items are disabled, and a note at the top of the submenu names the tabs to select.
-     * On the Marker tab PDF (Tiled) is disabled: tiling every size of every piece locks SeamlyLayout up.
+     * On a Marker tab PDF (Tiled) is disabled: tiling every size of every piece locks SeamlyLayout up.
        "Export Complete" names the `.dxf` and the `.rul`.
        A sample size piece the layout left out is named: "<piece>: not graded, size 36 does not fit the media."
        A piece whose sizes have other turn points names the first such size and the line: "<piece>: not graded, size 34 has other turn points than size 36 on the cut line."

@@ -9,8 +9,8 @@
 // grainline and labels. Every export but DXF-ASTM keeps only those of the
 // smallest size in each piece-set. The SVG export also moves them into one
 // `<g id="labels_and_grainlines">`, so an editor can show or hide them apart
-// from the size groups. Outlines, notches, fold lines and other components of
-// every size stay.
+// from the size groups. Outlines, notches, drill holes, fold lines and other
+// components of every size stay attached to their own piece.
 
 use xmltree::{Element, XMLNode};
 
@@ -156,6 +156,7 @@ mod tests {
     <g id="piece_A_s100" data-type="piece" data-size="100">
       <g id="cutline_A_s100" data-type="cutline"><path d="M0,0 L40,0 L40,40 Z"/></g>
       <g id="notch_A_s100" data-type="notch"><path d="M0,0 L1,1"/></g>
+      <g id="drill_A_s100" data-type="drill"><circle cx="10" cy="10" r="1"/></g>
       <g id="grainline_A_s100" data-type="grainline"><path d="M20,30 L20,5"/></g>
       <g id="piece_label_A_s100" data-type="piece_label"><text x="5" y="5">A</text></g>
       <g id="pattern_label_A_s100" data-type="pattern_label"><text x="5" y="9">Shirt</text></g>
@@ -164,6 +165,7 @@ mod tests {
     <g id="piece_A_s92" data-type="piece" data-size="92">
       <g id="cutline_A_s92" data-type="cutline"><path d="M0,0 L30,0 L30,30 Z"/></g>
       <g id="notch_A_s92" data-type="notch"><path d="M0,0 L1,1"/></g>
+      <g id="drill_A_s92" data-type="drill"><circle cx="8" cy="8" r="1"/></g>
       <g id="grainline_A_s92" data-type="grainline"><path d="M15,25 L15,5"/></g>
       <g id="piece_label_A_s92" data-type="piece_label"><text x="4" y="4">A</text></g>
       <g id="pattern_label_A_s92" data-type="pattern_label"><text x="4" y="8">Shirt</text></g>
@@ -203,9 +205,9 @@ mod tests {
     fn only_the_smallest_size_keeps_grainline_and_labels() {
         let mut doc = svg_dom::Document::parse(NESTED).expect("valid SVG");
         assert_eq!(keep_smallest_size_annotations(&mut doc), 4);
-        assert_eq!(child_ids(&doc, "piece_A_s100"), vec!["cutline_A_s100", "notch_A_s100"]);
+        assert_eq!(child_ids(&doc, "piece_A_s100"), vec!["cutline_A_s100", "notch_A_s100", "drill_A_s100"]);
         assert_eq!(child_ids(&doc, "piece_A_s92"), vec![
-            "cutline_A_s92", "notch_A_s92", "grainline_A_s92", "piece_label_A_s92", "pattern_label_A_s92", "size_label_A_s92",
+            "cutline_A_s92", "notch_A_s92", "drill_A_s92", "grainline_A_s92", "piece_label_A_s92", "pattern_label_A_s92", "size_label_A_s92",
         ]);
         assert!(find(&doc.root, "size_legend").is_some(), "the legend is not a piece label");
     } // only_the_smallest_size_keeps_grainline_and_labels
@@ -247,7 +249,8 @@ mod tests {
         assert_eq!(child_ids(&doc, LABELS_AND_GRAINLINES_ID), vec![
             "grainline_A_s92", "piece_label_A_s92", "pattern_label_A_s92", "size_label_A_s92",
         ]);
-        assert_eq!(child_ids(&doc, "piece_A_s92"), vec!["cutline_A_s92", "notch_A_s92"]);
+        assert_eq!(child_ids(&doc, "piece_A_s100"), vec!["cutline_A_s100", "notch_A_s100", "drill_A_s100"]);
+        assert_eq!(child_ids(&doc, "piece_A_s92"), vec!["cutline_A_s92", "notch_A_s92", "drill_A_s92"]);
 
         // The piece-set offset (100, 50) is baked into the moved grainline.
         let grainline = find(&doc.root, "grainline_A_s92").expect("grainline");

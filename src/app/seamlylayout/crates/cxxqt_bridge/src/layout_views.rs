@@ -22,8 +22,8 @@ use std::collections::VecDeque;
 use svg_dom::Document;
 
 use crate::layout_utils::ProcessLayoutResult;
-use layout_tiling::layout_settings::LayoutSettings;
 use crate::piece_divider::DivideSpec;
+use layout_tiling::layout_settings::LayoutSettings;
 
 // @brief Label of the tab where every size of every piece packs as its own piece.
 pub const MARKER_LABEL: &str = "Marker";
@@ -166,6 +166,16 @@ pub fn queued_kinds(sizes: &[String], base_size: &str) -> Vec<ViewKind> {
     kinds
 } // fn queued_kinds
 
+// @brief Size-only views for tiled multisize layouts, with Base Size first when available.
+pub fn tiled_kinds(sizes: &[String], base_size: &str) -> Vec<ViewKind> {
+    let mut kinds = Vec::new();
+    if sizes.iter().any(|size| size == base_size) {
+        kinds.push(ViewKind::BaseSize(base_size.to_string()));
+    } // if base size is known
+    kinds.extend(sizes.iter().map(|size| ViewKind::Size(size.clone())));
+    kinds
+} // fn tiled_kinds
+
 // @brief The per-layout controller fields that change when the tab changes.
 //
 // Fields the layouts share (settings, canvas width, roll form, the imported
@@ -232,6 +242,11 @@ impl LayoutViews {
         self.views.clear();
         self.active = 0;
     } // fn clear
+
+    // @brief Whether this material has any layout views yet.
+    pub fn is_empty(&self) -> bool {
+        self.views.is_empty()
+    } // fn is_empty
 
     // @brief Start a multisize layout: one active view, whose layout the controller holds.
     pub fn start(&mut self, kind: ViewKind) {
@@ -338,8 +353,7 @@ impl MaterialLayout {
 pub struct LayoutJob {
     // Index of the material in the import; 0 for an import with one material.
     pub material: usize,
-    // Tab to lay out; `None` for the material's first layout: the only layout of an
-    // individual pattern, or the Marker tab of a multisize one.
+    // Tab to lay out; `None` for an individual layout or a material's Marker layout.
     pub kind: Option<ViewKind>,
 }
 
@@ -348,17 +362,35 @@ pub struct LayoutJob {
 // @param active    Material whose first layout the run makes before the queue starts.
 // @param tab_kinds Tabs after the first layout, one list per material; empty lists for an individual pattern.
 // @return The shown material's tabs, then the first layout and tabs of each other material, in material order.
+#[cfg(test)]
 pub fn layout_jobs(active: usize, tab_kinds: &[Vec<ViewKind>]) -> Vec<LayoutJob> {
+    let first_kinds = vec![None; tab_kinds.len()];
+    layout_jobs_with_first_views(active, tab_kinds, &first_kinds)
+} // fn layout_jobs
+
+// @brief Queue the other materials' initial views before their remaining tabs.
+//
+// @param active      Material whose first layout already ran.
+// @param tab_kinds   Views after each material's first layout.
+// @param first_kinds First view for tiled layouts; `None` means the first layout is Marker or individual.
+pub fn layout_jobs_with_first_views(
+    active: usize,
+    tab_kinds: &[Vec<ViewKind>],
+    first_kinds: &[Option<ViewKind>],
+) -> Vec<LayoutJob> {
     let tabs = |material: usize| -> Vec<LayoutJob> {
         tab_kinds[material].iter().map(|kind| LayoutJob { material, kind: Some(kind.clone()) }).collect()
     };
     let mut jobs = if active < tab_kinds.len() { tabs(active) } else { Vec::new() };
     for material in (0..tab_kinds.len()).filter(|&m| m != active) {
-        jobs.push(LayoutJob { material, kind: None });
+        jobs.push(LayoutJob {
+            material,
+            kind: first_kinds.get(material).cloned().flatten(),
+        });
         jobs.extend(tabs(material));
     } // for each other material
     jobs
-} // fn layout_jobs
+} // fn layout_jobs_with_first_views
 
 // @brief Layouts still to make after the first one, one per UI tick.
 //
@@ -379,7 +411,7 @@ pub struct TabLayoutQueue {
     total: usize,
     // Material names that start each layout label; empty when the import has one material.
     material_names: Vec<String>,
-    // Label of a first layout: "Marker" for a multisize import, empty for an individual one.
+    // Label of the first layout: "Marker", a size tab, or empty for an individual pattern.
     first_label: String,
     // One line per layout with unplaced pieces or a failure: "Size 36: Front, Back".
     pub problems: Vec<String>,
@@ -393,8 +425,16 @@ impl TabLayoutQueue {
     // @brief Queue the layouts that follow the first one.
     //
     // @param material_names One name per material; pass an empty list for an import with one material.
-    // @param multisize      True when each first layout is a Marker tab.
-    pub fn new(settings_json: String, layout_h_px: u32, jobs: Vec<LayoutJob>, material_names: Vec<String>, multisize: bool) -> Self {
+    // @param multisize      True for multisize media extension and the default Marker label.
+    // @param first_label    Label of the first view when it is not the Marker tab.
+    pub fn new(
+        settings_json: String,
+        layout_h_px: u32,
+        jobs: Vec<LayoutJob>,
+        material_names: Vec<String>,
+        multisize: bool,
+        first_label: Option<String>,
+    ) -> Self {
         let total = jobs.len() + 1;
         Self {
             settings_json,
@@ -404,7 +444,13 @@ impl TabLayoutQueue {
             pending: jobs.into(),
             total,
             material_names,
-            first_label: if multisize { MARKER_LABEL.to_string() } else { String::new() },
+            first_label: first_label.unwrap_or_else(|| {
+                if multisize {
+                    MARKER_LABEL.to_string()
+                } else {
+                    String::new()
+                } // if multisize
+            }),
             problems: Vec::new(),
             fold_line_lines: Vec::new(),
             base_layout: None,
@@ -507,6 +553,26 @@ mod tests {
         } // for each unknown base size
     } // queued_kinds_follow_tab_order
 
+    // @brief Tiled multisize tabs contain only the Base Size and per-size views.
+    #[test]
+    fn tiled_kinds_omit_marker_and_nested() {
+        let kinds = tiled_kinds(&sizes(&["34", "36"]), "36");
+        assert_eq!(
+            kinds,
+            vec![
+                ViewKind::BaseSize("36".into()),
+                ViewKind::Size("34".into()),
+                ViewKind::Size("36".into())
+            ]
+        );
+        assert!(!kinds.iter().any(|kind| matches!(kind, ViewKind::Marker | ViewKind::Nested)));
+
+        assert_eq!(
+            tiled_kinds(&sizes(&["34", "36"]), "99"),
+            vec![ViewKind::Size("34".into()), ViewKind::Size("36".into())]
+        );
+    } // tiled_kinds_omit_marker_and_nested
+
     // @brief DXF-ASTM exports one size; Export all tabs skips the repeated Base Size layout in other formats.
     //        PDF (Tiled) skips Marker.
     #[test]
@@ -543,7 +609,7 @@ mod tests {
     #[test]
     fn tab_queue_messages_count_up() {
         let jobs = layout_jobs(0, &[vec![ViewKind::Nested, ViewKind::Size("34".into())]]);
-        let mut queue = TabLayoutQueue::new(String::new(), 0, jobs, Vec::new(), true);
+        let mut queue = TabLayoutQueue::new(String::new(), 0, jobs, Vec::new(), true, None);
         assert_eq!(queue.next_message().as_deref(), Some("Laying out Nested (2 of 3)…"));
         assert_eq!(queue.pop(), Some(tab(0, ViewKind::Nested)));
         assert_eq!(queue.next_message().as_deref(), Some("Laying out Size 34 (3 of 3)…"));
@@ -568,19 +634,53 @@ mod tests {
         assert!(layout_jobs(0, &[Vec::new()]).is_empty(), "one individual material needs no queue");
     } // layout_jobs_cover_every_material
 
+    // @brief Tiled materials queue their first size view instead of a Marker layout.
+    #[test]
+    fn layout_jobs_queue_tiled_first_view_for_other_materials() {
+        let first_views = vec![
+            Some(ViewKind::BaseSize("36".into())),
+            Some(ViewKind::BaseSize("40".into())),
+        ];
+        let tabs = vec![
+            vec![ViewKind::Size("34".into()), ViewKind::Size("36".into())],
+            vec![ViewKind::Size("38".into()), ViewKind::Size("40".into())],
+        ];
+
+        assert_eq!(
+            layout_jobs_with_first_views(0, &tabs, &first_views),
+            vec![
+                tab(0, ViewKind::Size("34".into())),
+                tab(0, ViewKind::Size("36".into())),
+                tab(1, ViewKind::BaseSize("40".into())),
+                tab(1, ViewKind::Size("38".into())),
+                tab(1, ViewKind::Size("40".into())),
+            ]
+        );
+    } // layout_jobs_queue_tiled_first_view_for_other_materials
+
     // @brief With several materials each label starts with the material; a first layout is Marker or the material.
     #[test]
     fn job_labels_name_the_material() {
         let names = vec!["Fabric".to_string(), "Lining".to_string()];
-        let multisize = TabLayoutQueue::new(String::new(), 0, vec![first(1)], names.clone(), true);
+        let multisize = TabLayoutQueue::new(String::new(), 0, vec![first(1)], names.clone(), true, None);
         assert_eq!(multisize.job_label(&first(1)), "Lining: Marker");
         assert_eq!(multisize.job_label(&tab(0, ViewKind::Size("34".into()))), "Fabric: Size 34");
         assert_eq!(multisize.next_message().as_deref(), Some("Laying out Lining: Marker (2 of 2)…"));
 
-        let individual = TabLayoutQueue::new(String::new(), 0, vec![first(1)], names, false);
+        let tiled = TabLayoutQueue::new(
+            String::new(),
+            0,
+            vec![tab(1, ViewKind::Size("40".into()))],
+            names.clone(),
+            true,
+            Some("Base Size 40".to_string()),
+        );
+        assert_eq!(tiled.job_label(&first(1)), "Lining: Base Size 40");
+
+        let individual = TabLayoutQueue::new(String::new(), 0, vec![first(1)], names, false, None);
         assert_eq!(individual.job_label(&first(1)), "Lining");
 
-        let one = TabLayoutQueue::new(String::new(), 0, Vec::new(), Vec::new(), true);
+        let one = TabLayoutQueue::new(String::new(), 0, Vec::new(), Vec::new(), true, None);
         assert_eq!(one.job_label(&first(0)), "Marker");
         assert_eq!(one.job_label(&tab(0, ViewKind::Nested)), "Nested");
     } // job_labels_name_the_material
@@ -606,7 +706,7 @@ mod tests {
     // @brief The size tab of the base size reuses the Base Size layout of its own material; other tabs do not.
     #[test]
     fn base_size_layout_is_reused_once_kept() {
-        let mut queue = TabLayoutQueue::new(String::new(), 0, Vec::new(), Vec::new(), true);
+        let mut queue = TabLayoutQueue::new(String::new(), 0, Vec::new(), Vec::new(), true, None);
         let base = tab(0, ViewKind::BaseSize("36".into()));
         assert!(queue.reusable_layout(&tab(0, ViewKind::Size("36".into()))).is_none(), "nothing kept yet");
 
@@ -624,7 +724,7 @@ mod tests {
     // @brief The final warning lists left-out pieces, then fold lines off the edge; nothing to report gives none.
     #[test]
     fn final_warning_joins_problems_and_fold_lines() {
-        let mut queue = TabLayoutQueue::new(String::new(), 0, Vec::new(), Vec::new(), false);
+        let mut queue = TabLayoutQueue::new(String::new(), 0, Vec::new(), Vec::new(), false, None);
         assert_eq!(queue.final_warning(), None);
         queue.problems.push(tab_unplaced_problem("Lining", &sizes(&["Back"])));
         queue.fold_line_lines.push("Lining: Back: the fold line crosses the grain".to_string());
@@ -749,6 +849,7 @@ mod tests {
             Vec::new(),
             Vec::new(),
             false,
+            None,
         );
         fabric_queue.problems.push(tab_unplaced_problem(MARKER_LABEL, &lines));
         let fabric_tabs = fabric_queue.final_warning().expect("unplaced fabric pieces");

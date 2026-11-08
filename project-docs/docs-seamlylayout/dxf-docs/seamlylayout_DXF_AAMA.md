@@ -18,7 +18,7 @@ It uses the DXF-ASTM pipeline. `DxfAstmExportOptions::aama` selects the AAMA con
 |---|---|---|
 | `$ACADVER` | AC1009 (R12) or AC1012 (R13) | AC1009 (R11; R11 and R12 share it) |
 | Contours on layers 1, 8, 11, 14 | key points; dense polyline on 84–87 | dense polyline only |
-| Layers 2 and 3 | key points | key points (each is a vertex of the dense polyline) |
+| Layers 2 and 3 | key points | boundary key points only (vertices of layer 1) |
 | Layer 6 mirror line | first two key points | first two vertices of the dense boundary; fold vertices between them dropped |
 | Notches | layer 4 slit and V; 80 T, 81 castle, 83 U | layer 4 only: T, castle, U become V with their width |
 | Label text | layer 15 | layer 1, without lines that read as piece text |

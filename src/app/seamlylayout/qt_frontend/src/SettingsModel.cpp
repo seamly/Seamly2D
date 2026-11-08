@@ -1,6 +1,6 @@
 // project: SeamlyLayout
 // author: slspencer, copyright 2026
-// LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
+// MIT License: https://opensource.org/licenses/MIT
 //
 // @file SettingsModel.cpp
 // @brief Implementation of SettingsModel — layout settings QObject.
@@ -71,6 +71,12 @@ static const SizeEntry PAPER_SIZES[] = {
 
 static const int PAPER_SIZES_COUNT =
     static_cast<int>(sizeof(PAPER_SIZES) / sizeof(PAPER_SIZES[0]));
+
+// @brief Format a paper dimension without unnecessary trailing zeroes.
+QString formatPaperDimension(double dimension)
+{
+    return QString::number(dimension, 'g', 6);
+} // formatPaperDimension
 
 // @brief Tile page sizes for tiled-PDF output.
 static const SizeEntry TILE_SIZES[] = {
@@ -171,12 +177,31 @@ SettingsModel::SettingsModel(QObject *parent)
 QStringList SettingsModel::paperSizeNames() const
 {
     QStringList names;
-    names.reserve(PAPER_SIZES_COUNT);
+    names.reserve(PAPER_SIZES_COUNT + 1);
     for (int i = 0; i < PAPER_SIZES_COUNT; ++i) {
         names.append(QString::fromUtf8(PAPER_SIZES[i].name));
     } // for i
+    names.append(QStringLiteral("Custom"));
     return names;
 } // paperSizeNames()
+
+// @brief Return sheet size labels with both standard unit dimensions.
+QStringList SettingsModel::paperSizeLabels() const
+{
+    QStringList labels;
+    labels.reserve(PAPER_SIZES_COUNT + 1);
+    for (int i = 0; i < PAPER_SIZES_COUNT; ++i) {
+        const SizeEntry &size = PAPER_SIZES[i];
+        labels.append(QStringLiteral("%1 (%2 × %3 in; %4 × %5 mm)")
+                          .arg(QString::fromUtf8(size.name),
+                               formatPaperDimension(size.widthIn),
+                               formatPaperDimension(size.heightIn),
+                               formatPaperDimension(size.widthMm),
+                               formatPaperDimension(size.heightMm)));
+    } // for i
+    labels.append(QStringLiteral("Custom"));
+    return labels;
+} // paperSizeLabels()
 
 // @brief Return all tile size names in the order they appear in the table.
 QStringList SettingsModel::tileSizeNames() const
@@ -429,16 +454,20 @@ void SettingsModel::setSheetName(const QString &v)
     emit sheetNameChanged();
 } // setSheetName()
 
+// @brief Set page width in active units; invalid dimensions are ignored.
 void SettingsModel::setPageWidth(double v)
 {
+    if (!std::isfinite(v) || v <= 0.0) return;
     if (qFuzzyCompare(m_pageWidth, v)) return;
     m_pageWidth = v;
     emit pageWidthChanged();
     emit pageWidthPxChanged();   // pageWidthPx is derived from pageWidth
 } // setPageWidth()
 
+// @brief Set page height in active units; invalid dimensions are ignored.
 void SettingsModel::setPageHeight(double v)
 {
+    if (!std::isfinite(v) || v <= 0.0) return;
     if (qFuzzyCompare(m_pageHeight, v)) return;
     m_pageHeight = v;
     emit pageHeightChanged();
@@ -925,6 +954,11 @@ void SettingsModel::convertAllUnits(const QString &fromUnit, const QString &toUn
 // @brief Look up a paper size by name and update pageWidth/pageHeight.
 void SettingsModel::selectPaperSize(const QString &name)
 {
+    if (name == QStringLiteral("Custom")) {
+        setSheetName(name);
+        return;
+    } // if custom size
+
     for (int i = 0; i < PAPER_SIZES_COUNT; ++i) {
         if (QString::fromUtf8(PAPER_SIZES[i].name) == name) {
             setSheetName(name);

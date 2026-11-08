@@ -24,6 +24,8 @@ pub struct Rect {
     // Some(angle): the rectangle touches the left bin edge, at this rotation
     // only.  Set for a piece whose fold line goes on the fold of the media.
     pub left_edge_angle: Option<u16>,
+    // Minimum x coordinate required for this rectangle inside the bin.
+    pub min_left_gap_px: u32,
 }
 
 impl Rect {
@@ -32,7 +34,7 @@ impl Rect {
     // @param h Height.
     // @return New rectangle.
     pub const fn new(w: u32, h: u32) -> Self {
-        Self { w, h, free_rotation: false, left_edge_angle: None }
+        Self { w, h, free_rotation: false, left_edge_angle: None, min_left_gap_px: 0 }
     }
 
     // @brief Return a copy with the given free-rotation flag.
@@ -43,6 +45,11 @@ impl Rect {
     // @brief Return a copy that touches the left bin edge at `angle` only.
     pub const fn with_left_edge(self, angle: u16) -> Self {
         Self { left_edge_angle: Some(angle), ..self }
+    }
+
+    // @brief Return a copy with the minimum clearance from the left bin edge.
+    pub const fn with_min_left_gap(self, gap_px: u32) -> Self {
+        Self { min_left_gap_px: gap_px, ..self }
     }
 }
 

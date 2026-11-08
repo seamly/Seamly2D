@@ -16,6 +16,7 @@
 #include "../../../../vpatterndb/PieceMarkings.h"
 
 class QComboBox;
+class QButtonGroup;
 class QLineEdit;
 class QListWidget;
 class QLabel;
@@ -43,7 +44,7 @@ private:
     QHash<quint32, QPointF> m_points;
     QComboBox *m_start;
     QComboBox *m_end;
-    QComboBox *m_type;
+    QButtonGroup *m_type_buttons;
     QLineEdit *m_diameter;
     QListWidget *m_list;
     QLabel *m_error;

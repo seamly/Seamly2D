@@ -1101,7 +1101,7 @@ pub struct AppControllerRust {
     // The active tab's layout lives in the layout fields above.
     layout_views: LayoutViews,
 
-    // Tabs still to lay out after the Marker tab; `None` when no tab run is pending.
+    // Tabs still to lay out after the first view; `None` when no tab run is pending.
     tab_queue: Option<TabLayoutQueue>,
 
     // Material tab labels mirrored for QML; empty for one material.
@@ -1749,17 +1749,28 @@ impl qobject::AppController {
 
         // Remember the media form so Adjust Apply knows whether to trim the bottom.
         // Invalid JSON fails inside do_process_layout, which reports the error.
-        let is_roll_layout = LayoutSettings::from_json(&json_str)
-            .map(|settings| settings.is_roll_form())
-            .unwrap_or(false);
-        let is_fabric_layout = LayoutSettings::from_json(&json_str)
-            .map(|settings| settings.media_type == "fabric")
-            .unwrap_or(false);
+        let settings = LayoutSettings::from_json(&json_str).ok();
+        let is_roll_layout = settings.as_ref().is_some_and(LayoutSettings::is_roll_form);
+        let is_fabric_layout = settings.as_ref().is_some_and(|settings| settings.media_type == "fabric");
+        let is_tiled_multisize = *self.is_multisize()
+            && settings.as_ref().is_some_and(|settings| {
+                settings.media_type == "paper" && settings.paper_type == "tiled"
+            });
+        let sizes: Vec<String> = if *self.is_multisize() {
+            self.multisize_sizes().to_string()
+                .split(',').map(str::trim).filter(|size| !size.is_empty()).map(String::from).collect()
+        } else {
+            Vec::new()
+        }; // sizes
+        let first_kind = if is_tiled_multisize {
+            let base_size = crate::piece_extractor::read_measurements_info(&input_dom_clone).base_size;
+            layout_views::tiled_kinds(&sizes, &base_size).into_iter().next()
+        } else {
+            None
+        }; // tiled first view
 
-        // Delegate to pure-logic function in layout_utils.rs.  A multisize layout
-        // starts with the Marker tab: every size of every piece packs alone.
-        // Multisize tabs extend the media until every piece fits; an individual
-        // pattern does so, or splits its oversized pieces, when the user chose it.
+        // A tiled multisize layout starts with its Base Size (or first size),
+        // then makes only per-size views. Other multisize layouts start with Marker.
         let args_extend_media = *self.is_multisize() || oversize == OversizeChoice::Extend;
         let args = ProcessLayoutArgs {
             settings_json: &json_str,
@@ -1782,7 +1793,12 @@ impl qobject::AppController {
             self.as_mut().progress_updated(percent);
         };
 
-        match do_process_layout(args, &mut progress) {
+        let first_layout = match first_kind.as_ref().and_then(ViewKind::size) {
+            Some(size) => do_process_size_layout(args, size, &mut progress),
+            None => do_process_layout(args, &mut progress),
+        }; // first layout
+
+        match first_layout {
             Ok(result) => {
                 // Store results in rust state
                 {
@@ -1801,37 +1817,61 @@ impl qobject::AppController {
                     rust.translate_dom     = Some(result.translate_dom);
                 } // rust borrow dropped
 
-                // Multisize: show the Marker tab now, then lay out Nested, Base Size
-                // and each size on later ticks.  Several materials: then lay out each
-                // other material, its first layout and its tabs.
-                let sizes: Vec<String> = if *self.is_multisize() {
-                    self.multisize_sizes().to_string()
-                        .split(',').map(str::trim).filter(|s| !s.is_empty()).map(String::from).collect()
-                } else {
-                    Vec::new()
-                }; // sizes
+                // Multisize layouts queue their remaining views; tiled paper omits
+                // Marker and Nested. Several materials also queue each other material.
                 let shown = usize::try_from(*self.active_material()).unwrap_or(0);
-                let (jobs, names) = {
+                let (jobs, names, first_kind, shown) = {
                     let rust = self.rust();
-                    // Tabs after each material's first layout; a material keeps its own base size.
-                    let tabs_of = |doc: &svg_dom::Document| -> Vec<ViewKind> {
+                    // Tiled sheets start each material on Base Size or its first size.
+                    let tabs_of = |doc: &svg_dom::Document| -> (Option<ViewKind>, Vec<ViewKind>) {
                         if sizes.is_empty() {
-                            Vec::new() // individual pattern: one layout per material
+                            (None, Vec::new()) // individual pattern: one layout per material
+                        } else if is_tiled_multisize {
+                            let base_size = crate::piece_extractor::read_measurements_info(doc).base_size;
+                            let mut kinds = layout_views::tiled_kinds(&sizes, &base_size).into_iter();
+                            (kinds.next(), kinds.collect())
                         } else {
-                            layout_views::queued_kinds(&sizes, &crate::piece_extractor::read_measurements_info(doc).base_size)
+                            (
+                                None,
+                                layout_views::queued_kinds(
+                                    &sizes,
+                                    &crate::piece_extractor::read_measurements_info(doc).base_size,
+                                ),
+                            )
                         } // if multisize
                     }; // tabs_of
+
+                    let mut first_kinds = Vec::new();
                     let tab_kinds: Vec<Vec<ViewKind>> = if rust.material_docs.len() > 1 {
-                        rust.material_docs.iter().map(|part| tabs_of(&part.doc)).collect()
+                        rust.material_docs.iter().map(|part| {
+                            let (first, following) = tabs_of(&part.doc);
+                            first_kinds.push(first);
+                            following
+                        }).collect()
                     } else {
-                        vec![tabs_of(&input_dom_clone)]
+                        let (first, following) = tabs_of(&input_dom_clone);
+                        first_kinds.push(first);
+                        vec![following]
                     }; // tab_kinds
                     let shown = if shown < tab_kinds.len() { shown } else { 0 };
-                    (layout_views::layout_jobs(shown, &tab_kinds), rust.material_names())
+                    (
+                        layout_views::layout_jobs_with_first_views(shown, &tab_kinds, &first_kinds),
+                        rust.material_names(),
+                        first_kinds.get(shown).cloned().flatten(),
+                        shown,
+                    )
                 }; // rust borrow dropped
                 if !jobs.is_empty() {
                     let multisize = !sizes.is_empty();
-                    let mut queue = TabLayoutQueue::new(json_str.clone(), layout_h_px, jobs, names, multisize);
+                    let first_label = first_kind.as_ref().map(ViewKind::label);
+                    let mut queue = TabLayoutQueue::new(
+                        json_str.clone(),
+                        layout_h_px,
+                        jobs,
+                        names,
+                        multisize,
+                        first_label,
+                    );
                     queue.extend_media = args_extend_media;
                     queue.split_oversized = oversize == OversizeChoice::Split;
                     let first = LayoutJob { material: shown, kind: None };
@@ -1846,7 +1886,9 @@ impl qobject::AppController {
                     let message = queue.next_message().unwrap_or_default();
                     {
                         let mut rust = self.as_mut().rust_mut();
-                        if multisize {
+                        if let Some(kind) = first_kind.clone() {
+                            rust.layout_views.start(kind);
+                        } else if multisize && !is_tiled_multisize {
                             rust.layout_views.start(ViewKind::Marker);
                         } // if multisize
                         rust.tab_queue = Some(queue);
@@ -2000,6 +2042,12 @@ impl qobject::AppController {
                     } else {
                         let layout = rust.material_layout_mut(job.material);
                         match job.kind {
+                            Some(kind) if layout.views.is_empty() => {
+                                layout.divide_spec = result.divide_spec.clone();
+                                layout.state = LayoutState::from_result(result);
+                                layout.views.start(kind);
+                                layout.is_laid_out = true;
+                            } // first view of another material
                             Some(kind) => layout.views.push(kind, LayoutState::from_result(result)),
                             None => {
                                 layout.divide_spec = result.divide_spec.clone();
@@ -2016,10 +2064,13 @@ impl qobject::AppController {
                     log_to_file(&format!("[process_next_tab_layout] {label} failed: {e}"));
                     let line = format!("{label}: not laid out ({e})");
                     if let Some(queue) = rust.tab_queue.as_mut() { queue.problems.push(line); }
-                    // A failed Marker still gets its tab, so the material's tabs keep their order.
-                    if job.material != shown && job.kind.is_none() && multisize {
-                        rust.material_layout_mut(job.material).views.start(ViewKind::Marker);
-                    } // if another material's Marker failed
+                    // Keep the first view slot even when its layout failed.
+                    if job.material != shown && multisize {
+                        let layout = rust.material_layout_mut(job.material);
+                        if layout.views.is_empty() {
+                            layout.views.start(job.kind.unwrap_or(ViewKind::Marker));
+                        } // if first view failed
+                    } // if another material's first view failed
                 } // Err
             } // match outcome
         } // rust borrow dropped

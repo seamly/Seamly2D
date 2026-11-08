@@ -1,6 +1,6 @@
 // project: SeamlyLayout
 // author: slspencer, copyright 2026
-// LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
+// MIT License: https://opensource.org/licenses/MIT
 //
 // @file PreferencesModelTests.cpp
 // @brief Qt tests for PreferencesModel INI persistence, viewer helpers, and legacy migration.
@@ -67,7 +67,8 @@ private slots:
     void isViewerUrl_rejectsEmpty();
     void isViewerUrl_rejectsLocalCommandWithArgs();
 
-    void openInViewer_emptyViewer_returnsFalse();
+    void openInViewer_emptyViewer_opensWithDefaultHandler();
+    void openInViewer_emptyViewerAndFile_returnsFalse();
     void openInViewer_emptyTokens_returnsFalse();
 
     void defaultPreferencesFilePath_usesAppConfigIni();
@@ -222,9 +223,21 @@ void PreferencesModelTests::isViewerUrl_rejectsLocalCommandWithArgs()
     QVERIFY(!PreferencesModel::isViewerUrl(cmd));
 }
 
-void PreferencesModelTests::openInViewer_emptyViewer_returnsFalse()
+void PreferencesModelTests::openInViewer_emptyViewer_opensWithDefaultHandler()
 {
-    QCOMPARE(PreferencesModel::openInViewer(QString(), QStringLiteral("/tmp/foo.dxf")), false);
+    UrlCapture capture;
+    QDesktopServices::setUrlHandler(QStringLiteral("file"), &capture, "handle");
+    const QString filePath = QCoreApplication::applicationFilePath();
+    const bool launched = PreferencesModel::openInViewer(QString(), filePath);
+    QDesktopServices::unsetUrlHandler(QStringLiteral("file"));
+
+    QVERIFY(launched);
+    QCOMPARE(capture.captured, QList<QUrl>({QUrl::fromLocalFile(filePath)}));
+}
+
+// @brief An empty viewer cannot launch without a file.
+void PreferencesModelTests::openInViewer_emptyViewerAndFile_returnsFalse()
+{
     QCOMPARE(PreferencesModel::openInViewer(QString(), QString()), false);
 }
 

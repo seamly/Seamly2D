@@ -11,7 +11,7 @@
 // hide the others. Every piece keeps its position.
 //
 // The size groups run largest size first: the largest size is drawn underneath,
-// the smallest on top.
+// the smallest on top. Each sized piece moves with its own drill-hole component.
 
 use std::cmp::Ordering;
 
@@ -127,12 +127,12 @@ mod tests {
     const NESTED: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">
   <g id="Rectangles"><rect id="backgroundRect" x="0" y="0" width="400" height="200"/></g>
   <g id="piece-set_A" data-type="piece-set">
-    <g id="piece_A_s34" data-type="piece" data-size="34"><path d="M0,0 L10,0 L10,10 Z"/></g>
-    <g id="piece_A_s36" data-type="piece" data-size="36"><path d="M0,0 L12,0 L12,12 Z"/></g>
+    <g id="piece_A_s34" data-type="piece" data-size="34"><path d="M0,0 L10,0 L10,10 Z"/><g id="drill_A_s34" data-type="drill"><circle cx="2" cy="2" r="1"/></g></g>
+    <g id="piece_A_s36" data-type="piece" data-size="36"><path d="M0,0 L12,0 L12,12 Z"/><g id="drill_A_s36" data-type="drill"><circle cx="3" cy="3" r="1"/></g></g>
   </g>
   <g id="piece-set_B" data-type="piece-set" transform="translate(100 50)">
-    <g id="piece_B_s36" data-type="piece" data-size="36"><path d="M0,0 L20,0 L20,20 Z"/><text x="1" y="2">B</text></g>
-    <g id="piece_B_s34" data-type="piece" data-size="34"><path d="M0,0 L18,0 L18,18 Z"/></g>
+    <g id="piece_B_s36" data-type="piece" data-size="36"><path d="M0,0 L20,0 L20,20 Z"/><text x="1" y="2">B</text><g id="drill_B_s36" data-type="drill"><circle cx="4" cy="4" r="1"/></g></g>
+    <g id="piece_B_s34" data-type="piece" data-size="34"><path d="M0,0 L18,0 L18,18 Z"/><g id="drill_B_s34" data-type="drill"><circle cx="5" cy="5" r="1"/></g></g>
   </g>
   <g id="size-legend" data-type="size_legend"><text x="5" y="190">Size 34</text></g>
 </svg>"#;
@@ -155,6 +155,25 @@ mod tests {
             .unwrap_or_default()
     } // fn piece_ids
 
+    // @brief One drill component stays with each sized piece.
+    fn assert_drills_stay_with_pieces(doc: &svg_dom::Document, group_id: &str) {
+        let group = doc.root.children.iter().filter_map(|n| n.as_element())
+            .find(|e| e.attributes.get("id").is_some_and(|id| id == group_id)).expect("size group");
+        for piece in group.children.iter().filter_map(|n| n.as_element()) {
+            let drills: Vec<_> = piece.children.iter().filter_map(|n| n.as_element())
+                .filter(|e| e.attributes.get("data-type").is_some_and(|t| t == "drill"))
+                .collect();
+            assert_eq!(drills.len(), 1, "{} has one drill group", piece.attributes.get("id").unwrap());
+            assert_eq!(
+                drills[0].children.iter().filter_map(|n| n.as_element())
+                    .filter(|e| e.name == "circle").count(),
+                1,
+                "{} keeps its drill hole",
+                piece.attributes.get("id").unwrap()
+            );
+        }
+    } // assert_drills_stay_with_pieces
+
     // @brief Each size gets one group, largest first, in place of the piece-sets.
     #[test]
     fn nested_pieces_regroup_by_size_largest_first() {
@@ -163,6 +182,8 @@ mod tests {
         assert_eq!(top_ids(&doc), vec!["Rectangles", "size_36", "size_34", "size-legend"]);
         assert_eq!(piece_ids(&doc, "size_36"), vec!["piece_A_s36", "piece_B_s36"]);
         assert_eq!(piece_ids(&doc, "size_34"), vec!["piece_A_s34", "piece_B_s34"]);
+        assert_drills_stay_with_pieces(&doc, "size_36");
+        assert_drills_stay_with_pieces(&doc, "size_34");
         let group = doc.root.children.iter().filter_map(|n| n.as_element())
             .find(|e| e.attributes.get("id").is_some_and(|id| id == "size_36")).expect("size group");
         assert_eq!(group.attributes.get("data-type").map(String::as_str), Some("size"));

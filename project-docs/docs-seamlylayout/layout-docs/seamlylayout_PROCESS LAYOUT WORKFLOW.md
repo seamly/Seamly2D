@@ -103,10 +103,11 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
 ## Oversized Pieces (individual pattern)
 
 - `process_layout` first runs `layout_utils::do_find_oversized_pieces`: pre-processing up to grain-up pieces, then `piece_divider::find_oversized_pieces`.
-- A piece is oversized when no trial angle fits it in the content rect. Paper roll and fabric limit only the width. Tiled paper is never checked.
+- A piece is oversized when no trial angle fits the effective content dimensions. Paper sheets use the dimensions inside their margins; warnings report each offending piece dimension and its effective media dimension. Paper roll and fabric limit only the width. Tiled paper is never checked.
 - Oversized pieces: the `oversized_pieces_found` signal, no layout. QML asks the user, then calls `process_layout_oversized(settings, "split" | "extend")` or `cancel_layout()`.
 - "split": `ProcessLayoutArgs::split_oversized`. `piece_divider::divide_oversized_pieces` runs after the piece-set centring and before `translate_dom`.
   - Equal columns for a piece too wide, equal rows for a piece too long on a sheet. Each outline region in a cell is one part.
+  - On folded fabric, true fold-line pieces remain pinned to the fold. Other pieces and split parts keep at least `pieceGap` from the fold edge. Oversize checks and split sizing use that same reduced width.
   - Cutting: `geometry::half_plane_clip` (`cut_closed`, `cut_open`). Each output vertex keeps its source vertex index, so `data-turn-points` stay valid.
   - `ProcessLayoutResult::divide_spec` keeps the media; `sheets::build_sheet_export_inputs` splits the same way for the paper-sheet PDF.
 - "extend": `ProcessLayoutArgs::extend_media`, as below.
@@ -116,7 +117,7 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
 
 Every multisize tab sets `ProcessLayoutArgs::extend_media`. An individual pattern sets it only when the user chose "Make the media bigger".
 
-- Width first: `packing::required_bin_width` is the widest piece, each piece in its narrowest trial angle. A wider value widens the bin.
+- Width first: `packing::required_bin_width` is the widest piece, each piece in its narrowest trial angle, plus any required left-edge clearance. A wider value widens the bin.
 - `packing::pack_polygons_extending` packs at the media length first.
 - While a piece stays unplaced, the bin grows by the stacked height of the unplaced pieces. The pack runs again.
 - The loop ends: a bin as tall as every piece stacked holds them all. No piece is left out.

@@ -91,3 +91,23 @@ bool PieceMarkings::valid(const QVector<PieceDrillHole> &holes, const QVector<Pi
     }
     return true;
 }
+
+bool PieceMarkings::usesAnchor(quint32 anchor, const QVector<PieceDrillHole> &holes,
+                               const QVector<PieceReferenceLine> &lines)
+{
+    for (const PieceDrillHole &hole : holes)
+    {
+        if (hole.center == anchor)
+        {
+            return true;
+        }
+    }
+    for (const PieceReferenceLine &line : lines)
+    {
+        if (line.start == anchor || line.end == anchor)
+        {
+            return true;
+        }
+    }
+    return false;
+}

@@ -1,6 +1,6 @@
 // project: SeamlyLayout
 // author: slspencer, copyright 2026
-// LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
+// MIT License: https://opensource.org/licenses/MIT
 // Main.qml — Root ApplicationWindow for SeamlyLayout Qt 6.11 frontend.
 //
 // Note on startup console messages:
@@ -818,15 +818,13 @@ ApplicationWindow {
                 "Open PDF File", dir,
                 "PDF Files (*.pdf);;All Files (*)")
             console.log("[Main.qml TopMenuBar] onViewPdfRequested(): 3 path=" + path + " pdfViewerPath=" + preferencesModel.pdfViewerPath)
-            if (path !== "" && preferencesModel.pdfViewerPath !== "") {
+            if (path !== "") {
                 // Open the selected PDF file in the configured PDF viewer application.
                 console.log("[Main.qml TopMenuBar] onViewPdfRequested(): 4 opening viewer")
                 preferencesModel.openInViewer(preferencesModel.pdfViewerPath, path)
             } else if (path === "") {
                 console.log("[Main.qml TopMenuBar] onViewPdfRequested(): 4 file pick cancelled")
-            } else {
-                console.log("[Main.qml TopMenuBar] onViewPdfRequested(): 4 no PDF viewer configured")
-            } // if path && viewer
+            } // if file selected
         } // onViewPdfRequested
         onViewPdfTiledRequested: {
             console.log("[Main.qml TopMenuBar] onViewPdfTiledRequested(): 1 triggered")
@@ -836,15 +834,13 @@ ApplicationWindow {
                 "Open Tiled PDF File", dir,
                 "PDF Files (*.pdf);;All Files (*)")
             console.log("[Main.qml TopMenuBar] onViewPdfTiledRequested(): 3 path=" + path + " pdfViewerPath=" + preferencesModel.pdfViewerPath)
-            if (path !== "" && preferencesModel.pdfViewerPath !== "") {
+            if (path !== "") {
                 // Open the selected PDF file in the configured PDF viewer application.
                 console.log("[Main.qml TopMenuBar] onViewPdfTiledRequested(): 4 opening viewer")
                 preferencesModel.openInViewer(preferencesModel.pdfViewerPath, path)
             } else if (path === "") {
                 console.log("[Main.qml TopMenuBar] onViewPdfTiledRequested(): 4 file pick cancelled")
-            } else {
-                console.log("[Main.qml TopMenuBar] onViewPdfTiledRequested(): 4 no PDF viewer configured")
-            } // if path && viewer
+            } // if file selected
         } // onViewPdfTiledRequested
         onViewPngRequested: {
             console.log("[Main.qml TopMenuBar] onViewPngRequested(): 1 triggered")
@@ -854,15 +850,13 @@ ApplicationWindow {
                 "Open PNG or JPG File", dir,
                 "Image Files (*.png *.jpg *.jpeg);;PNG Files (*.png);;JPG Files (*.jpg *.jpeg);;All Files (*)")
             console.log("[Main.qml TopMenuBar] onViewPngRequested(): 3 path=" + path + " pngViewerPath=" + preferencesModel.pngViewerPath)
-            if (path !== "" && preferencesModel.pngViewerPath !== "") {
+            if (path !== "") {
                 // Open the selected PNG or JPG file in the configured image viewer.
                 console.log("[Main.qml TopMenuBar] onViewPngRequested(): 4 opening viewer")
                 preferencesModel.openInViewer(preferencesModel.pngViewerPath, path)
             } else if (path === "") {
                 console.log("[Main.qml TopMenuBar] onViewPngRequested(): 4 file pick cancelled")
-            } else {
-                console.log("[Main.qml TopMenuBar] onViewPngRequested(): 4 no image viewer configured")
-            } // if path && viewer
+            } // if file selected
         } // onViewPngRequested
         onViewSvgRequested: {
             console.log("[Main.qml TopMenuBar] onViewSvgRequested(): 1 triggered")
@@ -1033,7 +1027,7 @@ ApplicationWindow {
                     } // Text materialHeaderText
                 } // Rectangle materialHeader
 
-                // Tab strip of a multisize layout: Marker, Nested, Base Size, then one per size.
+                // Non-tiled multisize tabs include Marker and Nested; tiled tabs show only sizes.
                 // Hidden when there is only one layout.  The strip is as wide as
                 // the canvas; a scroll bar below it reaches tabs past the right edge.
                 Flickable {

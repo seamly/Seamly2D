@@ -5,10 +5,9 @@
 //! Up-left compaction of placed pieces.
 //!
 //! Each piece moves up, then left, until the piece gap separates it from a
-//! blocking piece or it touches the bin edge.  After compaction no gap above
-//! or left of a piece is wider than the piece gap, except where the bin edge
-//! is closer.  A piece only moves up or left, so the layout stays inside the
-//! bin and no two pieces come closer than the gap.
+//! blocking piece or it reaches its minimum x coordinate. A piece only moves
+//! up or left, so the layout stays inside the bin and no two pieces come closer
+//! than the gap.
 
 // @brief Tolerance for coordinate comparisons, in pixels.
 const EPSILON: f64 = 1e-6;
@@ -21,6 +20,8 @@ const MAX_PASSES: usize = 64;
 pub struct PieceBox {
     // Left edge.
     pub x: f64,
+    // Minimum x coordinate allowed by the layout.
+    pub min_x: f64,
     // Top edge.
     pub y: f64,
     // Width.
@@ -80,7 +81,7 @@ pub fn compact_up_left(boxes: &mut [PieceBox], gap: f64) {
                 .enumerate()
                 .filter(|&(j, q)| j != i && piece.y_close(q, gap) && q.x + q.w + gap <= piece.x + EPSILON)
                 .map(|(_, q)| q.x + q.w + gap)
-                .fold(0.0, f64::max);
+                .fold(piece.min_x, f64::max);
             if left < piece.x - EPSILON {
                 boxes[i].x = left;
                 moved = true;
@@ -101,8 +102,8 @@ mod tests {
     #[test]
     fn box_moves_up_then_left_to_the_gap() {
         let mut boxes = [
-            PieceBox { x: 0.0, y: 0.0, w: 10.0, h: 10.0 },
-            PieceBox { x: 40.0, y: 7.0, w: 10.0, h: 10.0 },
+            PieceBox { x: 0.0, min_x: 0.0, y: 0.0, w: 10.0, h: 10.0 },
+            PieceBox { x: 40.0, min_x: 0.0, y: 7.0, w: 10.0, h: 10.0 },
         ];
         compact_up_left(&mut boxes, 2.0);
         assert_eq!((boxes[1].x, boxes[1].y), (12.0, 0.0));
@@ -112,11 +113,19 @@ mod tests {
     #[test]
     fn box_stops_one_gap_below_the_box_above() {
         let mut boxes = [
-            PieceBox { x: 0.0, y: 0.0, w: 10.0, h: 10.0 },
-            PieceBox { x: 5.0, y: 30.0, w: 10.0, h: 10.0 },
+            PieceBox { x: 0.0, min_x: 0.0, y: 0.0, w: 10.0, h: 10.0 },
+            PieceBox { x: 5.0, min_x: 0.0, y: 30.0, w: 10.0, h: 10.0 },
         ];
         compact_up_left(&mut boxes, 2.0);
         // At y 12 the y ranges are a full gap apart, so the box above does not block the left move.
         assert_eq!((boxes[1].x, boxes[1].y), (0.0, 12.0));
     } // box_stops_one_gap_below_the_box_above
+
+    // @brief Compaction keeps a piece's clearance from the left bin edge.
+    #[test]
+    fn box_stays_right_of_its_minimum_left_edge() {
+        let mut boxes = [PieceBox { x: 12.0, min_x: 5.0, y: 0.0, w: 10.0, h: 10.0 }];
+        compact_up_left(&mut boxes, 0.0);
+        assert_eq!(boxes[0].x, 5.0);
+    } // box_stays_right_of_its_minimum_left_edge
 } // mod tests

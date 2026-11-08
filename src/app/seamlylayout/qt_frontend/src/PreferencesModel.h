@@ -1,6 +1,6 @@
 // project: SeamlyLayout
 // author: slspencer, copyright 2026
-// LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
+// MIT License: https://opensource.org/licenses/MIT
 //
 // @file PreferencesModel.h
 // @brief QObject model for SeamlyLayout application preferences.
@@ -263,8 +263,9 @@ public:
 
     // @brief Launch a file in a viewer application or open an online viewer URL.
     // If viewerPath is an HTTP/HTTPS URL, opens the URL in the default browser.
+    // If viewerPath is empty, opens filePath with its OS default application.
     // Otherwise, starts the viewer executable as a detached process with the file path.
-    // @param viewerPath Absolute path to the viewer executable, or an HTTP/HTTPS URL.
+    // @param viewerPath Absolute path to the viewer executable, an HTTP/HTTPS URL, or empty.
     // @param filePath Absolute path to the file to open (ignored for URL viewers).
     // @return true if the viewer opened; false if viewerPath is empty or launch failed.
     Q_INVOKABLE static bool openInViewer(const QString &viewerPath, const QString &filePath);

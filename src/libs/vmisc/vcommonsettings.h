@@ -1,13 +1,13 @@
 //-----------------------------------------------------------------------------
 //  @file   vcommonsettings.h
-//  @author Douglas S Caskey
+//  @author slspencer
 //  @date   17 Sep, 2023
 //
 //  @brief
 //  @copyright
 //  This source code is part of the Seamly2D project, a pattern making
 //  program to create and model patterns of clothing.
-//  Copyright (C) 2017-2026 Seamly2D project
+//  Copyright (C) 2026 Seamly2D Project
 //  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
 //
 //  Seamly2D is free software: you can redistribute it and/or modify
@@ -100,13 +100,13 @@ public:
     static QString       dataRoot();
     static QString       dataSubdirPath(const QString &subdirectory);
     static QString       initializeDataRoot();
-    static bool          ensureDataRootTree(const QString &root = QString());
+    static bool          ensureDataRootTree(const QString &root = QString(), QString *failed_path = nullptr);
     // Resource copies of the default label templates, used when the user's file is missing.
     static QString       builtInPieceLabelTemplate();
     static QString       builtInPatternLabelTemplate();
     static QString       rebaseOntoDataRoot(const QString &path, const QString &oldRoot, const QString &newRoot);
     QString              getDataRoot() const;
-    void                 setDataRoot(const QString &value);
+    bool                 setDataRoot(const QString &value, QString *error_message = nullptr);
 
     // SEAMLY_DATA_DIR: call before the application or any settings object exists.
     static int           configureDataDirectory();
