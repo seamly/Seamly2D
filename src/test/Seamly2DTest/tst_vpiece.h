@@ -150,6 +150,7 @@ private slots:
     void PieceFlipValuesRoundTrip() const;
     void PieceTiltTransformRotatesAboutCenter() const;
     void PieceFlipTransformMirrorsAboutCenter() const;
+    void PieceDisplayTransformAppliesFlipBeforeTilt() const;
     void LayoutPieceKeepsFlip() const;
     void LayoutPieceKeepsPieceProperties() const;
     void RotationStepDegrees() const;

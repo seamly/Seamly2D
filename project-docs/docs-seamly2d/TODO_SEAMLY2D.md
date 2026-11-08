@@ -114,6 +114,7 @@ The 'Flip Piece' tool can be applied to any piece in Piece Mode, including piece
 
 - [x] Piece Properties and the Piece Mode context menu select None, Horizontal, Vertical, or Both.
 - [x] Follow the newer Layout.110 decision: mirror displayed geometry; labels and grainline retain their place and readability.
+- [x] Apply Piece Mode flip and tilt to path-node markers and internal paths without changing stored geometry.
 - [x] Do not flatten or rewrite stored geometry. The flip is a display of the stored choice.
 - [x] Centered flip-transform tests and integrated Qt suites pass.
 - [x] Existing flip schema and conversion remain in use; no additional schema change is needed.

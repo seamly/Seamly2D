@@ -1749,6 +1749,8 @@ void PatternPieceTool::RefreshGeometry()
 
     refreshFoldLine(piece, seamAllowancePoints);
 
+    const QRectF outline = this->path().united(m_cutLine->path()).boundingRect();
+    const QPointF transform_center = outline.center();
     applyFlipToGeometry(piece.getFlip());
     const VPieceLabelData &piece_properties = piece.GetPatternPieceData();
     int tilt_degrees = 0;
@@ -1763,6 +1765,10 @@ void PatternPieceTool::RefreshGeometry()
     applyTiltToGeometry(tilt_degrees);
 
     updatePieceDetails();
+    const QTransform detail_transform = outline.isNull()
+                                            ? QTransform()
+                                            : pieceDisplayTransform(piece.getFlip(), tilt_degrees, transform_center);
+    applyDisplayTransformToDetails(detail_transform);
 
     this->setPos(piece.GetMx(), piece.GetMy());
     this->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
@@ -1841,6 +1847,35 @@ void PatternPieceTool::applyTiltToGeometry(int signed_degrees)
     m_cutPath = tilt.map(m_cutPath);
     m_mainPath = tilt.map(m_mainPath);
     m_pieceRect = tilt.mapRect(m_pieceRect);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Apply the display transform to path-node markers and internal paths.
+void PatternPieceTool::applyDisplayTransformToDetails(const QTransform &transform)
+{
+    const VPiece piece = VAbstractTool::data.GetPiece(m_id);
+    for (const VPieceNode &node : piece.GetPath().getNodes())
+    {
+        if (node.GetTypeTool() != Tool::NodePoint)
+        {
+            continue;
+        }
+
+        VNodePoint *point_tool = qobject_cast<VNodePoint *>(VAbstractPattern::getTool(node.GetId()));
+        SCASSERT(point_tool != nullptr);
+        const QSharedPointer<VPointF> point = getData()->GeometricObject<VPointF>(node.GetId());
+        const bool sends_geometry_changes = point_tool->flags().testFlag(QGraphicsItem::ItemSendsGeometryChanges);
+        point_tool->setFlag(QGraphicsItem::ItemSendsGeometryChanges, false);
+        point_tool->setPos(transform.map(static_cast<QPointF>(*point)));
+        point_tool->setFlag(QGraphicsItem::ItemSendsGeometryChanges, sends_geometry_changes);
+    } // for each piece node
+
+    for (const quint32 path_id : piece.getInternalPaths())
+    {
+        InternalPathTool *path_tool = qobject_cast<InternalPathTool *>(VAbstractPattern::getTool(path_id));
+        SCASSERT(path_tool != nullptr);
+        path_tool->setPath(transform.map(path_tool->path()));
+    } // for each internal path
 }
 
 //---------------------------------------------------------------------------------------------------------------------

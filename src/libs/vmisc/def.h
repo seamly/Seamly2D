@@ -260,6 +260,8 @@ PieceFlip stringToPieceFlip(const QString &value);
 /// @brief Rotate piece geometry by signed degrees about a point; positive values rotate counterclockwise.
 QTransform pieceTiltTransform(int degrees, const QPointF &center);
 QTransform pieceFlipTransform(PieceFlip flip, const QPointF &center);
+/// @brief Combined Piece Mode transform; applies flip before signed tilt about the same center.
+QTransform pieceDisplayTransform(PieceFlip flip, int tilt_degrees, const QPointF &center);
 
 
 Unit         StrToUnits(const QString &unit);

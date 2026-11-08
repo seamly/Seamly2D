@@ -828,6 +828,18 @@ QTransform pieceTiltTransform(int degrees, const QPointF &center)
     return transform;
 }
 
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Flip and tilt transform for displayed Piece Mode geometry.
+ * @param flip Stored flip choice.
+ * @param tilt_degrees Signed visual tilt angle; positive is counterclockwise.
+ * @param center Point held fixed by both transforms.
+ */
+QTransform pieceDisplayTransform(PieceFlip flip, int tilt_degrees, const QPointF &center)
+{
+    return pieceTiltTransform(tilt_degrees, center) * pieceFlipTransform(flip, center);
+}
+
 
 //---------------------------------------------------------------------------------------------------------------------
 Unit StrToUnits(const QString &unit)
