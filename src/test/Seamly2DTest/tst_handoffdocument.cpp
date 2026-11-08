@@ -734,8 +734,9 @@ void TST_HandoffDocument::liveMarkingAnchorsGradeWithConstantDiameter() const
         piece.getAnchors().append(24);
         data->UpdateGObject(24, new VPointF(250, 250, "Anchor", 0, 0));
         QVERIFY(!HandoffPiece::create(piece, data.data()).marking_error().isEmpty());
-        data->UpdateGObject(23, new VPointF(200, 200, "Legacy anchor", 0, 0));
-        piece.setReferenceLines({{23, 24, QStringLiteral("stripe")}});
+        piece.getAnchors().append(25);
+        data->UpdateGObject(25, new VPointF(200, 200, "Legacy anchor", 0, 0));
+        piece.setReferenceLines({{25, 24, QStringLiteral("stripe")}});
         const HandoffPiece legacy_reference = HandoffPiece::create(piece, data.data());
         QVERIFY(legacy_reference.marking_error().isEmpty());
         QCOMPARE(legacy_reference.reference_lines().first().line, QLineF(200, 200, 250, 250));
