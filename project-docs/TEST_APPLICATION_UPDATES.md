@@ -70,6 +70,7 @@ Run from the repository root. Save edited patterns under new names; do not overw
    - [ ] Select a different disposable data root; accept the update prompt once and decline it on a second run.
 --> I selected a new data root is selected in Application Preferences and answered the prompt to update the remaining paths, but the paths did not change in the Paths dlalog. See test-seamly-layout\screenshots\New-Data-Root-doesnt-update-remaining-paths-Screenshot 2026-11-08 072650.png.
 --> Fix this issue in a worktree as a feature branch then merge into run-seamlyLayout.
+   - Regression coverage now checks all nine default folders and confirms customized folders stay unchanged. Keep the GUI result pending until the rebuilt installer is tested.
 - [x] A folder-creation failure shows an error instead of silently opening another folder.
   - Use a disposable data root where a required child folder cannot be created. Confirm an explicit error and that the prior picker path remains selected.
 - [ ] With a configured or renamed test data root, all three default folders follow that root. 

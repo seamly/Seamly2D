@@ -42,6 +42,7 @@
 #include <QFileInfo>
 #include <QSettings>
 #include <QStandardPaths>
+#include <QStringList>
 #include <QTemporaryDir>
 #include <QtTest>
 
@@ -955,16 +956,33 @@ void TST_DataRoot::DefaultPathsFollowDataRootOnlyWhenConfirmed() const
 {
     const QString oldRoot = QStringLiteral("C:/Users/tester/seamly2d");
     const QString newRoot = QStringLiteral("G:/My Drive/seamly");
-    const QString defaultPath = oldRoot + QStringLiteral("/templates");
-    const QString newDefaultPath = newRoot + QStringLiteral("/templates");
-    const QString customPath = oldRoot + QStringLiteral("/my-templates");
+    const QStringList default_subdirectories
+    {
+        QStringLiteral("/patterns"),
+        QStringLiteral("/templates"),
+        QStringLiteral("/measurements/individual"),
+        QStringLiteral("/measurements/multisize"),
+        QStringLiteral("/layouts"),
+        QStringLiteral("/label templates"),
+        QStringLiteral("/images"),
+        QStringLiteral("/backups"),
+        QStringLiteral("/bodyscans")
+    };
 
-    QCOMPARE(VCommonSettings::rebaseDefaultPathOntoDataRoot(defaultPath, defaultPath, oldRoot, newRoot, true),
-             newDefaultPath);
-    QCOMPARE(VCommonSettings::rebaseDefaultPathOntoDataRoot(defaultPath, defaultPath, oldRoot, newRoot, false),
-             defaultPath);
-    QCOMPARE(VCommonSettings::rebaseDefaultPathOntoDataRoot(customPath, defaultPath, oldRoot, newRoot, true),
-             customPath);
+    for (const QString &subdirectory : default_subdirectories)
+    {
+        const QString default_path = oldRoot + subdirectory;
+        QCOMPARE(VCommonSettings::rebaseDefaultPathOntoDataRoot(default_path, default_path, oldRoot, newRoot, true),
+                 newRoot + subdirectory);
+        QCOMPARE(VCommonSettings::rebaseDefaultPathOntoDataRoot(default_path, default_path, oldRoot, newRoot, false),
+                 default_path);
+    }
+
+    const QString custom_path = oldRoot + QStringLiteral("/my-templates");
+    QCOMPARE(VCommonSettings::rebaseDefaultPathOntoDataRoot(custom_path,
+                                                            oldRoot + QStringLiteral("/templates"),
+                                                            oldRoot, newRoot, true),
+             custom_path);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
