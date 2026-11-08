@@ -58,6 +58,7 @@
 #include <QThread>
 #include <QDateTime>
 #include <QIcon>
+#include <QMetaEnum>
 
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_CLANG("-Wmissing-prototypes")
@@ -390,51 +391,72 @@ void Application2D::startNewSeamly2D(const QString &fileName)
 /// reimplemented from QApplication so we can throw exceptions in slots
 bool Application2D::notify(QObject *receiver, QEvent *event)
 {
+    // The fatal log names the event and its receiver because the exception carries no call site.
+    const auto context = [receiver, event]()
+    {
+        const char *event_name = event != nullptr
+            ? QMetaEnum::fromType<QEvent::Type>().valueToKey(event->type()) : nullptr;
+        const QString receiver_class = receiver != nullptr
+            ? QString::fromLatin1(receiver->metaObject()->className()) : QStringLiteral("null");
+        const QString receiver_name = receiver != nullptr ? receiver->objectName() : QString();
+        return QStringLiteral("Event: %1; receiver: %2 \"%3\"")
+            .arg(event_name != nullptr ? QString::fromLatin1(event_name)
+                                       : QString::number(event != nullptr ? int(event->type()) : -1),
+                 receiver_class, receiver_name);
+    };
+
     try
     {
         return QApplication::notify(receiver, event);
     }
     catch (const VExceptionObjectError &error)
     {
-        qCCritical(vApp, "%s\n\n%s\n\n%s", qUtf8Printable(tr("Error parsing file. Program will be terminated.")), //-V807
-                   qUtf8Printable(error.ErrorMessage()), qUtf8Printable(error.DetailedInformation()));
+        qCCritical(vApp, "%s\n\n%s\n\n%s\n\n%s", qUtf8Printable(tr("Error parsing file. Program will be terminated.")), //-V807
+                   qUtf8Printable(error.ErrorMessage()), qUtf8Printable(error.DetailedInformation()),
+                   qUtf8Printable(context()));
         exit(V_EX_DATAERR);
     }
     catch (const VExceptionBadId &error)
     {
-        qCCritical(vApp, "%s\n\n%s\n\n%s", qUtf8Printable(tr("Error bad id. Program will be terminated.")),
-                   qUtf8Printable(error.ErrorMessage()), qUtf8Printable(error.DetailedInformation()));
+        qCCritical(vApp, "%s\n\n%s\n\n%s\n\n%s", qUtf8Printable(tr("Error bad id. Program will be terminated.")),
+                   qUtf8Printable(error.ErrorMessage()), qUtf8Printable(error.DetailedInformation()),
+                   qUtf8Printable(context()));
         exit(V_EX_DATAERR);
     }
     catch (const VExceptionConversionError &error)
     {
-        qCCritical(vApp, "%s\n\n%s\n\n%s", qUtf8Printable(tr("Error can't convert value. Program will be terminated.")),
-                   qUtf8Printable(error.ErrorMessage()), qUtf8Printable(error.DetailedInformation()));
+        qCCritical(vApp, "%s\n\n%s\n\n%s\n\n%s", qUtf8Printable(tr("Error can't convert value. Program will be terminated.")),
+                   qUtf8Printable(error.ErrorMessage()), qUtf8Printable(error.DetailedInformation()),
+                   qUtf8Printable(context()));
         exit(V_EX_DATAERR);
     }
     catch (const VExceptionEmptyParameter &error)
     {
-        qCCritical(vApp, "%s\n\n%s\n\n%s", qUtf8Printable(tr("Error empty parameter. Program will be terminated.")),
-                   qUtf8Printable(error.ErrorMessage()), qUtf8Printable(error.DetailedInformation()));
+        qCCritical(vApp, "%s\n\n%s\n\n%s\n\n%s", qUtf8Printable(tr("Error empty parameter. Program will be terminated.")),
+                   qUtf8Printable(error.ErrorMessage()), qUtf8Printable(error.DetailedInformation()),
+                   qUtf8Printable(context()));
         exit(V_EX_DATAERR);
     }
     catch (const VExceptionWrongId &error)
     {
-        qCCritical(vApp, "%s\n\n%s\n\n%s", qUtf8Printable(tr("Error wrong id. Program will be terminated.")),
-                   qUtf8Printable(error.ErrorMessage()), qUtf8Printable(error.DetailedInformation()));
+        qCCritical(vApp, "%s\n\n%s\n\n%s\n\n%s", qUtf8Printable(tr("Error wrong id. Program will be terminated.")),
+                   qUtf8Printable(error.ErrorMessage()), qUtf8Printable(error.DetailedInformation()),
+                   qUtf8Printable(context()));
         exit(V_EX_DATAERR);
     }
     catch (const VExceptionToolWasDeleted &error)
     {
-        qCCritical(vApp, "%s\n\n%s\n\n%s",
+        qCCritical(vApp, "%s\n\n%s\n\n%s\n\n%s",
                    qUtf8Printable("Unhadled deleting tool. Continue use object after deleting"),
-                   qUtf8Printable(error.ErrorMessage()), qUtf8Printable(error.DetailedInformation()));
+                   qUtf8Printable(error.ErrorMessage()), qUtf8Printable(error.DetailedInformation()),
+                   qUtf8Printable(context()));
         exit(V_EX_DATAERR);
     }
     catch (const VException &error)
     {
-        qCCritical(vApp, "%s\n\n%s\n\n%s", qUtf8Printable(tr("Something's wrong!!")),
-                   qUtf8Printable(error.ErrorMessage()), qUtf8Printable(error.DetailedInformation()));
+        qCCritical(vApp, "%s\n\n%s\n\n%s\n\n%s", qUtf8Printable(tr("Something's wrong!!")),
+                   qUtf8Printable(error.ErrorMessage()), qUtf8Printable(error.DetailedInformation()),
+                   qUtf8Printable(context()));
         return true;
     }
     // These last two cases are special. I found that we can't show a modal dialog here with an error message.
@@ -442,12 +464,14 @@ bool Application2D::notify(QObject *receiver, QEvent *event)
     // the program will hang.
     catch (const qmu::QmuParserError &error)
     {
-        qCCritical(vApp, "%s", qUtf8Printable(tr("Parser error: %1. Program will be terminated.").arg(error.GetMsg())));
+        qCCritical(vApp, "%s\n\n%s", qUtf8Printable(tr("Parser error: %1. Program will be terminated.").arg(error.GetMsg())),
+                   qUtf8Printable(context()));
         exit(V_EX_DATAERR);
     }
     catch (std::exception &error)
     {
-        qCCritical(vApp, "%s", qUtf8Printable(tr("Exception thrown: %1. Program will be terminated.").arg(error.what())));
+        qCCritical(vApp, "%s\n\n%s", qUtf8Printable(tr("Exception thrown: %1. Program will be terminated.").arg(error.what())),
+                   qUtf8Printable(context()));
         exit(V_EX_SOFTWARE);
     }
     return false;

@@ -101,6 +101,12 @@ public:
     static void addPatternLabel(VAbstractPattern *doc, QDomElement &domElement, const VPiece &piece);
     static void addGrainline(VAbstractPattern *doc, QDomElement &domElement, const VPiece &piece);
 
+    /**
+     * @brief Finds a piece marking point without throwing when the container lacks it.
+     * @return false, with a v.tool warning, when @p pointId is not a point in @p data.
+     */
+    static bool markingPoint(const VContainer &data, quint32 pieceId, quint32 pointId, QPointF &point);
+
     void                 updatePiece(const VPiece &piece);
     void                 RefreshGeometry();
 

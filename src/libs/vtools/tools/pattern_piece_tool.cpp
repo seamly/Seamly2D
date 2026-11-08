@@ -1573,6 +1573,21 @@ void PatternPieceTool::updateInternalPaths()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+bool PatternPieceTool::markingPoint(const VContainer &data, quint32 pieceId, quint32 pointId, QPointF &point)
+{
+    const QSharedPointer<VGObject> object = data.DataGObjects()->value(pointId);
+    const QSharedPointer<VPointF> marking_point = qSharedPointerDynamicCast<VPointF>(object);
+    if (marking_point.isNull())
+    {
+        qCWarning(vTool, "Piece %u: marking point %u is not in the tool data. The marking is not drawn.",
+                  pieceId, pointId);
+        return false;
+    }
+    point = static_cast<QPointF>(*marking_point);
+    return true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 void PatternPieceTool::updatePiece(const VPiece &piece)
 {
     setFlag(QGraphicsItem::ItemSendsGeometryChanges, false);
@@ -1684,18 +1699,27 @@ void PatternPieceTool::RefreshGeometry()
     QPainterPath drill_holes;
     QPainterPath drill_holes_outline;
     QPainterPath anchor_points;
+    const VContainer &piece_data = *getData();
     for (const PieceDrillHole &hole : piece.drillHoles())
     {
-        const QPointF center = static_cast<QPointF>(*getData()->GeometricObject<VPointF>(hole.center));
-        const qreal radius = ToPixel(hole.diameter, *getData()->GetPatternUnit()) / 2;
+        QPointF center;
+        if (!markingPoint(piece_data, m_id, hole.center, center))
+        {
+            continue;
+        }
+        const qreal radius = ToPixel(hole.diameter, *piece_data.GetPatternUnit()) / 2;
         drill_holes_outline.addEllipse(center, radius, radius);
         const qreal inset = qMin(ToPixel(0.4, Unit::Mm), radius / 4);
         drill_holes.addEllipse(center, qMax(0.0, radius - inset), qMax(0.0, radius - inset));
     }
     for (const PieceReferenceLine &line : piece.referenceLines())
     {
-        const QPointF start = static_cast<QPointF>(*getData()->GeometricObject<VPointF>(line.start));
-        const QPointF end = static_cast<QPointF>(*getData()->GeometricObject<VPointF>(line.end));
+        QPointF start;
+        QPointF end;
+        if (!markingPoint(piece_data, m_id, line.start, start) || !markingPoint(piece_data, m_id, line.end, end))
+        {
+            continue;
+        }
         const QLineF axis(start, end);
         const qreal length = axis.length();
         if (length <= 0)
@@ -1727,7 +1751,11 @@ void PatternPieceTool::RefreshGeometry()
     const qreal anchor_radius = ToPixel(1.2, Unit::Mm);
     for (quint32 anchor : piece.getAnchors())
     {
-        const QPointF point = static_cast<QPointF>(*getData()->GeometricObject<VPointF>(anchor));
+        QPointF point;
+        if (!markingPoint(piece_data, m_id, anchor, point))
+        {
+            continue;
+        }
         anchor_points.addEllipse(point, anchor_radius, anchor_radius);
         anchor_points.moveTo(point.x() - anchor_radius, point.y());
         anchor_points.lineTo(point.x() + anchor_radius, point.y());

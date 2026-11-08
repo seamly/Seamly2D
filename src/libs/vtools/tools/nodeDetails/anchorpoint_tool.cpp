@@ -196,9 +196,13 @@ void AnchorPointTool::AddToFile()
         newPiece.getAnchors().append(m_id);
         incrementReferens();
 
+        // The piece tool redraws anchors from its own container copy during the push. Give it the new node first.
+        doc->UpdateToolData(m_pieceId, &(VAbstractTool::data));
+
         SavePieceOptions *saveCommand = new SavePieceOptions(oldPiece, newPiece, doc, m_pieceId);
         saveCommand->setText(tr("add anchor point"));
         qApp->getUndoStack()->push(saveCommand);// First push then make a connect
+        connect(saveCommand, &SavePieceOptions::NeedLiteParsing, doc, &VAbstractPattern::LiteParseTree);
     }
 }
 

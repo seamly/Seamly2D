@@ -1,4 +1,13 @@
 //---------------------------------------------------------------------------------------------------------------------
+// @file tst_vcontainer.cpp
+// @author slspencer
+// @brief Tests VContainer data scoping and tool data copies.
+// Copyright (C) 2026 Seamly2D Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+// https://www.gnu.org/licenses/gpl-3.0.html
+//---------------------------------------------------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------------------------------------------------
 //  @file   tst_vcontainer.cpp
 //  @author Odrnorn
 //  @date   8 Sep, 2026
@@ -28,6 +37,7 @@
 
 #include "../vpatterndb/vcontainer.h"
 #include "../vgeometry/vpointf.h"
+#include "../vtools/tools/pattern_piece_tool.h"
 
 //---------------------------------------------------------------------------------------------------------------------
 TST_VContainer::TST_VContainer(QObject *parent)
@@ -84,4 +94,34 @@ void TST_VContainer::unknownToolIsNeverCleared() const
 
     QVERIFY2(data.DataGObjects()->contains(id_unknown),
              "An object with no resolvable draft block was cleared instead of conservatively kept");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief A tool's container copy does not see a node added to the pattern data after the copy.
+ *
+ * Adding an anchor creates its node in the pattern data while the piece tool still holds an older copy.
+ * Drawing the piece markings from that copy must not throw, and it must find the node after a data sync.
+ */
+void TST_VContainer::markingPointNeedsToolDataSync() const
+{
+    const Unit unit = Unit::Cm;
+    VContainer pattern_data(nullptr, &unit);
+    pattern_data.AddGObject(new VPointF(0, 0, QStringLiteral("A1"), 0, 0));
+
+    VContainer piece_tool_data = pattern_data;
+    const quint32 anchor_node = pattern_data.AddGObject(new VPointF(3, 4, QStringLiteral("A2"), 0, 0));
+    QVERIFY2(!piece_tool_data.DataGObjects()->contains(anchor_node),
+             "The container copy shares later additions; the stale-copy case cannot occur");
+
+    QPointF point;
+    QTest::ignoreMessage(QtWarningMsg, QRegularExpression(QStringLiteral("marking point %1 is not in the tool data")
+                                                              .arg(anchor_node)));
+    QVERIFY2(!PatternPieceTool::markingPoint(piece_tool_data, 1, anchor_node, point),
+             "A missing marking point was reported as found");
+
+    piece_tool_data = pattern_data;
+    QVERIFY2(PatternPieceTool::markingPoint(piece_tool_data, 1, anchor_node, point),
+             "The marking point is missing after the tool data sync");
+    QCOMPARE(point, QPointF(3, 4));
 }
