@@ -949,6 +949,26 @@ void TST_DataRoot::RebaseLeavesPathsOutsideTheOldRootAlone() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief DefaultPathsFollowDataRootOnlyWhenConfirmed keeps custom paths separate from defaults.
+ */
+void TST_DataRoot::DefaultPathsFollowDataRootOnlyWhenConfirmed() const
+{
+    const QString oldRoot = QStringLiteral("C:/Users/tester/seamly2d");
+    const QString newRoot = QStringLiteral("G:/My Drive/seamly");
+    const QString defaultPath = oldRoot + QStringLiteral("/templates");
+    const QString newDefaultPath = newRoot + QStringLiteral("/templates");
+    const QString customPath = oldRoot + QStringLiteral("/my-templates");
+
+    QCOMPARE(VCommonSettings::rebaseDefaultPathOntoDataRoot(defaultPath, defaultPath, oldRoot, newRoot, true),
+             newDefaultPath);
+    QCOMPARE(VCommonSettings::rebaseDefaultPathOntoDataRoot(defaultPath, defaultPath, oldRoot, newRoot, false),
+             defaultPath);
+    QCOMPARE(VCommonSettings::rebaseDefaultPathOntoDataRoot(customPath, defaultPath, oldRoot, newRoot, true),
+             customPath);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief PerAppPathsPersistToTheOwnSettingsFile guards against VSettings's per-app path
  * getters and setters (pattern, layout, the SeamlyLayout executable, graphical output)
  * reopening a fresh QSettings from format()/scope()/organizationName()/applicationName()

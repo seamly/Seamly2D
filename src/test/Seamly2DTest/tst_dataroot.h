@@ -99,6 +99,7 @@ private slots:
 
     void RebaseMovesPathsInsideTheOldRoot() const;
     void RebaseLeavesPathsOutsideTheOldRootAlone() const;
+    void DefaultPathsFollowDataRootOnlyWhenConfirmed() const;
     void PerAppPathsPersistToTheOwnSettingsFile() const;
 
 private:

@@ -60,7 +60,9 @@
 
 #include <QDir>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QMessageBox>
+#include <QStringList>
 
 //---------------------------------------------------------------------------------------------------------------------
 SeamlyMePreferencesPathPage::SeamlyMePreferencesPathPage(QWidget *parent)
@@ -95,31 +97,53 @@ void SeamlyMePreferencesPathPage::changeEvent(QEvent *event)
 /**
  * @brief Apply stores every path shown in the table back into the application settings.
  *
- * The shared data root (row 0) is applied first, and every subfolder still living inside
- * the previous root follows it to the new location, so repointing the root at another
- * drive or a cloud-synced folder relocates the whole tree in one edit. Creation failures leave paths unchanged.
+ * The shared data root (row 0) is applied first. Default folders follow a new root only
+ * after confirmation; customized paths remain unchanged.
  */
 void SeamlyMePreferencesPathPage::Apply()
 {
     VSeamlyMeSettings *settings = qApp->seamlyMeSettings();
 
     const QString previousRoot = settings->getDataRoot();
-    QString error_message;
-    if (!settings->setDataRoot(ui->pathTable->item(0, 1)->text(), &error_message))
+    const QStringList default_paths
     {
+        VCommonSettings::getDefaultIndividualSizePath(),
+        VCommonSettings::getDefaultMultisizePath(),
+        VCommonSettings::getDefaultTemplatePath(),
+        VCommonSettings::getDefaultBodyScansPath()
+    };
+    const QString requestedRoot = ui->pathTable->item(0, 1)->text();
+    const QString normalizedRoot = QDir::cleanPath(QDir::fromNativeSeparators(requestedRoot.trimmed()));
+    const bool rootChanged = QDir::isAbsolutePath(normalizedRoot)
+                             && VCommonSettings::rebaseOntoDataRoot(previousRoot, previousRoot, normalizedRoot)
+                                    != previousRoot;
+    const bool followDefaultPaths = rootChanged
+                                    && QMessageBox::question(
+                                           this, tr("Update default folders?"),
+                                           tr("Would you like all default folders to follow the new data root?"),
+                                           QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                                           == QMessageBox::Yes;
+
+    QString error_message;
+    if (!settings->setDataRoot(requestedRoot, &error_message))
+    {
+        ui->pathTable->item(0, 1)->setText(previousRoot);
+        ui->pathTable->item(0, 1)->setToolTip(previousRoot);
         QMessageBox::critical(this, tr("Cannot change data root"), error_message);
         return;
     }
     const QString dataRoot = settings->getDataRoot();
 
-    settings->setIndividualSizePath(
-        VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(1, 1)->text(), previousRoot, dataRoot));
-    settings->setMultisizePath(
-        VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(2, 1)->text(), previousRoot, dataRoot));
-    settings->setTemplatePath(
-        VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(3, 1)->text(), previousRoot, dataRoot));
-    settings->setBodyScansPath(
-        VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(4, 1)->text(), previousRoot, dataRoot));
+    const auto path_for_row = [this, &default_paths, &previousRoot, &dataRoot, followDefaultPaths](int row)
+    {
+        return VCommonSettings::rebaseDefaultPathOntoDataRoot(ui->pathTable->item(row, 1)->text(),
+                                                               default_paths.at(row - 1), previousRoot, dataRoot,
+                                                               followDefaultPaths);
+    };
+    settings->setIndividualSizePath(path_for_row(1));
+    settings->setMultisizePath(path_for_row(2));
+    settings->setTemplatePath(path_for_row(3));
+    settings->setBodyScansPath(path_for_row(4));
     initializeTable();
 }
 
@@ -193,6 +217,13 @@ void SeamlyMePreferencesPathPage::editPath()
     if (not directory.exists())
     {
         usedNotExistedDir = directory.mkpath(".");
+        if (not usedNotExistedDir)
+        {
+            QMessageBox::critical(this, tr("Cannot open folder"),
+                                  tr("Could not create the folder:\n%1")
+                                      .arg(QDir::toNativeSeparators(path)));
+            return;
+        }
     }
 
     QString filename = fileDialog(this, tr("Open Directory"), path, QString(""), nullptr,
@@ -201,14 +232,25 @@ void SeamlyMePreferencesPathPage::editPath()
                                                               qApp->seamlyMeSettings()->getUseNativeFileDialogs(),
                                                               QFileDialog::Directory, QFileDialog::AcceptOpen);
 
-    const QString dir = QFileInfo(filename).filePath();
-
-    if (usedNotExistedDir)
+    const QString selectedPath = QDir::cleanPath(QDir::fromNativeSeparators(filename));
+    const QString startingPath = QDir::cleanPath(QDir::fromNativeSeparators(path));
+#ifdef Q_OS_WIN
+    const Qt::CaseSensitivity case_sensitivity = Qt::CaseInsensitive;
+#else
+    const Qt::CaseSensitivity case_sensitivity = Qt::CaseSensitive;
+#endif
+    if (usedNotExistedDir && selectedPath.compare(startingPath, case_sensitivity) != 0)
     {
         QDir directory(path);
         directory.rmpath(".");
     }
 
+    if (filename.isEmpty())
+    {
+        return;
+    }
+
+    const QString dir = QFileInfo(filename).filePath();
     if (dir.isEmpty())
     {
         return;
