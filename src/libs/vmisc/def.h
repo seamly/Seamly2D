@@ -5,12 +5,14 @@
  **
  **  @author Douglas S Caskey
  **  @date   7.31.2022
+ **  @author slspencer
  **
  **  @brief
  **  @copyright
  **  This source code is part of the Seamly2D project, a pattern making
  **  program, whose allow create and modeling patterns of clothing.
  **  Copyright (C) 2013 - 2022 Seamly2D project
+ **  Copyright (C) 2026 Seamly2D Project
  **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
  **
  **  Seamly2D is free software: you can redistribute it and/or modify
@@ -255,6 +257,8 @@ enum class PieceFlip : unsigned char
 
 QString   pieceFlipToString(PieceFlip flip);
 PieceFlip stringToPieceFlip(const QString &value);
+/// @brief Rotate piece geometry by signed degrees about a point; positive values rotate counterclockwise.
+QTransform pieceTiltTransform(int degrees, const QPointF &center);
 QTransform pieceFlipTransform(PieceFlip flip, const QPointF &center);
 
 

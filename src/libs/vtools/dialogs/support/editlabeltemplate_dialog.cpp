@@ -179,6 +179,7 @@ void EditLabelTemplateDialog::AddLine()
     int row = ui->listWidgetEdit->currentRow();
     ui->listWidgetEdit->insertItem(++row, new QListWidgetItem(tr("<empty>")));
     ui->listWidgetEdit->setCurrentRow(row);
+    setTemplateFile(QString());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -189,6 +190,7 @@ void EditLabelTemplateDialog::RemoveLine()
     if (curLine)
     {
         delete curLine;
+        setTemplateFile(QString());
     }
     ui->listWidgetEdit->blockSignals(false);
     ShowLineDetails();
@@ -201,6 +203,7 @@ void EditLabelTemplateDialog::SaveLineText(const QString &text)
     if (curLine)
     {
         curLine->setText(text);
+        setTemplateFile(QString());
     }
 }
 
@@ -226,6 +229,7 @@ void EditLabelTemplateDialog::SaveFontStyle(bool checked)
         }
 
         curLine->setFont(lineFont);
+        setTemplateFile(QString());
     }
 }
 
@@ -288,6 +292,7 @@ void EditLabelTemplateDialog::SaveTextFormating(bool checked)
             ui->toolButtonTextLeft->blockSignals(false);
             ui->toolButtonTextCenter->blockSignals(false);
             ui->toolButtonTextRight->blockSignals(false);
+            setTemplateFile(QString());
         }
     }
 }
@@ -422,6 +427,7 @@ void EditLabelTemplateDialog::InsertPlaceholder()
     {
         ui->lineEditLine->insert(action->data().toString());
         ui->lineEditLine->setFocus();
+        setTemplateFile(QString());
     }
 }
 
@@ -451,6 +457,7 @@ void EditLabelTemplateDialog::SaveAdditionalFontSize(int i)
         lineFont.setPointSize(lineFont.pointSize() - curLine->data(Qt::UserRole).toInt() + i);
         curLine->setFont(lineFont);
         curLine->setData(Qt::UserRole, i);
+        setTemplateFile(QString());
     }
 }
 

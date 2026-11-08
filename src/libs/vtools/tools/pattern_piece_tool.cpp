@@ -1750,6 +1750,17 @@ void PatternPieceTool::RefreshGeometry()
     refreshFoldLine(piece, seamAllowancePoints);
 
     applyFlipToGeometry(piece.getFlip());
+    const VPieceLabelData &piece_properties = piece.GetPatternPieceData();
+    int tilt_degrees = 0;
+    if (piece_properties.GetTilt() == PieceTilt::CounterClockwise)
+    {
+        tilt_degrees = piece_properties.getTiltDegrees();
+    }
+    else if (piece_properties.GetTilt() == PieceTilt::Clockwise)
+    {
+        tilt_degrees = -piece_properties.getTiltDegrees();
+    }
+    applyTiltToGeometry(tilt_degrees);
 
     updatePieceDetails();
 
@@ -1794,6 +1805,42 @@ void PatternPieceTool::applyFlipToGeometry(PieceFlip flip)
     m_cutPath = mirror.map(m_cutPath);
     m_mainPath = mirror.map(m_mainPath);
     m_pieceRect = mirror.mapRect(m_pieceRect);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief applyTiltToGeometry rotates the displayed piece geometry without rotating its labels or grainline.
+ * @param signed_degrees counterclockwise degrees when positive; clockwise degrees when negative.
+ */
+void PatternPieceTool::applyTiltToGeometry(int signed_degrees)
+{
+    if (signed_degrees == 0)
+    {
+        return;
+    }
+
+    const QRectF outline = this->path().united(m_cutLine->path()).boundingRect();
+    if (outline.isNull())
+    {
+        return;
+    }
+    const QTransform tilt = pieceTiltTransform(signed_degrees, outline.center());
+
+    this->setPath(tilt.map(this->path()));
+    m_cutLine->setPath(tilt.map(m_cutLine->path()));
+    m_allowanceFill->setPath(tilt.map(m_allowanceFill->path()));
+    m_notches->setPath(tilt.map(m_notches->path()));
+    m_markings->setPath(tilt.map(m_markings->path()));
+    m_drill_holes_outline->setPath(tilt.map(m_drill_holes_outline->path()));
+    m_drill_holes->setPath(tilt.map(m_drill_holes->path()));
+    m_anchor_points_outline->setPath(tilt.map(m_anchor_points_outline->path()));
+    m_anchor_points->setPath(tilt.map(m_anchor_points->path()));
+    m_foldLine->setPath(tilt.map(m_foldLine->path()));
+    m_fold_line_arrow->setPath(tilt.map(m_fold_line_arrow->path()));
+    m_fold_line_arrow_heads->setPath(tilt.map(m_fold_line_arrow_heads->path()));
+    m_cutPath = tilt.map(m_cutPath);
+    m_mainPath = tilt.map(m_mainPath);
+    m_pieceRect = tilt.mapRect(m_pieceRect);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

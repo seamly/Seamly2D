@@ -25,6 +25,7 @@
  **
  **  @file   tst_vdetail.h
  **  @author Roman Telezhynskyi <dismine(at)gmail.com>
+ **  @author slspencer
  **  @date   9 1, 2016
  **
  **  @brief
@@ -32,6 +33,7 @@
  **  This source code is part of the Valentine project, a pattern making
  **  program, whose allow create and modeling patterns of clothing.
  **  Copyright (C) 2016 Seamly2D project
+ **  Copyright (C) 2026 Seamly2D Project
  **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
  **
  **  Seamly2D is free software: you can redistribute it and/or modify
@@ -81,6 +83,7 @@ private slots:
     void LabelTemplateFilePrefersUserFile() const;
     void LabelTemplateFileEmptyWithoutAnyFile() const;
     void SameLabelLinesComparesFormatting() const;
+    void StoredLabelTemplateHasNoProvenance() const;
     void NotchFlagsSelectLine_data() const;
     void NotchFlagsSelectLine() const;
     void LayoutNotchesMatchCanvas() const;
@@ -145,6 +148,7 @@ private slots:
     void ConverterRemovesFoldPosition_data() const;
     void ConverterRemovesFoldPosition() const;
     void PieceFlipValuesRoundTrip() const;
+    void PieceTiltTransformRotatesAboutCenter() const;
     void PieceFlipTransformMirrorsAboutCenter() const;
     void LayoutPieceKeepsFlip() const;
     void LayoutPieceKeepsPieceProperties() const;

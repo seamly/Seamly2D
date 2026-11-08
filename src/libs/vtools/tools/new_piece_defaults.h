@@ -88,16 +88,16 @@ QString labelTemplateFile(const QString &userFile, const QString &builtInFile);
 bool sameLabelLines(const QVector<VLabelTemplateLine> &first, const QVector<VLabelTemplateLine> &second);
 
 /**
- * @brief pieceLabelTemplateFile returns the default piece label file when @p lines match its lines.
- * @return the file path, or an empty string when @p lines are empty or differ from the default.
+ * @brief pieceLabelTemplateFile returns no path because piece data stores label lines without source provenance.
+ * @return an empty string.
  */
-QString pieceLabelTemplateFile(const QVector<VLabelTemplateLine> &lines);
+QString pieceLabelTemplateFile(const QVector<VLabelTemplateLine> &);
 
 /**
- * @brief patternLabelTemplateFile returns the default pattern label file when @p lines match its lines.
- * @return the file path, or an empty string when @p lines are empty or differ from the default.
+ * @brief patternLabelTemplateFile returns no path because pattern data stores label lines without source provenance.
+ * @return an empty string.
  */
-QString patternLabelTemplateFile(const QVector<VLabelTemplateLine> &lines);
+QString patternLabelTemplateFile(const QVector<VLabelTemplateLine> &);
 
 /// @brief Displays the template basename and its full path without claiming provenance for stored label lines.
 void showLabelTemplateFile(QLabel* label, const QString &file_path);

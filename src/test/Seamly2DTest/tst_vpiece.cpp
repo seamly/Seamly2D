@@ -1,9 +1,12 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  @file   tst_piece.cpp
+//  @author slspencer
 //  @date   9 1, 2016
 //
 //  @copyright
 //  Copyright (C) 2017 - 2026 Seamly, LLC
+//  Copyright (C) 2026 Seamly2D Project
+//  SPDX-License-Identifier: GPL-3.0-or-later
 //  https://github.com/fashionfreedom/seamly2d
 //
 //  @brief
@@ -73,6 +76,7 @@
 #include <QtTest>
 #include <QFile>
 #include <QFontMetricsF>
+#include <QLabel>
 #include <QPolygonF>
 #include <QTemporaryDir>
 #include <QTransform>
@@ -633,6 +637,26 @@ void TST_VPiece::SameLabelLinesComparesFormatting() const
     QVERIFY(NewPieceDefaults::sameLabelLines({line}, {line}));
     QVERIFY(!NewPieceDefaults::sameLabelLines({line}, {italic}));
     QVERIFY(!NewPieceDefaults::sameLabelLines({line}, {line, line}));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::StoredLabelTemplateHasNoProvenance() const
+{
+    const QVector<VLabelTemplateLine> piece_lines = NewPieceDefaults::pieceLabelTemplate();
+    const QVector<VLabelTemplateLine> pattern_lines = NewPieceDefaults::patternLabelTemplate();
+    QVERIFY(!piece_lines.isEmpty());
+    QVERIFY(!pattern_lines.isEmpty());
+
+    const QString piece_file = NewPieceDefaults::pieceLabelTemplateFile(piece_lines);
+    const QString pattern_file = NewPieceDefaults::patternLabelTemplateFile(pattern_lines);
+
+    QVERIFY(piece_file.isEmpty());
+    QVERIFY(pattern_file.isEmpty());
+
+    QLabel label;
+    NewPieceDefaults::showLabelTemplateFile(&label, piece_file);
+    QCOMPARE(label.text(), QStringLiteral("none"));
+    QVERIFY(label.toolTip().isEmpty());
 }
 
 namespace
@@ -2430,6 +2454,21 @@ void TST_VPiece::PieceFlipValuesRoundTrip() const
     QVERIFY(piece.IsForbidFlipping());
     piece.setFlip(PieceFlip::Vertical);
     QVERIFY(!piece.IsForbidFlipping());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PieceTiltTransformRotatesAboutCenter checks signed tilt direction and the zero-degree transform.
+ */
+void TST_VPiece::PieceTiltTransformRotatesAboutCenter() const
+{
+    const QPointF center(10, 20);
+    const QPointF point(14, 20);
+
+    QCOMPARE(pieceTiltTransform(0, center).map(point), point);
+    QVERIFY(QLineF(pieceTiltTransform(90, center).map(point), QPointF(10, 16)).length() < 1e-9);
+    QVERIFY(QLineF(pieceTiltTransform(-90, center).map(point), QPointF(10, 24)).length() < 1e-9);
+    QCOMPARE(pieceTiltTransform(90, center).map(center), center);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
