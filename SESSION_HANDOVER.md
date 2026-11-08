@@ -17,7 +17,7 @@
 - Extended `src/test/CollectionTest/test_pattern_input_status.py` and `src/test/Seamly2DTest/test_measurement_cli.py` with relative filenames, measurement overrides, and missing-file checks.
 - Runtime checks passed against MSI staging binaries with the staged DLL directory on `PATH` and Qt plugins configured.
 - SeamlyLayout has no matching working-directory change; its startup parser resolves relative input and output paths to absolute paths. No SeamlyLayout fix is needed.
-- Changes are committed and merged into local `run-seamlyLayout`; no push. The branch is 99 commits ahead of `origin/run-seamlyLayout`.
+- Changes are committed and merged into local `run-seamlyLayout`; no push.
 - Preserve untracked `scripts/cli/` and user validation files.
 
 ### Application implementation batch — merged locally, not pushed
