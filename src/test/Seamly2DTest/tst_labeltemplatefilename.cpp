@@ -11,11 +11,33 @@
 
 #include <QDir>
 #include <QFile>
+#include <QLineEdit>
 #include <QLabel>
+#include <QListWidget>
+#include <QMenu>
+#include <QPushButton>
 #include <QTemporaryDir>
 #include <QtTest>
 
+#include "../../libs/ifc/xml/vabstractpattern.h"
+#include "../../libs/vtools/dialogs/support/editlabeltemplate_dialog.h"
 #include "tools/new_piece_defaults.h"
+
+namespace
+{
+class LabelTemplateTestDocument : public VAbstractPattern
+{
+public:
+    void CreateEmptyFile() override {}
+    void IncrementReferens(quint32) const override {}
+    void DecrementReferens(quint32) const override {}
+    QStringList GetCurrentAlphabet() const override { return {}; }
+    QString GenerateLabel(const LabelType &, const QString &) const override { return {}; }
+    QString generateSuffix(const QString &) const override { return {}; }
+    void UpdateToolData(const quint32 &, VContainer *) override {}
+    void LiteParseTree(const Document &) override {}
+};
+}
 
 void TST_LabelTemplateFileName::selectedFile()
 {
@@ -64,4 +86,31 @@ void TST_LabelTemplateFileName::builtInFile()
     NewPieceDefaults::showLabelTemplateFile(&label, resource_file);
     QCOMPARE(label.text(), QStringLiteral("piece.label"));
     QCOMPARE(label.toolTip(), QDir::toNativeSeparators(resource_file));
+}
+
+void TST_LabelTemplateFileName::insertedPlaceholderReplacesEmptyLine()
+{
+    LabelTemplateTestDocument document;
+    EditLabelTemplateDialog dialog(&document);
+    QVERIFY(QMetaObject::invokeMethod(&dialog, "AddLine"));
+
+    auto *line_edit = dialog.findChild<QLineEdit *>(QStringLiteral("lineEditLine"));
+    auto *lines = dialog.findChild<QListWidget *>(QStringLiteral("listWidgetEdit"));
+    auto *insert_button = dialog.findChild<QPushButton *>(QStringLiteral("pushButtonInsert"));
+    QVERIFY(line_edit != nullptr);
+    QVERIFY(lines != nullptr);
+    QVERIFY(insert_button != nullptr);
+    QVERIFY(insert_button->menu() != nullptr);
+    QVERIFY(lines->currentItem() != nullptr);
+    QCOMPARE(line_edit->text(), QStringLiteral("<empty>"));
+
+    const QList<QAction *> actions = insert_button->menu()->actions();
+    QVERIFY(!actions.isEmpty());
+    const QString placeholder = actions.first()->data().toString();
+    QVERIFY(!placeholder.isEmpty());
+    actions.first()->trigger();
+
+    QCOMPARE(line_edit->text(), placeholder);
+    QCOMPARE(lines->currentItem()->text(), placeholder);
+    QVERIFY(dialog.templateFile().isEmpty());
 }
