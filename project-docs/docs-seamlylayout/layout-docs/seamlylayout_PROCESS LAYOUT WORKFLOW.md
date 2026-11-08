@@ -109,7 +109,7 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
   - Equal columns for a piece too wide, equal rows for a piece too long on a sheet. Each outline region in a cell is one part.
   - On folded fabric, true fold-line pieces remain pinned to the fold. Other pieces and split parts keep at least `pieceGap` from the fold edge. Oversize checks and split sizing use that same reduced width.
   - Cutting: `geometry::half_plane_clip` (`cut_closed`, `cut_open`). Each output vertex keeps its source vertex index, so `data-turn-points` stay valid.
-  - `ProcessLayoutResult::divide_spec` keeps the media; `sheets::build_sheet_export_inputs` splits the same way for the paper-sheet PDF.
+  - `ProcessLayoutResult::divide_spec` is set only when at least one piece was divided. It keeps the media so `sheets::build_sheet_export_inputs` can split the same way for the paper-sheet PDF.
   - `packing::pack_polygons_on_sheets` retries unplaced parts on fresh sheets of the configured content size.
   - The canvas stacks sheet content vertically with a piece gap between sheets. Prior placements keep their original piece ids.
   - Export enables regular PDF only; that PDF contains the layout's pages as one multi-page file.

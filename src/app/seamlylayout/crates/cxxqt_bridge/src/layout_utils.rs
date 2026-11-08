@@ -75,7 +75,7 @@ pub struct ProcessLayoutResult {
     pub flat_dom: Document,
     pub vertical_dom: Document,
     pub translate_dom: Document,
-    /// The media the pieces were split for; None when no split was asked for.
+    /// The media the pieces were split for; None when no piece was divided.
     /// The paper-sheet PDF export splits the same way.
     pub divide_spec: Option<DivideSpec>,
     /// User-unit dimensions when requested media enlargement changed the canvas.
@@ -319,14 +319,19 @@ pub fn do_process_layout(
     // Needs grain-up pieces; must run before translate_dom moves each part to the origin.
     // Tiled paper never splits: its pages already cover a large piece.
     let is_tiled = settings.media_type == "paper" && settings.paper_type == "tiled";
-    let divide_spec = (args.split_oversized && !is_tiled).then(|| layout_divide_spec(&settings, bin_w, bin_h));
-    if let Some(spec) = &divide_spec {
-        let divided = piece_divider::divide_oversized_pieces(&mut flat_dom, spec);
-        if !divided.is_empty() {
+    let divide_spec = if args.split_oversized && !is_tiled {
+        let spec = layout_divide_spec(&settings, bin_w, bin_h);
+        let divided = piece_divider::divide_oversized_pieces(&mut flat_dom, &spec);
+        if divided.is_empty() {
+            None
+        } else {
             log_to_file(&format!("[debug] layout_utils::do_process_layout(): 5b split pieces: {divided:?}"));
             save_debug_dom(&flat_dom, "divided_dom.svg");
+            Some(spec)
         } // if divided
-    } // if split
+    } else {
+        None
+    }; // if split requested
 
     // 3d-fold: fold lines on the left edge: turn or mirror each piece with a fold
     // line so its fold line can lie on the edge.  After the split, so each part
@@ -1247,6 +1252,19 @@ mod tests {
         assert!(names.contains(&"Back (1/2)") && names.contains(&"Back (2/2)"), "{names:?}");
         assert_eq!(names.len(), labels.len(), "one block per placed part");
     } // trousers_long_pieces_split_on_a_sheet
+
+    // @brief A split request without oversized pieces does not create split-layout export limits.
+    #[test]
+    fn split_request_without_divided_pieces_keeps_regular_layout_state() {
+        let settings_json = paper_sheet_settings_json(200.0, 100.0);
+        let result = process_trousers_sheet(&settings_json, true, false);
+
+        assert!(result.unplaced_labels.is_empty(), "unplaced: {:?}", result.unplaced_labels);
+        assert!(result.divide_spec.is_none(), "no piece was divided");
+        let labels = placed_labels(&result);
+        assert!(labels.contains(&"Back".to_string()), "whole Back piece remains: {labels:?}");
+        assert!(!labels.iter().any(|label| label.contains("(1/")), "no split parts: {labels:?}");
+    } // split_request_without_divided_pieces_keeps_regular_layout_state
 
     // @brief "Make the media bigger": the sheet grows until every piece is placed whole.
     #[test]
