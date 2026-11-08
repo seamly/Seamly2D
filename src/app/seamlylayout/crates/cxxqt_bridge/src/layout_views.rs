@@ -417,6 +417,8 @@ pub struct TabLayoutQueue {
     pub problems: Vec<String>,
     // One line per piece whose fold line stays off the left edge, in individual layouts.
     pub fold_line_lines: Vec<String>,
+    // User-requested enlargement dimensions, kept until all materials finish.
+    pub media_enlargements: Vec<String>,
     // Base Size layout, its material and its size: the size tab of that size shows the same layout.
     base_layout: Option<(usize, String, ProcessLayoutResult)>,
 }
@@ -453,6 +455,7 @@ impl TabLayoutQueue {
             }),
             problems: Vec::new(),
             fold_line_lines: Vec::new(),
+            media_enlargements: Vec::new(),
             base_layout: None,
         }
     } // fn new
@@ -509,11 +512,11 @@ impl TabLayoutQueue {
         } // match job
     } // fn reusable_layout
 
-    // @brief Warning after the last layout: layouts that left pieces out or failed, then fold lines off the edge.
+    // @brief Completion popup with enlargement dimensions, unplaced pieces, failures, and fold-line warnings.
     //
-    // @return `None` when every layout placed every piece.
+    // @return `None` when no warning or enlargement notification is needed.
     pub fn final_warning(&self) -> Option<String> {
-        let mut parts = Vec::new();
+        let mut parts = self.media_enlargements.clone();
         if !self.problems.is_empty() {
             let is_fabric = LayoutSettings::from_json(&self.settings_json)
                 .map(|settings| settings.media_type == "fabric")
@@ -700,6 +703,7 @@ mod tests {
             vertical_dom: doc.clone(),
             translate_dom: doc,
             divide_spec: None,
+            media_enlargement: None,
         }
     } // fn result
 
@@ -732,6 +736,19 @@ mod tests {
         assert!(text.starts_with("Some layouts left pieces out:\n\nLining:\n\u{2022} Back"), "{text}");
         assert!(text.ends_with("(the fold):\n\n\u{2022} Lining: Back: the fold line crosses the grain"), "{text}");
     } // final_warning_joins_problems_and_fold_lines
+
+    // @brief Enlargement dimensions survive the material queue and coexist with unplaced warnings.
+    #[test]
+    fn final_warning_includes_media_enlargement() {
+        let mut queue = TabLayoutQueue::new(String::new(), 0, Vec::new(), Vec::new(), false, None);
+        let dimensions = "Media enlarged: width 32.00 in, height 60.00 in.".to_string();
+        queue.media_enlargements.push(dimensions.clone());
+        assert_eq!(queue.final_warning(), Some(dimensions.clone()));
+        queue.problems.push(tab_unplaced_problem("Fabric", &sizes(&["Back"])));
+        let message = queue.final_warning().expect("notification and warning");
+        assert!(message.starts_with(&dimensions));
+        assert!(message.contains("Back"));
+    } // final_warning_includes_media_enlargement
 
     // @brief A material's layouts start as its blank canvas, and a new run drops them back to it.
     #[test]

@@ -110,6 +110,9 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
   - On folded fabric, true fold-line pieces remain pinned to the fold. Other pieces and split parts keep at least `pieceGap` from the fold edge. Oversize checks and split sizing use that same reduced width.
   - Cutting: `geometry::half_plane_clip` (`cut_closed`, `cut_open`). Each output vertex keeps its source vertex index, so `data-turn-points` stay valid.
   - `ProcessLayoutResult::divide_spec` keeps the media; `sheets::build_sheet_export_inputs` splits the same way for the paper-sheet PDF.
+  - `packing::pack_polygons_on_sheets` retries unplaced parts on fresh sheets of the configured content size.
+  - The canvas stacks sheet content vertically with a piece gap between sheets. Prior placements keep their original piece ids.
+  - Each successful retry removes at least one remaining piece. No-progress and coordinate-limit stops preserve explicit unplaced-piece warnings.
 - "extend": `ProcessLayoutArgs::extend_media`, as below.
 - `cancel_layout` sets `is_settings_required`: QML disables every button but 'Layout Settings', Preferences and Exit. `initialize_layout` clears it.
 
@@ -117,14 +120,16 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
 
 Every multisize tab sets `ProcessLayoutArgs::extend_media`. An individual pattern sets it only when the user chose "Make the media bigger".
 
-- Width first: `packing::required_bin_width` is the widest piece, each piece in its narrowest trial angle, plus any required left-edge clearance. A wider value widens the bin.
-- `packing::pack_polygons_extending` packs at the media length first.
-- While a piece stays unplaced, the bin grows by the stacked height of the unplaced pieces. The pack runs again.
-- The loop ends: a bin as tall as every piece stacked holds them all. No piece is left out.
+- Paper width: `packing::required_bin_width` finds the widest required bin. A wider value widens paper sheets and rolls.
+- Fabric keeps its configured width, including the folded half-width and selvedge margins. Only its height can enlarge.
+- `packing::pack_polygons_extending` packs into a bin as tall as all pieces that fit its width, stacked.
+- Pieces that cannot fit the fixed fabric width remain unplaced and appear in the warning popup.
 - `set_content_width` widens the canvas to the right. contentRect keeps its x; both side margins are kept.
 - `trim_bottom` sets the canvas height. Roll and fabric end at the lowest piece. A sheet ends at the lowest piece, but not above its own length.
 - Canvas, Adjust Mode and exports read the size from `layout_dom`. Exception: the paper-sheet PDF export packs the pieces again on sheets of the set size.
 - Tiled paper does not extend: its candidate-width search sets the width.
+- User-requested enlargement shows the resulting width and height in the active unit. Folded fabric reports its full configured width.
+- Multiple materials collect their enlargement dimensions and unplaced warnings in one completion popup.
 - Example: jacket2 Marker, 208 pieces, 48 in paper roll: the roll grows from 500 in to about 798 in. On a 10 in roll it also widens.
 
 ## Export Preparation
