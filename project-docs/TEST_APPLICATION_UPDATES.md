@@ -174,6 +174,7 @@ Anchor points are required to define drill holes and reference lines, so correct
 --> Determine why in a worktree and discuss a plan to this with me. If I agree with your plan then implement as a feature branch then merge with run-seamlyLayout. 
 - [ ] Opening "C:\Users\susan\Projects\Seamly2D-private\test-seamly-layout\patterns\validation\male_shirt.sm2d" yields error message: "Error parsing file. Exception: Invalid drill hole or reference line in piece 'Front_Panel'".
 --> Fix in worktree as a feature branch then merge into run-seamlyLayout.
+  - Older reference lines may point to live anchor IDs. The parser now preserves these lines; reopen the pattern with the rebuilt installer.
 - [x] A Drill hole with a missing or removed center anchor displays an error.
   - [x] Piece Mode: Trying to delete an anchor point that is in use will remove the anchor from the list but 'OK' and 'Apply' buttons do nothing so the deletion can't be saved. Add a display a message that the anchor point is in use and list the items where it is used, the user can click 'Close' button on this popup message to close it. Fix this in a worktree as a feature branch then merge into run-seamlyLayout. 
   - [x] Draft Mode: Adding an anchor point to a piece when that anchor point has already been added generates a 'Bad Id' message. It should generate a popup message that the anchor point has already been added, the user can click 'Close' to close the popup message. 
