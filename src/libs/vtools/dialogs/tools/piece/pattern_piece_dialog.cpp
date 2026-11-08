@@ -245,7 +245,8 @@ void PatternPieceDialog::pageChanged(QListWidgetItem *current, QListWidgetItem *
     if (m_drill_editor != nullptr && m_reference_editor != nullptr)
     {
         m_drill_editor->setPoints(GetListInternals<quint32>(ui->anchorPoints_ListWidget), data);
-        m_reference_editor->setPoints(pathNodeIds(GetListInternals<VPieceNode>(ui->mainPath_ListWidget)), data);
+        m_reference_editor->setPoints(pathNodeIds(GetListInternals<VPieceNode>(ui->mainPath_ListWidget)), data,
+                                      GetListInternals<quint32>(ui->anchorPoints_ListWidget));
     }
 
     if (rowIndex == TabOrder::Labels || rowIndex == TabOrder::AnchorPoints || rowIndex == TabOrder::Grainline)
@@ -327,7 +328,7 @@ void PatternPieceDialog::SetPiece(const VPiece &piece)
 
     initAnchorPointComboboxes();
     m_drill_editor->setPoints(piece.getAnchors(), data);
-    m_reference_editor->setPoints(pathNodeIds(piece.GetPath().getNodes()), data);
+    m_reference_editor->setPoints(pathNodeIds(piece.GetPath().getNodes()), data, piece.getAnchors());
     m_drill_editor->setMarkings(piece.drillHoles(), {});
     m_reference_editor->setMarkings({}, piece.referenceLines());
 
@@ -1340,6 +1341,7 @@ void PatternPieceDialog::showAnchorsContextMenu(const QPoint &pos)
     {
         const quint32 anchor = ui->anchorPoints_ListWidget->item(row)->data(Qt::UserRole).toUInt();
         QStringList dependencies = m_drill_editor->itemsUsingPoint(anchor);
+        dependencies.append(m_reference_editor->itemsUsingPoint(anchor));
         if (!dependencies.isEmpty())
         {
             QMessageBox message(QMessageBox::Warning, tr("Cannot delete anchor"),
@@ -1353,7 +1355,8 @@ void PatternPieceDialog::showAnchorsContextMenu(const QPoint &pos)
         delete ui->anchorPoints_ListWidget->item(row);
         initAnchorPointComboboxes();
         m_drill_editor->setPoints(GetListInternals<quint32>(ui->anchorPoints_ListWidget), data);
-        m_reference_editor->setPoints(pathNodeIds(GetListInternals<VPieceNode>(ui->mainPath_ListWidget)), data);
+        m_reference_editor->setPoints(pathNodeIds(GetListInternals<VPieceNode>(ui->mainPath_ListWidget)), data,
+                                      GetListInternals<quint32>(ui->anchorPoints_ListWidget));
         CheckState();
     }
 }
@@ -1371,7 +1374,8 @@ void PatternPieceDialog::nodeListChanged()
     initializeNodesList();
     if (m_reference_editor != nullptr)
     {
-        m_reference_editor->setPoints(pathNodeIds(GetListInternals<VPieceNode>(ui->mainPath_ListWidget)), data);
+        m_reference_editor->setPoints(pathNodeIds(GetListInternals<VPieceNode>(ui->mainPath_ListWidget)), data,
+                                      GetListInternals<quint32>(ui->anchorPoints_ListWidget));
     }
     initializeNotchesList();
     customSeamAllowanceChanged(ui->customSeamAllowance_ListWidget->currentRow());

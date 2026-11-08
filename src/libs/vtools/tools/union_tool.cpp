@@ -1020,7 +1020,8 @@ void UpdatePathNode(VContainer *data, const VPieceNode &node, QVector<quint32> &
 
 //---------------------------------------------------------------------------------------------------------------------
 void CreateUnitedNodes(VPiece &newPiece, const VPiece &piece1, const VPiece &piece2, quint32 id, const QString &blockName,
-                       const UnionToolInitData &initData, qreal dx, qreal dy, quint32 pRotate, qreal angle)
+                       const UnionToolInitData &initData, qreal dx, qreal dy, quint32 pRotate, qreal angle,
+                       QHash<quint32, quint32> &piece1_path_nodes, QHash<quint32, quint32> &piece2_path_nodes)
 {
     const VPiecePath piece1Path = piece1.GetPath().RemoveEdge(initData.piece1_Index);
     const VPiecePath piece2Path = piece2.GetPath().RemoveEdge(initData.piece2_Index);
@@ -1035,7 +1036,12 @@ void CreateUnitedNodes(VPiece &newPiece, const VPiece &piece1, const VPiece &pie
     const int piece1_Pt1_Index = piece1.GetPath().indexOfNode(pRotate);
     do
     {
-        AddNodeToNewPath(initData, newPath, piece1Path.at(i), id, children, blockName);
+        const VPieceNode piece1_node = piece1Path.at(i);
+        AddNodeToNewPath(initData, newPath, piece1_node, id, children, blockName);
+        if (piece1_node.GetTypeTool() == Tool::NodePoint)
+        {
+            piece1_path_nodes.insert(piece1_node.GetId(), newPath.at(newPath.nodeCount() - 1).GetId());
+        }
         ++i;
         if (i > piece1_Pt1_Index && piece2Points < piece2NodeCount-1)
         {
@@ -1047,7 +1053,12 @@ void CreateUnitedNodes(VPiece &newPiece, const VPiece &piece1, const VPiece &pie
                 {
                     j=0;
                 }
-                AddNodeToNewPath(initData, newPath, piece2Path.at(j), id, children, blockName, dx, dy, pRotate, angle);
+                const VPieceNode piece2_node = piece2Path.at(j);
+                AddNodeToNewPath(initData, newPath, piece2_node, id, children, blockName, dx, dy, pRotate, angle);
+                if (piece2_node.GetTypeTool() == Tool::NodePoint)
+                {
+                    piece2_path_nodes.insert(piece2_node.GetId(), newPath.at(newPath.nodeCount() - 1).GetId());
+                }
                 ++piece2Points;
                 ++j;
             } while (piece2Points < piece2NodeCount-1);
@@ -1168,6 +1179,39 @@ void createUnitedAnchors(VPiece &newPiece, const VPiece &piece1, const VPiece &p
     QVector<quint32> children;
     createUnionAnchors(newPiece, piece2, children, id, blockName, initData, dx, dy, pRotate, angle);
     SaveAnchorsChildren(initData.doc, id, children);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Maps a source path node to its corresponding node in the united piece.
+ * @details A removed join-edge endpoint may need to map by its transformed position.
+ * @param transform true when the source node belongs to the translated second piece.
+ */
+quint32 mapUnitedPathNode(quint32 source_id, const QHash<quint32, quint32> &copied_nodes,
+                          const VPiece &united_piece, const VContainer *pattern, bool transform,
+                          qreal dx, qreal dy, quint32 pRotate, qreal angle)
+{
+    if (copied_nodes.contains(source_id))
+    {
+        return copied_nodes.value(source_id);
+    }
+
+    VPointF source_point(*pattern->GeometricObject<VPointF>(source_id));
+    if (transform && (!qFuzzyIsNull(dx) || !qFuzzyIsNull(dy) || pRotate != NULL_ID))
+    {
+        BiasRotatePoint(&source_point, dx, dy,
+                        static_cast<QPointF>(*pattern->GeometricObject<VPointF>(pRotate)), angle);
+    }
+    const QPointF target = static_cast<QPointF>(source_point);
+    for (const VPieceNode &node : united_piece.GetPath().ListNodePoint())
+    {
+        const auto candidate = pattern->GeometricObject<VPointF>(node.GetId());
+        if (QLineF(target, static_cast<QPointF>(*candidate)).length() < accuracyPointOnLine)
+        {
+            return node.GetId();
+        }
+    }
+    return NULL_ID;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -1320,12 +1364,28 @@ void createUnion(quint32 id, const UnionToolInitData &initData, qreal dx, qreal 
 
     VPiece newPiece;
 
-    CreateUnitedNodes(newPiece, piece1, piece2, id, blockName, initData, dx, dy, pRotate, angle);
+    QHash<quint32, quint32> piece1_path_nodes;
+    QHash<quint32, quint32> piece2_path_nodes;
+    CreateUnitedNodes(newPiece, piece1, piece2, id, blockName, initData, dx, dy, pRotate, angle,
+                      piece1_path_nodes, piece2_path_nodes);
     CreateUnitedCSA(newPiece, piece1, piece2, id, blockName, initData, dx, dy, pRotate, angle);
     CreateUnitedInternalPaths(newPiece, piece1, piece2, id, blockName, initData, dx, dy, pRotate, angle);
     createUnitedAnchors(newPiece, piece1, piece2, id, blockName, initData, dx, dy, pRotate, angle);
     QVector<PieceDrillHole> holes = piece1.drillHoles();
-    QVector<PieceReferenceLine> lines = piece1.referenceLines();
+    QVector<PieceReferenceLine> lines;
+    for (PieceReferenceLine line : piece1.referenceLines())
+    {
+        const bool legacy_anchor_line = piece1.getAnchors().contains(line.start)
+            && piece1.getAnchors().contains(line.end);
+        if (!legacy_anchor_line)
+        {
+            line.start = mapUnitedPathNode(line.start, piece1_path_nodes, newPiece, initData.data, false,
+                                           dx, dy, pRotate, angle);
+            line.end = mapUnitedPathNode(line.end, piece1_path_nodes, newPiece, initData.data, false,
+                                         dx, dy, pRotate, angle);
+        }
+        lines.append(line);
+    }
     QHash<quint32, quint32> anchors;
     for (int i = 0; i < piece2.getAnchors().size(); ++i)
     {
@@ -1338,8 +1398,20 @@ void createUnion(quint32 id, const UnionToolInitData &initData, qreal dx, qreal 
     }
     for (PieceReferenceLine line : piece2.referenceLines())
     {
-        line.start = anchors.value(line.start);
-        line.end = anchors.value(line.end);
+        const bool legacy_anchor_line = piece2.getAnchors().contains(line.start)
+            && piece2.getAnchors().contains(line.end);
+        if (legacy_anchor_line)
+        {
+            line.start = anchors.value(line.start);
+            line.end = anchors.value(line.end);
+        }
+        else
+        {
+            line.start = mapUnitedPathNode(line.start, piece2_path_nodes, newPiece, initData.data, true,
+                                           dx, dy, pRotate, angle);
+            line.end = mapUnitedPathNode(line.end, piece2_path_nodes, newPiece, initData.data, true,
+                                         dx, dy, pRotate, angle);
+        }
         lines.append(line);
     }
     newPiece.setDrillHoles(holes);

@@ -145,11 +145,15 @@ PieceMarkingsEditor::PieceMarkingsEditor(bool drill_holes, QWidget *parent)
     updateValidation();
 }
 
-void PieceMarkingsEditor::setPoints(const QVector<quint32> &point_ids, const VContainer *data)
+void PieceMarkingsEditor::setPoints(const QVector<quint32> &point_ids, const VContainer *data,
+                                    const QVector<quint32> &legacy_anchor_ids)
 {
     const quint32 start = m_start->currentData().toUInt();
     const quint32 end = m_end->currentData().toUInt();
     m_points.clear();
+    m_point_names.clear();
+    m_anchor_ids = m_drill ? point_ids : legacy_anchor_ids;
+    m_path_node_ids = m_drill ? QVector<quint32>() : point_ids;
     m_start->clear();
     m_end->clear();
     const QString placeholder = m_drill ? tr("Select an anchor") : tr("Select a path node");
@@ -159,8 +163,17 @@ void PieceMarkingsEditor::setPoints(const QVector<quint32> &point_ids, const VCo
     {
         m_points.insert(id, static_cast<QPointF>(*data->GeometricObject<VPointF>(id)));
         const QString name = data->GetGObject(id)->name();
+        m_point_names.insert(id, name);
         m_start->addItem(name, id);
         m_end->addItem(name, id);
+    }
+    for (quint32 id : legacy_anchor_ids)
+    {
+        if (!m_points.contains(id))
+        {
+            m_points.insert(id, static_cast<QPointF>(*data->GeometricObject<VPointF>(id)));
+            m_point_names.insert(id, data->GetGObject(id)->name());
+        }
     }
     m_start->setCurrentIndex(qMax(0, m_start->findData(start)));
     m_end->setCurrentIndex(qMax(0, m_end->findData(end)));
@@ -183,7 +196,11 @@ QStringList PieceMarkingsEditor::itemsUsingPoint(quint32 point_id) const
     const auto name = [this](quint32 id)
     {
         const int index = m_start->findData(id);
-        return index > 0 ? m_start->itemText(index) : tr("Missing point %1").arg(id);
+        if (index > 0)
+        {
+            return m_start->itemText(index);
+        }
+        return m_point_names.value(id, tr("Missing point %1").arg(id));
     };
     QStringList items;
     if (m_drill)
@@ -201,7 +218,8 @@ QStringList PieceMarkingsEditor::itemsUsingPoint(quint32 point_id) const
     {
         for (const PieceReferenceLine &line : m_lines)
         {
-            if (line.start == point_id || line.end == point_id)
+            const bool legacy_anchor_line = m_anchor_ids.contains(line.start) && m_anchor_ids.contains(line.end);
+            if (legacy_anchor_line && (line.start == point_id || line.end == point_id))
             {
                 items.append(tr("%1 reference: %2 → %3")
                                  .arg(line.type, name(line.start), name(line.end)));
@@ -213,10 +231,7 @@ QStringList PieceMarkingsEditor::itemsUsingPoint(quint32 point_id) const
 
 bool PieceMarkingsEditor::markingsValid() const
 {
-    const QVector<quint32> available_points = m_points.keys().toVector();
-    if (!PieceMarkings::valid(m_holes, m_lines,
-                              m_drill ? available_points : QVector<quint32>(),
-                              m_drill ? QVector<quint32>() : available_points))
+    if (!PieceMarkings::valid(m_holes, m_lines, m_anchor_ids, m_path_node_ids))
     {
         return false;
     }
@@ -240,7 +255,11 @@ void PieceMarkingsEditor::refresh()
         {
             return m_start->itemText(index);
         }
-        return m_drill ? tr("Missing anchor %1").arg(id) : tr("Missing path node %1").arg(id);
+        if (m_point_names.contains(id))
+        {
+            return m_point_names.value(id);
+        }
+        return m_drill ? tr("Missing anchor %1").arg(id) : tr("Missing path node or legacy anchor %1").arg(id);
     };
     if (m_drill)
     {

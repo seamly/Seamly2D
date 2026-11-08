@@ -23,13 +23,16 @@ class QListWidget;
 class QLabel;
 class VContainer;
 
-/// @brief Requires an explicit positive drill diameter or two distinct reference nodes.
+/// @brief Edits anchor-based drill holes, path-node references, and saved legacy anchor references.
 class PieceMarkingsEditor : public QWidget
 {
     Q_OBJECT
 public:
     PieceMarkingsEditor(bool drill_holes, QWidget *parent = nullptr);
-    void setPoints(const QVector<quint32> &point_ids, const VContainer *data);
+    /// @brief Refreshes selectable points and legacy anchor references.
+    /// @param legacy_anchor_ids Existing anchors recognized for saved lines but excluded from new selections.
+    void setPoints(const QVector<quint32> &point_ids, const VContainer *data,
+                   const QVector<quint32> &legacy_anchor_ids = {});
     void setMarkings(const QVector<PieceDrillHole> &holes, const QVector<PieceReferenceLine> &lines);
     QVector<PieceDrillHole> drillHoles() const;
     QVector<PieceReferenceLine> referenceLines() const;
@@ -44,6 +47,9 @@ private:
     QVector<PieceDrillHole> m_holes;
     QVector<PieceReferenceLine> m_lines;
     QHash<quint32, QPointF> m_points;
+    QHash<quint32, QString> m_point_names;
+    QVector<quint32> m_anchor_ids;
+    QVector<quint32> m_path_node_ids;
     QComboBox *m_start;
     QComboBox *m_end;
     QButtonGroup *m_type_buttons;
