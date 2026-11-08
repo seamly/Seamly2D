@@ -271,6 +271,7 @@ Start with Paper > Sheet. Use a custom 36 × 36 in sheet when available. Earlier
 -> Fix this in a worktree as a feature branch then merge into run-seamlyLayout.
    - A part without a fold line is not expected to be offset from a fold by the piece-gap width.
     - Failure evidence: `test-seamly-layout\patterns\validation\layouts_trousers\error-split-the-pieces-pieces-could-not-be-placed-Screenshot 2026-11-07 212921.png` shows 11 unplaced parts. Add a sheet and retry placement for unplaced parts until all parts are placed or no further placement is possible.
+   - The export menu now enables regular PDF only for split layouts. Verify multi-sheet placement and export with the rebuilt installer.
 - [x] Every part is accounted for; any unplaced part is named in the warning.
 - [x] The fabric warning reports the offending piece dimension and effective folded-fabric dimension.
 - [x] SVG/PDF/DXF exports show the same split parts and joins.
