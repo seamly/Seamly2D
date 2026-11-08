@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-11-08 — Application updates and MSI build
+
+- Merged checklist fixes into local `run-seamlyLayout`: data-root regression coverage, label-template replacement, legacy reference-line anchors, split-export gating for actually divided pieces, and Piece Mode flip/tilt child graphics. No push.
+- `cargo test -p cxxqt_bridge layout_utils::tests::` passed 37 tests. An earlier `cargo test -p cxxqt_bridge` run passed 274 tests.
+- `packaging\windows\local_build_msi.ps1` stopped during `nmake check`: `Seamly2DTests.exe` returned 1. The script did not set `SEAMLY_TEST_LOG_DIR`, so the failing Qt test is unidentified.
+- CTest, the full Cargo workspace tests, and MSI packaging did not run. The new MSI was not produced.
+- Restored generated version stamps. Preserve untracked `scripts/cli/` and `test-seamly-layout/patterns/validation/`.
+
 ### User validation checklist review
 
 - Updated `project-docs/TEST_APPLICATION_UPDATES.md` while preserving all user checkmarks.
