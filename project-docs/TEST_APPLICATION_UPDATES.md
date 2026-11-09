@@ -114,6 +114,8 @@ Use male_shirt. Repeat the pattern-label checks on jacket2.
   - --> Fix this issue in a worktree as a feature branch then merge with run-seamlyLayout
   - Insert now replaces the empty-line placeholder and saves the selected variable. Confirm the editor behavior with the rebuilt installer.
 - [x] Template edits still change the rendered label correctly.
+- [x] `%pFileName%` and `%mFileName%` include extensions in rendered labels and editor previews; merged from the feature worktree. Targeted Qt tests pass.
+- [ ] Verify filename extensions in installed-app pattern labels, piece labels, and editor previews. Remove appended `%pExt%` or `%mExt%` from existing templates.
 
 ## 5. Seamly2D — Flip and placement properties
 

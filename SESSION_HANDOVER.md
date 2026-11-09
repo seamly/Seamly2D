@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-11-08 — Label filename extensions
+
+- `%pFileName%` and `%mFileName%` now include extensions in pattern labels, piece labels, and editor previews.
+- Legacy pattern conversion no longer appends `%mExt%` to `%mFileName%`. Existing templates with appended extension variables need manual editing.
+- Feature worktree changes are merged into local `run-seamlyLayout`; no push.
+- Targeted Qt suites passed: `TST_LabelTextManager` 11/11 and `TST_VPatternConverter` 10/10. All changed production units and the test harness compiled.
+- Full MSI build and installed-app checks remain pending. Preserve the user's existing build stamps and working-tree edits.
+
 ### 2026-11-08 — Application updates and MSI build
 
 - Merged checklist fixes into local `run-seamlyLayout`: data-root regression coverage, label-template replacement, legacy reference-line anchors, split-export gating for actually divided pieces, and Piece Mode flip/tilt child graphics. No push.
