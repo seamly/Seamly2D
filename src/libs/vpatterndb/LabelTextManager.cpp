@@ -119,10 +119,10 @@ QMap<QString, QString> preparePlaceholders(const VAbstractPattern* document)
     placeholders.insert(pl_author, document->GetCompanyName());
     placeholders.insert(pl_customer, document->GetCustomerName());
     placeholders.insert(pl_pExt, QFileInfo(qApp->getFilePath()).suffix());
-    placeholders.insert(pl_pFileName, QFileInfo(qApp->getFilePath()).baseName());
+    placeholders.insert(pl_pFileName, QFileInfo(qApp->getFilePath()).fileName());
 
     placeholders.insert(pl_mExt, QFileInfo(document->MPath()).suffix());
-    placeholders.insert(pl_mFileName, QFileInfo(document->MPath()).baseName());
+    placeholders.insert(pl_mFileName, QFileInfo(document->MPath()).fileName());
 
     // Size and height are known only when the pattern has measurements.
     QString current_size;

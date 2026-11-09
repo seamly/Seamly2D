@@ -103,6 +103,7 @@
 #include "../vmisc/vabstractapplication.h"
 #include "../vmisc/vcommonsettings.h"
 #include "../vmisc/projectversion.h"
+#include "../vpatterndb/vtranslatevars.h"
 
 class TestApplication2D : public VAbstractApplication
 {
@@ -129,7 +130,8 @@ TestApplication2D::TestApplication2D(int &argc, char **argv)
 //---------------------------------------------------------------------------------------------------------------------
 const VTranslateVars *TestApplication2D::translateVariables()
 {
-    return nullptr;
+    static const VTranslateVars variables;
+    return &variables;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
