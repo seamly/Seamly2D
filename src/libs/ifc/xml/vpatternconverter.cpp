@@ -3129,7 +3129,7 @@ void VPatternConverter::PortPatternLabeltoV0_6_0(QDomElement &label)
 
     if (UniqueTagText(strShowMeasurements) == trueStr)
     {
-        AddLabelTemplateLineV0_6_0(label, "%mFileName%.%mExt%", false, false, 0, 0);
+        AddLabelTemplateLineV0_6_0(label, "%mFileName%", false, false, 0, 0);
     }
 
     if (UniqueTagText(strShowDate) == trueStr)

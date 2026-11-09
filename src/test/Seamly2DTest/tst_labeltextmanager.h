@@ -3,7 +3,7 @@
  **  @author slspencer
  **
  **  @brief
- **  Unit tests for the label font fit of LabelTextManager
+ **  Unit tests for LabelTextManager
  **
  **  @copyright
  **  Copyright (C) 2026 Seamly2D Project
@@ -32,7 +32,7 @@
 #include <QObject>
 
 /**
- * @brief TST_LabelTextManager unit tests for the label font size search.
+ * @brief Tests label text substitution and font fitting.
  */
 class TST_LabelTextManager : public QObject
 {
@@ -44,6 +44,8 @@ public:
 private slots:
     void LargestFittingSize_data() const;
     void LargestFittingSize() const;
+    void fileNamePlaceholders_data() const;
+    void fileNamePlaceholders() const;
 };
 
 #endif // TST_LABELTEXTMANAGER_H

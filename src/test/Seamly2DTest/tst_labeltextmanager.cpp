@@ -3,7 +3,7 @@
  **  @author slspencer
  **
  **  @brief
- **  Unit tests for the label font fit of LabelTextManager
+ **  Unit tests for LabelTextManager
  **
  **  @copyright
  **  Copyright (C) 2026 Seamly2D Project
@@ -27,14 +27,39 @@
  *****************************************************************************/
 
 #include "tst_labeltextmanager.h"
+#include "../ifc/xml/vabstractpattern.h"
+#include "../vmisc/vabstractapplication.h"
 #include "../vpatterndb/LabelTextManager.h"
+#include "../vpatterndb/floatItemData/vpiecelabeldata.h"
+#include "../vtools/dialogs/support/editlabeltemplate_dialog.h"
 
 #include <QtTest>
 #include <QFont>
 #include <QFontMetrics>
+#include <QListWidget>
+#include <QTabWidget>
 
 namespace
 {
+/// @brief Pattern document with no drafting tools, used to test label templates.
+class TestPatternDocument : public VAbstractPattern
+{
+public:
+    TestPatternDocument()
+    {
+        setContent(QStringLiteral("<pattern><measurements/></pattern>"));
+    }
+
+    void CreateEmptyFile() override {}
+    void IncrementReferens(quint32) const override {}
+    void DecrementReferens(quint32) const override {}
+    QStringList GetCurrentAlphabet() const override { return QStringList(); }
+    QString GenerateLabel(const LabelType &, const QString &) const override { return QString(); }
+    QString generateSuffix(const QString &) const override { return QString(); }
+    void UpdateToolData(const quint32 &, VContainer *) override {}
+    void LiteParseTree(const Document &) override {}
+};
+
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief lineWidth returns the pixel width of a label line at a base font size.
@@ -48,6 +73,71 @@ int lineWidth(const QFont &font, const TextLine &line, int size)
     return QFontMetrics(fnt).horizontalAdvance(line.text);
 }
 } // namespace
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_LabelTextManager::fileNamePlaceholders_data() const
+{
+    QTest::addColumn<QString>("pattern_path");
+    QTest::addColumn<QString>("measurements_path");
+    QTest::addColumn<QString>("expected");
+
+    QTest::newRow("extensions") << QStringLiteral("patterns/dress.sm2d") << QStringLiteral("../measurements/body.smis")
+                               << QStringLiteral("dress.sm2d|body.smis|sm2d|smis");
+    QTest::newRow("multiple dots") << QStringLiteral("patterns/dress.v2.sm2d")
+                                  << QStringLiteral("measurements/body.v3.smms")
+                                  << QStringLiteral("dress.v2.sm2d|body.v3.smms|sm2d|smms");
+    QTest::newRow("no extension") << QStringLiteral("patterns/dress") << QStringLiteral("measurements/body")
+                                 << QStringLiteral("dress|body||");
+    QTest::newRow("empty paths") << QString() << QString() << QStringLiteral("|||");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_LabelTextManager::fileNamePlaceholders() const
+{
+    QFETCH(QString, pattern_path);
+    QFETCH(QString, measurements_path);
+    QFETCH(QString, expected);
+
+    TestPatternDocument document;
+    document.SetMPath(measurements_path);
+    VLabelTemplateLine line{};
+    line.line = QStringLiteral("%pFileName%|%mFileName%|%pExt%|%mExt%");
+    document.setPatternLabelTemplate({line});
+    VPieceLabelData piece_data;
+    piece_data.SetLabelTemplate({line});
+
+    const QString previous_path = qApp->getFilePath();
+    VAbstractPattern *previous_document = qApp->getCurrentDocument();
+    qApp->setFilePath(pattern_path);
+    qApp->setCurrentDocument(&document);
+
+    LabelTextManager pattern_label;
+    pattern_label.Update(&document);
+    LabelTextManager piece_label;
+    piece_label.Update(QStringLiteral("Front"), piece_data);
+
+    qApp->setCurrentDocument(previous_document);
+    qApp->setFilePath(previous_path);
+
+    QCOMPARE(pattern_label.GetSourceLinesCount(), 1);
+    QCOMPARE(pattern_label.GetSourceLine(0).text, expected);
+    QCOMPARE(piece_label.GetSourceLinesCount(), 1);
+    QCOMPARE(piece_label.GetSourceLine(0).text, expected);
+
+    qApp->setFilePath(pattern_path);
+    EditLabelTemplateDialog editor(&document);
+    qApp->setFilePath(previous_path);
+    editor.SetTemplate({line});
+    auto *tabs = editor.findChild<QTabWidget *>(QStringLiteral("tabWidget"));
+    auto *preview = editor.findChild<QListWidget *>(QStringLiteral("listWidgetPreview"));
+    auto *preview_tab = editor.findChild<QWidget *>(QStringLiteral("tabPreview"));
+    QVERIFY(tabs != nullptr);
+    QVERIFY(preview != nullptr);
+    QVERIFY(preview_tab != nullptr);
+    tabs->setCurrentWidget(preview_tab);
+    QCOMPARE(preview->count(), 1);
+    QCOMPARE(preview->item(0)->text(), expected);
+}
 
 //---------------------------------------------------------------------------------------------------------------------
 TST_LabelTextManager::TST_LabelTextManager(QObject *parent)

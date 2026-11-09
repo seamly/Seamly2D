@@ -164,6 +164,27 @@ void TST_VPatternConverter::emptyDocumentUsesCurrentSchema()
     VDomDocument::ValidateXML(VPatternConverter::CurrentSchema, file_path);
 }
 
+void TST_VPatternConverter::legacyMeasurementsLabelIncludesOneExtension()
+{
+    QTemporaryDir test_files;
+    QVERIFY(test_files.isValid());
+    QDomDocument document;
+    QVERIFY(document.setContent(QStringLiteral(
+        "<pattern readOnly=\"true\"><version>0.5.1</version><unit>cm</unit>"
+        "<showMeasurements>true</showMeasurements><measurements>body.smis</measurements>"
+        "<draw name=\"Front\"><calculation/><modeling/><details/></draw></pattern>")));
+    const QString file_path = QDir(test_files.path()).filePath(QStringLiteral("legacy.sm2d"));
+    QString error;
+    QVERIFY2(writeDocument(file_path, document, error), qPrintable(error));
+    VPatternConverter converter(file_path);
+    const QString converted_path = converter.Convert();
+    QVERIFY2(readDocument(converted_path, document, error), qPrintable(error));
+    const QDomElement label = document.documentElement().firstChildElement(QStringLiteral("patternLabel"));
+    QCOMPARE(label.elementsByTagName(QStringLiteral("line")).count(), 1);
+    QCOMPARE(label.firstChildElement(QStringLiteral("line")).attribute(QStringLiteral("text")),
+             QStringLiteral("%mFileName%"));
+}
+
 void TST_VPatternConverter::newDraftBlockCreatesImages()
 {
     QTemporaryDir test_files;

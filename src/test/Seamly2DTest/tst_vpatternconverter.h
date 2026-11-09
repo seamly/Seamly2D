@@ -24,6 +24,7 @@ private slots:
     void newDraftBlockCreatesImages();
     void currentSchemaRequiresImages();
     void previousSchemaGetsRequiredImages();
+    void legacyMeasurementsLabelIncludesOneExtension();
 };
 
 #endif // TST_VPATTERNCONVERTER_H
