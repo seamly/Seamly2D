@@ -1,5 +1,5 @@
 # project: SeamlyLayout
-# author: slspencer, copyright 2026
+# author: slspencer, copyright 2026 Seamly2D Project
 # MIT License: https://opensource.org/licenses/MIT
 #
 # CMakeLists.txt — Qt 6.11 + QML frontend for SeamlyLayout.
@@ -458,6 +458,18 @@ target_link_libraries(SettingsModelTests PRIVATE
     Qt6::Gui
     Qt6::Test
     Qt6::Widgets
+    Qt6::Qml
+    Qt6::Quick
+    Qt6::QuickControls2
+)
+
+qt_add_resources(SettingsModelTests "settings-dialog"
+    PREFIX "/qml"
+    BASE "${CMAKE_CURRENT_SOURCE_DIR}/qml"
+    FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/qml/SettingsDialog.qml"
+        "${CMAKE_CURRENT_SOURCE_DIR}/qml/Theme.qml"
+        "${CMAKE_CURRENT_SOURCE_DIR}/qml/SeamlyButton.qml"
 )
 
 add_test(NAME SettingsModelTests COMMAND SettingsModelTests)

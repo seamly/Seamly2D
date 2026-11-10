@@ -1,5 +1,5 @@
 // project: SeamlyLayout
-// author: slspencer, copyright 2026
+// author: slspencer, copyright 2026 Seamly2D Project
 // MIT License: https://opensource.org/licenses/MIT
 //
 // @file SettingsModelTests.cpp
@@ -29,6 +29,9 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QQmlComponent>
+#include <QQmlEngine>
+#include <QScopedPointer>
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QtTest/QtTest>
@@ -45,6 +48,9 @@ private slots:
     void defaults_paperTypeIsSheet();
     void defaults_layoutModeIsAlongGrainline();
     void paperSizeLabels_includeDimensionsAndCustom();
+    void tileSizes_matchPredefinedSheets();
+    void tileSizes_selectAndRoundtripNames();
+    void tileSizeDropdown_displaysDimensionsAndRestoresSelection();
     void selectPaperSize_customKeepsPageDimensions();
     void pageDimensions_rejectInvalidValues();
     void customPaperDimensions_roundtrip();
@@ -134,6 +140,100 @@ void SettingsModelTests::paperSizeLabels_includeDimensionsAndCustom()
     QCOMPARE(labels.at(names.indexOf(QStringLiteral("Letter"))),
              QStringLiteral("Letter (8.5 × 11 in; 216 × 279 mm)"));
     QCOMPARE(labels.last(), QStringLiteral("Custom"));
+}
+
+// @brief Tile choices reuse every predefined sheet name and dimension label.
+void SettingsModelTests::tileSizes_matchPredefinedSheets()
+{
+    SettingsModel model;
+    QStringList names = model.paperSizeNames();
+    QStringList labels = model.paperSizeLabels();
+    names.removeLast();
+    labels.removeLast();
+
+    QCOMPARE(model.tileSizeNames(), names);
+    QCOMPARE(model.tileSizeLabels(), labels);
+    QCOMPARE(names.size(), 27);
+    QVERIFY(!names.contains(QStringLiteral("None")));
+    QVERIFY(!names.contains(QStringLiteral("Custom")));
+    QCOMPARE(labels.at(names.indexOf(QStringLiteral("ANSI E"))),
+             QStringLiteral("ANSI E (34 × 44 in; 864 × 1118 mm)"));
+    QCOMPARE(labels.at(names.indexOf(QStringLiteral("A0"))),
+             QStringLiteral("A0 (33.11 × 46.81 in; 841 × 1189 mm)"));
+    QCOMPARE(labels.last(), QStringLiteral("B6 (4.92 × 6.93 in; 125 × 176 mm)"));
+}
+
+// @brief Selecting and saving any tile size preserves its stable name and orientation.
+void SettingsModelTests::tileSizes_selectAndRoundtripNames()
+{
+    const QString file_name = QStringLiteral("tile-size-%1.settings").arg(QCoreApplication::applicationPid());
+    const QString path = QDir(QCoreApplication::applicationDirPath()).filePath(file_name);
+    SettingsModel writer;
+    writer.setPaperType(QStringLiteral("tiled"));
+    writer.setTileOrientation(QStringLiteral("portrait"));
+    for (const QString &name : writer.tileSizeNames())
+    {
+        writer.selectTileSize(name);
+        QCOMPARE(writer.tileSize(), name);
+        QCOMPARE(QJsonDocument::fromJson(writer.toJson().toUtf8()).object()
+                     .value(QStringLiteral("tileSize")).toString(), name);
+        QVERIFY(writer.save(path));
+
+        SettingsModel reader;
+        QVERIFY(reader.load(path));
+        QCOMPARE(reader.tileSize(), name);
+        QCOMPARE(reader.tileOrientation(), QStringLiteral("portrait"));
+    }
+    QVERIFY(QFile::remove(path));
+
+    const QString previous = writer.tileSize();
+    writer.selectTileSize(QStringLiteral("None"));
+    writer.selectTileSize(QStringLiteral("Custom"));
+    writer.selectTileSize(QStringLiteral("unknown"));
+    writer.selectTileSize(writer.tileSizeLabels().first());
+    QCOMPARE(writer.tileSize(), previous);
+    QCOMPARE(writer.sheetName(), QStringLiteral("ARCH E"));
+}
+
+// @brief The real dropdown displays labels, selects stable names, and refreshes after loading settings.
+void SettingsModelTests::tileSizeDropdown_displaysDimensionsAndRestoresSelection()
+{
+    qmlRegisterSingletonType(QUrl(QStringLiteral("qrc:/qml/Theme.qml")), "SeamlyLayout", 1, 0, "Theme");
+    SettingsModel model;
+    model.setPaperType(QStringLiteral("tiled"));
+    model.selectTileSize(QStringLiteral("ANSI D"));
+    QQmlEngine engine;
+    QQmlComponent component(&engine, QUrl(QStringLiteral("qrc:/qml/SettingsDialog.qml")));
+    QVERIFY2(component.isReady(), qPrintable(component.errorString()));
+    QScopedPointer<QObject> dialog(component.createWithInitialProperties({
+        {QStringLiteral("model"), QVariant::fromValue(&model)}
+    }));
+    QVERIFY2(dialog, qPrintable(component.errorString()));
+    QObject *combo = dialog->findChild<QObject *>(QStringLiteral("tileSizeCombo"));
+    QVERIFY(combo);
+    QCOMPARE(combo->property("count").toInt(), 27);
+    const QStringList names = model.tileSizeNames();
+    const QStringList labels = model.tileSizeLabels();
+    QCOMPARE(combo->property("currentIndex").toInt(), names.indexOf(QStringLiteral("ANSI D")));
+    for (int index = 0; index < names.size(); ++index)
+    {
+        combo->setProperty("currentIndex", index);
+        QCOMPARE(combo->property("currentText").toString(), labels.at(index));
+        QVERIFY(QMetaObject::invokeMethod(combo, "activated", Q_ARG(int, index)));
+        QCOMPARE(model.tileSize(), names.at(index));
+    }
+
+    // Loading must repair the currentIndex binding replaced by interaction.
+    const QString path = QDir(QCoreApplication::applicationDirPath())
+                             .filePath(QStringLiteral("tile-ui-%1.settings").arg(QCoreApplication::applicationPid()));
+    SettingsModel writer;
+    writer.setPaperType(QStringLiteral("tiled"));
+    writer.selectTileSize(QStringLiteral("A0"));
+    QVERIFY(writer.save(path));
+    QVERIFY(model.load(path));
+    QVERIFY(QFile::remove(path));
+    QCOMPARE(combo->property("currentIndex").toInt(), names.indexOf(QStringLiteral("A0")));
+    QCOMPARE(combo->property("currentText").toString(), labels.at(names.indexOf(QStringLiteral("A0"))));
 }
 
 // @brief Selecting Custom preserves the current dimensions for editing.
