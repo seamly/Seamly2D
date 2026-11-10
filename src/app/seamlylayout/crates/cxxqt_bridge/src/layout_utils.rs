@@ -25,6 +25,7 @@ use layout_tiling::{
 
 use crate::piece_extractor::{
     extract_piece_rects_and_polygons, hoist_layout_units, keep_size, set_free_rotation_without_grainline,
+    set_piece_rotation_for_layout_mode,
 };
 use crate::layout_assembler::{create_layout, create_initial_layout_dom, set_content_width, trim_bottom};
 use crate::piece_divider::{self, DivideSpec, OversizedPiece};
@@ -61,6 +62,8 @@ pub struct ProcessLayoutResult {
     /// omitted from the rendered layout and reported to the user as a warning,
     /// rather than aborting the whole layout with a hard error.
     pub unplaced_labels: Vec<String>,
+    /// Pieces with unsupported explicit rotation values, limited to baseline 0°.
+    pub rotation_warnings: Vec<String>,
     /// Pieces with a fold line that stay off the left edge, with the reason
     /// (`fold_line_edge::FoldEdgePlan::warnings`).  Empty unless the fold
     /// lines go on the left edge.
@@ -342,7 +345,13 @@ pub fn do_process_layout(
     // line so its fold line can lie on the edge.  After the split, so each part
     // with a stretch of fold line goes on the edge.
     let fold_plan = settings.fold_lines_on_left_edge
-        .then(|| crate::fold_line_edge::plan_fold_line_edge(&mut flat_dom, &trial_angles_deg))
+        .then(|| {
+            crate::fold_line_edge::plan_fold_line_edge(
+                &mut flat_dom,
+                &trial_angles_deg,
+                settings.applies_piece_rotation_rules(),
+            )
+        })
         .unwrap_or_default();
     if !fold_plan.angles.is_empty() || !fold_plan.warnings.is_empty() {
         log_to_file(&format!(
@@ -377,7 +386,15 @@ pub fn do_process_layout(
     // `pack_polygons`; for orthogonal trial sets the polygons are ignored
     // and the call routes to MaxRects on `rects` alone.
     let (mut pieces, polygons) = extract_piece_rects_and_polygons(&flat_dom);
+    set_piece_rotation_for_layout_mode(&mut pieces, settings.applies_piece_rotation_rules());
     set_free_rotation_without_grainline(&mut pieces, settings.free_rotation_without_grainline());
+    let mut seen_rotation_warnings = std::collections::HashSet::new();
+    let rotation_warnings: Vec<String> = pieces.iter()
+        .filter(|piece| piece.rect.apply_piece_rotation
+            && piece.rect.piece_rotation == packing::PieceRotationRule::Invalid)
+        .map(|piece| format!("{}: unsupported rotation value", piece.label()))
+        .filter(|warning| seen_rotation_warnings.insert(warning.clone()))
+        .collect();
     crate::fold_line_edge::pin_fold_line_pieces(&mut pieces, &fold_plan);
     if settings.media_type == "fabric" && settings.fabric_folded {
         let fold_edge_gap_px = settings.piece_gap_px();
@@ -475,8 +492,15 @@ pub fn do_process_layout(
         //   floor = smallest column count that can hold the widest piece.
         //   ceil  = the initial layout's tile_cols — never produce a WORSE layout
         //           than the user already sees.
-        let floor_cols = widest_piece_tile_cols(&rects, trim_w, gap_px);
+        let floor_cols = widest_piece_tile_cols(&rects, trim_w, gap_px, &trial_angles_deg);
         let ceil_cols  = initial_td.tile_cols.max(floor_cols);
+
+        if let Some(piece) = pieces.iter().find(|piece| piece.rect.fold_edge_conflict) {
+            return Err(format!(
+                "Piece \"{}\" cannot satisfy both its rotation rule and the fold edge.",
+                piece.label()
+            ));
+        } // if rotation conflicts with the fold edge
 
         // Log the search range for diagnostics — narrow inputs or bad settings
         // can collapse floor==ceil, making the picker a no-op.
@@ -627,6 +651,12 @@ pub fn do_process_layout(
         let unplaced_labels = crate::piece_extractor::unplaced_piece_lines(&flat_dom, &pieces, &unplaced_ids);
 
         if is_paper_sheet && !unplaced_ids.is_empty() {
+            if let Some(piece) = pieces.iter().find(|piece| piece.rect.fold_edge_conflict) {
+                return Err(format!(
+                    "Piece \"{}\" cannot satisfy both its rotation rule and the fold edge.",
+                    piece.label()
+                ));
+            } // if rotation conflicts with the fold edge
             // Reject incomplete sheets before assembling or publishing a layout.
             return Err(format!(
                 "All pieces cannot fit on one sheet. Select PDF (tiled) in Layout Settings and create the layout again.\n\
@@ -859,6 +889,7 @@ pub fn do_process_layout(
         ml_px:       work_ml_px,
         mt_px:       work_mt_px,
         unplaced_labels,
+        rotation_warnings,
         fold_line_warnings: fold_plan.warnings,
         flat_dom,
         vertical_dom,
@@ -908,6 +939,7 @@ pub fn layout_divide_spec(settings: &LayoutSettings, bin_w: u32, bin_h: u32) -> 
         bin_h,
         limit_length: !settings.is_roll_form(),
         trial_angles_deg: settings.rotation_trial_set_deg(),
+        apply_piece_rotation: settings.applies_piece_rotation_rules(),
         free_rotation_without_grainline: settings.free_rotation_without_grainline(),
         fold_edge_gap_px: if settings.media_type == "fabric" && settings.fabric_folded {
             settings.piece_gap_px()
@@ -1263,7 +1295,7 @@ mod tests {
         } // for each leg
 
         // The paper-sheet PDF export splits the same way.
-        let (_, sheet_pieces) = crate::sheets::build_sheet_export_inputs(&input_dom, false, false, result.divide_spec.as_ref(), None)
+        let (_, sheet_pieces) = crate::sheets::build_sheet_export_inputs(&input_dom, false, false, false, result.divide_spec.as_ref(), None)
             .expect("sheet inputs build");
         assert_eq!(sheet_pieces.len(), labels.len(), "the PDF pages hold the same parts");
 
@@ -2252,7 +2284,7 @@ mod tests {
     fn jacket2_nested_sheet_export_keeps_the_smallest_size_annotations() {
         let (mut input_dom, sizes) = jacket2_handoff();
         assert_eq!(crate::size_labels::add_size_labels(&mut input_dom), 208);
-        let (flat_dom, pieces) = crate::sheets::build_sheet_export_inputs(&input_dom, false, true, None, None)
+        let (flat_dom, pieces) = crate::sheets::build_sheet_export_inputs(&input_dom, false, false, true, None, None)
             .expect("sheet export inputs");
         assert_eq!(pieces.len(), 8, "one unit per piece-set");
         let smallest = sizes.iter().min_by(|a, b| crate::size_groups::compare_sizes(a, b)).expect("sizes").clone();
@@ -2635,6 +2667,96 @@ mod tests {
         ).expect("layout")
     } // fn process_fold_pieces_with_options
 
+    // @brief Process the fold fixture with one unsupported per-piece rotation value.
+    fn process_invalid_rotation(layout_mode: &str) -> ProcessLayoutResult {
+        let svg = FOLD_PIECES_SVG.replace(
+            "data-name=\"Back\"",
+            "data-name=\"Back\" data-rotation=\"unsupported\"",
+        );
+        let input = Document::parse(&svg).expect("valid SVG");
+        let settings = serde_json::json!({
+            "unit": "in", "mediaType": "paper", "paperType": "sheet",
+            "pageWidth": 20.0, "pageHeight": 40.0,
+            "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
+            "pieceGap": 0.125, "layoutMode": layout_mode, "rotationStep": 0.0,
+            "foldLinesOnLeftEdge": false, "tileSize": "Letter", "tileOrientation": "Portrait"
+        }).to_string();
+        let init = do_initialize_layout(&settings, Some(&input)).expect("initialize");
+        let mut progress = |_pct: i32, _status: Option<&str>| {};
+        do_process_layout(
+            ProcessLayoutArgs {
+                settings_json: &settings,
+                input_dom: &input,
+                initial_layout_dom: &init.initial_dom,
+                layout_h_px: init.h_px,
+                nested_multisize: false,
+                extend_media: false,
+                split_oversized: false,
+            },
+            &mut progress,
+        ).expect("layout")
+    } // fn process_invalid_rotation
+
+    // @brief Process a 350×10 piece on the minimum 300×300 sheet with the given rule.
+    fn process_rotation_fit(rotation: Option<&str>) -> Result<ProcessLayoutResult, String> {
+        let rotation_attribute = rotation
+            .map(|value| format!(" data-rotation=\"{value}\""))
+            .unwrap_or_default();
+        let svg = format!(
+            r#"<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">
+  <g id="piece-Bias" data-type="piece" data-name="Bias" data-grainline-angle="90" transform="translate(10 5)"{rotation_attribute}>
+    <g data-type="cutline"><path d="M0,0 L350,0 L350,10 L0,10 Z"/></g>
+  </g>
+</svg>"#
+        );
+        let input = Document::parse(&svg).expect("valid SVG");
+        let settings = serde_json::json!({
+            "unit": "in", "mediaType": "paper", "paperType": "sheet",
+            "pageWidth": 3.125, "pageHeight": 3.125,
+            "marginLeft": 0.0, "marginRight": 0.0, "marginTop": 0.0, "marginBottom": 0.0,
+            "pieceGap": 0.0, "layoutMode": "any", "rotationStep": 0.0,
+            "foldLinesOnLeftEdge": false, "tileSize": "Letter", "tileOrientation": "Portrait"
+        }).to_string();
+        let init = do_initialize_layout(&settings, Some(&input)).expect("initialize");
+        let mut progress = |_pct: i32, _status: Option<&str>| {};
+        do_process_layout(
+            ProcessLayoutArgs {
+                settings_json: &settings,
+                input_dom: &input,
+                initial_layout_dom: &init.initial_dom,
+                layout_h_px: init.h_px,
+                nested_multisize: false,
+                extend_media: false,
+                split_oversized: false,
+            },
+            &mut progress,
+        )
+    } // fn process_rotation_fit
+
+    // @brief Invalid rotation values warn only when Any mode applies piece rules.
+    #[test]
+    fn invalid_piece_rotation_is_reported_only_in_any_mode() {
+        let any = process_invalid_rotation("any");
+        assert_eq!(any.rotation_warnings, vec!["Back: unsupported rotation value"]);
+
+        let along_grainline = process_invalid_rotation("alongGrainline");
+        assert!(along_grainline.rotation_warnings.is_empty());
+    } // invalid_piece_rotation_is_reported_only_in_any_mode
+
+    // @brief Piece Any fits at 45°; restricted and legacy rules do not fit at quarter turns.
+    #[test]
+    fn piece_any_uses_a_non_quarter_turn_to_fit() {
+        let any = process_rotation_fit(Some("1")).expect("Piece Any fits at 45 degrees");
+        assert!(any.unplaced_labels.is_empty());
+        assert!(any.output_doc.to_string().contains("data-rotation=\"1\""));
+        let laid_out_piece = crate::piece_extractor::extract_piece_rects(&any.output_doc).remove(0);
+        assert!(laid_out_piece.rect.w < 300 && laid_out_piece.rect.h < 300);
+
+        for rule in [None, Some("360"), Some("180"), Some("90")] {
+            assert!(process_rotation_fit(rule).is_err(), "rule {rule:?} must not use a 45° angle");
+        } // for each restricted or legacy rule
+    } // piece_any_uses_a_non_quarter_turn_to_fit
+
     // @brief Every x of the fold line path in a layout.
     fn fold_line_xs(doc: &Document) -> Vec<f64> {
         fn find<'a>(elem: &'a xmltree::Element) -> Option<&'a xmltree::Element> {
@@ -2702,7 +2824,7 @@ mod tests {
     fn sheet_export_pins_fold_line_pieces() {
         let input = Document::parse(FOLD_PIECES_SVG).expect("valid SVG");
         let edge = |trial: Option<&[u16]>| -> Vec<Option<u16>> {
-            let (_, pieces) = crate::sheets::build_sheet_export_inputs(&input, false, false, None, trial).expect("sheet inputs");
+            let (_, pieces) = crate::sheets::build_sheet_export_inputs(&input, false, false, false, None, trial).expect("sheet inputs");
             pieces.iter().map(|p| p.rect.left_edge_angle).collect()
         }; // edge
         assert_eq!(edge(Some(&[0, 180])), vec![Some(180), None], "Back on the left edge, turned; Yoke free");

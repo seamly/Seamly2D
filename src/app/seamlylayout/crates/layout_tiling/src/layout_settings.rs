@@ -360,8 +360,8 @@ impl LayoutSettings {
     // | "any"            | unused              | [0, 90, 180, 270]        |
     // | unknown/legacy    | —                   | [0, 180]                 |
     //
-    // "any" ignores grainline direction.  It stays on quarter turns because
-    // the packer places axis-aligned bboxes: other angles only enlarge a bbox.
+    // In Any mode, this is the fallback for pieces without a handoff rule.
+    // Explicit Piece Properties rules are resolved per rectangle by the packer.
     pub fn rotation_trial_set_deg(&self) -> Vec<u16> {
         match self.layout_mode.as_str() {
             "alongGrainline" => vec![0, 180],
@@ -378,6 +378,11 @@ impl LayoutSettings {
             _ => vec![0, 180], // unknown/legacy (including "rotate") → alongGrainline behavior
         } // match layout_mode
     } // fn rotation_trial_set_deg
+
+    // @brief True only when the layout mode activates Piece Properties rotation rules.
+    pub fn applies_piece_rotation_rules(&self) -> bool {
+        self.layout_mode == "any"
+    } // fn applies_piece_rotation_rules
 
     // @brief Left margin in the active unit: 0 on the fold edge of fabric (folded, or fold lines on the left edge), else `margin_left`.
     fn margin_left_value(&self) -> f64 {
@@ -778,6 +783,9 @@ mod tests {
         s.layout_mode = "any".to_string();
         s.rotation_step = 180.0;
         assert_eq!(s.rotation_trial_set_deg(), vec![0, 90, 180, 270]);
+        assert!(s.applies_piece_rotation_rules());
+        s.layout_mode = "withNap".to_string();
+        assert!(!s.applies_piece_rotation_rules());
     } // trial_set_any
 
     // @brief is_roll_form: fabric, or paper roll; never paper sheet or tiled.

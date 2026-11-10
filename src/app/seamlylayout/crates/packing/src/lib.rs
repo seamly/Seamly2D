@@ -22,7 +22,7 @@ pub use layout_engine::{
     fits_bin, pack_maxrects, pack_maxrects_multi_angle, pack_maxrects_multi_angle_extending,
     pack_maxrects_multi_angle_lenient, pack_shelves, required_bin_width, validate_placements,
 };
-pub use pack_types::{FreeRect, PackError, PackResult, Placed, Rect};
+pub use pack_types::{FreeRect, PackError, PackResult, PieceRotationRule, Placed, Rect};
 pub use polygon_pack::Polygon;
 
 // @brief Dispatch a packing job to the right packer based on the rotation trial set.

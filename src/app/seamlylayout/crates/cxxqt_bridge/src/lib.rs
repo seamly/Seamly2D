@@ -1890,9 +1890,11 @@ impl qobject::AppController {
                     if let Some(message) = &media_enlargement {
                         queue.media_enlargements.push(format!("{message} {}", queue.job_label(&first)));
                     } // if media enlarged
+                    let first_label = queue.job_label(&first);
                     if !result.unplaced_labels.is_empty() {
-                        queue.problems.push(layout_views::tab_unplaced_problem(&queue.job_label(&first), &result.unplaced_labels));
+                        queue.problems.push(layout_views::tab_unplaced_problem(&first_label, &result.unplaced_labels));
                     } // if unplaced pieces
+                    queue.rotation_lines.extend(result.rotation_warnings.iter().map(|line| format!("{first_label}: {line}")));
                     if !multisize {
                         // Multisize fold line warnings go to the log only.
                         let prefix = queue.material_prefix(shown);
@@ -1935,6 +1937,9 @@ impl qobject::AppController {
                 if !result.unplaced_labels.is_empty() {
                     warnings.push(layout_views::unplaced_warning(&result.unplaced_labels, is_fabric_layout));
                 } // if unplaced pieces
+                if !result.rotation_warnings.is_empty() {
+                    warnings.push(layout_views::rotation_warning(&result.rotation_warnings));
+                } // if unsupported rotation values
                 if !result.fold_line_warnings.is_empty() {
                     warnings.push(layout_views::fold_line_warning(&result.fold_line_warnings));
                 } // if fold lines off the edge
@@ -2049,6 +2054,7 @@ impl qobject::AppController {
                         if !result.unplaced_labels.is_empty() {
                             queue.problems.push(layout_views::tab_unplaced_problem(&label, &result.unplaced_labels));
                         } // if unplaced pieces
+                        queue.rotation_lines.extend(result.rotation_warnings.iter().map(|line| format!("{label}: {line}")));
                         if job.kind.is_none() && !multisize {
                             // Multisize fold line warnings go to the log only.
                             queue.fold_line_lines.extend(result.fold_line_warnings.iter().map(|line| format!("{prefix}{line}")));
@@ -2955,6 +2961,7 @@ impl qobject::AppController {
             let (flat_dom, pieces) = match build_sheet_export_inputs(
                 &input_dom,
                 settings.free_rotation_without_grainline(),
+                settings.applies_piece_rotation_rules(),
                 nested_multisize,
                 divide_spec.as_ref(),
                 settings.fold_lines_on_left_edge.then_some(trial_angles_deg.as_slice()),

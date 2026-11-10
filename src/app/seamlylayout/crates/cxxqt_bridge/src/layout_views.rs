@@ -71,6 +71,15 @@ pub fn fold_line_warning(lines: &[String]) -> String {
     )
 } // fn fold_line_warning
 
+// @brief Warning for pieces whose explicit rotation value is unsupported.
+pub fn rotation_warning(lines: &[String]) -> String {
+    format!(
+        "{} piece(s) have unsupported Piece Properties rotation values; only the 0° baseline is allowed:\n\n{}",
+        lines.len(),
+        bullet_lines(lines)
+    )
+} // fn rotation_warning
+
 // @brief One tab's entry in the warning after the last tab: the tab label, then one bullet per piece.
 pub fn tab_unplaced_problem(label: &str, lines: &[String]) -> String {
     format!("{label}:\n{}", bullet_lines(lines))
@@ -417,6 +426,8 @@ pub struct TabLayoutQueue {
     pub problems: Vec<String>,
     // One line per piece whose fold line stays off the left edge, in individual layouts.
     pub fold_line_lines: Vec<String>,
+    // One line per piece with an unsupported explicit rotation value.
+    pub rotation_lines: Vec<String>,
     // User-requested enlargement dimensions, kept until all materials finish.
     pub media_enlargements: Vec<String>,
     // Base Size layout, its material and its size: the size tab of that size shows the same layout.
@@ -455,6 +466,7 @@ impl TabLayoutQueue {
             }),
             problems: Vec::new(),
             fold_line_lines: Vec::new(),
+            rotation_lines: Vec::new(),
             media_enlargements: Vec::new(),
             base_layout: None,
         }
@@ -512,7 +524,7 @@ impl TabLayoutQueue {
         } // match job
     } // fn reusable_layout
 
-    // @brief Completion popup with enlargement dimensions, unplaced pieces, failures, and fold-line warnings.
+    // @brief Completion popup with enlargements, unplaced pieces, invalid rules, and fold-line warnings.
     //
     // @return `None` when no warning or enlargement notification is needed.
     pub fn final_warning(&self) -> Option<String> {
@@ -523,6 +535,9 @@ impl TabLayoutQueue {
                 .unwrap_or(false);
             parts.push(tab_problems_warning(&self.problems, is_fabric));
         } // if problems
+        if !self.rotation_lines.is_empty() {
+            parts.push(rotation_warning(&self.rotation_lines));
+        } // if unsupported rotation values
         if !self.fold_line_lines.is_empty() {
             parts.push(fold_line_warning(&self.fold_line_lines));
         } // if fold lines off the edge
@@ -698,6 +713,7 @@ mod tests {
             ml_px: 0,
             mt_px: 0,
             unplaced_labels: vec![format!("{name} piece")],
+            rotation_warnings: Vec::new(),
             fold_line_warnings: Vec::new(),
             flat_dom: doc.clone(),
             vertical_dom: doc.clone(),
@@ -736,6 +752,16 @@ mod tests {
         assert!(text.starts_with("Some layouts left pieces out:\n\nLining:\n\u{2022} Back"), "{text}");
         assert!(text.ends_with("(the fold):\n\n\u{2022} Lining: Back: the fold line crosses the grain"), "{text}");
     } // final_warning_joins_problems_and_fold_lines
+
+    // @brief Invalid rotation values are named in the final warning.
+    #[test]
+    fn final_warning_includes_rotation_values() {
+        let mut queue = TabLayoutQueue::new(String::new(), 0, Vec::new(), Vec::new(), false, None);
+        queue.rotation_lines.push("Back: unsupported rotation value".to_string());
+        let text = queue.final_warning().expect("rotation warning");
+        assert!(text.contains("only the 0° baseline is allowed"), "{text}");
+        assert!(text.contains("\u{2022} Back: unsupported rotation value"), "{text}");
+    } // final_warning_includes_rotation_values
 
     // @brief Enlargement dimensions survive the material queue and coexist with unplaced warnings.
     #[test]

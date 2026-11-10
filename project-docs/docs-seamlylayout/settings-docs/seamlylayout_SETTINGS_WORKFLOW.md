@@ -61,7 +61,8 @@
   All modes orient each pattern piece so the grainline points "up" (preprocessing).
   - alongGrainline: trial set {0°, 180°} — head-up or head-down.
   - withNap:        trial set is a singleton — every piece points the same direction.
-  - any:            trial set {0°, 90°, 180°, 270°} — grainline ignored; packer picks the best quarter turn.
+  - any:            per-piece Piece Properties > Rotation applies; missing legacy rules use {0°, 90°, 180°, 270°}.
+                    `Any` samples integer angles from 0° to 359°. `rotationStep` remains unused.
 - if layoutMode='withNap':
   >> Nap Direction -- 'Pieces point Up' (rotationStep=0) | 'Pieces point Down' (rotationStep=180);
      default is 'Pieces point Up'.

@@ -111,7 +111,7 @@ struct HandoffPieceInfo
     QString size;         ///< multisize size in the data-units unit; empty for an individual pattern
     QString piece_set_key; ///< same value for the same piece in every size; empty = no piece set
     int     quantity = 1;
-    int     rotation = 0; ///< rotation step in degrees; 0 = the piece may not rotate
+    int     rotation = 0; ///< rotation step in degrees; 0 explicitly means no additional rotation
     int     tilt     = 0; ///< largest tilt in degrees, negative = clockwise; 0 = the piece may not tilt
     QString flip;         ///< pieceFlipToString() value; empty = no flip
     QString orientation;  ///< "Left" or "Right"; empty = undefined

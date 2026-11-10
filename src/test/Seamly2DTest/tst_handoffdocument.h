@@ -53,6 +53,8 @@ private slots:
     void sheetMatchesOldScene() const;
     void emptySheetKeepsPositions() const;
     void hiddenItemsAreNotDrawn() const;
+    void rotationValuesSurviveHiddenLabels_data() const;
+    void rotationValuesSurviveHiddenLabels() const;
     void foldPieceSendsOpenLines_data() const;
     void foldPieceSendsOpenLines() const;
     void labelLinesElideAndAlign() const;

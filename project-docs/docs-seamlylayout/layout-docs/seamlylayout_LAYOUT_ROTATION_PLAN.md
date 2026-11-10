@@ -32,10 +32,12 @@ All pieces are preprocessed so the grainline points upward.
   - `0` = Pieces point Up, `180` = Pieces point Down.
 
 - `any`
-  - Trial set: `{0°, 90°, 180°, 270°}`
-  - Meaning: grainline ignored; packer picks the quarter turn that packs best.
-  - Only quarter turns: the packer places axis-aligned bboxes, so other angles only enlarge a bbox.
-  - Routed to `layout_engine::pack_maxrects_multi_angle`.
+  - Default trial set: `{0°, 90°, 180°, 270°}` for legacy handoffs without a Piece Rotation rule.
+  - When present, each piece's `data-rotation` rule restricts its own angles:
+    `0`/`360` → `{0°}`, `180` → `{0°, 180°}`, `90` → quarter turns, and `1` → every integer angle from 0° through 359°.
+  - `data-rotation="0"` means no rotation; omission preserves the legacy quarter-turn fallback.
+  - The grainline is ignored after the existing grain-up preprocessing. Any uses integer-degree sampling, not continuous optimization.
+  - Routed to `layout_engine::pack_maxrects_multi_angle`; the selected angle is applied to the full piece group.
 
 ## Settings model
 
@@ -73,6 +75,7 @@ On load:
 ## Packing and assembly notes
 
 - Packing consumes the trial set produced above.
+- Explicit Piece Properties rules apply only in `any`; `rotationStep` remains the Nap Direction setting.
 - `Placed.rotation_deg` remains part of the placement record.
 - Layout assembly applies translation and orientation transform to each piece
   group so fills and child elements remain aligned with the piece.

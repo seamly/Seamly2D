@@ -360,7 +360,7 @@ void SettingsModel::setLayoutMode(const QString &v)
 // @brief Set the rotation step (degrees).  Semantics depend on layoutMode:
 //   layoutMode == "withNap" → fixed offset in { 0, 180 } (head-up vs head-down)
 //   layoutMode == "alongGrainline" → unused (trial set is fixed at {0, 180})
-//   layoutMode == "any" → unused (trial set is fixed at {0, 90, 180, 270})
+//   layoutMode == "any" → unused (fallback set for handoffs without a piece rule)
 // Does not validate the value — QML radio binding enforces the per-mode set.
 void SettingsModel::setRotationStep(double v)
 {

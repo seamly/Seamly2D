@@ -18,7 +18,7 @@
 //   5. Return the assembled SVG; callers feed it into the tiled-PDF pipeline.
 //
 // Public API:
-//   partition_oversized_pieces(pieces, content_w_px, content_h_px)
+//   partition_oversized_pieces(pieces, content_w_px, content_h_px, trial_angles_deg)
 //       -> (Vec<usize>, Vec<usize>)
 //   build_oversized_svg(flat_dom, all_pieces, oversized_indices, gap_px,
 //                       trial_angles_deg, ml_px, mt_px, mr_px, mb_px)
@@ -39,30 +39,26 @@ const OVERSIZED_HEIGHT_SENTINEL_PX: u32 = (500.0 * LAYOUT_PPI as f64) as u32; //
 
 // @brief Split pieces into oversized and remaining by comparing to sheet contentRect.
 //
-// A piece is oversized if its width exceeds `content_w_px` OR its height exceeds
-// `content_h_px`, and a quarter turn (allowed only for `rect.free_rotation`)
-// does not make it fit.  Both returned vectors hold indices into the `pieces` slice.
+// A piece is oversized when it does not fit at any angle allowed by its rule
+// and the layout mode. Both returned vectors hold indices into `pieces`.
 // Relative order within each partition is preserved.
 //
 // @param pieces         All extracted PieceRect entries after preprocessing.
 // @param content_w_px   Sheet contentRect width in pixels (from settings.effective_bin_px()).
 // @param content_h_px   Sheet contentRect height in pixels (from settings.effective_bin_px()).
+// @param trial_angles_deg Layout mode's fallback rotation set.
 // @return (oversized_indices, remaining_indices) — parallel index vectors into `pieces`.
 pub fn partition_oversized_pieces(
     pieces: &[PieceRect],
     content_w_px: u32,
     content_h_px: u32,
+    trial_angles_deg: &[u16],
 ) -> (Vec<usize>, Vec<usize>) {
     // Walk every piece and classify by its AABB dimensions against the sheet bin.
     let mut oversized: Vec<usize> = Vec::new();
     let mut remaining: Vec<usize> = Vec::new();
     for (i, p) in pieces.iter().enumerate() {
-        // A piece is oversized when it exceeds the sheet contentRect on either
-        // axis, in every orientation the packer may try.
-        let fits_upright = p.rect.w <= content_w_px && p.rect.h <= content_h_px;
-        let fits_turned  = p.rect.free_rotation
-            && p.rect.h <= content_w_px && p.rect.w <= content_h_px;
-        if !fits_upright && !fits_turned {
+        if !packing::fits_bin(p.rect, content_w_px, content_h_px, trial_angles_deg) {
             oversized.push(i);
         } else {
             remaining.push(i);
@@ -466,13 +462,35 @@ mod tests {
     #[test]
     fn partition_keeps_free_rotation_piece_that_fits_turned() {
         let mut wide = piece(700, 300, "wide", 0);
-        let (over, _rem) = partition_oversized_pieces(&[wide.clone()], 500, 800);
+        let (over, _rem) = partition_oversized_pieces(&[wide.clone()], 500, 800, &[0]);
         assert_eq!(over, vec![0]);
         wide.rect.free_rotation = true;
-        let (over, rem) = partition_oversized_pieces(&[wide], 500, 800);
+        let (over, rem) = partition_oversized_pieces(&[wide], 500, 800, &[0, 90, 180, 270]);
         assert!(over.is_empty());
         assert_eq!(rem, vec![0]);
     } // partition_keeps_free_rotation_piece_that_fits_turned
+
+    // @brief Oversized checks use each Any-mode rotation rule.
+    #[test]
+    fn partition_respects_any_mode_piece_rotation() {
+        let mut any = piece(350, 10, "Bias", 0);
+        any.rect = any.rect
+            .with_piece_rotation(packing::PieceRotationRule::Any)
+            .with_piece_rotation_enabled(true);
+        let (oversized, remaining) =
+            partition_oversized_pieces(&[any], 300, 300, &[0, 90, 180, 270]);
+        assert!(oversized.is_empty());
+        assert_eq!(remaining, vec![0]);
+
+        let mut four_way = piece(350, 10, "Bias", 0);
+        four_way.rect = four_way.rect
+            .with_piece_rotation(packing::PieceRotationRule::FourWay)
+            .with_piece_rotation_enabled(true);
+        let (oversized, remaining) =
+            partition_oversized_pieces(&[four_way], 300, 300, &[0, 90, 180, 270]);
+        assert_eq!(oversized, vec![0]);
+        assert!(remaining.is_empty());
+    } // partition_respects_any_mode_piece_rotation
 
     // partition_oversized_pieces
     // -----------------------------------------------------------------------
@@ -484,7 +502,7 @@ mod tests {
             piece(100, 200, "a", 0),
             piece(300, 400, "b", 1),
         ];
-        let (over, rem) = partition_oversized_pieces(&pieces, 500, 600);
+        let (over, rem) = partition_oversized_pieces(&pieces, 500, 600, &[0]);
         assert!(over.is_empty(), "expected no oversized: {over:?}");
         assert_eq!(rem, vec![0, 1], "remaining should be all pieces");
     } // partition_no_oversized
@@ -496,7 +514,7 @@ mod tests {
             piece(800, 200, "wide", 0),  // wider than 700
             piece(100, 900, "tall", 1),  // taller than 700
         ];
-        let (over, rem) = partition_oversized_pieces(&pieces, 700, 700);
+        let (over, rem) = partition_oversized_pieces(&pieces, 700, 700, &[0]);
         assert_eq!(over, vec![0, 1], "both pieces should be oversized");
         assert!(rem.is_empty(), "expected no remaining");
     } // partition_all_oversized
@@ -510,7 +528,7 @@ mod tests {
             piece(300, 900, "tall",  2), // too tall
             piece(200, 200, "small", 3),
         ];
-        let (over, rem) = partition_oversized_pieces(&pieces, 500, 500);
+        let (over, rem) = partition_oversized_pieces(&pieces, 500, 500, &[0]);
         assert_eq!(over, vec![1, 2], "oversized indices");
         assert_eq!(rem,  vec![0, 3], "remaining indices");
     } // partition_mixed
@@ -521,7 +539,7 @@ mod tests {
         let pieces = vec![
             piece(500, 500, "exact", 0),
         ];
-        let (over, rem) = partition_oversized_pieces(&pieces, 500, 500);
+        let (over, rem) = partition_oversized_pieces(&pieces, 500, 500, &[0]);
         assert!(over.is_empty(), "exact-match piece should NOT be oversized");
         assert_eq!(rem, vec![0]);
     } // partition_exact_boundary_not_oversized
@@ -530,7 +548,7 @@ mod tests {
     #[test]
     fn partition_one_pixel_over_width() {
         let pieces = vec![piece(501, 100, "just_over", 0)];
-        let (over, rem) = partition_oversized_pieces(&pieces, 500, 500);
+        let (over, rem) = partition_oversized_pieces(&pieces, 500, 500, &[0]);
         assert_eq!(over, vec![0]);
         assert!(rem.is_empty());
     } // partition_one_pixel_over_width
@@ -539,7 +557,7 @@ mod tests {
     #[test]
     fn partition_empty_pieces() {
         let pieces: Vec<PieceRect> = vec![];
-        let (over, rem) = partition_oversized_pieces(&pieces, 500, 500);
+        let (over, rem) = partition_oversized_pieces(&pieces, 500, 500, &[0]);
         assert!(over.is_empty());
         assert!(rem.is_empty());
     } // partition_empty_pieces

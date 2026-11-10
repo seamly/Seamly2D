@@ -2,8 +2,8 @@
 
 Source: [TEST_APPLICATION_UPDATES.md, section 5](TEST_APPLICATION_UPDATES.md#5-seamly2d--flip-and-placement-properties).
 
-Status: implementation plan only. No rotation behavior is implemented by this document.
-All implementation and verification boxes remain open.
+Status: implementation is in progress. Automated Rust tests pass; Qt, GUI, and performance acceptance remain open.
+Track implementation and verification boxes individually.
 
 Tasks use the `Rotation.` prefix. Check completed subtasks individually.
 Move fully completed tasks to [TODO_COMPLETED.md](TODO_COMPLETED.md).
@@ -18,6 +18,8 @@ Move fully completed tasks to [TODO_COMPLETED.md](TODO_COMPLETED.md).
 - Do not change Piece Mode display, draft geometry, pattern schemas, Flip, Tilt, or DXF rule serialization.
 - Preserve grain-up preprocessing. Trial angles are additional SVG rotations from that baseline, not absolute draft angles.
 - Do not restore the retired free-angle layout mode or introduce polygon nesting.
+- Emit `data-rotation="0"` for Piece Properties > Rotation > None.
+- Treat a missing `data-rotation` as a legacy handoff and preserve the current quarter-turn fallback.
 - Update the source application-update checklist to distinguish this plan from implemented free rotation.
 - Installed-app acceptance remains a separate user check.
 
@@ -39,7 +41,7 @@ Repository-relative paths below identify the implementation points:
 | --- | --- |
 | Seamly2D properties | `src\libs\vtools\dialogs\tools\piece\pattern_piece_dialog.cpp` reads/writes `PieceRotation` through `VPieceLabelData`. This is not the label angle formula. |
 | Stored values | `src\libs\vpatterndb\floatItemData\vpiecelabeldata.cpp`, `rotationStepDegrees()`: None → 0, 1-Way → 360, 2-Way → 180, 4-Way → 90, Any → 1. |
-| Active producer | `src\libs\layout_handoff\handoff_document.cpp`, `HandoffPieceInfo::create()` and `HandoffDocument::to_dom()`, emit `data-rotation` for positive steps, even without visible labels. None is omitted. |
+| Active producer | `src\libs\layout_handoff\handoff_document.cpp`, `HandoffPieceInfo::create()` and `HandoffDocument::to_dom()`, emit `data-rotation` for all choices, including `0` for None, even without visible labels. |
 | Existing coverage | `src\test\Seamly2DTest\tst_vpiece.cpp` covers stored values and degree mapping. `tst_svgcomponenttags.cpp` covers old-writer attributes; extend `tst_handoffdocument.cpp` for the active writer. |
 | Global policy | `src\app\seamlylayout\crates\layout_tiling\src\layout_settings.rs`, `rotation_trial_set_deg()`, returns `[0,90,180,270]` for `any`. `rotation_step` controls nap direction only. |
 | Missing consumer | `crates\cxxqt_bridge\src\piece_extractor.rs`, both extractors, create `PieceRect`/`Rect` without reading `data-rotation`. Crate paths in this table are relative to `src\app\seamlylayout`. |
@@ -57,18 +59,16 @@ Normalize angles to integers in `[0,359]`; prefer ascending angles, beginning wi
 
 | Piece Rotation | Handoff value | Proposed trial angles |
 | --- | --- | --- |
-| None | Absent on a tagged piece | `[0]` |
+| None | `0` | `[0]` |
 | 1-Way | `360` | `[0]`; do not store 360 as a distinct orientation |
 | 2-Way | `180` | `[0,180]` |
 | 4-Way | `90` | `[0,90,180,270]` |
 | Any | `1` | Every integer angle from 0 through 359 |
-| Untagged SVG without a rule | Absent | Existing fallback `[0,90,180,270]` |
+| Missing rule (legacy or untagged SVG) | Absent | Existing fallback `[0,90,180,270]` |
 | Invalid explicit value | Empty, nonnumeric, nonfinite, unsupported step | `[0]` with a piece-named warning |
 
-**Decision gate:** the attribute contract does not define the nesting meaning of omitted Rotation.
-The conservative proposal treats tagged None as no additional rotation.
-This also affects older tagged SVGs without `data-rotation`; omission cannot distinguish their origin.
-Confirm this policy before implementation, or explicitly select the existing quarter-turn fallback for omitted values.
+**Policy decision:** the user approved explicit `0` for None. New handoffs can distinguish None from older handoffs that omit the attribute.
+Missing values retain the existing quarter-turn fallback for backward compatibility.
 Do not silently treat None as piece Any.
 
 Fold-edge placement remains a geometric constraint, not permission to bypass Rotation.
@@ -204,6 +204,14 @@ ctest --preset debug
 
 The approved integrated MSI build also runs the Seamly2D Qt suites, release CTest, and Rust workspace tests.
 Keep GUI acceptance and performance results separate from automated test results.
+
+### Latest verification
+
+- `cargo test -p pack_types -p layout_engine -p packing -p layout_tiling -p cxxqt_bridge` — passed.
+- `cargo test --workspace` — passed.
+- `ctest --preset debug` — no configured debug build or tests were available in this worktree.
+- The integrated Windows MSI build and installed-app checks remain pending user approval.
+- Runtime comparison is preliminary synthetic data, not the representative multi-piece measurement required by Rotation.5.6.
 
 ## Completion criteria
 

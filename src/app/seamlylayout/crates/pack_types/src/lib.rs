@@ -26,6 +26,12 @@ pub struct Rect {
     pub left_edge_angle: Option<u16>,
     // Minimum x coordinate required for this rectangle inside the bin.
     pub min_left_gap_px: u32,
+    // Piece Properties rule carried from the SVG handoff.
+    pub piece_rotation: PieceRotationRule,
+    // True only when the active layout mode applies per-piece rotation rules.
+    pub apply_piece_rotation: bool,
+    // True when a fold-edge requirement has no angle permitted by the piece rule.
+    pub fold_edge_conflict: bool,
 }
 
 impl Rect {
@@ -34,7 +40,16 @@ impl Rect {
     // @param h Height.
     // @return New rectangle.
     pub const fn new(w: u32, h: u32) -> Self {
-        Self { w, h, free_rotation: false, left_edge_angle: None, min_left_gap_px: 0 }
+        Self {
+            w,
+            h,
+            free_rotation: false,
+            left_edge_angle: None,
+            min_left_gap_px: 0,
+            piece_rotation: PieceRotationRule::Unspecified,
+            apply_piece_rotation: false,
+            fold_edge_conflict: false,
+        }
     }
 
     // @brief Return a copy with the given free-rotation flag.
@@ -51,6 +66,72 @@ impl Rect {
     pub const fn with_min_left_gap(self, gap_px: u32) -> Self {
         Self { min_left_gap_px: gap_px, ..self }
     }
+
+    // @brief Return a copy with the piece's source rotation rule.
+    pub const fn with_piece_rotation(self, piece_rotation: PieceRotationRule) -> Self {
+        Self { piece_rotation, ..self }
+    }
+
+    // @brief Enable or disable applying the source rule in Any layout mode.
+    pub const fn with_piece_rotation_enabled(self, apply_piece_rotation: bool) -> Self {
+        Self { apply_piece_rotation, ..self }
+    }
+
+    // @brief Return a copy that cannot be placed because its fold rule conflicts with rotation.
+    pub const fn with_fold_edge_conflict(self) -> Self {
+        Self { fold_edge_conflict: true, ..self }
+    }
+}
+
+// @brief Source rotation choices carried by a piece, independent of layout mode.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PieceRotationRule {
+    // The handoff did not provide a rule; keep the layout mode's current set.
+    Unspecified,
+    // None or 1-Way; both permit only the normalized baseline angle.
+    Fixed,
+    // Permit 0° and 180°.
+    TwoWay,
+    // Permit quarter turns.
+    FourWay,
+    // Permit every integer degree in Any layout mode.
+    Any,
+    // An explicit unsupported value; layout mode Any restricts it to baseline.
+    Invalid,
+}
+
+impl PieceRotationRule {
+    // @brief Return the effective angle set for Any mode, using the legacy set when unspecified.
+    pub fn angles_for_any_mode(self, fallback: &[u16]) -> Vec<u16> {
+        match self {
+            Self::Unspecified => {
+                if fallback.is_empty() { vec![0] } else { fallback.to_vec() }
+            }
+            Self::Fixed | Self::Invalid => vec![0],
+            Self::TwoWay => vec![0, 180],
+            Self::FourWay => vec![0, 90, 180, 270],
+            Self::Any => (0..360).collect(),
+        } // match rule
+    } // fn angles_for_any_mode
+
+    // @brief Intersect two rules using Any-mode compatibility defaults.
+    pub fn intersect_for_any_mode(self, other: Self) -> Self {
+        if self == Self::Invalid || other == Self::Invalid {
+            return Self::Invalid;
+        } // if either source rule is invalid
+        let rank = |rule| match rule {
+            Self::Unspecified | Self::FourWay => 2,
+            Self::Fixed | Self::Invalid => 0,
+            Self::TwoWay => 1,
+            Self::Any => 3,
+        }; // rank
+        match rank(self).min(rank(other)) {
+            0 => Self::Fixed,
+            1 => Self::TwoWay,
+            2 => Self::FourWay,
+            _ => Self::Any,
+        } // intersection
+    } // fn intersect_for_any_mode
 }
 
 // @brief A rectangle with a position inside a bin.

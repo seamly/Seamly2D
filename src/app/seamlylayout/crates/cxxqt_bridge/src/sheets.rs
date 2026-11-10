@@ -45,6 +45,7 @@ use crate::exports::{
 //
 // @param input_dom            Raw imported SVG DOM.
 // @param free_rotation_allowed  The user's "Rotate freely" choice for pieces without a grainline.
+// @param apply_piece_rotation Whether Any mode activates each piece's rule.
 // @param nested_multisize       `true` packs each multisize piece-set as one unit (Nested layout).
 // @param divide                 The media the layout split its pieces for; None when it did not split.
 // @param fold_line_trial        The layout mode's trial angles when fold lines go on the left
@@ -53,6 +54,7 @@ use crate::exports::{
 pub(crate) fn build_sheet_export_inputs(
     input_dom: &Document,
     free_rotation_allowed: bool,
+    apply_piece_rotation: bool,
     nested_multisize: bool,
     divide: Option<&crate::piece_divider::DivideSpec>,
     fold_line_trial: Option<&[u16]>,
@@ -79,12 +81,13 @@ pub(crate) fn build_sheet_export_inputs(
     } // if split
     // Fold lines on the left edge, as the layout put them.
     let fold_plan = fold_line_trial
-        .map(|trial| crate::fold_line_edge::plan_fold_line_edge(&mut flat_dom, trial))
+        .map(|trial| crate::fold_line_edge::plan_fold_line_edge(&mut flat_dom, trial, apply_piece_rotation))
         .unwrap_or_default();
     svg_dom::translate_dom(&mut flat_dom);
     svg_dom::flatten_dom(&mut flat_dom);
 
     let mut pieces = crate::extract_piece_rects(&flat_dom);
+    crate::piece_extractor::set_piece_rotation_for_layout_mode(&mut pieces, apply_piece_rotation);
     crate::piece_extractor::set_free_rotation_without_grainline(&mut pieces, free_rotation_allowed);
     crate::fold_line_edge::pin_fold_line_pieces(&mut pieces, &fold_plan);
     if pieces.is_empty() {
@@ -127,6 +130,13 @@ pub(crate) fn do_export_sheets_pdf(
 
     use std::fs;
 
+    if let Some(piece) = all_pieces.iter().find(|piece| piece.rect.fold_edge_conflict) {
+        return Err(format!(
+            "Sheets PDF: {} cannot satisfy both its rotation rule and the fold edge.",
+            piece.label()
+        ));
+    } // if a fold edge conflicts with piece rotation
+
     // Derive content-rect dimensions from settings.
     // effective_bin_px() = (page_w - margins - selvedge) × (page_h - margins).
     let (content_w_px, content_h_px) = settings.effective_bin_px();
@@ -142,7 +152,7 @@ pub(crate) fn do_export_sheets_pdf(
 
     // Partition pieces into oversized (→ Phase A) and remaining (→ Phase B).
     let (oversized_indices, remaining_indices) =
-        partition_oversized_pieces(all_pieces, content_w_px, content_h_px);
+        partition_oversized_pieces(all_pieces, content_w_px, content_h_px, &trial_angles_deg);
 
     log::debug!(
         "do_export_sheets_pdf: {} oversized pieces (Phase A), {} remaining (Phase B).",
@@ -193,7 +203,7 @@ pub(crate) fn collect_sheet_pdf_page_bytes(
     let gap_px = settings.piece_gap_px();
     let trial_angles_deg = settings.rotation_trial_set_deg();
     let (oversized_indices, remaining_indices) =
-        partition_oversized_pieces(all_pieces, content_w_px, content_h_px);
+        partition_oversized_pieces(all_pieces, content_w_px, content_h_px, &trial_angles_deg);
 
     if !oversized_indices.is_empty() {
         log::debug!("do_export_sheets_pdf: Phase A — building oversized SVG.");
@@ -336,7 +346,7 @@ fn flat_dom_and_pieces_for_dims(dims: &[(u32, u32)]) -> (Document, Vec<PieceRect
         groups.join("")
     );
     let input = Document::parse(&svg).expect("test SVG should parse");
-    build_sheet_export_inputs(&input, false, true, None, None).expect("sheet export inputs should build")
+    build_sheet_export_inputs(&input, false, false, true, None, None).expect("sheet export inputs should build")
 } // fn flat_dom_and_pieces_for_dims
 
 #[cfg(test)]
@@ -353,6 +363,78 @@ mod tests {
             "preprocessed DOM should preserve piece groups"
         );
     } // build_sheet_export_inputs_extracts_pieces
+
+    // @brief Sheet export uses the same per-piece rotation rules as the layout preview.
+    #[test]
+    fn sheet_export_oversize_check_uses_piece_rotation_rules() {
+        let settings = LayoutSettings::from_json(
+            r#"{
+                "unit": "in", "mediaType": "paper", "paperType": "sheet",
+                "pageWidth": 3.125, "pageHeight": 3.125,
+                "marginLeft": 0.0, "marginRight": 0.0, "marginTop": 0.0, "marginBottom": 0.0,
+                "pieceGap": 0.0, "layoutMode": "any", "rotationStep": 0
+            }"#,
+        )
+        .expect("test settings should parse");
+        let trial_angles = settings.rotation_trial_set_deg();
+        let (bin_w, bin_h) = settings.effective_bin_px();
+
+        for (rule, should_fit) in [("1", true), ("90", false)] {
+            let svg = format!(
+                r#"<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">
+  <g id="piece-Bias" data-type="piece" data-name="Bias" data-rotation="{rule}">
+    <g data-type="cutline"><path d="M0,0 L350,0 L350,10 L0,10 Z"/></g>
+  </g>
+</svg>"#
+            );
+            let input = Document::parse(&svg).expect("test SVG should parse");
+            let (flat_dom, pieces) =
+                build_sheet_export_inputs(&input, false, true, false, None, None).expect("inputs build");
+            let (oversized, remaining) =
+                partition_oversized_pieces(&pieces, bin_w, bin_h, &trial_angles);
+            assert_eq!(oversized.is_empty(), should_fit, "rotation rule {rule}");
+            assert_eq!(remaining.is_empty(), !should_fit, "rotation rule {rule}");
+            assert!(flat_dom.to_string().contains("data-rotation"));
+        } // for each rule
+    } // sheet_export_oversize_check_uses_piece_rotation_rules
+
+    // @brief Sheet PDF export names a piece whose fixed rule conflicts with its fold edge.
+    #[test]
+    fn sheet_export_reports_fold_rotation_conflict() {
+        let settings = LayoutSettings::from_json(
+            r#"{
+                "unit": "in", "mediaType": "paper", "paperType": "sheet",
+                "pageWidth": 20.0, "pageHeight": 20.0,
+                "marginLeft": 0.0, "marginRight": 0.0, "marginTop": 0.0, "marginBottom": 0.0,
+                "pieceGap": 0.0, "layoutMode": "any", "rotationStep": 0,
+                "foldLinesOnLeftEdge": true
+            }"#,
+        )
+        .expect("test settings should parse");
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">
+  <g id="piece-Back" data-type="piece" data-name="Back" data-on-fold="true" data-rotation="0">
+    <g data-type="cutline"><path d="M0,0 L100,0 L100,200 L0,200 Z"/></g>
+    <g data-type="fold_line"><path d="M100,190 L100,10"/></g>
+  </g>
+</svg>"#;
+        let input = Document::parse(svg).expect("test SVG should parse");
+        let trial_angles = settings.rotation_trial_set_deg();
+        let (flat_dom, pieces) = build_sheet_export_inputs(
+            &input,
+            false,
+            true,
+            false,
+            None,
+            Some(&trial_angles),
+        )
+        .expect("sheet export inputs should build");
+
+        assert!(pieces[0].rect.fold_edge_conflict);
+        let error = do_export_sheets_pdf(&flat_dom, &pieces, "unused.pdf", &settings)
+            .expect_err("rotation and fold edge conflict");
+        assert!(error.contains("Back"), "{error}");
+        assert!(error.contains("fold edge"), "{error}");
+    } // sheet_export_reports_fold_rotation_conflict
 
     // @brief Pure remaining-piece export yields one PDF page per packed sheet.
     #[test]
@@ -375,8 +457,9 @@ mod tests {
         let settings = test_sheet_settings();
         let (flat_dom, pieces) = flat_dom_and_pieces_for_dims(&[(2500, 300), (1200, 1200)]);
         let (content_w_px, content_h_px) = settings.effective_bin_px();
+        let trial_angles_deg = settings.rotation_trial_set_deg();
         let (oversized_indices, remaining_indices) =
-            partition_oversized_pieces(&pieces, content_w_px, content_h_px);
+            partition_oversized_pieces(&pieces, content_w_px, content_h_px, &trial_angles_deg);
         let oversized_doc = build_oversized_svg(
             &flat_dom,
             &pieces,

@@ -354,7 +354,9 @@ void flatten(const QDomElement &element, const QTransform &parent, QHash<QString
         for (int i = 0; i < attributes.size(); ++i)
         {
             const QDomAttr attribute = attributes.item(i).toAttr();
-            if (attribute.name().startsWith(QLatin1String("data-")) || attribute.name() == QLatin1String("id"))
+            if ((attribute.name().startsWith(QLatin1String("data-"))
+                 && attribute.name() != QLatin1String("data-rotation"))
+                || attribute.name() == QLatin1String("id"))
             {
                 parts.append(attribute.name() + QLatin1Char('=') + attribute.value());
             }
@@ -789,6 +791,7 @@ void TST_HandoffDocument::hiddenItemsAreNotDrawn() const
     QCOMPARE(count_type(hidden_entries, QStringLiteral("grainline")), 0);
     QCOMPARE(count_type(hidden_entries, QStringLiteral("cutline")), 1);
     QVERIFY(dom.toString().contains(QStringLiteral("data-grainline-angle=")));
+    QVERIFY(dom.toString().contains(QStringLiteral("data-rotation=\"0\"")));
 
     style.show_labels          = false;
     style.show_grainlines      = false;
@@ -804,6 +807,73 @@ void TST_HandoffDocument::hiddenItemsAreNotDrawn() const
     QCOMPARE(count_type(off_entries, QStringLiteral("cutline")), 0);
     QCOMPARE(count_type(off_entries, QStringLiteral("seamline")), 1);
     QVERIFY(dom.toString().contains(QStringLiteral("data-grainline-angle=")));
+    QVERIFY(dom.toString().contains(QStringLiteral("data-rotation=\"0\"")));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_HandoffDocument::rotationValuesSurviveHiddenLabels_data() const
+{
+    QTest::addColumn<int>("rotation");
+    QTest::addColumn<bool>("label_visible");
+    QTest::addColumn<QString>("expected");
+
+    const QList<QPair<PieceRotation, QString>> rotations = {
+        {PieceRotation::None, QStringLiteral("0")},
+        {PieceRotation::OneWay, QStringLiteral("360")},
+        {PieceRotation::TwoWay, QStringLiteral("180")},
+        {PieceRotation::FourWay, QStringLiteral("90")},
+        {PieceRotation::Any, QStringLiteral("1")},
+    };
+    for (const auto &[rotation, expected] : rotations)
+    {
+        QTest::newRow(qPrintable(expected + QStringLiteral("-visible")))
+            << static_cast<int>(rotation) << true << expected;
+        QTest::newRow(qPrintable(expected + QStringLiteral("-hidden")))
+            << static_cast<int>(rotation) << false << expected;
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_HandoffDocument::rotationValuesSurviveHiddenLabels() const
+{
+    QFETCH(int, rotation);
+    QFETCH(bool, label_visible);
+    QFETCH(QString, expected);
+
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+    TestPatternDocument document;
+    VAbstractPattern *previous = qApp->getCurrentDocument();
+    qApp->setCurrentDocument(&document);
+
+    VPiece piece = make_piece(data.data(), true, false, false);
+    set_label_templates(&document, &piece);
+    piece.GetPatternPieceData().SetRotationWay(static_cast<PieceRotation>(rotation));
+    if (!label_visible)
+    {
+        piece.GetPatternPieceData().SetVisible(false);
+    }
+    const HandoffPlacedPiece placed = placed_piece(piece, data.data(), &document, QString(), QString());
+    qApp->setCurrentDocument(previous);
+
+    const QDomDocument dom = make_new_document({placed}, {});
+    QDomDocument reopened;
+    QVERIFY(reopened.setContent(dom.toString()));
+    const QDomNodeList groups = reopened.elementsByTagName(QStringLiteral("g"));
+    QDomElement piece_group;
+    for (int i = 0; i < groups.size(); ++i)
+    {
+        const QDomElement group = groups.at(i).toElement();
+        if (group.attribute(QStringLiteral("data-type")) == QLatin1String("piece"))
+        {
+            piece_group = group;
+            break;
+        }
+    }
+
+    QVERIFY(!piece_group.isNull());
+    QCOMPARE(piece_group.attribute(QStringLiteral("data-rotation")), expected);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

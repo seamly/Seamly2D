@@ -6,7 +6,10 @@
 
 - Implemented the Tile Size choices, split-layout export formats, paper overflow rejection, and fixed-size paper splitting.
 - Grouped anchor creation into one undo operation. Added redo and Stripe/Plaid path-node regression coverage; path-node support already existed.
-- Added `project-docs/TODO_ROTATION.md`. Layout Mode Any free rotation remains unimplemented.
+- Implemented per-piece Rotation rules for Layout Mode Any, including explicit None, legacy fallback, fold conflicts, and rule propagation through layout/export paths.
+- `cargo test -p pack_types -p layout_engine -p packing -p layout_tiling -p cxxqt_bridge` and `cargo test --workspace` pass on `task-rotation-plan`.
+- `ctest --preset debug` found no tests because this worktree has no configured debug build. MSI approval, rebuilt-app checks, and representative performance evidence remain open.
+- Rotation changes are committed as `9e27295d20` on `task-rotation-plan`; not merged or pushed. Do not delete the branch or worktree. The main worktree remains untouched.
 - Targeted checks passed: SettingsModel/QML (40), `layout_tiling` (40), ExportMenuTests (20), paper-layout regressions (6), and `cxxqt_bridge` (278).
 - Anchor tests passed: PieceMarkings (9) and three MainWindow undo/redo cycles. The reported missing-redo symptom also passed on baseline; verify the installed MSI.
 - Updated `project-docs/TEST_APPLICATION_UPDATES.md`; MSI GUI acceptance remains open. No full MSI build or push.
