@@ -30,6 +30,7 @@ CLAUDE.md
 # text files
 *.txt
 
+packaging/windows/seamly-msi/x64/seamly-x64.msi
 # include track Third-party license notices - shipped in every installer
 !packaging/licenses/*.txt
 
@@ -298,7 +299,6 @@ src/app/seamlylayout/qt_frontend/build/
 !src/app/seamlylayout/qt_frontend/.qt/
 !src/app/seamlylayout/qt_frontend/*.user
 !src/app/seamlylayout//qt_frontend/*.user.*
-
 
 
 

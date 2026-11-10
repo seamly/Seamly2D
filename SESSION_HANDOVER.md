@@ -2,6 +2,17 @@
 
 ## Current status
 
+### 2026-11-09 — Application update fixes
+
+- Implemented the Tile Size choices, split-layout export formats, paper overflow rejection, and fixed-size paper splitting.
+- Grouped anchor creation into one undo operation. Added redo and Stripe/Plaid path-node regression coverage; path-node support already existed.
+- Added `project-docs/TODO_ROTATION.md`. Layout Mode Any free rotation remains unimplemented.
+- Targeted checks passed: SettingsModel/QML (40), `layout_tiling` (40), ExportMenuTests (20), paper-layout regressions (6), and `cxxqt_bridge` (278).
+- Anchor tests passed: PieceMarkings (9) and three MainWindow undo/redo cycles. The reported missing-redo symptom also passed on baseline; verify the installed MSI.
+- Updated `project-docs/TEST_APPLICATION_UPDATES.md`; MSI GUI acceptance remains open. No full MSI build or push.
+- Twelve task commits are merged into local `run-seamlyLayout` by `a9e1e10ef0`; the branch is 165 commits ahead of origin. No push.
+- Keep the open GUI checks in `project-docs/TEST_APPLICATION_UPDATES.md`. Preserve the pre-existing edits in the main worktree.
+
 ### 2026-11-08 — Label filename extensions
 
 - `%pFileName%` and `%mFileName%` now include extensions in pattern labels, piece labels, and editor previews.
@@ -10,13 +21,32 @@
 - Targeted Qt suites passed: `TST_LabelTextManager` 11/11 and `TST_VPatternConverter` 10/10. All changed production units and the test harness compiled.
 - Full MSI build and installed-app checks remain pending. Preserve the user's existing build stamps and working-tree edits.
 
+### 2026-11-08 — Handoff marking test crash fixed
+
+- `liveMarkingAnchorsGradeWithConstantDiameter` reused ID 23 for a point after creating an arc. `VContainer::UpdateObject` rejects that type change.
+- The legacy-reference fixture now uses a separate point ID 25. Production validation remains unchanged.
+- Committed on a feature worktree and merged into local `run-seamlyLayout`. No push; the completed worktree was removed.
+- Rebuilt `Seamly2DTests.exe` with `nmake`; the full executable returned 0. `TST_HandoffDocument`: 23 passed, including the formerly crashing test.
+- Test logs: `build/handoff-marking-fixture-testlogs/`. Next: rerun the full MSI build before installing or resuming checklist work.
+- Preserve the current version stamps from the user's build and the other pre-existing working-tree edits.
+
+### 2026-11-08 — Anchor point Bad Id crash
+
+- Cause: `PatternPieceTool::RefreshGeometry` drew anchor markers from the piece tool's `VContainer` copy. The new anchor node existed only in the pattern data.
+- Fix: `AnchorPointTool::AddToFile` syncs the piece tool data before the push and connects `NeedLiteParsing`. Marker loops skip missing points with a `v.tool` warning. `Application2D::notify` logs the event and receiver.
+- Test: `TST_VContainer::markingPointNeedsToolDataSync`. Changed units compile; the suite was not run.
+- Follow-up merge: Insert Nodes syncs piece tool data before its save command. Switching to Draft Mode or Piece Mode runs `LiteParseTree` (user decision: defense against stale tool copies). Missing marking points show one deferred modal warning per piece and point.
+- Next: run the MSI build, then add `CrotchLine` to `Front_with_pocket` in `trousers.sm2d` and undo/redo. Also test Insert Nodes and mode-switch speed on a large pattern.
+
 ### 2026-11-08 — Application updates and MSI build
 
 - Merged checklist fixes into local `run-seamlyLayout`: data-root regression coverage, label-template replacement, legacy reference-line anchors, split-export gating for actually divided pieces, and Piece Mode flip/tilt child graphics. No push.
 - `cargo test -p cxxqt_bridge layout_utils::tests::` passed 37 tests. An earlier `cargo test -p cxxqt_bridge` run passed 274 tests.
-- `packaging\windows\local_build_msi.ps1` stopped during `nmake check`: `Seamly2DTests.exe` returned 1. The script did not set `SEAMLY_TEST_LOG_DIR`, so the failing Qt test is unidentified.
-- CTest, the full Cargo workspace tests, and MSI packaging did not run. The new MSI was not produced.
-- Restored generated version stamps. Preserve untracked `scripts/cli/` and `test-seamly-layout/patterns/validation/`.
+- Diagnosed and fixed three Seamly2D failures: reject mixed anchor/node reference endpoints and compose Piece Mode flip/tilt transforms in the expected order.
+- Fixed `ExportMenuTests` to attach and open its menu and DXF submenu before checking visible menu items.
+- Documented Windows app log locations and used `%LOCALAPPDATA%\Seamly\Seamly2D\logs` for QTest reports and the MSI build log.
+- Built [seamly-x64.msi](packaging/windows/seamly-msi/x64/seamly-x64.msi) `26.11.813` (166.3 MB). `nmake check`, CTest (8/8), `cargo test --workspace`, MSI authoring, data seeding (37 checks), and WiX validation passed.
+- Build log: `%LOCALAPPDATA%\Seamly\Seamly2D\logs\msi-build-20261108-1307.log`. Preserve untracked `scripts/cli/` and `test-seamly-layout/patterns/validation/`.
 
 ### User validation checklist review
 
