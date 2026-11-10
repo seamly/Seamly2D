@@ -56,6 +56,7 @@
 //-----------------------------------------------------------------------------
 
 #include <QDir>
+#include <QUndoStack>
 #include <QtTest>
 
 #include "tst_abstractpiece.h"
@@ -122,6 +123,7 @@ public:
 TestApplication2D::TestApplication2D(int &argc, char **argv)
     : VAbstractApplication(argc, argv)
 {
+    undoStack = new QUndoStack(this);
     setApplicationName(VER_INTERNALNAME_2D_STR);
     setOrganizationName(VER_COMPANYNAME_STR);
     openSettings();

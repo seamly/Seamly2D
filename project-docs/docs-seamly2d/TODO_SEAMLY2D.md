@@ -102,10 +102,11 @@ Rotation, arrow line, label, extended fold line, SeamlyLayout fold placement and
 ### Task Seamly2D.60 - Implement - Strip & plaid reference lines
 
 - [x] Seamly2D.60 - Implement Stripe and plaid reference lines.
-  - [x] Seamly2D.60.1 Live, distinct endpoints define reference-only lines in Piece Mode.
+  - [x] Seamly2D.60.1 Live, distinct main-path point nodes define reference-only lines in Piece Mode.
   - [x] Seamly2D.60.2 DXF R13 writes stripe/plaid lines on layers 9/10 without changing packing bounds.
 - [x] Real producer, transformation, DXF, and packing-invariance tests pass.
 - [x] Schema v0.7.9 and conversion preserve reference lines.
+- [x] Dialog regression verifies path-node choices, saved IDs, anchor independence, and edited endpoint geometry.
 - [ ] Verify (User)
 
 ### [ ] Task Seamly2D.62 - Implement - Piece Mode - 'Flip Piece' tool

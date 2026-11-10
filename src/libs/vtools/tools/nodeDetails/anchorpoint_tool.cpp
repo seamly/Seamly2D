@@ -186,6 +186,8 @@ void AnchorPointTool::AddToFile()
         doc->SetAttribute(domElement, AttrIdTool, idTool);
     }
 
+    // Keep the modeling node and its piece membership in the same undo operation.
+    qApp->getUndoStack()->beginMacro(tr("add anchor point"));
     AddToModeling(domElement);
 
     if (m_pieceId > NULL_ID)
@@ -204,6 +206,7 @@ void AnchorPointTool::AddToFile()
         qApp->getUndoStack()->push(saveCommand);// First push then make a connect
         connect(saveCommand, &SavePieceOptions::NeedLiteParsing, doc, &VAbstractPattern::LiteParseTree);
     }
+    qApp->getUndoStack()->endMacro();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
