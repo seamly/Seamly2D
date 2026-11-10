@@ -17,10 +17,9 @@ use crate::up_left_compaction::{compact_up_left, PieceBox};
 use pack_types::{FreeRect, Placed, Rect};
 use tracing::debug;
 
-// @brief Upper limit of search work, in evaluations × pieces².
+// @brief Upper limit of search work, in evaluations × pieces × orientations.
 //
-// One evaluation packs every piece once.  Its cost grows with the square of
-// the piece count, so this limit keeps large layouts to a few seconds.
+// One evaluation places every piece and checks its cached orientations.
 const SEARCH_WORK: u64 = 60_000_000;
 
 // @brief Upper limit of evaluations for small piece counts.
@@ -448,13 +447,19 @@ pub(crate) fn search_layout(
 ) -> Decoded {
     let ids: Vec<usize> = (0..rects.len()).filter(|&id| job.fits_empty_bin(id)).collect();
     let n = ids.len() as u64;
+    let orientation_work: u64 = ids
+        .iter()
+        .map(|&id| job.orientations[id].len() as u64)
+        .sum();
     let seeds = seed_orders(rects, &ids);
     let rules = [PlacementRule::TopLeft, PlacementRule::WeightedTopLeft];
     let evals = match depth {
         // Start orders only: no hill climbing
         SearchDepth::StartOrders => 0,
         // Full: the work limit sets the evaluation count
-        SearchDepth::Full if n >= 2 => (SEARCH_WORK / (n * n)).min(MAX_SEARCH_EVALS) as usize,
+        SearchDepth::Full if n >= 2 => {
+            (SEARCH_WORK / n.saturating_mul(orientation_work.max(n))).min(MAX_SEARCH_EVALS) as usize
+        }
         // Full with fewer than two pieces: no order to change
         SearchDepth::Full => 0,
     }; // match depth

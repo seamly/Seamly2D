@@ -564,13 +564,6 @@ pub fn create_initial_tiled_layout_dom(td: &TileDimensions) -> svg_dom::Document
 // trimmed tile width and returns the packing with the fewest non-empty tiles
 // (with smallest unused area as tiebreaker).
 //
-// Rotation support (not yet enabled — see docs/layout-docs/LAYOUT_ROTATION_PLAN.md)
-// plugs in at two seams:
-//   1. `widest_piece_tile_cols` — the floor depends on the narrowest rotated
-//      orientation of each piece.
-//   2. Inside `packing::pack_maxrects` — rotation is a per-placement
-//      trial, not an outer loop, so this function's structure does not change.
-
 // @brief One tiled-layout candidate evaluated at a specific bin width.
 //
 // Scored by (non_empty_tiles, unused_area_px2) in that priority order.
@@ -590,38 +583,25 @@ pub struct TiledCandidate {
     pub unused_area_px2: u64,
 } // struct TiledCandidate
 
-// @brief Minimum tile-column count that can hold the widest piece.
-//
-// Returned value is the floor of the candidate-width search: any smaller
-// bin width would make pack_maxrects fail with TooLarge for the widest piece.
-//
-// Rotation seam: this function currently uses the verticalized bounding-box
-// width.  When rotation lands (see LAYOUT_ROTATION_PLAN.md):
-//   - 180° flip only      → no change (bbox width unchanged).
-//   - 90° included        → use `min(piece.w, piece.h)` per piece.
-//   - 45° included        → use the rotated bbox width at each allowed angle.
+// @brief Minimum tile-column count that can hold the widest piece at an allowed angle.
 //
 // @param pieces        Extracted piece rectangles in layout pixels.
 // @param trim_tile_w_px Trimmed tile width in pixels.
 // @param gap_px        Inter-piece clearance used by pack_maxrects.
+// @param trial_angles_deg Layout-level trial angles, narrowed by each piece's active rule.
 // @return              At-least-1 tile-column count.
 pub fn widest_piece_tile_cols(
     pieces: &[packing::Rect],
     trim_tile_w_px: u32,
     gap_px: u32,
+    trial_angles_deg: &[u16],
 ) -> u32 {
     // No pieces → no packing, but keep the floor at one column to avoid a zero bin.
     if pieces.is_empty() || trim_tile_w_px == 0 {
         return 1; // degenerate — caller will handle empty-pieces case separately
     } // if pieces empty
 
-    // Find the widest piece, then pad by gap so a placement at x=0 still leaves clearance.
-    // A free-rotation piece can be turned, so its narrower side counts.
-    let widest = pieces.iter()
-        .map(|r| if r.free_rotation { r.w.min(r.h) } else { r.w })
-        .max()
-        .unwrap_or(0);
-    let needed = widest.saturating_add(gap_px);
+    let needed = packing::required_bin_width(pieces, trial_angles_deg).saturating_add(gap_px);
 
     // Ceiling division: smallest whole-tile count that covers `needed` pixels.
     let cols = (needed + trim_tile_w_px - 1) / trim_tile_w_px;
@@ -1042,7 +1022,7 @@ mod tests {
     // @brief widest_piece_tile_cols: empty pieces → 1 (avoids zero-size bin).
     #[test]
     fn widest_piece_tile_cols_empty() {
-        let cols = widest_piece_tile_cols(&[], 768, 5);
+        let cols = widest_piece_tile_cols(&[], 768, 5, &[0]);
         assert_eq!(cols, 1, "empty pieces floor");
     } // widest_piece_tile_cols_empty
 
@@ -1053,7 +1033,7 @@ mod tests {
             packing::Rect::new(500, 400),
             packing::Rect::new(300, 300),
         ];
-        let cols = widest_piece_tile_cols(&pieces, 768, 5);
+        let cols = widest_piece_tile_cols(&pieces, 768, 5, &[0]);
         assert_eq!(cols, 1, "single-tile floor");
     } // widest_piece_tile_cols_single_tile
 
@@ -1061,9 +1041,22 @@ mod tests {
     #[test]
     fn widest_piece_tile_cols_two_tiles() {
         let pieces = [packing::Rect::new(800, 400)];
-        let cols = widest_piece_tile_cols(&pieces, 768, 5);
+        let cols = widest_piece_tile_cols(&pieces, 768, 5, &[0]);
         assert_eq!(cols, 2, "two-tile floor");
     } // widest_piece_tile_cols_two_tiles
+
+    // @brief The tile-column floor uses a piece's permitted quarter turn in Any mode.
+    #[test]
+    fn widest_piece_tile_cols_respects_piece_rotation_rule() {
+        let piece = packing::Rect::new(600, 400)
+            .with_piece_rotation(packing::PieceRotationRule::FourWay)
+            .with_piece_rotation_enabled(true);
+        assert_eq!(widest_piece_tile_cols(&[piece], 405, 5, &[0, 90, 180, 270]), 1);
+        assert_eq!(
+            widest_piece_tile_cols(&[piece.with_piece_rotation_enabled(false)], 405, 5, &[0]),
+            2
+        );
+    } // widest_piece_tile_cols_respects_piece_rotation_rule
 
     // @brief count_non_empty_tiles: piece fully inside one tile → 1.
     #[test]
@@ -1129,7 +1122,7 @@ mod tests {
             packing::Rect::new(600, 400),
             packing::Rect::new(300, 300),
         ];
-        let floor = widest_piece_tile_cols(&pieces, 400, 5);
+        let floor = widest_piece_tile_cols(&pieces, 400, 5, &[0]);
         assert_eq!(floor, 2, "computed floor");
         let best = pick_best_tiled_candidate(&pieces, 400, 400, floor, 3, 5, &[0])
             .expect("pick ok");

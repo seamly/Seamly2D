@@ -20,7 +20,7 @@
 mod maxrects_order_search;
 mod up_left_compaction;
 
-pub use pack_types::{FreeRect, PackError, PackResult, Placed, Rect};
+pub use pack_types::{FreeRect, PackError, PackResult, PieceRotationRule, Placed, Rect};
 
 use maxrects_order_search::{search_layout, PackJob, SearchDepth};
 use tracing::debug;
@@ -285,17 +285,27 @@ pub fn fits_bin(r: Rect, bin_w: u32, bin_h: u32, trial_angles_deg: &[u16]) -> bo
 // first, so ties keep the mode's preferred orientation.  A piece on the left
 // edge has its one angle.
 fn piece_trial_set(trial_angles_deg: &[u16], r: &Rect) -> Vec<u16> {
-    if let Some(angle) = r.left_edge_angle {
-        return vec![angle]; // the angle that puts its fold line on the left
-    } // if on the left edge
-    let mut angles: Vec<u16> = if trial_angles_deg.is_empty() { vec![0] } else { trial_angles_deg.to_vec() };
-    if r.free_rotation {
+    if r.fold_edge_conflict {
+        return Vec::new();
+    } // if fold and rotation conflict
+    let mut angles = if r.apply_piece_rotation {
+        r.piece_rotation.angles_for_any_mode(trial_angles_deg)
+    } else {
+        if trial_angles_deg.is_empty() { vec![0] } else { trial_angles_deg.to_vec() }
+    }; // angles
+    if r.free_rotation && !r.apply_piece_rotation {
         for deg in [0u16, 90, 180, 270] {
             if !angles.contains(&deg) {
                 angles.push(deg);
             }
         }
-    }
+    } // if free rotation is active
+    if let Some(angle) = r.left_edge_angle {
+        if !r.apply_piece_rotation {
+            return vec![angle]; // preserve legacy fold-edge behavior outside Any mode
+        } // if piece rules are inactive
+        angles.retain(|candidate| *candidate % 360 == angle % 360);
+    } // if on the left edge
     angles
 } // fn piece_trial_set
 
@@ -671,6 +681,96 @@ mod tests {
         assert!(fits_bin(tall, 30, 10, &[0, 90, 180, 270]));
         assert!(fits_bin(tall, 4, 20, &[0]));
     } // fits_bin_checks_each_trial_angle
+
+    // @brief Explicit piece rules constrain only Any mode and preserve legacy fallback behavior.
+    #[test]
+    fn piece_rotation_rules_resolve_by_layout_mode() {
+        let quarter_turns = [0, 90, 180, 270];
+        let cases = [
+            (PieceRotationRule::Unspecified, quarter_turns.to_vec()),
+            (PieceRotationRule::Fixed, vec![0]),
+            (PieceRotationRule::TwoWay, vec![0, 180]),
+            (PieceRotationRule::FourWay, quarter_turns.to_vec()),
+            (PieceRotationRule::Invalid, vec![0]),
+        ];
+        for (rule, expected) in cases {
+            let rect = Rect::new(20, 10).with_piece_rotation(rule).with_piece_rotation_enabled(true);
+            assert_eq!(piece_trial_set(&quarter_turns, &rect), expected, "{rule:?}");
+        } // for each rule
+
+        let stale_free_rotation = Rect::new(20, 10)
+            .with_free_rotation(true)
+            .with_piece_rotation(PieceRotationRule::Fixed)
+            .with_piece_rotation_enabled(true);
+        assert_eq!(piece_trial_set(&quarter_turns, &stale_free_rotation), vec![0]);
+
+        let any = Rect::new(20, 10)
+            .with_piece_rotation(PieceRotationRule::Any)
+            .with_piece_rotation_enabled(true);
+        assert_eq!(piece_trial_set(&quarter_turns, &any), (0..360).collect::<Vec<_>>());
+
+        let inactive = any.with_piece_rotation_enabled(false);
+        assert_eq!(piece_trial_set(&quarter_turns, &inactive), quarter_turns);
+    } // piece_rotation_rules_resolve_by_layout_mode
+
+    // @brief A 1° rule fits a bin at 45° when the legacy quarter-turn set cannot fit.
+    #[test]
+    fn any_piece_uses_non_quarter_turn_to_fit() {
+        let rule = Rect::new(100, 10)
+            .with_piece_rotation(PieceRotationRule::Any)
+            .with_piece_rotation_enabled(true);
+        let (placed, _) = pack_maxrects_multi_angle(78, 78, 0, &[rule], &[0, 90, 180, 270], None)
+            .expect("free-angle rule fits at 45 degrees");
+
+        assert_eq!(placed.len(), 1);
+        assert_eq!(placed[0].rotation_deg, 45);
+        assert!(placed[0].w <= 78 && placed[0].h <= 78);
+
+        for restricted in [
+            PieceRotationRule::Unspecified,
+            PieceRotationRule::Fixed,
+            PieceRotationRule::TwoWay,
+            PieceRotationRule::FourWay,
+            PieceRotationRule::Invalid,
+        ] {
+            let rect = Rect::new(100, 10)
+                .with_piece_rotation(restricted)
+                .with_piece_rotation_enabled(true);
+            assert!(!fits_bin(rect, 78, 78, &[0, 90, 180, 270]), "{restricted:?}");
+        } // for each restricted rule
+    } // any_piece_uses_non_quarter_turn_to_fit
+
+    // @brief Mixed per-piece rules keep the allowed non-quarter placement and preserve unplaced IDs.
+    #[test]
+    fn mixed_piece_rules_keep_allowed_angles_and_unplaced_ids() {
+        let rects = [
+            Rect::new(100, 10)
+                .with_piece_rotation(PieceRotationRule::Any)
+                .with_piece_rotation_enabled(true),
+            Rect::new(100, 10)
+                .with_piece_rotation(PieceRotationRule::Fixed)
+                .with_piece_rotation_enabled(true),
+        ];
+        let (placed, _, unplaced) =
+            pack_maxrects_multi_angle_lenient(78, 78, 0, &rects, &[0, 90, 180, 270], None);
+
+        assert_eq!(placed.len(), 1);
+        assert_eq!(placed[0].id, 0);
+        assert_eq!(placed[0].rotation_deg, 45);
+        assert_eq!(unplaced, vec![1]);
+        assert!(validate_placements(78, 78, &placed));
+    } // mixed_piece_rules_keep_allowed_angles_and_unplaced_ids
+
+    // @brief A fold edge that conflicts with a fixed rotation cannot fall back to baseline.
+    #[test]
+    fn fold_edge_rotation_conflict_has_no_allowed_angle() {
+        let rect = Rect::new(12, 10)
+            .with_piece_rotation(PieceRotationRule::Fixed)
+            .with_piece_rotation_enabled(true)
+            .with_left_edge(180);
+        assert!(!fits_bin(rect, 100, 100, &[0, 90, 180, 270]));
+    } // fold_edge_rotation_conflict_has_no_allowed_angle
+
     // @brief Smallest clearance between any two placements; u32::MAX for fewer than two.
     fn min_clearance(placed: &[Placed]) -> u32 {
         let mut least = u32::MAX;

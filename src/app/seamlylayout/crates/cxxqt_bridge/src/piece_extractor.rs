@@ -32,7 +32,7 @@
 
 use layout_tiling::measurement_to_px;
 use geometry::{BoundingBox, Path, PathSegment, Point};
-use packing::Rect;
+use packing::{PieceRotationRule, Rect};
 use xmltree::{Element, XMLNode};
 
 // @brief One extracted pattern piece ready for bin packing.
@@ -100,6 +100,13 @@ pub fn set_free_rotation_without_grainline(pieces: &mut [PieceRect], allow: bool
         piece.rect.free_rotation = allow && !piece.has_grainline;
     }
 } // fn set_free_rotation_without_grainline
+
+// @brief Enable piece-specific rules only when the current layout mode is Any.
+pub fn set_piece_rotation_for_layout_mode(pieces: &mut [PieceRect], enabled: bool) {
+    for piece in pieces.iter_mut() {
+        piece.rect = piece.rect.with_piece_rotation_enabled(enabled);
+    } // for each piece
+} // fn set_piece_rotation_for_layout_mode
 
 // @brief Warning lines for the pieces a layout left out: one line per piece, then its sizes.
 //
@@ -216,8 +223,17 @@ pub fn extract_piece_rects(doc: &svg_dom::Document) -> Vec<PieceRect> {
             continue; // zero-size — skip
         } // if w_px == 0
 
+        let piece_label = if !piece_name.is_empty() {
+            piece_name.as_str()
+        } else if !piece_letter.is_empty() {
+            piece_letter.as_str()
+        } else {
+            piece_id.as_str()
+        };
+        let rotation = piece_rotation_rule(elem, piece_label);
+
         pieces.push(PieceRect {
-            rect: Rect::new(w_px, h_px),
+            rect: Rect::new(w_px, h_px).with_piece_rotation(rotation),
             id: piece_id,
             name: piece_name,
             letter: piece_letter,
@@ -342,8 +358,17 @@ pub fn extract_piece_rects_and_polygons(
             }
         };
 
+        let piece_label = if !piece_name.is_empty() {
+            piece_name.as_str()
+        } else if !piece_letter.is_empty() {
+            piece_letter.as_str()
+        } else {
+            piece_id.as_str()
+        };
+        let rotation = piece_rotation_rule(elem, piece_label);
+
         pieces.push(PieceRect {
-            rect: Rect::new(w_px, h_px),
+            rect: Rect::new(w_px, h_px).with_piece_rotation(rotation),
             id: piece_id,
             name: piece_name,
             letter: piece_letter,
@@ -681,6 +706,41 @@ fn piece_identity(elem: &Element) -> (String, String, String) {
     } // if sized
     (id, name, letter)
 } // fn piece_identity
+
+// @brief Read a piece rule, intersecting the member rules of a Nested piece-set.
+pub(crate) fn piece_rotation_rule(elem: &Element, label: &str) -> PieceRotationRule {
+    if !svg_dom::is_piece_set(elem) {
+        return parse_piece_rotation(elem, label);
+    } // if not a Nested piece-set
+
+    let mut member_rules = elem.children.iter()
+        .filter_map(|node| node.as_element())
+        .filter(|member| is_tagged_piece(member))
+        .map(|member| parse_piece_rotation(member, label));
+
+    let Some(first) = member_rules.next() else {
+        return PieceRotationRule::Unspecified;
+    }; // no member sizes
+    member_rules.fold(first, PieceRotationRule::intersect_for_any_mode)
+} // fn piece_rotation_rule
+
+// @brief Parse the SVG handoff's rotation step; missing values retain legacy behavior.
+fn parse_piece_rotation(elem: &Element, label: &str) -> PieceRotationRule {
+    let Some(value) = elem.attributes.get("data-rotation") else {
+        return PieceRotationRule::Unspecified;
+    }; // legacy handoff without a value
+
+    match value.trim() {
+        "0" | "360" => PieceRotationRule::Fixed,
+        "180" => PieceRotationRule::TwoWay,
+        "90" => PieceRotationRule::FourWay,
+        "1" => PieceRotationRule::Any,
+        invalid => {
+            log::warn!("Unsupported data-rotation '{invalid}' for piece '{label}'; restricting rotation to 0°");
+            PieceRotationRule::Invalid
+        } // invalid value
+    } // match step
+} // fn parse_piece_rotation
 
 // ---------------------------------------------------------------------------
 // Private helpers
@@ -1081,6 +1141,68 @@ pub(crate) mod tests {
         assert_eq!(pieces[0].id, "piece-1");
         assert_eq!(pieces[1].id, "piece-2");
     } // extracts_two_pieces
+
+    // @brief Both extraction paths preserve explicit rotation values and distinguish legacy omissions.
+    #[test]
+    fn rotation_rules_parse_in_both_extractors() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <g id="pattern-1" data-type="pattern">
+    <g id="none" data-type="piece" data-name="None" data-rotation="0"><path d="M0 0 L40 0 L40 20 L0 20 Z"/></g>
+    <g id="one" data-type="piece" data-rotation="360"><path d="M0 0 L40 0 L40 20 L0 20 Z"/></g>
+    <g id="two" data-type="piece" data-rotation="180"><path d="M0 0 L40 0 L40 20 L0 20 Z"/></g>
+    <g id="four" data-type="piece" data-rotation="90"><path d="M0 0 L40 0 L40 20 L0 20 Z"/></g>
+    <g id="any" data-type="piece" data-rotation="1"><path d="M0 0 L40 0 L40 20 L0 20 Z"/></g>
+    <g id="invalid" data-type="piece" data-name="Invalid" data-rotation="1.5"><path d="M0 0 L40 0 L40 20 L0 20 Z"/></g>
+    <g id="legacy" data-type="piece"><path d="M0 0 L40 0 L40 20 L0 20 Z"/></g>
+  </g>
+</svg>"#;
+        let mut doc = svg_dom::Document::parse(svg).expect("parse ok");
+        hoist_layout_units(&mut doc, false);
+
+        let pieces = extract_piece_rects(&doc);
+        let (paired, polygons) = extract_piece_rects_and_polygons(&doc);
+        let expected = [
+            PieceRotationRule::Fixed,
+            PieceRotationRule::Fixed,
+            PieceRotationRule::TwoWay,
+            PieceRotationRule::FourWay,
+            PieceRotationRule::Any,
+            PieceRotationRule::Invalid,
+            PieceRotationRule::Unspecified,
+        ];
+        assert_eq!(pieces.len(), expected.len());
+        assert_eq!(paired.len(), expected.len());
+        assert_eq!(polygons.len(), expected.len());
+        for (index, expected_rule) in expected.into_iter().enumerate() {
+            assert_eq!(pieces[index].rect.piece_rotation, expected_rule, "piece {}", pieces[index].id);
+            assert_eq!(paired[index].rect.piece_rotation, expected_rule, "paired piece {}", paired[index].id);
+            assert!(!pieces[index].rect.apply_piece_rotation);
+        } // for each rule
+
+        let mut active = pieces;
+        set_piece_rotation_for_layout_mode(&mut active, true);
+        assert!(active.iter().all(|piece| piece.rect.apply_piece_rotation));
+    } // rotation_rules_parse_in_both_extractors
+
+    // @brief Nested piece-set rotation is the intersection of its member-size rules.
+    #[test]
+    fn nested_piece_set_intersects_rotation_rules() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <g id="piece-set-1" data-type="piece-set">
+    <g id="small" data-type="piece" data-rotation="1"><path d="M0 0 L40 0 L40 20 L0 20 Z"/></g>
+    <g id="large" data-type="piece" data-rotation="180"><path d="M0 0 L50 0 L50 25 L0 25 Z"/></g>
+  </g>
+</svg>"#;
+        let doc = svg_dom::Document::parse(svg).expect("parse ok");
+        let pieces = extract_piece_rects(&doc);
+        assert_eq!(pieces.len(), 1);
+        assert_eq!(pieces[0].rect.piece_rotation, PieceRotationRule::TwoWay);
+
+        let invalid = svg.replace("data-rotation=\"1\"", "data-rotation=\"unsupported\"");
+        let doc = svg_dom::Document::parse(&invalid).expect("parse invalid value");
+        let pieces = extract_piece_rects(&doc);
+        assert_eq!(pieces[0].rect.piece_rotation, PieceRotationRule::Invalid);
+    } // nested_piece_set_intersects_rotation_rules
 
     // @brief A <g> with no <path> children is skipped.
     #[test]

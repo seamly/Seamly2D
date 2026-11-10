@@ -757,4 +757,33 @@ mod tests {
         );
     } // rotated_translate_uses_rotated_bbox_min
 
+    // @brief A 45° placement stays inside its packed slot after non-zero margins and origins.
+    #[test]
+    fn arbitrary_rotation_stays_inside_packed_slot() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">
+  <g id="p1"><g data-type="cutline"><path d="M100 200 L200 200 L200 210 L100 210 Z"/></g></g>
+</svg>"#;
+        let input_doc = svg_dom::Document::parse(svg).expect("parse ok");
+        let pieces = extract_piece_rects(&input_doc);
+        let placements = vec![packing::Placed {
+            id: 0,
+            x: 40,
+            y: 50,
+            w: 78,
+            h: 78,
+            rotation_deg: 45,
+        }];
+        let mut output_doc = make_base_doc(300, 300);
+        create_layout(&mut output_doc, &input_doc, &pieces, &placements, 24, 30);
+        svg_dom::flatten_dom(&mut output_doc);
+
+        let piece = output_doc.root.children.iter().filter_map(|node| node.as_element())
+            .find(|element| element.attributes.get("id").is_some_and(|id| id == "p1"))
+            .expect("placed piece");
+        let bbox = crate::piece_extractor::piece_bbox(piece).expect("piece bounds");
+        assert!((bbox.min.x - 64.0).abs() < 0.02, "left bound {}", bbox.min.x);
+        assert!((bbox.min.y - 80.0).abs() < 0.02, "top bound {}", bbox.min.y);
+        assert!(bbox.max.x <= 142.0 && bbox.max.y <= 158.0, "bounds {bbox:?}");
+    } // arbitrary_rotation_stays_inside_packed_slot
+
 } // mod tests

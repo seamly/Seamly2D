@@ -823,10 +823,7 @@ QDomDocument HandoffDocument::to_dom() const
         {
             group.setAttribute(QStringLiteral("data-on-fold"), QStringLiteral("true"));
         }
-        if (info.rotation > 0)
-        {
-            group.setAttribute(QStringLiteral("data-rotation"), QString::number(info.rotation));
-        }
+        group.setAttribute(QStringLiteral("data-rotation"), QString::number(info.rotation));
         if (info.tilt != 0)
         {
             group.setAttribute(QStringLiteral("data-tilt"), QString::number(info.tilt));

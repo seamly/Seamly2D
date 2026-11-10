@@ -42,7 +42,10 @@ use packing::Rect;
 use svg_dom::Document;
 use xmltree::{Element, XMLNode};
 
-use crate::piece_extractor::{extract_piece_rects, set_free_rotation_without_grainline, svg_uu_per_px};
+use crate::piece_extractor::{
+    extract_piece_rects, set_free_rotation_without_grainline, set_piece_rotation_for_layout_mode,
+    svg_uu_per_px,
+};
 
 // Match notch length; DXF-ASTM slit depth is half the seam allowance written for it.
 const MATCH_NOTCH_IN: f64 = 0.25;
@@ -66,6 +69,8 @@ pub struct DivideSpec {
     pub limit_length: bool,
     // The layout mode's trial angles.
     pub trial_angles_deg: Vec<u16>,
+    // Apply each piece's source rule only in Any layout mode.
+    pub apply_piece_rotation: bool,
     // The user's "Rotate freely" choice for pieces without a grainline.
     pub free_rotation_without_grainline: bool,
     // Clearance from the fold edge for pieces without a fold line.
@@ -206,6 +211,9 @@ pub fn divide_oversized_pieces(doc: &mut Document, spec: &DivideSpec) -> Vec<Div
 
 // @brief Columns and rows a piece splits into; (1, 1) when it fits at one of its trial angles.
 fn grid(rect: Rect, spec: &DivideSpec) -> (usize, usize) {
+    if rect.fold_edge_conflict {
+        return (1, 1);
+    } // leave fold conflicts whole for the packer to report as unplaced
     let bin_h = if spec.limit_length { spec.bin_h } else { u32::MAX };
     if packing::fits_bin(rect, spec.bin_w, bin_h, &spec.trial_angles_deg) {
         return (1, 1);
@@ -219,11 +227,16 @@ fn grid(rect: Rect, spec: &DivideSpec) -> (usize, usize) {
 fn prepared_pieces(doc: &Document, spec: &DivideSpec) -> Vec<crate::piece_extractor::PieceRect> {
     let mut measured_doc = doc.clone();
     let fold_plan = if spec.fold_lines_on_left_edge {
-        crate::fold_line_edge::plan_fold_line_edge(&mut measured_doc, &spec.trial_angles_deg)
+        crate::fold_line_edge::plan_fold_line_edge(
+            &mut measured_doc,
+            &spec.trial_angles_deg,
+            spec.apply_piece_rotation,
+        )
     } else {
         crate::fold_line_edge::FoldEdgePlan::default()
     };
     let mut pieces = extract_piece_rects(&measured_doc);
+    set_piece_rotation_for_layout_mode(&mut pieces, spec.apply_piece_rotation);
     set_free_rotation_without_grainline(&mut pieces, spec.free_rotation_without_grainline);
     crate::fold_line_edge::pin_fold_line_pieces(&mut pieces, &fold_plan);
     for piece in &mut pieces {
@@ -1299,6 +1312,7 @@ mod tests {
             bin_h,
             limit_length,
             trial_angles_deg: vec![0, 180],
+            apply_piece_rotation: false,
             free_rotation_without_grainline: false,
             fold_edge_gap_px: 0,
             fold_lines_on_left_edge: false,
@@ -1418,6 +1432,31 @@ mod tests {
         let free = DivideSpec { free_rotation_without_grainline: true, ..spec(500, 250, true) };
         assert!(find_oversized_pieces(&doc, &free).is_empty());
     } // long_piece_and_turned_piece
+
+    // @brief Any-mode rules prevent a 45°-fitting piece from splitting and survive required splits.
+    #[test]
+    fn piece_rotation_controls_split_and_stays_on_parts() {
+        let any_svg = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-Bias" data-type="piece" data-name="Bias" data-rotation="1">
+            <g data-type="cutline"><path d="M0,0 L350,0 L350,10 L0,10 Z"/></g></g></svg>"#;
+        let any_doc = Document::parse(any_svg).expect("fixture parses");
+        let any_spec = DivideSpec {
+            apply_piece_rotation: true,
+            ..spec(300, 300, true)
+        };
+        assert!(find_oversized_pieces(&any_doc, &any_spec).is_empty());
+        let mut any_copy = any_doc;
+        assert!(divide_oversized_pieces(&mut any_copy, &any_spec).is_empty());
+
+        let restricted_svg = any_svg.replace("data-rotation=\"1\"", "data-rotation=\"90\"");
+        let mut restricted_doc = Document::parse(&restricted_svg).expect("fixture parses");
+        let restricted_spec = DivideSpec {
+            apply_piece_rotation: true,
+            ..spec(300, 300, true)
+        };
+        assert_eq!(find_oversized_pieces(&restricted_doc, &restricted_spec).len(), 1);
+        assert_eq!(divide_oversized_pieces(&mut restricted_doc, &restricted_spec)[0].parts, 2);
+        assert!(part_groups(&restricted_doc).iter().all(|part| attr(part, "data-rotation") == "90"));
+    } // piece_rotation_controls_split_and_stays_on_parts
 
     // @brief Fold-line pieces use the fold edge while other pieces keep its configured clearance.
     #[test]
