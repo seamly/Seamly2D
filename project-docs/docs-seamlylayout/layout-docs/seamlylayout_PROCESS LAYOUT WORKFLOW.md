@@ -110,12 +110,15 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
   - On folded fabric, true fold-line pieces remain pinned to the fold. Other pieces and split parts keep at least `pieceGap` from the fold edge. Oversize checks and split sizing use that same reduced width.
   - Cutting: `geometry::half_plane_clip` (`cut_closed`, `cut_open`). Each output vertex keeps its source vertex index, so `data-turn-points` stay valid.
   - `ProcessLayoutResult::divide_spec` is set only when at least one piece was divided. It keeps the media so `sheets::build_sheet_export_inputs` can split the same way for the paper-sheet PDF.
-  - `packing::pack_polygons_on_sheets` retries unplaced parts on fresh sheets of the configured content size.
-  - The canvas stacks sheet content vertically with a piece gap between sheets. Prior placements keep their original piece ids.
+  - Paper sheets pack all whole pieces and split parts on one configured sheet. Overflow aborts layout creation.
+  - The error names unplaced pieces and instructs the user to select **PDF (tiled)** in **Layout Settings**.
+  - Paper does not retry on additional sheets. Fabric retains `packing::pack_polygons_on_sheets` retries and its fixed width.
+  - Splitting paper sheets keeps the selected width, height, and margins, even if a caller also requests enlargement.
+  - A scale grid or legend that exceeds the fixed sheet also directs the user to PDF (tiled); it never enlarges the sheet.
   - Paper and fabric split layouts enable PDF, PNG, JPG, EPS, PostScript (PS), SVG, and HPGL.
     PDF combines sheet pages into one multi-page file; the other formats export the assembled layout.
     DXF, PDF (Tiled), and paid formats remain disabled.
-  - Each successful retry removes at least one remaining piece. No-progress and coordinate-limit stops preserve explicit unplaced-piece warnings.
+  - Each successful fabric retry removes at least one remaining piece. No-progress and coordinate-limit stops preserve explicit unplaced-piece warnings.
 - "extend": `ProcessLayoutArgs::extend_media`, as below.
 - `cancel_layout` sets `is_settings_required`: QML disables every button but 'Layout Settings', Preferences and Exit. `initialize_layout` clears it.
 
