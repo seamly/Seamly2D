@@ -1,5 +1,5 @@
 // project: SeamlyLayout
-// author: slspencer, copyright 2026
+// author: slspencer, copyright 2026 Seamly2D Project
 // MIT License: https://opensource.org/licenses/MIT
 
 use cxx_qt::CxxQtType;
@@ -629,7 +629,7 @@ pub mod qobject {
         #[qproperty(bool, dxf_export_allowed)]
         // True when PDF (Tiled) can export the shown layout: any layout but the Marker tab.
         #[qproperty(bool, pdf_tiled_export_allowed)]
-        // True when the current layout split oversized pieces; only regular PDF can export it.
+        // True when the current layout split oversized pieces; DXF and tiled PDF are unavailable.
         #[qproperty(bool, is_split_layout_active)]
         // True after Cancel in the oversized-pieces dialog: only 'Layout Settings'
         // stays active until new settings are submitted.

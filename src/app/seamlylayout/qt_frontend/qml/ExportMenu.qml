@@ -1,6 +1,6 @@
 // project: SeamlyLayout
-// author: slspencer, copyright 2026
-// LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
+// author: slspencer, copyright 2026 Seamly2D Project
+// MIT License: https://opensource.org/licenses/MIT
 //
 // @file ExportMenu.qml
 // @brief Export dropdown menu with all supported output formats.
@@ -38,7 +38,8 @@
 // "Export all tabs" item leads the menu.  While checked, every format writes
 // one file per tab instead of one file for the selected tab.
 //
-// With splitLayout true, regular PDF is the only enabled export format.
+// Split layouts support PDF, PNG, JPG, EPS, PS, SVG and HPGL on paper and fabric.
+// DXF, PDF (Tiled), and paid formats remain disabled.
 //
 // With dxfEnabled false (Export menu, Marker or Nested tab shown), the DXF
 // items are disabled and a note at the top of the DXF submenu names the tabs
@@ -73,7 +74,7 @@ Menu {
     // View menu can keep this true because it opens already-exported files.
     property bool pdfTiledEnabled: true
 
-    // @brief True when the active layout split oversized pieces; only regular PDF remains available.
+    // @brief True when the active layout split oversized pieces; disables DXF, tiled PDF and paid formats.
     property bool splitLayout: false
 
     // @brief False disables PDF (Tiled): the shown tab is Marker, which every size makes too large to tile.
@@ -230,7 +231,7 @@ Menu {
 
     MenuItem {
         objectName: "splitLayoutDisabledNote"
-        text: "Split layouts export only as PDF"
+        text: "Split layouts: DXF, PDF (Tiled), G-Code and 3D Mesh unavailable"
         visible: root.splitLayout
         height: visible ? implicitHeight : 0
         enabled: false
@@ -256,7 +257,7 @@ Menu {
         // A disabled item shows no tooltip, so this note explains the disabled DXF items.
         MenuItem {
             objectName: "dxfDisabledNote"
-            text: root.splitLayout ? "DXF: split layouts export only as PDF"
+            text: root.splitLayout ? "DXF: unavailable for split layouts"
                                   : "DXF: select Base Size or a size tab"
             visible: !root.dxfEnabled || root.splitLayout
             height: visible ? implicitHeight : 0
@@ -306,7 +307,7 @@ Menu {
     MenuItem {
         objectName: "pngItem"
         text: root.showJpg ? "PNG" : "PNG/JPG"
-        enabled: root.layoutReady && !root.splitLayout
+        enabled: root.layoutReady
         onTriggered: root.exportPngRequested()
     } // MenuItem PNG
 
@@ -314,7 +315,7 @@ Menu {
         id: jpgItem
         objectName: "jpgItem"
         text: "JPG"
-        enabled: root.layoutReady && !root.splitLayout
+        enabled: root.layoutReady
         onTriggered: root.exportJpgRequested()
     } // MenuItem JPG
 
@@ -322,7 +323,7 @@ Menu {
         id: epsItem
         objectName: "epsItem"
         text: "EPS"
-        enabled: root.layoutReady && !root.splitLayout
+        enabled: root.layoutReady
         onTriggered: root.exportPostscriptRequested("eps")
     } // MenuItem EPS
 
@@ -330,7 +331,7 @@ Menu {
         id: psItem
         objectName: "psItem"
         text: "PostScript (PS)"
-        enabled: root.layoutReady && !root.splitLayout
+        enabled: root.layoutReady
         onTriggered: root.exportPostscriptRequested("ps")
     } // MenuItem PS
 
@@ -338,7 +339,7 @@ Menu {
         id: svgItem
         objectName: "svgItem"
         text: "SVG"
-        enabled: root.layoutReady && !root.splitLayout
+        enabled: root.layoutReady
         onTriggered: root.exportSvgRequested()
     } // MenuItem SVG
 
@@ -375,10 +376,11 @@ Menu {
         id: svgSubmenu
         objectName: "svgSubmenu"
         title: "SVG"
-        enabled: root.layoutReady && !root.splitLayout
+        enabled: root.layoutReady
         width: root.fittedWidth(svgSubmenu)
 
         SvgModeItem {
+            objectName: "svgDesignerFontItem"
             text: "Text: use current designer font"
             mode: "designerFont"
             enabled: root.svgTextModesEnabled
@@ -482,9 +484,10 @@ Menu {
         id: hpglSubmenu
         objectName: "hpglSubmenu"
         title: "HPGL"
-        enabled: root.layoutReady && !root.splitLayout
+        enabled: root.layoutReady
 
         MenuItem {
+            objectName: "hpglPlotItem"
             text: "Plot (all lines)"
             ToolTip.visible: hovered
             ToolTip.text:    "Cut lines, marks and labels, each with its own pen.\n"
@@ -494,6 +497,7 @@ Menu {
         } // MenuItem plot
 
         MenuItem {
+            objectName: "hpglCutItem"
             text: "Cut (cut lines only)"
             ToolTip.visible: hovered
             ToolTip.text:    "Only cut lines, so a cutter does not cut seam lines or labels."

@@ -112,7 +112,9 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
   - `ProcessLayoutResult::divide_spec` is set only when at least one piece was divided. It keeps the media so `sheets::build_sheet_export_inputs` can split the same way for the paper-sheet PDF.
   - `packing::pack_polygons_on_sheets` retries unplaced parts on fresh sheets of the configured content size.
   - The canvas stacks sheet content vertically with a piece gap between sheets. Prior placements keep their original piece ids.
-  - Export enables regular PDF only; that PDF contains the layout's pages as one multi-page file.
+  - Paper and fabric split layouts enable PDF, PNG, JPG, EPS, PostScript (PS), SVG, and HPGL.
+    PDF combines sheet pages into one multi-page file; the other formats export the assembled layout.
+    DXF, PDF (Tiled), and paid formats remain disabled.
   - Each successful retry removes at least one remaining piece. No-progress and coordinate-limit stops preserve explicit unplaced-piece warnings.
 - "extend": `ProcessLayoutArgs::extend_media`, as below.
 - `cancel_layout` sets `is_settings_required`: QML disables every button but 'Layout Settings', Preferences and Exit. `initialize_layout` clears it.
