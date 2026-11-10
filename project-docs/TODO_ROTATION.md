@@ -18,7 +18,8 @@ Move fully completed tasks to [TODO_COMPLETED.md](TODO_COMPLETED.md).
 - Do not change Piece Mode display, draft geometry, pattern schemas, Flip, Tilt, or DXF rule serialization.
 - Preserve grain-up preprocessing. Trial angles are additional SVG rotations from that baseline, not absolute draft angles.
 - Do not restore the retired free-angle layout mode or introduce polygon nesting.
-- Leave `TEST_APPLICATION_UPDATES.md` unchanged. Installed-app acceptance remains a separate user check.
+- Update the source application-update checklist to distinguish this plan from implemented free rotation.
+- Installed-app acceptance remains a separate user check.
 
 ## References and verified code
 
