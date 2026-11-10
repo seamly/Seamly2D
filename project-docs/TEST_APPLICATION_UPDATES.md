@@ -181,8 +181,8 @@ Anchor points are required to define drill holes and reference lines, so correct
 - [x] A Drill hole with a missing or removed center anchor displays an error.
   - [x] Piece Mode: Trying to delete an anchor point that is in use will remove the anchor from the list but 'OK' and 'Apply' buttons do nothing so the deletion can't be saved. Add a display a message that the anchor point is in use and list the items where it is used, the user can click 'Close' button on this popup message to close it. Fix this in a worktree as a feature branch then merge into run-seamlyLayout. 
   - [x] Draft Mode: Adding an anchor point to a piece when that anchor point has already been added generates a 'Bad Id' message. It should generate a popup message that the anchor point has already been added, the user can click 'Close' to close the popup message. 
-- [x] Add one Stripe reference and one Plaid reference between distinct live anchors.
--> Stripe and Plaid reference lines should align with nodes along the path, not with anchor points. Change these reference lines to use path nodes instead of achor points. Fix this in a worktree as a feature branch then merge into run-seamlyLayout.
+- [x] Add one Stripe reference and one Plaid reference between distinct live path nodes.
+- [x] Stripe and Plaid reference endpoints use path nodes; regression coverage checks refresh and serialization.
 - [x] Missing endpoints or coincident endpoints show an error.
   - Try to use the same path node for both endpoints. For a missing endpoint, use a disposable pattern whose reference points to a deleted node.
 - [ ] Record separate Stripe/Plaid results; previously checked general marking tests do not complete these two unchecked cases.
