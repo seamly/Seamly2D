@@ -1,5 +1,5 @@
 // project: SeamlyLayout
-// author: slspencer, copyright 2026
+// author: slspencer, copyright 2026 Seamly2D Project
 // MIT License: https://opensource.org/licenses/MIT
 //
 // @file SettingsDialog.qml
@@ -690,11 +690,14 @@ Dialog {
                 } // Text tileSizeLabel
                 ComboBox {
                     id:               tileSizeCombo
+                    objectName:       "tileSizeCombo"
                     visible:          root.model ? (root.model.mediaType === "paper" && root.model.paperType === "tiled") : false
                     Layout.fillWidth: true
-                    model:            root.model ? root.model.tileSizeNames : []
-                    currentIndex:     root.model ? Math.max(0, model.indexOf(root.model.tileSize)) : 0
-                    onActivated:      if (root.model) root.model.selectTileSize(currentText)
+                    model:            root.model ? root.model.tileSizeLabels : []
+                    currentIndex:     root.model ? Math.max(0, root.model.tileSizeNames.indexOf(root.model.tileSize)) : 0
+                    onActivated: {
+                        if (root.model) root.model.selectTileSize(root.model.tileSizeNames[currentIndex])
+                    } // onActivated
                 } // ComboBox tileSize
 
                 Text {
@@ -1092,7 +1095,7 @@ Dialog {
 
             // Paper-size, tile-size, tile-orientation, and roll-size ComboBoxes
             paperSizeCombo.currentIndex      = Math.max(0, root.model.paperSizeNames.indexOf(root.model.sheetName))
-            tileSizeCombo.currentIndex       = Math.max(0, tileSizeCombo.model.indexOf(root.model.tileSize))
+            tileSizeCombo.currentIndex       = Math.max(0, root.model.tileSizeNames.indexOf(root.model.tileSize))
             tileOrientationCombo.currentIndex = Math.max(0, tileOrientationCombo.model.indexOf(root.model.tileOrientation))
             rollSizeCombo.currentIndex       = Math.max(0, rollSizeCombo.model.indexOf(root.model.rollSize))
 

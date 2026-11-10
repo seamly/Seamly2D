@@ -1,12 +1,12 @@
 // project: SeamlyLayout
-// author: slspencer, copyright 2026
+// author: slspencer, copyright 2026 Seamly2D Project
 // MIT License: https://opensource.org/licenses/MIT
 //
 // @file SettingsModel.cpp
 // @brief Implementation of SettingsModel — layout settings QObject.
 //
-// Paper/tile size tables mirror the Rust compile-time constants in
-// Matches the Rust settings data tables (PAPER_SIZES_DATA, TILE_SIZES_DATA).
+// Sheet and tile controls share the paper size table and dimension labels.
+// Tile dimensions are resolved by the Rust tiling TILE_SIZES_DATA table.
 // JSON keys match the Rust #[serde(rename_all = "camelCase")] annotation.
 
 #include "SettingsModel.h"
@@ -25,7 +25,7 @@
 #include <cmath>
 
 // ---------------------------------------------------------------------------
-// Static lookup tables (mirrored from Rust PAPER_SIZES_DATA / TILE_SIZES_DATA)
+// Static lookup tables
 // ---------------------------------------------------------------------------
 
 namespace {
@@ -77,20 +77,6 @@ QString formatPaperDimension(double dimension)
 {
     return QString::number(dimension, 'g', 6);
 } // formatPaperDimension
-
-// @brief Tile page sizes for tiled-PDF output.
-static const SizeEntry TILE_SIZES[] = {
-    { "None",   0.0,  0.0,  0.0,  0.0 },
-    { "Letter", 8.5, 11.0, 216.0, 279.0 },
-    { "Legal",  8.5, 14.0, 216.0, 356.0 },
-    { "Ledger", 11.0, 17.0, 279.0, 432.0 },
-    { "A3",     11.69, 16.54, 297.0, 420.0 },
-    { "A4",     8.27, 11.69, 210.0, 297.0 },
-    { "A5",     5.83,  8.27, 148.0, 210.0 },
-}; // TILE_SIZES
-
-static const int TILE_SIZES_COUNT =
-    static_cast<int>(sizeof(TILE_SIZES) / sizeof(TILE_SIZES[0]));
 
 // @brief Copy a file if the destination does not already exist.
 // Mirrors PreferencesModel.cpp's copyIfMissing() (kept local to this file
@@ -203,16 +189,21 @@ QStringList SettingsModel::paperSizeLabels() const
     return labels;
 } // paperSizeLabels()
 
-// @brief Return all tile size names in the order they appear in the table.
+// @brief Return predefined sheet names accepted by tiled output.
 QStringList SettingsModel::tileSizeNames() const
 {
-    QStringList names;
-    names.reserve(TILE_SIZES_COUNT);
-    for (int i = 0; i < TILE_SIZES_COUNT; ++i) {
-        names.append(QString::fromUtf8(TILE_SIZES[i].name));
-    } // for i
+    QStringList names = paperSizeNames();
+    names.removeLast(); // Custom uses sheet dimensions, not a named tile size.
     return names;
 } // tileSizeNames()
+
+// @brief Reuse sheet dimension formatting for every predefined tile size.
+QStringList SettingsModel::tileSizeLabels() const
+{
+    QStringList labels = paperSizeLabels();
+    labels.removeLast(); // Keep labels aligned with the predefined tile names.
+    return labels;
+} // tileSizeLabels()
 
 QStringList SettingsModel::tileOrientationNames() const
 {
@@ -980,12 +971,10 @@ void SettingsModel::selectPaperSize(const QString &name)
 // @brief Look up a tile size by name and update tileSize property.
 void SettingsModel::selectTileSize(const QString &name)
 {
-    for (int i = 0; i < TILE_SIZES_COUNT; ++i) {
-        if (QString::fromUtf8(TILE_SIZES[i].name) == name) {
-            setTileSize(name);
-            return;
-        } // if name matches
-    } // for i
+    if (tileSizeNames().contains(name))
+    {
+        setTileSize(name);
+    }
 } // selectTileSize()
 
 // @brief Return the appropriate default margin value for the given unit.

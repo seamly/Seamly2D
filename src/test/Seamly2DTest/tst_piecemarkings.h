@@ -13,10 +13,12 @@ class TST_PieceMarkings : public QObject
 {
     Q_OBJECT
 private slots:
+    void anchorAdditionUndoRedo();
     void roundTripAndDetach();
     void rejectsUnsafeValues();
     void currentSchemaAndCopy();
     void editorRequiresExplicitInput();
     void pieceDialogHasSeparateMarkingPages();
+    void pieceDialogReferencesUsePathNodes();
 };
 #endif // TST_PIECE_MARKINGS_H

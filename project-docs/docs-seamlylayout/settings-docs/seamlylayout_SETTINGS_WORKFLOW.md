@@ -26,7 +26,10 @@
         >>> if unit='mm' then default is 10 for all margins.
         >>> if unit='in' then default is .25 for all margins.
     > if paperType='tiled':
-      >> tileSize = dropdown list of paperSize restricted to Letter, Legal, Tabloid, A3, A4, A5; default is Letter.
+      >> tileSize uses the Sheet dropdown's 27 predefined sizes, order, and imperial/metric dimension labels; default is Letter.
+      >> Sizes include Letter, Legal, Ledger, ANSI C–E, ARCH A–E/E1–E3, ISO A0–A5, and ISO B0–B6.
+      >> Custom remains sheet-only; tile output requires a predefined physical page size. None is not a selectable tile size.
+      >> Settings store the size name, not the dimension label; orientation remains independent.
       >> tileWidth = tileSize width converted to user units; default is 8.5.
       >> tileHeight = tileSize height converted to user units; default is 11.
       >> Margins - marginLeft, marginRight, marginTop, marginBottom

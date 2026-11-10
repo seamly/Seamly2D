@@ -1,5 +1,5 @@
 // project: SeamlyLayout
-// author: slspencer, copyright 2026
+// author: slspencer, copyright 2026 Seamly2D Project
 // MIT License: https://opensource.org/licenses/MIT
 
 // @file tiling.rs
@@ -25,17 +25,37 @@ use crate::layout_settings::{LayoutSettings, LAYOUT_PPI};
 // Tile size lookup table
 // ---------------------------------------------------------------------------
 
-// @brief Built-in tile page sizes matching SettingsModel TILE_SIZES[] in C++.
+// @brief Predefined sheet sizes offered by SettingsModel's shared paper/tile catalog.
 // @details Columns: (name, imperial_w_in, imperial_h_in, metric_w_mm, metric_h_mm)
 const TILE_SIZES_DATA: &[(&str, f64, f64, f64, f64)] = &[
     // (name,    imp_w,  imp_h,  met_w,  met_h)
-    ("None", 0.0, 0.0, 0.0, 0.0),
     ("Letter", 8.5, 11.0, 215.9, 279.4),
     ("Legal", 8.5, 14.0, 215.9, 355.6),
     ("Ledger", 11.0, 17.0, 279.4, 431.8),
+    ("ANSI C", 17.0, 22.0, 431.8, 558.8),
+    ("ANSI D", 22.0, 34.0, 558.8, 863.6),
+    ("ANSI E", 34.0, 44.0, 863.6, 1117.6),
+    ("ARCH A", 9.0, 12.0, 228.6, 304.8),
+    ("ARCH B", 12.0, 18.0, 304.8, 457.2),
+    ("ARCH C", 18.0, 24.0, 457.2, 609.6),
+    ("ARCH D", 24.0, 36.0, 609.6, 914.4),
+    ("ARCH E", 36.0, 48.0, 914.4, 1219.2),
+    ("ARCH E1", 30.0, 42.0, 762.0, 1066.8),
+    ("ARCH E2", 26.0, 38.0, 660.4, 965.2),
+    ("ARCH E3", 27.0, 39.0, 685.8, 990.6),
+    ("A0", 33.11, 46.81, 841.0, 1189.0),
+    ("A1", 23.39, 33.11, 594.0, 841.0),
+    ("A2", 16.54, 23.39, 420.0, 594.0),
     ("A3", 11.69, 16.54, 297.0, 420.0),
     ("A4", 8.27, 11.69, 210.0, 297.0),
     ("A5", 5.83, 8.27, 148.0, 210.0),
+    ("B0", 39.37, 55.67, 1000.0, 1414.0),
+    ("B1", 27.83, 39.37, 707.0, 1000.0),
+    ("B2", 19.68, 27.83, 500.0, 707.0),
+    ("B3", 13.90, 19.68, 353.0, 500.0),
+    ("B4", 9.84, 13.90, 250.0, 353.0),
+    ("B5", 6.93, 9.84, 176.0, 250.0),
+    ("B6", 4.92, 6.93, 125.0, 176.0),
 ]; // TILE_SIZES_DATA
 
 // ---------------------------------------------------------------------------
@@ -107,9 +127,6 @@ fn tile_size_px(name: &str, unit: &str) -> Option<(f64, f64)> {
         if n != name {
             continue; // skip non-matching entry
         } // if name mismatch
-        if n == "None" || (imp_w == 0.0 && met_w == 0.0) {
-            return None; // "None" entry has no dimensions
-        } // if None entry
         let (w_px, h_px) = match unit {
             "mm" => (met_w / 25.4 * LAYOUT_PPI, met_h / 25.4 * LAYOUT_PPI), // mm → px
             "cm" => (met_w / 10.0 / 2.54 * LAYOUT_PPI, met_h / 10.0 / 2.54 * LAYOUT_PPI), // mm→cm→px
@@ -836,6 +853,57 @@ mod tests {
         assert!((w - 816.0).abs() < 0.01, "Letter w: {w}");
         assert!((h - 1056.0).abs() < 0.01, "Letter h: {h}");
     } // tile_size_letter_in
+
+    // @brief Every predefined UI size resolves through tiling in every unit and orientation.
+    #[test]
+    fn tile_catalog_matches_sheet_choices_and_computes_dimensions() {
+        // Check the UI source catalog so newly offered names cannot silently lack backend support.
+        let model_source = include_str!("../../../qt_frontend/src/SettingsModel.cpp");
+        let paper_table = model_source
+            .split("static const SizeEntry PAPER_SIZES[] = {")
+            .nth(1)
+            .expect("paper catalog")
+            .split("}; // PAPER_SIZES")
+            .next()
+            .expect("paper catalog end");
+        let sheet_names: Vec<&str> = paper_table
+            .lines()
+            .filter_map(|line| line.split('"').nth(1))
+            .collect();
+        let tile_names: Vec<&str> = TILE_SIZES_DATA.iter().map(|entry| entry.0).collect();
+        assert_eq!(tile_names, sheet_names);
+        assert_eq!(tile_names.len(), 27);
+
+        for &(name, width_in, height_in, width_mm, height_mm) in TILE_SIZES_DATA {
+            for unit in ["in", "mm", "cm"] {
+                let expected = if unit == "in" {
+                    (width_in * LAYOUT_PPI, height_in * LAYOUT_PPI)
+                } else {
+                    (width_mm / 25.4 * LAYOUT_PPI, height_mm / 25.4 * LAYOUT_PPI)
+                };
+                let actual = tile_size_px(name, unit).expect("predefined tile dimensions");
+                assert!((actual.0 - expected.0).abs() < 1e-8, "{name} {unit} width");
+                assert!((actual.1 - expected.1).abs() < 1e-8, "{name} {unit} height");
+                for orientation in ["portrait", "landscape"] {
+                    let mut settings = LayoutSettings::default_for_test();
+                    settings.tile_size = name.to_string();
+                    settings.unit = unit.to_string();
+                    settings.tile_orientation = orientation.to_string();
+                    let dimensions = compute_tile_dims(5000, 7000, &settings)
+                        .unwrap_or_else(|error| panic!("{name} {unit} {orientation}: {error}"));
+                    let (width, height) = if orientation == "landscape" {
+                        (expected.1, expected.0)
+                    } else {
+                        expected
+                    };
+                    assert!((dimensions.paper_w_px - width).abs() < 1e-8, "{name} width");
+                    assert!((dimensions.paper_h_px - height).abs() < 1e-8, "{name} height");
+                }
+            }
+        }
+        assert!(tile_size_px("Custom", "in").is_none());
+        assert!(tile_size_px("unknown", "in").is_none());
+    }
 
     // @brief compute_tile_dims: "None" tile size returns Err.
     #[test]

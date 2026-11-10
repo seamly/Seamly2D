@@ -1,5 +1,5 @@
 // project: SeamlyLayout
-// author: slspencer, copyright 2026
+// author: slspencer, copyright 2026 Seamly2D Project
 // MIT License: https://opensource.org/licenses/MIT
 //
 // @file SettingsModel.h
@@ -180,6 +180,9 @@ class SettingsModel : public QObject
     // @brief Tile size names for the tile size ComboBox.
     Q_PROPERTY(QStringList tileSizeNames   READ tileSizeNames   CONSTANT)
 
+    // @brief Tile labels reuse the predefined sheet dimensions and formatting.
+    Q_PROPERTY(QStringList tileSizeLabels  READ tileSizeLabels  CONSTANT)
+
     // @brief Tile orientation names for the tiled-paper orientation ComboBox.
     Q_PROPERTY(QStringList tileOrientationNames READ tileOrientationNames CONSTANT)
 
@@ -236,6 +239,7 @@ public:
     QStringList paperSizeNames()  const;
     QStringList paperSizeLabels() const;
     QStringList tileSizeNames()   const;
+    QStringList tileSizeLabels()  const;
     QStringList tileOrientationNames() const;
     QStringList unitNames()       const;
     QStringList layoutModeNames() const;
