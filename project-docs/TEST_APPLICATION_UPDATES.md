@@ -168,6 +168,7 @@ Use male_shirt, then a jacket2 piece.
 Use a male_shirt test copy and jacket2 Back. Add suitable live anchors if the piece has none.
 
 Anchor points are required to define drill holes and reference lines, so correction operations for anchor point add/edit/delete actions are essential; issues related to anchor points are included in this section.
+Implementation: anchor creation now uses one undo macro; regression tests cover three MainWindow undo/redo cycles. The reported missing-action symptom also appeared on baseline, so installed-MSI confirmation remains open.
 
 - [x] Piece Properties has a dedicated Drill holes page, separate from notch settings.
 - [x] Add a Drill hole at an anchor point with a known positive diameter.
@@ -262,6 +263,7 @@ Start from the baseline jacket2 copy. Use Paper > Roll, width 48 in, for the fir
 ## 11. Trousers — oversized pieces and fabric
 
 Start with Paper > Sheet. Use a custom 36 × 36 in sheet when available. Earlier testing used Arch E (36 × 48 in), the closest available option. Keep a baseline copy without added markings.
+Regression results: SettingsModel/QML 40, `layout_tiling` 40, paper-layout 6, `cxxqt_bridge` 278, and ExportMenu 20. Installed-MSI GUI validation remains pending.
 
 - [x] Paper > Sheets > Custom implemented
 - [x] Oversized-piece dialog names the affected legs, including Back and the applicable Front variants.
