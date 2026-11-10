@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-11-09 — Anchor undo/redo
+
+- Anchor creation now groups the modeling node and piece membership into one undo operation.
+- The Edit action regression covers two anchors, enabled Redo actions, stable IDs, and repeated undo/redo.
+- Focused `TST_PieceMarkings` passed 8/8 with Qt 6.11.3 and current cached suite libraries.
+- The full MSI build and installed-app toolbar check remain pending.
+- Work stays on `task-anchor-reference-fixes`; no merge or push.
+
 ### 2026-11-08 — Label filename extensions
 
 - `%pFileName%` and `%mFileName%` now include extensions in pattern labels, piece labels, and editor previews.

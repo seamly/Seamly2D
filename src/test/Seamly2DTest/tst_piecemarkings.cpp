@@ -14,6 +14,7 @@
 #include "../../libs/vgeometry/vpointf.h"
 #include "../../libs/vtools/dialogs/tools/piece/PieceMarkingsEditor.h"
 #include "../../libs/vtools/dialogs/tools/piece/pattern_piece_dialog.h"
+#include "../../libs/vtools/tools/nodeDetails/anchorpoint_tool.h"
 #include "../../libs/ifc/xml/PatternPieceCopy.h"
 #include "../../libs/ifc/xml/vpatternconverter.h"
 #include "../../libs/ifc/xml/vdomdocument.h"
@@ -21,6 +22,7 @@
 #include "../../libs/vmisc/vabstractapplication.h"
 #include "../../libs/ifc/exception/vexception.h"
 #include <QComboBox>
+#include <QAction>
 #include <QDir>
 #include <QFile>
 #include <QLineEdit>
@@ -29,8 +31,10 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QToolButton>
+#include <QUndoStack>
 #include <QTemporaryDir>
 #include <QScopeGuard>
+#include <QScopedPointer>
 #include <QtTest>
 #include <limits>
 
@@ -49,6 +53,36 @@ public:
     void LiteParseTree(const Document &) override {}
 };
 
+/// @brief Supplies a registered piece ID without creating graphics items.
+class MarkingsTestTool : public VDataTool
+{
+public:
+    using VDataTool::VDataTool;
+    void GroupVisibility(quint32, bool) override {}
+};
+
+/// @brief Rebuilds anchor membership when an undo command requests a parse.
+class AnchorTestDocument : public MarkingsTestDocument
+{
+public:
+    explicit AnchorTestDocument(VContainer *data) : m_data(data)
+    {
+        setContent(QStringLiteral("<pattern><draftBlock name=\"Block\"><modeling/><pieces>"
+                                  "<piece id=\"20\"/></pieces></draftBlock></pattern>"));
+        m_activeDraftBlock = QStringLiteral("Block");
+    }
+
+    void LiteParseTree(const Document &) override
+    {
+        VPiece piece = m_data->GetPiece(20);
+        piece.setAnchors(ParsePieceAnchors(elementById(20).firstChildElement(QStringLiteral("anchors"))));
+        m_data->UpdatePiece(20, piece);
+    }
+
+private:
+    VContainer *m_data;
+};
+
 QVector<quint32> pathNodeIds(const QVector<VPieceNode> &nodes)
 {
     QVector<quint32> ids;
@@ -58,6 +92,67 @@ QVector<quint32> pathNodeIds(const QVector<VPieceNode> &nodes)
     }
     return ids;
 }
+}
+
+/// @brief Checks atomic anchor creation and the enabled redo action across repeated cycles.
+void TST_PieceMarkings::anchorAdditionUndoRedo()
+{
+    Unit unit = Unit::Cm;
+    VContainer data(nullptr, &unit);
+    data.UpdateGObject(7, new VPointF(10, 20, QStringLiteral("A"), 0, 0));
+    data.UpdateGObject(8, new VPointF(30, 40, QStringLiteral("B"), 0, 0));
+    data.UpdatePiece(20, VPiece());
+    AnchorTestDocument document(&data);
+    MarkingsTestTool piece_tool(&data);
+    QUndoStack *stack = qApp->getUndoStack();
+    QVERIFY(stack != nullptr);
+    VAbstractPattern::AddTool(20, &piece_tool);
+    stack->clear();
+    QVector<quint32> anchor_ids;
+    const auto restore = qScopeGuard([&]
+    {
+        stack->clear();
+        for (quint32 id : anchor_ids)
+        {
+            VAbstractPattern::RemoveTool(id);
+        }
+        VAbstractPattern::RemoveTool(20);
+    });
+    QScopedPointer<QAction> undo(stack->createUndoAction(nullptr, QStringLiteral("Undo")));
+    QScopedPointer<QAction> redo(stack->createRedoAction(nullptr, QStringLiteral("Redo")));
+    for (quint32 point_id : {7U, 8U})
+    {
+        AnchorPointTool *anchor = AnchorPointTool::Create(
+            0, point_id, 20, &document, &data, Document::FullParse, Source::FromGui);
+        QVERIFY(anchor != nullptr);
+        document.LiteParseTree(Document::LiteParse);
+        anchor_ids = data.GetPiece(20).getAnchors();
+    }
+    QCOMPARE(anchor_ids.size(), 2);
+    QCOMPARE(stack->count(), 2);
+    QCOMPARE(document.elementsByTagName(QStringLiteral("point")).size(), 2);
+    QVERIFY(undo->isEnabled());
+    QVERIFY(!redo->isEnabled());
+    for (int repeat = 0; repeat < 2; ++repeat)
+    {
+        undo->trigger();
+        QCOMPARE(data.GetPiece(20).getAnchors(), QVector<quint32>({anchor_ids.first()}));
+        QVERIFY(document.elementById(anchor_ids.last()).isNull());
+        QVERIFY(redo->isVisible());
+        QVERIFY(redo->isEnabled());
+        QCOMPARE(redo->text(), QStringLiteral("Redo add anchor point"));
+        redo->trigger();
+        QCOMPARE(data.GetPiece(20).getAnchors(), anchor_ids);
+        QVERIFY(!document.elementById(anchor_ids.last()).isNull());
+        QVERIFY(!redo->isEnabled());
+    }
+    undo->trigger();
+    undo->trigger();
+    QVERIFY(data.GetPiece(20).getAnchors().isEmpty());
+    QVERIFY(document.elementsByTagName(QStringLiteral("point")).isEmpty());
+    redo->trigger();
+    redo->trigger();
+    QCOMPARE(data.GetPiece(20).getAnchors(), anchor_ids);
 }
 
 void TST_PieceMarkings::roundTripAndDetach()

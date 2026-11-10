@@ -12,6 +12,10 @@ Piece Mode uses distinct symbols:
 Seamly2D prevents deletion of an anchor used by a drill hole or a legacy reference line.
 Remove the marking before deleting its anchor.
 
+Adding an anchor creates one undo operation, including its modeling node and piece membership.
+Undo enables **Redo add anchor point** in the Edit menu and toolbar.
+Redo restores the same anchor ID. Repeated undo/redo does not leave detached modeling nodes.
+
 New reference lines use two distinct main-path node IDs. Files saved by earlier versions may use two live anchor IDs.
 Those lines remain loadable, and their anchors cannot be deleted until the lines are removed.
 A line with one node ID and one anchor ID is invalid.
