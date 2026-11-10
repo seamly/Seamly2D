@@ -6,9 +6,19 @@
 
 - Anchor creation now groups the modeling node and piece membership into one undo operation.
 - The Edit action regression covers two anchors, enabled Redo actions, stable IDs, and repeated undo/redo.
-- Focused `TST_PieceMarkings` passed 8/8 with Qt 6.11.3 and current cached suite libraries.
-- The full MSI build and installed-app toolbar check remain pending.
+- Focused `TST_PieceMarkings` passed 9/9 with Qt 6.11.3 and current cached suite libraries.
+- A real MainWindow harness passed three undo/redo cycles, including the menu action, toolbar button, and nonempty icon.
+- The original missing-redo symptom also did not reproduce with cached baseline code; the fix makes creation atomic.
+- The full MSI build and installed-app check remain pending.
 - Work stays on `task-anchor-reference-fixes`; no merge or push.
+
+### Reference endpoint coverage
+
+- The baseline already selects main-path point nodes for Stripe/Plaid references, while retaining saved legacy anchor references.
+- Added dialog-level coverage for both reference types, page refreshes, saved node IDs, anchor independence, and edited path geometry.
+- Corrected the piece-markings guide, which still described all markings as anchor-based.
+- Updated the existing reference-line task's implementation evidence; user verification remains open.
+- No change was made to `TEST_APPLICATION_UPDATES.md`.
 
 ### 2026-11-08 — Label filename extensions
 

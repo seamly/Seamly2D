@@ -19,5 +19,6 @@ private slots:
     void currentSchemaAndCopy();
     void editorRequiresExplicitInput();
     void pieceDialogHasSeparateMarkingPages();
+    void pieceDialogReferencesUsePathNodes();
 };
 #endif // TST_PIECE_MARKINGS_H
