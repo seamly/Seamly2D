@@ -63,6 +63,18 @@ there; read-only legacy-migration source only, never written to at runtime |
 - seamly2d/seamlyme: `VAbstractApplication::MigrateSeamlySettingsLocation()` (`src/libs/vmisc/vabstractapplication.h/.cpp`) copies from the old shared `"Seamly2DTeam"` organization folder; a one-time `NotifySeamlySettingsMigrated()` dialog tells the user, shown only in confirmed GUI mode (never during a headless CLI export or an automated test) after command-line parsing has run.
 - seamlyLayout: `appConfigRootPath()` (`PreferencesModel.cpp`) and `defaultSettingsFilePath()` (`SettingsModel.cpp`) each recursively copy the whole legacy `"Seamly Systems"` AppConfigLocation tree forward; the Inno Setup installer's upgrade-guard dialog (`SeamlyLayout.iss`) also mentions the org-folder rename.
 
+### Windows application logs
+
+The apps create their log directories under `%LOCALAPPDATA%\Seamly`:
+
+| App | Log directory | File names |
+|---|---|---|
+| Seamly2D | `%LOCALAPPDATA%\Seamly\Seamly2D\logs` | `seamly2d-pid<PID>.log` |
+| SeamlyMe | `%LOCALAPPDATA%\Seamly\SeamlyMe\logs` | `seamlyme-pid<PID>.log` |
+| SeamlyLayout | `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs` | `log_<YYMMDDHHMMSS>.txt` when debug logging is enabled |
+
+Use these folders for application and diagnostic logs. `SEAMLY_DATA_DIR` relocates app logs to `<data-dir>\logs\seamly2d`, `seamlyme`, or `seamlylayout`.
+
 ## User data tree — the relocatable data root
 
 Settings (above) are separate from the **user data tree**: patterns, measurements, templates, bodyscans, label templates, images, backups and layouts. Replaced the nine independent `QDir::homePath() + "/seamly2d/<subdir>"` literals with a single settings-backed **data root**:
@@ -193,7 +205,7 @@ A Flatpak sandbox exports `XDG_CONFIG_HOME=~/.var/app/<app-id>/config` and `XDG_
 
 - Why the traps exist (2026-07 findings):
   - `Seamly2DTests.exe` needs the (debug) Qt DLLs, `xerces-c_3_3.dll`, **and the Qt platform plugin** (`platforms\qwindows[d].dll`). Qt looks for the platform plugin **relative to the executable only** — if it is missing, `QGuiApplication` startup hits a `qFatal` that in a debug-CRT build pops a *hidden modal dialog*, so the suite looks like it hangs at startup with no output. `Seamly2DTest.pro` post-links `windeployqt` (plus the xerces copy) so everything is deployed beside the test exe. In an older tree, set `QT_PLUGIN_PATH` to the directory holding `platforms\` and put the seamly2d `bin` directory on `PATH`.
-  - QTest **stdout is lost** when the suite's console output is redirected on Windows, and a single `-o file,txt` logger is overwritten by every suite in turn. Set `SEAMLY_TEST_LOG_DIR`, which `qttestmainlambda.cpp` honors by writing one text log per suite to `<build>\test-logs\<Suite>.txt`, then read those logs.
+  - QTest **stdout is lost** when the suite's console output is redirected on Windows, and a single `-o file,txt` logger is overwritten by every suite in turn. Set `SEAMLY_TEST_LOG_DIR` to `%LOCALAPPDATA%\Seamly\Seamly2D\logs`; `qttestmainlambda.cpp` writes one text log per suite there as `<Suite>.txt`. Read those files to find failures.
   - Unit tests must not depend on the **system default printer**: `QPrinter` defaults to the machine's default printer and page size (a 5×7 in photo printer once broke a printer test locally while CI, with no printers, fell back to PDF/A4). Tests that touch `QPrinter` should force `QPrinter::PdfFormat` and an explicit page size.
 - Stale-tree trap: qmake subdir Makefiles in an old `build\` tree do not always regenerate when a `.pro` gains new source files, which surfaces as `LNK2019` unresolved externals for the new classes. Delete `build\src\**\Makefile*` and rebuild so qmake regenerates them.
 - CI is unaffected by any of this: the `linux-test` job runs the suite under xvfb on Ubuntu.
