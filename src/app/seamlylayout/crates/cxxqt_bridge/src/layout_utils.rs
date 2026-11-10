@@ -409,7 +409,7 @@ pub fn do_process_layout(
     // Tiled paper uses a candidate-width search: several bin widths (in multiples
     // of the trimmed tile width) are packed and the best result by tile-count
     // (then unused area) wins. Non-tiled paths pack a fixed bin, extend media,
-    // or retry remaining split parts on fresh sheets. `is_tiled` is set in step 3.
+    // or retry split fabric parts. `is_tiled` is set in step 3.
 
     // Fabric width is a physical constraint, including when folded.
     // Tiled paper never extends: its candidate-width search sets the width.
@@ -584,9 +584,8 @@ pub fn do_process_layout(
         };
         // Lenient pack: place every piece that fits, skip the rest, and collect
         // the unplaced ids.  This replaces the previous hard-error behavior — a
-        // piece too large for the sheet, or one that runs out of room, no longer
-        // aborts the whole layout.  The layout renders the pieces that fit and
-        // the unplaced piece ids are surfaced to the user as a warning popup.
+        // piece too large or one that runs out of room is collected below.
+        // Paper sheets reject incomplete layouts; other media keep the warning.
         // Extended fabric keeps its width and reports pieces too wide to fit.
         // `packed_bin_h` includes any extra height or successive sheets.
         let (placements, _created_rects, unplaced_ids, packed_bin_h) = if args.extend_media {
@@ -599,8 +598,8 @@ pub fn do_process_layout(
                 &trial_angles_deg,
                 Some(&mut piece_status),
             )
-        } else if args.split_oversized {
-            // Keep prior placements and retry only remaining parts on a fresh sheet.
+        } else if args.split_oversized && settings.media_type != "paper" {
+            // Preserve fabric's retry behavior; paper must fit its configured media.
             let (placements, unplaced_ids, height) = packing::pack_polygons_on_sheets(
                 bin_w, bin_h, gap_px, &polygons, &rects, &trial_angles_deg, Some(&mut piece_status),
             );
@@ -621,6 +620,15 @@ pub fn do_process_layout(
         // Map the unplaced original indices to warning lines: one per piece, named as
         // DXF-ASTM names it ("Detail (3)"), then its sizes.
         let unplaced_labels = crate::piece_extractor::unplaced_piece_lines(&flat_dom, &pieces, &unplaced_ids);
+
+        if settings.media_type == "paper" && settings.paper_type == "sheet" && !unplaced_ids.is_empty() {
+            // Reject incomplete sheets before assembling or publishing a layout.
+            return Err(format!(
+                "All pieces cannot fit on one sheet. Select PDF (tiled) in Layout Settings and create the layout again.\n\
+                 Pieces that could not be placed:\n{}",
+                unplaced_labels.join("\n")
+            ));
+        } // if paper sheet has unplaced pieces
 
         log_to_file(&format!(
             "[process_layout] non-tiled pack returned in {} ms with {} placements, {} unplaced: {:?}; bin {}x{} -> {}x{}",
@@ -1389,7 +1397,9 @@ mod tests {
     } // fn placed_count
 
     // @brief Process small rectangles with the user's split or enlargement choice.
-    fn process_placement_fixture(settings: serde_json::Value, split: bool, extend: bool) -> ProcessLayoutResult {
+    fn process_placement_fixture(
+        settings: serde_json::Value, split: bool, extend: bool,
+    ) -> Result<ProcessLayoutResult, String> {
         let input = Document::parse(
             r#"<svg xmlns="http://www.w3.org/2000/svg" width="600" height="200">
             <g id="long" data-type="piece" data-name="Long">
@@ -1413,26 +1423,43 @@ mod tests {
                 extend_media: extend,
             },
             &mut |_, _| {},
-        ).expect("process")
+        )
     } // fn process_placement_fixture
 
-    // @brief Split parts that exhaust one sheet retry on more sheets without disappearing.
+    // @brief Paper rejects overflowing whole pieces and split parts instead of stacking sheets.
     #[test]
-    fn placement_split_retries_across_sheets() {
+    fn placement_paper_sheet_overflow_requires_tiled_pdf() {
+        for (split, width, height) in [(false, 6.0, 2.0), (true, 1.0, 1.0)] {
+            let settings = serde_json::json!({
+                "unit": "in", "mediaType": "paper", "paperType": "sheet",
+                "pageWidth": width, "pageHeight": height, "pieceGap": 0.0,
+                "marginLeft": 0.0, "marginRight": 0.0, "marginTop": 0.0, "marginBottom": 0.0,
+                "layoutMode": "alongGrainline", "scaleGrid": false
+            });
+            let error = process_placement_fixture(settings, split, false).err().expect("sheet must fail");
+            assert!(error.contains("All pieces cannot fit on one sheet."), "{error}");
+            assert!(error.contains("Select PDF (tiled) in Layout Settings"), "{error}");
+            assert!(error.contains("Long") || error.contains("Wide"), "{error}");
+        } // for whole and split pieces
+    } // placement_paper_sheet_overflow_requires_tiled_pdf
+
+    // @brief Fabric keeps retrying split parts without widening the configured fabric.
+    #[test]
+    fn placement_fabric_split_retries_without_widening() {
         let settings = serde_json::json!({
-            "unit": "in", "mediaType": "paper", "paperType": "sheet",
-            "pageWidth": 1.0, "pageHeight": 1.0, "pieceGap": 0.0,
+            "unit": "in", "mediaType": "fabric", "fabricWidth": 1.0, "fabricHeight": 2.0,
+            "pieceGap": 0.0,
             "marginLeft": 0.0, "marginRight": 0.0, "marginTop": 0.0, "marginBottom": 0.0,
             "layoutMode": "alongGrainline", "scaleGrid": false
         });
-        let result = process_placement_fixture(settings, true, false);
+        let result = process_placement_fixture(settings, true, false).expect("fabric split");
         assert!(result.unplaced_labels.is_empty(), "{:?}", result.unplaced_labels);
-        assert_eq!(placed_count(&result), 8, "two length parts and six width parts");
+        assert_eq!(placed_count(&result), 7, "one whole piece and six width parts");
         assert!(result.layout_h_px > 96);
         assert_eq!(result.output_doc.root.attributes["width"], "96");
         assert!(result.divide_spec.is_some());
         assert!(result.media_enlargement.is_none(), "split is not requested enlargement");
-    } // placement_split_retries_across_sheets
+    } // placement_fabric_split_retries_without_widening
 
     // @brief Fabric enlargement fixes full and folded width and reports impossible pieces.
     #[test]
@@ -1444,7 +1471,7 @@ mod tests {
                 "marginLeft": 0.0, "marginRight": 0.0, "marginTop": 0.0, "marginBottom": 0.0,
                 "layoutMode": "alongGrainline", "scaleGrid": false
             });
-            let result = process_placement_fixture(settings, false, true);
+            let result = process_placement_fixture(settings, false, true).expect("fabric enlargement");
             assert_eq!(result.output_doc.root.attributes["width"], if folded { "192" } else { "384" });
             assert_eq!(result.layout_h_px, 180);
             assert_eq!(placed_count(&result), 1);
@@ -1463,7 +1490,7 @@ mod tests {
             "marginLeft": 0.0, "marginRight": 0.0, "marginTop": 0.0, "marginBottom": 0.0,
             "layoutMode": "alongGrainline", "scaleGrid": false
         });
-        let result = process_placement_fixture(settings, false, true);
+        let result = process_placement_fixture(settings, false, true).expect("paper enlargement");
         assert_eq!(result.output_doc.root.attributes["width"], "500");
         assert!(result.unplaced_labels.is_empty());
         assert_eq!(placed_count(&result), 2);
