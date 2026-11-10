@@ -455,3 +455,107 @@ void TST_PieceMarkings::pieceDialogHasSeparateMarkingPages()
     QVERIFY(!pages->item(TabOrder::DrillHoles)->flags().testFlag(Qt::ItemIsEnabled));
     QVERIFY(!pages->item(TabOrder::ReferenceLines)->flags().testFlag(Qt::ItemIsEnabled));
 }
+
+/// @brief Checks reference endpoint IDs through page refreshes and piece serialization, without requiring anchors.
+void TST_PieceMarkings::pieceDialogReferencesUsePathNodes()
+{
+    Unit unit = Unit::Cm;
+    VContainer data(nullptr, &unit);
+    data.UpdateGObject(7, new VPointF(10, 20, QStringLiteral("Path A"), 0, 0));
+    data.UpdateGObject(8, new VPointF(30, 40, QStringLiteral("Path B"), 0, 0));
+    data.UpdateGObject(9, new VPointF(50, 20, QStringLiteral("Path C"), 0, 0));
+    data.UpdateGObject(70, new VPointF(10, 20, QStringLiteral("Anchor A"), 0, 0));
+    data.UpdateGObject(80, new VPointF(30, 40, QStringLiteral("Anchor B"), 0, 0));
+    MarkingsTestDocument document;
+    VAbstractPattern *previous = qApp->getCurrentDocument();
+    const auto restore = qScopeGuard([previous] { qApp->setCurrentDocument(previous); });
+    qApp->setCurrentDocument(&document);
+    PatternPieceDialog dialog(&data, 0);
+    dialog.enableApply(true);
+    auto *pages = dialog.findChild<QListWidget *>(QStringLiteral("menuTab_ListWidget"));
+    auto *path = dialog.findChild<QListWidget *>(QStringLiteral("mainPath_ListWidget"));
+    auto *anchors = dialog.findChild<QListWidget *>(QStringLiteral("anchorPoints_ListWidget"));
+    QVERIFY(pages != nullptr);
+    QVERIFY(path != nullptr);
+    QVERIFY(anchors != nullptr);
+    for (quint32 id : {7U, 8U, 9U})
+    {
+        auto *item = new QListWidgetItem(data.GetGObject(id)->name(), path);
+        item->setData(Qt::UserRole, QVariant::fromValue(VPieceNode(id, Tool::NodePoint)));
+    }
+    // Curve IDs do not identify individual point endpoints.
+    auto *curve = new QListWidgetItem(QStringLiteral("Curve"), path);
+    curve->setData(Qt::UserRole, QVariant::fromValue(VPieceNode(200, Tool::NodeSpline)));
+    pages->setCurrentRow(TabOrder::ReferenceLines);
+    PieceMarkingsEditor *reference = nullptr;
+    PieceMarkingsEditor *drill = nullptr;
+    for (PieceMarkingsEditor *editor : dialog.findChildren<PieceMarkingsEditor *>())
+    {
+        if (editor->findChild<QToolButton *>(QStringLiteral("stripeReferenceIcon")) != nullptr)
+        {
+            reference = editor;
+        }
+        else
+        {
+            drill = editor;
+        }
+    }
+    QVERIFY(reference != nullptr);
+    QVERIFY(drill != nullptr);
+    auto *start = reference->findChild<QComboBox *>(QStringLiteral("startPoint"));
+    auto *end = reference->findChild<QComboBox *>(QStringLiteral("endPoint"));
+    auto *add = reference->findChild<QPushButton *>(QStringLiteral("addMarking"));
+    QCOMPARE(start->count(), 4);
+    QVERIFY(start->findData(200) < 0);
+    QCOMPARE(drill->findChild<QComboBox *>(QStringLiteral("startPoint"))->count(), 1);
+    start->setCurrentIndex(start->findData(7U));
+    end->setCurrentIndex(end->findData(8U));
+    QVERIFY(add->isEnabled());
+    add->click();
+    reference->findChild<QToolButton *>(QStringLiteral("plaidReferenceIcon"))->click();
+    add->click();
+
+    for (quint32 id : {70U, 80U})
+    {
+        auto *item = new QListWidgetItem(data.GetGObject(id)->name(), anchors);
+        item->setData(Qt::UserRole, id);
+    }
+    pages->setCurrentRow(TabOrder::Properties);
+    pages->setCurrentRow(TabOrder::ReferenceLines);
+    QCOMPARE(start->count(), 4);
+    QVERIFY(start->findData(70U) < 0);
+    QVERIFY(start->findData(80U) < 0);
+    QCOMPARE(start->currentData().toUInt(), 7U);
+    QCOMPARE(end->currentData().toUInt(), 8U);
+    QCOMPARE(drill->findChild<QComboBox *>(QStringLiteral("startPoint"))->count(), 3);
+
+    const VPiece piece = dialog.GetPiece();
+    QCOMPARE(piece.referenceLines().size(), 2);
+    QCOMPARE(piece.referenceLines().first().type, QStringLiteral("stripe"));
+    QCOMPARE(piece.referenceLines().last().type, QStringLiteral("plaid"));
+    QDomDocument saved;
+    QDomElement element = saved.createElement(QStringLiteral("piece"));
+    saved.appendChild(element);
+    PieceMarkings::write(element, {}, piece.referenceLines());
+    const auto lines = PieceMarkings::readReferenceLines(element);
+    for (const PieceReferenceLine &line : lines)
+    {
+        QCOMPARE(line.start, 7U);
+        QCOMPARE(line.end, 8U);
+    }
+    QVERIFY(PieceMarkings::valid({}, lines, {}, {7, 8, 9}));
+    QVERIFY(!PieceMarkings::valid({}, lines, {70, 80}, {}));
+    anchors->clear();
+    pages->setCurrentRow(TabOrder::Properties);
+    pages->setCurrentRow(TabOrder::ReferenceLines);
+    QVERIFY(reference->markingsValid());
+
+    data.UpdateGObject(8, new VPointF(10, 20, QStringLiteral("Path B"), 0, 0));
+    pages->setCurrentRow(TabOrder::Properties);
+    pages->setCurrentRow(TabOrder::ReferenceLines);
+    QVERIFY(!reference->markingsValid());
+    data.UpdateGObject(8, new VPointF(60, 80, QStringLiteral("Path B"), 0, 0));
+    pages->setCurrentRow(TabOrder::Properties);
+    pages->setCurrentRow(TabOrder::ReferenceLines);
+    QVERIFY(reference->markingsValid());
+}
