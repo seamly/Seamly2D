@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-11-09 — Rotation implementation plan
+
+- Added `project-docs/TODO_ROTATION.md` for section 5's Any-mode rotation item; no behavior changes.
+- Plan covers metadata, per-piece packing, fit/export parity, assembly, regression tests, performance, and documentation.
+- Confirm omitted Rotation semantics before implementation; the plan proposes no additional rotation for tagged None.
+- Branch `task-rotation-plan` uses `.worktrees\rotation-plan`, based on `run-seamlyLayout` at `0f21f9f56e`.
+- Source checklist and main-worktree edits remain untouched. No merge or push; implementation and application tests remain pending.
+
 ### 2026-11-08 — Label filename extensions
 
 - `%pFileName%` and `%mFileName%` now include extensions in pattern labels, piece labels, and editor previews.
