@@ -44,16 +44,28 @@ Dialog {
     readonly property bool isTiledPaper: root.model
         ? (root.model.mediaType === "paper" && root.model.paperType === "tiled")
         : false
+    // @brief True when Paper Type is "custom": a sheet with user-entered dimensions.
     readonly property bool isCustomPaper: root.model
-        ? (root.model.mediaType === "paper" && root.model.paperType === "sheet"
-           && root.model.sheetName === "Custom")
+        ? (root.model.mediaType === "paper" && root.model.paperTypeChoice === "custom")
         : false
+    // @brief True when Paper Type is "sheet": a predefined paper size.
+    readonly property bool isPredefinedSheet: root.model
+        ? (root.model.mediaType === "paper" && root.model.paperTypeChoice === "sheet")
+        : true
     readonly property bool showFabricSection: root.model
         ? root.model.mediaType === "fabric"
         : false
     readonly property bool showMarginsSection: root.model
         ? root.model.mediaType !== "fabric"
         : true
+
+    // @brief Copy the model sheet dimensions into the custom size fields.
+    // An edit replaces each field's text binding, so model changes need this call.
+    function refreshCustomPaperFields() {
+        if (!root.model) return;
+        customPaperWidthField.text = root.model.pageWidth.toFixed(2);
+        customPaperHeightField.text = root.model.pageHeight.toFixed(2);
+    } // function refreshCustomPaperFields
 
     title:           "Layout Settings"
     modal:           true
@@ -497,8 +509,7 @@ Dialog {
                         if (oldUnit !== newUnit) {
                             root.model.convertAllUnits(oldUnit, newUnit);
                             root.model.unit = newUnit;
-                            customPaperWidthField.text = root.model.pageWidth.toFixed(2);
-                            customPaperHeightField.text = root.model.pageHeight.toFixed(2);
+                            root.refreshCustomPaperFields();
                         } // if unit changed
                     } // onActivated
                 } // ComboBox unitCombo
@@ -554,23 +565,24 @@ Dialog {
                     font.pixelSize: Theme.fontSizeNormal
                     Layout.preferredWidth: scrollView.labelWidth
                 } // Text paperTypeLabel
+                // "custom" is a sheet with user-entered dimensions.
                 ComboBox {
                     id:               paperTypeCombo
+                    objectName:       "paperTypeCombo"
                     visible:          root.model ? root.model.mediaType === "paper" : true
                     Layout.fillWidth: true
-                    model:            ["sheet", "tiled", "roll"]
-                    currentIndex: {
-                        if (!root.model) return 0
-                        if (root.model.paperType === "tiled") return 1
-                        if (root.model.paperType === "roll")  return 2
-                        return 0 // "sheet"
-                    } // currentIndex
-                    onActivated:      if (root.model) root.model.paperType = currentText
+                    model:            root.model ? root.model.paperTypeNames : []
+                    currentIndex:     root.model ? Math.max(0, model.indexOf(root.model.paperTypeChoice)) : 0
+                    onActivated: {
+                        if (!root.model) return;
+                        root.model.selectPaperType(currentText);
+                        root.refreshCustomPaperFields();   // custom keeps the current dimensions
+                    } // onActivated
                 } // ComboBox paperType
 
-                // Paper size — sheet only, with dimensions on predefined labels.
+                // Paper size — a predefined sheet shows the size list; a custom sheet shows width × height fields.
                 Text {
-                    visible:        root.model ? (root.model.mediaType === "paper" && root.model.paperType === "sheet") : true
+                    visible:        root.isPredefinedSheet || root.isCustomPaper
                     text:           "Paper Size:"
                     color:          Theme.fieldLabel
                     font.pixelSize: Theme.fontSizeNormal
@@ -578,7 +590,7 @@ Dialog {
                 } // Text paperSizeLabel
                 ComboBox {
                     id:               paperSizeCombo
-                    visible:          root.model ? (root.model.mediaType === "paper" && root.model.paperType === "sheet") : true
+                    visible:          root.isPredefinedSheet
                     Layout.fillWidth: true
                     model:            root.model ? root.model.paperSizeLabels : []
                     currentIndex:     root.model ? Math.max(0, root.model.paperSizeNames.indexOf(root.model.sheetName)) : 0
@@ -587,89 +599,93 @@ Dialog {
                     } // onActivated
                 } // ComboBox paperSize
 
-                Text {
-                    visible:        root.isCustomPaper
-                    text:           "Custom Width (" + (root.model ? root.model.unit : "in") + "):"
-                    color:          Theme.fieldLabel
-                    font.pixelSize: Theme.fontSizeNormal
-                    Layout.preferredWidth: scrollView.labelWidth
-                } // Text customPaperWidthLabel
-                TextField {
-                    id:               customPaperWidthField
-                    objectName:       "customPaperWidthField"
+                // Custom size: width × height in the Layout Settings unit.
+                RowLayout {
+                    id:               customPaperSizeRow
                     visible:          root.isCustomPaper
                     Layout.fillWidth: true
-                    text:             root.model ? root.model.pageWidth.toFixed(2) : "36.00"
-                    validator:        DoubleValidator {
-                        bottom: 0.000001
-                        top: 1000000000
-                        decimals: 6
-                        notation: DoubleValidator.StandardNotation
-                        locale: Qt.locale("C")
-                    }
-                    onEditingFinished: {
-                        if (!root.model) return;
-                        var value = parseFloat(text);
-                        if (acceptableInput && isFinite(value) && value > 0) {
-                            root.model.sheetName = "Custom";
-                            root.model.pageWidth = value;
-                        } // if valid dimension
-                        text = root.model.pageWidth.toFixed(2);
-                    } // onEditingFinished
-                    color:            Theme.fieldText
-                    background:       Rectangle { color: Theme.fieldBackground; radius: 2 }
-                } // TextField customPaperWidth
+                    spacing:          6
 
-                Text {
-                    visible:        root.isCustomPaper
-                    text:           "Custom Height (" + (root.model ? root.model.unit : "in") + "):"
-                    color:          Theme.fieldLabel
-                    font.pixelSize: Theme.fontSizeNormal
-                    Layout.preferredWidth: scrollView.labelWidth
-                } // Text customPaperHeightLabel
-                TextField {
-                    id:               customPaperHeightField
-                    objectName:       "customPaperHeightField"
-                    visible:          root.isCustomPaper
-                    Layout.fillWidth: true
-                    text:             root.model ? root.model.pageHeight.toFixed(2) : "48.00"
-                    validator:        DoubleValidator {
-                        bottom: 0.000001
-                        top: 1000000000
-                        decimals: 6
-                        notation: DoubleValidator.StandardNotation
-                        locale: Qt.locale("C")
-                    }
-                    onEditingFinished: {
-                        if (!root.model) return;
-                        var value = parseFloat(text);
-                        if (acceptableInput && isFinite(value) && value > 0) {
-                            root.model.sheetName = "Custom";
-                            root.model.pageHeight = value;
-                        } // if valid dimension
-                        text = root.model.pageHeight.toFixed(2);
-                    } // onEditingFinished
-                    color:            Theme.fieldText
-                    background:       Rectangle { color: Theme.fieldBackground; radius: 2 }
-                } // TextField customPaperHeight
+                    TextField {
+                        id:               customPaperWidthField
+                        objectName:       "customPaperWidthField"
+                        Layout.fillWidth: true
+                        placeholderText:  "Width"
+                        ToolTip.visible:  hovered
+                        ToolTip.text:     "Sheet width (" + (root.model ? root.model.unit : "in") + ")"
+                        text:             root.model ? root.model.pageWidth.toFixed(2) : "36.00"
+                        validator:        DoubleValidator {
+                            bottom: 0.000001
+                            top: 1000000000
+                            decimals: 6
+                            notation: DoubleValidator.StandardNotation
+                            locale: Qt.locale("C")
+                        }
+                        onEditingFinished: {
+                            if (!root.model) return;
+                            var value = parseFloat(text);
+                            // The model ignores a value that is not positive and finite.
+                            if (acceptableInput && isFinite(value) && value > 0) {
+                                root.model.pageWidth = value;
+                            } // if valid dimension
+                            text = root.model.pageWidth.toFixed(2);
+                        } // onEditingFinished
+                        color:            Theme.fieldText
+                        background:       Rectangle { color: Theme.fieldBackground; radius: 2 }
+                    } // TextField customPaperWidth
+
+                    Text {
+                        text:           "\u00D7"
+                        color:          Theme.textOnDark
+                        font.pixelSize: Theme.fontSizeNormal
+                    } // Text customPaperTimes
+
+                    TextField {
+                        id:               customPaperHeightField
+                        objectName:       "customPaperHeightField"
+                        Layout.fillWidth: true
+                        placeholderText:  "Height"
+                        ToolTip.visible:  hovered
+                        ToolTip.text:     "Sheet height (" + (root.model ? root.model.unit : "in") + ")"
+                        text:             root.model ? root.model.pageHeight.toFixed(2) : "48.00"
+                        validator:        DoubleValidator {
+                            bottom: 0.000001
+                            top: 1000000000
+                            decimals: 6
+                            notation: DoubleValidator.StandardNotation
+                            locale: Qt.locale("C")
+                        }
+                        onEditingFinished: {
+                            if (!root.model) return;
+                            var value = parseFloat(text);
+                            // The model ignores a value that is not positive and finite.
+                            if (acceptableInput && isFinite(value) && value > 0) {
+                                root.model.pageHeight = value;
+                            } // if valid dimension
+                            text = root.model.pageHeight.toFixed(2);
+                        } // onEditingFinished
+                        color:            Theme.fieldText
+                        background:       Rectangle { color: Theme.fieldBackground; radius: 2 }
+                    } // TextField customPaperHeight
+
+                    Text {
+                        text:           root.model ? root.model.unit : "in"
+                        color:          Theme.textOnDark
+                        font.pixelSize: Theme.fontSizeNormal
+                    } // Text customPaperUnit
+                } // RowLayout customPaperSizeRow
 
                 // Page dimensions (display-only, shown only for paper/sheet):
                 //   paper/sheet → pageWidth × pageHeight (user units) + pixel equivalents
                 Text {
-                    visible:        root.model
-                        ? (root.model.mediaType === "paper" && root.model.paperType === "sheet"
-                           && root.model.sheetName !== "Custom")
-                        : true
+                    visible:        root.isPredefinedSheet
                     text:           "Page Size:"
                     color:          Theme.fieldLabel
                     font.pixelSize: Theme.fontSizeNormal
                     Layout.preferredWidth: scrollView.labelWidth
                 } // Text pageSizeLabel
                 Text {
-                    visible:        root.model
-                        ? (root.model.mediaType === "paper" && root.model.paperType === "sheet"
-                           && root.model.sheetName !== "Custom")
-                        : true
+                    visible:        root.isPredefinedSheet
                     text: {
                         if (!root.model) return "\u2014"
                         return root.model.pageWidth.toFixed(2) + " \u00D7 "
@@ -1089,10 +1105,8 @@ Dialog {
             // Unit ComboBox
             unitCombo.currentIndex = unitCombo.model.indexOf(root.model.unit)
 
-            // Paper-type ComboBox
-            if      (root.model.paperType === "tiled") paperTypeCombo.currentIndex = 1
-            else if (root.model.paperType === "roll")  paperTypeCombo.currentIndex = 2
-            else                                        paperTypeCombo.currentIndex = 0
+            // Paper-type ComboBox: a sheet named "Custom" shows as "custom".
+            paperTypeCombo.currentIndex = Math.max(0, root.model.paperTypeNames.indexOf(root.model.paperTypeChoice))
 
             // Paper-size, tile-size, tile-orientation, and roll-size ComboBoxes
             paperSizeCombo.currentIndex      = Math.max(0, root.model.paperSizeNames.indexOf(root.model.sheetName))
@@ -1109,8 +1123,7 @@ Dialog {
             // Fabric TextFields
             fabricWidthField.text   = root.model.fabricWidth.toFixed(2)
             selvedgeWidthField.text  = root.model.selvedgeWidth.toFixed(2)
-            customPaperWidthField.text = root.model.pageWidth.toFixed(2)
-            customPaperHeightField.text = root.model.pageHeight.toFixed(2)
+            root.refreshCustomPaperFields()
         } // onSettingsLoaded
     } // Connections settingsLoaded
 } // Dialog root
