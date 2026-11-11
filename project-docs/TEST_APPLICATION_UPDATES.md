@@ -172,19 +172,18 @@ Anchor points are required to define drill holes and reference lines, so correct
 - [ ] Installed-app GUI: after Undo anchor point, Redo anchor point is visible and enabled.
   - Anchor creation now groups both model changes into one undo operation. The MainWindow regression covers three undo/redo cycles. The reported missing-action symptom also appeared on baseline, so installed-MSI confirmation remains open.
   - [x] 'Redo anchor point' becomes an option in the 'Edit' dropdown menu
-  - [ ] 'Redo anchor point' becomes an icon in the bar menu
- --> Fix this in a worktree as a feature branch then merge into run-seamlyLayout
+  - [x] 'Redo anchor point' becomes an icon in the bar menu
 - [x] A Drill hole with a missing or removed center anchor displays an error.
   - [x] Piece Mode: Trying to delete an anchor point that is in use will remove the anchor from the list but 'OK' and 'Apply' buttons do nothing so the deletion can't be saved. Add a display a message that the anchor point is in use and list the items where it is used, the user can click 'Close' button on this popup message to close it. Fix this in a worktree as a feature branch then merge into run-seamlyLayout.
-  - [ ] Piece Mode > Pattern Piece Tool > Drill Holes: Drill Holes needs its own icon. Above the label 'Drill Holes' display an icon of two concentric circles that are blue with black outline.
+  - [ ] YY Piece Mode > Pattern Piece Tool > Drill Holes: Drill Holes needs its own icon. Above the label 'Drill Holes' display an icon of two concentric circles that are blue with black outline.
 --> Fix this in a worktree as a feature branch then merge into run-seamlyLayout.
   - [x] Draft Mode: Adding an anchor point to a piece when that anchor point has already been added generates a 'Bad Id' message. It should generate a popup message that the anchor point has already been added, the user can click 'Close' to close the popup message.
 - [x] Add Stripe and Plaid references using path-node endpoints, not anchors.
   - The path-node behavior already existed. Regression coverage verifies node-only choices, dialog refresh, and serialization.
-- [ ] Display Plaid reference line as double line in piece mode and layout canvases; for DXF exports the Plaid reference line is a single line, for all other exports Plaid reference line is a dboule line. 
+- [ ] YY Display Plaid reference line as double line in piece mode and layout canvases; for DXF exports the Plaid reference line is a single line, for all other exports Plaid reference line is a dboule line. 
 --> Fix this in a worktree as a feature branch then merge into run-seamlyLayout.
-- [ ] Piece Mode > Pattern Piece Tool > Reference Lines: Needs an icon. Show an icon composed of two side-by-side symbols: for stripe symbol show two vertical parallel lines in blue with black outine; for plaid symbol show two verical parallel lines crossed by two horizontal lines.
---> Fix this in a worktree as a feature branch then merge into run-seamlyLayout.
+- [x] WW Piece Mode > Pattern Piece Tool > Reference Lines: The 'Reference Lines' label needs an icon. Above the 'Reference Lines' label display an icon composed of two side-by-side symbols: for stripe symbol show two blue vertical parallel lines with black outine; for plaid symbol show the same two vertical parallel lines crossed by two blue horizontal lines with black outline.
+  - Render check: 8/8 pixels pass. `TST_PieceMarkings` and installed-app check run with the next MSI.
 - [x] Missing endpoints or coincident endpoints show an error.
   - Try to use the same path node for both endpoints. For a missing endpoint, use a disposable pattern whose reference points to a deleted node.
 - [x] Remove selected markings; only the selected marking disappears.
@@ -270,29 +269,28 @@ Regression results: SettingsModel/QML 40, `layout_tiling` 40, paper-layout 6, `c
 - [x] Layout Settings > Tile Size dropdown menu lists all predefined Sheet sizes and displays dimensions.
   - SettingsModel/QML tests: 40 passed. `layout_tiling` tests: 40 passed. Rebuilt-MSI verification remains open.
   
-- [ ] Layout Settings > Any media: all pieces with a foldline are placed with foldline along the left edge. 
---> Fix this in a worktree as a feature branch then merge into run-seamlyLayout.
+- [x] WW Layout Settings > Any media: all pieces with a foldline are placed with foldline along the left edge. 
+  - A fold line across or aslant the grain turns its piece onto the fold edge, whole or split. `cargo test --workspace`: pass. Installed-app check with `trousers.sm2d` runs with the next MSI.
 
-- [ ] Paper: split paper layouts enable PDF, PNG, JPG, EPS, PostScript (PS), SVG, and HPGL.
-  - `ExportMenuTests`: 20 cases passed. Rebuilt-MSI verification remains open.
-  - [ ] Enable G-code and 3D mesh exports, update export menu message to state "Split layouts: DXF and PDF (tiled) are disabled."
- --> Fix this in a worktree as a feature branch then merge into run-seamlyLayout.
+- [x] WW Paper (any paper type): regression error - Split pieces disable all DXF exports.
+  - Cause: a single layout never refreshed the split flag. Fixed; `export_dxf` also refuses split layouts. `cargo test --workspace`: pass. Installed-app check runs with the next MSI.
 
-- [x] Paper > Sheets: paper sheets reject overflow and direct the user to PDF (tiled), without creating multiple sheets.
-  - Paper-layout regression tests: 6 passed. Full `cxxqt_bridge` tests: 278 passed. Rebuilt-MSI verification remains open.
-  - [ ] Direct the user to PDF (tiled) and do not display the dialog containing the choice of 'Split the Pieces" or "Make the media bigger"
---> Fix this in a worktree as a feature branch then merge into run-seamlyLayout.
-- [x] Paper > Sheets > Custom implemented.
+- [x] WW Paper > Sheets: Disable 'Make the media bigger' option and direct the user to PDF (tiled) 
+  - The dialog disables the option on a paper sheet and names PDF (tiled); the controller refuses it too. `cargo test --workspace`: pass. Installed-app check runs with the next MSI.
+- [x] WW Paper > Sheets > Paper Type: regression error - add 'Custom' option to 'Paper Type' dropdown list and enable user to enter numeric value in 'Paper Size' field into user specified units from Layout Settings. 
+  - Paper Type now lists custom; it shows Paper Size as width × height fields in the Layout Settings unit. SettingsModel tests (temporary test program): 42 pass. Installed-app check runs with the next MSI.
+- [x] WW Paper > Sheets > 'Split the pieces': If all pieces can't fit on a single sheet then direct the user to PDF (tiled)  and close dialog without creating a layout.
+  - No layout when the pieces or parts overflow the sheet: the error names PDF (tiled), the canvas shows the blank sheet, and only Layout Settings stays active; any material's overflow ends the run. cargo test --workspace: pass. Installed-app check runs with the next MSI.
 - [x] Paper > Sheets > 'Split the pieces'  - works in that it splits the pieces.
 - [x] Paper > Sheets > 'Split the pieces' - Disable the main DXF menu option.
 - [x] Paper > Sheets > 'Make the media bigger' - works in that it fits all pieces onto the expanded media.
 - [x] Paper > Sheets > 'Make the media bigger' - if no pieces have been split then Enable all export options (except 'PDF (tiled)')
 --> Fix this in a worktree as a feature branch then merge into run-seamlyLayout.
 
-- [ ] Paper > Roll: Add an option 'custom' to the Roll width dropdown menu. If 'custom' is selected then enabl the user to enter a numeric value  in the Roll Width field, in the user units selected in Layout Settings. 
---> Fix this in a worktree as a feature branch then merge into run-seamlyLayout.
-- [ ] Paper > Roll: Splitting paper pieces preserves the selected media dimensions. 
---> Fix this in a worktree as a feature branch then merge into run-seamlyLayout.
+- [x] WW Paper > Roll: Add an option 'custom' to the Roll width dropdown menu. If 'custom' is selected then enabl the user to enter a numeric value  in the Roll Width field, in the user units selected in Layout Settings. 
+  - Roll Width lists custom; it shows a width field in the Layout Settings unit. SettingsModel tests (temporary test program): 44 pass. Installed-app check runs with the next MSI.
+- [x] WW Paper > Roll: Splitting paper pieces preserves the selected media dimensions. 
+  - Code already kept the roll width; new tests pin roll width, margins, and the trousers on a 16 in roll. Installed-app check with the next MSI.
 
 - [x] Fabric (folded) > 'Split the pieces' - works in that it splits the pieces.
 - [x] Fabric (folded) > 'Split the pieces' - Disable DXF export options.
