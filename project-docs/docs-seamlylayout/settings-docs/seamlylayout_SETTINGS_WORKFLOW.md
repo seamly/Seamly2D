@@ -78,6 +78,7 @@
 - foldLinesOnLeftEdge -- checkbox "Place fold lines on the left edge (fabric: no left margin)"; default off.
   Every media.
   >> Each piece with a fold line lies with its fold line on the left content edge.
+  >> A fold line across or aslant the grain turns its piece; the fold edge outranks the layout mode.
   >> media='fabric': marginLeft=0; the left edge is the fold.
   >> media='paper': marginLeft is kept; the fold line lies on the left content edge.
   >> A Nested piece-set: its sizes stack on their fold line start, so the stack goes on the edge when the sizes share one fold line; else a warning.

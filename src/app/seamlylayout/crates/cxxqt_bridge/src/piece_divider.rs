@@ -170,10 +170,16 @@ fn unit_length(px: u32, unit: &str) -> String {
 // A piece without a `cutline` or `seamline` group cannot be split; it stays whole.
 //
 // @param doc Pre-processed DOM, changed in place: each split piece's `<g>` is
-//            replaced, at the same position, by one `<g>` per part.
+//            replaced, at the same position, by one `<g>` per part. With fold
+//            lines on the left edge, pieces also turn or mirror as
+//            `fold_line_edge::plan_fold_line_edge` plans.
 // @return The split pieces, in document order.
 pub fn divide_oversized_pieces(doc: &mut Document, spec: &DivideSpec) -> Vec<DividedPiece> {
     let uu_per_px = svg_uu_per_px(&doc.root);
+    if spec.fold_lines_on_left_edge {
+        // Turn and mirror in place, so each grid cuts the piece as the packer places it.
+        crate::fold_line_edge::plan_fold_line_edge(doc, &spec.trial_angles_deg, spec.apply_piece_rotation);
+    } // if fold lines go on the left edge
     let pieces = prepared_pieces(doc, spec);
 
     // Grid of each piece that does not fit, keyed by its index among the root's <g> children.
