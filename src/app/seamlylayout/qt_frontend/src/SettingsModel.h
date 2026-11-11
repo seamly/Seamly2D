@@ -115,10 +115,10 @@ class SettingsModel : public QObject
     // Roll dimensions
     // -----------------------------------------------------------------------
 
-    // @brief Roll size descriptor string (e.g., "36 in").
+    // @brief Roll size descriptor ("36 in", "900 mm"), or "custom" for a user-entered rollWidth.
     Q_PROPERTY(QString rollSize      READ rollSize      WRITE setRollSize      NOTIFY rollSizeChanged)
 
-    // @brief Roll width in active units.
+    // @brief Roll width in active units; zero, negative, and non-finite values are ignored.
     Q_PROPERTY(double  rollWidth     READ rollWidth     WRITE setRollWidth     NOTIFY rollWidthChanged)
 
     // @brief Roll width in pixels at 96 px/in (derived from rollWidth + unit).
