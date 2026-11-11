@@ -1714,6 +1714,8 @@ impl qobject::AppController {
     ) -> bool {
         // Mark layout as in-progress and clear previous result, tabs included.
         // Every other material goes back to its blank canvas until its turn in the run.
+        // Drop the previous split first: clear_layout_views copies it to the split flag.
+        self.as_mut().rust_mut().divide_spec = None;
         self.as_mut().clear_layout_views();
         for layout in self.as_mut().rust_mut().material_layouts.iter_mut() {
             layout.reset_to_blank();
@@ -1928,6 +1930,7 @@ impl qobject::AppController {
                 self.as_mut().set_layout_status_message(cxx_qt_lib::QString::default());
                 self.as_mut().set_is_layout_ready(true);           // enables 'Export' button
                 self.as_mut().set_is_create_layout_enabled(false); // disable 'Create Layout' until settings change
+                self.as_mut().refresh_layout_view_properties();    // split flag gates DXF and PDF (Tiled)
                 self.as_mut().layout_finished();                   // notify QML right canvas to reload
 
                 // Soft failure: some pieces didn't fit, or a fold line stays off
