@@ -162,6 +162,23 @@ impl ViewKind {
     } // fn in_all_tabs_export
 } // impl ViewKind
 
+// @brief Why DXF cannot export the shown layout; `None` when it can.
+//
+// @param kind     Shown tab; `None` for an individual layout.
+// @param split    True when the shown layout split pieces.
+// @param standard "DXF-ASTM" or "DXF-AAMA", for the message.
+pub fn dxf_export_refusal(kind: Option<&ViewKind>, split: bool, standard: &str) -> Option<String> {
+    if split {
+        // A split part is not a whole pattern piece, so no DXF file carries it.
+        Some(format!("{standard} is unavailable for split layouts."))
+    } else if kind.is_some_and(|kind| !kind.exports_dxf()) {
+        // Marker and Nested hold every size; a DXF file carries one size.
+        Some(format!("{standard} exports one size. Select the Base Size tab or a size tab, then export again."))
+    } else {
+        None // individual layout, Base Size tab, or size tab
+    } // if split
+} // fn dxf_export_refusal
+
 // @brief Tabs that follow the first (Marker) tab of a multisize layout, in tab order.
 //
 // @param sizes     Every size of the import, in handoff order.
@@ -612,6 +629,30 @@ mod tests {
         assert!(nested.nested() && !marker.nested() && !base.nested());
         assert_eq!((marker.size(), base.size(), size.size()), (None, Some("36"), Some("34")));
     } // view_kinds_choose_their_exports
+
+    // @brief A split layout refuses every DXF format on every tab; whole layouts refuse only Marker and Nested.
+    #[test]
+    fn split_layouts_refuse_dxf() {
+        let kinds = [
+            None,
+            Some(ViewKind::Marker),
+            Some(ViewKind::Nested),
+            Some(ViewKind::BaseSize("36".into())),
+            Some(ViewKind::Size("34".into())),
+        ];
+        for standard in ["DXF-ASTM", "DXF-AAMA"] {
+            for kind in &kinds {
+                // Split: refused, whatever the tab.
+                let refusal = dxf_export_refusal(kind.as_ref(), true, standard);
+                assert_eq!(refusal.as_deref(), Some(format!("{standard} is unavailable for split layouts.").as_str()), "{kind:?}");
+
+                // Whole: only the tabs that hold every size refuse.
+                let refused = dxf_export_refusal(kind.as_ref(), false, standard).is_some();
+                let every_size = matches!(kind, Some(ViewKind::Marker | ViewKind::Nested));
+                assert_eq!(refused, every_size, "{standard} {kind:?}");
+            } // for each tab
+        } // for each standard
+    } // split_layouts_refuse_dxf
 
     // @brief A tab job of material `material`.
     fn tab(material: usize, kind: ViewKind) -> LayoutJob {

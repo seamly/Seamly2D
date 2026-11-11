@@ -2796,15 +2796,15 @@ impl qobject::AppController {
             opts.create_annotated_version, opts.aama
         ));
         let standard = if opts.aama { "DXF-AAMA" } else { "DXF-ASTM" };
-        // A DXF-ASTM or DXF-AAMA file carries one size: Marker and Nested hold every size.
+        // Refuse split layouts, and Marker and Nested, which hold every size.
+        // The menu disables these cases too; this guard covers every caller.
         let active_kind = self.rust().layout_views.active_kind().cloned();
-        if active_kind.as_ref().is_some_and(|kind| !kind.exports_dxf()) {
-            log_to_file("[lib.rs AppController] export_dxf(): 3 refused: Marker or Nested tab");
-            self.as_mut().error_occurred(cxx_qt_lib::QString::from(&format!(
-                "{standard} exports one size. Select the Base Size tab or a size tab, then export again."
-            )));
+        let split = self.rust().divide_spec.is_some();
+        if let Some(message) = layout_views::dxf_export_refusal(active_kind.as_ref(), split, standard) {
+            log_to_file(&format!("[lib.rs AppController] export_dxf(): 3 refused: {message}"));
+            self.as_mut().error_occurred(cxx_qt_lib::QString::from(&message));
             return false;
-        } // if Marker or Nested
+        } // if DXF cannot export the shown layout
         let layout_doc = match self.clone_dxf_layout_doc() {
             Ok(d)  => {
                 log_to_file("[lib.rs AppController] export_dxf(): 3 layout DOM cloned and stripped");
