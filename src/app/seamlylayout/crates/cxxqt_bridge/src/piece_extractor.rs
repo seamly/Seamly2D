@@ -793,10 +793,15 @@ fn is_non_outline_group(e: &xmltree::Element) -> bool {
 // without the decoration groups (`is_non_outline_group`).
 // @return None for a piece without path geometry.
 pub(crate) fn piece_bbox(piece: &xmltree::Element) -> Option<BoundingBox> {
+    BoundingBox::from_points(piece_outline_points(piece))
+} // fn piece_bbox
+
+// @brief Every path point `piece_bbox` measures, curve control points included.
+pub(crate) fn piece_outline_points(piece: &xmltree::Element) -> Vec<Point> {
     let mut points = Vec::new();
     collect_all_path_points(piece, &mut points);
-    BoundingBox::from_points(points)
-} // fn piece_bbox
+    points
+} // fn piece_outline_points
 
 // @brief Collect all coordinates from every `<path d="...">` descendant,
 // skipping any child `<g>` whose id identifies it as a non-outline decoration
