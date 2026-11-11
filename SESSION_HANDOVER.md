@@ -2,6 +2,12 @@
 
 ## Current status
 
+### 2026-11-10 — Split-layout export branch cleanup
+
+- The export-format implementation and regression tests from `task-split-paper-export` already match `run-seamlyLayout`; no source changes were needed.
+- Verified `ctest --preset debug` (8/8) and `cargo test --workspace` (passed).
+- Deleted local `task-split-paper-export` after verification. Preserved worktree edits were restored; no push.
+
 ### 2026-11-09 — Application update fixes
 
 - Implemented the Tile Size choices, split-layout export formats, paper overflow rejection, and fixed-size paper splitting.

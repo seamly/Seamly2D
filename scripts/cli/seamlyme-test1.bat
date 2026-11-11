@@ -1,0 +1,1 @@
+seamlyme --test "C:\Users\susan\Projects\Seamly2D-private\test-seamly-layout\patterns\validation\male_chest_102cm.smis"

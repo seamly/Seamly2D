@@ -1,23 +1,71 @@
 # TODO: remove entries related to testing after SeamlyLayout is fully tested
 
-# ignore claude
+# TRACK THESE FILES =======
+
+# track third-party license notices - shipped in every installer
+!packaging/licenses/*.txt
+
+# track xerces lib
+!xerces-c_3D.lib
+!xerces-c_3_2D.dll
+
+# -------------------------------------------
+# TODO: Remove these after testing is complete
+# track claude Session handover file during development
+!SESSION_HANDOVER.md
+
+# track utility scripts during development
+!scripts/*
+!scripts/cli/*
+
+# track test files during development
+!test-seamly-layout/
+
+# track project docs during development
+!project-docs/
+
+# track qtCreator files during development
+!*.pro.user
+!*.pro.user.*
+!*.qbs.user
+
+# track seamlylayout .claude & .vs files for testing
+!src/app/seamlylayout/.claude/
+!src/app/seamlylayout/.vs/
+
+# track seamlylayout output files, and top-level test input, for testing
+!test-seamly-layout/*.png
+!src/app/seamlylayout/output/
+
+# track seamlylayout local build files for testing
+!src/app/seamlylayout/qt_frontend/CMakeFiles/
+!src/app/seamlylayout/qt_frontend/CMakeCache.txt
+!src/app/seamlylayout/qt_frontend/.cmake/
+!src/app/seamlylayout/qt_frontend/.qt/
+!src/app/seamlylayout/qt_frontend/*.user
+!src/app/seamlylayout//qt_frontend/*.user.*
+
+# END TRACK FILES ==========
+
+# claude
 CLAUDE.md
 .claude
 .claude/*
+SESSION_HANDOVER.md
 
-# Ignore temporary files
+# temporary files
 *~
 
-# Ignore Mercurial .orig files
+# Mercurial .orig files
 *.orig
 
-# Ignore Git merge-related files
+# Git merge-related files
 *.rej
 
-# Seamly2D lock files
+# lock files
 *.locked
 
-# .json
+# .json files
 *.json
 
 # bundle files
@@ -30,12 +78,11 @@ CLAUDE.md
 # text files
 *.txt
 
-packaging/windows/seamly-msi/x64/seamly-x64.msi
-# include track Third-party license notices - shipped in every installer
-!packaging/licenses/*.txt
+# exe files
+*.exe
 
-# include track project docs
-!project-docs/
+# installer files
+packaging/windows/seamly-msi/x64/seamly-x64.msi
 
 # other docs
 *.docx
@@ -53,17 +100,11 @@ packaging/windows/seamly-msi/x64/seamly-x64.msi
 # test key files
 *seamly-signing-key.json
 
-# test layouts
-test-seamly-layout
-test-seamly-layout/
-test-seamly-layout/layouts/
-test-seamly-layout/layouts/*
-
 # packaging files
 Info.plist
 project-version.*
 
-# Previous backup file formats
+# previous backup file formats
 *(v*).val*
 *(v*).vit*
 *(v*).vst*
@@ -74,13 +115,15 @@ project-version.*
 # Linux trash folder which might appear on any partition or disk
 .Trash-*
 
-# track these test files
-!test-seamly-layout/
-
 # don't track other Test files and directories
 test*.*
 Test*.*
-
+test-seamly-layout/
+test-seamly-layout/*
+test-seamly-layout/layouts/
+test-seamly-layout/layouts/*
+src/app/seamlylayout/crates/ezdxf2dxfastm/target/writer-test-output/
+src/app/seamlylayout/crates/ezdxf2dxfastm/target/writer-test-output/*
 
 # Lock files used by the Emacs editor.
 # Notice that the "#" character is quoted with a backslash.
@@ -113,7 +156,7 @@ logs/
 __pycache__/
 *.pyc
 
-# Ignore Coverity Scan Build Tool
+# Coverity Scan Build Tool
 cov-int/
 
 # Compiled Object files
@@ -161,11 +204,6 @@ cov-int/
 # Qt-es
 /.qmake.cache
 /.qmake.stash
-
-# track qtCreator files for testing
-!*.pro.user
-!*.pro.user.*
-!*.qbs.user
 
 # Qt compiled files
 *.moc
@@ -260,10 +298,6 @@ target_wrapper.sh
 target_wrapper.bat
 *.bak
 
-# Allow xerces lib
-!xerces-c_3D.lib
-!xerces-c_3_2D.dll
-
 # Claude Code personal overrides — NOT tracked. The shared .claude/settings.json
 # is committed; this file is per-machine and the harness rewrites it on every
 # permission grant, accumulating absolute paths and session ids that have no
@@ -278,27 +312,6 @@ docs/
 src/app/seamlylayout/target/
 src/app/seamlylayout/logs/
 src/app/seamlylayout/qt_frontend/build/
-
-# -------------------------------------------
-# TODO: Remove these after testing is cocmplete
-# track claude Session handover file
-!SESSION_HANDOVER.md
-
-# track seamlylayout .claude & .vs files for testing
-!src/app/seamlylayout/.claude/
-!src/app/seamlylayout/.vs/
-
-# track seamlylayout output files, and top-level test input, for testing
-!test-seamly-layout/*.png
-!src/app/seamlylayout/output/
-
-# track seamlylayout local build files for testing
-!src/app/seamlylayout/qt_frontend/CMakeFiles/
-!src/app/seamlylayout/qt_frontend/CMakeCache.txt
-!src/app/seamlylayout/qt_frontend/.cmake/
-!src/app/seamlylayout/qt_frontend/.qt/
-!src/app/seamlylayout/qt_frontend/*.user
-!src/app/seamlylayout//qt_frontend/*.user.*
 
 
 

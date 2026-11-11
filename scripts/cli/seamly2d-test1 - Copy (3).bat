@@ -1,0 +1,1 @@
+seamly2d --test "C:\Users\susan\Projects\Seamly2D-private\test-seamly-layout\patterns\validation\male_shirt.sm2d"
