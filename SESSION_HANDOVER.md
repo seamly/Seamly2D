@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-11-11 — Fold lines across the grain
+
+- Cause: trousers `Test-halfleg` fold line runs across the grain; the fold plan pinned vertical fold lines only.
+- `fold_line_edge::plan_fold_line_edge` turns such a piece until its fold line is vertical. Fold edge outranks layout mode; Any mode checks an explicit piece rotation.
+- `piece_divider::divide_oversized_pieces` turns in place before it measures.
+- Risk: on fabric, a turned piece's grain runs across the fabric.
+- `cargo test --workspace`: pass. Installed-app check with `trousers.sm2d` runs with the next MSI.
+
 ### 2026-11-10 — Reference lines icon
 
 - Pattern Piece dialog: Reference lines page shows stripe and plaid icon (`reference_lines.svg`).
