@@ -619,7 +619,7 @@ Dialog {
                             top: 1000000000
                             decimals: 6
                             notation: DoubleValidator.StandardNotation
-                            locale: Qt.locale("C")
+                            locale: "C"   // the locale name: a decimal point in every system locale
                         }
                         onEditingFinished: {
                             if (!root.model) return;
@@ -653,7 +653,7 @@ Dialog {
                             top: 1000000000
                             decimals: 6
                             notation: DoubleValidator.StandardNotation
-                            locale: Qt.locale("C")
+                            locale: "C"   // the locale name: a decimal point in every system locale
                         }
                         onEditingFinished: {
                             if (!root.model) return;
