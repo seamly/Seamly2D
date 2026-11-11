@@ -585,7 +585,7 @@ void PieceWriter::write_components()
 }
 
 /**
- * @brief Writes drill circles and reference lines in the same piece frame as internal paths.
+ * @brief Writes drill circles and styled reference lines in the piece frame.
  */
 void PieceWriter::add_markings()
 {
@@ -610,8 +610,11 @@ void PieceWriter::add_markings()
         const QString path = QStringLiteral("M%1,%2 L%3,%4")
             .arg(coordinate(reference.line.x1()), coordinate(reference.line.y1()),
                  coordinate(reference.line.x2()), coordinate(reference.line.y2()));
-        add_path(group, path,
-                 m_style.seam, Qt::FlatCap, QStringLiteral("miter"));
+        QDomElement styled = add_path(group, path, m_style.seam, Qt::FlatCap, QStringLiteral("miter"));
+        if (reference.type == QStringLiteral("plaid"))
+        {
+            styled.setAttribute(QStringLiteral("stroke-dasharray"), QStringLiteral("2 1 0.5 1 "));
+        }
         m_piece_group.appendChild(group);
     }
 }

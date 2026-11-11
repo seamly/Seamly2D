@@ -934,6 +934,10 @@ void PatternPieceTool::paint(QPainter *painter, const QStyleOptionGraphicsItem *
                            Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     const qreal marking_width = scaleWidth(ToPixel(0.3, Unit::Mm), sceneScale(scene()));
     m_markings->setPen(QPen(Qt::blue, marking_width, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    QPen plaid_pen(Qt::blue, marking_width, Qt::CustomDashLine, Qt::RoundCap, Qt::RoundJoin);
+    // Match the plaid path's SVG stroke-dasharray.
+    plaid_pen.setDashPattern({2, 1, 0.5, 1});
+    m_plaid_markings->setPen(plaid_pen);
     m_drill_holes_outline->setPen(QPen(Qt::black, scaleWidth(ToPixel(0.7, Unit::Mm), sceneScale(scene())),
                                        Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     m_drill_holes->setPen(QPen(Qt::blue, marking_width, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
@@ -1491,6 +1495,7 @@ PatternPieceTool::PatternPieceTool(VAbstractPattern *doc, VContainer *data, cons
     , m_grainLine(new VGrainlineItem(this))
     , m_notches(new QGraphicsPathItem(this))
     , m_markings(new QGraphicsPathItem(this))
+    , m_plaid_markings(new QGraphicsPathItem(this))
     , m_drill_holes_outline(new QGraphicsPathItem(this))
     , m_drill_holes(new QGraphicsPathItem(this))
     , m_anchor_points_outline(new QGraphicsPathItem(this))
@@ -1634,6 +1639,9 @@ void PatternPieceTool::updatePiece(const VPiece &piece)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Rebuilds the piece's visible geometry and reference markings.
+ */
 void PatternPieceTool::RefreshGeometry()
 {
     this->setFlag(QGraphicsItem::ItemSendsGeometryChanges, false);
@@ -1732,6 +1740,7 @@ void PatternPieceTool::RefreshGeometry()
 
     m_notches->setPath(piece.getNotchesPath(this->getData(), seamAllowancePoints));
     QPainterPath markings;
+    QPainterPath plaid_markings;
     QPainterPath drill_holes;
     QPainterPath drill_holes_outline;
     QPainterPath anchor_points;
@@ -1778,8 +1787,9 @@ void PatternPieceTool::RefreshGeometry()
         const QPointF normal(-direction.y(), direction.x());
         const QPointF center = (start + end) / 2;
         const qreal icon_half = qMin(ToPixel(2.0, Unit::Mm), length / 4);
-        markings.moveTo(start);
-        markings.lineTo(end);
+        QPainterPath &reference_path = line.type == QStringLiteral("plaid") ? plaid_markings : markings;
+        reference_path.moveTo(start);
+        reference_path.lineTo(end);
         if (line.type == QStringLiteral("stripe"))
         {
             const QPointF offset = normal * ToPixel(0.6, Unit::Mm);
@@ -1813,6 +1823,8 @@ void PatternPieceTool::RefreshGeometry()
     reportMissingMarkingPoints(piece.GetName(), missing_points);
     m_markings->setPath(markings);
     m_markings->setBrush(Qt::NoBrush);
+    m_plaid_markings->setPath(plaid_markings);
+    m_plaid_markings->setBrush(Qt::NoBrush);
     m_drill_holes_outline->setPath(drill_holes_outline);
     m_drill_holes_outline->setBrush(Qt::NoBrush);
     m_drill_holes->setPath(drill_holes);
@@ -1878,6 +1890,7 @@ void PatternPieceTool::applyFlipToGeometry(PieceFlip flip)
     m_allowanceFill->setPath(mirror.map(m_allowanceFill->path()));
     m_notches->setPath(mirror.map(m_notches->path()));
     m_markings->setPath(mirror.map(m_markings->path()));
+    m_plaid_markings->setPath(mirror.map(m_plaid_markings->path()));
     m_drill_holes_outline->setPath(mirror.map(m_drill_holes_outline->path()));
     m_drill_holes->setPath(mirror.map(m_drill_holes->path()));
     m_anchor_points_outline->setPath(mirror.map(m_anchor_points_outline->path()));
@@ -1914,6 +1927,7 @@ void PatternPieceTool::applyTiltToGeometry(int signed_degrees)
     m_allowanceFill->setPath(tilt.map(m_allowanceFill->path()));
     m_notches->setPath(tilt.map(m_notches->path()));
     m_markings->setPath(tilt.map(m_markings->path()));
+    m_plaid_markings->setPath(tilt.map(m_plaid_markings->path()));
     m_drill_holes_outline->setPath(tilt.map(m_drill_holes_outline->path()));
     m_drill_holes->setPath(tilt.map(m_drill_holes->path()));
     m_anchor_points_outline->setPath(tilt.map(m_anchor_points_outline->path()));

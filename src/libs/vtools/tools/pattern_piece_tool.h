@@ -186,6 +186,7 @@ private:
     VGrainlineItem         *m_grainLine;
     QGraphicsPathItem      *m_notches;
     QGraphicsPathItem      *m_markings;
+    QGraphicsPathItem      *m_plaid_markings;
     QGraphicsPathItem      *m_drill_holes_outline;
     QGraphicsPathItem      *m_drill_holes;
     QGraphicsPathItem      *m_anchor_points_outline;
