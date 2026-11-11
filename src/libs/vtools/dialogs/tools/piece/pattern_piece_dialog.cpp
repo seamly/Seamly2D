@@ -194,7 +194,8 @@ PatternPieceDialog::PatternPieceDialog(const VContainer *data, const quint32 &to
     m_reference_editor = new PieceMarkingsEditor(false, this);
     ui->pages_StackedWidget->addWidget(m_drill_editor);
     ui->pages_StackedWidget->addWidget(m_reference_editor);
-    ui->menuTab_ListWidget->addItem(tr("Drill holes"));
+    ui->menuTab_ListWidget->addItem(new QListWidgetItem(QIcon(QStringLiteral(":/icon/svg/drill_holes.svg")),
+                                                       tr("Drill holes")));
     ui->menuTab_ListWidget->addItem(tr("Reference lines"));
     enableApply(applyAllowed);
     connect(m_drill_editor, &PieceMarkingsEditor::changed, this, &PatternPieceDialog::CheckState);

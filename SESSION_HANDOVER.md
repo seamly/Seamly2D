@@ -2,6 +2,12 @@
 
 ## Current status
 
+### 2026-11-10 — Drill Holes icon
+
+- Added a blue, black-outlined concentric-circle icon to the Pattern Piece dialog's Drill Holes page.
+- A focused Qt resource and rendering check passed. The Seamly2D test suite and installed-app check remain pending.
+- Preserve the existing edits in `project-docs/TEST_APPLICATION_UPDATES.md`. No push.
+
 ### 2026-11-10 — Split-layout export branch cleanup
 
 - The export-format implementation and regression tests from `task-split-paper-export` already match `run-seamlyLayout`; no source changes were needed.
