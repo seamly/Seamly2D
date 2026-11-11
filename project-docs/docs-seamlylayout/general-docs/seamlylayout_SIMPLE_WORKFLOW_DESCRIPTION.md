@@ -175,10 +175,12 @@ The application workflow loop consists of:
        * "Split the pieces" (default; SVG, PDF, HPGL, EPS, PS, PNG, JPG): each such piece splits into equal parts that fit.
          Each part gets a label "<name> part i of n, joins j" and 2 match notches per shared cut edge. No seam allowance on a cut edge.
          The paper-sheet PDF export splits the same way. See `SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout split parts".
+         A paper sheet: when the pieces and parts do not all fit on one sheet, no layout. The error directs the user to PDF (tiled);
+         the canvas shows the blank sheet, and only 'Layout Settings' stays active.
        * "Make the media bigger" (DXF): fabric keeps its configured width and grows longer. Other media can grow wider and longer.
          A paper sheet cannot grow: the option is disabled, and its text directs the user to PDF (tiled).
          A completion popup reports the resulting dimensions. Pieces that cannot fit fabric width remain explicitly reported.
-       * Split placement retries remaining pieces on fresh sheets until all fit or a fresh sheet makes no progress.
+       * Split placement on roll and fabric retries remaining pieces on fresh sheets until all fit or a fresh sheet makes no progress.
      * OK lays out with the choice. Cancel: no layout; only 'Layout Settings' (plus Preferences and Exit) stays active until new settings are submitted.
    * Multisize import (`data-measurements='multisize'`) — one tab per layout, every tab from the imported SVG:
      * For non-tiled paper, "Marker" packs every size of every piece as its own piece. It runs first.
