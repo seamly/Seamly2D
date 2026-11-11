@@ -7,12 +7,16 @@
 # Media Settings
 - media -- 'paper' or 'fabric' radio buttons; default is 'paper'.
 - if media = 'paper':
-    > paperType - 'sheet', 'roll', 'tiled' radio buttons; default is 'sheet'.
+    > paperType - 'sheet', 'custom', 'tiled', 'roll' dropdown; default is 'sheet'.
+    > if paperType='custom':
+      >> Paper Size shows positive width × height inputs in the active unit; they start at the current page size.
+      >> Settings store paperType 'sheet' and sheetName 'Custom' with pageWidth/pageHeight.
+      >> Margins -- same as 'sheet'.
     > if paperType='sheet':
-      >> paperSize -- dropdown lists predefined sizes with imperial and metric dimensions, plus 'Custom'; default is 'Arch E'.
+      >> paperSize -- dropdown lists predefined sizes with imperial and metric dimensions; default is 'Arch E'.
       >> paperWidth=paperSize's width converted to user's unit; default is 'Arch E' width 36.
       >> paperHeight=paperSize's height converted to user's unit; default is 'Arch E' height 48.
-      >> Custom enables positive width and height inputs in the active unit; the values use the existing pageWidth/pageHeight settings.
+      >> Selecting 'sheet' after 'custom' restores 'Arch E'.
       >> Margins - marginLeft, marginRight, marginTop, marginBottom
         >>> if unit='cm' then default is 1 for all margins.
         >>> if unit='mm' then default is 10 for all margins.
@@ -28,7 +32,7 @@
     > if paperType='tiled':
       >> tileSize uses the Sheet dropdown's 27 predefined sizes, order, and imperial/metric dimension labels; default is Letter.
       >> Sizes include Letter, Legal, Ledger, ANSI C–E, ARCH A–E/E1–E3, ISO A0–A5, and ISO B0–B6.
-      >> Custom remains sheet-only; tile output requires a predefined physical page size. None is not a selectable tile size.
+      >> Custom sizes are sheet-only; tile output requires a predefined physical page size. None is not a selectable tile size.
       >> Settings store the size name, not the dimension label; orientation remains independent.
       >> tileWidth = tileSize width converted to user units; default is 8.5.
       >> tileHeight = tileSize height converted to user units; default is 11.
