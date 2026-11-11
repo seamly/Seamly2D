@@ -673,6 +673,33 @@ void TST_HandoffDocument::markingsKeepTheirGeometryAndRejectInvalidData() const
     QCOMPARE(count_type(flattened, QStringLiteral("drill")), 1);
     QCOMPARE(count_type(flattened, QStringLiteral("stripe")), 1);
     QCOMPARE(count_type(flattened, QStringLiteral("plaid")), 1);
+    QDomElement plaid_group;
+    const QDomNodeList groups = dom.elementsByTagName(QStringLiteral("g"));
+    for (int index = 0; index < groups.size(); ++index)
+    {
+        const QDomElement group = groups.at(index).toElement();
+        if (group.attribute(QStringLiteral("data-type")) == QStringLiteral("plaid"))
+        {
+            plaid_group = group;
+            break;
+        }
+    }
+    QVERIFY(!plaid_group.isNull());
+    const QDomElement plaid_style = plaid_group.elementsByTagName(QStringLiteral("g")).at(0).toElement();
+    QCOMPARE(plaid_style.attribute(QStringLiteral("stroke-dasharray")), QStringLiteral("2 1 0.5 1 "));
+    QDomElement stripe_group;
+    for (int index = 0; index < groups.size(); ++index)
+    {
+        const QDomElement group = groups.at(index).toElement();
+        if (group.attribute(QStringLiteral("data-type")) == QStringLiteral("stripe"))
+        {
+            stripe_group = group;
+            break;
+        }
+    }
+    QVERIFY(!stripe_group.isNull());
+    const QDomElement stripe_style = stripe_group.elementsByTagName(QStringLiteral("g")).at(0).toElement();
+    QVERIFY(!stripe_style.hasAttribute(QStringLiteral("stroke-dasharray")));
     QVERIFY(!placed.piece.set_markings({{QPointF(120, 130), 0}}, {}));
     HandoffDocument invalid;
     invalid.add_piece(placed);

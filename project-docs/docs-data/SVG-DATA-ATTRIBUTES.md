@@ -89,6 +89,7 @@ Each piece is a `piece-set` group holding that piece once per size.
 - Nested SVG export keeps one drill component with each sized piece in its corresponding size group; drill holes are not shared across sizes.
 - The circle radius is half the diameter. Its centre uses the current size's resolved modeling anchor.
 - Each `stripe` or `plaid` component contains one absolute `M… L…` path with two distinct endpoints.
+- The plaid path's styled group uses `stroke-dasharray="2 1 0.5 1 "`; stripe paths retain their configured stroke style.
 - A styled child group applies the same sheet placement matrix as an internal path.
 - Markings do not change cut outlines, packing bounds, grain direction, or rotation constraints.
 - Non-finite coordinates, non-positive diameters, unknown line types, and coincident endpoints invalidate the entire document.

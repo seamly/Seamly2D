@@ -8,7 +8,7 @@ Piece Mode uses distinct symbols:
 
 - Drill holes appear as blue unfilled circles with black outlines.
 - Stripe references use parallel blue lines.
-- Plaid references use intersecting blue lines.
+- Plaid references use a dashed blue line and intersecting blue lines.
 - Live anchors appear as blue point markers with black outlines.
 
 Seamly2D prevents deletion of an anchor used by a drill hole or a legacy reference line.

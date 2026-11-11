@@ -28,6 +28,8 @@ It uses the DXF-ASTM pipeline. `DxfAstmExportOptions::aama` selects the AAMA con
 
 Same in both: layer 1 boundary and system text, `Piece Name:`, `Quantity:`, `Material:`, layer 5 grade reference line, layer 7 grainline, stripe/plaid reference lines on layers 9/10, drill markers on layer 13, `# n` grade rule texts and the `.rul` body. Units follow the pattern `data-units`. SeamlyLayout also carries the positive drill diameter in layer 13 group 30 in both formats; this is a writer extension in DXF-AAMA.
 
+Plaid references use `stroke-dasharray="2 1 0.5 1 "` in SVG display output. DXF-ASTM and DXF-AAMA ignore this display style and export each plaid reference as one `LINE` on layer 10.
+
 ## Decisions
 
 - **R11 (AC1009).** User decision: ANSI/AAMA-292 compliance, so the file uses the DXF version the standard builds on. R11 and R12 share AC1009, so the file structure is the DXF-ASTM (R12) structure.
