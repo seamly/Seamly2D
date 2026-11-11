@@ -17,6 +17,10 @@
 //     across its fold line and takes the other angle. The cut piece is the
 //     same: the two halves of a piece cut on the fold are mirror images. Text
 //     keeps reading forward; only its position is mirrored.
+// A fold line across or aslant the grain outranks the layout mode: the piece
+// turns in the DOM until its fold line is vertical on the side the packer angle
+// turns to the left. In Layout Mode Any, an explicit Piece Properties rotation
+// must allow the whole turn.
 // The packer then puts the piece against the left bin edge (`Rect::with_left_edge`).
 //
 // The fold line is the first path of the piece's `fold_line` group
@@ -25,12 +29,13 @@
 // sizes share: `svg_dom::center_piece_sets` stacks them on their fold line start.
 //
 // Not pinned: a piece-set whose sizes do not share one fold line, a fold line
-// that is not vertical, and an outline on both sides of its fold line. Each
-// gets a warning line.
+// without length, and an outline on both sides of its fold line. Each gets a
+// warning line. A second plan of the planned DOM changes nothing.
 
 use std::collections::{HashMap, HashSet};
 
 use geometry::{Path, PathSegment, Point};
+use packing::PieceRotationRule;
 use xmltree::Element;
 
 use crate::piece_extractor::PieceRect;
@@ -55,7 +60,7 @@ pub(crate) struct FoldEdgePlan {
 } // struct FoldEdgePlan
 
 // @brief Turn or mirror each piece with a fold line so its fold line can go on the left edge.
-// @param doc                         Pre-processed DOM; a mirrored piece changes in place.
+// @param doc                         Pre-processed DOM; a turned or mirrored piece changes in place.
 // @param trial_angles_deg            The layout mode's trial angles.
 // @param apply_piece_rotation_rules  True only for Layout Mode Any.
 // @return The packer angle per piece, and the pieces that stay off the edge.
@@ -65,7 +70,7 @@ pub(crate) fn plan_fold_line_edge(
     apply_piece_rotation_rules: bool,
 ) -> FoldEdgePlan {
     let mut plan = FoldEdgePlan::default();
-    let mut mirrored = false;
+    let mut changed = false;
     let groups = doc.root.children.iter_mut().filter_map(|n| n.as_mut_element()).filter(|e| e.name == "g");
     for (index, piece) in groups.enumerate() {
         let name = piece_name(piece);
@@ -83,36 +88,52 @@ pub(crate) fn plan_fold_line_edge(
             } // Err
         }; // match ends
         let (dx, dy) = ((b.x - a.x).abs(), (b.y - a.y).abs());
-        if dy < ON_EDGE_TOLERANCE_UU || dx > dy * VERTICAL_TOLERANCE {
-            plan.warnings.push(format!("{name}: the fold line does not run along the grainline"));
+        if dx.hypot(dy) < ON_EDGE_TOLERANCE_UU {
+            plan.warnings.push(format!("{name}: the fold line has no length"));
             continue;
-        } // if not vertical
-        let Some(bbox) = crate::piece_extractor::piece_bbox(piece) else {
+        } // if the fold line is a point
+        let points = crate::piece_extractor::piece_outline_points(piece);
+        if points.is_empty() {
             continue; // no outline
-        }; // bbox
-        let fold_x = (a.x + b.x) / 2.0;
+        } // if no outline
 
         // Side of the fold line the piece lies on.
-        let fold_on_left = fold_x - bbox.min.x <= ON_EDGE_TOLERANCE_UU;
-        let fold_on_right = bbox.max.x - fold_x <= ON_EDGE_TOLERANCE_UU;
-        if !fold_on_left && !fold_on_right {
+        let Some(toward) = toward_outline(&points, a, b) else {
             plan.warnings.push(format!("{name}: the outline lies on both sides of the fold line"));
             continue;
-        } // if the fold line is inside the outline
+        }; // toward the outline
+        let rule = apply_piece_rotation_rules.then(|| crate::piece_extractor::piece_rotation_rule(piece, &name));
+        let allowed_angles = match rule {
+            Some(rule) => rule.angles_for_any_mode(trial_angles_deg),
+            None => trial_angles_deg.to_vec(),
+        }; // allowed_angles
+
+        if dx > dy * VERTICAL_TOLERANCE {
+            // Across or aslant the grain: turn the piece so a later plan sees a vertical fold line.
+            let turn = edge_turn_deg(toward);
+            let explicit_rule = rule.filter(|rule| *rule != PieceRotationRule::Unspecified);
+            if explicit_rule.is_some_and(|rule| !rule.angles_for_any_mode(trial_angles_deg).contains(&(turn.round() as u16 % 360))) {
+                plan.warnings.push(format!("{name}: Piece Properties rotation conflicts with the fold edge"));
+                plan.conflicts.insert(index);
+                continue;
+            } // if the piece rule forbids the turn
+            // The angle a vertical fold line takes without a mirror, so a second plan keeps it.
+            let angle = if allowed_angles.contains(&0) || !allowed_angles.contains(&180) { 0 } else { 180 };
+            let centre = Point::new((a.x + b.x) / 2.0, (a.y + b.y) / 2.0);
+            prepend_transform(piece, &format!("rotate({} {} {})", turn - f32::from(angle), centre.x, centre.y));
+            changed = true;
+            plan.angles.insert(index, angle);
+            continue;
+        } // if not vertical
 
         // 0 keeps a fold line on the left; 180 turns a fold line on the right to the left.
-        let (wanted, other) = if fold_on_left { (0, 180) } else { (180, 0) };
-        let allowed_angles = if apply_piece_rotation_rules {
-            crate::piece_extractor::piece_rotation_rule(piece, &name)
-                .angles_for_any_mode(trial_angles_deg)
-        } else {
-            trial_angles_deg.to_vec()
-        }; // angle
+        let fold_x = (a.x + b.x) / 2.0;
+        let (wanted, other) = if toward.0 > 0.0 { (0, 180) } else { (180, 0) };
         let angle = if allowed_angles.contains(&wanted) {
             wanted
         } else if allowed_angles.contains(&other) && !apply_piece_rotation_rules {
             mirror_across(piece, fold_x);
-            mirrored = true;
+            changed = true;
             other
         } else {
             let reason = if apply_piece_rotation_rules {
@@ -129,14 +150,37 @@ pub(crate) fn plan_fold_line_edge(
         plan.angles.insert(index, angle);
     } // for each piece
 
-    if mirrored {
-        svg_dom::flatten_dom(doc); // bake the mirror transforms
+    if changed {
+        svg_dom::flatten_dom(doc); // bake the turn and mirror transforms
         for piece in doc.root.children.iter_mut().filter_map(|n| n.as_mut_element()) {
             unmirror_text(piece);
         } // for each piece
-    } // if any piece was mirrored
+    } // if any piece was turned or mirrored
     plan
 } // fn plan_fold_line_edge
+
+// @brief Unit normal from the fold line a–b toward the outline.
+// @return None when outline points lie more than `ON_EDGE_TOLERANCE_UU` on both sides of the line.
+fn toward_outline(points: &[Point], a: Point, b: Point) -> Option<(f32, f32)> {
+    let length = (b.x - a.x).hypot(b.y - a.y);
+    let normal = ((a.y - b.y) / length, (b.x - a.x) / length);
+    let (low, high) = points
+        .iter()
+        .map(|p| (p.x - a.x) * normal.0 + (p.y - a.y) * normal.1)
+        .fold((f32::MAX, f32::MIN), |(low, high), d| (low.min(d), high.max(d)));
+    if low >= -ON_EDGE_TOLERANCE_UU {
+        Some(normal)
+    } else if high <= ON_EDGE_TOLERANCE_UU {
+        Some((-normal.0, -normal.1))
+    } else {
+        None
+    } // if one side
+} // fn toward_outline
+
+// @brief SVG `rotate` angle, 0 to 360, that turns `toward` to +x: the fold line then lies left of the outline.
+fn edge_turn_deg(toward: (f32, f32)) -> f32 {
+    (-toward.1.atan2(toward.0)).to_degrees().rem_euclid(360.0)
+} // fn edge_turn_deg
 
 // @brief Set the left-edge angle on every planned piece.
 pub(crate) fn pin_fold_line_pieces(pieces: &mut [PieceRect], plan: &FoldEdgePlan) {
@@ -158,7 +202,7 @@ fn fold_line_ends(piece: &Element) -> Option<(Point, Point)> {
 
 // @brief Fold line of a Nested piece-set: the largest size's, when every size has one on the same line.
 // @details `svg_dom::center_piece_sets` puts the largest size first and stacks the sizes on their fold
-//          line start, so vertical fold lines of the sizes share one x.
+//          line start, so the fold lines of the sizes lie on one line.
 // @return Ok(None) when a size has no fold line; Err with the reason when the sizes' fold lines lie apart.
 fn piece_set_fold_line_ends(set: &Element) -> Result<Option<(Point, Point)>, &'static str> {
     let mut first: Option<(Point, Point)> = None;
@@ -169,8 +213,9 @@ fn piece_set_fold_line_ends(set: &Element) -> Result<Option<(Point, Point)>, &'s
         }; // fold line
         match first {
             Some((fa, fb)) => {
-                // Compare the middle x of the two fold lines.
-                apart |= ((a.x + b.x) - (fa.x + fb.x)).abs() / 2.0 > ON_EDGE_TOLERANCE_UU;
+                // Distance of this fold line's middle from the largest size's fold line.
+                let middle = Point::new((a.x + b.x) / 2.0, (a.y + b.y) / 2.0);
+                apart |= line_distance(middle, fa, fb) > ON_EDGE_TOLERANCE_UU;
             } // Some: a later size
             None => first = Some((a, b)), // the largest size
         } // match first
@@ -181,6 +226,15 @@ fn piece_set_fold_line_ends(set: &Element) -> Result<Option<(Point, Point)>, &'s
         Ok(first)
     } // if apart
 } // fn piece_set_fold_line_ends
+
+// @brief Distance from `p` to the line through `a` and `b`; to `a` when the two ends meet.
+fn line_distance(p: Point, a: Point, b: Point) -> f32 {
+    let length = (b.x - a.x).hypot(b.y - a.y);
+    if length < f32::EPSILON {
+        return (p.x - a.x).hypot(p.y - a.y);
+    } // if a point
+    ((b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x)).abs() / length
+} // fn line_distance
 
 // @brief End point of a path segment; None for close.
 fn segment_end(segment: &PathSegment) -> Option<Point> {
@@ -203,14 +257,18 @@ fn piece_name(piece: &Element) -> String {
 
 // @brief Mirror the piece across the vertical line x = `fold_x`; `flatten_dom` bakes it.
 fn mirror_across(piece: &mut Element, fold_x: f32) {
-    let mirror = format!("matrix(-1 0 0 1 {} 0)", 2.0 * fold_x);
-    let transform = match piece.attributes.get("transform") {
-        Some(own) => format!("{mirror} {own}"),
-        None => mirror,
-    }; // transform
-    piece.attributes.insert("transform".to_string(), transform);
+    prepend_transform(piece, &format!("matrix(-1 0 0 1 {} 0)", 2.0 * fold_x));
     piece.attributes.insert("data-fold-mirrored".to_string(), "true".to_string());
 } // fn mirror_across
+
+// @brief Apply `transform` after the piece's own transform.
+fn prepend_transform(piece: &mut Element, transform: &str) {
+    let combined = match piece.attributes.get("transform") {
+        Some(own) => format!("{transform} {own}"),
+        None => transform.to_string(),
+    }; // combined
+    piece.attributes.insert("transform".to_string(), combined);
+} // fn prepend_transform
 
 // @brief In a mirrored piece, make each mirrored `<text>` read forward again at its mirrored place.
 // @details The text matrix T becomes T · scale(-1, 1); `x` changes sign, so
@@ -373,13 +431,87 @@ mod tests {
         assert_eq!((bbox.min.x, bbox.max.x), (-100.0, 0.0), "fold line on the right edge");
     } // mirror_brings_the_fold_line_left_when_the_mode_forbids_the_turn
 
-    // @brief A fold line across the grain, or inside the outline, stays off the edge with a warning.
+    // @brief First piece's fold line ends after a plan.
+    fn back_fold_line(doc: &svg_dom::Document) -> (Point, Point) {
+        let back = doc.root.children.iter().filter_map(|n| n.as_element()).next().expect("Back");
+        fold_line_ends(back).expect("fold line")
+    } // fn back_fold_line
+
+    // @brief True when `a` and `b` differ by less than 0.01.
+    fn near(a: f32, b: f32) -> bool {
+        (a - b).abs() < 0.01
+    } // fn near
+
+    // @brief A fold line across the grain turns the piece a quarter turn, whatever the layout mode allows.
+    //        The fold line ends vertical on the side the packer angle brings to the left; a second plan
+    //        changes nothing.
+    #[test]
+    fn fold_line_across_the_grain_turns_the_piece() {
+        // Fold line along the bottom edge: 90 brings it left, about its middle (50, 200).
+        for (trial, angle, fold_on_left) in [(vec![0, 180], 0, true), (vec![0], 0, true), (vec![180], 180, false)] {
+            let mut d = svg_dom::Document::parse(&svg("M0,200 L100,200")).expect("valid SVG");
+            let plan = plan_fold_line_edge(&mut d, &trial, false);
+            assert_eq!(plan.angles, HashMap::from([(0, angle)]), "trial {trial:?}");
+            assert!(plan.warnings.is_empty(), "trial {trial:?}: {:?}", plan.warnings);
+
+            let (a, b) = back_fold_line(&d);
+            assert!(near(a.x, 50.0) && near(b.x, 50.0), "trial {trial:?}: fold line {a:?} {b:?}");
+            let bbox = bbox_of(&d, "piece_Back");
+            let fold_edge = if fold_on_left { bbox.min.x } else { bbox.max.x };
+            assert!(near(fold_edge, 50.0), "trial {trial:?}: outline {bbox:?}");
+            assert!(near(bbox.max.x - bbox.min.x, 200.0), "trial {trial:?}: quarter turn");
+
+            let planned = d.to_string();
+            assert_eq!(plan_fold_line_edge(&mut d, &trial, false), plan, "trial {trial:?}: second plan");
+            assert_eq!(d.to_string(), planned, "trial {trial:?}: second plan changes nothing");
+        } // for each trial set
+    } // fold_line_across_the_grain_turns_the_piece
+
+    // @brief A slanted fold line turns the piece until the fold line is vertical on its left.
+    #[test]
+    fn slanted_fold_line_turns_the_piece() {
+        let triangle = r#"<svg xmlns="http://www.w3.org/2000/svg">
+  <g id="piece_Gusset" data-type="piece" data-name="Gusset" data-on-fold="true">
+    <g data-type="cutline"><path d="M0,0 L100,0 L0,100 Z"/></g>
+    <g id="fold_line_Gusset" data-type="fold_line"><path d="M100,0 L0,100"/></g>
+  </g>
+</svg>"#;
+        let mut d = svg_dom::Document::parse(triangle).expect("valid SVG");
+        let plan = plan_fold_line_edge(&mut d, &[0, 180], false);
+        assert_eq!(plan.angles, HashMap::from([(0, 0)]));
+        let (a, b) = back_fold_line(&d);
+        assert!(near(a.x, b.x), "vertical fold line: {a:?} {b:?}");
+        assert!(near(bbox_of(&d, "piece_Gusset").min.x, a.x), "fold line on the left");
+    } // slanted_fold_line_turns_the_piece
+
+    // @brief Layout Mode Any: an explicit Piece Properties rotation must allow the quarter turn.
+    #[test]
+    fn any_mode_turn_needs_the_piece_rotation() {
+        for (rotation, turned) in [("0", false), ("180", false), ("90", true), ("1", true)] {
+            let source = svg("M0,200 L100,200").replace(
+                "data-on-fold=\"true\"",
+                &format!("data-on-fold=\"true\" data-rotation=\"{rotation}\""),
+            );
+            let mut d = svg_dom::Document::parse(&source).expect("valid SVG");
+            let plan = plan_fold_line_edge(&mut d, &[0, 90, 180, 270], true);
+            if turned {
+                assert_eq!(plan.angles, HashMap::from([(0, 0)]), "rotation {rotation}");
+                assert!(plan.conflicts.is_empty(), "rotation {rotation}");
+            } else {
+                assert!(plan.angles.is_empty(), "rotation {rotation}");
+                assert_eq!(plan.conflicts, HashSet::from([0]), "rotation {rotation}");
+                assert_eq!(bbox_of(&d, "piece_Back").max.x, 100.0, "rotation {rotation}: not turned");
+            } // if turned
+        } // for each rotation
+    } // any_mode_turn_needs_the_piece_rotation
+
+    // @brief A fold line without length, or inside the outline, stays off the edge with a warning.
     #[test]
     fn fold_line_off_the_edge_is_reported() {
-        let mut across = svg_dom::Document::parse(&svg("M10,0 L90,0")).expect("valid SVG");
-        let plan = plan_fold_line_edge(&mut across, &[0, 180], false);
+        let mut point = svg_dom::Document::parse(&svg("M10,0 L10,0.5")).expect("valid SVG");
+        let plan = plan_fold_line_edge(&mut point, &[0, 180], false);
         assert!(plan.angles.is_empty());
-        assert_eq!(plan.warnings, vec!["Back: the fold line does not run along the grainline".to_string()]);
+        assert_eq!(plan.warnings, vec!["Back: the fold line has no length".to_string()]);
 
         let mut inside = doc(50);
         let plan = plan_fold_line_edge(&mut inside, &[0, 180], false);
@@ -418,6 +550,31 @@ mod tests {
         assert!(plan.angles.is_empty());
         assert_eq!(plan.warnings, vec!["Back: the sizes do not share one fold line".to_string()]);
     } // piece_set_on_a_shared_fold_line_is_pinned
+
+    // @brief Sizes stacked on the start of a fold line across the grain share that fold line; the set turns once.
+    #[test]
+    fn piece_set_on_a_shared_fold_line_across_the_grain_is_pinned() {
+        let size = |n: usize, right: u32| {
+            format!(r#"<g id="piece_Back_s{n}" data-type="piece" data-name="Back" data-on-fold="true">
+      <g data-type="cutline"><path d="M0,0 L{right},0 L{right},200 L0,200 Z"/></g>
+      <g id="fold_line_Back_s{n}" data-type="fold_line"><path d="M0,200 L{right},200"/></g>
+    </g>"#)
+        }; // size
+        let source = format!(r#"<svg xmlns="http://www.w3.org/2000/svg">
+  <g id="piece-set_Back" data-type="piece-set" data-name="Back">
+    {}
+    {}
+  </g>
+</svg>"#, size(0, 100), size(1, 60));
+        let mut d = svg_dom::Document::parse(&source).expect("valid SVG");
+        let plan = plan_fold_line_edge(&mut d, &[0, 180], false);
+        assert_eq!(plan.angles, HashMap::from([(0, 0)]));
+        assert!(plan.warnings.is_empty(), "{:?}", plan.warnings);
+
+        let planned = d.to_string();
+        assert_eq!(plan_fold_line_edge(&mut d, &[0, 180], false), plan);
+        assert_eq!(d.to_string(), planned, "the turned set has a vertical fold line");
+    } // piece_set_on_a_shared_fold_line_across_the_grain_is_pinned
 
     // @brief The fold line group of a Seamly2D handoff holds the fold line, then the tagged arrow line and
     //        label groups. The fold line, not the arrow line, decides the side.
