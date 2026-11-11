@@ -1644,6 +1644,57 @@ mod tests {
         );
     } // placement_paper_roll_split_keeps_configured_width
 
+    // @brief A split paper roll keeps the selected roll width and margins.
+    // Only the roll length follows the content, with or without inherited extension.
+    #[test]
+    fn placement_paper_roll_split_keeps_media_dimensions() {
+        let settings = serde_json::json!({
+            "unit": "in", "mediaType": "paper", "paperType": "roll",
+            "rollWidth": 1.5, "pieceGap": 0.0,
+            "marginLeft": 0.25, "marginRight": 0.25, "marginTop": 0.25, "marginBottom": 0.25,
+            "layoutMode": "alongGrainline", "scaleGrid": false
+        });
+        for extend in [false, true] {
+            let result = process_placement_fixture(settings.clone(), true, extend).expect("split roll fits");
+            assert!(result.unplaced_labels.is_empty(), "{:?}", result.unplaced_labels);
+            assert_eq!(placed_count(&result), 7, "one whole piece and six width parts");
+            // 1.5 in roll = 144 px; 0.25 in margins leave 96 px of content.
+            assert_eq!(result.output_doc.root.attributes["width"], "144");
+            assert_eq!(result.output_doc.get_attr_by_id("contentRect", "width").as_deref(), Some("96"));
+            assert_eq!(result.output_doc.get_attr_by_id("contentRect", "x").as_deref(), Some("24"));
+            assert_eq!(result.output_doc.get_attr_by_id("contentRect", "y").as_deref(), Some("24"));
+            assert_canvas_holds_pieces(&result);
+            assert!(result.divide_spec.is_some(), "split metadata is available to export");
+            assert!(result.media_enlargement.is_none(), "split is not requested enlargement");
+        } // for enlargement flags
+    } // placement_paper_roll_split_keeps_media_dimensions
+
+    // @brief Trousers split on a 16 in paper roll: the 16.61 in Back and the other
+    // wide pieces divide to fit the 15.5 in between the margins; the roll stays 16 in wide.
+    #[test]
+    fn trousers_split_on_a_narrow_paper_roll_keep_roll_width() {
+        let settings_json = serde_json::json!({
+            "unit": "in", "mediaType": "paper", "paperType": "roll",
+            "rollWidth": 16.0, "pieceGap": 0.125,
+            "marginLeft": 0.25, "marginRight": 0.25, "marginTop": 0.25, "marginBottom": 0.25,
+            "layoutMode": "alongGrainline"
+        }).to_string();
+        for extend in [false, true] {
+            let result = process_trousers_sheet(&settings_json, true, extend);
+            assert!(result.unplaced_labels.is_empty(), "unplaced: {:?}", result.unplaced_labels);
+            // 16 in = 1536 px; 15.5 in = 1488 px inside the margins.
+            assert_eq!(result.output_doc.root.attributes["width"], "1536");
+            assert_eq!(result.output_doc.get_attr_by_id("contentRect", "width").as_deref(), Some("1488"));
+            assert_eq!(result.output_doc.get_attr_by_id("contentRect", "x").as_deref(), Some("24"));
+            assert_canvas_holds_pieces(&result);
+            assert!(result.divide_spec.is_some(), "the split media is kept for export");
+            assert!(result.media_enlargement.is_none(), "split is not requested enlargement");
+            let labels = placed_labels(&result);
+            assert!(labels.contains(&"Back (1/2)".to_string()), "Back divides: {labels:?}");
+            assert!(!labels.contains(&"Back".to_string()), "no whole Back: {labels:?}");
+        } // for enlargement flags
+    } // trousers_split_on_a_narrow_paper_roll_keep_roll_width
+
     // @brief Fabric keeps retrying split parts without widening the configured fabric.
     #[test]
     fn placement_fabric_split_retries_without_widening() {

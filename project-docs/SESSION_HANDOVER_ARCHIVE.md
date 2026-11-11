@@ -2,6 +2,13 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-11 — Split layouts and DXF
+
+- Cause: a single layout (no tabs, one material) never refreshed `is_split_layout_active`. DXF stayed enabled after a split; the stale flag disabled it after the next whole layout.
+- `run_layout` drops the old `divide_spec` at the start and refreshes the flag at the end.
+- `export_dxf` refuses split layouts through `layout_views::dxf_export_refusal`.
+- `cargo test --workspace`: pass. Installed-app check (paper sheet and roll, split) runs with the next MSI.
+
 ### 2026-11-11 — Fold lines across the grain
 
 - Cause: trousers `Test-halfleg` fold line runs across the grain; the fold plan pinned vertical fold lines only.
