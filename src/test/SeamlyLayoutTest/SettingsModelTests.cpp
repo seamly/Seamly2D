@@ -8,6 +8,7 @@
 // Covers:
 //   • Default field values after construction
 //   • Paper Type choices, including the custom sheet and its dialog fields
+//   • Roll Width choices, including the custom roll width and its dialog field
 //   • Legacy layoutMode schema migration (pre-2026-05 → current)
 //   • Save/load round-trip preserving all fields
 //   • Unit conversion helpers
@@ -68,6 +69,8 @@ private slots:
     void paperTypeDropdown_customShowsSizeFields();
     void pageDimensions_rejectInvalidValues();
     void customPaperDimensions_roundtrip();
+    void rollSize_customKeepsRollWidth();
+    void rollSizeDropdown_customShowsWidthField();
 
     // Legacy layoutMode migration
     void legacy_withGrainRotationEnabled_mapsToAlongGrainline();
@@ -414,6 +417,114 @@ void SettingsModelTests::customPaperDimensions_roundtrip()
     QCOMPARE(reader.pageHeight(), 650.25);
     QFile::remove(path);
 }
+
+// @brief A "custom" roll size keeps the roll width for the user to edit; save and load keep it.
+void SettingsModelTests::rollSize_customKeepsRollWidth()
+{
+    SettingsModel model;
+    const QStringList names = model.rollSizeNames();
+    QCOMPARE(names.last(), QStringLiteral("custom"));
+    QCOMPARE(names.count(QStringLiteral("custom")), 1);
+
+    // A predefined size sets the width; "custom" keeps it.
+    model.setRollSize(QStringLiteral("48 in"));
+    QCOMPARE(model.rollWidth(), 48.0);
+    model.setRollSize(QStringLiteral("custom"));
+    QCOMPARE(model.rollSize(), QStringLiteral("custom"));
+    QCOMPARE(model.rollWidth(), 48.0);
+
+    model.setRollWidth(52.5);
+    QCOMPARE(model.rollWidthPx(), 5040);   // 52.5 in × 96 px/in
+
+    // Invalid widths leave the roll width unchanged.
+    model.setRollWidth(0.0);
+    model.setRollWidth(-1.0);
+    model.setRollWidth(std::numeric_limits<double>::quiet_NaN());
+    QCOMPARE(model.rollWidth(), 52.5);
+
+    // The layout core reads rollWidth from the saved settings.
+    const QString path = QDir(QCoreApplication::applicationDirPath())
+                             .filePath(QStringLiteral("custom-roll-%1.settings").arg(QCoreApplication::applicationPid()));
+    SettingsModel writer;
+    writer.setUnit(QStringLiteral("mm"));
+    writer.setRollSize(QStringLiteral("custom"));
+    writer.setRollWidth(1350.0);
+    const QJsonObject json = QJsonDocument::fromJson(writer.toJson().toUtf8()).object();
+    QCOMPARE(json.value(QStringLiteral("rollSize")).toString(), QStringLiteral("custom"));
+    QCOMPARE(json.value(QStringLiteral("rollWidth")).toDouble(), 1350.0);
+    QVERIFY(writer.save(path));
+
+    SettingsModel reader;
+    QVERIFY(reader.load(path));
+    QVERIFY(QFile::remove(path));
+    QCOMPARE(reader.rollSize(), QStringLiteral("custom"));
+    QCOMPARE(reader.rollWidth(), 1350.0);
+
+    // A unit change converts the custom width.
+    reader.convertAllUnits(QStringLiteral("mm"), QStringLiteral("cm"));
+    QCOMPARE(reader.rollWidth(), 135.0);
+} // rollSize_customKeepsRollWidth()
+
+// @brief The dialog offers custom in Roll Width; its width field edits the roll width.
+void SettingsModelTests::rollSizeDropdown_customShowsWidthField()
+{
+    register_theme_singleton();
+    SettingsModel model;
+    model.selectPaperType(QStringLiteral("roll"));
+    QQmlEngine engine;
+    QQmlComponent component(&engine, QUrl(QStringLiteral("qrc:/qml/SettingsDialog.qml")));
+    QVERIFY2(component.isReady(), qPrintable(component.errorString()));
+    QScopedPointer<QObject> dialog(component.createWithInitialProperties({
+        {QStringLiteral("model"), QVariant::fromValue(&model)}
+    }));
+    QVERIFY2(dialog, qPrintable(component.errorString()));
+    QObject* combo = dialog->findChild<QObject*>(QStringLiteral("rollSizeCombo"));
+    QObject* width_field = dialog->findChild<QObject*>(QStringLiteral("customRollWidthField"));
+    QVERIFY(combo);
+    QVERIFY(width_field);
+    QCOMPARE(combo->property("count").toInt(), model.rollSizeNames().size());
+    QVERIFY(dialog->property("isRollPaper").toBool());
+    QVERIFY(!dialog->property("isCustomRoll").toBool());
+
+    // Select 48 in, then custom, as a user does: the index changes, then activated fires.
+    const int size_index = model.rollSizeNames().indexOf(QStringLiteral("48 in"));
+    combo->setProperty("currentIndex", size_index);
+    QVERIFY(QMetaObject::invokeMethod(combo, "activated", Q_ARG(int, size_index)));
+    QCOMPARE(model.rollWidth(), 48.0);
+    const int custom_index = model.rollSizeNames().indexOf(QStringLiteral("custom"));
+    combo->setProperty("currentIndex", custom_index);
+    QCOMPARE(combo->property("currentText").toString(), QStringLiteral("custom"));
+    QVERIFY(QMetaObject::invokeMethod(combo, "activated", Q_ARG(int, custom_index)));
+    QCOMPARE(model.rollSize(), QStringLiteral("custom"));
+    QVERIFY(dialog->property("isCustomRoll").toBool());
+    QCOMPARE(width_field->property("text").toString(), QStringLiteral("48.00"));
+
+    // A typed value goes to the model in the active unit.
+    width_field->setProperty("text", QStringLiteral("54.25"));
+    QVERIFY(QMetaObject::invokeMethod(width_field, "editingFinished"));
+    QCOMPARE(model.rollWidth(), 54.25);
+    QCOMPARE(width_field->property("text").toString(), QStringLiteral("54.25"));
+
+    // A value that is not positive restores the model value.
+    width_field->setProperty("text", QStringLiteral("0"));
+    QVERIFY(QMetaObject::invokeMethod(width_field, "editingFinished"));
+    QCOMPARE(model.rollWidth(), 54.25);
+    QCOMPARE(width_field->property("text").toString(), QStringLiteral("54.25"));
+
+    // Loading a saved custom roll restores the dropdown and the field.
+    const QString path = QDir(QCoreApplication::applicationDirPath())
+                             .filePath(QStringLiteral("custom-roll-ui-%1.settings").arg(QCoreApplication::applicationPid()));
+    SettingsModel writer;
+    writer.selectPaperType(QStringLiteral("roll"));
+    writer.setRollSize(QStringLiteral("custom"));
+    writer.setRollWidth(66.0);
+    QVERIFY(writer.save(path));
+    combo->setProperty("currentIndex", 0);
+    QVERIFY(model.load(path));
+    QVERIFY(QFile::remove(path));
+    QCOMPARE(combo->property("currentIndex").toInt(), custom_index);
+    QCOMPARE(width_field->property("text").toString(), QStringLiteral("66.00"));
+} // rollSizeDropdown_customShowsWidthField()
 
 // ---------------------------------------------------------------------------
 // Legacy layoutMode migration
