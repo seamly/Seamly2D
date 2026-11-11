@@ -936,6 +936,18 @@ fn enlarged_media_message(
     ))
 } // fn enlarged_media_message
 
+/// @brief Why "Make the media bigger" is unavailable on a paper sheet: the reader goes to PDF (tiled).
+pub const SHEET_CANNOT_GROW_MESSAGE: &str =
+    "A paper sheet keeps its size. Split the pieces, or select PDF (tiled) in Layout Settings \
+     to print pieces larger than the sheet.";
+
+/// @brief True when "Make the media bigger" may grow the media: every media but a paper sheet.
+///
+/// A paper sheet is a printer page, so it cannot grow. PDF (tiled) prints a larger piece whole.
+pub fn media_can_grow(settings: &LayoutSettings) -> bool {
+    !(settings.media_type == "paper" && settings.paper_type == "sheet")
+} // fn media_can_grow
+
 /// @brief The media a piece must fit to stay whole: the content rect, limited in
 /// length only for a sheet.
 pub fn layout_divide_spec(settings: &LayoutSettings, bin_w: u32, bin_h: u32) -> DivideSpec {
@@ -1334,6 +1346,21 @@ mod tests {
         assert_eq!(placed_count(&result), 12, "no piece split");
         assert!(result.layout_h_px > 36 * 96, "the sheet grows past 36 in: {} px", result.layout_h_px);
     } // trousers_long_pieces_extend_a_sheet
+
+    // @brief Only a paper sheet refuses "Make the media bigger"; its message names PDF (tiled).
+    #[test]
+    fn paper_sheet_media_cannot_grow() {
+        let sheet = LayoutSettings::from_json(&paper_sheet_settings_json(36.0, 36.0)).expect("sheet settings parse");
+        assert!(!media_can_grow(&sheet));
+        assert!(SHEET_CANNOT_GROW_MESSAGE.contains("PDF (tiled)"));
+
+        for (media, paper) in [("paper", "roll"), ("paper", "tiled"), ("fabric", "sheet"), ("fabric", "roll")] {
+            let mut settings = sheet.clone();
+            settings.media_type = media.to_string();
+            settings.paper_type = paper.to_string();
+            assert!(media_can_grow(&settings), "{media} {paper}");
+        } // for each media that can grow
+    } // paper_sheet_media_cannot_grow
 
     // @brief 36 in fabric folded to 18 in: the trousers go on the fabric, not on the
     // B0 paper sheet that the settings keep from paper media.  The initial 500 in
