@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-11-11 — Custom sheet in Paper Type
+
+- Cause: 'Custom' sat last in the 27-size Paper Size list; users could not find it.
+- Paper Type lists sheet, custom, tiled, roll. Custom shows Paper Size as width × height fields in the Layout Settings unit.
+- Data format unchanged: paperType 'sheet', sheetName 'Custom'. Rust unchanged.
+- `SettingsModel::selectPaperType`, `paperTypeChoice`, `paperTypeNames`; Paper Size lists hold predefined sizes only.
+- SettingsModel tests (temporary test program): 42 pass. `cargo test --workspace`: pass. Installed-app check runs with the next MSI.
+
 ### 2026-11-11 — Paper sheets cannot grow
 
 - Oversized-pieces dialog disables 'Make the media bigger' on a paper sheet; its text names PDF (tiled).

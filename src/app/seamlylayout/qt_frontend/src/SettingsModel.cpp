@@ -72,6 +72,18 @@ static const SizeEntry PAPER_SIZES[] = {
 static const int PAPER_SIZES_COUNT =
     static_cast<int>(sizeof(PAPER_SIZES) / sizeof(PAPER_SIZES[0]));
 
+// @brief Paper type of a single sheet, predefined or custom.
+constexpr QLatin1StringView SHEET_PAPER_TYPE{"sheet"};
+
+// @brief Paper Type dropdown choice for a sheet with user-entered dimensions.
+constexpr QLatin1StringView CUSTOM_PAPER_TYPE{"custom"};
+
+// @brief Sheet name stored for user-entered dimensions.
+constexpr QLatin1StringView CUSTOM_SHEET_NAME{"Custom"};
+
+// @brief Predefined sheet that replaces custom dimensions when the user selects "sheet".
+constexpr QLatin1StringView DEFAULT_SHEET_NAME{"ARCH E"};
+
 // @brief Format a paper dimension without unnecessary trailing zeroes.
 QString formatPaperDimension(double dimension)
 {
@@ -159,15 +171,32 @@ SettingsModel::SettingsModel(QObject *parent)
 // ComboBox source lists
 // ---------------------------------------------------------------------------
 
-// @brief Return all paper size names in the order they appear in the table.
+// @brief Return the Paper Type dropdown choices; "custom" follows "sheet" because it is a sheet.
+QStringList SettingsModel::paperTypeNames() const
+{
+    return { QString(SHEET_PAPER_TYPE), QString(CUSTOM_PAPER_TYPE),
+             QStringLiteral("tiled"), QStringLiteral("roll") };
+} // paperTypeNames()
+
+// @brief Return the Paper Type dropdown choice; a sheet named "Custom" shows as "custom".
+QString SettingsModel::paperTypeChoice() const
+{
+    QString choice = m_paperType;
+    if (m_paperType == SHEET_PAPER_TYPE && m_sheetName == CUSTOM_SHEET_NAME)
+    {
+        choice = QString(CUSTOM_PAPER_TYPE);
+    } // if custom sheet
+    return choice;
+} // paperTypeChoice()
+
+// @brief Return predefined paper size names in table order; the Paper Type dropdown offers custom sizes.
 QStringList SettingsModel::paperSizeNames() const
 {
     QStringList names;
-    names.reserve(PAPER_SIZES_COUNT + 1);
+    names.reserve(PAPER_SIZES_COUNT);
     for (int i = 0; i < PAPER_SIZES_COUNT; ++i) {
         names.append(QString::fromUtf8(PAPER_SIZES[i].name));
     } // for i
-    names.append(QStringLiteral("Custom"));
     return names;
 } // paperSizeNames()
 
@@ -175,7 +204,7 @@ QStringList SettingsModel::paperSizeNames() const
 QStringList SettingsModel::paperSizeLabels() const
 {
     QStringList labels;
-    labels.reserve(PAPER_SIZES_COUNT + 1);
+    labels.reserve(PAPER_SIZES_COUNT);
     for (int i = 0; i < PAPER_SIZES_COUNT; ++i) {
         const SizeEntry &size = PAPER_SIZES[i];
         labels.append(QStringLiteral("%1 (%2 × %3 in; %4 × %5 mm)")
@@ -185,24 +214,19 @@ QStringList SettingsModel::paperSizeLabels() const
                                formatPaperDimension(size.widthMm),
                                formatPaperDimension(size.heightMm)));
     } // for i
-    labels.append(QStringLiteral("Custom"));
     return labels;
 } // paperSizeLabels()
 
 // @brief Return predefined sheet names accepted by tiled output.
 QStringList SettingsModel::tileSizeNames() const
 {
-    QStringList names = paperSizeNames();
-    names.removeLast(); // Custom uses sheet dimensions, not a named tile size.
-    return names;
+    return paperSizeNames();
 } // tileSizeNames()
 
 // @brief Reuse sheet dimension formatting for every predefined tile size.
 QStringList SettingsModel::tileSizeLabels() const
 {
-    QStringList labels = paperSizeLabels();
-    labels.removeLast(); // Keep labels aligned with the predefined tile names.
-    return labels;
+    return paperSizeLabels();
 } // tileSizeLabels()
 
 QStringList SettingsModel::tileOrientationNames() const
@@ -436,6 +460,7 @@ void SettingsModel::setPaperType(const QString &v)
     if (m_paperType == v) return;
     m_paperType = v;
     emit paperTypeChanged();
+    emit paperTypeChoiceChanged();
 } // setPaperType()
 
 void SettingsModel::setSheetName(const QString &v)
@@ -443,6 +468,7 @@ void SettingsModel::setSheetName(const QString &v)
     if (m_sheetName == v) return;
     m_sheetName = v;
     emit sheetNameChanged();
+    emit paperTypeChoiceChanged();
 } // setSheetName()
 
 // @brief Set page width in active units; invalid dimensions are ignored.
@@ -786,6 +812,7 @@ bool SettingsModel::load(const QString &path)
     emit rollWidthPxChanged();
     emit mediaTypeChanged();
     emit paperTypeChanged();
+    emit paperTypeChoiceChanged();
     emit sheetNameChanged();
     emit pageWidthChanged();
     emit pageHeightChanged();
@@ -941,6 +968,26 @@ void SettingsModel::convertAllUnits(const QString &fromUnit, const QString &toUn
     // ">0" guard the optional fields above use isn't needed.
     setPieceGap(convertUnit(m_pieceGap, fromUnit, toUnit));
 } // convertAllUnits()
+
+// @brief Apply a Paper Type dropdown choice; unknown choices change nothing.
+void SettingsModel::selectPaperType(const QString& choice)
+{
+    if (choice == CUSTOM_PAPER_TYPE)
+    {
+        // A custom sheet is a sheet: keep the current dimensions for editing.
+        setPaperType(QString(SHEET_PAPER_TYPE));
+        selectPaperSize(QString(CUSTOM_SHEET_NAME));
+    }
+    else if (paperTypeNames().contains(choice))
+    {
+        setPaperType(choice);
+        // Leaving custom for "sheet" restores a predefined size.
+        if (choice == SHEET_PAPER_TYPE && !paperSizeNames().contains(m_sheetName))
+        {
+            selectPaperSize(QString(DEFAULT_SHEET_NAME));
+        } // if no predefined size
+    } // if choice
+} // selectPaperType()
 
 // @brief Look up a paper size by name and update pageWidth/pageHeight.
 void SettingsModel::selectPaperSize(const QString &name)

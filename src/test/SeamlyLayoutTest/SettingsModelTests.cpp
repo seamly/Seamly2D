@@ -7,6 +7,7 @@
 //
 // Covers:
 //   • Default field values after construction
+//   • Paper Type choices, including the custom sheet and its dialog fields
 //   • Legacy layoutMode schema migration (pre-2026-05 → current)
 //   • Save/load round-trip preserving all fields
 //   • Unit conversion helpers
@@ -37,6 +38,17 @@
 #include <QtTest/QtTest>
 #include <limits>
 
+namespace
+{
+// @brief Register the Theme singleton that SettingsDialog.qml imports, once per process.
+void register_theme_singleton()
+{
+    static const int type_id = qmlRegisterSingletonType(QUrl(QStringLiteral("qrc:/qml/Theme.qml")),
+                                                        "SeamlyLayout", 1, 0, "Theme");
+    Q_UNUSED(type_id)
+} // register_theme_singleton()
+} // namespace
+
 class SettingsModelTests : public QObject
 {
     Q_OBJECT
@@ -47,11 +59,13 @@ private slots:
     void defaults_mediaTypeIsPaper();
     void defaults_paperTypeIsSheet();
     void defaults_layoutModeIsAlongGrainline();
-    void paperSizeLabels_includeDimensionsAndCustom();
+    void paperSizeLabels_includeDimensions();
     void tileSizes_matchPredefinedSheets();
     void tileSizes_selectAndRoundtripNames();
     void tileSizeDropdown_displaysDimensionsAndRestoresSelection();
     void selectPaperSize_customKeepsPageDimensions();
+    void paperType_customChoiceStoresSheet();
+    void paperTypeDropdown_customShowsSizeFields();
     void pageDimensions_rejectInvalidValues();
     void customPaperDimensions_roundtrip();
 
@@ -129,8 +143,8 @@ void SettingsModelTests::defaults_layoutModeIsAlongGrainline()
     QCOMPARE(m.layoutMode(), QStringLiteral("alongGrainline"));
 }
 
-// @brief Predefined sheet labels show imperial and metric dimensions and include Custom.
-void SettingsModelTests::paperSizeLabels_includeDimensionsAndCustom()
+// @brief Paper size labels show imperial and metric dimensions; Custom moved to the Paper Type list.
+void SettingsModelTests::paperSizeLabels_includeDimensions()
 {
     SettingsModel m;
     const QStringList names = m.paperSizeNames();
@@ -139,17 +153,16 @@ void SettingsModelTests::paperSizeLabels_includeDimensionsAndCustom()
     QCOMPARE(names.size(), labels.size());
     QCOMPARE(labels.at(names.indexOf(QStringLiteral("Letter"))),
              QStringLiteral("Letter (8.5 × 11 in; 216 × 279 mm)"));
-    QCOMPARE(labels.last(), QStringLiteral("Custom"));
+    QVERIFY(!names.contains(QStringLiteral("Custom")));
+    QVERIFY(!labels.contains(QStringLiteral("Custom")));
 }
 
 // @brief Tile choices reuse every predefined sheet name and dimension label.
 void SettingsModelTests::tileSizes_matchPredefinedSheets()
 {
     SettingsModel model;
-    QStringList names = model.paperSizeNames();
-    QStringList labels = model.paperSizeLabels();
-    names.removeLast();
-    labels.removeLast();
+    const QStringList names = model.paperSizeNames();
+    const QStringList labels = model.paperSizeLabels();
 
     QCOMPARE(model.tileSizeNames(), names);
     QCOMPARE(model.tileSizeLabels(), labels);
@@ -198,7 +211,7 @@ void SettingsModelTests::tileSizes_selectAndRoundtripNames()
 // @brief The real dropdown displays labels, selects stable names, and refreshes after loading settings.
 void SettingsModelTests::tileSizeDropdown_displaysDimensionsAndRestoresSelection()
 {
-    qmlRegisterSingletonType(QUrl(QStringLiteral("qrc:/qml/Theme.qml")), "SeamlyLayout", 1, 0, "Theme");
+    register_theme_singleton();
     SettingsModel model;
     model.setPaperType(QStringLiteral("tiled"));
     model.selectTileSize(QStringLiteral("ANSI D"));
@@ -249,6 +262,117 @@ void SettingsModelTests::selectPaperSize_customKeepsPageDimensions()
     QCOMPARE(m.pageWidth(), 400.5);
     QCOMPARE(m.pageHeight(), 650.25);
 }
+
+// @brief The custom Paper Type stores a sheet named Custom; "sheet" restores a predefined size.
+void SettingsModelTests::paperType_customChoiceStoresSheet()
+{
+    SettingsModel model;
+    QCOMPARE(model.paperTypeNames(),
+             QStringList({QStringLiteral("sheet"), QStringLiteral("custom"),
+                          QStringLiteral("tiled"), QStringLiteral("roll")}));
+    QCOMPARE(model.paperTypeChoice(), QStringLiteral("sheet"));
+
+    QSignalSpy choice_spy(&model, &SettingsModel::paperTypeChoiceChanged);
+    model.setPageWidth(40.5);
+    model.setPageHeight(60.25);
+    model.selectPaperType(QStringLiteral("custom"));
+
+    // The layout core reads paperType "sheet" and the page dimensions.
+    QCOMPARE(model.paperType(), QStringLiteral("sheet"));
+    QCOMPARE(model.sheetName(), QStringLiteral("Custom"));
+    QCOMPARE(model.paperTypeChoice(), QStringLiteral("custom"));
+    QCOMPARE(model.pageWidth(), 40.5);
+    QCOMPARE(model.pageHeight(), 60.25);
+    QVERIFY(choice_spy.count() >= 1);
+    const QJsonObject json = QJsonDocument::fromJson(model.toJson().toUtf8()).object();
+    QCOMPARE(json.value(QStringLiteral("paperType")).toString(), QStringLiteral("sheet"));
+
+    // Another paper type and back to custom keeps the custom size.
+    model.selectPaperType(QStringLiteral("tiled"));
+    QCOMPARE(model.paperTypeChoice(), QStringLiteral("tiled"));
+    model.selectPaperType(QStringLiteral("custom"));
+    QCOMPARE(model.pageWidth(), 40.5);
+
+    // "sheet" replaces the custom size with the default predefined sheet.
+    model.selectPaperType(QStringLiteral("sheet"));
+    QCOMPARE(model.paperTypeChoice(), QStringLiteral("sheet"));
+    QCOMPARE(model.sheetName(), QStringLiteral("ARCH E"));
+    QCOMPARE(model.pageWidth(), 36.0);
+    QCOMPARE(model.pageHeight(), 48.0);
+
+    // "sheet" keeps a predefined size.
+    model.selectPaperSize(QStringLiteral("A4"));
+    model.selectPaperType(QStringLiteral("roll"));
+    model.selectPaperType(QStringLiteral("sheet"));
+    QCOMPARE(model.sheetName(), QStringLiteral("A4"));
+
+    model.selectPaperType(QStringLiteral("unknown"));
+    QCOMPARE(model.paperType(), QStringLiteral("sheet"));
+    QCOMPARE(model.sheetName(), QStringLiteral("A4"));
+} // paperType_customChoiceStoresSheet()
+
+// @brief The dialog offers custom in Paper Type; its width and height fields edit the sheet.
+void SettingsModelTests::paperTypeDropdown_customShowsSizeFields()
+{
+    register_theme_singleton();
+    SettingsModel model;
+    QQmlEngine engine;
+    QQmlComponent component(&engine, QUrl(QStringLiteral("qrc:/qml/SettingsDialog.qml")));
+    QVERIFY2(component.isReady(), qPrintable(component.errorString()));
+    QScopedPointer<QObject> dialog(component.createWithInitialProperties({
+        {QStringLiteral("model"), QVariant::fromValue(&model)}
+    }));
+    QVERIFY2(dialog, qPrintable(component.errorString()));
+    QObject* combo = dialog->findChild<QObject*>(QStringLiteral("paperTypeCombo"));
+    QObject* width_field = dialog->findChild<QObject*>(QStringLiteral("customPaperWidthField"));
+    QObject* height_field = dialog->findChild<QObject*>(QStringLiteral("customPaperHeightField"));
+    QVERIFY(combo);
+    QVERIFY(width_field);
+    QVERIFY(height_field);
+    QCOMPARE(combo->property("count").toInt(), 4);
+    QVERIFY(dialog->property("isPredefinedSheet").toBool());
+    QVERIFY(!dialog->property("isCustomPaper").toBool());
+
+    // Select custom as a user does: the index changes, then activated fires.
+    const int custom_index = model.paperTypeNames().indexOf(QStringLiteral("custom"));
+    combo->setProperty("currentIndex", custom_index);
+    QCOMPARE(combo->property("currentText").toString(), QStringLiteral("custom"));
+    QVERIFY(QMetaObject::invokeMethod(combo, "activated", Q_ARG(int, custom_index)));
+    QCOMPARE(model.paperTypeChoice(), QStringLiteral("custom"));
+    QVERIFY(dialog->property("isCustomPaper").toBool());
+    QVERIFY(!dialog->property("isPredefinedSheet").toBool());
+    QCOMPARE(width_field->property("text").toString(), QStringLiteral("36.00"));
+
+    // Typed values go to the model in the active unit.
+    width_field->setProperty("text", QStringLiteral("91.5"));
+    QVERIFY(QMetaObject::invokeMethod(width_field, "editingFinished"));
+    height_field->setProperty("text", QStringLiteral("120"));
+    QVERIFY(QMetaObject::invokeMethod(height_field, "editingFinished"));
+    QCOMPARE(model.pageWidth(), 91.5);
+    QCOMPARE(model.pageHeight(), 120.0);
+    QCOMPARE(width_field->property("text").toString(), QStringLiteral("91.50"));
+
+    // A value that is not positive restores the model value.
+    height_field->setProperty("text", QStringLiteral("0"));
+    QVERIFY(QMetaObject::invokeMethod(height_field, "editingFinished"));
+    QCOMPARE(model.pageHeight(), 120.0);
+    QCOMPARE(height_field->property("text").toString(), QStringLiteral("120.00"));
+
+    // Loading a saved custom sheet restores the dropdown and the fields.
+    const QString path = QDir(QCoreApplication::applicationDirPath())
+                             .filePath(QStringLiteral("custom-ui-%1.settings").arg(QCoreApplication::applicationPid()));
+    SettingsModel writer;
+    writer.selectPaperType(QStringLiteral("custom"));
+    writer.setPageWidth(50.0);
+    writer.setPageHeight(70.0);
+    QVERIFY(writer.save(path));
+    combo->setProperty("currentIndex", 0);
+    QVERIFY(model.load(path));
+    QVERIFY(QFile::remove(path));
+    QCOMPARE(combo->property("currentIndex").toInt(), custom_index);
+    QCOMPARE(width_field->property("text").toString(), QStringLiteral("50.00"));
+    QCOMPARE(height_field->property("text").toString(), QStringLiteral("70.00"));
+} // paperTypeDropdown_customShowsSizeFields()
 
 // @brief Page dimensions reject zero, negative, and non-finite values.
 void SettingsModelTests::pageDimensions_rejectInvalidValues()
@@ -756,6 +880,7 @@ void SettingsModelTests::load_emitsAllPropertySignals()
     QSignalSpy spyUnit            (&m, &SettingsModel::unitChanged);
     QSignalSpy spyMediaType       (&m, &SettingsModel::mediaTypeChanged);
     QSignalSpy spyPaperType       (&m, &SettingsModel::paperTypeChanged);
+    QSignalSpy spyPaperTypeChoice (&m, &SettingsModel::paperTypeChoiceChanged);
     QSignalSpy spySheetName       (&m, &SettingsModel::sheetNameChanged);
     QSignalSpy spyPageWidth       (&m, &SettingsModel::pageWidthChanged);
     QSignalSpy spyPageHeight      (&m, &SettingsModel::pageHeightChanged);
@@ -786,6 +911,7 @@ void SettingsModelTests::load_emitsAllPropertySignals()
     QVERIFY(spyUnit.count()            >= 1);
     QVERIFY(spyMediaType.count()       >= 1);
     QVERIFY(spyPaperType.count()       >= 1);
+    QVERIFY(spyPaperTypeChoice.count() >= 1);
     QVERIFY(spySheetName.count()       >= 1);
     QVERIFY(spyPageWidth.count()       >= 1);
     QVERIFY(spyPageHeight.count()      >= 1);
