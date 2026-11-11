@@ -61,6 +61,8 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | 15 | Piece and pattern label text | TEXT |
 | 84 / 85 / 86 / 87 | Validation curves for 1 / 8 / 11 / 14 | POLYLINE |
 
+Plaid SVG paths use a display dash pattern; DXF exports ignore that style and write one `LINE` per reference on layer 10.
+
 ## Contour rules (`astm_contour.rs`)
 
 - Seamly2D sends interpolated polylines; it tags the turn point vertices with `data-turn-points`.
