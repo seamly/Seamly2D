@@ -248,6 +248,8 @@ build/
 
 # Icon must end with two \r
 Icon
+# core.ignorecase makes "Icon" match the icon/ resource folders too; keep them tracked.
+!icon/
 
 # Thumbnails
 ._*
