@@ -2682,7 +2682,20 @@ mod tests {
         fabric_width: f64,
         split_oversized: bool,
     ) -> ProcessLayoutResult {
-        let input = Document::parse(FOLD_PIECES_SVG).expect("valid SVG");
+        process_fold_svg(FOLD_PIECES_SVG, media, layout_mode, rotation_step, fold_lines_on_left_edge, fabric_width, split_oversized)
+    } // fn process_fold_pieces_with_options
+
+    // @brief Lay out `svg` as `process_fold_pieces_with_options` lays out the fold fixture.
+    fn process_fold_svg(
+        svg: &str,
+        media: &str,
+        layout_mode: &str,
+        rotation_step: f64,
+        fold_lines_on_left_edge: bool,
+        fabric_width: f64,
+        split_oversized: bool,
+    ) -> ProcessLayoutResult {
+        let input = Document::parse(svg).expect("valid SVG");
         let paper_type = if media == "paper" { "sheet" } else { "roll" };
         let settings = serde_json::json!({
             "unit": "in", "mediaType": media, "paperType": paper_type,
@@ -2706,7 +2719,7 @@ mod tests {
             },
             &mut progress,
         ).expect("layout")
-    } // fn process_fold_pieces_with_options
+    } // fn process_fold_svg
 
     // @brief Process the fold fixture with one unsupported per-piece rotation value.
     fn process_invalid_rotation(layout_mode: &str) -> ProcessLayoutResult {
@@ -2798,21 +2811,28 @@ mod tests {
         } // for each restricted or legacy rule
     } // piece_any_uses_a_non_quarter_turn_to_fit
 
-    // @brief Every x of the fold line path in a layout.
+    // @brief Every x of every fold line path in a layout.
     fn fold_line_xs(doc: &Document) -> Vec<f64> {
-        fn find<'a>(elem: &'a xmltree::Element) -> Option<&'a xmltree::Element> {
+        fn find<'a>(elem: &'a xmltree::Element, folds: &mut Vec<&'a xmltree::Element>) {
             if elem.attributes.get("data-type").is_some_and(|t| t == "fold_line") {
-                return Some(elem);
+                folds.push(elem);
+                return;
             } // if fold line
-            elem.children.iter().filter_map(|n| n.as_element()).find_map(find)
+            for child in elem.children.iter().filter_map(|n| n.as_element()) {
+                find(child, folds);
+            } // for each child
         } // fn find
-        let fold = find(&doc.root).expect("fold line");
-        let path = fold.children.iter().filter_map(|n| n.as_element()).find(|e| e.name == "path").expect("path");
-        let numbers: Vec<f64> = path.attributes["d"]
-            .split(|c: char| !(c.is_ascii_digit() || c == '.' || c == '-'))
-            .filter_map(|t| t.parse().ok())
-            .collect();
-        numbers.iter().step_by(2).copied().collect()
+        let mut folds = Vec::new();
+        find(&doc.root, &mut folds);
+        assert!(!folds.is_empty(), "fold line");
+        folds.iter().flat_map(|fold| {
+            let path = fold.children.iter().filter_map(|n| n.as_element()).find(|e| e.name == "path").expect("path");
+            let numbers: Vec<f64> = path.attributes["d"]
+                .split(|c: char| !(c.is_ascii_digit() || c == '.' || c == '-'))
+                .filter_map(|t| t.parse().ok())
+                .collect();
+            numbers.into_iter().step_by(2).collect::<Vec<f64>>()
+        }).collect()
     } // fn fold_line_xs
 
     // @brief Fold lines on the left edge.  Fabric: the fold line lies on the left
@@ -2859,6 +2879,40 @@ mod tests {
             "non-fold pieces keep the 0.125 in gap: {yokes:?}"
         );
     } // split_folded_fabric_pins_fold_parts_and_clears_other_parts
+
+    // @brief The fold fixture with Back `width` x `height` px and its fold line along the bottom edge,
+    //        across the grain.
+    fn fold_across_grain_svg(width: u32, height: u32) -> String {
+        FOLD_PIECES_SVG
+            .replace("M0,0 L192,0 L192,384 L0,384 Z", &format!("M0,0 L{width},0 L{width},{height} L0,{height} Z"))
+            .replace("M192,374 L192,10", &format!("M10,{height} L{},{height}", width - 10))
+    } // fn fold_across_grain_svg
+
+    // @brief Paper sheet: a fold line across the grain turns its piece onto the left content edge, whole
+    //        or split. Split, only the part with the fold line goes on the edge.
+    #[test]
+    fn fold_line_across_the_grain_lies_on_the_left_edge() {
+        // 4 x 10 in, fold line 4 in long: turned, it fits whole.
+        for split in [false, true] {
+            let result = process_fold_svg(&fold_across_grain_svg(384, 960), "paper", "alongGrainline", 0.0, true, 40.0, split);
+            assert!(result.unplaced_labels.is_empty(), "split {split}: unplaced {:?}", result.unplaced_labels);
+            assert!(result.fold_line_warnings.is_empty(), "split {split}: {:?}", result.fold_line_warnings);
+            let xs = fold_line_xs(&result.output_doc);
+            assert!(xs.iter().all(|x| (x - 48.0).abs() < 1.0), "split {split}: fold line at x {xs:?}");
+        } // for each split choice
+
+        // 12 x 25 in, fold line 12 in long: turned, 25 in wide; the 19 in content width splits it in two.
+        let result = process_fold_svg(&fold_across_grain_svg(1152, 2400), "paper", "alongGrainline", 0.0, true, 40.0, true);
+        assert!(result.unplaced_labels.is_empty(), "unplaced {:?}", result.unplaced_labels);
+        assert!(result.fold_line_warnings.is_empty(), "{:?}", result.fold_line_warnings);
+        let xs = fold_line_xs(&result.output_doc);
+        assert!(xs.iter().all(|x| (x - 48.0).abs() < 1.0), "fold line at x {xs:?}");
+        let bbox: serde_json::Value = serde_json::from_str(&result.bbox_json).expect("valid bbox JSON");
+        let backs = bbox["pieces"].as_array().expect("pieces")
+            .iter().filter(|piece| piece["label"].as_str().is_some_and(|label| label.starts_with("Back ")))
+            .count();
+        assert_eq!(backs, 2, "the turned piece splits into two parts");
+    } // fold_line_across_the_grain_lies_on_the_left_edge
 
     // @brief The paper-sheet PDF input pins the fold line pieces as the layout does.
     #[test]
