@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-11-11 — Reference lines icon restored
+
+- Cause: MSI build stopped in vmisc: `icon.qrc` lists `icon/svg/reference_lines.svg`; the file was never committed.
+- `.gitignore` rule `Icon` (macOS) matched every `icon/` folder because `core.ignorecase` is true; `git add` skipped new icons.
+- `.gitignore`: `!icon/` keeps the resource folders tracked.
+- `reference_lines.svg` recreated: stripe and plaid symbols; edges on whole pixels.
+- Temporary test program: the 8 pixel checks of `tst_piecemarkings.cpp` pass. Full Qt suites run with the next MSI.
+
 ### 2026-11-11 — Split paper roll keeps media
 
 - Split on a paper roll keeps the selected roll width and margins; only the length follows the content.
@@ -33,14 +41,6 @@
 - Data format unchanged: paperType 'sheet', sheetName 'Custom'. Rust unchanged.
 - `SettingsModel::selectPaperType`, `paperTypeChoice`, `paperTypeNames`; Paper Size lists hold predefined sizes only.
 - SettingsModel tests (temporary test program): 42 pass. `cargo test --workspace`: pass. Installed-app check runs with the next MSI.
-
-### 2026-11-11 — Paper sheets cannot grow
-
-- Oversized-pieces dialog disables 'Make the media bigger' on a paper sheet; its text names PDF (tiled).
-- Rule: `layout_utils::media_can_grow`. Bridge property `media_can_grow` is set before the dialog opens.
-- `process_layout_oversized` refuses "extend" on a sheet: error names PDF (tiled), no layout.
-- Multisize sheets still extend (no dialog); out of scope.
-- `cargo test --workspace`: pass. qmllint: no syntax errors. Installed-app check runs with the next MSI.
 
 ## Decisions to retain
 
