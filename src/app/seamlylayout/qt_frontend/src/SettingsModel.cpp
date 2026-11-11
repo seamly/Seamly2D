@@ -313,7 +313,7 @@ double SettingsModel::rollLength() const
     return 500.0;          // "in" or unknown — return inches
 } // rollLength()
 
-// @brief Return roll size names for the roll size ComboBox.
+// @brief Return roll size names for the roll size ComboBox; "custom" comes last.
 QStringList SettingsModel::rollSizeNames() const
 {
     return {
@@ -324,6 +324,7 @@ QStringList SettingsModel::rollSizeNames() const
         QStringLiteral("900 mm"),
         QStringLiteral("1200 mm"),
         QStringLiteral("1500 mm"),
+        QStringLiteral("custom"),   // the user enters rollWidth
     };
 } // rollSizeNames()
 
@@ -491,6 +492,7 @@ void SettingsModel::setPageHeight(double v)
     emit pageHeightPxChanged();  // pageHeightPx is derived from pageHeight
 } // setPageHeight()
 
+// @brief Set the roll size; a predefined size also sets rollWidth, "custom" keeps it.
 void SettingsModel::setRollSize(const QString &v)
 {
     if (m_rollSize == v) return;
@@ -499,6 +501,7 @@ void SettingsModel::setRollSize(const QString &v)
 
     // Parse the numeric value and unit from the descriptor (e.g. "48 in", "900 mm")
     // and update rollWidth in the active unit so Page Size stays in sync.
+    // "custom" has one part: rollWidth keeps the current width for the user to edit.
     const QStringList parts = v.split(QChar(u' '), Qt::SkipEmptyParts);
     if (parts.size() == 2) {
         bool ok = false;
@@ -508,8 +511,10 @@ void SettingsModel::setRollSize(const QString &v)
     } // if parts.size() == 2
 } // setRollSize()
 
+// @brief Set roll width in active units; invalid widths are ignored.
 void SettingsModel::setRollWidth(double v)
 {
+    if (!std::isfinite(v) || v <= 0.0) return;
     if (qFuzzyCompare(m_rollWidth, v)) return;
     m_rollWidth = v;
     emit rollWidthChanged();
