@@ -455,6 +455,19 @@ void TST_PieceMarkings::pieceDialogHasSeparateMarkingPages()
     QCOMPARE(drill_icon.pixelColor(80, 23), QColor(Qt::black));
     QCOMPARE(drill_icon.pixelColor(80, 10), QColor(Qt::black));
     QCOMPARE(drill_icon.pixelColor(0, 0).alpha(), 0);
+    // Stripe symbol: two outlined vertical bars with a clear gap.
+    const QImage reference_icon =
+        pages->item(TabOrder::ReferenceLines)->icon().pixmap(QSize(160, 64), 1.0).toImage();
+    QVERIFY(!reference_icon.isNull());
+    QCOMPARE(reference_icon.pixelColor(37, 32), QColor("#3977d4"));
+    QCOMPARE(reference_icon.pixelColor(32, 32), QColor(Qt::black));
+    QCOMPARE(reference_icon.pixelColor(45, 32).alpha(), 0);
+    // Plaid symbol: horizontal bars cross the vertical bars with no outline inside the crossing.
+    QCOMPARE(reference_icon.pixelColor(97, 24), QColor("#3977d4"));
+    QCOMPARE(reference_icon.pixelColor(102, 24), QColor("#3977d4"));
+    QCOMPARE(reference_icon.pixelColor(97, 9), QColor(Qt::black));
+    QCOMPARE(reference_icon.pixelColor(105, 32).alpha(), 0);
+    QCOMPARE(reference_icon.pixelColor(0, 0).alpha(), 0);
     dialog.enableApply(true);
     QVERIFY(pages->item(TabOrder::DrillHoles)->flags().testFlag(Qt::ItemIsEnabled));
     QVERIFY(pages->item(TabOrder::ReferenceLines)->flags().testFlag(Qt::ItemIsEnabled));

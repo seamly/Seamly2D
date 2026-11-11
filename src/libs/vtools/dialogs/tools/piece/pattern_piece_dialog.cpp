@@ -196,7 +196,9 @@ PatternPieceDialog::PatternPieceDialog(const VContainer *data, const quint32 &to
     ui->pages_StackedWidget->addWidget(m_reference_editor);
     ui->menuTab_ListWidget->addItem(new QListWidgetItem(QIcon(QStringLiteral(":/icon/svg/drill_holes.svg")),
                                                        tr("Drill holes")));
-    ui->menuTab_ListWidget->addItem(tr("Reference lines"));
+    // Stripe and plaid symbols share one icon above the reference lines label.
+    ui->menuTab_ListWidget->addItem(new QListWidgetItem(QIcon(QStringLiteral(":/icon/svg/reference_lines.svg")),
+                                                       tr("Reference lines")));
     enableApply(applyAllowed);
     connect(m_drill_editor, &PieceMarkingsEditor::changed, this, &PatternPieceDialog::CheckState);
     connect(m_reference_editor, &PieceMarkingsEditor::changed, this, &PatternPieceDialog::CheckState);

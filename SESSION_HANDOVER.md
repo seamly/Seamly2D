@@ -2,6 +2,11 @@
 
 ## Current status
 
+### 2026-11-10 — Reference lines icon
+
+- Pattern Piece dialog: Reference lines page shows stripe and plaid icon (`reference_lines.svg`).
+- Temporary render check: 8/8 pixels pass. `TST_PieceMarkings` runs in the next MSI build.
+
 ## Decisions to retain
 
 - Keep `data-notch-type`. Only DXF export converts every notch to a layer 4 slit.
