@@ -201,7 +201,8 @@ pub fn do_process_layout(
         .map_err(|e| format!("[ERROR] layout_utils::do_process_layout(): 1 Failed to parse layout settings: {e}"))?;
 
     let is_paper_sheet = settings.media_type == "paper" && settings.paper_type == "sheet";
-    // A split request must never inherit enlargement from a caller's layout mode.
+    let is_paper_roll = settings.media_type == "paper" && settings.paper_type == "roll";
+    // Splitting a paper sheet overrides extension; a paper roll may still extend in length.
     let extend_media = args.extend_media && !(is_paper_sheet && args.split_oversized);
 
     // Build the per-piece rotation trial set from layoutMode + rotationStep.
@@ -435,7 +436,11 @@ pub fn do_process_layout(
 
     // Fabric width is a physical constraint, including when folded.
     // Tiled paper never extends: its candidate-width search sets the width.
-    let pack_bin_w = if extend_media && !is_tiled && settings.media_type != "fabric" {
+    let widen_media = extend_media
+        && !is_tiled
+        && settings.media_type != "fabric"
+        && !(is_paper_roll && args.split_oversized);
+    let pack_bin_w = if widen_media {
         bin_w.max(packing::required_bin_width(&rects, &trial_angles_deg))
     } else {
         bin_w
@@ -1541,6 +1546,42 @@ mod tests {
             assert!(error.contains("Select PDF (tiled) in Layout Settings"), "{error}");
         } // for piece and annotation overflow
     } // placement_paper_split_cannot_enlarge_media
+
+    // @brief Split paper rolls keep their configured width when extension is inherited.
+    #[test]
+    fn placement_paper_roll_split_keeps_configured_width() {
+        let settings = serde_json::json!({
+            "unit": "in", "mediaType": "paper", "paperType": "roll",
+            "rollWidth": 1.0, "pieceGap": 0.0,
+            "marginLeft": 0.0, "marginRight": 0.0, "marginTop": 0.0, "marginBottom": 0.0,
+            "layoutMode": "alongGrainline", "scaleGrid": false
+        });
+        let result = process_placement_fixture(settings, true, true).expect("split roll fits");
+
+        assert!(
+            result.unplaced_labels.is_empty(),
+            "{:?}",
+            result.unplaced_labels
+        );
+        assert_eq!(
+            placed_count(&result),
+            7,
+            "one whole piece and six width parts"
+        );
+        assert_eq!(result.output_doc.root.attributes["width"], "96");
+        assert_eq!(
+            result
+                .output_doc
+                .get_attr_by_id("contentRect", "width")
+                .as_deref(),
+            Some("96")
+        );
+        assert!(result.divide_spec.is_some());
+        assert!(
+            result.media_enlargement.is_none(),
+            "split is not requested enlargement"
+        );
+    } // placement_paper_roll_split_keeps_configured_width
 
     // @brief Fabric keeps retrying split parts without widening the configured fabric.
     #[test]
