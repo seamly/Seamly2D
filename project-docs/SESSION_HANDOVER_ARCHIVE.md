@@ -2,6 +2,14 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-11 — Paper sheets cannot grow
+
+- Oversized-pieces dialog disables 'Make the media bigger' on a paper sheet; its text names PDF (tiled).
+- Rule: `layout_utils::media_can_grow`. Bridge property `media_can_grow` is set before the dialog opens.
+- `process_layout_oversized` refuses "extend" on a sheet: error names PDF (tiled), no layout.
+- Multisize sheets still extend (no dialog); out of scope.
+- `cargo test --workspace`: pass. qmllint: no syntax errors. Installed-app check runs with the next MSI.
+
 ### 2026-11-11 — Split layouts and DXF
 
 - Cause: a single layout (no tabs, one material) never refreshed `is_split_layout_active`. DXF stayed enabled after a split; the stale flag disabled it after the next whole layout.
