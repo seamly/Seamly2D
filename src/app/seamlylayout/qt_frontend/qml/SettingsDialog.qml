@@ -52,6 +52,12 @@ Dialog {
     readonly property bool isPredefinedSheet: root.model
         ? (root.model.mediaType === "paper" && root.model.paperTypeChoice === "sheet")
         : true
+    // @brief True when the dialog shows the roll fields: paper of type "roll".
+    readonly property bool isRollPaper: root.model
+        ? (root.model.mediaType === "roll" || (root.model.mediaType === "paper" && root.model.paperType === "roll"))
+        : false
+    // @brief True when Roll Width is "custom": the user enters the roll width.
+    readonly property bool isCustomRoll: root.isRollPaper && root.model.rollSize === "custom"
     readonly property bool showFabricSection: root.model
         ? root.model.mediaType === "fabric"
         : false
@@ -59,12 +65,13 @@ Dialog {
         ? root.model.mediaType !== "fabric"
         : true
 
-    // @brief Copy the model sheet dimensions into the custom size fields.
+    // @brief Copy the model sheet and roll dimensions into the custom size fields.
     // An edit replaces each field's text binding, so model changes need this call.
     function refreshCustomPaperFields() {
         if (!root.model) return;
         customPaperWidthField.text = root.model.pageWidth.toFixed(2);
         customPaperHeightField.text = root.model.pageHeight.toFixed(2);
+        customRollWidthField.text = root.model.rollWidth.toFixed(2);
     } // function refreshCustomPaperFields
 
     title:           "Layout Settings"
@@ -733,33 +740,80 @@ Dialog {
                     onActivated:      if (root.model) root.model.tileOrientation = currentText
                 } // ComboBox tileOrientation
 
-                // Roll size — when mediaType == "roll", or mediaType == "paper" && paperType == "roll"
+                // Roll width: a predefined size, or "custom" with a width field in the Layout Settings unit.
                 Text {
-                    visible:        root.model ? (root.model.mediaType === "roll" || (root.model.mediaType === "paper" && root.model.paperType === "roll")) : false
+                    visible:        root.isRollPaper
                     text:           "Roll Width:"
                     color:          Theme.fieldLabel
                     font.pixelSize: Theme.fontSizeNormal
                     Layout.preferredWidth: scrollView.labelWidth
                 } // Text rollSizeLabel
-                ComboBox {
-                    id:               rollSizeCombo
-                    visible:          root.model ? (root.model.mediaType === "roll" || (root.model.mediaType === "paper" && root.model.paperType === "roll")) : false
+                RowLayout {
+                    id:               rollWidthRow
+                    visible:          root.isRollPaper
                     Layout.fillWidth: true
-                    model:            root.model ? root.model.rollSizeNames : []
-                    currentIndex:     root.model ? Math.max(0, model.indexOf(root.model.rollSize)) : 0
-                    onActivated:      if (root.model) root.model.rollSize = currentText
-                } // ComboBox rollSize
+                    spacing:          6
+
+                    ComboBox {
+                        id:               rollSizeCombo
+                        objectName:       "rollSizeCombo"
+                        Layout.fillWidth: true
+                        model:            root.model ? root.model.rollSizeNames : []
+                        currentIndex:     root.model ? Math.max(0, model.indexOf(root.model.rollSize)) : 0
+                        onActivated: {
+                            if (!root.model) return;
+                            root.model.rollSize = currentText;
+                            root.refreshCustomPaperFields();   // custom starts from the current width
+                        } // onActivated
+                    } // ComboBox rollSize
+
+                    TextField {
+                        id:               customRollWidthField
+                        objectName:       "customRollWidthField"
+                        visible:          root.isCustomRoll
+                        Layout.fillWidth: true
+                        placeholderText:  "Width"
+                        ToolTip.visible:  hovered
+                        ToolTip.text:     "Roll width (" + (root.model ? root.model.unit : "in") + ")"
+                        text:             root.model ? root.model.rollWidth.toFixed(2) : "36.00"
+                        validator:        DoubleValidator {
+                            bottom: 0.000001
+                            top: 1000000000
+                            decimals: 6
+                            notation: DoubleValidator.StandardNotation
+                            locale: "C"   // the locale name: a decimal point in every system locale
+                        }
+                        onEditingFinished: {
+                            if (!root.model) return;
+                            var value = parseFloat(text);
+                            // The model ignores a value that is not positive and finite.
+                            if (acceptableInput && isFinite(value) && value > 0) {
+                                root.model.rollWidth = value;
+                            } // if valid width
+                            text = root.model.rollWidth.toFixed(2);
+                        } // onEditingFinished
+                        color:            Theme.fieldText
+                        background:       Rectangle { color: Theme.fieldBackground; radius: 2 }
+                    } // TextField customRollWidth
+
+                    Text {
+                        visible:        root.isCustomRoll
+                        text:           root.model ? root.model.unit : "in"
+                        color:          Theme.textOnDark
+                        font.pixelSize: Theme.fontSizeNormal
+                    } // Text customRollUnit
+                } // RowLayout rollWidthRow
 
                 // Roll length (display-only — 500 in / 1270 cm / 12700 mm sentinel; trimmed after packing)
                 Text {
-                    visible:        root.model ? (root.model.mediaType === "roll" || (root.model.mediaType === "paper" && root.model.paperType === "roll")) : false
+                    visible:        root.isRollPaper
                     text:           "Roll Length:"
                     color:          Theme.fieldLabel
                     font.pixelSize: Theme.fontSizeNormal
                     Layout.preferredWidth: scrollView.labelWidth
                 } // Text rollLengthLabel
                 Text {
-                    visible:        root.model ? (root.model.mediaType === "roll" || (root.model.mediaType === "paper" && root.model.paperType === "roll")) : false
+                    visible:        root.isRollPaper
                     text:           root.model
                         ? root.model.rollLength.toFixed(0) + " " + root.model.unit
                           + "  (" + root.model.rollLengthPx + " px)"
