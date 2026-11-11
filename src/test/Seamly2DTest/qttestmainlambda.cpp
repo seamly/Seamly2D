@@ -196,6 +196,7 @@ int main(int argc, char** argv)
 {
     Q_INIT_RESOURCE(schema);
     Q_INIT_RESOURCE(label_templates);
+    Q_INIT_RESOURCE(icon);
 
     TestApplication2D app( argc, argv );// For QPrinter
 

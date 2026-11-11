@@ -448,6 +448,13 @@ void TST_PieceMarkings::pieceDialogHasSeparateMarkingPages()
     QVERIFY(pages != nullptr);
     QCOMPARE(pages->count(), static_cast<int>(TabOrder::Count));
     QCOMPARE(dialog.findChildren<PieceMarkingsEditor *>().size(), 2);
+    const QImage drill_icon = pages->item(TabOrder::DrillHoles)->icon().pixmap(QSize(160, 64), 1.0).toImage();
+    QVERIFY(!drill_icon.isNull());
+    QCOMPARE(drill_icon.pixelColor(80, 32), QColor("#3977d4"));
+    QCOMPARE(drill_icon.pixelColor(80, 16), QColor("#3977d4"));
+    QCOMPARE(drill_icon.pixelColor(80, 23), QColor(Qt::black));
+    QCOMPARE(drill_icon.pixelColor(80, 10), QColor(Qt::black));
+    QCOMPARE(drill_icon.pixelColor(0, 0).alpha(), 0);
     dialog.enableApply(true);
     QVERIFY(pages->item(TabOrder::DrillHoles)->flags().testFlag(Qt::ItemIsEnabled));
     QVERIFY(pages->item(TabOrder::ReferenceLines)->flags().testFlag(Qt::ItemIsEnabled));
