@@ -1714,6 +1714,8 @@ impl qobject::AppController {
     ) -> bool {
         // Mark layout as in-progress and clear previous result, tabs included.
         // Every other material goes back to its blank canvas until its turn in the run.
+        // Drop the previous split first: clear_layout_views copies it to the split flag.
+        self.as_mut().rust_mut().divide_spec = None;
         self.as_mut().clear_layout_views();
         for layout in self.as_mut().rust_mut().material_layouts.iter_mut() {
             layout.reset_to_blank();
@@ -1928,6 +1930,7 @@ impl qobject::AppController {
                 self.as_mut().set_layout_status_message(cxx_qt_lib::QString::default());
                 self.as_mut().set_is_layout_ready(true);           // enables 'Export' button
                 self.as_mut().set_is_create_layout_enabled(false); // disable 'Create Layout' until settings change
+                self.as_mut().refresh_layout_view_properties();    // split flag gates DXF and PDF (Tiled)
                 self.as_mut().layout_finished();                   // notify QML right canvas to reload
 
                 // Soft failure: some pieces didn't fit, or a fold line stays off
@@ -2793,15 +2796,15 @@ impl qobject::AppController {
             opts.create_annotated_version, opts.aama
         ));
         let standard = if opts.aama { "DXF-AAMA" } else { "DXF-ASTM" };
-        // A DXF-ASTM or DXF-AAMA file carries one size: Marker and Nested hold every size.
+        // Refuse split layouts, and Marker and Nested, which hold every size.
+        // The menu disables these cases too; this guard covers every caller.
         let active_kind = self.rust().layout_views.active_kind().cloned();
-        if active_kind.as_ref().is_some_and(|kind| !kind.exports_dxf()) {
-            log_to_file("[lib.rs AppController] export_dxf(): 3 refused: Marker or Nested tab");
-            self.as_mut().error_occurred(cxx_qt_lib::QString::from(&format!(
-                "{standard} exports one size. Select the Base Size tab or a size tab, then export again."
-            )));
+        let split = self.rust().divide_spec.is_some();
+        if let Some(message) = layout_views::dxf_export_refusal(active_kind.as_ref(), split, standard) {
+            log_to_file(&format!("[lib.rs AppController] export_dxf(): 3 refused: {message}"));
+            self.as_mut().error_occurred(cxx_qt_lib::QString::from(&message));
             return false;
-        } // if Marker or Nested
+        } // if DXF cannot export the shown layout
         let layout_doc = match self.clone_dxf_layout_doc() {
             Ok(d)  => {
                 log_to_file("[lib.rs AppController] export_dxf(): 3 layout DOM cloned and stripped");

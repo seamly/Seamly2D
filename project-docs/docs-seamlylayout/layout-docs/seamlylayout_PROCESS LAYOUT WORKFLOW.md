@@ -119,6 +119,7 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
   - Paper and fabric split layouts enable PDF, PNG, JPG, EPS, PostScript (PS), SVG, and HPGL.
     PDF combines sheet pages into one multi-page file; the other formats export the assembled layout.
     DXF, PDF (Tiled), and paid formats remain disabled.
+    `run_layout` drops the previous `divide_spec` at the start and refreshes `is_split_layout_active` at the end.
   - Each successful fabric retry removes at least one remaining piece. No-progress and coordinate-limit stops preserve explicit unplaced-piece warnings.
 - "extend": `ProcessLayoutArgs::extend_media`, as below.
 - `cancel_layout` sets `is_settings_required`: QML disables every button but 'Layout Settings', Preferences and Exit. `initialize_layout` clears it.
