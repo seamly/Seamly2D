@@ -115,6 +115,8 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
   - Paper sheets pack all whole pieces and split parts on one configured sheet. Overflow aborts layout creation.
   - Paper rolls keep their configured width when splitting, even if a caller requests enlargement; their length may still grow.
   - The error names unplaced pieces and instructs the user to select **PDF (tiled)** in **Layout Settings**.
+  - `layout_utils::is_sheet_overflow` recognizes this error and the annotation error. `run_layout` and `process_next_tab_layout` then call `refuse_sheet_layout`:
+    every material shows its blank sheet, tabs and split state clear, then `cancel_layout`. One material's overflow ends the whole run.
   - Paper sheets do not retry on additional sheets. Fabric retains `packing::pack_polygons_on_sheets` retries and its fixed width.
   - Splitting paper sheets keeps the selected width, height, and margins, even if a caller also requests enlargement.
   - A scale grid or legend that exceeds the fixed sheet also directs the user to PDF (tiled); it never enlarges the sheet.

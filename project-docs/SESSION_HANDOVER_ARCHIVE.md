@@ -2,6 +2,11 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-10 — Reference lines icon
+
+- Pattern Piece dialog: Reference lines page shows stripe and plaid icon (`reference_lines.svg`).
+- Temporary render check: 8/8 pixels pass. `TST_PieceMarkings` runs in the next MSI build.
+
 ### 2026-10-28 — Fabric media size fix; merged into local `run-seamlyLayout`, not pushed
 
 - Cause: Sue's trousers on fabric (folded, 36 in, selvedge 0.5 in) left 4 pieces out. The fabric canvas used the B0 paper sheet size that the settings keep from paper media; fabric width, fold and open length were ignored.

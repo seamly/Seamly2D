@@ -1722,6 +1722,37 @@ impl qobject::AppController {
         self.as_mut().set_is_settings_required(true);
     } // fn cancel_layout
 
+    // Refuse a layout that overflows one paper sheet: every material shows its
+    // blank sheet, the error names PDF (tiled), and only 'Layout Settings' stays active.
+    // `material` is the material that overflowed; its name prefixes the error
+    // when the import has several materials.
+    fn refuse_sheet_layout(mut self: std::pin::Pin<&mut Self>, material: usize, error: &str) {
+        log_to_file(&format!("[refuse_sheet_layout] material {material}: {error}"));
+        let message = {
+            let mut rust = self.as_mut().rust_mut();
+            // No layout stays: no split parts, and every canvas goes back to blank.
+            rust.divide_spec = None;
+            for layout in rust.material_layouts.iter_mut() {
+                layout.reset_to_blank();
+            } // for each material
+            let blank = rust.initial_layout_dom.as_ref().map(LayoutState::blank).unwrap_or_default();
+            rust.put_layout_state(blank);
+            match rust.material_names().get(material) {
+                Some(name) => format!("{name}: {error}"),
+                None => error.to_string(), // one material: no prefix
+            } // match material name
+        }; // rust borrow dropped
+        // Drop the queued run and its tabs; this also clears the split flag.
+        self.as_mut().clear_layout_views();
+        self.as_mut().set_is_layout_in_progress(false);
+        self.as_mut().set_layout_progress(-1);
+        self.as_mut().set_layout_status_message(cxx_qt_lib::QString::default());
+        self.as_mut().set_is_layout_ready(false);
+        self.as_mut().cancel_layout();   // only 'Layout Settings' stays active
+        self.as_mut().layout_finished(); // right canvas shows the blank sheet
+        self.as_mut().error_occurred(cxx_qt_lib::QString::from(message.as_str()));
+    } // fn refuse_sheet_layout
+
     // The layout pipeline behind process_layout and process_layout_oversized.
     // Emits error_occurred with a descriptive message on any failure path.
     fn run_layout(
@@ -1969,6 +2000,12 @@ impl qobject::AppController {
 
                 true
             }
+            Err(e) if layout_utils::is_sheet_overflow(&e) => {
+                // The pieces overflow the paper sheet: no layout; the user selects PDF (tiled).
+                let shown = usize::try_from(*self.active_material()).unwrap_or(0);
+                self.as_mut().refuse_sheet_layout(shown, &e);
+                false
+            } // sheet overflow
             Err(e) => {
                 let msg = cxx_qt_lib::QString::from(e.as_str());
                 self.as_mut().set_is_layout_in_progress(false);
@@ -2056,6 +2093,14 @@ impl qobject::AppController {
                 } // match size
             } // None
         }; // outcome
+
+        // A paper sheet that any material overflows ends the whole run with no layout.
+        if let Err(e) = &outcome {
+            if layout_utils::is_sheet_overflow(e) {
+                self.as_mut().refuse_sheet_layout(job.material, e);
+                return;
+            } // if sheet overflow
+        } // if failed
 
         // Store the layout, or note the problem for the final warning.
         {
