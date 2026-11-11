@@ -89,6 +89,9 @@ class SettingsModel : public QObject
     // @brief Paper type when mediaType == "paper": "sheet" | "tiled" | "roll".
     Q_PROPERTY(QString paperType     READ paperType     WRITE setPaperType     NOTIFY paperTypeChanged)
 
+    // @brief Paper Type dropdown choice: paperType, or "custom" for a sheet named "Custom".
+    Q_PROPERTY(QString paperTypeChoice READ paperTypeChoice NOTIFY paperTypeChoiceChanged)
+
     // -----------------------------------------------------------------------
     // Sheet (paper) dimensions
     // -----------------------------------------------------------------------
@@ -171,7 +174,10 @@ class SettingsModel : public QObject
     // ComboBox source lists (read-only)
     // -----------------------------------------------------------------------
 
-    // @brief Paper size names for the sheet name ComboBox.
+    // @brief Paper Type dropdown choices: "sheet", "custom", "tiled", "roll".
+    Q_PROPERTY(QStringList paperTypeNames  READ paperTypeNames  CONSTANT)
+
+    // @brief Predefined paper size names for the sheet name ComboBox.
     Q_PROPERTY(QStringList paperSizeNames  READ paperSizeNames  CONSTANT)
 
     // @brief Paper size labels with imperial and metric dimensions.
@@ -216,6 +222,7 @@ public:
     QString    unit()          const { return m_unit;          }
     QString    mediaType()     const { return m_mediaType;     }
     QString    paperType()     const { return m_paperType;     }
+    QString    paperTypeChoice() const;
     QString    sheetName()     const { return m_sheetName;     }
     double     pageWidth()     const { return m_pageWidth;     }
     double     pageHeight()    const { return m_pageHeight;    }
@@ -236,6 +243,7 @@ public:
     double     fabricHeight()  const { return m_fabricHeight;  }
     double     selvedgeWidth() const { return m_selvedgeWidth; }
 
+    QStringList paperTypeNames()  const;
     QStringList paperSizeNames()  const;
     QStringList paperSizeLabels() const;
     QStringList tileSizeNames()   const;
@@ -316,6 +324,10 @@ public:
     // @param toUnit   Target unit ("in", "mm", "cm").
     Q_INVOKABLE void convertAllUnits(const QString &fromUnit, const QString &toUnit);
 
+    // @brief Apply a Paper Type dropdown choice.
+    // @param choice One of paperTypeNames; "custom" stores paperType "sheet" and sheetName "Custom".
+    Q_INVOKABLE void selectPaperType(const QString& choice);
+
     // @brief Select a paper size by name and update pageWidth/pageHeight.
     // @param name Paper size name (e.g., "ARCH E", "A4").
     Q_INVOKABLE void selectPaperSize(const QString &name);
@@ -341,6 +353,7 @@ signals:
     void unitChanged();
     void mediaTypeChanged();
     void paperTypeChanged();
+    void paperTypeChoiceChanged();
     void sheetNameChanged();
     void pageWidthChanged();
     void pageHeightChanged();
