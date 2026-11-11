@@ -176,6 +176,7 @@ The application workflow loop consists of:
          Each part gets a label "<name> part i of n, joins j" and 2 match notches per shared cut edge. No seam allowance on a cut edge.
          The paper-sheet PDF export splits the same way. See `SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout split parts".
        * "Make the media bigger" (DXF): fabric keeps its configured width and grows longer. Other media can grow wider and longer.
+         A paper sheet cannot grow: the option is disabled, and its text directs the user to PDF (tiled).
          A completion popup reports the resulting dimensions. Pieces that cannot fit fabric width remain explicitly reported.
        * Split placement retries remaining pieces on fresh sheets until all fit or a fresh sheet makes no progress.
      * OK lays out with the choice. Cancel: no layout; only 'Layout Settings' (plus Preferences and Exit) stays active until new settings are submitted.

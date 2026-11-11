@@ -105,6 +105,8 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
 - `process_layout` first runs `layout_utils::do_find_oversized_pieces`: pre-processing up to grain-up pieces, then `piece_divider::find_oversized_pieces`.
 - A piece is oversized when no trial angle fits the effective content dimensions. Paper sheets use the dimensions inside their margins; warnings report each offending piece dimension and its effective media dimension. Paper roll and fabric limit only the width. Tiled paper is never checked.
 - Oversized pieces: the `oversized_pieces_found` signal, no layout. QML asks the user, then calls `process_layout_oversized(settings, "split" | "extend")` or `cancel_layout()`.
+- `layout_utils::media_can_grow` is false for a paper sheet. `process_layout` copies it to `media_can_grow` before the signal; the dialog disables "Make the media bigger".
+  `process_layout_oversized` refuses "extend" on a paper sheet: `SHEET_CANNOT_GROW_MESSAGE` names PDF (tiled), then `cancel_layout`.
 - "split": `ProcessLayoutArgs::split_oversized`. `piece_divider::divide_oversized_pieces` runs after the piece-set centring and before `translate_dom`.
   - Equal columns for a piece too wide, equal rows for a piece too long on a sheet. Each outline region in a cell is one part.
   - On folded fabric, true fold-line pieces remain pinned to the fold. Other pieces and split parts keep at least `pieceGap` from the fold edge. Oversize checks and split sizing use that same reduced width.
