@@ -177,6 +177,7 @@ The application workflow loop consists of:
          The paper-sheet PDF export splits the same way. See `SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout split parts".
          A paper sheet: when the pieces and parts do not all fit on one sheet, no layout. The error directs the user to PDF (tiled);
          the canvas shows the blank sheet, and only 'Layout Settings' stays active.
+         A paper roll keeps the selected roll width and margins; only its length follows the content.
        * "Make the media bigger" (DXF): fabric keeps its configured width and grows longer. Other media can grow wider and longer.
          A paper sheet cannot grow: the option is disabled, and its text directs the user to PDF (tiled).
          A completion popup reports the resulting dimensions. Pieces that cannot fit fabric width remain explicitly reported.

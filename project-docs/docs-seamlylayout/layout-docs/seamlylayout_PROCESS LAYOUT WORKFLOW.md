@@ -113,7 +113,7 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
   - Cutting: `geometry::half_plane_clip` (`cut_closed`, `cut_open`). Each output vertex keeps its source vertex index, so `data-turn-points` stay valid.
   - `ProcessLayoutResult::divide_spec` is set only when at least one piece was divided. It keeps the media so `sheets::build_sheet_export_inputs` can split the same way for the paper-sheet PDF.
   - Paper sheets pack all whole pieces and split parts on one configured sheet. Overflow aborts layout creation.
-  - Paper rolls keep their configured width when splitting, even if a caller requests enlargement; their length may still grow.
+  - Paper rolls keep the selected roll width and margins when splitting, even if a caller requests enlargement. Only the length follows the content.
   - The error names unplaced pieces and instructs the user to select **PDF (tiled)** in **Layout Settings**.
   - `layout_utils::is_sheet_overflow` recognizes this error and the annotation error. `run_layout` and `process_next_tab_layout` then call `refuse_sheet_layout`:
     every material shows its blank sheet, tabs and split state clear, then `cancel_layout`. One material's overflow ends the whole run.

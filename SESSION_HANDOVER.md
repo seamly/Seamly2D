@@ -2,6 +2,15 @@
 
 ## Current status
 
+### 2026-11-11 — Split paper roll keeps media
+
+- Split on a paper roll keeps the selected roll width and margins; only the length follows the content.
+- Code unchanged: an individual roll split packs on fixed `bin_w` columns and never widens.
+- New tests: `placement_paper_roll_split_keeps_media_dimensions` (margins, extend off and on),
+  `trousers_split_on_a_narrow_paper_roll_keep_roll_width` (16 in roll, Back divides).
+- Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW_DESCRIPTION.
+- Installed-app check runs with the next MSI.
+
 ### 2026-11-11 — Custom roll width
 
 - Roll Width lists 'custom' last. It shows a width field in the Layout Settings unit; a predefined size hides it.
@@ -32,13 +41,6 @@
 - `process_layout_oversized` refuses "extend" on a sheet: error names PDF (tiled), no layout.
 - Multisize sheets still extend (no dialog); out of scope.
 - `cargo test --workspace`: pass. qmllint: no syntax errors. Installed-app check runs with the next MSI.
-
-### 2026-11-11 — Split layouts and DXF
-
-- Cause: a single layout (no tabs, one material) never refreshed `is_split_layout_active`. DXF stayed enabled after a split; the stale flag disabled it after the next whole layout.
-- `run_layout` drops the old `divide_spec` at the start and refreshes the flag at the end.
-- `export_dxf` refuses split layouts through `layout_views::dxf_export_refusal`.
-- `cargo test --workspace`: pass. Installed-app check (paper sheet and roll, split) runs with the next MSI.
 
 ## Decisions to retain
 
