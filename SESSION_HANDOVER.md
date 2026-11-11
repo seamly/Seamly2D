@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-11-11 — Custom roll width
+
+- Roll Width lists 'custom' last. It shows a width field in the Layout Settings unit; a predefined size hides it.
+- `setRollSize("custom")` keeps rollWidth; `setRollWidth` ignores zero, negative, and non-finite values.
+- QML: `isRollPaper`, `isCustomRoll`, `customRollWidthField`; `refreshCustomPaperFields` also copies rollWidth.
+- Rust unchanged: the layout core reads `rollWidth`.
+- SettingsModel tests (temporary test program): 44 pass. Installed-app check runs with the next MSI.
+
 ### 2026-11-11 — Sheet overflow leaves no layout
 
 - Cause: run_layout showed the error but kept the old layout and Create Layout; another material's overflow became a warning with a partial layout.
@@ -31,14 +39,6 @@
 - `run_layout` drops the old `divide_spec` at the start and refreshes the flag at the end.
 - `export_dxf` refuses split layouts through `layout_views::dxf_export_refusal`.
 - `cargo test --workspace`: pass. Installed-app check (paper sheet and roll, split) runs with the next MSI.
-
-### 2026-11-11 — Fold lines across the grain
-
-- Cause: trousers `Test-halfleg` fold line runs across the grain; the fold plan pinned vertical fold lines only.
-- `fold_line_edge::plan_fold_line_edge` turns such a piece until its fold line is vertical. Fold edge outranks layout mode; Any mode checks an explicit piece rotation.
-- `piece_divider::divide_oversized_pieces` turns in place before it measures.
-- Risk: on fabric, a turned piece's grain runs across the fabric.
-- `cargo test --workspace`: pass. Installed-app check with `trousers.sm2d` runs with the next MSI.
 
 ## Decisions to retain
 

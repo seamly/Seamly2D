@@ -22,8 +22,9 @@
         >>> if unit='mm' then default is 10 for all margins.
         >>> if unit='in' then default is .25 for all margins.
     > if paperType='roll':
-      >> rollSize --  dropdown list of roll paper widths (24 in, 32 in, 36 in, 40 in, 42 in, 297 mm, 420 mm, 432 mm, 594 mm, 841 mm);  default is '36 in'.
-      >> paperWidth = rollSize's width converted from inches or millimeters into user unit; default is 36.
+      >> rollSize --  dropdown list of roll paper widths (36 in, 48 in, 60 in, 72 in, 900 mm, 1200 mm, 1500 mm, custom);  default is '36 in'.
+      >> 'custom' shows a Roll Width field: the user enters the width in the user unit. rollSize saves as 'custom'.
+      >> paperWidth = rollSize's width converted from inches or millimeters into user unit, or the custom width; default is 36.
       >> paperHeight = 500 inches converted to user unit.
       >> Margins - marginLeft, marginRight, marginTop, marginBottom
         >>> if unit='cm' then default is 1 for all margins.
