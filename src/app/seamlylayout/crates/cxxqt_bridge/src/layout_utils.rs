@@ -664,8 +664,7 @@ pub fn do_process_layout(
             } // if rotation conflicts with the fold edge
             // Reject incomplete sheets before assembling or publishing a layout.
             return Err(format!(
-                "All pieces cannot fit on one sheet. Select PDF (tiled) in Layout Settings and create the layout again.\n\
-                 Pieces that could not be placed:\n{}",
+                "{SHEET_OVERFLOW_MESSAGE}\nPieces that could not be placed:\n{}",
                 unplaced_labels.join("\n")
             ));
         } // if paper sheet has unplaced pieces
@@ -734,10 +733,7 @@ pub fn do_process_layout(
 
     if is_paper_sheet && !extend_media && content_bottom > bin_h {
         // Legends and scale grids must not silently enlarge fixed sheet media.
-        return Err(
-            "The pieces and layout annotations cannot fit on one sheet. \
-             Select PDF (tiled) in Layout Settings and create the layout again.".to_string()
-        );
+        return Err(SHEET_ANNOTATION_OVERFLOW_MESSAGE.to_string());
     } // if annotations exceed the fixed sheet
 
     // compute the blank space below the lowest piece (or the legend)
@@ -947,6 +943,23 @@ pub const SHEET_CANNOT_GROW_MESSAGE: &str =
 pub fn media_can_grow(settings: &LayoutSettings) -> bool {
     !(settings.media_type == "paper" && settings.paper_type == "sheet")
 } // fn media_can_grow
+
+/// @brief Error when the pieces, whole or split, do not all fit on one paper sheet.
+pub const SHEET_OVERFLOW_MESSAGE: &str =
+    "All pieces cannot fit on one sheet. Select PDF (tiled) in Layout Settings and create the layout again.";
+
+/// @brief Error when the legend or scale grid pushes the layout past one paper sheet.
+pub const SHEET_ANNOTATION_OVERFLOW_MESSAGE: &str =
+    "The pieces and layout annotations cannot fit on one sheet. \
+     Select PDF (tiled) in Layout Settings and create the layout again.";
+
+/// @brief True when `error` refuses a layout because it overflows one paper sheet.
+///
+/// Such a run makes no layout at all: the user selects PDF (tiled) in Layout Settings.
+pub fn is_sheet_overflow(error: &str) -> bool {
+    // The piece overflow error lists the unplaced pieces after its first line.
+    error.starts_with(SHEET_OVERFLOW_MESSAGE) || error == SHEET_ANNOTATION_OVERFLOW_MESSAGE
+} // fn is_sheet_overflow
 
 /// @brief The media a piece must fit to stay whole: the content rect, limited in
 /// length only for a sheet.
@@ -1517,6 +1530,7 @@ mod tests {
             assert!(error.contains("All pieces cannot fit on one sheet."), "{error}");
             assert!(error.contains("Select PDF (tiled) in Layout Settings"), "{error}");
             assert!(error.contains("Long") || error.contains("Wide"), "{error}");
+            assert!(is_sheet_overflow(&error), "the controller must refuse the layout: {error}");
         } // for whole and split pieces
     } // placement_paper_sheet_overflow_requires_tiled_pdf
 
@@ -1571,8 +1585,28 @@ mod tests {
             });
             let error = process_placement_fixture(settings, true, true).err().expect("fixed media must fail");
             assert!(error.contains("Select PDF (tiled) in Layout Settings"), "{error}");
+            assert!(is_sheet_overflow(&error), "the controller must refuse the layout: {error}");
         } // for piece and annotation overflow
     } // placement_paper_split_cannot_enlarge_media
+
+    // @brief Only the two sheet overflow errors make the controller refuse a layout.
+    #[test]
+    fn sheet_overflow_errors_are_recognized() {
+        let pieces = format!("{SHEET_OVERFLOW_MESSAGE}\nPieces that could not be placed:\nBack");
+        assert!(is_sheet_overflow(&pieces));
+        assert!(is_sheet_overflow(SHEET_ANNOTATION_OVERFLOW_MESSAGE));
+        assert!(SHEET_OVERFLOW_MESSAGE.contains("PDF (tiled)"));
+        assert!(SHEET_ANNOTATION_OVERFLOW_MESSAGE.contains("PDF (tiled)"));
+
+        for other in [
+            SHEET_CANNOT_GROW_MESSAGE,
+            "No SVG imported. Please import an SVG file first.",
+            "Piece \"Back\" cannot satisfy both its rotation rule and the fold edge.",
+            "",
+        ] {
+            assert!(!is_sheet_overflow(other), "{other}");
+        } // for other errors
+    } // sheet_overflow_errors_are_recognized
 
     // @brief Split paper rolls keep their configured width when extension is inherited.
     #[test]
