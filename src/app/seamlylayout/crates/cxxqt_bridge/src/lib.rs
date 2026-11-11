@@ -634,6 +634,8 @@ pub mod qobject {
         // True after Cancel in the oversized-pieces dialog: only 'Layout Settings'
         // stays active until new settings are submitted.
         #[qproperty(bool, is_settings_required)]
+        // False when the oversized-pieces dialog must disable 'Make the media bigger': a paper sheet.
+        #[qproperty(bool, media_can_grow)]
         // Material tab labels of the import ("Fabric", "Lining", ...); empty for one material.
         #[qproperty(QStringList, material_labels)]
         // Index of the shown material in `material_labels`.
@@ -1098,6 +1100,9 @@ pub struct AppControllerRust {
     // True after Cancel in the oversized-pieces dialog, until new settings are submitted.
     is_settings_required: bool,
 
+    // False when the media of the oversized-pieces dialog is a paper sheet.
+    media_can_grow: bool,
+
     // The media the current layout split its pieces for; None when it did not split.
     // The paper-sheet PDF export splits the same way.
     divide_spec: Option<piece_divider::DivideSpec>,
@@ -1174,6 +1179,7 @@ impl Default for AppControllerRust {
             pdf_tiled_export_allowed:  true,                           // no tabs: an individual layout exports PDF (Tiled)
             is_split_layout_active:    false,                          // no split layout
             is_settings_required:      false,                          // no cancelled layout
+            media_can_grow:            true,                           // set before the dialog opens
             divide_spec:               None,                           // no split layout
             layout_views:              LayoutViews::default(),         // no tabs
             tab_queue:                 None,                           // no tab run queued
@@ -1675,11 +1681,13 @@ impl qobject::AppController {
                 found
             }; // rust borrow dropped
             if !found.is_empty() {
-                // The settings parsed in do_find_oversized_pieces, so the unit is there.
-                let unit = LayoutSettings::from_json(&settings_json.to_string())
-                    .map(|settings| settings.unit)
-                    .unwrap_or_default();
+                // The settings parsed in do_find_oversized_pieces, so the unit and media are there.
+                let settings = LayoutSettings::from_json(&settings_json.to_string()).ok();
+                let unit = settings.as_ref().map(|settings| settings.unit.clone()).unwrap_or_default();
+                let can_grow = settings.as_ref().map_or(true, layout_utils::media_can_grow);
                 let message = piece_divider::oversized_pieces_message(&found, &unit);
+                // The dialog disables 'Make the media bigger' for a paper sheet.
+                self.as_mut().set_media_can_grow(can_grow);
                 self.as_mut().oversized_pieces_found(cxx_qt_lib::QString::from(message.as_str()));
                 return false;
             } // if oversized pieces
@@ -1690,11 +1698,20 @@ impl qobject::AppController {
     // Lay out after the oversized-pieces dialog's OK: "split" splits each such
     // piece into parts; any other value makes the media bigger.
     fn process_layout_oversized(
-        self: std::pin::Pin<&mut Self>,
+        mut self: std::pin::Pin<&mut Self>,
         settings_json: &cxx_qt_lib::QString,
         choice: &cxx_qt_lib::QString,
     ) -> bool {
         let choice = if choice.to_string() == "split" { OversizeChoice::Split } else { OversizeChoice::Extend };
+        // A paper sheet cannot grow: send the user to PDF (tiled) and make no layout.
+        let can_grow = LayoutSettings::from_json(&settings_json.to_string())
+            .map_or(true, |settings| layout_utils::media_can_grow(&settings));
+        if choice == OversizeChoice::Extend && !can_grow {
+            log_to_file("[process_layout_oversized] refused: a paper sheet cannot grow");
+            self.as_mut().cancel_layout();
+            self.as_mut().error_occurred(cxx_qt_lib::QString::from(layout_utils::SHEET_CANNOT_GROW_MESSAGE));
+            return false;
+        } // if a paper sheet would grow
         self.run_layout(settings_json, choice)
     } // fn process_layout_oversized
 

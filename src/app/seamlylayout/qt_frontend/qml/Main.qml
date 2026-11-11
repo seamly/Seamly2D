@@ -1698,6 +1698,7 @@ ApplicationWindow {
     // Oversized pieces dialog — an individual pattern has a piece wider or
     // longer than the media.  OK lays out with the chosen remedy; Cancel
     // leaves only 'Layout Settings' active.  Only the buttons close it.
+    // A paper sheet cannot grow, so it offers only 'Split the pieces'.
     // -----------------------------------------------------------------------
     Dialog {
         id: oversizedPiecesDialog
@@ -1784,23 +1785,29 @@ ApplicationWindow {
                 width:          440
             } // Text split description
 
+            // A paper sheet cannot grow: the option stays visible but disabled.
             RadioButton {
-                id:   extendMediaRadio
-                text: "Make the media bigger"
+                id:      extendMediaRadio
+                text:    "Make the media bigger"
+                enabled: appController.mediaCanGrow
                 ButtonGroup.group: oversizeChoiceGroup
 
                 contentItem: Text {
                     text:              extendMediaRadio.text
-                    color:             Theme.textOnDark
+                    color:             extendMediaRadio.enabled ? Theme.textOnDark : Theme.grayMedium
                     font.pixelSize:    Theme.fontSizeNormal
                     leftPadding:       extendMediaRadio.indicator.width + extendMediaRadio.spacing
                     verticalAlignment: Text.AlignVCenter
                 } // contentItem Text
             } // RadioButton extendMediaRadio
 
+            // On a paper sheet the description directs the user to PDF (tiled).
             Text {
-                text:           "For DXF files: pieces stay whole. Fabric keeps its width and grows longer. " +
-                                "Other media can grow wider and longer."
+                text:           appController.mediaCanGrow
+                                ? "For DXF files: pieces stay whole. Fabric keeps its width and grows longer. " +
+                                  "Other media can grow wider and longer."
+                                : "Unavailable for paper sheets. To print pieces larger than the sheet, " +
+                                  "select PDF (tiled) in Layout Settings."
                 color:          Theme.textOnDark
                 font.pixelSize: Theme.fontSizeSmall
                 wrapMode:       Text.WordWrap
