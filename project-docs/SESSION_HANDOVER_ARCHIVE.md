@@ -2,6 +2,13 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-11 — Sheet overflow leaves no layout
+
+- Cause: run_layout showed the error but kept the old layout and Create Layout; another material's overflow became a warning with a partial layout.
+- `layout_utils::is_sheet_overflow` recognizes `SHEET_OVERFLOW_MESSAGE` and `SHEET_ANNOTATION_OVERFLOW_MESSAGE`.
+- `refuse_sheet_layout`: blank canvases, tabs and split cleared, `cancel_layout`, error names PDF (tiled). Any material's overflow ends the run.
+- `cargo test --workspace`: pass. Installed-app check runs with the next MSI.
+
 ### 2026-11-11 — Custom sheet in Paper Type
 
 - Cause: 'Custom' sat last in the 27-size Paper Size list; users could not find it.

@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-11-12 — .gitignore broad rules narrowed
+
+- `*.json` → `AGENT_STATE.json`, `CMakeUserPresets.json`, `compile_commands.json` (+ signing key rule).
+- `test*.*`, `Test*.*`, `docs/` → repository root only. `man/` deleted.
+- Track: `packaging/macos/**/Info.plist`, `.claude/rules/`, `.claude/skills/`, `.claude/settings.json`, `src/libs/xerces-c/*/lib/*`.
+- Ignore: `.cmake/`, `.qt/`, `scripts/**/*.txt`, `**/.claude/settings.local.json`.
+- Check: no new file became visible; `scripts/2026-11-10-prompt.txt` is ignored now.
+
 ### 2026-11-12 — .gitignore track rules
 
 - Git uses the last matching rule: the track block now sits at the end of `.gitignore`. Keep it there.
@@ -35,13 +43,6 @@
 - QML: `isRollPaper`, `isCustomRoll`, `customRollWidthField`; `refreshCustomPaperFields` also copies rollWidth.
 - Rust unchanged: the layout core reads `rollWidth`.
 - SettingsModel tests (temporary test program): 44 pass. Installed-app check runs with the next MSI.
-
-### 2026-11-11 — Sheet overflow leaves no layout
-
-- Cause: run_layout showed the error but kept the old layout and Create Layout; another material's overflow became a warning with a partial layout.
-- `layout_utils::is_sheet_overflow` recognizes `SHEET_OVERFLOW_MESSAGE` and `SHEET_ANNOTATION_OVERFLOW_MESSAGE`.
-- `refuse_sheet_layout`: blank canvases, tabs and split cleared, `cancel_layout`, error names PDF (tiled). Any material's overflow ends the run.
-- `cargo test --workspace`: pass. Installed-app check runs with the next MSI.
 
 ## Decisions to retain
 
