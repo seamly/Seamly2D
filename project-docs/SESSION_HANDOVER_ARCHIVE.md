@@ -2,6 +2,14 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-11 — Custom roll width
+
+- Roll Width lists 'custom' last. It shows a width field in the Layout Settings unit; a predefined size hides it.
+- `setRollSize("custom")` keeps rollWidth; `setRollWidth` ignores zero, negative, and non-finite values.
+- QML: `isRollPaper`, `isCustomRoll`, `customRollWidthField`; `refreshCustomPaperFields` also copies rollWidth.
+- Rust unchanged: the layout core reads `rollWidth`.
+- SettingsModel tests (temporary test program): 44 pass. Installed-app check runs with the next MSI.
+
 ### 2026-11-11 — Sheet overflow leaves no layout
 
 - Cause: run_layout showed the error but kept the old layout and Create Layout; another material's overflow became a warning with a partial layout.

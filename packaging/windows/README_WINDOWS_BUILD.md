@@ -55,10 +55,9 @@ for the Linux/macOS equivalents of this script).
 .\packaging\windows\local_build_msi.ps1
 ```
 
-1. Stamps `-Version` (default: computed from the current local time) into
-   `projectversion.{h,cpp}` and both `Info.plist` files, via `packaging\version.sh`.
-   Reverts the stamp after a successful build, unless those files already
-   carried uncommitted changes before the run.
+1. Runs `packaging\version.sh` with `-Version` (default: computed from the current
+   local time). It writes the generated, git-ignored
+   `src\libs\vmisc\project_version_number.h`; no tracked file changes.
 2. Finds the newest `msvc2022_64` Qt kit at or above 6.11.3 under `C:\Qt`;
    installs WiX v6 and its UI/Util extensions if missing.
 3. Under one `vcvars64.bat` environment: `qmake Seamly.pro -r -config release`

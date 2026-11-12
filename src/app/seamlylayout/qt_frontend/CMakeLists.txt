@@ -152,24 +152,22 @@ if(NOT APPLE)
 endif() # NOT APPLE
 
 # SeamlyLayout ships in the Seamly2D suite and reports the suite version.
-# packaging/version.sh stamps VER_FILEVERSION_STR before every release build;
-# CMAKE_CONFIGURE_DEPENDS re-reads it when the stamp changes.
-set(SEAMLY_PROJECT_VERSION_H "${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/vmisc/projectversion.h")
-set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${SEAMLY_PROJECT_VERSION_H}")
-file(READ "${SEAMLY_PROJECT_VERSION_H}" SEAMLY_VERSION_HEADER)
-set(SEAMLY_VERSION_KEY "#define VER_FILEVERSION_STR \"")
-string(FIND "${SEAMLY_VERSION_HEADER}" "${SEAMLY_VERSION_KEY}" SEAMLY_VERSION_AT)
-set(SEAMLY_SUITE_VERSION "")
-if(SEAMLY_VERSION_AT GREATER -1)
-    string(LENGTH "${SEAMLY_VERSION_KEY}" SEAMLY_VERSION_KEY_LENGTH)
-    math(EXPR SEAMLY_VERSION_AT "${SEAMLY_VERSION_AT} + ${SEAMLY_VERSION_KEY_LENGTH}")
-    string(SUBSTRING "${SEAMLY_VERSION_HEADER}" ${SEAMLY_VERSION_AT} -1 SEAMLY_VERSION_TAIL)
-    string(FIND "${SEAMLY_VERSION_TAIL}" "\"" SEAMLY_VERSION_END)
-    string(SUBSTRING "${SEAMLY_VERSION_TAIL}" 0 ${SEAMLY_VERSION_END} SEAMLY_SUITE_VERSION)
-endif() # VER_FILEVERSION_STR found
-if(NOT SEAMLY_SUITE_VERSION)
-    message(FATAL_ERROR "VER_FILEVERSION_STR not found in ${SEAMLY_PROJECT_VERSION_H}")
-endif() # NOT SEAMLY_SUITE_VERSION
+# packaging/version.sh writes it into a generated header that git ignores.
+# A configure step without that header (a development build) uses 0.0.0.
+# CMAKE_CONFIGURE_DEPENDS re-reads the header when version.sh rewrites it.
+set(SEAMLY_PROJECT_VERSION_H "${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/vmisc/project_version_number.h")
+set(SEAMLY_SUITE_VERSION "0.0.0")
+if(EXISTS "${SEAMLY_PROJECT_VERSION_H}")
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${SEAMLY_PROJECT_VERSION_H}")
+    file(STRINGS "${SEAMLY_PROJECT_VERSION_H}" SEAMLY_VERSION_LINE
+         REGEX "^#define PROJECT_VERSION_STR \"[0-9]+\\.[0-9]+\\.[0-9]+\"")
+    if(NOT SEAMLY_VERSION_LINE)
+        message(FATAL_ERROR "No PROJECT_VERSION_STR \"X.Y.Z\" in ${SEAMLY_PROJECT_VERSION_H}. "
+                            "Run packaging/version.sh or delete the file.")
+    endif() # NOT SEAMLY_VERSION_LINE
+    string(REGEX REPLACE "^[^\"]*\"([^\"]*)\".*$" "\\1" SEAMLY_SUITE_VERSION "${SEAMLY_VERSION_LINE}")
+endif() # EXISTS SEAMLY_PROJECT_VERSION_H
+message(STATUS "SeamlyLayout suite version: ${SEAMLY_SUITE_VERSION}")
 target_compile_definitions(SeamlyLayout PRIVATE SEAMLY_SUITE_VERSION="${SEAMLY_SUITE_VERSION}")
 
 if(WIN32)

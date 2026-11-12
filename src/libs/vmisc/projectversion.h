@@ -24,14 +24,16 @@
  ************************************************************************
  **
  **  @file   projectversion.h
- **  @author Roman Telezhynskyi <dismine(at)gmail.com>
- **  @date   8 7, 2015
+ **  @author slspencer
+ **  @date   2026
  **
  **  @brief
+ **  Declares the application version and the Windows resource version.
+ **
  **  @copyright
  **  This source code is part of the Valentine project, a pattern making
  **  program, whose allow create and modeling patterns of clothing.
- **  Copyright (C) 2015 Seamly2D project
+ **  Copyright (C) 2026 Seamly2D Project
  **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
  **
  **  Seamly2D is free software: you can redistribute it and/or modify
@@ -51,6 +53,9 @@
 
 #ifndef PROJECTVERSION_H
 #define PROJECTVERSION_H
+
+// packaging/version.sh or common.pri generates this header. Git ignores it.
+#include "project_version_number.h"
 
 class QString;
 
@@ -74,10 +79,8 @@ extern const QString APP_VERSION_STR;
 */
 #define WINDOW_STATE_VERSION 1
 
-// Start: Do not edit here, use packaging/version.sh to update
-#define VER_FILEVERSION 26,11,910,0
-#define VER_FILEVERSION_STR "26.11.910"
-// End: Do not edit here
+#define VER_FILEVERSION     PROJECT_VERSION_MAJOR,PROJECT_VERSION_MINOR,PROJECT_VERSION_DAY_HOUR,0
+#define VER_FILEVERSION_STR PROJECT_VERSION_STR
 
 #define V_PRERELEASE // Mark prerelease builds
 

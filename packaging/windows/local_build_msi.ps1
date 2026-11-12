@@ -40,12 +40,9 @@
        - cargo test --workspace: the SeamlyLayout Rust crates.
      A failing suite stops the build before smsi.ps1 runs.
 
-    The version stamp touches git-tracked files
-    (src\libs\vmisc\projectversion.{h,cpp}, packaging\macos\seamly2d\Info.plist,
-    packaging\macos\seamlyme\Info.plist). A successful build reverts them via
-    `git checkout`, unless those files already carried uncommitted changes
-    before the run, in which case they are left alone so unrelated work is
-    not discarded.
+    packaging\version.sh writes the version into
+    src\libs\vmisc\project_version_number.h. Git ignores that header, so the
+    build changes no tracked file.
 
     Requires an elevated-free MSVC + Qt + Rust dev machine: Visual Studio 18
     Community (VC\Auxiliary\Build\vcvars64.bat), a Qt 6.11.3+ msvc2022_64 kit
@@ -54,8 +51,8 @@
     automatically if missing.
 
 .PARAMETER Version
-    Project version as YY.M.DDHH, stamped into seamly2d/seamlyme via
-    packaging\version.sh and used as the MSI's ProductVersion.
+    Project version as YY.M.DDHH. packaging\version.sh writes it for
+    seamly2d, seamlyme and SeamlyLayout; smsi.ps1 uses it as the MSI's ProductVersion.
     Default: computed from the current local time, the same formula ci.yml's
     version job uses.
 
@@ -106,27 +103,13 @@ if (-not $Version) {
 }
 Write-Host "version: $Version"
 
-# packaging\version.sh writes the version YY.M.DDHH into these git-tracked files, the
-# same way every ci.yml build job does. The stamp is reverted (via
-# `git checkout`) once the build succeeds, unless one of these files already
-# carried uncommitted changes before this run (then it is left alone, to not
-# discard unrelated work).
-$versionStampedFiles = @(
-    'src\libs\vmisc\projectversion.cpp',
-    'src\libs\vmisc\projectversion.h',
-    'packaging\macos\seamly2d\Info.plist',
-    'packaging\macos\seamlyme\Info.plist'
-)
-
+# packaging\version.sh writes the version YY.M.DDHH into the generated, git-ignored
+# src\libs\vmisc\project_version_number.h, the same way every ci.yml build job does.
 $bash = Get-Command bash -ErrorAction SilentlyContinue
 if (-not $bash) {
-    throw "packaging\version.sh needs bash + perl (Git for Windows ships both) - install Git for Windows."
+    throw "packaging\version.sh needs bash (Git for Windows ships it) - install Git for Windows."
 }
-$versionFilesWereClean = -not (& git -C $repoRoot status --porcelain -- $versionStampedFiles)
-Write-Host "stamping version into projectversion.cpp/.h and Info.plist..."
-# version.sh writes its targets with paths relative to the repo root (src/libs/...,
-# packaging/macos/...), so bash needs that as its working directory - not wherever
-# this script was invoked from.
+Write-Host "writing the version into src\libs\vmisc\project_version_number.h..."
 Push-Location $repoRoot
 try {
     Invoke-NativeCommand { & bash 'packaging/version.sh' $Version }
@@ -340,9 +323,3 @@ if ($SkipTests) {
     Write-Host "unit tests: PASSED (nmake check, ctest, cargo test)"
 }
 Write-Host "MSI OK: packaging\windows\seamly-msi\x64\seamly-x64.msi"
-if ($versionFilesWereClean) {
-    Write-Host "reverting the version stamp (projectversion.cpp/.h, both Info.plist) - packaging\version.sh regenerates it on demand, nothing to keep..."
-    & git -C $repoRoot checkout -- $versionStampedFiles
-} else {
-    Write-Host "projectversion.cpp/.h and/or Info.plist carried uncommitted changes before this build - not auto-reverting them; check 'git status' for what to keep."
-}

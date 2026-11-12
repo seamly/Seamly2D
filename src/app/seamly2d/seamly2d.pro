@@ -162,6 +162,8 @@ unix{
         ICON = ../../../packaging/assets/seamly2d.icns
 
         QMAKE_INFO_PLIST = $${PWD}/../../../packaging/macos/seamly2d/info.plist
+        # qmake writes VERSION into the ${QMAKE_FULL_VERSION} fields of Info.plist.
+        VERSION = $$PROJECT_VERSION
 
         # Copy to bundle multisize measurements files
         multisize.path = $${RESOURCES_DIR}/tables/multisize
