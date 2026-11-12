@@ -42,16 +42,16 @@ pub struct LayoutSettings {
     #[serde(default = "default_media_type")]
     pub media_type: String,
 
-    // Paper sub-type: "sheet" | "tiled".
-    // "tiled" is deferred — not yet supported by the layout engine.
+    // Paper sub-type: "tiled" | "roll".
+    // `from_json` stores "tiled" for any other value, such as "sheet" from older settings files.
     #[serde(default = "default_paper_type")]
     pub paper_type: String,
 
-    // Sheet (paper) width in active units; used when media_type == "paper".
+    // Page width in active units: tiled paper size; fabric width when `fabric_width` is 0.
     #[serde(default = "default_page_width")]
     pub page_width: f64,
 
-    // Sheet (paper) height in active units; used when media_type == "paper".
+    // Page height in active units: tiled paper size.
     #[serde(default = "default_page_height")]
     pub page_height: f64,
 
@@ -133,8 +133,6 @@ pub struct LayoutSettings {
     pub no_grainline_rotation: String,
 
     #[serde(default)]
-    pub sheet_name: String,
-    #[serde(default)]
     pub roll_size: String,
     #[serde(default)]
     pub tile_size: String,
@@ -154,7 +152,7 @@ pub struct LayoutSettings {
 
 fn default_unit()          -> String { "in".to_string()         } // default unit
 fn default_media_type()    -> String { "paper".to_string()      } // default media
-fn default_paper_type()    -> String { "sheet".to_string()      } // default paper sub-type
+fn default_paper_type()    -> String { "tiled".to_string()      } // default paper sub-type
 fn default_page_width()    -> f64    { 36.0                     } // ARCH E width in inches
 fn default_page_height()   -> f64    { 48.0                     } // ARCH E height in inches
 fn default_roll_width()    -> f64    { 0.0                      } // 0" roll width
@@ -174,12 +172,19 @@ impl LayoutSettings {
     // @brief Deserialize from a JSON string emitted by `SettingsModel::save()`.
     //
     // Missing keys fall back to their `#[serde(default)]` values, which match
-    // the C++ `SettingsModel` field defaults.
+    // the C++ `SettingsModel` field defaults.  Unknown keys, such as the
+    // retired `sheetName`, are ignored.
     //
     // @param json JSON string (UTF-8).
     // @return Parsed settings or a serde_json error.
     pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
-        serde_json::from_str(json)
+        let mut settings: Self = serde_json::from_str(json)?;
+        // Paper is tiled or roll, as in `SettingsModel::setPaperType`.
+        // Tiled pages print every layout that a single sheet could hold.
+        if settings.paper_type != "roll" {
+            settings.paper_type = "tiled".to_string();
+        } // if paper type is not roll
+        Ok(settings)
     } // fn from_json
 
     // @brief True for roll-form media: fabric, or paper with paper_type "roll".
@@ -190,6 +195,14 @@ impl LayoutSettings {
         self.media_type == "fabric"
             || (self.media_type == "paper" && self.paper_type == "roll")
     } // fn is_roll_form
+
+    // @brief True for paper printed on tiled pages.
+    //
+    // Fabric keeps the paper type of the paper media, which is "tiled" by
+    // default, so a paper type check alone does not exclude fabric.
+    pub fn is_tiled_paper(&self) -> bool {
+        self.media_type == "paper" && self.paper_type == "tiled"
+    } // fn is_tiled_paper
 
     // @brief Convert a value from the active unit system to inches.
     //
@@ -235,7 +248,7 @@ impl LayoutSettings {
     // | ------------------ | -------------------------------------------------- | --------------------------------------- |
     // | fabric             | `fabric_width` (`page_width` when 0), half if folded | `fabric_height`, sentinel when 0        |
     // | paper roll, "roll" | `roll_width`                                       | `ROLL_DEFAULT_LENGTH_IN` sentinel       |
-    // | paper sheet, tiled | `page_width`                                       | `page_height`                           |
+    // | paper tiled        | `page_width`                                       | `page_height`                           |
     //
     // The settings keep the paper fields while fabric is the media, and the
     // fabric fields while paper is the media.  Each media reads only its own.
@@ -265,7 +278,7 @@ impl LayoutSettings {
             return (Self::to_inches(self.roll_width, u), ROLL_DEFAULT_LENGTH_IN);
         } // if paper roll
 
-        // Paper sheet or tiled: the physical sheet.
+        // Tiled paper: the page size fields.
         (Self::to_inches(self.page_width, u), Self::to_inches(self.page_height, u))
     } // fn media_size_in
 
@@ -292,7 +305,7 @@ impl LayoutSettings {
     //
     // Applies the following transformations in order:
     //   1. Take the media size from `media_size_in` (fabric width and fold,
-    //      roll width, or sheet size; see its table).
+    //      roll width, or page size; see its table).
     //   2. Subtract all four margins.  For media_type == "fabric" the margins
     //      already carry the selvedge (SettingsModel::syncFabricMarginsFromSelvedge()
     //      sets each margin to selvedgeWidth), so no separate selvedge step
@@ -306,7 +319,8 @@ impl LayoutSettings {
     // NOTE: `layout_mode` and `rotation_step` are NOT applied here — piece
     // arrangement (alongGrainline / withNap) and rotation step are
     // deferred pending layout_engine support.
-    // NOTE: `paper_type == "tiled"` is NOT handled — tiling is deferred.
+    // NOTE: a tiled layout sizes its canvas from the input SVG
+    // (`create_initial_tiled_layout_dom`), not from this bin.
     //
     // @return `(bin_w_px, bin_h_px)` as `u32` values ready for `pack_maxrects`.
     pub fn effective_bin_px(&self) -> (u32, u32) {
@@ -441,7 +455,6 @@ impl LayoutSettings {
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
             no_grainline_rotation: "upright".to_string(),
-            sheet_name:     "".to_string(),
             roll_size:      "".to_string(),
             tile_size:      "Letter".to_string(),
             tile_orientation: "landscape".to_string(),
@@ -458,13 +471,13 @@ impl LayoutSettings {
 mod tests {
     use super::*;
 
-    // @brief ARCH E sheet at 96 DPI with 0.25 in margins produces correct bin.
+    // @brief A 36 x 48 in page at 96 DPI with 0.25 in margins produces the correct bin.
     #[test]
-    fn arch_e_paper_bin() {
+    fn page_size_paper_bin() {
         let s = LayoutSettings {
             unit:         "in".to_string(),
             media_type:   "paper".to_string(),
-            paper_type:   "sheet".to_string(),
+            paper_type:   "tiled".to_string(),
             page_width:   36.0,
             page_height:  48.0,
             roll_width:   36.0,
@@ -481,7 +494,6 @@ mod tests {
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
             no_grainline_rotation: "upright".to_string(),
-            sheet_name:     "ARCH E".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
             tile_orientation: "landscape".to_string(),
@@ -491,7 +503,7 @@ mod tests {
         // (36 - 0.5) * 96 = 3408, (48 - 0.5) * 96 = 4560
         assert_eq!(w, 3408);
         assert_eq!(h, 4560);
-    } // arch_e_paper_bin
+    } // page_size_paper_bin
 
     // @brief Roll media uses 500-inch length sentinel regardless of roll width.
     #[test]
@@ -517,7 +529,6 @@ mod tests {
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
             no_grainline_rotation: "upright".to_string(),
-            sheet_name:     "none".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "none".to_string(),
             tile_orientation: "landscape".to_string(),
@@ -538,7 +549,7 @@ mod tests {
         let s = LayoutSettings {
             unit:          "in".to_string(),
             media_type:    "fabric".to_string(),
-            paper_type:    "sheet".to_string(),
+            paper_type:    "tiled".to_string(),
             page_width:    36.0,
             page_height:   48.0,
             roll_width:    36.0,
@@ -557,7 +568,6 @@ mod tests {
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
             no_grainline_rotation: "upright".to_string(),
-            sheet_name:     "ARCH E".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
             tile_orientation: "landscape".to_string(),
@@ -578,7 +588,7 @@ mod tests {
         let s = LayoutSettings {
             unit:          "in".to_string(),
             media_type:    "paper".to_string(),
-            paper_type:    "sheet".to_string(),
+            paper_type:    "tiled".to_string(),
             page_width:    36.0,
             page_height:   48.0,
             roll_width:    36.0,
@@ -595,7 +605,6 @@ mod tests {
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
             no_grainline_rotation: "upright".to_string(),
-            sheet_name:     "ARCH E".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
             tile_orientation: "landscape".to_string(),
@@ -612,7 +621,7 @@ mod tests {
         let s = LayoutSettings {
             unit:          "in".to_string(),
             media_type:    "fabric".to_string(),
-            paper_type:    "sheet".to_string(),
+            paper_type:    "tiled".to_string(),
             page_width:    36.0,
             page_height:   48.0,
             roll_width:    36.0,
@@ -629,7 +638,6 @@ mod tests {
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
             no_grainline_rotation: "upright".to_string(),
-            sheet_name:     "ARCH E".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
             tile_orientation: "landscape".to_string(),
@@ -641,12 +649,12 @@ mod tests {
     } // fabric_folded_halves_width
 
     // @brief Each media reads only its own size fields.  Fabric takes its
-    // width, fold and open length, never the paper sheet size that the
-    // settings keep; paper takes the sheet, never the fabric width or fold.
+    // width, fold and open length, never the page size that the settings
+    // keep; paper takes the page size, never the fabric width or fold.
     #[test]
     fn media_reads_only_its_own_size_fields() {
         let json = |media: &str, fabric_height: f64| format!(
-            r#"{{"unit": "in", "mediaType": "{media}", "paperType": "sheet", "pageWidth": 39.37, "pageHeight": 55.67,
+            r#"{{"unit": "in", "mediaType": "{media}", "paperType": "tiled", "pageWidth": 39.37, "pageHeight": 55.67,
                 "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
                 "fabricWidth": 36.0, "fabricHeight": {fabric_height}, "fabricFolded": true, "foldLinesOnLeftEdge": true}}"#);
 
@@ -660,7 +668,7 @@ mod tests {
         let cut_length = LayoutSettings::from_json(&json("fabric", 60.0)).expect("parse ok");
         assert_eq!(cut_length.page_h_px(), 5760);
 
-        // B0 paper sheet: 39.37 x 55.67 in, all four margins.
+        // B0 page: 39.37 x 55.67 in, all four margins.
         let paper = LayoutSettings::from_json(&json("paper", 0.0)).expect("parse ok");
         assert_eq!((paper.page_w_px(), paper.page_h_px()), (3780, 5344));
         assert_eq!(paper.effective_bin_px(), (3684, 5248));
@@ -671,7 +679,7 @@ mod tests {
     #[test]
     fn fold_lines_on_left_edge_drop_the_left_margin_of_fabric_only() {
         let json = |media: &str, folded: bool, on_edge: bool| format!(
-            r#"{{"unit": "in", "mediaType": "{media}", "paperType": "sheet", "pageWidth": 40.0, "pageHeight": 48.0,
+            r#"{{"unit": "in", "mediaType": "{media}", "paperType": "tiled", "pageWidth": 40.0, "pageHeight": 48.0,
                 "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
                 "fabricFolded": {folded}, "foldLinesOnLeftEdge": {on_edge}, "layoutMode": "alongGrainline"}}"#);
         let fold = LayoutSettings::from_json(&json("fabric", true, true)).expect("parse ok");
@@ -716,7 +724,7 @@ mod tests {
         let s = LayoutSettings {
             unit:          "mm".to_string(),
             media_type:    "paper".to_string(),
-            paper_type:    "sheet".to_string(),
+            paper_type:    "tiled".to_string(),
             page_width:    914.0,  // ARCH E in mm
             page_height:   1219.0, // ARCH E in mm
             roll_width:    914.0,
@@ -733,7 +741,6 @@ mod tests {
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
             no_grainline_rotation: "upright".to_string(),
-            sheet_name:     "ARCH E".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
             tile_orientation: "landscape".to_string(),
@@ -751,7 +758,7 @@ mod tests {
         let json = r#"{
             "unit": "in",
             "mediaType": "paper",
-            "paperType": "sheet",
+            "paperType": "tiled",
             "pageWidth": 36.0,
             "pageHeight": 48.0,
             "rollWidth": 36.0,
@@ -765,7 +772,6 @@ mod tests {
             "fabricHeight": 0.0,
             "layoutMode": "alongGrainline",
             "rotationStep": 0.0,
-            "sheetName": "ARCH E",
             "rollSize": "36 in",
             "tileSize": "Letter",
             "tileOrientation": "landscape",
@@ -774,6 +780,7 @@ mod tests {
         let s = LayoutSettings::from_json(json).expect("parse ok");
         assert_eq!(s.unit, "in");
         assert_eq!(s.media_type, "paper");
+        assert_eq!(s.paper_type, "tiled");
         assert!((s.page_width - 36.0).abs() < 1e-9);
         assert!((s.margin_top - 0.25).abs() < 1e-9);
         assert_eq!(s.tile_orientation, "landscape");
@@ -821,14 +828,13 @@ mod tests {
         assert!(!s.applies_piece_rotation_rules());
     } // trial_set_any
 
-    // @brief is_roll_form: fabric, or paper roll; never paper sheet or tiled.
+    // @brief is_roll_form: fabric, or paper roll; never tiled paper.
     #[test]
     fn is_roll_form_truth_table() {
         let cases = [
-            ("fabric", "sheet", true),
+            ("fabric", "tiled", true),
             ("fabric", "roll",  true),
             ("paper",  "roll",  true),
-            ("paper",  "sheet", false),
             ("paper",  "tiled", false),
         ];
         for (media, paper, expected) in cases {
@@ -836,8 +842,40 @@ mod tests {
             s.media_type = media.to_string();
             s.paper_type = paper.to_string();
             assert_eq!(s.is_roll_form(), expected, "media={media} paper={paper}");
-        }
+        } // for each media and paper type
     } // is_roll_form_truth_table
+
+    // @brief is_tiled_paper: tiled paper only; fabric with the default paper type is not tiled.
+    #[test]
+    fn is_tiled_paper_truth_table() {
+        let cases = [
+            ("fabric", "tiled", false),
+            ("fabric", "roll",  false),
+            ("paper",  "roll",  false),
+            ("paper",  "tiled", true),
+        ];
+        for (media, paper, expected) in cases {
+            let mut s = LayoutSettings::default_for_test();
+            s.media_type = media.to_string();
+            s.paper_type = paper.to_string();
+            assert_eq!(s.is_tiled_paper(), expected, "media={media} paper={paper}");
+        } // for each media and paper type
+    } // is_tiled_paper_truth_table
+
+    // @brief Paper type defaults to "tiled"; each stored value except "roll" loads as "tiled".
+    #[test]
+    fn paper_type_loads_as_tiled_or_roll() {
+        let s = LayoutSettings::from_json(r#"{"unit":"in"}"#).unwrap();
+        assert_eq!(s.paper_type, "tiled");
+
+        // "sheet" and "sheetName" come from older settings files.
+        let cases = [("tiled", "tiled"), ("roll", "roll"), ("sheet", "tiled"), ("custom", "tiled"), ("", "tiled")];
+        for (stored, expected) in cases {
+            let json = format!(r#"{{"unit":"in","mediaType":"paper","paperType":"{stored}","sheetName":"ARCH E"}}"#);
+            let s = LayoutSettings::from_json(&json).unwrap();
+            assert_eq!(s.paper_type, expected, "stored={stored}");
+        } // for each stored paper type
+    } // paper_type_loads_as_tiled_or_roll
 
     // @brief noGrainlineRotation: default "upright"; only "free" allows quarter turns.
     #[test]

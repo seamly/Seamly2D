@@ -1785,3 +1785,11 @@ The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`sr
 - [x] Removed the production comparison writer and unused file-writing helper after all 25 real-pattern comparisons passed at 0.01 px.
 - [x] Updated active documentation to use the reproducible test-only capture application.
 - [x] GUI and CLI use the fitted handoff writer. Integrated Windows Qt suites, CTest 8/8, Rust workspace tests, and MSI validation passed.
+### [x] Task Layout.300 - Remove the capability of extending the media for media=paper and paperType=sheet
+
+- [x] remove capability to extend media length or width when media=paper and paperType=sheet.
+- [x] delete tests for this capability
+- [x] verify that this capability has been removed
+  - Obsolete: Paper > Sheet is removed (Layout.999). The installed-app check no longer applies.
+- [x] verify that the tests for this capability have been removed
+

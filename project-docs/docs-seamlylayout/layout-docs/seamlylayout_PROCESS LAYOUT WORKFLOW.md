@@ -89,9 +89,9 @@ Roll and fabric media: the packing bin height is the media length (paper roll: 5
 |---|---|---|
 | fabric | `fabricWidth` (`pageWidth` when 0), half when `fabricFolded` | `fabricHeight`, 500 in when 0 |
 | paper roll | `rollWidth` | 500 in |
-| paper sheet, tiled | `pageWidth` | `pageHeight` |
+| paper tiled | `pageWidth` | `pageHeight` |
 
-The settings keep the paper sheet size while fabric is the media. Fabric never reads it.
+The settings keep the page size while fabric is the media. Fabric never reads it.
 After packing, `trim_roll_height()` reduces the SVG to actual content height:
 
 ```
@@ -103,25 +103,17 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
 ## Oversized Pieces (individual pattern)
 
 - `process_layout` first runs `layout_utils::do_find_oversized_pieces`: pre-processing up to grain-up pieces, then `piece_divider::find_oversized_pieces`.
-- A piece is oversized when no trial angle fits the effective content dimensions. Paper sheets use the dimensions inside their margins; warnings report each offending piece dimension and its effective media dimension. Paper roll and fabric limit only the width. Tiled paper is never checked.
+- A piece is oversized when no trial angle fits the content width. Paper roll and fabric limit only the width. Warnings report each offending piece width and the media width inside the margins. Tiled paper is never checked.
 - Oversized pieces: the `oversized_pieces_found` signal, no layout. QML asks the user, then calls `process_layout_oversized(settings, "split" | "extend")` or `cancel_layout()`.
-- `layout_utils::media_can_grow` is false for a paper sheet. `process_layout` copies it to `media_can_grow` before the signal; the dialog disables "Make the media bigger".
-  `process_layout_oversized` refuses "extend" on a paper sheet: `SHEET_CANNOT_GROW_MESSAGE` names PDF (tiled), then `cancel_layout`.
 - "split": `ProcessLayoutArgs::split_oversized`. `piece_divider::divide_oversized_pieces` runs after the piece-set centring and before `translate_dom`.
-  - Equal columns for a piece too wide, equal rows for a piece too long on a sheet. Each outline region in a cell is one part.
+  - Equal columns for a piece too wide. Each outline region in a column is one part.
   - On folded fabric with fold lines on the left edge, true fold-line pieces remain pinned to the fold. Layout Mode Any pins none. Other pieces and split parts keep at least `pieceGap` from the fold edge. Oversize checks and split sizing use that same reduced width.
   - Cutting: `geometry::half_plane_clip` (`cut_closed`, `cut_open`). Each output vertex keeps its source vertex index, so `data-turn-points` stay valid.
-  - `ProcessLayoutResult::divide_spec` is set only when at least one piece was divided. It keeps the media so `sheets::build_sheet_export_inputs` can split the same way for the paper-sheet PDF.
-  - Paper sheets pack all whole pieces and split parts on one configured sheet. Overflow aborts layout creation.
+  - `ProcessLayoutResult::divide_spec` is set only when at least one piece was divided. `is_split_layout_active` follows it.
   - Paper rolls keep the selected roll width and margins when splitting, even if a caller requests enlargement. Only the length follows the content.
-  - The error names unplaced pieces and instructs the user to select **PDF (tiled)** in **Layout Settings**.
-  - `layout_utils::is_sheet_overflow` recognizes this error and the annotation error. `run_layout` and `process_next_tab_layout` then call `refuse_sheet_layout`:
-    every material shows its blank sheet, tabs and split state clear, then `cancel_layout`. One material's overflow ends the whole run.
-  - Paper sheets do not retry on additional sheets. Fabric retains `packing::pack_polygons_on_sheets` retries and its fixed width.
-  - Splitting paper sheets keeps the selected width, height, and margins, even if a caller also requests enlargement.
-  - A scale grid or legend that exceeds the fixed sheet also directs the user to PDF (tiled); it never enlarges the sheet.
+  - Roll and fabric retry the remaining pieces on successive media lengths (`packing::pack_polygons_on_sheets`). Fabric keeps its fixed width.
   - Paper and fabric split layouts enable PDF, PNG, JPG, EPS, PostScript (PS), SVG, and HPGL.
-    PDF combines sheet pages into one multi-page file; the other formats export the assembled layout.
+    Each format exports the assembled layout.
     DXF, PDF (Tiled), and paid formats remain disabled.
     `run_layout` drops the previous `divide_spec` at the start and refreshes `is_split_layout_active` at the end.
   - Each successful fabric retry removes at least one remaining piece. No-progress and coordinate-limit stops preserve explicit unplaced-piece warnings.
@@ -132,15 +124,13 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
 
 Every multisize tab sets `ProcessLayoutArgs::extend_media`. An individual pattern sets it only when the user chose "Make the media bigger".
 
-- A paper sheet never grows: `do_process_layout` ignores `extend_media` when `media_can_grow` is false.
-  Pieces that do not fit give `SHEET_OVERFLOW_MESSAGE`, which directs the user to PDF (tiled).
 - Paper width: `packing::required_bin_width` finds the widest required bin. A wider value widens paper rolls.
 - Fabric keeps its configured width, including the folded half-width and selvedge margins. Only its height can enlarge.
 - `packing::pack_polygons_extending` packs into a bin as tall as all pieces that fit its width, stacked.
 - Pieces that cannot fit the fixed fabric width remain unplaced and appear in the warning popup.
 - `set_content_width` widens the canvas to the right. contentRect keeps its x; both side margins are kept.
 - `trim_bottom` sets the canvas height. Roll and fabric end at the lowest piece.
-- Canvas, Adjust Mode and exports read the size from `layout_dom`. Exception: the paper-sheet PDF export packs the pieces again on sheets of the set size.
+- Canvas, Adjust Mode and exports read the size from `layout_dom`.
 - Tiled paper does not extend: its candidate-width search sets the width.
 - User-requested enlargement shows the resulting width and height in the active unit. Folded fabric reports its full configured width.
 - Multiple materials collect their enlargement dimensions and unplaced warnings in one completion popup.

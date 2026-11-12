@@ -25,8 +25,7 @@ Layout Mode Any ignores the option (`LayoutSettings::places_fold_lines_on_left_e
 Piece Properties Rotation alone sets each angle, no fold line goes on the edge,
 and fabric keeps its left margin unless it is folded.
 The packer then puts the piece against the left bin edge (`Rect::with_left_edge`).
-Fabric has no left margin then; paper keeps it. The paper-sheet PDF export
-does the same (`sheets::build_sheet_export_inputs`).
+Fabric has no left margin then; paper keeps it.
 
 ## Layout Engine Pipeline
 

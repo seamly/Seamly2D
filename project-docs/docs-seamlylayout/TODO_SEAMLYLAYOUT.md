@@ -8,28 +8,22 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 The complexity of generating a layout on a single sheet has revealed that all layouts that can be successfully created for 'Paper > Sheet' can be created by 'Paper > Tiled'. This means that 'Paper > Sheet' is redundant and its complex procesing is unnecessary. 
 
-- [ ] Layout.999.1 - Remove the option for 'Sheet' in Layout settings
-- [ ] Layout.999.2 - Remove the code functions that process 'Paper > Sheet' without removing functionality for 'Paper > Tile' and 'Paper > Roll' and 'Fabric > Folded' and 'Fabric > not Folded'
-- [ ] Layout.999.3 - Remove the tests for 'Paper > Sheet' without removing tests for 'Paper > Tile', 'Paper > Roll', 'Fabric > Folded', 'Fabric > not Folded'
-- [ ] Layout.999.4 - Verify that:
+- [x] Layout.999.1 - Remove the option for 'Sheet' in Layout settings
+  - Paper Type lists Tiled and Roll. The custom sheet size goes too.
+  - A saved "sheet" or "custom" loads as "tiled" (`SettingsModel::setPaperType`, `LayoutSettings::from_json`). `sheetName` removed.
+- [x] Layout.999.2 - Remove the code functions that process 'Paper > Sheet' without removing functionality for 'Paper > Tile' and 'Paper > Roll' and 'Fabric > Folded' and 'Fabric > not Folded'
+  - Deleted `sheets.rs`, `oversized.rs`, `remaining.rs`, `media_can_grow`, `refuse_sheet_layout`, sheet overflow checks, sheet PDF export.
+  - `piece_divider` splits columns only. "Make the media bigger" is always enabled.
+  - New `LayoutSettings::is_tiled_paper`: fabric with the default paper type "tiled" is no longer treated as tiled paper.
+- [x] Layout.999.3 - Remove the tests for 'Paper > Sheet' without removing tests for 'Paper > Tile', 'Paper > Roll', 'Fabric > Folded', 'Fabric > not Folded'
+  - Sheet tests deleted; fold and rotation tests moved to roll or fabric.
+  - New: `paper_type_loads_as_tiled_or_roll`, `is_tiled_paper_truth_table`, `trousers_wide_pieces_split_on_a_paper_roll`, `retired_sheet_settings_lay_out_as_tiled_paper`, `paperType_acceptsOnlyTiledOrRoll`, `paperTypeDropdown_offersTiledAndRoll`.
+  - `cargo test --workspace`: 665 pass. `ctest --preset debug`: 8/8.
+- [ ] Layout.999.4 - Verify that: (next MSI, `AGENT_CHECKLIST.md` §10, §12)
   - [ ] 'Paper > Tile' operates properly
   - [ ] 'Paper > Roll' operates properly
   - [ ] 'Fabric > Folded' operates properly
   - [ ] 'Fabric > Not Folded' operates properly
-
-### [ ] Task Layout.300 - Remove the capability of extending the media for media=paper and paperType=sheet
-
-- [x] remove capability to extend media length or width when media=paper and paperType=sheet.
-  - `do_process_layout` ignores `extend_media` when `media_can_grow` is false. Multisize tabs on a sheet now fail with `SHEET_OVERFLOW_MESSAGE` (PDF (tiled)).
-- [x] delete tests for this capability
-  - Deleted `jacket2_marker_extends_paper_sheet`, `trousers_long_pieces_extend_a_sheet`.
-  - `placement_enlargement_dimensions_and_notifications` now uses a paper roll.
-  - `placement_paper_sheet_overflow_requires_tiled_pdf` also runs with `extend_media` on.
-- [ ] verify that this capability has been removed
-  - `cargo test --workspace` pass; `ctest --preset debug` 8/8.
-  - [ ] in layout with pieces longer or wider than sheet size, the dialog directs user to select 'tiled' instead of 'sheet'. User check with the next MSI: `AGENT_CHECKLIST.md` §10, §12.
-- [x] verify that the tests for this capability have been removed
-  - No test lays out a paper sheet with `extend_media` and expects growth.
 
 ### [ ] Task Layout.108 — Implement - Seamly2D: stack multisize grainlines and labels in `layout_handoff`, inside every size's cut line
 
@@ -38,7 +32,7 @@ The complexity of generating a layout on a single sheet has revealed that all la
 - User decisions:
   - Fit every size: one shared place inside every size's cut line, nearest the base size's place. No pattern edit, no warning. --> Agree
   - Seamly2D handoff, not SeamlyLayout import. --> what's the difference between the handoff and the import?
-  - Start after the Dead.4.4.3 compare and `MainWindow` switch, so the compare stays clean and the work is done once. 
+  - Start after the Dead.4.4.3 compare and `MainWindow` switch, so the compare stays clean and the work is done once.
 - [x] Layout.108.1 Dead.4.4.3 comparison passed all 21 required patterns plus four extras at 0.01 px. GUI and CLI now use the fitted handoff writer.
 - [x] Layout.108.2 Stack point per piece set: the fold line start when every size has one, else the outline centre.
 - [x] Layout.108.3 Fit the base size's annotation offset inside every size, or select the nearest shared offset.
@@ -357,16 +351,16 @@ Marker tab, Export menu (MSI 26.10.2023): the note "DXF-ASTM: select Base Size o
 For oversized individual-pattern pieces, ask whether to split them or enlarge the media (decision 2026-10-13).
 
 - Dialog: list pieces and offending dimensions; offer "Split the pieces" (SVG, PDF, HPGL, EPS, PS, PNG, JPG) or "Make the media bigger" (DXF). OK continues; Cancel leaves only Layout Settings active.
-- Split only if no allowed rotation fits: too wide → vertical cuts; too long on non-roll media → horizontal cuts. Paper roll and fabric are roll-form. No dialog for tiled paper.
+- Split only if no allowed rotation fits: too wide → vertical cuts. Paper roll and fabric have no length limit. No dialog for tiled paper.
 - Enlarge media using Layout.71 (width) and Layout.25 (length).
-- Split into the minimum number of equal parts (rounded up), without cut-edge seam allowance. Label each part; add 2 match notches per cut edge. Apply the same split to sheet PDF. Warn if a fitting piece is left out because the media is full.
+- Split into the minimum number of equal parts (rounded up), without cut-edge seam allowance. Label each part; add 2 match notches per cut edge. Warn if a fitting piece is left out because the media is full.
 
 - [x] Layout.72.9 Dialog names each offending dimension with the piece and media sizes, in the settings unit: `• Back: length 43.10 in, media 35.50 in`. The piece list is plain text and scrolls past 40% of the window. Tests: `piece_divider` `oversized_message_gives_the_offending_dimensions`; `trousers_long_pieces_split_on_a_sheet` checks each leg line. Checked: `cargo test -p cxxqt_bridge`; `qmllint` shows no new warnings; scratch `qml` render, 30 pieces: list 280 px, dialog 523 px in a 700 px window.
-- [ ] Layout.72.8 Next MSI: trousers sample, Paper Sheet 36 × 36 in, Create Layout:
-  - [ ] Dialog lists four too-long legs: Back, Front_Pleats, Front_no_pocket, Front_with_pocket. Each line reads `<name>: length <n> in, media 35.50 in`.
+- [ ] Layout.72.8 Next MSI: trousers sample, Paper Roll, custom width 16 in, Create Layout:
+  - [ ] Dialog lists `Back: width 16.61 in, media 15.50 in`.
   - [ ] Cancel: only Layout Settings, Preferences, Exit enabled; submitting settings re-enables Create Layout.
-  - [ ] Split: each leg becomes 2 parts, blue "<name> part i of 2, joins j" label, and 2 green match notches. Warn about unplaced pieces.
-  - [ ] Enlarge: sheet exceeds 36 in length; no splits or warnings.
+  - [ ] Split: Back becomes 2 parts, blue "<name> part i of 2, joins j" label, and 2 green match notches.
+  - [ ] Enlarge: the roll grows wider than 16 in; no splits or warnings.
   - [ ] Export split PDF parts and DXF-ASTM blocks named `Back (1/2)` and `Back (2/2)`.
 
 ### [ ] Task Layout.83 - Verify - Multisize - Nested - Legend - change legend color from line to rect element with width equal to current legend color line width and height equal to width. (makes legend easier to read)

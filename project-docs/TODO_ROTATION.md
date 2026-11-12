@@ -48,8 +48,8 @@ Repository-relative paths below identify the implementation points:
 | Shared packing | `crates\pack_types\src\lib.rs` stores `Rect` and `Placed`. `crates\layout_engine\src\lib.rs`, `piece_trial_set()`, currently combines global angles, `free_rotation`, and `left_edge_angle`. |
 | Existing arbitrary-angle support | `rotated_rect_dims()` already calculates conservative rotated AABBs. `maxrects_order_search.rs`, `PackJob::new()`, caches fitting orientations and deduplicates equal dimensions. |
 | Actual backend | `crates\packing\src\lib.rs` routes both rectangle and polygon entry points to MaxRects. Some comments still describe polygon routing; follow executable code. |
-| Additional consumers | `crates\cxxqt_bridge\src\layout_utils.rs`, `sheets.rs`, `piece_divider.rs`, `oversized.rs`, `remaining.rs`, and `crates\layout_tiling` perform packing or fit decisions. |
-| Rendering | `layout_assembler.rs`, `oversized.rs`, and `remaining.rs` already compose arbitrary-angle rotation and rotated-AABB-minimum translation. Verify these paths rather than replacing them unnecessarily. |
+| Additional consumers | `crates\cxxqt_bridge\src\layout_utils.rs`, `piece_divider.rs`, and `crates\layout_tiling` perform packing or fit decisions. |
+| Rendering | `layout_assembler.rs` already composes arbitrary-angle rotation and rotated-AABB-minimum translation. Verify this path rather than replacing it unnecessarily. |
 
 ## Proposed rotation contract
 
@@ -141,15 +141,13 @@ The  'Rotation > Any' layout settings option means that the fold edge rule is ig
 
 - [ ] Rotation.4.1 Apply the shared policy in `layout_utils::do_process_layout()` and size-layout entry points.
   Pass sufficient mode context rather than inferring Any from a numeric trial set.
-- [ ] Rotation.4.2 Update `sheets::build_sheet_export_inputs()` and its controller caller in `cxxqt_bridge::lib.rs`.
-  Carry the same mode/rules into sheet assignment, oversized output, and remaining-piece packing.
-- [ ] Rotation.4.3 Replace `oversized::partition_oversized_pieces()` upright/quarter-turn special cases with the shared fit predicate.
-  Honor gap and fold-edge constraints consistently with packing.
+- [x] Rotation.4.2 Obsolete: Paper > Sheet and `sheets.rs` are removed.
+- [x] Rotation.4.3 Obsolete: `oversized.rs` is removed with Paper > Sheet.
 - [ ] Rotation.4.4 Carry mode context through `piece_divider::DivideSpec` and its `prepared_pieces()` path.
   Do not split or enlarge media for a piece that fits at a permitted angle.
   Retain rules on every generated part.
 - [ ] Rotation.4.5 Audit `layout_tiling` candidate-width and page-count calculations for the same per-piece policy.
-  Preserve individual, Marker, Nested, per-size, paper-sheet, tiled, roll, and fabric behavior.
+  Preserve individual, Marker, Nested, per-size, tiled, roll, and fabric behavior.
 - [x] Rotation.4.6 Superseded: Layout Mode Any pins no piece, so no `left_edge_angle` overrides the resolver (Rotation.0).
 - [ ] Rotation.4.7 Test preview/export agreement and oversized/split decisions with identical input/settings.
   Include Any-only, non-quarter-turn fits and restrictions that prevent an otherwise possible quarter turn.

@@ -70,7 +70,7 @@ Menu {
     property bool showProjector: false
 
     // @brief Controls whether the PDF (Tiled) item is enabled by settings state.
-    // Export menu binds this to (settings.paperType === "tiled").
+    // Export menu binds this to tiled paper: mediaType "paper" and paperType "tiled".
     // View menu can keep this true because it opens already-exported files.
     property bool pdfTiledEnabled: true
 

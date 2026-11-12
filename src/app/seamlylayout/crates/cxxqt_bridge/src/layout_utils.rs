@@ -58,7 +58,7 @@ pub struct ProcessLayoutResult {
     /// Warning lines for pieces that could not be placed in the layout: one per
     /// piece, then its sizes (`piece_extractor::unplaced_piece_lines`).
     /// Empty on a fully successful pack.  Non-empty when the (non-tiled) packer
-    /// ran out of room or a piece was larger than the sheet: those pieces are
+    /// ran out of room or a piece was larger than the media: those pieces are
     /// omitted from the rendered layout and reported to the user as a warning,
     /// rather than aborting the whole layout with a hard error.
     pub unplaced_labels: Vec<String>,
@@ -79,7 +79,6 @@ pub struct ProcessLayoutResult {
     pub vertical_dom: Document,
     pub translate_dom: Document,
     /// The media the pieces were split for; None when no piece was divided.
-    /// The paper-sheet PDF export splits the same way.
     pub divide_spec: Option<DivideSpec>,
     /// User-unit dimensions when requested media enlargement changed the canvas.
     pub media_enlargement: Option<String>,
@@ -91,7 +90,7 @@ pub type ProgressFn<'a> = &'a mut dyn FnMut(i32, Option<&str>);
 
 /// @brief Build the initial layout DOM from settings JSON.
 ///
-/// Parses layout settings, creates either a tiled or single-sheet canvas,
+/// Parses layout settings, creates either a tiled canvas or a roll or fabric canvas,
 /// and returns the DOM with its pixel dimensions.
 ///
 /// When paper_type is "tiled", uses input_dom dimensions to compute tile
@@ -113,7 +112,7 @@ pub fn do_initialize_layout(
         .map_err(|e| format!("[debug] layout_utils::do_initialize_layout: 2 Failed to parse layout settings: {e}"))?;
 
     // --- 2 create initial_dom ---
-    let initial_dom: Document = if settings.paper_type == "tiled" {
+    let initial_dom: Document = if settings.is_tiled_paper() {
         log_to_file("[debug] layout_utils::do_initialize_layout:: 3 Creating tiled layout with input SVG dimensions and tile settings.");
         // 2a get input_dom dimensions
         let doc = input_dom.ok_or("[debug] layout_utils::do_initialize_layout: 4 input_dom is required for tiled layout")?;
@@ -163,11 +162,10 @@ pub struct ProcessLayoutArgs<'a> {
     pub nested_multisize: bool,
     /// `true` extends media in height, and in width unless it is fabric.
     /// Fabric pieces that cannot fit the configured width remain unplaced.
-    /// Paper sheets and tiled paper ignore it: a sheet keeps its size and
-    /// rejects an incomplete layout; PDF (tiled) prints larger layouts.
+    /// Tiled paper ignores it: its pages cover a larger layout.
     pub extend_media: bool,
-    /// `true` splits each piece wider or longer than the media into parts that
-    /// fit (individual pattern, the user's choice).  Tiled paper ignores it.
+    /// `true` splits each piece wider than the media into parts that fit
+    /// (individual pattern, the user's choice).  Tiled paper ignores it.
     pub split_oversized: bool,
 }
 
@@ -200,11 +198,8 @@ pub fn do_process_layout(
     let settings = LayoutSettings::from_json(args.settings_json)
         .map_err(|e| format!("[ERROR] layout_utils::do_process_layout(): 1 Failed to parse layout settings: {e}"))?;
 
-    let is_paper_sheet = settings.media_type == "paper" && settings.paper_type == "sheet";
     let is_paper_roll = settings.media_type == "paper" && settings.paper_type == "roll";
-    // A paper sheet never grows, for any caller: pieces that do not fit fail with
-    // SHEET_OVERFLOW_MESSAGE, which sends the user to PDF (tiled).
-    let extend_media = args.extend_media && media_can_grow(&settings);
+    let extend_media = args.extend_media;
 
     // Build the per-piece rotation trial set from layoutMode + rotationStep.
     // Passed to every packing call below; the dispatcher in `packing` routes
@@ -325,12 +320,12 @@ pub fn do_process_layout(
     let scale_grid = (crate::scale_grid::scale_grid_requested(args.settings_json) && !marker_layout)
         .then(|| crate::scale_grid::ScaleGrid::for_unit(&settings.unit));
 
-    // 3d'': the user chose to split each piece wider or longer than the media.
+    // 3d'': the user chose to split each piece wider than the media.
     // Needs grain-up pieces; must run before translate_dom moves each part to the origin.
     // Tiled paper never splits: its pages already cover a large piece.
-    let is_tiled = settings.media_type == "paper" && settings.paper_type == "tiled";
+    let is_tiled = settings.is_tiled_paper();
     let divide_spec = if args.split_oversized && !is_tiled {
-        let spec = layout_divide_spec(&settings, bin_w, bin_h);
+        let spec = layout_divide_spec(&settings, bin_w);
         let divided = piece_divider::divide_oversized_pieces(&mut flat_dom, &spec);
         if divided.is_empty() {
             None
@@ -583,7 +578,7 @@ pub fn do_process_layout(
         // still surfaces as a hard error above.  No unplaced pieces to report here.
         (choice.placements, out_doc, new_bin_h, new_ml, new_mt, new_mb, new_layout_h_px, Vec::new())
     } else {
-        // --- 5b non-tiled branch: fixed media, extension, or successive sheets ---
+        // --- 5b non-tiled branch: fixed media, extension, or successive media lengths ---
         //
         // `pack_polygons` is the dispatcher entry point that auto-routes:
         //   * orthogonal trial set ({0, 180}) → MaxRects (polygons ignored)
@@ -608,9 +603,8 @@ pub fn do_process_layout(
         // Lenient pack: place every piece that fits, skip the rest, and collect
         // the unplaced ids.  This replaces the previous hard-error behavior — a
         // piece too large or one that runs out of room is collected below.
-        // Paper sheets reject incomplete layouts; other media keep the warning.
         // Extended fabric keeps its width and reports pieces too wide to fit.
-        // `packed_bin_h` includes any extra height or successive sheets.
+        // `packed_bin_h` includes any extra height or successive media lengths.
         let (placements, _created_rects, unplaced_ids, packed_bin_h) = if extend_media {
             packing::pack_polygons_extending(
                 pack_bin_w,
@@ -621,8 +615,8 @@ pub fn do_process_layout(
                 &trial_angles_deg,
                 Some(&mut piece_status),
             )
-        } else if args.split_oversized && !is_paper_sheet {
-            // Preserve roll-form retries; paper sheets must fit their configured media.
+        } else if args.split_oversized {
+            // Split parts that run out of room go on successive media lengths.
             let (placements, unplaced_ids, height) = packing::pack_polygons_on_sheets(
                 bin_w, bin_h, gap_px, &polygons, &rects, &trial_angles_deg, Some(&mut piece_status),
             );
@@ -643,14 +637,6 @@ pub fn do_process_layout(
         // Map the unplaced original indices to warning lines: one per piece, named as
         // DXF-ASTM names it ("Detail (3)"), then its sizes.
         let unplaced_labels = crate::piece_extractor::unplaced_piece_lines(&flat_dom, &pieces, &unplaced_ids);
-
-        if is_paper_sheet && !unplaced_ids.is_empty() {
-            // Reject incomplete sheets before assembling or publishing a layout.
-            return Err(format!(
-                "{SHEET_OVERFLOW_MESSAGE}\nPieces that could not be placed:\n{}",
-                unplaced_labels.join("\n")
-            ));
-        } // if paper sheet has unplaced pieces
 
         log_to_file(&format!(
             "[process_layout] non-tiled pack returned in {} ms with {} placements, {} unplaced: {:?}; bin {}x{} -> {}x{}",
@@ -714,11 +700,6 @@ pub fn do_process_layout(
         content_bottom = grid_top + grid.height_px();
     } // if scale_grid
 
-    if is_paper_sheet && content_bottom > bin_h {
-        // Legends and scale grids must not silently enlarge fixed sheet media.
-        return Err(SHEET_ANNOTATION_OVERFLOW_MESSAGE.to_string());
-    } // if annotations exceed the fixed sheet
-
     // compute the blank space below the lowest piece (or the legend)
     let blank_bottom = work_bin_h.saturating_sub(content_bottom);
     // Extended media: wider than the media for the widest piece, or longer
@@ -736,7 +717,7 @@ pub fn do_process_layout(
 
     // 7b. Content height the canvas ends at.  Roll and fabric end at the lowest
     // piece when the blank space below it is large.  Extended media always ends
-    // at the lowest piece.  A paper sheet keeps its own size.
+    // at the lowest piece.  Tiled paper keeps its own size.
     let fitted_content_h = if extended || (settings.is_roll_form() && blank_bottom > MIN_THRESHOLD_PX) {
         Some(content_bottom)
     } else {
@@ -913,47 +894,10 @@ fn enlarged_media_message(
     ))
 } // fn enlarged_media_message
 
-/// @brief Why "Make the media bigger" is unavailable on a paper sheet: the reader goes to PDF (tiled).
-pub const SHEET_CANNOT_GROW_MESSAGE: &str =
-    "You selected 'Paper > Sheet'. Paper sheets cannot be made bigger.  \
-    Instead, create a larger layout by returning to Layout Settings  \
-    and selecting 'Paper > Tiled' with your current paper size.";
-
-/// @brief True when the media may grow: every media but a paper sheet.
-///
-/// A paper sheet is a printer page, so it cannot grow. PDF (tiled) prints a larger piece whole.
-/// The oversized-pieces dialog and `do_process_layout` both use it.
-pub fn media_can_grow(settings: &LayoutSettings) -> bool {
-    !(settings.media_type == "paper" && settings.paper_type == "sheet")
-} // fn media_can_grow
-
-/// @brief Error when the pieces, whole or split, do not all fit on one paper sheet.
-pub const SHEET_OVERFLOW_MESSAGE: &str =
-    "You selected 'Paper > Sheet'. All pieces cannot fit on one paper sheet. \
-    Instead, create a larger layout by returning to Layout Settings \
-    and selecting 'Paper > Tiled' with your current paper size.";
-
-/// @brief Error when the legend or scale grid pushes the layout past one paper sheet.
-pub const SHEET_ANNOTATION_OVERFLOW_MESSAGE: &str =
-    "You selected 'Paper > Sheet'. The pieces and layout annotations cannot fit on one sheet. \
-    Instead, create a larger layout by returning to Layout Settings \
-    and selecting 'Paper > Tiled' with your current paper size.";
-
-/// @brief True when `error` refuses a layout because it overflows one paper sheet.
-///
-/// Such a run makes no layout at all: the user selects PDF (tiled) in Layout Settings.
-pub fn is_sheet_overflow(error: &str) -> bool {
-    // The piece overflow error lists the unplaced pieces after its first line.
-    error.starts_with(SHEET_OVERFLOW_MESSAGE) || error == SHEET_ANNOTATION_OVERFLOW_MESSAGE
-} // fn is_sheet_overflow
-
-/// @brief The media a piece must fit to stay whole: the content rect, limited in
-/// length only for a sheet.
-pub fn layout_divide_spec(settings: &LayoutSettings, bin_w: u32, bin_h: u32) -> DivideSpec {
+/// @brief The media a piece must fit to stay whole: the content rect width, of no length limit.
+pub fn layout_divide_spec(settings: &LayoutSettings, bin_w: u32) -> DivideSpec {
     DivideSpec {
         bin_w,
-        bin_h,
-        limit_length: !settings.is_roll_form(),
         trial_angles_deg: settings.rotation_trial_set_deg(),
         apply_piece_rotation: settings.applies_piece_rotation_rules(),
         free_rotation_without_grainline: settings.free_rotation_without_grainline(),
@@ -966,7 +910,7 @@ pub fn layout_divide_spec(settings: &LayoutSettings, bin_w: u32, bin_h: u32) -> 
     }
 } // fn layout_divide_spec
 
-/// @brief Pieces of an individual pattern that do not fit the media at any of their trial angles.
+/// @brief Pieces of an individual pattern wider than the media at each of their trial angles.
 ///
 /// Runs the pre-processing up to grain-up pieces, as `do_process_layout` does.
 /// Tiled paper reports none: its pages already cover a large piece.
@@ -980,18 +924,19 @@ pub fn do_find_oversized_pieces(
 ) -> Result<Vec<OversizedPiece>, String> {
     let settings = LayoutSettings::from_json(settings_json)
         .map_err(|e| format!("Failed to parse layout settings: {e}"))?;
-    if settings.media_type == "paper" && settings.paper_type == "tiled" {
+    if settings.is_tiled_paper() {
         return Ok(Vec::new());
     } // if tiled
-    let size = |name: &str| -> u32 {
-        initial_layout_dom.get_attr_by_id("contentRect", name).and_then(|s| s.parse().ok()).unwrap_or(0)
-    };
+    let content_width: u32 = initial_layout_dom
+        .get_attr_by_id("contentRect", "width")
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(0);
     let mut dom = input_dom.clone();
     hoist_layout_units(&mut dom, false);
     svg_dom::flatten_dom(&mut dom);
     svg_dom::verticalize_dom(&mut dom);
     svg_dom::flatten_dom(&mut dom);
-    Ok(piece_divider::find_oversized_pieces(&dom, &layout_divide_spec(&settings, size("width"), size("height"))))
+    Ok(piece_divider::find_oversized_pieces(&dom, &layout_divide_spec(&settings, content_width)))
 } // fn do_find_oversized_pieces
 
 /// @brief Lay out one size of a multisize handoff as its own layout.
@@ -1226,14 +1171,13 @@ mod tests {
             &mut progress,
         ).expect("process_layout should succeed on the trousers handoff")
     } // fn process_trousers
-    // @brief Paper sheet settings, in inches, for the oversized-piece tests.
-    fn paper_sheet_settings_json(width_in: f64, height_in: f64) -> String {
+    // @brief Paper roll settings, in inches, for the oversized-piece tests.
+    fn paper_roll_settings_json(roll_width_in: f64) -> String {
         serde_json::json!({
             "unit": "in",
             "mediaType": "paper",
-            "paperType": "sheet",
-            "pageWidth": width_in,
-            "pageHeight": height_in,
+            "paperType": "roll",
+            "rollWidth": roll_width_in,
             "marginLeft": 0.25,
             "marginRight": 0.25,
             "marginTop": 0.25,
@@ -1241,10 +1185,10 @@ mod tests {
             "pieceGap": 0.125,
             "layoutMode": "alongGrainline"
         }).to_string()
-    } // fn paper_sheet_settings_json
+    } // fn paper_roll_settings_json
 
     // @brief Lay out the trousers, splitting or extending as asked.
-    fn process_trousers_sheet(settings_json: &str, split: bool, extend: bool) -> ProcessLayoutResult {
+    fn process_trousers_with(settings_json: &str, split: bool, extend: bool) -> ProcessLayoutResult {
         let input_dom = Document::parse(TROUSERS_HANDOFF_SVG).expect("trousers fixture should parse");
         let init = do_initialize_layout(settings_json, Some(&input_dom)).expect("initialize_layout should succeed");
         let mut progress = |_pct: i32, _status: Option<&str>| {};
@@ -1260,7 +1204,7 @@ mod tests {
             },
             &mut progress,
         ).expect("process_layout should succeed on the trousers handoff")
-    } // fn process_trousers_sheet
+    } // fn process_trousers_with
 
     // @brief The bbox JSON labels of a layout.
     fn placed_labels(result: &ProcessLayoutResult) -> Vec<String> {
@@ -1270,63 +1214,43 @@ mod tests {
             .collect()
     } // fn placed_labels
 
-    // @brief On a sheet 36 in long the 43 in trouser legs are longer than the media.
-    // Split: each long piece becomes parts that fit; the sheet is wide enough for all.
+    // @brief On a 16 in paper roll the 16.61 in Back is wider than the 15.5 in between the margins.
+    // The 43 in legs fit whole: a roll has no length limit.
     // The DXF-ASTM export writes each part as its own piece.
     #[test]
-    fn trousers_long_pieces_split_on_a_sheet() {
-        let settings_json = paper_sheet_settings_json(200.0, 36.0);
+    fn trousers_wide_pieces_split_on_a_paper_roll() {
+        let settings_json = paper_roll_settings_json(16.0);
         let input_dom = Document::parse(TROUSERS_HANDOFF_SVG).expect("trousers fixture should parse");
         let init = do_initialize_layout(&settings_json, Some(&input_dom)).expect("initialize_layout should succeed");
         let oversized = do_find_oversized_pieces(&settings_json, &input_dom, &init.initial_dom).expect("check runs");
-        let long: Vec<&str> = oversized.iter().filter(|p| p.longer && !p.wider).map(|p| p.label.as_str()).collect();
-        for leg in ["Back", "Front_Pleats", "Front_no_pocket", "Front_with_pocket"] {
-            assert!(long.contains(&leg), "{leg} is longer than the sheet: {oversized:?}");
-        }
-        // The dialog names each leg's length and the 35.5 in sheet length inside the margins.
+        // The dialog names the piece width and the media width inside the margins.
         let message = piece_divider::oversized_pieces_message(&oversized, "in");
-        for leg in ["Back", "Front_Pleats", "Front_no_pocket", "Front_with_pocket"] {
-            let line = message.lines().find(|l| l.starts_with(&format!("\u{2022} {leg}: length "))).unwrap_or_default();
-            assert!(line.ends_with(" in, media 35.50 in"), "{leg} line: {message}");
-        }
-
-        let narrow_settings = paper_sheet_settings_json(16.0, 100.0);
-        let narrow_init = do_initialize_layout(&narrow_settings, Some(&input_dom)).expect("initialize narrow sheet");
-        let narrow = do_find_oversized_pieces(&narrow_settings, &input_dom, &narrow_init.initial_dom)
-            .expect("narrow-sheet check runs");
-        let narrow_message = piece_divider::oversized_pieces_message(&narrow, "in");
         assert!(
-            narrow_message.lines().any(|line| line == "\u{2022} Back: width 16.61 in, media 15.50 in"),
-            "warning uses offending and effective sheet width: {narrow_message}"
+            message.lines().any(|line| line == "\u{2022} Back: width 16.61 in, media 15.50 in"),
+            "warning uses offending and effective roll width: {message}"
         );
+        assert!(!message.contains("length"), "a roll has no length limit: {message}");
 
-        let result = process_trousers_sheet(&settings_json, true, false);
+        let result = process_trousers_with(&settings_json, true, false);
         assert!(result.unplaced_labels.is_empty(), "unplaced: {:?}", result.unplaced_labels);
-        assert!(result.divide_spec.is_some(), "the split media is kept for the PDF export");
+        assert!(result.divide_spec.is_some(), "the split media is kept for export");
         let labels = placed_labels(&result);
-        for leg in ["Back", "Front_Pleats", "Front_no_pocket", "Front_with_pocket"] {
-            for part in ["(1/2)", "(2/2)"] {
-                assert!(labels.contains(&format!("{leg} {part}")), "{leg} {part} placed: {labels:?}");
-            }
-        } // for each leg
-
-        // The paper-sheet PDF export splits the same way.
-        let (_, sheet_pieces) = crate::sheets::build_sheet_export_inputs(&input_dom, false, false, false, result.divide_spec.as_ref(), None)
-            .expect("sheet inputs build");
-        assert_eq!(sheet_pieces.len(), labels.len(), "the PDF pages hold the same parts");
+        for part in ["Back (1/2)", "Back (2/2)"] {
+            assert!(labels.contains(&part.to_string()), "{part} placed: {labels:?}");
+        } // for each part
 
         // DXF-ASTM: one block per part, named "<piece> (i/n)".
         let (_, dxf, _, _) = export_dxf_for_test(&result, "split_trousers", None);
         let names: Vec<&str> = dxf.lines().map(str::trim).filter_map(|l| l.strip_prefix("Piece Name:")).collect();
         assert!(names.contains(&"Back (1/2)") && names.contains(&"Back (2/2)"), "{names:?}");
         assert_eq!(names.len(), labels.len(), "one block per placed part");
-    } // trousers_long_pieces_split_on_a_sheet
+    } // trousers_wide_pieces_split_on_a_paper_roll
 
     // @brief A split request without oversized pieces does not create split-layout export limits.
     #[test]
     fn split_request_without_divided_pieces_keeps_regular_layout_state() {
-        let settings_json = paper_sheet_settings_json(200.0, 100.0);
-        let result = process_trousers_sheet(&settings_json, true, false);
+        let settings_json = paper_roll_settings_json(200.0);
+        let result = process_trousers_with(&settings_json, true, false);
 
         assert!(result.unplaced_labels.is_empty(), "unplaced: {:?}", result.unplaced_labels);
         assert!(result.divide_spec.is_none(), "no piece was divided");
@@ -1335,29 +1259,14 @@ mod tests {
         assert!(!labels.iter().any(|label| label.contains("(1/")), "no split parts: {labels:?}");
     } // split_request_without_divided_pieces_keeps_regular_layout_state
 
-    // @brief Only a paper sheet refuses "Make the media bigger"; its message names 'Paper > Tiled'.
-    #[test]
-    fn paper_sheet_media_cannot_grow() {
-        let sheet = LayoutSettings::from_json(&paper_sheet_settings_json(36.0, 36.0)).expect("sheet settings parse");
-        assert!(!media_can_grow(&sheet));
-        assert!(SHEET_CANNOT_GROW_MESSAGE.contains("'Paper > Tiled'"));
-
-        for (media, paper) in [("paper", "roll"), ("paper", "tiled"), ("fabric", "sheet"), ("fabric", "roll")] {
-            let mut settings = sheet.clone();
-            settings.media_type = media.to_string();
-            settings.paper_type = paper.to_string();
-            assert!(media_can_grow(&settings), "{media} {paper}");
-        } // for each media that can grow
-    } // paper_sheet_media_cannot_grow
-
     // @brief 36 in fabric folded to 18 in: the trousers go on the fabric, not on the
-    // B0 paper sheet that the settings keep from paper media.  The initial 500 in
+    // B0 page size that the settings keep from paper media.  The initial 500 in
     // length trims to the packed pieces, all inside the 17.5 in content.
     #[test]
-    fn trousers_on_folded_fabric_ignore_the_paper_sheet() {
+    fn trousers_on_folded_fabric_ignore_the_page_size() {
         let settings_json = serde_json::json!({
             "unit": "in", "mediaType": "fabric", "paperType": "roll",
-            "pageWidth": 39.37, "pageHeight": 55.67, "sheetName": "B0",
+            "pageWidth": 39.37, "pageHeight": 55.67,
             "fabricWidth": 36.0, "fabricHeight": 0.0, "fabricFolded": true, "selvedgeWidth": 0.5,
             "foldLinesOnLeftEdge": true,
             "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
@@ -1374,7 +1283,7 @@ mod tests {
         // (18 - 0.5) * 96 = 1680: no left margin on the fold, the selvedge on the right.
         assert_eq!(init.initial_dom.get_attr_by_id("contentRect", "width"), Some("1680"));
 
-        let result = process_trousers_sheet(&settings_json, false, false);
+        let result = process_trousers_with(&settings_json, false, false);
         assert!(result.unplaced_labels.is_empty(), "unplaced: {:?}", result.unplaced_labels);
         assert_eq!(placed_count(&result), 12, "every piece placed whole");
         let trimmed_height = result.output_doc.root.attributes.get("height")
@@ -1386,7 +1295,35 @@ mod tests {
             let right = piece["x"].as_u64().unwrap_or(0) + piece["w"].as_u64().unwrap_or(0);
             assert!(right <= 1680, "{} ends at x {right}, past the fold half", piece["label"]);
         } // for each placed piece
-    } // trousers_on_folded_fabric_ignore_the_paper_sheet
+    } // trousers_on_folded_fabric_ignore_the_page_size
+
+    // @brief Settings saved with the retired paper type "sheet" lay out as tiled paper.
+    // The tile grid covers the pattern, so no piece splits, the media does not grow,
+    // and every piece is placed whole.
+    #[test]
+    fn retired_sheet_settings_lay_out_as_tiled_paper() {
+        let settings_json = serde_json::json!({
+            "unit": "in", "mediaType": "paper", "paperType": "sheet", "sheetName": "Letter",
+            "pageWidth": 8.5, "pageHeight": 11.0,
+            "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
+            "pieceGap": 0.125, "layoutMode": "alongGrainline",
+            "tileSize": "Letter", "tileOrientation": "Portrait"
+        }).to_string();
+        let settings = LayoutSettings::from_json(&settings_json).expect("settings parse");
+        assert_eq!(settings.paper_type, "tiled");
+
+        let input_dom = Document::parse(TROUSERS_HANDOFF_SVG).expect("trousers fixture should parse");
+        let init = do_initialize_layout(&settings_json, Some(&input_dom)).expect("initialize_layout should succeed");
+        let oversized = do_find_oversized_pieces(&settings_json, &input_dom, &init.initial_dom).expect("check runs");
+        assert!(oversized.is_empty(), "tiled paper reports no oversized piece: {oversized:?}");
+
+        // The split and grow requests have no effect on tiled paper.
+        let result = process_trousers_with(&settings_json, true, true);
+        assert!(result.unplaced_labels.is_empty(), "unplaced: {:?}", result.unplaced_labels);
+        assert_eq!(placed_count(&result), 12, "every piece placed whole");
+        assert!(result.divide_spec.is_none(), "tiled paper never splits");
+        assert!(result.media_enlargement.is_none(), "tiled paper never grows");
+    } // retired_sheet_settings_lay_out_as_tiled_paper
 
     // @brief Fabric roll settings for the multisize fixture.
     fn multisize_settings_json() -> String {
@@ -1491,100 +1428,6 @@ mod tests {
         )
     } // fn process_placement_fixture
 
-    // @brief Paper rejects overflowing whole pieces and split parts instead of stacking sheets.
-    // A request to extend the media (multisize tabs) does not grow the sheet.
-    #[test]
-    fn placement_paper_sheet_overflow_requires_tiled_pdf() {
-        for (split, width, height) in [(false, 6.0, 2.0), (true, 1.0, 1.0)] {
-            let settings = serde_json::json!({
-                "unit": "in", "mediaType": "paper", "paperType": "sheet",
-                "pageWidth": width, "pageHeight": height, "pieceGap": 0.0,
-                "marginLeft": 0.0, "marginRight": 0.0, "marginTop": 0.0, "marginBottom": 0.0,
-                "layoutMode": "alongGrainline", "scaleGrid": false
-            });
-            for extend in [false, true] {
-                let error = process_placement_fixture(settings.clone(), split, extend).err().expect("sheet must fail");
-                assert!(error.contains("All pieces cannot fit on one paper sheet."), "{error}");
-                assert!(error.contains("selecting 'Paper > Tiled'"), "{error}");
-                assert!(error.contains("Long") || error.contains("Wide"), "{error}");
-                assert!(is_sheet_overflow(&error), "the controller must refuse the layout: {error}");
-            } // for extension requests
-        } // for whole and split pieces
-    } // placement_paper_sheet_overflow_requires_tiled_pdf
-
-    // @brief Split paper parts keep the selected sheet dimensions, margins, and join metadata.
-    #[test]
-    fn placement_paper_split_keeps_media_dimensions() {
-        for (width, height, divided) in [(7.5, 1.5, "Long"), (3.5, 4.5, "Wide")] {
-            let settings = serde_json::json!({
-                "unit": "in", "mediaType": "paper", "paperType": "sheet",
-                "pageWidth": width, "pageHeight": height, "pieceGap": 0.0,
-                "marginLeft": 0.25, "marginRight": 0.25, "marginTop": 0.25, "marginBottom": 0.25,
-                "layoutMode": "alongGrainline", "scaleGrid": false
-            });
-            for extend in [false, true] {
-                // The sheet keeps its size even if a caller also requests enlargement.
-                let result = process_placement_fixture(settings.clone(), true, extend).expect("split fits");
-                assert!(result.unplaced_labels.is_empty(), "{:?}", result.unplaced_labels);
-                assert_eq!(placed_count(&result), 3, "two split parts and one whole piece");
-                let width_px = (width * 96.0) as u32;
-                let height_px = (height * 96.0) as u32;
-                assert_eq!(result.output_doc.root.attributes["width"], width_px.to_string());
-                assert_eq!(result.output_doc.root.attributes["height"], height_px.to_string());
-                assert_eq!(result.layout_h_px, height_px);
-                assert_eq!(
-                    result.output_doc.get_attr_by_id("contentRect", "width"),
-                    Some((width_px - 48).to_string()).as_deref()
-                );
-                assert_eq!(
-                    result.output_doc.get_attr_by_id("contentRect", "height"),
-                    Some((height_px - 48).to_string()).as_deref()
-                );
-                assert_eq!(result.output_doc.get_attr_by_id("contentRect", "x").as_deref(), Some("24"));
-                assert_eq!(result.output_doc.get_attr_by_id("contentRect", "y").as_deref(), Some("24"));
-                assert!(result.divide_spec.is_some(), "split metadata is available to export");
-                assert!(result.media_enlargement.is_none());
-                let labels = placed_labels(&result);
-                assert!(labels.contains(&format!("{divided} (1/2)")), "{labels:?}");
-                assert!(labels.contains(&format!("{divided} (2/2)")), "{labels:?}");
-            } // for enlargement flags
-        } // for length and width splits
-    } // placement_paper_split_keeps_media_dimensions
-
-    // @brief Neither inherited extension nor annotations can enlarge a split paper sheet.
-    #[test]
-    fn placement_paper_split_cannot_enlarge_media() {
-        for (width, scale_grid) in [(6.0, false), (7.0, true)] {
-            let settings = serde_json::json!({
-                "unit": "in", "mediaType": "paper", "paperType": "sheet",
-                "pageWidth": width, "pageHeight": 1.0, "pieceGap": 0.0,
-                "marginLeft": 0.0, "marginRight": 0.0, "marginTop": 0.0, "marginBottom": 0.0,
-                "layoutMode": "alongGrainline", "scaleGrid": scale_grid
-            });
-            let error = process_placement_fixture(settings, true, true).err().expect("fixed media must fail");
-            assert!(error.contains("selecting 'Paper > Tiled'"), "{error}");
-            assert!(is_sheet_overflow(&error), "the controller must refuse the layout: {error}");
-        } // for piece and annotation overflow
-    } // placement_paper_split_cannot_enlarge_media
-
-    // @brief Only the two sheet overflow errors make the controller refuse a layout.
-    #[test]
-    fn sheet_overflow_errors_are_recognized() {
-        let pieces = format!("{SHEET_OVERFLOW_MESSAGE}\nPieces that could not be placed:\nBack");
-        assert!(is_sheet_overflow(&pieces));
-        assert!(is_sheet_overflow(SHEET_ANNOTATION_OVERFLOW_MESSAGE));
-        assert!(SHEET_OVERFLOW_MESSAGE.contains("'Paper > Tiled'"));
-        assert!(SHEET_ANNOTATION_OVERFLOW_MESSAGE.contains("'Paper > Tiled'"));
-
-        for other in [
-            SHEET_CANNOT_GROW_MESSAGE,
-            "No SVG imported. Please import an SVG file first.",
-            "",
-        ] {
-            assert!(!is_sheet_overflow(other), "{other}");
-        } // for other errors
-    } // sheet_overflow_errors_are_recognized
-
     // @brief Split paper rolls keep their configured width when extension is inherited.
     #[test]
     fn placement_paper_roll_split_keeps_configured_width() {
@@ -1657,7 +1500,7 @@ mod tests {
             "layoutMode": "alongGrainline"
         }).to_string();
         for extend in [false, true] {
-            let result = process_trousers_sheet(&settings_json, true, extend);
+            let result = process_trousers_with(&settings_json, true, extend);
             assert!(result.unplaced_labels.is_empty(), "unplaced: {:?}", result.unplaced_labels);
             // 16 in = 1536 px; 15.5 in = 1488 px inside the margins.
             assert_eq!(result.output_doc.root.attributes["width"], "1536");
@@ -2408,21 +2251,6 @@ mod tests {
         } // for later group
     } // jacket2_nested_export_keeps_the_smallest_size_annotations
 
-    // @brief The paper-sheet PDF input of a Nested layout keeps the grainline and
-    // labels of the smallest size only, and still packs one unit per piece-set.
-    #[test]
-    fn jacket2_nested_sheet_export_keeps_the_smallest_size_annotations() {
-        let (mut input_dom, sizes) = jacket2_handoff();
-        assert_eq!(crate::size_labels::add_size_labels(&mut input_dom), 208);
-        let (flat_dom, pieces) = crate::sheets::build_sheet_export_inputs(&input_dom, false, false, true, None, None)
-            .expect("sheet export inputs");
-        assert_eq!(pieces.len(), 8, "one unit per piece-set");
-        let smallest = sizes.iter().min_by(|a, b| crate::size_groups::compare_sizes(a, b)).expect("sizes").clone();
-        let mut kept = Vec::new();
-        annotation_sizes(&flat_dom.root, "", &mut kept);
-        assert_eq!(kept, vec![smallest; 20], "the grainlines and labels of the smallest size only");
-    } // jacket2_nested_sheet_export_keeps_the_smallest_size_annotations
-
     // @brief Marker packs every size of every piece as its own unit, numbered by its piece-set.
     #[test]
     fn jacket2_marker_places_every_size() {
@@ -2732,8 +2560,8 @@ mod tests {
   </g>
 </svg>"#;
 
-    // @brief Lay out FOLD_PIECES_SVG on 40 in fabric folded to 20 in, or on a 20 x 40 in
-    // paper sheet, with the given layout mode.
+    // @brief Lay out FOLD_PIECES_SVG on 40 in fabric folded to 20 in, or on a 20 in
+    // paper roll, with the given layout mode.
     fn process_fold_pieces(media: &str, layout_mode: &str, rotation_step: f64, fold_lines_on_left_edge: bool) -> ProcessLayoutResult {
         process_fold_pieces_with_options(media, layout_mode, rotation_step, fold_lines_on_left_edge, 40.0, false)
     } // fn process_fold_pieces
@@ -2761,10 +2589,9 @@ mod tests {
         split_oversized: bool,
     ) -> ProcessLayoutResult {
         let input = Document::parse(svg).expect("valid SVG");
-        let paper_type = if media == "paper" { "sheet" } else { "roll" };
         let settings = serde_json::json!({
-            "unit": "in", "mediaType": media, "paperType": paper_type,
-            "pageWidth": 20.0, "pageHeight": 40.0, "fabricWidth": fabric_width,
+            "unit": "in", "mediaType": media, "paperType": "roll",
+            "rollWidth": 20.0, "fabricWidth": fabric_width,
             "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
             "pieceGap": 0.125, "layoutMode": layout_mode, "rotationStep": rotation_step,
             "fabricFolded": media == "fabric", "foldLinesOnLeftEdge": fold_lines_on_left_edge,
@@ -2794,8 +2621,8 @@ mod tests {
         );
         let input = Document::parse(&svg).expect("valid SVG");
         let settings = serde_json::json!({
-            "unit": "in", "mediaType": "paper", "paperType": "sheet",
-            "pageWidth": 20.0, "pageHeight": 40.0,
+            "unit": "in", "mediaType": "paper", "paperType": "roll",
+            "rollWidth": 20.0,
             "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
             "pieceGap": 0.125, "layoutMode": layout_mode, "rotationStep": 0.0,
             "foldLinesOnLeftEdge": false, "tileSize": "Letter", "tileOrientation": "Portrait"
@@ -2816,7 +2643,7 @@ mod tests {
         ).expect("layout")
     } // fn process_invalid_rotation
 
-    // @brief Process a 350×10 piece on the minimum 300×300 sheet with the given rule.
+    // @brief Process a 350×10 piece on 300×300 fabric of fixed length with the given rule.
     fn process_rotation_fit(rotation: Option<&str>) -> Result<ProcessLayoutResult, String> {
         let rotation_attribute = rotation
             .map(|value| format!(" data-rotation=\"{value}\""))
@@ -2830,8 +2657,8 @@ mod tests {
         );
         let input = Document::parse(&svg).expect("valid SVG");
         let settings = serde_json::json!({
-            "unit": "in", "mediaType": "paper", "paperType": "sheet",
-            "pageWidth": 3.125, "pageHeight": 3.125,
+            "unit": "in", "mediaType": "fabric", "paperType": "roll",
+            "fabricWidth": 3.125, "fabricHeight": 3.125, "fabricFolded": false,
             "marginLeft": 0.0, "marginRight": 0.0, "marginTop": 0.0, "marginBottom": 0.0,
             "pieceGap": 0.0, "layoutMode": "any", "rotationStep": 0.0,
             "foldLinesOnLeftEdge": false, "tileSize": "Letter", "tileOrientation": "Portrait"
@@ -2872,7 +2699,9 @@ mod tests {
         assert!(laid_out_piece.rect.w < 300 && laid_out_piece.rect.h < 300);
 
         for rule in [None, Some("360"), Some("180"), Some("90")] {
-            assert!(process_rotation_fit(rule).is_err(), "rule {rule:?} must not use a 45° angle");
+            // The piece is left out: a warning, or an error when no piece is placed.
+            let left_out = process_rotation_fit(rule).map_or(true, |result| !result.unplaced_labels.is_empty());
+            assert!(left_out, "rule {rule:?} must not use a 45° angle");
         } // for each restricted or legacy rule
     } // piece_any_uses_a_non_quarter_turn_to_fit
 
@@ -2946,7 +2775,7 @@ mod tests {
             let settings = LayoutSettings::from_json(&format!(
                 r#"{{"unit": "in", "mediaType": "fabric", "fabricWidth": 40.0, "foldLinesOnLeftEdge": true, "layoutMode": "{mode}"}}"#
             )).expect("settings parse");
-            assert_eq!(layout_divide_spec(&settings, 1000, 1000).fold_lines_on_left_edge, on_edge, "{mode}");
+            assert_eq!(layout_divide_spec(&settings, 1000).fold_lines_on_left_edge, on_edge, "{mode}");
         } // for each layout mode
     } // any_mode_divide_spec_ignores_the_fold_edge
 
@@ -2978,7 +2807,7 @@ mod tests {
             .replace("M192,374 L192,10", &format!("M10,{height} L{},{height}", width - 10))
     } // fn fold_across_grain_svg
 
-    // @brief Paper sheet: a fold line across the grain turns its piece onto the left content edge, whole
+    // @brief Paper roll: a fold line across the grain turns its piece onto the left content edge, whole
     //        or split. Split, only the part with the fold line goes on the edge.
     #[test]
     fn fold_line_across_the_grain_lies_on_the_left_edge() {
@@ -3004,15 +2833,4 @@ mod tests {
         assert_eq!(backs, 2, "the turned piece splits into two parts");
     } // fold_line_across_the_grain_lies_on_the_left_edge
 
-    // @brief The paper-sheet PDF input pins the fold line pieces as the layout does.
-    #[test]
-    fn sheet_export_pins_fold_line_pieces() {
-        let input = Document::parse(FOLD_PIECES_SVG).expect("valid SVG");
-        let edge = |trial: Option<&[u16]>| -> Vec<Option<u16>> {
-            let (_, pieces) = crate::sheets::build_sheet_export_inputs(&input, false, false, false, None, trial).expect("sheet inputs");
-            pieces.iter().map(|p| p.rect.left_edge_angle).collect()
-        }; // edge
-        assert_eq!(edge(Some(&[0, 180])), vec![Some(180), None], "Back on the left edge, turned; Yoke free");
-        assert_eq!(edge(None), vec![None, None]);
-    } // sheet_export_pins_fold_line_pieces
 } // mod tests

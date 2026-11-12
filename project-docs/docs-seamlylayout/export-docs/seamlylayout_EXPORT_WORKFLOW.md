@@ -113,7 +113,7 @@ ExportMenu HPGL submenu → exportHpglRequested("plot" | "cut")
 - View > HPGL: file picker (`*.plt *.hpgl`), then `openInViewer(hpglViewerPath, file)`.
 - Preferences > HPGL Viewer: default `https://tiny-online.tools/embroidery-cnc-tools/hpgl-plt-viewer`. A web viewer opens its page only; the user loads the file there.
 - A missing `hpgl_viewer_path` key (INI or defaults JSON) falls back to that URL. The installer also seeds the key.
-- Not covered: HP-GL/2, a rotate option for the roll axis, sheet-mode pages.
+- Not covered: HP-GL/2, a rotate option for the roll axis.
 
 ## PostScript export — PS and EPS
 
@@ -189,7 +189,6 @@ ExportMenu EPS / PostScript (PS) → exportPostscriptRequested("eps" | "ps")
 - Reason: a nested multisize file shows one drill set, one label set and one grainline per piece.
 - Smallest size: `data-size` compared as numbers; as text when a size is not a number.
 - `clone_export_layout_doc` → `nested_annotations::keep_smallest_size_annotations`. PDF, PDF (Tiled), SVG, PNG, JPG, HPGL, PS, EPS and the paid formats use it.
-- Paper-sheet PDF: `sheets::build_sheet_export_inputs` strips after the piece extraction, so the pieces pack as on the Nested tab.
 - SVG: `nested_annotations::gather_labels_and_grainlines` moves the kept groups into `<g id="labels_and_grainlines">`. The group takes the place of the `Rectangles` group: just before the largest size group.
 - Unchanged: the Nested canvas, Marker, Base Size and the size tabs.
 - DXF-ASTM uses `clone_dxf_layout_doc` and keeps the annotations of every size. It refuses the Nested tab.

@@ -193,16 +193,15 @@ On the Nested tab each size has its own color. Every stroke and fill of a piece 
 - Colors follow the size order, smallest first. The first size is blue. Each next size takes the candidate color farthest, in OKLab, from white and from every earlier size.
 - Candidates: OKLab lightness 0.40 (dark) to 0.80 (pastel), 10° hue steps, the most chroma sRGB holds up to 0.20; grays left out. More sizes than candidates (177) repeat the colors.
 - The legend is `<g id="size_legend" data-type="size_legend">`: a frame, then per size a 32 × 32 px square `rect` filled with its color and the text "Size <size>". It sits one piece gap below the lowest piece, at the left edge of the content; the media grows to hold it (tiled paper gets more tile rows).
-- Every export of the tab keeps the colors and the legend. The paper-sheet PDF repacks the pieces: it keeps the colors, not the legend.
+- Every export of the tab keeps the colors and the legend.
 - Text modes and HPGL treat `size_legend` as a label: HPGL plot mode draws it with the label pen; cut mode leaves it out.
-- Code: `cxxqt_bridge/src/size_colors.rs`, called by `layout_utils::do_process_layout` and `sheets::build_sheet_export_inputs`.
+- Code: `cxxqt_bridge/src/size_colors.rs`, called by `layout_utils::do_process_layout`.
 
 ### Scale check grid
 
 Settings > "Add scale check grid" (`scaleGrid` in the settings JSON) adds `<g id="scale_grid" data-type="scale_grid">` to every layout except Marker: 3 x 3 squares of 1 cm for mm or cm settings, 2 x 2 squares of 1 in for inch settings, and the label "Scale check: 3 cm × 3 cm" or "2 in × 2 in". It goes one piece gap below the lowest piece and the size legend, at the left edge of the content; the media grows to hold it (tiled paper gets more tile rows). Marker is the multisize layout that holds more than one size without piece-sets.
 
 - DXF-ASTM exports leave it out (`clone_dxf_layout_doc`). HPGL plot mode draws it with the mark pen; cut mode leaves it out. Text modes treat its label as label text.
-- The paper-sheet PDF repacks the pieces and has no grid.
 - Code: `cxxqt_bridge/src/scale_grid.rs`, called by `layout_utils::do_process_layout`.
 
 ### Nested SVG export

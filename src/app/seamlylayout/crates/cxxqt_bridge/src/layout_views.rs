@@ -42,13 +42,15 @@ pub fn base_size_label(size: &str) -> String {
 } // fn base_size_label
 
 // @brief Advice that ends every "pieces left out" warning.
-// @param is_fabric True for fabric media: it has a width and a length, not a sheet.
+// @param is_fabric True for fabric media; false for a paper roll. Tiled paper places every piece.
 fn unplaced_advice(is_fabric: bool) -> &'static str {
     if is_fabric {
+        // Fabric has a width and a length.
         "The remaining pieces were laid out. Try a wider fabric, a longer fabric length, or remove pieces."
     } else {
-        "The remaining pieces were laid out. Try a larger sheet size, reduce the piece gap or margins, or remove pieces."
-    }
+        // A paper roll has a width only.
+        "The remaining pieces were laid out. Try a wider paper roll, reduce the piece gap or margins, or remove pieces."
+    } // if fabric
 } // fn unplaced_advice
 
 // @brief Warning for a single layout that left pieces out.
@@ -915,7 +917,7 @@ mod tests {
         let single = unplaced_warning(&lines, false);
         let fabric = unplaced_warning(&lines, true);
         assert!(fabric.contains("wider fabric, a longer fabric length"), "fabric advice: {fabric}");
-        assert!(!fabric.contains("sheet size"), "fabric warning must not suggest a larger sheet: {fabric}");
+        assert!(!fabric.contains("paper roll"), "fabric warning must not suggest a paper roll: {fabric}");
         assert!(single.starts_with("2 piece(s) could not be placed"), "{single}");
         assert!(single.contains("\n\n\u{2022} Detail (3): 220, 240\n\u{2022} Front: 220\n\n"), "{single}");
 
@@ -925,7 +927,7 @@ mod tests {
             tabs.contains("Marker:\n\u{2022} Detail (3): 220, 240\n\u{2022} Front: 220\nSize 220: not laid out (no room)"),
             "{tabs}"
         );
-        assert!(tabs.contains("Try a larger sheet size"), "{tabs}");
+        assert!(tabs.contains("Try a wider paper roll"), "{tabs}");
 
         let mut fabric_queue = TabLayoutQueue::new(
             r#"{"mediaType":"fabric"}"#.to_string(),
@@ -938,6 +940,6 @@ mod tests {
         fabric_queue.problems.push(tab_unplaced_problem(MARKER_LABEL, &lines));
         let fabric_tabs = fabric_queue.final_warning().expect("unplaced fabric pieces");
         assert!(fabric_tabs.contains("Try a wider fabric, a longer fabric length"), "{fabric_tabs}");
-        assert!(!fabric_tabs.contains("larger sheet"), "{fabric_tabs}");
+        assert!(!fabric_tabs.contains("paper roll"), "{fabric_tabs}");
     } // unplaced_warnings_list_one_piece_per_line
 } // mod tests

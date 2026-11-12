@@ -30,8 +30,8 @@ const ANNOTATION_TYPES: [&str; 5] = [
 
 // @brief Remove the annotation groups of every size but the smallest from each piece-set.
 //
-// Finds piece-sets at any depth, so it works on a layout and on the sheet
-// export DOM. A document without piece-sets (Marker, a size tab, an individual
+// Finds piece-sets at any depth, so it works on a layout and inside a pattern
+// group. A document without piece-sets (Marker, a size tab, an individual
 // pattern) is unchanged.
 //
 // @param doc Export copy of a layout; changed in place.
@@ -155,7 +155,7 @@ mod tests {
 
     // @brief One piece-set in sizes 92 and 100, moved by its transform. Each size has a
     // cutline, a notch, a drill, a grainline and three labels. A piece-set inside a pattern
-    // group, as in the sheet export input, and a plain individual piece follow.
+    // group and a plain individual piece follow.
     const NESTED: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">
   <defs/>
   <g id="piece-set_A" data-type="piece-set" transform="translate(100 50)">
@@ -217,7 +217,7 @@ mod tests {
         assert!(find(&doc.root, "size_legend").is_some(), "the legend is not a piece label");
     } // only_the_smallest_size_keeps_grainline_and_labels
 
-    // @brief A piece-set inside a pattern group, as in the sheet export input, is found.
+    // @brief A piece-set inside a pattern group is found.
     #[test]
     fn piece_set_inside_a_pattern_group_is_found() {
         let svg = NESTED.replace(r#"<defs/>"#, r#"<defs/><g id="pattern" data-type="pattern">"#)
