@@ -21,29 +21,31 @@ The complexity of generating a layout on a single sheet has revealed that all la
   - Sheet tests deleted; fold and rotation tests moved to roll or fabric.
   - New: `paper_type_loads_as_tiled_or_roll`, `is_tiled_paper_truth_table`, `trousers_wide_pieces_split_on_a_paper_roll`, `retired_sheet_settings_lay_out_as_tiled_paper`, `paperType_acceptsOnlyTiledOrRoll`, `paperTypeDropdown_offersTiledAndRoll`.
   - `cargo test --workspace`: 665 pass. `ctest --preset debug`: 8/8.
-- [ ] Layout.999.4 - Verify that: (next MSI, `AGENT_CHECKLIST.md` §10, §12)
+- [ ] Layout.999.4 - In the next MSI build, check that each media type lays out jacket2 and trousers. Steps: `AGENT_CHECKLIST.md` sections 10 and 12.
   - [ ] 'Paper > Tile' operates properly
   - [ ] 'Paper > Tile > Custom' operates properly
   - [ ] 'Paper > Roll' operates properly
   - [ ] 'Fabric > Folded' operates properly
   - [ ] 'Fabric > Not Folded' operates properly
 
-### [ ] Task Layout.108 — Implement - Seamly2D: stack multisize grainlines and labels in `layout_handoff`, inside every size's cut line
+### [ ] Task Layout.108 — Implement - Seamly2D: put each multisize piece's grainline and labels in the same place in every size, inside every size's cut line
 
-`layout_handoff` gives every size of a piece set one shared place for its grainline, piece label and pattern label. The Nested stacks read as one, and no label leaves a size's cut line. This replaces the SeamlyLayout import move of Layout.94 (`annotation_alignment.rs`) where each multisize file's grainline.
+Seamly2D moves the grainline, piece label and pattern label of every size of a piece before it sends the SVG to SeamlyLayout (`layout_handoff`). Each one gets the same position relative to its size's outline, inside every size's cut line. On the Nested tab, the grainlines and labels of all sizes then lie exactly on top of each other. Layout.94 does a similar move in SeamlyLayout, when it reads the SVG (`annotation_alignment.rs`).
 
 - User decisions:
-  - Fit every size: one shared place inside every size's cut line, nearest the base size's place. No pattern edit, no warning. --> Agree
-  - Seamly2D handoff, not SeamlyLayout import. --> what's the difference between the handoff and the import?
-  - Start after the Dead.4.4.3 compare and `MainWindow` switch, so the compare stays clean and the work is done once.
-- [x] Layout.108.1 Dead.4.4.3 comparison passed all 21 required patterns plus four extras at 0.01 px. GUI and CLI now use the fitted handoff writer.
-- [x] Layout.108.2 Stack point per piece set: the fold line start when every size has one, else the outline centre.
-- [x] Layout.108.3 Fit the base size's annotation offset inside every size, or select the nearest shared offset.
-- [x] Layout.108.4 Decision: when no shared place fits (a label larger than the smallest size), keep the base size's place. Seamly2D warns before the launch.
-- [x] Layout.108.5 Decision: SeamlyLayout keeps its import move and warning (`annotation_alignment.rs`, `finish_import`). They cover SVG files from older Seamly2D builds.
-- [x] Layout.108.6 Shared-position, containment, and fallback Qt tests pass. The fresh jacket2 fixture passes the Rust stacking regression; integrated Qt/Rust suites pass.
-- [ ] Layout.108.7 Docs: `SVG-DATA-ATTRIBUTES.md` "Multisize grainline and label positions", `AGENT_CHECKLIST.md` section 26.
-- [ ] Layout.108.8 Verify: MSI. jacket2 Layout Mode: no import warning; Size 220 tab: Back's piece label inside the cut line.
+  - Use one position for every size. The position is inside every size's cut line and as near as possible to the base size's position. Seamly2D does not change the pattern file and shows no warning. --> Agree
+  - Seamly2D moves the grainlines and labels before it sends the SVG. SeamlyLayout does not do it after it reads the SVG. --> what's the difference between the handoff and the import?
+    - Answer: the handoff is the Seamly2D side. Seamly2D converts the pattern pieces to SVG text in memory and writes that text to SeamlyLayout's standard input. No file is written.
+    - The import is the SeamlyLayout side. SeamlyLayout reads the SVG text from standard input and prepares the pieces for the layout.
+  - Start after Dead.4.4.3. Dead.4.4.3 checks that the old and the new SVG writer give the same SVG, then switches `MainWindow` to the new writer. This change then goes into the new writer only, and does not upset that check.
+- [x] Layout.108.1 Dead.4.4.3: the old and the new SVG writer gave the same SVG, within 0.01 px, for the 21 required patterns and 4 extra patterns. Seamly2D (GUI and command line) now uses the new writer, which includes this change.
+- [x] Layout.108.2 Reference point for each size of a piece: the start point of the fold line, when every size of the piece has a fold line. Else, the centre of the box around the cut line (the seam line, if the piece has no cut line).
+- [x] Layout.108.3 Seamly2D measures the distance from the base size's reference point to its grainline, piece label and pattern label. It puts each of them at that distance from the reference point in every size. If a grainline end or a label text line start then falls outside a size's cut line, Seamly2D moves that item by the smallest distance that puts it inside every size's cut line. The move is the same in every size.
+- [x] Layout.108.4 Decision: if no such move exists (for example, a label larger than the smallest size), Seamly2D keeps the base size's distance. Seamly2D shows a warning before it starts SeamlyLayout. This warning is the one exception to "shows no warning" above.
+- [x] Layout.108.5 Decision: SeamlyLayout keeps its own move and warning when it reads the SVG (`annotation_alignment.rs`, `finish_import`). They are for SVG files from older Seamly2D builds.
+- [x] Layout.108.6 Qt tests pass: same position in every size; position inside every cut line; base size's position kept when no move fits. A new jacket2 test input file (SVG from Seamly2D) passes the Rust test `jacket2_nested_stacks_each_piece_set_annotations`. All Qt and Rust test suites pass.
+- [ ] Layout.108.7 Update the docs: `SVG-DATA-ATTRIBUTES.md` section "Multisize grainline and label positions", and `AGENT_CHECKLIST.md` section 26.
+- [ ] Layout.108.8 In the next MSI build: open jacket2 in Seamly2D and press Layout. SeamlyLayout shows no import warning. On the Size 220 tab, Back's piece label is inside the cut line.
 
 ### [ ] Task Layout.110 - Implement - Fix "| Layout.98.6 | 24 | S2D > male_shirt > Piece Properties: Flip radio buttons, Flip submenu | FAIL --> Flip selection appears in piece context menu but without a checkbox, and the submenu appears when 'Flip' is selected, but the piece isn't flipped."
 
@@ -52,7 +54,7 @@ When the user clicks 'Horizontal', 'Vertical', or 'Both' then the piece is flipp
 - [x] Layout.110.1 Cause: the Flip choice only set the `flip` attribute for the layout; Piece Mode drew no mirror.
 - [x] Layout.110.2 `PatternPieceTool::applyFlipToGeometry` mirrors the drawn outline (seam line, cut line, allowance fill, notches, fold line) about the outline center, using `pieceFlipTransform` (`def.cpp`). Horizontal mirrors left to right, Vertical top to bottom. Labels and grainline keep their place and stay readable. Decision: the mirror is a display of the choice; the stored piece path does not change.
 - [x] Layout.110.3 Test: `TST_VPiece::PieceFlipTransformMirrorsAboutCenter`. `cl /Zs` OK on `def.cpp`, `pattern_piece_tool.cpp`, `tst_vpiece.cpp`. Not run: Qt suites (next build).
-- [ ] Layout.110.4 Integrated MSI build and Qt suites passed. User check remains: `AGENT_CHECKLIST.md` §24, including Flip submenu check marks.
+- [ ] Layout.110.4 The MSI build and the Qt test suites passed. Still to do, in the app: in Piece mode, right-click a male_shirt piece > Flip > Horizontal, Vertical, Both, None. The outline on the canvas mirrors as chosen. Note whether the Flip submenu shows a check mark or a dot next to the current choice. Steps: `AGENT_CHECKLIST.md` section 24.
 
 ## VERIFY
 
@@ -60,12 +62,12 @@ When the user clicks 'Horizontal', 'Vertical', or 'Both' then the piece is flipp
 
 See `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, "Not exported".
 
-- [ ] Layout.61 Verify grade IDs (`# n`), size blocks (`Size Name:`), layer 5, and `.rul` output.
-  - [ ] Layout.61.7 Validate the multisize DXF-ASTM export with aw.fyi (DXF.8.4).
-    - [ ] Layout.61.7.2 Export jacket2 Base Size 500 as DXF-ASTM R13; check in aw.fyi. Expect all 8 pieces graded and no merged Detail pieces, layer 5 mismatches, or duplicate vertices. Nested has no DXF-ASTM export (Layout.67). User check: `AGENT_CHECKLIST.md` §5.
+- [ ] Layout.61 Check the DXF-ASTM grading output: grade rule numbers (`# n`), one block per size (`Size Name:`), layer 5 lines, and the `.rul` file.
+  - [ ] Layout.61.7 Check the multisize DXF-ASTM export in the aw.fyi DXF checker (DXF.8.4).
+    - [ ] Layout.61.7.2 Export jacket2 Base Size 500 as DXF-ASTM (R13) and check the file in aw.fyi. Expected: all 8 pieces graded; aw.fyi does not read two Detail pieces as one piece; layer 5 lines agree between sizes; no duplicate vertices. The Nested tab has no DXF-ASTM export (Layout.67). Steps: `AGENT_CHECKLIST.md` section 5.
       - [x] Fabric R13, MSI 26.10.2023: `test-seamly-layout/layouts/jacket2/20261021/jacket2_40-146_R13_Fabric_BaseSize500_202610211408_apparelwerks_compliance_report.pdf`. 7 of 7 pieces graded: 7 blocks, 7 layer 5 lines, `# n` texts in each block. No departures. 5 advisories: Unicode escapes, L84 densification, validation spans, curve tolerance, piece-113 layer 14 curve points.
       - [x] Fabric R13, MSI 26.10.2312: `test-seamly-layout/layouts/jacket2/20261023/jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf`. 7 of 7 graded, 0 departures, the same 5 advisories. Page 1 caption "L5 endpoint mismatch up to 227.990 — sizes not a pure translation": accepted as a viewer note (user decision). Back's layer 5 line ends on two corners with different grade rules; only a graded nest needs the same line in every size (D6673 §4.3.1.5).
-      - [ ] Lining R13: Detail 4, the 8th piece, is in the Lining document. Export its Base Size 500 and check it in aw.fyi.
+      - [ ] Lining R13: Detail 4, the 8th piece, is on the Lining material tab. Select the Lining tab, export Base Size 500 as DXF-ASTM (R13), and check the file in aw.fyi.
       - [x] R12: not needed. Layout.100 removed the R12 export.
 
     | aw.fyi finding | Report | Cause | Task |
@@ -82,9 +84,9 @@ See `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, "Not exported".
 
 ### [ ] Task Layout.71 — Verify - automatic media width
 
-Multisize layouts expand right for wide pieces and down for long pieces. Only individual patterns split pieces (Layout.72).
+In a multisize layout, the media grows wider for wide pieces and longer for long pieces. Only an individual pattern splits pieces (Layout.72).
 
-- [ ] Layout.71.6 Next MSI: jacket2, 10-in Paper Roll. All tabs should widen without warnings; Adjust Mode and SVG export should match.
+- [ ] Layout.71.6 In the next MSI build: jacket2, Paper Roll 10 in wide. Every tab grows wider than 10 in, with no warning. On each tab, the Adjust Mode frame and the SVG export page have the same size as the canvas. Steps: `AGENT_CHECKLIST.md` section 11.
 
 ### [ ] Task Layout.28 — Verify - built-in seam line
 
@@ -92,7 +94,7 @@ Seamly2D now sends both cut and seam lines for built-in seam allowances. SeamlyL
 
 Status (2026-10-12): code, docs, Rust (472 pass) and Qt tests pass; MSI 26.10.1220 built. Changes are local to `run-seamlyLayout` (not pushed).
 
-- [ ] Layout.28.7 Next MSI: run `TEST_CHECKLIST.md` §5, "Piece with a built-in seam allowance".
+- [ ] Layout.28.7 In the next MSI build: run the steps in `TEST_CHECKLIST.md` section 5, "Piece with a built-in seam allowance".
 
 ### [ ] Task Layout.68 — Verify - add grid to prove PDF export scale
 
@@ -112,7 +114,7 @@ Cause (MSI 26.10.1311): PDF used 72 dpi instead of SVG’s 96 dpi, scaling pages
 - [ ] Layout.68.10 Test/Verify - Check Settings for grid option.
 - [ ] Layout.68.11 Test/Verify - Check grid in layouts; Check grid is not included in Marker.
 - [ ] Layout.68.12 Test/Verify - Check grid in exports; Check grid is not in DXF or HPGL cutter files.
-- [ ] Layout.58.13 Test/Verify - Check scale; Print a small layout, check scale for correct grid size (3cm x 3cm, or 2" x 2")
+- [ ] Layout.68.13 Test/Verify - Check scale; Print a small layout, check scale for correct grid size (3cm x 3cm, or 2" x 2")
 
 ### [ ] Task Layout.70 — Verify - "Some pieces could not be placed" dialog: piece names and length
 
@@ -123,13 +125,13 @@ It might be difficult to reproduce this error as we now have Layout.71 automatic
 - [x] Layout.70.2 One line per piece, then its sizes: "Detail (3): 220, 240, 260". Group by `data-parent` (as Layout.26.1).
 - [x] Layout.70.3 `Main.qml` `warningDialog`: scroll area; the OK button stays visible (as Layout.26.2).
 - [x] Layout.70.4 Rust test: warning text for a jacket2 Marker layout that leaves pieces out.
-- [ ] Layout.70.5 Next MSI: run `TEST_CHECKLIST.md` §7, "Left-out pieces warning".
+- [ ] Layout.70.5 In the next MSI build: run the steps in `TEST_CHECKLIST.md` section 7, "Left-out pieces warning". The warning has one line per piece with its sizes, for example "Detail (3): 220, 240, 260". The list scrolls, and the OK button stays visible.
 
 ### [ ] Task Layout.27 — Verify - Fix jacket2 DXF-ASTM grading
 
 Prior results (jacket2, sizes 220–720): Nested graded 4 of 8 pieces; Marker placed 96/208 pieces and lost grading on others. Base Size 500 in MSI 26.10.1311 graded 4 pieces, with rules accurate to 0.011 mm. Detail (3), (6), (7), (8) remained ungraded. Evidence: `test-seamly-layout/layouts/jacket2/`, aw.fyi reports, `jacket2_40-146_basesize_R13_202610131248.dxf`.
 
-Note: Seamly2D performs the grading and passes these graded pieces to SeamlyLayout in the input stringified SVG. Do not perform grading in SeamlyLayout.
+Note: Seamly2D grades the pieces. It sends the graded pieces to SeamlyLayout in the SVG text. Do not grade in SeamlyLayout.
 
 Note: The piece names in the jacket2 pattern have changed, so items below may refer to piece names
 
@@ -140,47 +142,47 @@ Note: The piece names in the jacket2 pattern have changed, so items below may re
   - [x] Layout.27.3.2 Run the Qt suites with `local_build_msi.ps1`. Passed in MSI 26.10.1921: 6 turn point tests in `TST_SvgComponentTags`.
   - [x] Layout.27.3.3 Next MSI: export jacket2 Base Size 500 to DXF-ASTM. With Layout.27.13: all 8 graded, no "other turn points" warning.
     - Passed (MSI 26.10.2023): no "other turn points" warning. Fabric: 7 of 7 graded (Layout.61.7.2). Lining (Detail 4) not checked.
-  - Note: the MSI 26.10.1416 handoff has the same `data-turn-points` as the old fixture. Detail (7) and (8) are consistent; Detail (3) and (6) differ in shape (Layout.27.13).
+  - Note: the SVG that Seamly2D sent in MSI 26.10.1416 has the same `data-turn-points` as the old test input file. Detail (7) and (8) are consistent; Detail (3) and (6) differ in shape (Layout.27.13).
 - [x] Layout.27.4 Give `grade_anchors` a distinct error when a key point is missing from the dense line. `GradeError::KeyPointOffLine`.
 - [x] Layout.27.5 Name the first size whose turn points differ from the sample size. jacket2 fixture: Detail (3) size 660, Detail (6) size 220, both on the cut line.
-- [ ] Layout.27.7 Add jacket2 handoff fixture to `crates/cxxqt_bridge/test_data/`; end-to-end test should grade every piece and write `.rul`.
+- [ ] Layout.27.7 Add the jacket2 SVG from Seamly2D as a test input file in `crates/cxxqt_bridge/test_data/`. A test that runs the whole DXF-ASTM export grades every piece and writes the `.rul` file.
   - [x] Layout.27.7.1 `jacket2_40-146_handoff.svg` (MSI 26.10.1416) replaces `jacket2_40-146_202610121819.svg`; `jacket2_base_size_export_names_and_grades_each_piece` grades 6 and writes `.rul`.
-  - [ ] Layout.27.7.2 Expect 8 graded after Layout.27.13.
-    - MSI 26.10.2023 fixture: 7 of 8 graded, `.rul` written. Detail 4 (Lining) warns: "size 220 has other turn points than size 500 on the cut line". Tests `jacket2_base_size_export_names_and_grades_each_piece`, `jacket2_assigned_names_reach_the_base_size_export` pin it.
+  - [ ] Layout.27.7.2 After the Layout.27.13 fix, the test expects 8 graded pieces.
+    - With the test input file from MSI 26.10.2023: 7 of 8 pieces graded, `.rul` written. Detail 4 (Lining) warns: "size 220 has other turn points than size 500 on the cut line". The tests `jacket2_base_size_export_names_and_grades_each_piece` and `jacket2_assigned_names_reach_the_base_size_export` check this result.
 - [x] Layout.27.8 If nothing grades, show "No piece graded: no .rul file written". `astm_grading::grade_drawing` writes `.rul` only when at least one piece grades.
 - [x] Layout.27.11 Fix near-duplicate written vertices. Example: Подборт layer 87 has `(333.01, 626.21)` followed by `(333.01, 626.22)`. Increase `SNAP_VERTEX_MM` from 0.01 to 0.02, or compare rounded coordinates. Test: no consecutive written vertices 0.01 mm apart or closer. Done: `DUPLICATE_TOLERANCE_MM` and `SNAP_VERTEX_MM` = 0.025; jacket2 test found 6 before the fix.
 - [x] Layout.27.12 Make line-end turn points consistent across sizes. Detail (7) differs from size 660; Detail (8) differs at 520–640, 680 and 700. `astm_contour::straight_run_ends` flips at its 10-mm / 2× break thresholds (e.g., 9.97 mm at size 640 vs 10.2 mm at 660). Decision (2026-10-13): Option 1.
-  - Option 1 (chosen): Seamly2D checks node line ends, then `unifyTurnPoints` shares flags across sizes. SeamlyLayout stops adding line ends to tagged paths. Refresh old fixtures.
+  - Option 1 (chosen): Seamly2D checks node line ends, then `unifyTurnPoints` shares flags across sizes. SeamlyLayout stops adding line ends to tagged paths. Replace the old test input files.
   - Option 2: SeamlyLayout shares line-end flags across sizes, using new node-index attributes from Seamly2D.
   - [x] Layout.27.12.1 Seamly2D: `turnPointIndices` marks line ends; `unifyTurnPoints` shares them (`5bcb1f3cf1`).
   - [x] Layout.27.12.2 SeamlyLayout: no line ends added to tagged input (`5bcb1f3cf1`).
   - [x] Layout.27.12.3 Refresh fixtures from the next MSI handoff: `male_shirt_pieces.svg` (expect 16 FrontPanel turn points, not 14); jacket2 (expect all 8 pieces graded). Done with MSI 26.10.1416: FrontPanel 16. jacket2: 6 of 8 (Layout.27.13).
   - [x] Layout.27.12.4 Build and user check: Layout.27.3.2, Layout.27.3.3.
-- [ ] Layout.27.13 jacket2 Detail (3) and (6) lines change shape between sizes, so they cannot grade. Found in the MSI 26.10.1416 handoff. Decision (2026-10-14): fix both in Seamly2D.
+- [ ] Layout.27.13 jacket2 Detail (3) and (6) lines change shape between sizes, so they cannot grade. Found in the SVG that Seamly2D sent in MSI 26.10.1416. Decision (2026-10-14): fix both in Seamly2D.
   - Detail (3), sizes 660–700: the seam line and cut line reverse 0.2 mm past a corner (178.7° turn, then a 0.2 mm segment). The corner gets two turn points; other sizes have one. Cause: `VAbstractCurve::FromBegin` keeps a curve end in the same pixel as the node point, so the curve overshoots it.
   - Detail (6), sizes 220–340: the cut line's last seam allowance corner is two vertices (67° each, 9.3 mm apart). From size 360 it is one vertex (131°). Cause: `AngleByLength` cuts a miter longer than 2.4 × the width; the miter is near that limit.
   - The extra vertices also change the node count, so `unifyTurnPoints` skipped these lines.
   - [x] Layout.27.13.1 Detail (3): `vpiecepath.cpp` `curveSegmentPoints` ends a curve at its node point when both round to the same pixel. Test `TST_VPiece::CurveEndInNodePixelEndsAtNode`.
   - [x] Layout.27.13.2 Detail (6): the multisize handoff cuts a ByLength corner in every size when one size cuts it (`MainWindowsNoGUI::unevenCornerCuts`, `VPiece::setForcedCornerCuts`). Only those sizes are built again. Test `TST_VPiece::ForcedCornerCutCutsShortMiter`.
   - [x] Layout.27.13.3 Run the Qt suites. Done: `Seamly2DTests` passed, with both new tests; `ParserTest` and `TranslationsTest` passed; `CollectionTest` exited 1 on the first run and passed 44 of 44 on a rerun. These were the binaries that the MSI 26.10.1421 build compiled.
-  - [ ] Layout.27.13.4 Next MSI: run `capture_handoff_jacket2.bat` again; replace `jacket2_40-146_handoff.svg`; expect 8 graded (Layout.27.7.2).
-    - MSI 26.10.2023 capture: `C:\Users\susan\seamly2d\layouts\handoff_jacket2.svg`. Two material groups: Fabric 7 pieces, Lining 1 (Detail 4).
-    - Done: the capture replaces `jacket2_40-146_handoff.svg`; the jacket2 tests follow (names, grainlines, labels). Result: 7 of 8 graded; Detail 4 does not (Layout.27.13.6).
-    - MSI 26.10.1421 result: still 6 of 8 graded. The fixture was not replaced.
+  - [ ] Layout.27.13.4 In the next MSI build: run `capture_handoff_jacket2.bat` again. It saves the SVG that Seamly2D sends to SeamlyLayout. Replace the test input file `jacket2_40-146_handoff.svg` with it. Expect 8 graded pieces (Layout.27.7.2).
+    - SVG saved from MSI 26.10.2023: `C:\Users\susan\seamly2d\layouts\handoff_jacket2.svg`. Two material groups: Fabric 7 pieces, Lining 1 (Detail 4).
+    - Done: this SVG replaces `jacket2_40-146_handoff.svg`; the jacket2 tests now use it (names, grainlines, labels). Result: 7 of 8 graded; Detail 4 does not (Layout.27.13.6).
+    - MSI 26.10.1421 result: still 6 of 8 graded. The test input file was not replaced.
     - Detail (3): sizes 660 and 680 are fixed. Size 700 has one extra turn point, 3.7 mm before the corner at node 247.
     - Detail (6): no change. Sizes 220–340 still cut the corner and 360+ do not, so the forced cut did not apply.
     - Suspected cause (not verified): the corner and turn point lists count spline interior nodes. Both pieces end a curve at a `cutSplinePath` point (217: `SplPath_А_А3-22`; 209: 50 mm along path 80). An interior node can be on that curve segment in some sizes only. The node count then differs between sizes, so `unevenCornerCuts` and `unifyNodeTurnPoints` skip the piece.
     - Detail (3) evidence: interior node А20 is on the curve from about size 540 up, and past О6 in smaller sizes. Size 700 flags А20 as a turn point; sizes 560–720 have the same vertex without the flag. А20 is smooth: its curve bends 1.4° there.
     - Spline node terms: end node (first or last spline point, or a spline point where the tangent breaks), interior node (spline point with the same tangent on both sides; never a turn point), control node (off-curve handle).
-    - Next MSI check: the Seamly2D log (`%LOCALAPPDATA%\Seamly\Seamly2D\logs\seamly2d-pid*.log`) has the line "Multisize layout: 26 sizes; 0 of 8 pieces differ in node count between sizes." Lines starting `Piece "Detail"` name a piece that still differs.
-  - [ ] Layout.27.13.6 Detail 4 cut line turn points differ (MSI 26.10.2023 capture; Seamly2D log of that run):
+    - Check in the next MSI build: the Seamly2D log (`%LOCALAPPDATA%\Seamly\Seamly2D\logs\seamly2d-pid*.log`) has the line "Multisize layout: 26 sizes; 0 of 8 pieces differ in node count between sizes." Lines starting `Piece "Detail"` name a piece that still differs.
+  - [ ] Layout.27.13.6 Detail 4: the cut line turn points differ between sizes (SVG saved from MSI 26.10.2023, and the Seamly2D log of that run):
     - Node counts (seam line/cut line) differ: Detail 4 280 and 520: 5/5, other sizes 6/7. Back 280, 480, 700: 5/5, others 6/6. Sleeve 1 620: 3/3, others 4/4. `unifyTurnPoints` skips such a piece.
-    - Likely cause, from the code (not yet checked on the capture): `RemoveDublicates` erases the later of two vertices closer than 0.1555 mm. A curve point just before a node stays and the node vertex goes; the node match tolerance is 0.01 px, so the node is lost in that size only.
-    - [x] Layout.27.13.6.1 Fix: `VAbstractPiece::snapNodeVertices` moves the nearest vertex back onto such a node (seam line, cut line, built-in seam line, internal paths). Test `TST_VPiece::SnapNodeVerticesRestoresErasedNode` (harness: passed). `cl /Zs` on the changed `.cpp`. Not run: Qt suites.
+    - Likely cause, from the code (not yet checked in the saved SVG): `RemoveDublicates` erases the later of two vertices closer than 0.1555 mm. A curve point just before a node stays and the node vertex goes; the node match tolerance is 0.01 px, so the node is lost in that size only.
+    - [x] Layout.27.13.6.1 Fix: `VAbstractPiece::snapNodeVertices` moves the nearest vertex back onto such a node (seam line, cut line, built-in seam line, internal paths). Test `TST_VPiece::SnapNodeVerticesRestoresErasedNode` (temporary test program: passed). `cl /Zs` on the changed `.cpp`. Not run: Qt suites.
     - Still open after the fix (geometry, not node count):
       - Sizes 220, 240: one more cut line turn point, a -29° bend followed by a 1.4 mm segment at about 10% across, 23% down the piece box. Other sizes have no such bend.
       - Size 520: the cut corner near the top left is one vertex (+121°); other sizes cut it into two vertices 8 mm apart (+61°, +61°), although the log says "Every size cuts them".
-    - [ ] Layout.27.13.6.2 Next MSI: capture jacket2 again. The log line should read "0 of 8 pieces differ in node count". Check the Detail 4 sizes 220, 240 and 520 cut line in the capture; replace the fixture.
+    - [ ] Layout.27.13.6.2 In the next MSI build: save the jacket2 SVG again with `capture_handoff_jacket2.bat`. The Seamly2D log reads "0 of 8 pieces differ in node count". In the saved SVG, check the Detail 4 cut line in sizes 220, 240 and 520. Replace the test input file `jacket2_40-146_handoff.svg` with the saved SVG.
   - [x] Layout.27.13.5 Seamly2D: a spline interior node is a curve point, not a node vertex (`isSplineEndNode` in `vpiecepath.cpp`). A spline point is an end node when it is first or last, the two curves that meet at it have different tangents, or a control node has length 0. The handoff logs each piece whose node counts differ between sizes, and each forced corner cut. Tests `TST_VPiece::SplineNodeVertices`, `TST_VPiece::CubicBezierPathNodeVertices`, `TST_VPiece::SplineInteriorNodeKeepsNodeCount`. Done: `cl /Zs`. Qt suites passed in `local_build_msi.ps1` (MSI 26.10.1921).
     - First Qt run failed: row `SplineNodeVertices(tangent breaks)` asked for a point that cannot exist. `VSplinePoint` makes the control node angles opposite. `VCubicBezierPath::GetSpline()` turns the control node after an interior node opposite the one before. Only a control node of length 0 gives a tangent break at an interior node.
     - Fix: `isSplineEndNode` reads the two curves that meet at the point, as drawn. The row now expects a smooth point.
@@ -193,12 +195,12 @@ Currently in the nested layout, all pieces are black. To distinguish between siz
 - [x] Layout 74.1 - Assign each size a color. `size_colors::size_palette`: smallest size first, golden-angle hue steps, relative luminance at most 0.3. Layout.82 replaced this palette.
 - [x] Layout 74.2 - Assign each piece its color based on its size. These colors are displayed in the Nested layout, and included in all exports except DXF (Nested can't be exported to DXF). `color_pieces_by_size`, called by `do_process_layout` (Nested only) and `build_sheet_export_inputs` (paper-sheet PDF).
 - [x] Layout 74.3 - Create a color-to-size legend. Place this legend on the Nested Layout. `SizeLegend`: `<g id="size_legend" data-type="size_legend">`, one piece gap below the lowest piece; the media grows to hold it (tiled: more tile rows). Text modes and HPGL treat it as a label. Not on the paper-sheet PDF, which repacks the pieces.
-- [ ] Layout 74.4 - Test/Verify using a multisize pattern. Next MSI: jacket2, Nested tab, then Export > SVG, PDF, PNG.
+- [ ] Layout 74.4 - Test/Verify using a multisize pattern. In the next MSI build: jacket2, Nested tab, then Export > SVG, PDF, PNG.
   - [ ] Layout 74.4.1 - Each piece is displayed with its size's color
   - [ ] Layout 74.4.2 - The legend appears in the Layout
   - [ ] Layout 74.4.3 - Exported files retain the colors
   - [ ] Layout 74.4.4 - Exported files retain the legend
-  - [ ] Layout 74.4.5 - 5 `size_colors` tests; `layout_utils` `jacket2_nested_colors_sizes_and_adds_legend`, `jacket2_nested_tiled_legend_has_tile_rows`; `svg_label_text` `size_legend_text_is_label_text`; `hpgl_writer` `cut_mode_drops_the_size_legend`. `cargo test --workspace` 533 passed; `ctest --preset debug` 6 of 6. jacket2 Nested PNG render checked by eye. Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested size colors".
+  - [ ] Layout 74.4.5 - Automated tests, already passed: 5 `size_colors` tests; `layout_utils` `jacket2_nested_colors_sizes_and_adds_legend`, `jacket2_nested_tiled_legend_has_tile_rows`; `svg_label_text` `size_legend_text_is_label_text`; `hpgl_writer` `cut_mode_drops_the_size_legend`. `cargo test --workspace` 533 passed; `ctest --preset debug` 6 of 6. A PNG image of the jacket2 Nested tab was checked by eye. Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested size colors".
 
 ### [ ] Task Layout.76 - Verify - Multisize - Filename - each piece must have the size in a label
 
@@ -208,7 +210,7 @@ Currently in Multisize layouts, the pattern pieces don't display the size. Add a
   - Done: `size_labels::add_size_labels`, called by `finish_import`. `<g data-type="size_label">` with "Size <size>", Arial 24 px; text bottom 5 px past the grainline front end, reading across the grainline, so it is level after the layout turns the grainline up. Text modes, HPGL, DXF (layer 15) and the outline search treat it as a label.
   - Decision taken (no grainline): the label sits level at the centre of the piece outline. jacket2 hides its grainlines, so its labels are centred.
   - Tests: 5 `size_labels` tests (one lays out a sideways grainline and checks the label is level, 5 px above the top); `layout_utils` `jacket2_size_labels_reach_the_exports` (8 labels on Size 300, 8 DXF texts). Doc: `SVG-DATA-ATTRIBUTES.md`, "Size labels".
-- [ ] Task Layout.76.2 - Test/Verify - Check that exports include the size label. Next MSI: a multisize pattern with visible grainlines; the left canvas shows "Size <size>" above each grainline; Size tab exports (SVG, PDF, DXF) show it.
+- [ ] Task Layout.76.2 - Test/Verify - Check that exports include the size label. In the next MSI build: open a multisize pattern with visible grainlines. The left canvas shows "Size <size>" above each grainline. Exports from a size tab (SVG, PDF, DXF) show it.
 
 ### [ ] Task Layout.77 - Verify - Import - Separate pieces into fabric, a.k.a 'Material'; display on separate tabs in left import canvas
 
@@ -232,7 +234,7 @@ Currently in the import left canvas, all pieces are displayed together regardles
   - [ ] Layout.77.2.4 - check right layout canvas that the pieces are correct for that material.
   - [ ] Layout.77.2.5 - check that .sm2d files contain pieces with material attribute
   - [ ] Layout.77.2.6 - check that older .sm2d files update to new schema properly
-  - [ ] Layout.77.2.7 - `material_split` 3 tests (one lays out each material and checks its pieces); `exports` `material_segment_goes_after_the_variant_and_before_the_tab`. `cargo test --workspace` 543 passed; `ctest --preset debug` 6 of 6 (QML compiles). Doc: `SVG-DATA-ATTRIBUTES.md`, "Materials"; `NEW-ATTRIBUTES.csv`.
+  - [ ] Layout.77.2.7 - Automated tests, already passed: `material_split` 3 tests (one lays out each material and checks its pieces); `exports` `material_segment_goes_after_the_variant_and_before_the_tab`. `cargo test --workspace` 543 passed; `ctest --preset debug` 6 of 6 (the QML files compile). Doc: `SVG-DATA-ATTRIBUTES.md`, "Materials"; `NEW-ATTRIBUTES.csv`.
 - [x] Layout.77.3 - Update Schema
   - [x] Layout.77.3.1 - Create a new `.sm2d` schema: foldline node ids, schema version bump
     - Done for the material: `v0.7.6.xsd` adds the optional piece attribute `material`; `VPatternConverter` max version 0.7.6. Fold line node ids belong to Layout.80 (Layout.80.2); 0.7.6 is not released yet, so Layout.80 can add them to the same schema version.
@@ -249,11 +251,11 @@ Note: This may require flatting the SVG data before grouping pieces by size to p
 
 - [x] Task Layout.78.1 - when exporting an SVG for a nested layout, group the pieces according to size, so that there is a group element for each size that contains all the pieces of that size. Order the size groups in the SVG layout from the largest (so the largest size is underneath all other sizes in the svg display canvas) to the smallest (so it is highest in the svg display canvas) to enable easy selection of each size. The exported SVG should be flat (contains no transforms except for text elements).
   - Done: `size_groups::group_pieces_by_size`, called by `export_svg`. Groups `<g id="size_<size>" data-type="size" data-size="<size>">`, largest first; piece-sets removed; `flatten_dom` first. Only a layout with top-level piece-sets (Nested) changes. Tests: 4 `size_groups` tests; `layout_utils` `jacket2_nested_svg_export_groups_pieces_by_size` (26 groups of 8, no piece moves). Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested SVG export".
-- [ ] Task Layout.78.2 - Test/Verify - Export a multisize file to SVG, open the SVG file using the View feature, confirm that the file is grouped by size. Next MSI: jacket2 Nested tab, Export > SVG; in Inkscape, Objects panel lists `size_720` … `size_220`; hiding one group hides one size.
+- [ ] Task Layout.78.2 - Test/Verify - Export a multisize file to SVG, open the SVG file using the View feature, confirm that the file is grouped by size. In the next MSI build: jacket2 Nested tab, Export > SVG. In Inkscape, the Objects panel lists `size_720` … `size_220`; hiding one group hides one size.
 
 ### [ ] Task Layout.80 — Verify - Fold lines (mirror lines)
 
-A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. `FoldPosition` is free text.
+Before this task, a piece had an "on fold" check box (`VPieceLabelData::IsOnFold()`) but no fold line, and the fold position (`FoldPosition`) was free text.
 
 - [x] Layout.80.1 implement foldline:
   - [x] Layout.80.1.1 - Application Preferences - implement default Foldline style properties. Preferences > Pattern > Fold Lines tab: color (black), line type (dash dot), line weight (0.35 mm). `VCommonSettings::getDefaultFoldLine*`.
@@ -274,7 +276,7 @@ A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. 
   - Decisions taken: the mirror is a draft operation, not a new piece tool element, so the full piece follows draft changes and the file format does not change. The half piece stays; dialog option "Take the half piece out of the layout", checked by default. A custom seam allowance record across the fold line is left out.
   - Also fixed: `v0.7.6.xsd` allows `foldLine` on `unionPiece` nodes; a union of a piece with a fold line wrote an invalid file.
   - Tests: `TST_VPiece` `PieceMirrorFullPathOrder` (7 rows), `PieceMirrorNodeAttributes`, `PieceMirrorFoldNodesTakeHalfWidth`, `PieceMirrorBuildsFullOutline`, `PieceMirrorRecordRanges`, `PieceMirrorDropsRecordAcrossFold`. Passed in a temporary test program against the current `vpatterndb` sources. Checked: `cl /Zs` on every changed `.cpp`. Qt suites passed in `local_build_msi.ps1` (MSI 26.10.1921).
-  - [ ] Layout.80.3.1 Next MSI (`AGENT_CHECKLIST.md` §20): mark a fold line on a half piece; Piece mode > Piece Mirror, click the piece, OK. Check: full piece right of the half; symmetric outline; seam allowance all round; no fold line; half piece out of the layout. Draft mode shows the Mirror by Line operation; move a draft point: both halves follow. Undo removes the full piece and the operation. Save, reopen. Click a piece without a fold line: status bar message, no dialog. In a pattern with several draft blocks, mirror a piece of the first block; undo, redo, save, reopen.
+  - [ ] Layout.80.3.1 In the next MSI build (steps: `AGENT_CHECKLIST.md` section 20): mark a fold line on a half piece. Piece mode > Piece Mirror, click the piece, OK. Check: the full piece is to the right of the half piece; the outline is symmetric; the seam allowance goes all the way round; the full piece has no fold line; the half piece is out of the layout. Draft mode shows the Mirror by Line operation. Move a draft point: both halves follow. Undo removes the full piece and the operation. Save and reopen. Click a piece without a fold line: a status bar message shows, and no dialog. In a pattern with several draft blocks, mirror a piece of the first block; then undo, redo, save, and reopen.
 - [x] Layout.80.4 Handoff SVG: `data-on-fold` on the piece `<g>`, a `fold_line` component group with the two points; update `SVG-DATA-ATTRIBUTES.md` and `NEW-ATTRIBUTES.csv`. `VLayoutPiece::createFoldLineItem`; id `fold_line_<name>`. HPGL draws it as a mark; DXF-ASTM writes layer 6 (Layout.80.6.4).
 - [x] Layout.80.5 Unit tests: schema round-trip, handoff attributes. Written: `TST_VPiece` `FoldLineNodeIndexes` (8 rows), `FoldLineHasNoSeamAllowance`, `LayoutPieceTakesFoldLine`, `FoldLineNodeAttributeIsRead`; `TST_SvgComponentTags::FoldLineSendsFoldLineGroup`. Checked: `cl /Zs` on every changed `.cpp`. Qt suites passed in `local_build_msi.ps1` (MSI 26.10.1921).
 - [ ] Layout.80.6 SeamlyLayout side (was Layout.16):
@@ -291,7 +293,7 @@ A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. 
     - Not on the edge: Nested piece-sets (sizes centred, so their fold lines differ). A fold line across the grain or inside the outline: layout warning popup on an individual pattern; log only on a multisize layout.
     - Known limit: a mirrored piece does not grade in a Base Size DXF-ASTM export ("does not fit its handoff shape").
   - [ ] Layout.80.6.3 Adjust Mode: the fold line moves with its piece.
-    - Expected to work: `accept_adjustments` sets the transform on the piece `<g>`; `fold_line` is its child. User check, `AGENT_CHECKLIST.md` §21.
+    - Expected to work with no code change: `accept_adjustments` sets the transform on the piece `<g>`, and `fold_line` is inside that `<g>`. Check in the app: `AGENT_CHECKLIST.md` section 21.
   - [x] Layout.80.6.4 DXF-ASTM: layer 6 mirror line; boundary starts or ends on the mirror line points (D6673 §4.3.6); a piece without a fold line writes no layer 6.
     - `layers`: `fold_line` → layer 6. `converter`: `Block::mirror_line`. Writer: two-point `LINE` before the grainline.
     - `astm_mirror::align_mirror_lines`, after grading: the cut line edge on the fold line (0.1 mm) is the mirror line, and the boundary starts with it. Key points inside that edge are dropped, with their rule texts.
@@ -301,8 +303,8 @@ A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. 
     - `piece_extractor::fold_line_is_a_component_group`; `svg_extract::find_outline_group_skips_fold_line_at_structural_position_1`; `piece_divider::fold_line_is_clipped_per_part`.
     - `fold_line_edge` (5); `layout_utils::fold_line_lies_on_the_left_edge` (fabric and paper), `sheet_export_pins_fold_line_pieces`; `layout_views::fold_line_warning_lists_one_piece_per_line`; `layout_engine` `left_edge_pieces_touch_the_left_edge`, `left_edge_piece_is_not_turned_to_fit`; `layout_settings::fold_lines_on_left_edge_drop_the_left_margin_of_fabric_only`; `SettingsModelTests::foldLinesOnLeftEdge_defaultsOffAndRoundtrips`.
     - Checked: `cargo test --workspace` 597 passed. `cl /Zs` on `SettingsModel.cpp` and `SettingsModelTests.cpp`. `qmllint SettingsDialog.qml`: no new kind of warning. Not run: ctest, MSI.
-  - [ ] Layout.80.6.6 Next MSI: user check, `AGENT_CHECKLIST.md` §21.
-- [ ] Layout.80.7 Next MSI: Piece Properties > Path, mark two neighbouring nodes Fold Line; check the dashed line, no seam allowance on it, "On fold" checked; save, reopen; Layout Mode handoff has `fold_line`. Mark three nodes: OK disabled. `AGENT_CHECKLIST.md` §20.
+  - [ ] Layout.80.6.6 In the next MSI build: in Settings, check "Place fold lines on the left edge (fabric: no left margin)". On jacket2, each piece with a fold line lies with its fold line on the left edge of the media. Steps: `AGENT_CHECKLIST.md` section 21.
+- [ ] Layout.80.7 In the next MSI build: Piece Properties > Path, mark two neighbouring nodes as Fold Line. Check: the fold line is dashed, it has no seam allowance, and "On fold" is checked. Save and reopen. The SVG that Seamly2D sends in Layout Mode has a `fold_line` group. Mark three nodes: OK is disabled. Steps: `AGENT_CHECKLIST.md` section 20.
 
 ### [ ] Task Layout.84 - Verify - Multisize - Nested - non-DXF export - display only the smallest size's grainline and labels
 
@@ -318,7 +320,7 @@ Display only the labels and grainline of the smallest size of each piece. (In SV
   - Decision taken: the export strips the `Rectangles` group, which holds `contentRect`. The new group takes its place: the first content group, under the size groups. Inkscape lists it directly below `size_720`.
 - [x] Layout.84.3 Tests: `nested_annotations` (5); `layout_utils` `jacket2_nested_export_keeps_the_smallest_size_annotations`, `jacket2_nested_sheet_export_keeps_the_smallest_size_annotations`. `cargo test --workspace` 568 passed.
   - Docs: `SVG-DATA-ATTRIBUTES.md`, "Nested SVG export"; `seamlylayout_EXPORT_WORKFLOW.md`, "Nested tab — one grainline and label set per piece".
-- [ ] Layout.84.4 Next MSI: user check, `AGENT_CHECKLIST.md` §19.
+- [ ] Layout.84.4 In the next MSI build: on the jacket2 Nested tab, export each format. In each file, every piece shows one grainline and one set of labels. The size label reads "Size 220". Steps: `AGENT_CHECKLIST.md` section 19.
 
 ### [ ] Task Layout.82 - Verify - Multisize - Nested - wider range of colors.
 
@@ -327,16 +329,16 @@ Currently all colors are dark and appear to be repeated across sizes. Use some p
 - [x] Layout.82.1 New palette. `size_colors::palette_colors`: OKLCH candidates, lightness 0.40 (dark) to 0.80 (pastel), 10° hue steps. The first size is blue. Each next size takes the candidate farthest, in OKLab, from white and from every earlier size.
   - jacket2, 26 sizes: closest pair 0.11 apart in OKLab. Before: 0.012 (`#085e1d`, `#085e28`). 7 pastel, 5 dark. Distance to white at least 0.2.
 - [x] Layout.82.2 Tests: `size_colors` `palette_colors_differ_and_show_on_white`, `palette_spans_dark_to_pastel`, `palette_repeats_only_past_the_candidates`. `cargo test --workspace` 561 passed. Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested size colors".
-- [ ] Layout.82.3 Next MSI: user check, `AGENT_CHECKLIST.md` §16.
+- [ ] Layout.82.3 In the next MSI build: on the jacket2 Nested tab, each size has a different color, and every color shows clearly on white. Steps: `AGENT_CHECKLIST.md` section 16.
 
 ### [ ] Task Layout.89 - Verify - Export sheet - dialog text is too dark 
 
 Text "Split the pieces" and "Make the media bigger" need to be white, not black.
 See screenshot "C:\Users\susan\Projects\Seamly2D-private\test-seamly-layout\screenshots\Screenshot 2026-10-21 192850 jacket_2.png"
 
-- [x] Layout.89.1 Cause: the screenshot shows a scratch `qml` render of the dialog, not SeamlyLayout. The render had no Fusion style and no `Theme`, so the radio labels took the default black. In SeamlyLayout, both radio labels and both descriptions are `Theme.textOnDark` (`#f3f3f3`).
+- [x] Layout.89.1 Cause: the screenshot shows the dialog drawn by a temporary `qml` preview program, not by SeamlyLayout. The preview had no Fusion style and no `Theme`, so the radio labels took the default black. In SeamlyLayout, both radio labels and both descriptions are `Theme.textOnDark` (`#f3f3f3`).
 - [x] Layout.89.2 `Main.qml` `oversizedPiecesLabel`: the piece list was `Theme.violetLight` on `Theme.dialogBackground`, contrast 2.1:1. Now `Theme.textOnDark`, contrast 7.9:1. Checked: Fusion render of the dialog from `Main.qml` with `Theme.qml`; `qmllint` shows no new warnings.
-- [ ] Layout.89.3 Next MSI: user check, `AGENT_CHECKLIST.md` §12.
+- [ ] Layout.89.3 In the next MSI build: trousers, Paper Roll 16 in. In the "Pieces do not fit the media" dialog, all text is light on the violet background. Steps: `AGENT_CHECKLIST.md` section 12.
 
 ### [ ] Task Layout.88 — Verify - Export menu: DXF-ASTM note is cut off
 
@@ -347,23 +349,23 @@ Marker tab, Export menu (MSI 26.10.2023): the note "DXF-ASTM: select Base Size o
   - Done: `ExportMenu.qml` `fittedWidth`. The Export menu and its SVG submenu take the width of their widest shown item. A hidden item does not widen a menu.
   - The SVG submenu had the same defect: "Paths: convert to single-stroke (Hershey)" 245 px, "Paths: no conversion - labels are already paths" 254 px.
   - Checked: Fusion render of `ExportMenu.qml`. Export menu 222 px, SVG submenu 247/256 px, no elided text. `qmllint` shows no warnings.
-- [ ] Layout.88.2 Next MSI: Marker and Nested tabs, Export menu; the note is readable. `AGENT_CHECKLIST.md` §3.
+- [ ] Layout.88.2 In the next MSI build: jacket2, Marker and Nested tabs, open Export > DXF. The note "DXF: select Base Size or a size tab" shows in full. Steps: `AGENT_CHECKLIST.md` sections 3 and 18.
 
 ### [ ] Task Layout.72 — Verify - Split oversized individual pieces
 
-For oversized individual-pattern pieces, ask whether to split them or enlarge the media (decision 2026-10-13).
+When a piece of an individual pattern is larger than the media, SeamlyLayout asks whether to split the piece or make the media bigger (decision 2026-10-13).
 
-- Dialog: list pieces and offending dimensions; offer "Split the pieces" (SVG, PDF, HPGL, EPS, PS, PNG, JPG) or "Make the media bigger" (DXF). OK continues; Cancel leaves only Layout Settings active.
-- Split only if no allowed rotation fits: too wide → vertical cuts. Paper roll and fabric have no length limit. No dialog for tiled paper.
-- Enlarge media using Layout.71 (width) and Layout.25 (length).
-- Split into the minimum number of equal parts (rounded up), without cut-edge seam allowance. Label each part; add 2 match notches per cut edge. Warn if a fitting piece is left out because the media is full.
+- The dialog lists each piece that is too large, and the dimension that is too large. It offers "Split the pieces" (SVG, PDF, HPGL, EPS, PS, PNG, JPG) or "Make the media bigger" (DXF). OK continues. Cancel leaves only Layout Settings available.
+- SeamlyLayout splits a piece only if no allowed rotation makes it fit. A piece that is too wide is cut vertically. Paper roll and fabric have no length limit. Tiled paper shows no dialog.
+- "Make the media bigger" uses the automatic media width (Layout.71) and length (Layout.25).
+- A split piece becomes the fewest equal parts that fit. The cut edges get no seam allowance. Each part gets a label, and each cut edge gets 2 match notches. If a piece that fits is left out because the media is full, SeamlyLayout warns.
 
-- [x] Layout.72.9 Dialog names each offending dimension with the piece and media sizes, in the settings unit: `• Back: length 43.10 in, media 35.50 in`. The piece list is plain text and scrolls past 40% of the window. Tests: `piece_divider` `oversized_message_gives_the_offending_dimensions`; `trousers_long_pieces_split_on_a_sheet` checks each leg line. Checked: `cargo test -p cxxqt_bridge`; `qmllint` shows no new warnings; scratch `qml` render, 30 pieces: list 280 px, dialog 523 px in a 700 px window.
-- [ ] Layout.72.8 Next MSI: trousers sample, Paper Roll, custom width 16 in, Create Layout:
+- [x] Layout.72.9 Dialog names each offending dimension with the piece and media sizes, in the settings unit: `• Back: length 43.10 in, media 35.50 in`. The piece list is plain text and scrolls past 40% of the window. Tests: `piece_divider` `oversized_message_gives_the_offending_dimensions`; `trousers_long_pieces_split_on_a_sheet` checks each leg line. Checked: `cargo test -p cxxqt_bridge`; `qmllint` shows no new warnings; temporary `qml` preview program, 30 pieces: list 280 px, dialog 523 px in a 700 px window.
+- [ ] Layout.72.8 In the next MSI build: trousers sample, Paper Roll, custom width 16 in, Create Layout (steps: `AGENT_CHECKLIST.md` section 12):
   - [ ] Dialog lists `Back: width 16.61 in, media 15.50 in`.
   - [ ] Cancel: only Layout Settings, Preferences, Exit enabled; submitting settings re-enables Create Layout.
   - [ ] Split: Back becomes 2 parts, blue "<name> part i of 2, joins j" label, and 2 green match notches.
-  - [ ] Enlarge: the roll grows wider than 16 in; no splits or warnings.
+  - [ ] Make the media bigger: the roll grows wider than 16 in; no splits and no warnings.
   - [ ] Export split PDF parts and DXF-ASTM blocks named `Back (1/2)` and `Back (2/2)`.
 
 ### [ ] Task Layout.83 - Verify - Multisize - Nested - Legend - change legend color from line to rect element with width equal to current legend color line width and height equal to width. (makes legend easier to read)
@@ -371,15 +373,19 @@ For oversized individual-pattern pieces, ask whether to split them or enlarge th
 - [x] Layout.83.1 `SizeLegend::element`: each swatch is a 32 × 32 px `rect`, filled with the size color, no stroke, centered on its row. Was a 32 px line, stroke width 4.
 - [x] Layout.83.2 Row height 24 → 40 px (swatch plus one 8 px pad), so rows do not overlap. The legend is taller; the media grows to hold it as before.
 - [x] Layout.83.3 Tests: `size_colors` `legend_swatches_are_filled_squares` (new); `legend_wraps_and_lists_every_size` counts swatch rects. `cargo test --workspace` 561 passed. Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested size colors".
-- [ ] Layout.83.4 Next MSI: user check, `AGENT_CHECKLIST.md` §15.
+- [ ] Layout.83.4 In the next MSI build: on the jacket2 Nested tab, each legend color is a filled square, and the legend rows do not overlap. Steps: `AGENT_CHECKLIST.md` section 15.
 
 ### [ ] Task Layout.86 - Verify - Export - Combine the DXF exports into a DXF submenu
 
+In the next MSI build: the Export menu has one "DXF" item. Its submenu holds DXF-ASTM (R13), DXF-ASTM (CLO3D) and DXF-AAMA (R11). Steps: `AGENT_CHECKLIST.md` section 18.
+
 ### [ ] Task Layout.87 - Verify - Export - Marker - Disable 'PDF (Tiled)' layout for Marker layout (seamlylayout will lock up when exporting a Marker as a tiled layout)
+
+In the next MSI build: on the jacket2 Marker tab, Export > PDF (Tiled) is disabled. With "Export all tabs" checked, PDF (Tiled) writes files for the other tabs, and SeamlyLayout does not lock up. Steps: `AGENT_CHECKLIST.md` section 17.
 
 ### [ ] Task Layout.85 - Verify - Exports - add an option to export DXF 10 (DXF-AAMA)
 
-Export > DXF > "DXF-AAMA (R11)": ANSI/AAMA-292 content in a DXF R11 (AC1009) file, the DXF version the standard builds on. Same pipeline as DXF-ASTM; `DxfAstmExportOptions::aama` selects the AAMA layers. Reference: `dxf-docs/seamlylayout_DXF_AAMA.md`.
+Export > DXF > "DXF-AAMA (R11)": ANSI/AAMA-292 content in a DXF R11 (AC1009) file, the DXF version the standard builds on. It uses the same export code as DXF-ASTM; the option `DxfAstmExportOptions::aama` selects the AAMA layers. Reference: `dxf-docs/seamlylayout_DXF_AAMA.md`.
 
 - [x] Layout.85.1 Research ANSI/AAMA-292: AutoCAD R11 DXF base, 14 layers, grade rules in a `.rul` file. D6673 added layers 15 and 80–87.
 - [x] Layout.85.2 Writer (`ezdxf2dxfastm/src/writer.rs`):
@@ -395,14 +401,14 @@ Export > DXF > "DXF-AAMA (R11)": ANSI/AAMA-292 content in a DXF R11 (AC1009) fil
   - Marker and Nested: disabled, as DXF-ASTM. The submenu note is now "DXF: select Base Size or a size tab".
   - Missing Piece Data dialog, save dialog, progress text and annotated `.txt` title name DXF-AAMA.
 - [x] Layout.85.4 Tests: `writer_astm_test` `aama_r11_header_names_ac1009`, `aama_style_text_has_no_curve_tolerance_or_astm_version`, `aama_block_uses_layers_1_to_14_only`, `aama_labels_never_repeat_piece_text`, `aama_graded_export_writes_rule_ids_and_aama_rule_file`, `aama_annotated_version_names_dxf_aama`, `aama_boundary_starts_on_the_mirror_line`; `exports.rs` `do_export_dxf_writes_aama_r11_when_asked` and AAMA name segments.
-  - Checked: `cargo test --workspace` 596 passed, after the fold line merge. ezdxf 1.4.4 `recover`: male_shirt and graded fixtures as DXF-AAMA, 0 errors, layers 1–14 only. Scratch render of `ExportMenu.qml`: item order, signal, disabled state. `qmllint`: no new warnings.
+  - Checked: `cargo test --workspace` 596 passed, after the fold line merge. ezdxf 1.4.4 `recover`: male_shirt and graded fixtures as DXF-AAMA, 0 errors, layers 1–14 only. Temporary `qml` preview of `ExportMenu.qml`: item order, signal, disabled state. `qmllint`: no new warnings.
   - Not run: ctest, MSI.
   - Decisions taken:
     - R11 DXF (AC1009), user decision: ANSI/AAMA-292 compliance. The first version wrote R10 (AC1006) from the task title.
     - Labels on layer 1, as the Seamly2D and Valentina AAMA writers do. AAMA has no annotation layer.
     - No `Category:`: the handoff has no value for it.
-  - Open: an untagged SVG (no `data-type`) keeps its generic layers, so its text stays on layer 15.
-- [ ] Layout.85.5 Next MSI: user check, `AGENT_CHECKLIST.md` §22. Import the file in an AAMA reader (CLO3D or another pattern CAD).
+  - Not changed: in an SVG without `data-type` attributes, the text keeps its general layers, so it stays on layer 15.
+- [ ] Layout.85.5 In the next MSI build: export DXF-AAMA (R11). Import the `.dxf` and `.rul` files in a program that reads AAMA DXF files (CLO3D or another pattern CAD program). Steps: `AGENT_CHECKLIST.md` section 22.
 
 
 ### [ ] Task Layout.95 - Verify - Seamly2D Piece Properties - Rotation" Change Rotation to be radio buttons for: None, 1-Way → 360, 2-Way → 180, 4-Way → 90, Any → 1. None or Undefined writes no line. (Default is "None"). Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
@@ -414,8 +420,8 @@ Export > DXF > "DXF-AAMA (R11)": ANSI/AAMA-292 content in a DXF R11 (AC1009) fil
   - Layout.96–98 add to the same 0.7.7 format.
 - [x] Layout.95.4 Converter: `VPatternConverter::toVersion0_7_7`, `rotationWayToV0_7_7`. An empty, unknown or translated value becomes `None`.
 - [x] Layout.95.5 Tests: `TST_VPiece::PieceRotationValuesRoundTrip`, `ConverterSetsRotationWay` (3 rows). Passed in a temporary test program (in-tree libs, current `vpatternconverter.cpp`, `vpiecelabeldata.cpp`, `schema.qrc`); the converted file validates against `v0.7.7.xsd`. `cl /Zs` on every changed `.cpp`. Fusion render of the dialog: the page fits. Not run: Qt suites (next MSI).
-- [ ] Layout.95.6 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
-- DXF `Rotation:` line and the handoff attribute: Layout.93.4, 93.5.
+- [ ] Layout.95.6 In the next MSI build: Piece Properties > Rotation shows five radio buttons, with None selected. Select 2-Way, save, and reopen: Rotation is still 2-Way. Save an older pattern: the file has `<version>0.7.7</version>`. Steps: `AGENT_CHECKLIST.md` section 24.
+- The DXF `Rotation:` line and the `data-rotation` attribute in the SVG sent to SeamlyLayout: Layout.93.4, 93.5.
 
 ### [ ] Task Layout.96 - Verify - Seamly2D Piece Properties - Tilt: change to radio buttons "None", "CCW", "CW". If "CCW" or "CW' chosen then enable a text field 'Degrees' that accepts integers between 0 and 90. Default radio button is "None", Default Degrees is "0". Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
 
@@ -424,8 +430,8 @@ Export > DXF > "DXF-AAMA (R11)": ANSI/AAMA-292 content in a DXF R11 (AC1009) fil
 - [x] Layout.96.3 Schema 0.7.7: `tilt` type `pieceTilt` (`None`, `CCW`, `CW`); new attribute `tiltDegrees` type `tiltDegrees` (0–90). `VAbstractPattern::AttrTiltDegrees`.
 - [x] Layout.96.4 Converter `tiltToV0_7_7`: old "CW X" / "CCW X" → direction, 0 degrees; "CCW 15" → CCW, 15; a number past 90 → 0; any other value → None without `tiltDegrees`.
 - [x] Layout.96.5 Tests: `TST_VPiece::PieceTiltValuesRoundTrip`, `ConverterSplitsTilt` (6 rows). Passed in the temporary test program, with the rotation tests (13 passed). `cl /Zs` on every changed `.cpp`. Fusion render of the dialog. Not run: Qt suites (next MSI).
-- [ ] Layout.96.6 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
-- DXF `Tilt:` line and the handoff attribute: Layout.93.4, 93.5.
+- [ ] Layout.96.6 In the next MSI build: Piece Properties > Tilt shows None, CCW and CW, with None selected. Degrees is enabled for CCW and CW only, and stops at 90. Select CCW 15, save, and reopen: CCW, 15°. Steps: `AGENT_CHECKLIST.md` section 24.
+- The DXF `Tilt:` line and the `data-tilt` attribute in the SVG sent to SeamlyLayout: Layout.93.4, 93.5.
 
 ### [ ] Layout.97 - Verify - Seamly2D Piece Properties - Fold: Seamly2D gives Up/Down or Left/Right. D6673 Fold: is Y or N, and means the piece may go on the fold of tubular fabric. Change Seamly2D Piece Properties "On Fold" to be a checkbox that saves as "True" or "False", which exports to 'Y' or 'N' in DXF formats. This removes the possibility for 'Up/Down' folds as this is not typical for soft goods development. (Default is unchecked/"False"). Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
 
@@ -434,11 +440,11 @@ Export > DXF > "DXF-AAMA (R11)": ANSI/AAMA-292 content in a DXF R11 (AC1009) fil
 - [x] Layout.97.3 Schema 0.7.7: no `foldPosition` attribute. Converter `removeFoldPositionV0_7_7` drops it; `onFold` is unchanged.
   - Decision taken: a fold position (Up/Down, Left/Right) does not set `onFold`; the check box was the fold flag before too.
   - Label placeholder `%pFoldPosition%`: removed from the label editor Insert menu; an old template prints nothing for it. No sample or template uses it.
-- [x] Layout.97.4 Tests: `TST_VPiece::ConverterRemovesFoldPosition` (3 rows). Harness: 16 passed. `cl /Zs` on every changed `.cpp`. Fusion render: the page fits again. Not run: Qt suites (next MSI).
-- [ ] Layout.97.5 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
+- [x] Layout.97.4 Tests: `TST_VPiece::ConverterRemovesFoldPosition` (3 rows). Temporary test program: 16 passed. `cl /Zs` on every changed `.cpp`. Fusion render: the page fits again. Not run: Qt suites (next MSI).
+- [ ] Layout.97.5 In the next MSI build: Piece Properties has no "Fold position" row. The "Fold:" row has an "On fold" check box, unchecked on a new piece. An older pattern with a fold position saves without `foldPosition`. Steps: `AGENT_CHECKLIST.md` section 24.
 - [x] Layout.97.6 Fix: removing the fold line in the piece dialog left "On fold" checked. The box now returns to the user choice; a saved piece with a fold line has none (unchecked). `cl` compile check; no dialog test.
   - Probable cause of `onFold="true"` on male_shirt "CollarTopInterface Mirrored": the Piece Mirror tool writes `false`, and only the dialog sets `true`.
-- [ ] Layout.97.7 Verify (User), next MSI: mark two fold line nodes, then unmark them: "On fold" unchecks. male_shirt "CollarTopInterface Mirrored": uncheck "On fold", export: `Fold:N` (user decision: a mirrored piece is not on the fold). male_shirt "FrontPanel" (`onFold="true"`, no fold line): `Fold:N` (Layout.97.8).
+- [ ] Layout.97.7 In the next MSI build, check in the app: mark two fold line nodes, then unmark them: "On fold" unchecks. male_shirt "CollarTopInterface Mirrored": uncheck "On fold", export: `Fold:N` (user decision: a mirrored piece is not on the fold). male_shirt "FrontPanel" (`onFold="true"`, no fold line): `Fold:N` (Layout.97.8).
 - [x] Layout.97.8 DXF-ASTM `Fold:Y` needs `data-on-fold="true"` and a fold line. User decision: no fold line → `Fold:N`. The `Quantity:` split follows: such a piece with N=2 writes `1,1`, not `2,0`.
   - `converter::piece_is_on_fold` (`seamly_svg2ezdxf`). Test `astm_piece_test::piece_on_fold_needs_a_fold_line` replaces `piece_on_fold_counts_every_cut_as_right`.
   - A fold line off the cut line keeps `Fold:Y`; `align_mirror_lines` drops only the mirror line and warns.
@@ -454,9 +460,9 @@ Export > DXF > "DXF-AAMA (R11)": ANSI/AAMA-292 content in a DXF R11 (AC1009) fil
   - Piece context menu: "Flip" submenu with the four choices replaces "Forbid Flipping".
   - Decision taken: the F key no longer toggles flipping (four states); the Shortcuts dialog row is removed.
   - Preferences > Pattern: the "Forbid flipping" default is removed (`VCommonSettings::getForbidPieceFlipping`, key `pattern/forbidFlipping`): a new piece is always None.
-- [x] Layout.98.5 Tests: `TST_VPiece::PieceFlipValuesRoundTrip`, `LayoutPieceKeepsFlip`, `ConverterRemovesForbidFlipping` (2 rows). Harness: 19 passed (`LayoutPieceKeepsFlip` needs a rebuilt `vlayout`; Qt suites). The harness also converted the 8 committed samples and 13 CollectionTest patterns to 0.7.7; all validate. Not converted: 4 inputs that fail before conversion (seamtest1–3 at 0.4.0, the empty `text.sm2d`) and 21 formats older than `readOnly`. `cl /Zs` on every changed `.cpp`. Fusion and Windows renders of the dialog. Not run: Qt suites (next MSI).
-- [ ] Layout.98.6 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
-- DXF `Flip:` line and the handoff attribute: Layout.93.4, 93.5.
+- [x] Layout.98.5 Tests: `TST_VPiece::PieceFlipValuesRoundTrip`, `LayoutPieceKeepsFlip`, `ConverterRemovesForbidFlipping` (2 rows). Temporary test program: 19 passed (`LayoutPieceKeepsFlip` needs a rebuilt `vlayout`; Qt suites). The temporary test program also converted the 8 committed samples and 13 CollectionTest patterns to 0.7.7; all validate. Not converted: 4 inputs that fail before conversion (seamtest1–3 at 0.4.0, the empty `text.sm2d`) and 21 formats older than `readOnly`. `cl /Zs` on every changed `.cpp`. Fusion and Windows renders of the dialog. Not run: Qt suites (next MSI).
+- [ ] Layout.98.6 In the next MSI build: Piece Properties > Flip shows None, Horizontal, Vertical and Both, with None selected. Select Vertical, save, and reopen: Vertical. The piece's right-click Flip submenu shows the current choice. Last result: FAIL, the piece did not flip on the canvas. Fix: Layout.110. Steps: `AGENT_CHECKLIST.md` section 24.
+- The DXF `Flip:` line and the `data-flip` attribute in the SVG sent to SeamlyLayout: Layout.93.4, 93.5.
 
 ### [ ] Task Layout.92 - Verify - right layout canvas - Material tabs
 
@@ -471,7 +477,7 @@ Currently SeamlyLayout's left input canvas displays the Material types in tabs; 
   - Exports and Export all tabs work on the shown material, as before.
 - [x] Layout.92.3 Tests: `layout_views` `layout_jobs_cover_every_material`, `job_labels_name_the_material`, `final_warning_joins_problems_and_fold_lines`, `material_layout_resets_to_its_blank_canvas`; `tab_queue_messages_count_up` and `base_size_layout_is_reused_once_kept` updated. Existing `material_split::material_layout_holds_its_own_pieces` lays out each material. Doc: `SVG-DATA-ATTRIBUTES.md`, "Materials".
   - Checked: `cargo test --workspace` 603 passed; `ctest --preset debug` 6 of 6 (debug build with the new QML); `qmllint`: no new kind of warning. Not run: GUI, MSI.
-- [ ] Layout.92.4 Next MSI: user check, `AGENT_CHECKLIST.md` §25.
+- [ ] Layout.92.4 In the next MSI build: jacket2 shows the material tabs (Fabric, Lining) above the right canvas too. Create Layout lays out every material. A click on a material tab shows that material's pieces on the left and its layouts on the right. Steps: `AGENT_CHECKLIST.md` section 25.
 
 ### [ ] Task Layout.93 - Verify - DXF - for each piece, use its 'piece tool' properties and attributes as source of truth instead of labels for names, letter, quantity, material, foldline, etc.; track this data with the layout pieces.
 
@@ -494,10 +500,10 @@ This information should be tracked in the layout data even if it's not shown in 
   - Decision taken: every tagged piece writes `Fold:Y` or `Fold:N`. `Fold:Y` needs a fold line (Layout.97.8).
   - Decision taken: DXF-AAMA writes none of the four: AAMA piece text has no such identifiers.
 - [x] Layout.93.6 Tests: `TST_SvgComponentTags`; Rust converter and writer tests with hidden labels and grainlines.
-  - `TST_SvgComponentTags::PieceCarriesPieceProperties` (hidden label); `TST_VPiece::LayoutPieceKeepsPieceProperties`, `RotationStepDegrees` (harness: passed); `astm_piece_test::layout_rules_come_from_piece_properties`; `writer_astm_test::layout_rule_text_follows_quantity_in_d6673_order`; `graded_sample_blocks_follow_d6673` expects `Fold:N`. Hidden labels and grainlines: Layout.93.1–93.3 tests.
+  - `TST_SvgComponentTags::PieceCarriesPieceProperties` (hidden label); `TST_VPiece::LayoutPieceKeepsPieceProperties`, `RotationStepDegrees` (temporary test program: passed); `astm_piece_test::layout_rules_come_from_piece_properties`; `writer_astm_test::layout_rule_text_follows_quantity_in_d6673_order`; `graded_sample_blocks_follow_d6673` expects `Fold:N`. Hidden labels and grainlines: Layout.93.1–93.3 tests.
   - Checked: `cargo test --workspace` 605 passed; `cl /Zs` on every changed `.cpp`. Not run: Qt suites (next MSI).
   - Docs: `SVG-DATA-ATTRIBUTES.md` (piece attributes), `NEW-ATTRIBUTES.csv`, `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
-- [ ] Layout.93.7 Next MSI: user check, `AGENT_CHECKLIST.md` §23.
+- [ ] Layout.93.7 In the next MSI build: export jacket2 as DXF-ASTM (R13) and check the file in aw.fyi. The piece text (Material, Rotation, Flip, Tilt, Fold) comes from Piece Properties, also when a label is hidden. Steps: `AGENT_CHECKLIST.md` section 23.
 
 ### [ ] Task Layout.94 - Verify - Multisize the grainline, pattern label, and piece label all have the same position relative to local space within their piece. One of the results will be that the Nested layout's grainlines, pattern label, and piece label stack exactly on top of each other to make the nested layout visually more simple and easier to read. Another results is that no grainline, piece label, pattern label is placed outside or extends beyond the cutline.
 
@@ -510,13 +516,13 @@ Select the position of the base size's grainline (when visible), pattern label (
   - Finding: jacket2 Back's pattern label sits near the edge in size 500 and leaves sizes 220–280: "Back: pattern label past the cut line in sizes 220, 240, 260, 280". Fix in Seamly2D: move Back's pattern label toward the middle in the base size.
   - Decision taken: positions stay the base size's even then (the task's rule); the warning names the sizes. No label is moved inward on its own.
   - Decision revised: Task Layout.108 fits every size in Seamly2D's `layout_handoff`. The warning stays until then.
-  - Open: on the Nested canvas the size labels of every size stack too ("Size 220" over "Size 240"). Nested exports keep the smallest size's only (Layout.84).
+  - Not changed: on the Nested canvas, the size labels of all sizes lie on top of each other ("Size 220" over "Size 240"). Nested exports keep only the smallest size's size label (Layout.84).
 - [x] Layout.94.4 Tests: `annotation_alignment` (5); `layout_utils::jacket2_nested_stacks_each_piece_set_annotations` with the MSI 26.10.2023 capture as fixture (now `jacket2_40-146_handoff.svg`, Layout.27.13.4). `cargo test --workspace` 611 passed. Doc: `SVG-DATA-ATTRIBUTES.md`, "Multisize grainline and label positions".
-- [ ] Layout.94.5 Next MSI: user check, `AGENT_CHECKLIST.md` §26.
+- [ ] Layout.94.5 In the next MSI build: on the jacket2 Size 220 and Size 720 tabs, each piece's grainline and labels sit in the same place in the piece as on the Base Size 500 tab. On the Nested tab, the grainlines and labels of all sizes lie exactly on top of each other. Steps: `AGENT_CHECKLIST.md` section 26.
 
 ### [ ] Task Layout.100 — Verify - Remove the DXF-ASTM (R12) export code and menu option (100.1-100.5 done, see TODO_COMPLETED.md)
 
-- [ ] Layout.100.6 NEEDS_USER_TEST: Export > DXF shows DXF-ASTM (R13), (CLO3D) and DXF-AAMA (R11) only. View > DXF-ASTM still opens a .dxf. Qt build check open (next MSI).
+- [ ] Layout.100.6 In the next MSI build, check in the app: Export > DXF shows only DXF-ASTM (R13), DXF-ASTM (CLO3D) and DXF-AAMA (R11). View > DXF-ASTM still opens a .dxf file. The Qt build also runs in the next MSI build.
 
 
 ### [ ] Task Layout.103 — Verify - DXF units: `METRIC` (in mm) or `ENGLISH` (in inches), these are the options for DXF units.
@@ -539,8 +545,8 @@ User approved (2026-10-25). The measurement file's unit decides the file units. 
 - [x] Layout.103.4 `ezdxf2dxfastm`: `ENGLISH` writes every length in inches with 4 decimals: coordinates, text heights, notch depth and width, `Curve Tolerance:`, `.rul` grade steps. `Units:ENGLISH`.
 - [x] Layout.103.5 Rust tests: mm, cm and inch handoffs; `.rul`; R11 and R13.
 - [x] Layout.103.6 Docs: `seamlylayout_DXF_AAMA.md` (Decisions, McNeel table `Size:` row), `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
-- [x] Layout.103.8 Seamly2D picks the file unit: the referenced measurement file unit, else the pattern unit (`MainWindowsNoGUI::exportUnit`, `MainWindow::measurementFileUnit`). `data-units` carries it; size values (`data-size`, `data-sizes`, `data-base-size`, `data-height`, `data-sample-size`) convert from pattern units to it. Decision: conversion on the Seamly2D side; the `--svg-stdin` contract and the Rust DXF writers stay unchanged (lengths are px). NEEDS_USER_TEST: mm/cm pattern with an inch `.smis` writes `Units:ENGLISH`; inch pattern with a `.smms` in cm writes `Units:METRIC` with sizes in mm.
-- [ ] Layout.103.7 Verify: `cargo test --workspace` and `ctest --preset debug` pass. Open: Qt test `PatternCarriesUnits` (`tst_svgcomponenttags.cpp`) not run, and the Qt build check, until the next MSI. NEEDS_USER_TEST: in an inch pattern (`.smis` in inches), export DXF-AAMA and DXF-ASTM; the DXF has `Units:ENGLISH` and inch coordinates with 4 decimals. In a cm pattern, a `.smms` size 50 writes `Size:500` and `Units:METRIC`.
+- [x] Layout.103.8 Seamly2D picks the file unit: the referenced measurement file unit, else the pattern unit (`MainWindowsNoGUI::exportUnit`, `MainWindow::measurementFileUnit`). `data-units` carries it; size values (`data-size`, `data-sizes`, `data-base-size`, `data-height`, `data-sample-size`) convert from pattern units to it. Decision: conversion on the Seamly2D side; the `--svg-stdin` contract and the Rust DXF writers stay unchanged (lengths are px). Still to check in the app: mm/cm pattern with an inch `.smis` writes `Units:ENGLISH`; inch pattern with a `.smms` in cm writes `Units:METRIC` with sizes in mm.
+- [ ] Layout.103.7 `cargo test --workspace` and `ctest --preset debug` pass. Not run yet: the Qt test `PatternCarriesUnits` (`tst_svgcomponenttags.cpp`) and the Qt build. Both run in the next MSI build. Check in the app: in an inch pattern (`.smis` in inches), export DXF-AAMA and DXF-ASTM. The DXF has `Units:ENGLISH` and inch coordinates with 4 decimals. In a cm pattern with a `.smms` file, size 50 writes `Size:500` and `Units:METRIC`.
 
 ### [ ] Task Layout.104 — Verify - DXF-AAMA piece text from the McNeel guide
 
@@ -551,7 +557,7 @@ User approved (2026-10-25). DXF-AAMA only; DXF-ASTM and CLO3D keep their output.
 - [x] Layout.104.3 `Creation Time:` as `HH:MM:SS` in DXF-AAMA; DXF-ASTM keeps `hh-mm`. Check the `.rul` header time too.
 - [x] Layout.104.4 Tests in `writer_astm_test.rs` (`aama_*`).
 - [x] Layout.104.5 Docs: `seamlylayout_DXF_AAMA.md` Decisions and McNeel table.
-- [ ] Layout.104.6 Verify: `cargo test --workspace` and `ctest --preset debug` pass. Open: Qt build check until the next MSI. NEEDS_USER_TEST: export a multisize pattern to DXF-AAMA; blocks are `<piece name>_<size>` (e.g. `Front_36`), `Annotation:` follows `Size:` when the piece has one, `Creation Time:` is `HH:MM:SS`, and the `.rul` `CREATION TIME:` too. DXF-ASTM keeps `<svg id>_M` and `hh-mm`.
+- [ ] Layout.104.6 `cargo test --workspace` and `ctest --preset debug` pass. Not run yet: the Qt build; it runs in the next MSI build. Check in the app: export a multisize pattern to DXF-AAMA. Blocks are `<piece name>_<size>` (e.g. `Front_36`), `Annotation:` follows `Size:` when the piece has one, `Creation Time:` is `HH:MM:SS`, and the `.rul` `CREATION TIME:` too. DXF-ASTM keeps `<svg id>_M` and `hh-mm`.
 - Not done (user decisions): `Piece Name:` stays full length; `Material:` stays the full name; no `Category:`; layer 5 keeps the grade reference line.
 
 ### [ ] Task Layout.105 — Verify - rewrite or leave the untracked `AAMA-INTEROP.md`
@@ -566,12 +572,12 @@ User approved (2026-10-25). DXF-AAMA only; DXF-ASTM and CLO3D keep their output.
 ### [ ] Task Layout.101 — Verify - `SEAMLY_DATA_DIR` for SeamlyLayout
 
 - Done: `DataDirectory` (`qt_frontend/src/DataDirectory.{h,cpp}`) reads the variable first in `main()`. Settings go to `<dir>/settings/`, logs to `<dir>/logs/seamlylayout/`. A relative path exits 78; an unwritable one exits 73. Seamly2D's `--svg-stdin` launch passes the variable on.
-- [ ] Layout.101.4 NEEDS_USER_TEST: with the MSI, run `$env:SEAMLY_DATA_DIR="D:/sl_job"; seamlylayout.exe`. Expect `settings\qt6_seamlylayout.ini` and `logs\seamlylayout\log_*.txt` under it, nothing new in `%LOCALAPPDATA%\Seamly\SeamlyLayout`. Run with `SEAMLY_DATA_DIR=rel` (exit 78) and a path under a file (exit 73). Run Seamly2D with the variable set, open Layout Mode: SeamlyLayout uses the same folder. Qt build check open (next MSI).
+- [ ] Layout.101.4 In the next MSI build, check in the app: in PowerShell, run `$env:SEAMLY_DATA_DIR="D:/sl_job"; seamlylayout.exe`. Expect `settings\qt6_seamlylayout.ini` and `logs\seamlylayout\log_*.txt` under it, nothing new in `%LOCALAPPDATA%\Seamly\SeamlyLayout`. Run with `SEAMLY_DATA_DIR=rel`, a relative path (exit 78). Run with a path whose parent is a file, so the folder cannot be made (exit 73). Run Seamly2D with the variable set, open Layout Mode: SeamlyLayout uses the same folder. The Qt build also runs in the next MSI build.
 
 
-### [ ] Task Layout.106 — Verify - Seamly2D: build the handoff pieces with `layout_handoff`, not `VLayoutPiece` (Gap 2)
+### [ ] Task Layout.106 — Verify - Seamly2D: build the pieces for the SVG sent to SeamlyLayout with `layout_handoff`, not `VLayoutPiece`
 
-Closes Gap 2 of Dead.4.4.3 (`TODO_REMOVE_DEAD_LAYOUT_CODE.md`). After it, Dead.4.4.3 can compare the two writers and switch `MainWindow`. Dead.4.5 can then delete `VLayoutPiece`.
+Before this task, Seamly2D built the pieces for the SVG with the old class `VLayoutPiece`. This task builds them with `layout_handoff` (Gap 2 in Dead.4.4.3, `TODO_REMOVE_DEAD_LAYOUT_CODE.md`). After it, Dead.4.4.3 can check that the old and the new SVG writer give the same SVG, then switch `MainWindow` to the new writer. Dead.4.5 can then delete `VLayoutPiece`.
 
 - Today `MainWindowsNoGUI` holds `VLayoutPiece` in `pieceList` and `SizePieceList::pieces`. `preparePiecesForLayout()` and `prepareSizePieceList()` fill them with `VLayoutPiece::Create()`.
 - Users of these lists: `unevenCornerCuts()`, `needsCornerCuts()`, `unifySizeTurnPoints()`, `arrangePieceItemsFlat()`, `generatePiecesSvgDocument()`, `generateMultisizePiecesSvgDocument()`, `MainWindow::prepareMultisizePieceLists()`, and the `clear()` calls in `mainwindow.cpp`.
@@ -580,7 +586,7 @@ Closes Gap 2 of Dead.4.4.3 (`TODO_REMOVE_DEAD_LAYOUT_CODE.md`). After it, Dead.4
 - [x] Layout.106.1 User decision: how Dead.4.4.3 compares the two writers.
   - Option A (recommended): fill the old and the new lists in the same size loop. A developer switch writes both SVGs. The `MainWindow` switch deletes the old lists.
   - Option B: replace the old lists now. Compare only in a test program that loads a pattern and runs both writers.
-  - Decision: Option A was used for development. The production comparison switch was removed after verified parity; use the test-only capture application for reproducible comparisons.
+  - Decision: Option A was used during development. When the old and the new writer gave the same SVG, the comparison switch was removed from Seamly2D. To compare the two writers again, build `handoff_capture.exe` with `build_handoff_capture.ps1`, then run `capture_handoff_writers.py` and `compare_handoff_writers.py` (`src/test/Seamly2DTest/`).
 - [x] Layout.106.2 Add the new lists: `QVector<HandoffPlacedPiece>` for an individual pattern, and one in `SizePieceList`. Keep them index-aligned with `pieceIds`.
   - Done: `MainWindowsNoGUI::handoff_pieces`, `SizePieceList::handoff_pieces`. `mainwindow.cpp` clears `handoff_pieces` with `pieceList`.
 - [x] Layout.106.3 `preparePiecesForLayout()` and `prepareSizePieceList()`: build each piece with `HandoffPieceInfo::create()`, `HandoffPiece::create()`, `HandoffLabel::create_piece_label()` and `create_pattern_label()`.
@@ -599,21 +605,21 @@ Closes Gap 2 of Dead.4.4.3 (`TODO_REMOVE_DEAD_LAYOUT_CODE.md`). After it, Dead.4
 - [x] Layout.106.8 Tests: the corner compare (same cuts; different cuts, same corner count; different corner count). Run `TST_HandoffPiece` and `TST_HandoffDocument` again.
   - Done: new `TST_HandoffCornerCuts` (4 cases pass in a temporary test program). `TST_HandoffPiece` and `TST_HandoffDocument` run in 106.9.
   - `cl /Zs` of `mainwindowsnogui.cpp`, `mainwindow.cpp` and `handoff_corner_cuts.cpp`: no errors.
-- [ ] Layout.106.9 MSI build and Qt suites passed. NEEDS_USER_TEST: Layout Mode on an individual and a multisize pattern opens SeamlyLayout with the same pieces as before.
+- [ ] Layout.106.9 The MSI build and the Qt test suites passed. Check in the app: in Seamly2D, press Layout for an individual pattern and for a multisize pattern. SeamlyLayout opens with the same pieces as before.
 
-### [ ] Task Layout.102 — Verify - DXF-ASTM (CLO3D): preset of the shared exporter with a configurable cut/sew layer mapping
+### [ ] Task Layout.102 — Verify - DXF-ASTM (CLO3D): the DXF-ASTM export with CLO3D settings, and a setting that can swap the cut line and sew line layers
 
-- Design rule: a vendor export preset may make compatibility changes. They never change the standard DXF-ASTM export.
-- DXF-ASTM (CLO3D) is a preset of the shared DXF-ASTM exporter, not a second implementation.
-- User decision (Sue, 2026-11-01): DXF-ASTM keeps the ASTM D6673 layers. The CLO3D preset makes only the changes CLO3D import needs. It keeps the standard mapping (layer 1 = cut line, layer 14 = sew line) for now.
+- Design rule: an export for one vendor's program may change the output so that program can read it. Such a change never changes the standard DXF-ASTM export.
+- DXF-ASTM (CLO3D) uses the DXF-ASTM export code with different settings. It is not a second copy of the export code.
+- User decision (Sue, 2026-11-01): DXF-ASTM keeps the ASTM D6673 layers. The CLO3D export makes only the changes that CLO3D needs to import the file. It keeps the standard mapping (layer 1 = cut line, layer 14 = sew line) for now.
 - CLO3D import option (import side): "Swap Cutting Line and Sewing Line". CLO documentation confirms DXF-ASTM support and that setting. It does not show that SeamlyLayout must swap layers.
-- Swap layers 1 and 14 in the CLO3D preset only if the CLO3D import test (102.5) shows it is needed.
+- Swap layers 1 and 14 in the CLO3D export only if the CLO3D import test (102.5) shows it is needed.
 - Guide: `dxf-docs/seamlylayout_DXF_AAMA.md`, "McNeel guide" (layers 0 to 19, piece text).
 - [x] Layout.102.1 Reuse the "DXF-ASTM (CLO3D)" menu item and `clo3d_group_250`. Add `CutSewLayers` (`Standard`, `Swapped`) to `DxfAstmExportOptions` (`writer.rs`). The preset sets `CLO3D_CUT_SEW_LAYERS = Standard` in `do_export_dxf()` (`exports.rs`).
 - [x] Layout.102.2 Document the CLO3D import settings in `dxf-docs/seamlylayout_DXF_EXPORT_WORKFLOW.md` and `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
 - [x] Layout.102.3 Tests (`writer_astm_test.rs`): the standard export and the preset write layers 1/84/14/87 byte for byte alike; a `Swapped` mapping writes cut on 14/87 and sew on 1/84, group 250 follows the role. `cargo test --workspace` passed.
 - [x] Layout.102.4 Integrated MSI build, Qt suites, and Rust workspace tests passed.
-- [ ] Layout.102.5 NEEDS_USER_TEST: see `AGENT_CHECKLIST.md` section 8. Export DXF-ASTM (CLO3D), import in CLO3D with "Swap Cutting Line and Sewing Line" off. If cut and sew lines come in reversed, set `CLO3D_CUT_SEW_LAYERS = CutSewLayers::Swapped` (one line, `writer.rs`) and rerun the test.
+- [ ] Layout.102.5 Check in the app (steps: `AGENT_CHECKLIST.md` section 8): export DXF-ASTM (CLO3D), then import the file in CLO3D with "Swap Cutting Line and Sewing Line" off. If the cut line and sew line come in reversed, set `CLO3D_CUT_SEW_LAYERS = CutSewLayers::Swapped` (one line in `writer.rs`) and run the test again.
 
 
 ### [ ] Task Layout.109 - Verify - SeamlyLayout > Layout Settings > Media Type=Fabric
