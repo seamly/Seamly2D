@@ -559,7 +559,7 @@ ApplicationWindow {
         adjustMode:           appController.isAdjustMode
         settingsOnly:         appController.isSettingsRequired
         splitLayout:          appController.isSplitLayoutActive
-        pdfTiledExportEnabled: settingsModel.paperType === "tiled"
+        pdfTiledExportEnabled: settingsModel.mediaType === "paper" && settingsModel.paperType === "tiled"
         hasLayoutTabs:        appController.layoutViewLabels.length > 1
         exportAllTabs:        root.exportAllTabs
         // Marker and Nested hold every size; DXF-ASTM and DXF-AAMA export one size per file.
@@ -1695,10 +1695,9 @@ ApplicationWindow {
     } // Dialog warningDialog
 
     // -----------------------------------------------------------------------
-    // Oversized pieces dialog — an individual pattern has a piece wider or
-    // longer than the media.  OK lays out with the chosen remedy; Cancel
-    // leaves only 'Layout Settings' active.  Only the buttons close it.
-    // A paper sheet cannot grow, so it offers only 'Split the pieces'.
+    // Oversized pieces dialog — an individual pattern has a piece wider than
+    // the media.  OK lays out with the chosen remedy; Cancel leaves only
+    // 'Layout Settings' active.  Only the buttons close it.
     // -----------------------------------------------------------------------
     Dialog {
         id: oversizedPiecesDialog
@@ -1785,29 +1784,23 @@ ApplicationWindow {
                 width:          440
             } // Text split description
 
-            // A paper sheet cannot grow: the option stays visible but disabled.
             RadioButton {
                 id:      extendMediaRadio
                 text:    "Make the media bigger"
-                enabled: appController.mediaCanGrow
                 ButtonGroup.group: oversizeChoiceGroup
 
                 contentItem: Text {
                     text:              extendMediaRadio.text
-                    color:             extendMediaRadio.enabled ? Theme.textOnDark : Theme.grayMedium
+                    color:             Theme.textOnDark
                     font.pixelSize:    Theme.fontSizeNormal
                     leftPadding:       extendMediaRadio.indicator.width + extendMediaRadio.spacing
                     verticalAlignment: Text.AlignVCenter
                 } // contentItem Text
             } // RadioButton extendMediaRadio
 
-            // On a paper sheet the description directs the user to PDF (tiled).
             Text {
-                text:           appController.mediaCanGrow
-                                ? "For DXF files: pieces stay whole. Fabric keeps its width and grows longer. " +
-                                  "Other media can grow wider and longer."
-                                : "Unavailable for paper sheets. To print pieces larger than the sheet, " +
-                                  "select PDF (tiled) in Layout Settings."
+                text:           "For DXF files: pieces stay whole. Fabric keeps its width and grows longer. " +
+                                "Other media can grow wider and longer."
                 color:          Theme.textOnDark
                 font.pixelSize: Theme.fontSizeSmall
                 wrapMode:       Text.WordWrap

@@ -228,8 +228,7 @@ Pattern: `C:\Users\susan\seamly2d\patterns\jacket2_40-146.sm2d`.
   - [ ] Marker tab: the roll is longer than 500 in (about 800 in). No piece sits outside the frame.
   - [ ] Adjust Layout on the Marker tab: the frame shows the full length.
   - [ ] Export SVG from the Marker tab: the page height matches the canvas.
-- [ ] Settings: Paper, Sheet 36 × 48 in. Create Layout: no layout. The error names the pieces and directs to PDF (tiled).
-- [ ] Left-out pieces warning (Layout.70). Trousers sample, Paper Sheet 36 × 36 in, Create Layout, Split the pieces:
+- [ ] Left-out pieces warning (Layout.70). Trousers sample, Fabric 16 in wide, Folded off, Create Layout, Make the media bigger:
   - [ ] Each left-out piece is one bullet. A long list scrolls; OK stays visible.
   - Note: multisize tabs grow roll and fabric media, so they leave no piece out. Rust tests cover "Detail (3): 220, 240" lines.
 - [ ] Marker or Nested tab shown, Export > DXF:

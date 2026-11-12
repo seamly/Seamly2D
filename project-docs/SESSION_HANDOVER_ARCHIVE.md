@@ -2,6 +2,14 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-12 — .gitignore broad rules narrowed
+
+- `*.json` → `AGENT_STATE.json`, `CMakeUserPresets.json`, `compile_commands.json` (+ signing key rule).
+- `test*.*`, `Test*.*`, `docs/` → repository root only. `man/` deleted.
+- Track: `packaging/macos/**/Info.plist`, `.claude/rules/`, `.claude/skills/`, `.claude/settings.json`, `src/libs/xerces-c/*/lib/*`.
+- Ignore: `.cmake/`, `.qt/`, `scripts/**/*.txt`, `**/.claude/settings.local.json`.
+- Check: no new file became visible; `scripts/2026-11-10-prompt.txt` is ignored now.
+
 ### 2026-11-12 — .gitignore track rules
 
 - Git uses the last matching rule: the track block now sits at the end of `.gitignore`. Keep it there.

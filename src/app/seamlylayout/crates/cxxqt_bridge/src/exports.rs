@@ -953,9 +953,7 @@ pub fn do_export_pdf(
 
 // @brief Render a layout DOM into tiled PDF pages and return them as byte buffers.
 //
-// Extracted from `do_export_pdf_tile_inner` so the sheets orchestrator
-// (`sheets::do_export_sheets_pdf`) can collect Phase A tile pages and Phase B
-// sheet pages together before a single merged write.
+// `do_export_pdf_tile_inner` merges the pages and writes one file.
 //
 // The returned Vec is ordered: [thumbnail page, tile pages row-major].
 //
@@ -1457,7 +1455,7 @@ fn do_export_pdf_tile_inner(
 
 // @brief Export a layout document as a multi-page tiled PDF (Qt-facing entry point).
 //
-// Parses `settings_json`, validates that `paper_type == "tiled"`, then delegates
+// Parses `settings_json`, validates that the media is tiled paper, then delegates
 // to `do_export_pdf_tile_inner`.  The Qt bridge calls this from `export_pdf_tiled()`.
 //
 // @param doc           Cloned, piece-fill-stripped layout DOM.
@@ -1478,44 +1476,19 @@ pub fn do_export_pdf_tile(
             format!("Tiled PDF: invalid settings JSON: {e}")
         })?;
 
-    // Guard: this function is only valid for the "tiled" paper_type.
-    if settings.paper_type != "tiled" {
-        crate::log_to_file(&format!("[exports.rs] do_export_pdf_tile(): 2 paper_type='{}' is not 'tiled'", settings.paper_type));
-        return Err("Tiled PDF: export requested while paperType is not 'tiled'.".to_string());
-    } // if not tiled
+    // Guard: this function is only valid for tiled paper; fabric keeps a paper type too.
+    if !settings.is_tiled_paper() {
+        crate::log_to_file(&format!(
+            "[exports.rs] do_export_pdf_tile(): 2 media_type='{}' paper_type='{}' is not tiled paper",
+            settings.media_type, settings.paper_type
+        ));
+        return Err("Tiled PDF: export requested while the media is not tiled paper.".to_string());
+    } // if not tiled paper
 
     crate::log_to_file(&format!("[exports.rs] do_export_pdf_tile(): 2 paper_type='tiled' tile_size='{}'; delegating to inner", settings.tile_size));
 
     do_export_pdf_tile_inner(doc, path, &settings)
 } // fn do_export_pdf_tile
-
-// ---------------------------------------------------------------------------
-// PDF Tiled export — Phase A / oversized pieces entry point
-// ---------------------------------------------------------------------------
-
-// @brief Export an oversized-pieces SVG as a multi-page tiled PDF (Phase A).
-//
-// Called from `oversized.rs` during L.2.1 Phase A processing to feed the
-// assembled "oversized" SVG Document into the tiled-PDF pipeline.
-//
-// Unlike the Qt-facing `do_export_pdf_tile`, this function:
-//   - Takes a plain Rust `&LayoutSettings` instead of a Qt JSON string.
-//   - Does NOT check `paper_type` — the caller (oversized.rs) is responsible
-//     for providing settings with a valid `tile_size`.
-//
-// @param doc      Oversized SVG Document produced by `oversized::build_oversized_svg`.
-// @param path     Destination PDF file path.
-// @param settings Parsed settings; `tile_size` must be a valid named tile size
-//                 (e.g., "Letter", "A4") so `compute_tile_dims` can succeed.
-// @return Ok(()) on success; Err(message) on any failure.
-#[allow(dead_code)] // TODO: remove or use once sheet-mode / Phase A callers are finalized
-pub(crate) fn do_export_pdf_tile_with_settings(
-    doc: &svg_dom::Document,
-    path: &str,
-    settings: &LayoutSettings,
-) -> Result<(), String> {
-    do_export_pdf_tile_inner(doc, path, settings)
-} // fn do_export_pdf_tile_with_settings
 
 // ---------------------------------------------------------------------------
 // PDF multi-page merge helper (lopdf)

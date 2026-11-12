@@ -43,7 +43,7 @@ ToolBar {
     required property bool adjustMode
 
     // @brief True when Export should allow "PDF (Tiled)" selection.
-    // Bound by Main.qml from settingsModel.paperType === "tiled".
+    // Bound by Main.qml: true for mediaType "paper" with paperType "tiled".
     required property bool pdfTiledExportEnabled
 
     // @brief True when the active layout split oversized pieces.

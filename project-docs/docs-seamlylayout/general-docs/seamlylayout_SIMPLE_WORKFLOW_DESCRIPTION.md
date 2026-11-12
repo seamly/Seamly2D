@@ -166,22 +166,19 @@ The application workflow loop consists of:
      * Enable 'Adjust Layout' button
      * Enable 'Export' button
    * Oversized pieces (individual pattern, not tiled paper):
-     * Before the layout, `do_find_oversized_pieces` lists each piece wider than the media, or longer than a sheet, at every trial angle.
+     * Before the layout, `do_find_oversized_pieces` lists each piece wider than the media at every trial angle.
        Paper roll and fabric have no length limit.
      * None: the layout runs as before. A piece that fits but runs out of room is left out, and a warning names it.
      * Some: no layout yet. Dialog "Pieces do not fit the media" lists them, with two radio buttons.
        One line per piece names each dimension that does not fit, and the media size inside the margins, in the settings unit:
-       "• Back: length 43.10 in, media 35.50 in". A long list scrolls; the buttons stay visible.
+       "• Back: width 16.61 in, media 15.50 in". A long list scrolls; the buttons stay visible.
        * "Split the pieces" (default; SVG, PDF, HPGL, EPS, PS, PNG, JPG): each such piece splits into equal parts that fit.
          Each part gets a label "<name> part i of n, joins j" and 2 match notches per shared cut edge. No seam allowance on a cut edge.
-         The paper-sheet PDF export splits the same way. See `SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout split parts".
-         A paper sheet: when the pieces and parts do not all fit on one sheet, no layout. The error directs the user to PDF (tiled);
-         the canvas shows the blank sheet, and only 'Layout Settings' stays active.
+         See `SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout split parts".
          A paper roll keeps the selected roll width and margins; only its length follows the content.
        * "Make the media bigger" (DXF): fabric keeps its configured width and grows longer. Other media can grow wider and longer.
-         A paper sheet cannot grow: the option is disabled, and its text directs the user to PDF (tiled).
          A completion popup reports the resulting dimensions. Pieces that cannot fit fabric width remain explicitly reported.
-       * Split placement on roll and fabric retries remaining pieces on fresh sheets until all fit or a fresh sheet makes no progress.
+       * Split placement on roll and fabric retries remaining pieces on fresh media lengths until all fit or a fresh length makes no progress.
      * OK lays out with the choice. Cancel: no layout; only 'Layout Settings' (plus Preferences and Exit) stays active until new settings are submitted.
    * Multisize import (`data-measurements='multisize'`) — one tab per layout, every tab from the imported SVG:
      * For non-tiled paper, "Marker" packs every size of every piece as its own piece. It runs first.
@@ -195,7 +192,6 @@ The application workflow loop consists of:
        * Wider: a piece wider than the paper roll widens it to the right. Both side margins are kept.
        * Longer: the media grows downwards. The canvas ends at the lowest piece.
        * No piece is left out. Tiled paper does not extend.
-       * A paper sheet does not grow. When the pieces do not fit, no layout; the error directs the user to PDF (tiled).
        * An individual pattern: see "Oversized pieces" below.
      * One warning after the last tab lists every layout that left pieces out or failed.
        * One bullet per piece, named as DXF-ASTM names it, then its sizes: "Detail (3): 220, 240".

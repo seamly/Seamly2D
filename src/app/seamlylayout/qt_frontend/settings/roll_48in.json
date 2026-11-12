@@ -18,7 +18,6 @@
     "rotationStep": 22.5,
     "noGrainlineRotation": "upright",
     "selvedgeWidth": 0,
-    "sheetName": "B0",
     "tileSize": "Letter",
     "unit": "in"
 }

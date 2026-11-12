@@ -19,8 +19,8 @@
 // The handoff nests every piece inside a single `<g data-type="pattern">` wrapper,
 // so `hoist_tagged_pieces` re-parents the tagged pieces up to the SVG root before
 // the layout pipeline runs.  After that one normalisation the whole pipeline —
-// `verticalize_dom`, `translate_dom`, extraction, `layout_assembler`, `oversized`,
-// `remaining`, `sheets` — sees the flat "one piece per top-level `<g>`" shape it
+// `verticalize_dom`, `translate_dom`, extraction, `layout_assembler` — sees the
+// flat "one piece per top-level `<g>`" shape it
 // has always assumed, and `PieceRect::group_index` stays a valid index into the
 // root's `<g>` children.
 //
@@ -400,12 +400,12 @@ pub fn extract_piece_rects_and_polygons(
 // ```
 //
 // Every stage of this app's layout pipeline — `svg_dom::verticalize_dom`,
-// `svg_dom::translate_dom`, `extract_piece_rects*`, `layout_assembler`,
-// `oversized`, `remaining`, `sheets` — treats a **direct** `<g>` child of the
-// root as one piece.  Left alone, the wrapper is that one piece: the packer is
-// handed a single sheet-sized object and places nothing (Task 59).
+// `svg_dom::translate_dom`, `extract_piece_rects*`, `layout_assembler` — treats
+// a **direct** `<g>` child of the root as one piece.  Left alone, the wrapper is
+// that one piece: the packer is handed a single pattern-sized object and places
+// nothing.
 //
-// Rather than teach eight call sites a new tree shape, the document is
+// Rather than teach each call site a new tree shape, the document is
 // normalised once, here: each tagged piece is lifted out of its wrapper and
 // appended to the root, and any wrapper left with no element children is
 // dropped.  Wrappers that still hold content (a legend, a title group) are

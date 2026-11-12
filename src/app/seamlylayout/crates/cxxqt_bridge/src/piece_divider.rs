@@ -3,17 +3,16 @@
 // MIT License: https://opensource.org/licenses/MIT
 
 // @file piece_divider.rs
-// @brief Split a piece wider or longer than the media into parts that fit.
+// @brief Split a piece wider than the media into parts that fit.
 //
 // Runs on the pre-processed DOM: pieces are direct `<g>` children of the root,
 // grain up, with transforms baked (text keeps its own transform), before
 // `translate_dom` moves each piece to the origin.
 //
 // A piece that fits at one of its trial angles is not split.  Otherwise its
-// outline bounding box splits into equal columns (vertical cut lines) when it
-// is wider than the media, and into equal rows (horizontal cut lines) when it is
-// longer than media with a length limit.  Each region of the outline inside one
-// cell is a part.
+// outline bounding box splits into equal columns (vertical cut lines).  Roll and
+// fabric media have no length limit, so only the width limits a piece.  Each
+// region of the outline inside one column is a part.
 //
 // Per part:
 //   - outline (`cutline`, else `seamline`) and `cut_path`: closed, with new
@@ -53,7 +52,7 @@ const MATCH_NOTCH_IN: f64 = 0.25;
 const PART_LABEL_FONT_IN: f64 = 0.25;
 // Outline regions smaller than this (square user units) are slivers, not parts.
 const MIN_PART_AREA_UU: f64 = 1.0;
-// Upper limit of parts along one side; tiny media must not explode a piece.
+// Upper limit of parts across a piece; tiny media must not explode a piece.
 const MAX_PARTS_PER_SIDE: usize = 50;
 // Largest distance, in inches, of a cut line point from the fold line for it to lie on the fold (0.1 mm).
 const FOLD_LINE_TOLERANCE_IN: f64 = 0.1 / 25.4;
@@ -61,12 +60,8 @@ const FOLD_LINE_TOLERANCE_IN: f64 = 0.1 / 25.4;
 // @brief Media a piece must fit, in layout pixels.
 #[derive(Debug, Clone, PartialEq)]
 pub struct DivideSpec {
-    // Content rectangle width.
+    // Content rectangle width; the media has no length limit.
     pub bin_w: u32,
-    // Content rectangle height.
-    pub bin_h: u32,
-    // False for roll-form media (paper roll, fabric): only the width limits a piece.
-    pub limit_length: bool,
     // The layout mode's trial angles.
     pub trial_angles_deg: Vec<u16>,
     // Apply each piece's source rule only in Any layout mode.
@@ -80,21 +75,15 @@ pub struct DivideSpec {
     pub fold_lines_on_left_edge: bool,
 }
 
-// @brief A piece that does not fit the media at any of its trial angles.
+// @brief A piece wider than the media at each of its trial angles.
 #[derive(Debug, Clone, PartialEq)]
 pub struct OversizedPiece {
     // Name the user reads (`PieceRect::label`).
     pub label: String,
-    // Wider than the media.
-    pub wider: bool,
-    // Longer than the media.
-    pub longer: bool,
-    // Piece bounding box, grain up, in layout pixels.
+    // Piece bounding box width, grain up, in layout pixels.
     pub width_px: u32,
-    pub length_px: u32,
-    // Media content rectangle the piece does not fit, in layout pixels.
+    // Media content width the piece does not fit, less the fold edge gap, in layout pixels.
     pub media_width_px: u32,
-    pub media_length_px: u32,
 }
 
 // @brief A piece that was split, and into how many parts.
@@ -104,53 +93,35 @@ pub struct DividedPiece {
     pub parts: usize,
 }
 
-// @brief Pieces that do not fit the media at any of their trial angles.
+// @brief Pieces wider than the media at each of their trial angles.
 //
 // @param doc Pre-processed DOM: pieces grain up, transforms baked.
 pub fn find_oversized_pieces(doc: &Document, spec: &DivideSpec) -> Vec<OversizedPiece> {
     let pieces = prepared_pieces(doc, spec);
     pieces
         .iter()
-        .filter_map(|piece| {
-            let (columns, rows) = grid(piece.rect, spec);
-            (columns > 1 || rows > 1).then(|| OversizedPiece {
-                label: piece.label().to_string(),
-                wider: columns > 1,
-                longer: rows > 1,
-                width_px: piece.rect.w,
-                length_px: piece.rect.h,
-                media_width_px: spec.bin_w.saturating_sub(piece.rect.min_left_gap_px),
-                media_length_px: spec.bin_h,
-            })
+        .filter(|piece| columns_for(piece.rect, spec) > 1)
+        .map(|piece| OversizedPiece {
+            label: piece.label().to_string(),
+            width_px: piece.rect.w,
+            media_width_px: spec.bin_w.saturating_sub(piece.rect.min_left_gap_px),
         })
         .collect()
 } // fn find_oversized_pieces
 
-// @brief One line per piece for the oversized-pieces dialog, with each dimension
-// that does not fit: "• Back: length 43.10 in, media 35.50 in".
+// @brief One line per piece for the oversized-pieces dialog: "• Back: width 43.10 in, media 35.50 in".
 //
 // @param unit Settings unit, "in", "cm" or "mm"; any other value gives inches.
 pub fn oversized_pieces_message(pieces: &[OversizedPiece], unit: &str) -> String {
     pieces
         .iter()
         .map(|piece| {
-            // One clause per offending dimension: width first, then length.
-            let mut sides = Vec::new();
-            if piece.wider {
-                sides.push(format!(
-                    "width {}, media {}",
-                    unit_length(piece.width_px, unit),
-                    unit_length(piece.media_width_px, unit)
-                ));
-            } // if wider
-            if piece.longer {
-                sides.push(format!(
-                    "length {}, media {}",
-                    unit_length(piece.length_px, unit),
-                    unit_length(piece.media_length_px, unit)
-                ));
-            } // if longer
-            format!("\u{2022} {}: {}", piece.label, sides.join("; "))
+            format!(
+                "\u{2022} {}: width {}, media {}",
+                piece.label,
+                unit_length(piece.width_px, unit),
+                unit_length(piece.media_width_px, unit)
+            )
         })
         .collect::<Vec<_>>()
         .join("\n")
@@ -178,20 +149,20 @@ fn unit_length(px: u32, unit: &str) -> String {
 pub fn divide_oversized_pieces(doc: &mut Document, spec: &DivideSpec) -> Vec<DividedPiece> {
     let uu_per_px = svg_uu_per_px(&doc.root);
     if spec.fold_lines_on_left_edge {
-        // Turn and mirror in place, so each grid cuts the piece as the packer places it.
+        // Turn and mirror in place, so each cut follows the piece as the packer places it.
         crate::fold_line_edge::plan_fold_line_edge(doc, &spec.trial_angles_deg);
     } // if fold lines go on the left edge
     let pieces = prepared_pieces(doc, spec);
 
-    // Grid of each piece that does not fit, keyed by its index among the root's <g> children.
-    let grids: HashMap<usize, (usize, usize)> = pieces
+    // Column count of each piece that does not fit, keyed by its index among the root's <g> children.
+    let column_counts: HashMap<usize, usize> = pieces
         .iter()
-        .map(|piece| (piece.group_index, grid(piece.rect, spec)))
-        .filter(|&(_, (columns, rows))| columns > 1 || rows > 1)
+        .map(|piece| (piece.group_index, columns_for(piece.rect, spec)))
+        .filter(|&(_, columns)| columns > 1)
         .collect();
-    if grids.is_empty() {
+    if column_counts.is_empty() {
         return Vec::new();
-    }
+    } // if every piece fits
 
     let mut divided = Vec::new();
     let mut group_index = 0usize;
@@ -200,12 +171,12 @@ pub fn divide_oversized_pieces(doc: &mut Document, spec: &DivideSpec) -> Vec<Div
         let planned = match &node {
             XMLNode::Element(el) if el.name == "g" => {
                 group_index += 1;
-                grids.get(&(group_index - 1)).copied()
+                column_counts.get(&(group_index - 1)).copied()
             } // <g>
             _ => None,
         }; // planned
-        if let (Some((columns, rows)), XMLNode::Element(piece)) = (planned, &node) {
-            if let Some(parts) = divide_piece(piece, columns, rows, uu_per_px) {
+        if let (Some(columns), XMLNode::Element(piece)) = (planned, &node) {
+            if let Some(parts) = divide_piece(piece, columns, uu_per_px) {
                 divided.push(DividedPiece { label: display_name(piece), parts: parts.len() });
                 doc.root.children.extend(parts.into_iter().map(XMLNode::Element));
                 continue;
@@ -216,16 +187,15 @@ pub fn divide_oversized_pieces(doc: &mut Document, spec: &DivideSpec) -> Vec<Div
     divided
 } // fn divide_oversized_pieces
 
-// @brief Columns and rows a piece splits into; (1, 1) when it fits at one of its trial angles.
-fn grid(rect: Rect, spec: &DivideSpec) -> (usize, usize) {
-    let bin_h = if spec.limit_length { spec.bin_h } else { u32::MAX };
-    if packing::fits_bin(rect, spec.bin_w, bin_h, &spec.trial_angles_deg) {
-        return (1, 1);
-    }
-    let rows = if spec.limit_length { parts_for(rect.h, spec.bin_h) } else { 1 };
+// @brief Columns a piece splits into; 1 when it fits at one of its trial angles.
+fn columns_for(rect: Rect, spec: &DivideSpec) -> usize {
+    // The media has no length limit.
+    if packing::fits_bin(rect, spec.bin_w, u32::MAX, &spec.trial_angles_deg) {
+        return 1;
+    } // if the piece fits
     let available_width = spec.bin_w.saturating_sub(rect.min_left_gap_px);
-    (parts_for(rect.w, available_width), rows)
-} // fn grid
+    parts_for(rect.w, available_width)
+} // fn columns_for
 
 // @brief Return piece bounds with fold-edge placement rules applied.
 fn prepared_pieces(doc: &Document, spec: &DivideSpec) -> Vec<crate::piece_extractor::PieceRect> {
@@ -380,13 +350,11 @@ fn fmt_coord(v: f64) -> String {
 // Cells and parts
 // ---------------------------------------------------------------------------
 
-// @brief One cell of the cut grid; None = unbounded on that side.
+// @brief One column between two vertical cut lines; None = unbounded on that side.
 #[derive(Debug, Clone, Copy)]
 struct Cell {
     x_lo: Option<f64>,
     x_hi: Option<f64>,
-    y_lo: Option<f64>,
-    y_hi: Option<f64>,
 }
 
 impl Cell {
@@ -395,8 +363,6 @@ impl Cell {
         let mut out = Vec::new();
         if let Some(at) = self.x_lo { out.push((CutLine { vertical: true, at }, true)); }
         if let Some(at) = self.x_hi { out.push((CutLine { vertical: true, at }, false)); }
-        if let Some(at) = self.y_lo { out.push((CutLine { vertical: false, at }, true)); }
-        if let Some(at) = self.y_hi { out.push((CutLine { vertical: false, at }, false)); }
         out
     } // fn bounds
 } // impl Cell
@@ -456,22 +422,22 @@ impl Part {
     } // fn cut_edges
 } // impl Part
 
-// @brief The cut line an edge lies on, with its ends along the line; None for any other edge.
+// @brief The vertical cut line an edge lies on, with its ends along the line; None for any other edge.
 //
 // Both ends are new vertices on the same cut line.  Two new vertices on different
 // lines are joined by a piece of an original edge, not by a cut edge.
 fn cut_edge(a: CutVertex, b: CutVertex) -> Option<(CutLine, f64, f64)> {
     if a.source.is_some() || b.source.is_some() {
         return None; // a kept vertex: not a cut edge
-    }
+    } // if a vertex is kept
     let (pa, pb) = (a.point, b.point);
     if (pa.0 - pb.0).abs() < 1e-9 && (pa.1 - pb.1).abs() > 1e-9 {
+        // Same x, different y: a stretch of a vertical cut line.
         Some((CutLine { vertical: true, at: pa.0 }, pa.1.min(pb.1), pa.1.max(pb.1)))
-    } else if (pa.1 - pb.1).abs() < 1e-9 && (pa.0 - pb.0).abs() > 1e-9 {
-        Some((CutLine { vertical: false, at: pa.1 }, pa.0.min(pb.0), pa.0.max(pb.0)))
     } else {
+        // An original edge between two cut lines, or a point.
         None
-    }
+    } // if the edge is vertical
 } // fn cut_edge
 
 // @brief Break a clipped loop into open runs at its edges on cut lines.
@@ -891,7 +857,7 @@ fn shared_edges(a: &Part, b: &Part) -> Vec<(CutLine, f64, f64)> {
     let mut out = Vec::new();
     for (la, lo_a, hi_a) in a.cut_edges() {
         for (lb, lo_b, hi_b) in b.cut_edges() {
-            if la.vertical != lb.vertical || (la.at - lb.at).abs() > 1e-6 {
+            if (la.at - lb.at).abs() > 1e-6 {
                 continue;
             }
             let (lo, hi) = (lo_a.max(lo_b), hi_a.min(hi_b));
@@ -903,16 +869,14 @@ fn shared_edges(a: &Part, b: &Part) -> Vec<(CutLine, f64, f64)> {
     out
 } // fn shared_edges
 
-// @brief Direction from a cut line into a part: +1 or -1 across the line.
+// @brief Direction from a vertical cut line into a part: +1 to the right, -1 to the left.
 fn inward(part: &Part, line: CutLine) -> f64 {
-    let centre = part.centre();
-    let across = if line.vertical { centre.0 } else { centre.1 };
-    if across >= line.at { 1.0 } else { -1.0 }
+    if part.centre().0 >= line.at { 1.0 } else { -1.0 }
 } // fn inward
 
-// @brief A point `offset` from the cut line into the part, at `along` on the line.
+// @brief A point `offset` across the vertical cut line, at `along` (y) on the line.
 fn off_line(line: CutLine, along: f64, offset: f64) -> (f64, f64) {
-    if line.vertical { (line.at + offset, along) } else { (along, line.at + offset) }
+    (line.at + offset, along)
 } // fn off_line
 
 // @brief A vertical grainline with two arrow heads, centred in the part.
@@ -944,7 +908,7 @@ fn grainline_d(part: &Part, uu_per_in: f64) -> Option<String> {
 } // fn grainline_d
 
 // @brief Split one piece group into part groups; None when it cannot be split.
-fn divide_piece(piece: &Element, columns: usize, rows: usize, uu_per_px: f64) -> Option<Vec<Element>> {
+fn divide_piece(piece: &Element, columns: usize, uu_per_px: f64) -> Option<Vec<Element>> {
     let uu_per_in = uu_per_px * layout_tiling::LAYOUT_PPI;
     let children: Vec<&Element> = piece.children.iter().filter_map(|n| n.as_element()).collect();
     let of_type = |t: &str| children.iter().position(|c| attr(c, "data-type") == t);
@@ -981,32 +945,25 @@ fn divide_piece(piece: &Element, columns: usize, rows: usize, uu_per_px: f64) ->
         return None;
     }
 
-    // Equal cut positions, moved off any vertex of the piece.
+    // Equal vertical cut positions, moved off any vertex of the piece.
     let piece_points = all_points(piece);
-    let cuts = |lo: f64, hi: f64, n: usize, along_x: bool| -> Vec<f64> {
-        (1..n)
-            .map(|k| {
-                let mut at = lo + (hi - lo) * k as f64 / n as f64;
-                while piece_points.iter().any(|p| ((if along_x { p.0 } else { p.1 }) - at).abs() < 1e-3) {
-                    at += 0.01;
-                }
-                at
-            })
-            .collect()
-    }; // cuts
-    let xs = cuts(x0, x1, columns, true);
-    let ys = cuts(y0, y1, rows, false);
-    let cells: Vec<Cell> = (0..rows)
-        .flat_map(|r| (0..columns).map(move |c| (r, c)))
-        .map(|(r, c)| Cell {
+    let xs: Vec<f64> = (1..columns)
+        .map(|k| {
+            let mut at = x0 + (x1 - x0) * k as f64 / columns as f64;
+            while piece_points.iter().any(|p| (p.0 - at).abs() < 1e-3) {
+                at += 0.01;
+            } // while a vertex lies on the cut line
+            at
+        })
+        .collect();
+    let cells: Vec<Cell> = (0..columns)
+        .map(|c| Cell {
             x_lo: (c > 0).then(|| xs[c - 1]),
             x_hi: (c + 1 < columns).then(|| xs[c]),
-            y_lo: (r > 0).then(|| ys[r - 1]),
-            y_hi: (r + 1 < rows).then(|| ys[r]),
         })
         .collect();
 
-    // Parts: each outline region of each cell, cells in reading order, then top-left first.
+    // Parts: each outline region of each cell, cells left to right, then top-left first.
     let mut parts: Vec<Part> = Vec::new();
     for (c, cell) in cells.iter().enumerate() {
         let mut in_cell: Vec<Part> = Vec::new();
@@ -1232,7 +1189,7 @@ fn divide_piece(piece: &Element, columns: usize, rows: usize, uu_per_px: f64) ->
             } // match notch group
         } // if match notches
 
-        // Part label beside the longest cut edge, reading along it.
+        // Part label beside the longest cut edge, reading up along it.
         let mut others: Vec<usize> = joins[i].iter().map(|j| j + 1).collect();
         others.sort_unstable();
         let joins_text = others.iter().map(usize::to_string).collect::<Vec<_>>().join(", ");
@@ -1245,11 +1202,7 @@ fn divide_piece(piece: &Element, columns: usize, rows: usize, uu_per_px: f64) ->
         let transform = match part.cut_edges().into_iter().max_by(|a, b| (a.2 - a.1).total_cmp(&(b.2 - b.1))) {
             Some((line, lo, hi)) => {
                 let (x, y) = off_line(line, (lo + hi) / 2.0, inward(part, line) * 1.5 * font);
-                if line.vertical {
-                    format!("translate({} {}) rotate(-90)", fmt_coord(x), fmt_coord(y))
-                } else {
-                    format!("translate({} {})", fmt_coord(x), fmt_coord(y))
-                }
+                format!("translate({} {}) rotate(-90)", fmt_coord(x), fmt_coord(y))
             } // Some
             None => {
                 let (x, y) = part.centre();
@@ -1306,11 +1259,9 @@ mod tests {
 </svg>"#;
 
     // @brief Media spec in layout pixels.
-    fn spec(bin_w: u32, bin_h: u32, limit_length: bool) -> DivideSpec {
+    fn spec(bin_w: u32) -> DivideSpec {
         DivideSpec {
             bin_w,
-            bin_h,
-            limit_length,
             trial_angles_deg: vec![0, 180],
             apply_piece_rotation: false,
             free_rotation_without_grainline: false,
@@ -1350,21 +1301,13 @@ mod tests {
     #[test]
     fn wide_piece_splits_into_two_parts() {
         let mut doc = Document::parse(WIDE_PIECE_SVG).expect("fixture parses");
-        let oversized = find_oversized_pieces(&doc, &spec(250, 1000, true));
+        let oversized = find_oversized_pieces(&doc, &spec(250));
         assert_eq!(
             oversized,
-            vec![OversizedPiece {
-                label: "Front".to_string(),
-                wider: true,
-                longer: false,
-                width_px: 400,
-                length_px: 100,
-                media_width_px: 250,
-                media_length_px: 1000,
-            }]
+            vec![OversizedPiece { label: "Front".to_string(), width_px: 400, media_width_px: 250 }]
         );
 
-        let divided = divide_oversized_pieces(&mut doc, &spec(250, 1000, true));
+        let divided = divide_oversized_pieces(&mut doc, &spec(250));
         assert_eq!(divided, vec![DividedPiece { label: "Front".to_string(), parts: 2 }]);
         let parts = part_groups(&doc);
         assert_eq!(parts.len(), 2);
@@ -1414,48 +1357,47 @@ mod tests {
         assert_eq!(ids.len(), count, "duplicate ids");
     } // wide_piece_splits_into_two_parts
 
-    // @brief A long piece splits in rows on a sheet; roll-form media has no length limit.
-    // A piece that fits turned is not split when it may turn.
+    // @brief The media has no length limit: a long piece is not split.
+    // A wide piece that fits turned is not split when it may turn.
     #[test]
     fn long_piece_and_turned_piece() {
         let long = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-1" data-type="piece" data-name="Leg">
-            <g data-type="cutline"><path d="M0,0 L100,0 L100,400 L0,400 Z"/></g></g></svg>"#;
-        let doc = Document::parse(long).expect("parses");
-        let oversized = find_oversized_pieces(&doc, &spec(250, 250, true));
-        assert_eq!(oversized.len(), 1);
-        assert_eq!((oversized[0].label.as_str(), oversized[0].wider, oversized[0].longer), ("Leg", false, true));
-        assert!(find_oversized_pieces(&doc, &spec(250, 250, false)).is_empty(), "a roll has no length limit");
-        let mut split = doc.clone();
-        assert_eq!(divide_oversized_pieces(&mut split, &spec(250, 250, true))[0].parts, 2);
+            <g data-type="cutline"><path d="M0,0 L100,0 L100,4000 L0,4000 Z"/></g></g></svg>"#;
+        let mut doc = Document::parse(long).expect("parses");
+        assert!(find_oversized_pieces(&doc, &spec(250)).is_empty(), "no length limit");
+        assert!(divide_oversized_pieces(&mut doc, &spec(250)).is_empty());
 
+        let wide = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-1" data-type="piece" data-name="Yoke">
+            <g data-type="cutline"><path d="M0,0 L400,0 L400,100 L0,100 Z"/></g></g></svg>"#;
+        let doc = Document::parse(wide).expect("parses");
+        assert_eq!(find_oversized_pieces(&doc, &spec(250)).len(), 1, "0 and 180 degrees only");
         // No grainline, free rotation allowed: the piece turns instead.
-        let free = DivideSpec { free_rotation_without_grainline: true, ..spec(500, 250, true) };
+        let free = DivideSpec { free_rotation_without_grainline: true, ..spec(250) };
         assert!(find_oversized_pieces(&doc, &free).is_empty());
     } // long_piece_and_turned_piece
 
-    // @brief Any-mode rules prevent a 45°-fitting piece from splitting and survive required splits.
+    // @brief Any-mode piece rules decide the split: a piece that may turn a quarter is not split;
+    // a piece held to 0 and 180 degrees splits, and its parts keep the rule.
     #[test]
     fn piece_rotation_controls_split_and_stays_on_parts() {
         let any_svg = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-Bias" data-type="piece" data-name="Bias" data-rotation="1">
             <g data-type="cutline"><path d="M0,0 L350,0 L350,10 L0,10 Z"/></g></g></svg>"#;
-        let any_doc = Document::parse(any_svg).expect("fixture parses");
         let any_spec = DivideSpec {
             apply_piece_rotation: true,
-            ..spec(300, 300, true)
+            ..spec(300)
         };
-        assert!(find_oversized_pieces(&any_doc, &any_spec).is_empty());
-        let mut any_copy = any_doc;
-        assert!(divide_oversized_pieces(&mut any_copy, &any_spec).is_empty());
+        for rule in ["1", "90"] {
+            let turning_svg = any_svg.replace("data-rotation=\"1\"", &format!("data-rotation=\"{rule}\""));
+            let mut turning_doc = Document::parse(&turning_svg).expect("fixture parses");
+            assert!(find_oversized_pieces(&turning_doc, &any_spec).is_empty(), "rule {rule}");
+            assert!(divide_oversized_pieces(&mut turning_doc, &any_spec).is_empty(), "rule {rule}");
+        } // for each rule that allows a quarter turn
 
-        let restricted_svg = any_svg.replace("data-rotation=\"1\"", "data-rotation=\"90\"");
+        let restricted_svg = any_svg.replace("data-rotation=\"1\"", "data-rotation=\"180\"");
         let mut restricted_doc = Document::parse(&restricted_svg).expect("fixture parses");
-        let restricted_spec = DivideSpec {
-            apply_piece_rotation: true,
-            ..spec(300, 300, true)
-        };
-        assert_eq!(find_oversized_pieces(&restricted_doc, &restricted_spec).len(), 1);
-        assert_eq!(divide_oversized_pieces(&mut restricted_doc, &restricted_spec)[0].parts, 2);
-        assert!(part_groups(&restricted_doc).iter().all(|part| attr(part, "data-rotation") == "90"));
+        assert_eq!(find_oversized_pieces(&restricted_doc, &any_spec).len(), 1);
+        assert_eq!(divide_oversized_pieces(&mut restricted_doc, &any_spec)[0].parts, 2);
+        assert!(part_groups(&restricted_doc).iter().all(|part| attr(part, "data-rotation") == "180"));
     } // piece_rotation_controls_split_and_stays_on_parts
 
     // @brief Fold-line pieces use the fold edge while other pieces keep its configured clearance.
@@ -1474,20 +1416,12 @@ mod tests {
         let folded = DivideSpec {
             fold_edge_gap_px: 5,
             fold_lines_on_left_edge: true,
-            ..spec(100, 200, false)
+            ..spec(100)
         };
 
         assert_eq!(
             find_oversized_pieces(&doc, &folded),
-            vec![OversizedPiece {
-                label: "NoFold".to_string(),
-                wider: true,
-                longer: false,
-                width_px: 96,
-                length_px: 40,
-                media_width_px: 95,
-                media_length_px: 200,
-            }]
+            vec![OversizedPiece { label: "NoFold".to_string(), width_px: 96, media_width_px: 95 }]
         );
         assert_eq!(
             divide_oversized_pieces(&mut doc, &folded),
@@ -1500,27 +1434,29 @@ mod tests {
     // of fold line inside it, and a part the fold line misses holds none.
     #[test]
     fn fold_line_is_clipped_per_part() {
-        // Fold line on the left edge, 0..400 down; the piece splits in two rows and two columns.
+        // Fold line on the top edge, 400..0; the piece splits in two columns.
         let svg = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-1" data-type="piece" data-name="Back" data-on-fold="true">
             <g data-type="cutline"><path d="M0,0 L400,0 L400,400 L0,400 Z"/></g>
-            <g id="fold_line_Back" data-type="fold_line"><path d="M0,400 L0,0"/></g></g></svg>"#;
+            <g id="fold_line_Back" data-type="fold_line"><path d="M400,0 L0,0"/></g></g></svg>"#;
         let mut doc = Document::parse(svg).expect("parses");
-        let divided = divide_oversized_pieces(&mut doc, &spec(250, 250, true));
-        assert_eq!(divided, vec![DividedPiece { label: "Back".to_string(), parts: 4 }]);
+        let divided = divide_oversized_pieces(&mut doc, &spec(250));
+        assert_eq!(divided, vec![DividedPiece { label: "Back".to_string(), parts: 2 }]);
 
         let mut stretches = Vec::new();
         for part in part_groups(&doc) {
-            let Some(fold) = component(part, "fold_line") else {
-                let (x0, _, _, _) = part_bbox(part);
-                assert!(x0 > 1.0, "{}: on the fold but has no fold line", attr(part, "id"));
-                continue;
-            }; // if no fold line
-            let d = ds(fold);
+            let d = ds(component(part, "fold_line").expect("each part is on the fold line"));
             assert_eq!(d.matches('M').count(), 1, "one open run: {d}");
             assert!(!d.contains('Z'), "{d}");
             stretches.push(d);
         } // for each part
-        assert_eq!(stretches, vec!["M0,200 L0,0".to_string(), "M0,400 L0,200".to_string()]);
+        assert_eq!(stretches, vec!["M200,0 L0,0".to_string(), "M400,0 L200,0".to_string()]);
+
+        // A fold line on the left edge is not cut: the right part has none.
+        let left = svg.replace("M400,0 L0,0", "M0,400 L0,0");
+        let mut doc = Document::parse(&left).expect("parses");
+        assert_eq!(divide_oversized_pieces(&mut doc, &spec(250))[0].parts, 2);
+        let holders: Vec<bool> = part_groups(&doc).iter().map(|part| component(part, "fold_line").is_some()).collect();
+        assert_eq!(holders, vec![true, false]);
     } // fold_line_is_clipped_per_part
 
     // @brief An outline without its fold line edge makes parts like a closed one. A part on the fold line
@@ -1540,8 +1476,8 @@ mod tests {
             <g data-type="{outline_type}" data-turn-points="0 1 2 3"><path d="M0,0 L400,0 L400,400 L0,400"/></g>
             <g id="fold_line_Back" data-type="fold_line"><path d="M0,400 L0,0"/></g></g></svg>"#);
         let mut doc = Document::parse(&svg).expect("parses");
-        let divided = divide_oversized_pieces(&mut doc, &spec(250, 250, true));
-        assert_eq!(divided, vec![DividedPiece { label: "Back".to_string(), parts: 4 }], "{outline_type}");
+        let divided = divide_oversized_pieces(&mut doc, &spec(250));
+        assert_eq!(divided, vec![DividedPiece { label: "Back".to_string(), parts: 2 }], "{outline_type}");
 
         let mut open = 0;
         for part in part_groups(&doc) {
@@ -1558,7 +1494,7 @@ mod tests {
                 assert!(d.ends_with('Z'), "{outline_type}: {d}");
             } // if on the fold line
         } // for each part
-        assert_eq!(open, 2, "{outline_type}");
+        assert_eq!(open, 1, "{outline_type}");
     } // fn open_outline_on_the_fold_line_splits_and_stays_open_with
 
     // @brief An open cut line without a fold line is not an outline region: the piece is not divided.
@@ -1567,21 +1503,21 @@ mod tests {
         let svg = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-1" data-type="piece" data-name="Back">
             <g data-type="cutline"><path d="M0,0 L400,0 L400,400 L0,400"/></g></g></svg>"#;
         let mut doc = Document::parse(svg).expect("parses");
-        assert!(divide_oversized_pieces(&mut doc, &spec(250, 250, true)).is_empty());
+        assert!(divide_oversized_pieces(&mut doc, &spec(250)).is_empty());
     } // open_cut_line_without_fold_line_is_not_divided
 
     // @brief The fold line arrow line and label are not clipped: each goes whole into the fold line group
     // of the part nearest to it, after that part's stretch of fold line.
     #[test]
     fn fold_line_arrow_and_label_go_whole_to_the_nearest_part() {
-        // Arrow line and label near the top of the fold line, in the top left part.
+        // Fold line on the top edge; arrow line and label near its left end, in the left part.
         let svg = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-1" data-type="piece" data-name="Back" data-on-fold="true">
             <g data-type="cutline"><path d="M0,0 L400,0 L400,400 L0,400 Z"/></g>
-            <g id="fold_line_Back" data-type="fold_line"><g><path d="M0,400 L0,0"/></g>
-              <g id="fold_line_arrow_Back" data-type="fold_line_arrow"><path d="M5,180 L20,180 L20,20 L5,20"/></g>
-              <g id="fold_line_label_Back" data-type="fold_line_label"><text x="10" y="100">Foldline</text></g></g></g></svg>"#;
+            <g id="fold_line_Back" data-type="fold_line"><g><path d="M400,0 L0,0"/></g>
+              <g id="fold_line_arrow_Back" data-type="fold_line_arrow"><path d="M20,5 L20,20 L180,20 L180,5"/></g>
+              <g id="fold_line_label_Back" data-type="fold_line_label"><text x="100" y="10">Foldline</text></g></g></g></svg>"#;
         let mut doc = Document::parse(svg).expect("parses");
-        assert_eq!(divide_oversized_pieces(&mut doc, &spec(250, 250, true))[0].parts, 4);
+        assert_eq!(divide_oversized_pieces(&mut doc, &spec(250))[0].parts, 2);
 
         let mut holders = Vec::new();
         for part in part_groups(&doc) {
@@ -1608,48 +1544,40 @@ mod tests {
         )
     } // fn part_bbox
 
-    // @brief The dialog line names each dimension that does not fit, with the
-    // piece and media sizes in the settings unit.
+    // @brief The dialog line names the piece width and the media width in the settings unit.
     #[test]
     fn oversized_message_gives_the_offending_dimensions() {
-        let long = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-1" data-type="piece" data-name="Leg">
-            <g data-type="cutline"><path d="M0,0 L96,0 L96,480 L0,480 Z"/></g></g></svg>"#;
-        let doc = Document::parse(long).expect("parses");
+        let wide = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-1" data-type="piece" data-name="Leg">
+            <g data-type="cutline"><path d="M0,0 L480,0 L480,96 L0,96 Z"/></g></g></svg>"#;
+        let doc = Document::parse(wide).expect("parses");
 
-        // 96 × 480 px = 1 × 5 in, on media 2.5 in wide and 3 in long.
-        let longer = find_oversized_pieces(&doc, &spec(240, 288, true));
-        assert_eq!(oversized_pieces_message(&longer, "in"), "\u{2022} Leg: length 5.00 in, media 3.00 in");
-        assert_eq!(oversized_pieces_message(&longer, "cm"), "\u{2022} Leg: length 12.7 cm, media 7.6 cm");
-        assert_eq!(oversized_pieces_message(&longer, "mm"), "\u{2022} Leg: length 127 mm, media 76 mm");
-        assert_eq!(oversized_pieces_message(&longer, ""), "\u{2022} Leg: length 5.00 in, media 3.00 in", "unknown unit: inches");
-
-        // Too wide and too long: width first, then length.
-        let both = find_oversized_pieces(&doc, &spec(48, 288, true));
-        assert_eq!(
-            oversized_pieces_message(&both, "in"),
-            "\u{2022} Leg: width 1.00 in, media 0.50 in; length 5.00 in, media 3.00 in"
-        );
+        // 480 × 96 px = 5 × 1 in, on media 3 in wide.
+        let wider = find_oversized_pieces(&doc, &spec(288));
+        assert_eq!(oversized_pieces_message(&wider, "in"), "\u{2022} Leg: width 5.00 in, media 3.00 in");
+        assert_eq!(oversized_pieces_message(&wider, "cm"), "\u{2022} Leg: width 12.7 cm, media 7.6 cm");
+        assert_eq!(oversized_pieces_message(&wider, "mm"), "\u{2022} Leg: width 127 mm, media 76 mm");
+        assert_eq!(oversized_pieces_message(&wider, ""), "\u{2022} Leg: width 5.00 in, media 3.00 in", "unknown unit: inches");
 
         // One line per piece, in document order.
         let two = format!(
-            "{}<g id=\"piece-2\" data-type=\"piece\" data-name=\"Cuff\"><g data-type=\"cutline\"><path d=\"M200,0 L296,0 L296,480 L200,480 Z\"/></g></g></svg>",
-            long.trim_end_matches("</svg>")
+            "{}<g id=\"piece-2\" data-type=\"piece\" data-name=\"Cuff\"><g data-type=\"cutline\"><path d=\"M0,200 L480,200 L480,296 L0,296 Z\"/></g></g></svg>",
+            wide.trim_end_matches("</svg>")
         );
         let doc = Document::parse(&two).expect("parses");
-        let message = oversized_pieces_message(&find_oversized_pieces(&doc, &spec(240, 288, true)), "in");
+        let message = oversized_pieces_message(&find_oversized_pieces(&doc, &spec(288)), "in");
         assert_eq!(message.lines().collect::<Vec<_>>(), [
-            "\u{2022} Leg: length 5.00 in, media 3.00 in",
-            "\u{2022} Cuff: length 5.00 in, media 3.00 in",
+            "\u{2022} Leg: width 5.00 in, media 3.00 in",
+            "\u{2022} Cuff: width 5.00 in, media 3.00 in",
         ]);
     } // oversized_message_gives_the_offending_dimensions
 
-    // @brief A U open at the bottom, cut across its arms: the bridge and one part per arm.
+    // @brief A U open at the right, cut across its arms: the bridge and one part per arm.
     #[test]
     fn concave_piece_gives_one_part_per_region() {
         let u = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece_U" data-type="piece" data-name="U">
-            <g data-type="cutline"><path d="M0,0 L300,0 L300,300 L200,300 L200,100 L100,100 L100,300 L0,300 L0,0 Z"/></g></g></svg>"#;
+            <g data-type="cutline"><path d="M0,0 L300,0 L300,100 L100,100 L100,200 L300,200 L300,300 L0,300 L0,0 Z"/></g></g></svg>"#;
         let mut doc = Document::parse(u).expect("parses");
-        let divided = divide_oversized_pieces(&mut doc, &spec(400, 160, true));
+        let divided = divide_oversized_pieces(&mut doc, &spec(160));
         assert_eq!(divided[0].parts, 3);
         let svg = doc.to_string();
         assert!(svg.contains("U part 1 of 3, joins 2, 3"), "{svg}");

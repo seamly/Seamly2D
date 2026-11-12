@@ -79,21 +79,6 @@ use exports::{
     do_export_svg, paid_export_available, default_export_file_name, material_name_segment, tab_export_path, export_name_segment, dxf_export_name_segment, do_export_hpgl, parse_hpgl_options, do_export_postscript,
 };
 
-// Phase A of the "sheets" paper_type (L.2.1):
-// identifies oversized pieces and assembles the oversized SVG for the tiled-PDF pipeline.
-pub mod oversized;
-pub use oversized::{partition_oversized_pieces, build_oversized_svg};
-
-// Phase B of the "sheets" paper_type (L.2.2):
-// packs remaining (non-oversized) pieces onto multiple sheet SVG documents.
-pub mod remaining;
-pub use remaining::build_remaining_svgs;
-
-// Sheets orchestrator (L.2.1 + L.2.2):
-// combines Phase A tiled pages and Phase B sheet pages into one merged PDF.
-mod sheets;
-use sheets::{build_sheet_export_inputs, do_export_sheets_pdf};
-
 // Optional copy of the Seamly2D handoff document (SEAMLYLAYOUT_SAVE_HANDOFF).
 mod handoff_capture;
 
@@ -634,8 +619,6 @@ pub mod qobject {
         // True after Cancel in the oversized-pieces dialog: only 'Layout Settings'
         // stays active until new settings are submitted.
         #[qproperty(bool, is_settings_required)]
-        // False when the oversized-pieces dialog must disable 'Make the media bigger': a paper sheet.
-        #[qproperty(bool, media_can_grow)]
         // Material tab labels of the import ("Fabric", "Lining", ...); empty for one material.
         #[qproperty(QStringList, material_labels)]
         // Index of the shown material in `material_labels`.
@@ -994,17 +977,16 @@ pub struct AppControllerRust {
 
     // Full SVG canvas width in pixels, set by initialize_layout.
     // Semantic: the <svg width> of the layout canvas, margins included.
-    // For sheet/roll: pageWidth  (or rollWidth) converted to px.
-    // For tiled:      inputDomWidthPx  (full pattern, spanning all tiles).
+    // For roll/fabric: the roll or fabric width converted to px.
+    // For tiled:       inputDomWidthPx  (full pattern, spanning all tiles).
     // Used by process_layout: bin_w = layout_w_px - margin_left_px - margin_right_px.
     // Reset to 0.0 on import.
     layout_w_px: u32,
 
     // Full SVG canvas height in pixels, set by initialize_layout.
     // Semantic: the <svg height> of the layout canvas, margins included.
-    // For sheet:      pageHeight converted to px.
-    // For roll:       500 in sentinel; updated to trimmed height after process_layout.
-    // For tiled:      inputDomHeightPx (full pattern, spanning all tiles).
+    // For roll/fabric: 500 in sentinel, or the fabric length; updated to trimmed height after process_layout.
+    // For tiled:       inputDomHeightPx (full pattern, spanning all tiles).
     // Used by process_layout: bin_h = layout_h_px - margin_top_px - margin_bottom_px.
     // Reset to 0.0 on import.
     layout_h_px: u32,
@@ -1100,11 +1082,7 @@ pub struct AppControllerRust {
     // True after Cancel in the oversized-pieces dialog, until new settings are submitted.
     is_settings_required: bool,
 
-    // False when the media of the oversized-pieces dialog is a paper sheet.
-    media_can_grow: bool,
-
     // The media the current layout split its pieces for; None when it did not split.
-    // The paper-sheet PDF export splits the same way.
     divide_spec: Option<piece_divider::DivideSpec>,
 
     // Inactive tabs of a multisize layout; empty for an individual import.
@@ -1179,7 +1157,6 @@ impl Default for AppControllerRust {
             pdf_tiled_export_allowed:  true,                           // no tabs: an individual layout exports PDF (Tiled)
             is_split_layout_active:    false,                          // no split layout
             is_settings_required:      false,                          // no cancelled layout
-            media_can_grow:            true,                           // set before the dialog opens
             divide_spec:               None,                           // no split layout
             layout_views:              LayoutViews::default(),         // no tabs
             tab_queue:                 None,                           // no tab run queued
@@ -1681,13 +1658,11 @@ impl qobject::AppController {
                 found
             }; // rust borrow dropped
             if !found.is_empty() {
-                // The settings parsed in do_find_oversized_pieces, so the unit and media are there.
-                let settings = LayoutSettings::from_json(&settings_json.to_string()).ok();
-                let unit = settings.as_ref().map(|settings| settings.unit.clone()).unwrap_or_default();
-                let can_grow = settings.as_ref().map_or(true, layout_utils::media_can_grow);
+                // The settings parsed in do_find_oversized_pieces, so the unit is there.
+                let unit = LayoutSettings::from_json(&settings_json.to_string())
+                    .map(|settings| settings.unit)
+                    .unwrap_or_default();
                 let message = piece_divider::oversized_pieces_message(&found, &unit);
-                // The dialog disables 'Make the media bigger' for a paper sheet.
-                self.as_mut().set_media_can_grow(can_grow);
                 self.as_mut().oversized_pieces_found(cxx_qt_lib::QString::from(message.as_str()));
                 return false;
             } // if oversized pieces
@@ -1698,20 +1673,11 @@ impl qobject::AppController {
     // Lay out after the oversized-pieces dialog's OK: "split" splits each such
     // piece into parts; any other value makes the media bigger.
     fn process_layout_oversized(
-        mut self: std::pin::Pin<&mut Self>,
+        self: std::pin::Pin<&mut Self>,
         settings_json: &cxx_qt_lib::QString,
         choice: &cxx_qt_lib::QString,
     ) -> bool {
         let choice = if choice.to_string() == "split" { OversizeChoice::Split } else { OversizeChoice::Extend };
-        // A paper sheet cannot grow: send the user to PDF (tiled) and make no layout.
-        let can_grow = LayoutSettings::from_json(&settings_json.to_string())
-            .map_or(true, |settings| layout_utils::media_can_grow(&settings));
-        if choice == OversizeChoice::Extend && !can_grow {
-            log_to_file("[process_layout_oversized] refused: a paper sheet cannot grow");
-            self.as_mut().cancel_layout();
-            self.as_mut().error_occurred(cxx_qt_lib::QString::from(layout_utils::SHEET_CANNOT_GROW_MESSAGE));
-            return false;
-        } // if a paper sheet would grow
         self.run_layout(settings_json, choice)
     } // fn process_layout_oversized
 
@@ -1721,37 +1687,6 @@ impl qobject::AppController {
         self.as_mut().set_is_create_layout_enabled(false);
         self.as_mut().set_is_settings_required(true);
     } // fn cancel_layout
-
-    // Refuse a layout that overflows one paper sheet: every material shows its
-    // blank sheet, the error names PDF (tiled), and only 'Layout Settings' stays active.
-    // `material` is the material that overflowed; its name prefixes the error
-    // when the import has several materials.
-    fn refuse_sheet_layout(mut self: std::pin::Pin<&mut Self>, material: usize, error: &str) {
-        log_to_file(&format!("[refuse_sheet_layout] material {material}: {error}"));
-        let message = {
-            let mut rust = self.as_mut().rust_mut();
-            // No layout stays: no split parts, and every canvas goes back to blank.
-            rust.divide_spec = None;
-            for layout in rust.material_layouts.iter_mut() {
-                layout.reset_to_blank();
-            } // for each material
-            let blank = rust.initial_layout_dom.as_ref().map(LayoutState::blank).unwrap_or_default();
-            rust.put_layout_state(blank);
-            match rust.material_names().get(material) {
-                Some(name) => format!("{name}: {error}"),
-                None => error.to_string(), // one material: no prefix
-            } // match material name
-        }; // rust borrow dropped
-        // Drop the queued run and its tabs; this also clears the split flag.
-        self.as_mut().clear_layout_views();
-        self.as_mut().set_is_layout_in_progress(false);
-        self.as_mut().set_layout_progress(-1);
-        self.as_mut().set_layout_status_message(cxx_qt_lib::QString::default());
-        self.as_mut().set_is_layout_ready(false);
-        self.as_mut().cancel_layout();   // only 'Layout Settings' stays active
-        self.as_mut().layout_finished(); // right canvas shows the blank sheet
-        self.as_mut().error_occurred(cxx_qt_lib::QString::from(message.as_str()));
-    } // fn refuse_sheet_layout
 
     // The layout pipeline behind process_layout and process_layout_oversized.
     // Emits error_occurred with a descriptive message on any failure path.
@@ -1810,9 +1745,7 @@ impl qobject::AppController {
         let is_roll_layout = settings.as_ref().is_some_and(LayoutSettings::is_roll_form);
         let is_fabric_layout = settings.as_ref().is_some_and(|settings| settings.media_type == "fabric");
         let is_tiled_multisize = *self.is_multisize()
-            && settings.as_ref().is_some_and(|settings| {
-                settings.media_type == "paper" && settings.paper_type == "tiled"
-            });
+            && settings.as_ref().is_some_and(LayoutSettings::is_tiled_paper);
         let sizes: Vec<String> = if *self.is_multisize() {
             self.multisize_sizes().to_string()
                 .split(',').map(str::trim).filter(|size| !size.is_empty()).map(String::from).collect()
@@ -1884,7 +1817,7 @@ impl qobject::AppController {
                 let shown = usize::try_from(*self.active_material()).unwrap_or(0);
                 let (jobs, names, first_kind, shown) = {
                     let rust = self.rust();
-                    // Tiled sheets start each material on Base Size or its first size.
+                    // Tiled paper starts each material on Base Size or its first size.
                     let tabs_of = |doc: &svg_dom::Document| -> (Option<ViewKind>, Vec<ViewKind>) {
                         if sizes.is_empty() {
                             (None, Vec::new()) // individual pattern: one layout per material
@@ -2000,12 +1933,6 @@ impl qobject::AppController {
 
                 true
             }
-            Err(e) if layout_utils::is_sheet_overflow(&e) => {
-                // The pieces overflow the paper sheet: no layout; the user selects PDF (tiled).
-                let shown = usize::try_from(*self.active_material()).unwrap_or(0);
-                self.as_mut().refuse_sheet_layout(shown, &e);
-                false
-            } // sheet overflow
             Err(e) => {
                 let msg = cxx_qt_lib::QString::from(e.as_str());
                 self.as_mut().set_is_layout_in_progress(false);
@@ -2093,14 +2020,6 @@ impl qobject::AppController {
                 } // match size
             } // None
         }; // outcome
-
-        // A paper sheet that any material overflows ends the whole run with no layout.
-        if let Err(e) = &outcome {
-            if layout_utils::is_sheet_overflow(e) {
-                self.as_mut().refuse_sheet_layout(job.material, e);
-                return;
-            } // if sheet overflow
-        } // if failed
 
         // Store the layout, or note the problem for the final warning.
         {
@@ -2957,12 +2876,7 @@ impl qobject::AppController {
     // PDF export (single page)
     // -----------------------------------------------------------------------
 
-    // Export the assembled layout as a PDF file.
-    //
-    // Sheet mode (`mediaType=="paper" && paperType=="sheet"`) uses the L.2.1/L.2.2
-    // multi-page export path so oversized pieces tile and remaining pieces flow
-    // across additional sheets. All other modes retain the existing single-page
-    // PDF export behavior.
+    // Export the assembled layout as a single-page PDF file.
     //
     // Called by QML 'Export PDF' button handler: onExportPDF: appController.exportPdf(path, settingsJson)
     fn export_pdf(
@@ -2991,68 +2905,8 @@ impl qobject::AppController {
         self.as_mut().set_export_status_message(cxx_qt_lib::QString::from("Exporting PDF…"));
         self.as_mut().progress_updated(0);
 
-        // Progress handling: emit 0%/100% here; forward intermediate ticks from the export path
-        // (single-page via a progress closure, sheet-mode via manual 10%/90% ticks).
-        // Keep `self` borrows scoped so the closure can borrow `self` mutably when needed.
-        let export_result = if settings.media_type == "paper" && settings.paper_type == "sheet" {
-            log_to_file("[lib.rs AppController] export_pdf(): 3 using sheet (multi-page) export path");
-            let input_dom = match self.rust().input_dom.as_ref() {
-                Some(doc) => doc.clone(),
-                None => {
-                    log_to_file("[lib.rs AppController] export_pdf(): 4 no input_dom for sheet export");
-                    self.as_mut().set_export_progress(-1);
-                    self.as_mut().set_export_status_message(cxx_qt_lib::QString::default());
-                    self.as_mut().error_occurred(cxx_qt_lib::QString::from(
-                        "PDF export: no imported SVG is available for sheet export."
-                    ));
-                    return false;
-                } // None
-            }; // input_dom
-
-            // A Base Size or size tab packs only that size's pieces, one unit per piece.
-            // Nested packs each piece-set as one unit; Marker and an individual layout pack every piece alone.
-            let active_kind = self.rust().layout_views.active_kind().cloned();
-            let (input_dom, nested_multisize) = match active_kind.as_ref().and_then(ViewKind::size) {
-                Some(size) => {
-                    let mut size_dom = input_dom;
-                    crate::piece_extractor::keep_size(&mut size_dom, size);
-                    (size_dom, false)
-                } // Some
-                None => (input_dom, active_kind.as_ref().is_some_and(ViewKind::nested)),
-            }; // input_dom, nested_multisize
-
-            let divide_spec = self.rust().divide_spec.clone();
-            let trial_angles_deg = settings.rotation_trial_set_deg();
-            let (flat_dom, pieces) = match build_sheet_export_inputs(
-                &input_dom,
-                settings.free_rotation_without_grainline(),
-                settings.applies_piece_rotation_rules(),
-                nested_multisize,
-                divide_spec.as_ref(),
-                settings.places_fold_lines_on_left_edge().then_some(trial_angles_deg.as_slice()),
-            ) {
-                Ok(v) => v,
-                Err(e) => {
-                    log_to_file(&format!("[lib.rs AppController] export_pdf(): 4 build_sheet_export_inputs failed: {e}"));
-                    self.as_mut().set_export_progress(-1);
-                    self.as_mut().set_export_status_message(cxx_qt_lib::QString::default());
-                    self.as_mut().error_occurred(cxx_qt_lib::QString::from(&e));
-                    return false;
-                } // Err
-            }; // flat_dom, pieces
-
-            log_to_file(&format!("[lib.rs AppController] export_pdf(): 4 sheet inputs built; {} pieces", pieces.len()));
-
-            // Emit intermediate progress around the blocking sheet export.
-            self.as_mut().set_export_progress(10);
-            self.as_mut().progress_updated(10);
-            let result = do_export_sheets_pdf(&flat_dom, &pieces, &path_str, &settings);
-            if result.is_ok() {
-                self.as_mut().set_export_progress(90);
-                self.as_mut().progress_updated(90);
-            } // if ok
-            result
-        } else {
+        // Progress handling: emit 0%/100% here; a closure forwards the intermediate ticks.
+        let export_result = {
             log_to_file("[lib.rs AppController] export_pdf(): 3 using single-page export path");
             let layout_doc = match self.clone_export_layout_doc() {
                 Ok(d)  => d,

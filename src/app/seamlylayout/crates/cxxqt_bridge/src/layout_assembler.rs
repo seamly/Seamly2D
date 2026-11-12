@@ -76,7 +76,7 @@ const PIECE_FILL_COLORS: &[&str] = &[
 //
 // @param settings Parsed `LayoutSettings`; margin values used to size the canvas.
 // @return New `svg_dom::Document` ready to serialize and display.
-// Called by `submit_settings()` when media_type='fabric' or paper_type in ('sheet', 'roll')
+// Called by `submit_settings()` when media_type='fabric' or paper_type='roll'
 pub fn create_initial_layout_dom(settings: &LayoutSettings) -> svg_dom::Document {
     let (ml, mr, mt, mb): (u32, u32, u32, u32) = settings.margin_px();
     let canvas_w: u32    = settings.page_w_px();

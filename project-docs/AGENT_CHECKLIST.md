@@ -42,7 +42,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 ## OPEN
 
 JACKET_2
-| Layout.300 | 10 | SL > jacket_2 > Paper sheet keeps its size; error directs to PDF (tiled) | ?
+| Layout.999.4 | 10 | SL > jacket_2 > Paper Type is Tiled or Roll; Tiled, Roll, Fabric folded and not folded lay out | ?
 | Layout.93.7 | 23 | SL > jacket_2 > DXF piece properties: Material, Missing Piece Data, Rotation, Flip, Tilt, Fold | --> export DXF (R13), upload to https://aw.fyi/dxf
 | Seamly2D.71.12 | 34 | S2D > jacket2 > Piece mode, Back: seam line and cut line stop at the fold line | ?
 | Seamly2D.71.15 | 35 | S2D > jacket2 > Layout > SL, Back: seam line and cut line stop at the fold line | ?
@@ -58,7 +58,7 @@ MALE_SHIRT
 
 TROUSERS
 | Layout.71.6 | 11 | SL > trousers > Media grows in width | ?
-| Layout.72.8 | 12 | SL > trousers > Settings > B0 sheet: Oversized pieces - split or enlarge | FAIL -- 'Some pieces could not be placed' error
+| Layout.72.8 | 12 | SL > trousers > Settings > Paper Roll 16 in: Oversized pieces - split or enlarge | ?
 
 ## [x] 0. Install
 
@@ -193,12 +193,13 @@ Export all tabs unchecked.
 - [ ] GIMP, Image > Print Size: 96 pixels/in, not 72. Check both files.
 - [ ] Print the PNG at "Actual size". A known piece length measures true.
 
-## 10. Paper sheet keeps its size
+## 10. Paper Type is Tiled or Roll
 
-- [ ] Settings: Paper, Sheet 36 × 48 in. Submit. Create Layout.
-- [ ] No layout. The error names the pieces that do not fit and directs to PDF (tiled).
-- [ ] Only 'Layout Settings' stays active.
-- [ ] Settings: Paper, Tiled. Submit. Create Layout: the tabs lay out.
+- [ ] Settings: Paper Type lists Tiled and Roll only. No sheet size fields.
+- [ ] Paper, Tiled, Letter. Submit. Create Layout: the tabs lay out. Export > PDF (Tiled) is enabled and saves.
+- [ ] Paper, Roll 36 in. Submit. Create Layout: the tabs lay out. Export > PDF (Tiled) is disabled.
+- [ ] Fabric, width 60 in, Folded on. Submit. Create Layout: the tabs lay out on the folded half.
+- [ ] Fabric, width 60 in, Folded off. Submit. Create Layout: the tabs lay out on the full width.
 
 ## 11. Media grows in width
 
@@ -213,19 +214,18 @@ Export all tabs unchecked.
 Pattern: `C:\Users\susan\seamly2d\patterns\trousers.sm2d` (individual).
 
 - [ ] Start Seamly2D from the Start menu. Open the pattern. Press Layout.
-- [ ] Settings: Paper, Sheet 36 × 36 in. Submit. Create Layout.
-- [ ] Dialog "Pieces do not fit the media" lists 4 legs: Back, Front_Pleats, Front_no_pocket, Front_with_pocket.
+- [ ] Settings: Paper, Roll, custom width 16 in. Submit. Create Layout.
+- [ ] Dialog "Pieces do not fit the media" lists `Back: width 16.61 in, media 15.50 in`.
 - [ ] Dialog text is light on the violet background: heading, piece list, "Split the pieces", "Make the media bigger", both descriptions. No black text.
 - [ ] Cancel: only Layout Settings, Preferences and Exit are enabled.
 - [ ] Submit the settings: Create Layout is enabled.
 - [ ] Create Layout. Choose "Split the pieces". OK.
-  - [ ] Each leg is 2 parts.
+  - [ ] Back is 2 parts.
   - [ ] Each part has a blue label `<name> part i of 2, joins j`.
   - [ ] Each cut edge has 2 green match notches.
-  - [ ] Left-out pieces warning: one bullet per piece. A long list scrolls. OK stays visible.
   - [ ] Export > PDF: save dialog offers `trousers_<stamp>.pdf`, with no tab. The split parts appear.
   - [ ] Export > DXF > DXF-ASTM (R13): blocks named `Back (1/2)` and `Back (2/2)`.
-- [ ] Create Layout. "Make the media bigger" is disabled. Its text directs to PDF (tiled) in Layout Settings.
+- [ ] Create Layout. Choose "Make the media bigger". OK: the roll grows wider than 16 in; Back stays whole.
 - [ ] Close both apps.
 
 ## 13. male_shirt: built-in seam line
@@ -321,7 +321,6 @@ Needs the next MSI. Settings from section 1: Paper, Roll, 48 in.
   - [ ] Hide `labels_and_grainlines`: no grainline or label is left.
   - [ ] Expand `size_720`: its pieces hold no grainline or label.
 - [ ] Export > PDF, PNG, JPG, PostScript (PS), EPS and HPGL > Plot: each piece shows one grainline and one set of labels.
-- [ ] Settings: Paper, Paper Type Sheet. Submit. Create Layout. Nested tab, Export > PDF: same.
 - [ ] Marker tab and Size 220 tab, Export > SVG: every piece keeps its grainline and labels.
 
 ## 20. Seamly2D: fold line and Piece Mirror
@@ -356,7 +355,6 @@ Needs the next MSI. jacket2 Back has a fold line.
 - [ ] Uncheck the option. Create Layout: Back leaves the edge; the left margin is back.
 - [ ] Check the option. Layout Mode Any. Create Layout: no error message. Back keeps its Piece Properties rotation; its fold line can lie off the edge.
 - [ ] Option on, Media Paper, Paper Type Roll. Create Layout. Size 220 tab: Back's fold line on the left edge of the content, inside the left margin.
-- [ ] Paper Type Sheet, 36 × 48 in. Create Layout. Size 220 tab, Export > PDF: Back's fold line on the left content edge of its page.
 - [ ] Option on, Along Grainline. Base Size 500 tab, Export > DXF > DXF-ASTM (R13). Open the `.dxf`:
   - [ ] The Back block has one `LINE` on layer `6`.
   - [ ] Its two points are the first two `VERTEX` points of the layer `1` `POLYLINE`.
@@ -539,8 +537,7 @@ Needs the next MSI. (Layout.109)
 
 - [ ] Open trousers.sm2d. Layout Settings: Media Fabric, width 36 in, Folded on. Create Layout. All pieces placed, no "could not be placed" popup.
 - [ ] Layout is trimmed to the pieces (not 500 in long). Left margin is 0; fold lines lie on the left edge.
-- [ ] Fabric width 10 in so a piece cannot fit: the popup says "wider fabric, a longer fabric length", not "larger sheet size".
-- [ ] Media Paper with an oversize piece: the popup still says "Try a larger sheet size".
+- [ ] Fabric width 10 in so a piece cannot fit: the popup says "wider fabric, a longer fabric length", not "wider paper roll".
 
 ## 34. Seam line and cut line stop at the fold line
 

@@ -7,20 +7,7 @@
 # Media Settings
 - media -- 'paper' or 'fabric' radio buttons; default is 'paper'.
 - if media = 'paper':
-    > paperType - 'sheet', 'custom', 'tiled', 'roll' dropdown; default is 'sheet'.
-    > if paperType='custom':
-      >> Paper Size shows positive width × height inputs in the active unit; they start at the current page size.
-      >> Settings store paperType 'sheet' and sheetName 'Custom' with pageWidth/pageHeight.
-      >> Margins -- same as 'sheet'.
-    > if paperType='sheet':
-      >> paperSize -- dropdown lists predefined sizes with imperial and metric dimensions; default is 'Arch E'.
-      >> paperWidth=paperSize's width converted to user's unit; default is 'Arch E' width 36.
-      >> paperHeight=paperSize's height converted to user's unit; default is 'Arch E' height 48.
-      >> Selecting 'sheet' after 'custom' restores 'Arch E'.
-      >> Margins - marginLeft, marginRight, marginTop, marginBottom
-        >>> if unit='cm' then default is 1 for all margins.
-        >>> if unit='mm' then default is 10 for all margins.
-        >>> if unit='in' then default is .25 for all margins.
+    > paperType - 'tiled', 'roll' dropdown; default is 'tiled'. A saved 'sheet' or 'custom' loads as 'tiled'.
     > if paperType='roll':
       >> rollSize --  dropdown list of roll paper widths (36 in, 48 in, 60 in, 72 in, 900 mm, 1200 mm, 1500 mm, custom);  default is '36 in'.
       >> 'custom' shows a Roll Width field: the user enters the width in the user unit. rollSize saves as 'custom'.
@@ -31,9 +18,9 @@
         >>> if unit='mm' then default is 10 for all margins.
         >>> if unit='in' then default is .25 for all margins.
     > if paperType='tiled':
-      >> tileSize uses the Sheet dropdown's 27 predefined sizes, order, and imperial/metric dimension labels; default is Letter.
+      >> tileSize -- dropdown of 27 predefined sizes with imperial and metric dimension labels; default is Letter.
       >> Sizes include Letter, Legal, Ledger, ANSI C–E, ARCH A–E/E1–E3, ISO A0–A5, and ISO B0–B6.
-      >> Custom sizes are sheet-only; tile output requires a predefined physical page size. None is not a selectable tile size.
+      >> No custom size: tile output requires a predefined physical page size. None is not a selectable tile size.
       >> Settings store the size name, not the dimension label; orientation remains independent.
       >> tileWidth = tileSize width converted to user units; default is 8.5.
       >> tileHeight = tileSize height converted to user units; default is 11.
@@ -53,7 +40,7 @@
     > fabricWidth -- width of fabric including selvedges; default is 0 (then pageWidth).
       >> if fabricFold is True then the canvas is fabricWidth / 2: pieces go on the folded half.
     > fabricHeight -- length of fabric including margins; default is 0: no fixed length (500 in, trimmed after packing). No field in the Settings dialog.
-    > The paper sheet size (pageWidth, pageHeight) does not apply to fabric.
+    > The page size (pageWidth, pageHeight) does not apply to fabric.
     > selvedgeWidth -- default is 0.
     > fabricFold -- checkbox.
     > Margins - marginLeft, marginRight, marginTop, marginBottom

@@ -7,7 +7,7 @@
 //
 // Mirrors the Rust LayoutSettings data model exposed to the Qt frontend.
 // Exposes all fields as Q_PROPERTY items for QML binding and handles
-// JSON load/save, unit conversion, and paper/tile size lookup.
+// JSON load/save, unit conversion, and tile size lookup.
 //
 // Registration:
 //   Registered at runtime in seamlyLayout_main.mm:
@@ -86,30 +86,19 @@ class SettingsModel : public QObject
     // @brief Media type: "paper" | "roll".
     Q_PROPERTY(QString mediaType     READ mediaType     WRITE setMediaType     NOTIFY mediaTypeChanged)
 
-    // @brief Paper type when mediaType == "paper": "sheet" | "tiled" | "roll".
+    // @brief Paper type when mediaType == "paper": "tiled" | "roll".
+    // Any other value, such as "sheet" from an older settings file, becomes "tiled".
     Q_PROPERTY(QString paperType     READ paperType     WRITE setPaperType     NOTIFY paperTypeChanged)
 
-    // @brief Paper Type dropdown choice: paperType, or "custom" for a sheet named "Custom".
-    Q_PROPERTY(QString paperTypeChoice READ paperTypeChoice NOTIFY paperTypeChoiceChanged)
-
     // -----------------------------------------------------------------------
-    // Sheet (paper) dimensions
+    // Page dimensions
     // -----------------------------------------------------------------------
 
-    // @brief Selected paper size name (e.g., "ARCH E", "A4").
-    Q_PROPERTY(QString sheetName     READ sheetName     WRITE setSheetName     NOTIFY sheetNameChanged)
-
-    // @brief Sheet/page width in active units.
+    // @brief Page width in active units; fabric media uses it when fabricWidth is 0.
     Q_PROPERTY(double  pageWidth     READ pageWidth     WRITE setPageWidth     NOTIFY pageWidthChanged)
 
-    // @brief Sheet/page height in active units.
+    // @brief Page height in active units.
     Q_PROPERTY(double  pageHeight    READ pageHeight    WRITE setPageHeight    NOTIFY pageHeightChanged)
-
-    // @brief Sheet/page width in pixels at 96 px/in (derived from pageWidth + unit).
-    Q_PROPERTY(int     pageWidthPx   READ pageWidthPx   NOTIFY pageWidthPxChanged)
-
-    // @brief Sheet/page height in pixels at 96 px/in (derived from pageHeight + unit).
-    Q_PROPERTY(int     pageHeightPx  READ pageHeightPx  NOTIFY pageHeightPxChanged)
 
     // -----------------------------------------------------------------------
     // Roll dimensions
@@ -174,19 +163,13 @@ class SettingsModel : public QObject
     // ComboBox source lists (read-only)
     // -----------------------------------------------------------------------
 
-    // @brief Paper Type dropdown choices: "sheet", "custom", "tiled", "roll".
+    // @brief Paper Type dropdown choices: "tiled", "roll".
     Q_PROPERTY(QStringList paperTypeNames  READ paperTypeNames  CONSTANT)
-
-    // @brief Predefined paper size names for the sheet name ComboBox.
-    Q_PROPERTY(QStringList paperSizeNames  READ paperSizeNames  CONSTANT)
-
-    // @brief Paper size labels with imperial and metric dimensions.
-    Q_PROPERTY(QStringList paperSizeLabels READ paperSizeLabels CONSTANT)
 
     // @brief Tile size names for the tile size ComboBox.
     Q_PROPERTY(QStringList tileSizeNames   READ tileSizeNames   CONSTANT)
 
-    // @brief Tile labels reuse the predefined sheet dimensions and formatting.
+    // @brief Tile size labels with imperial and metric dimensions.
     Q_PROPERTY(QStringList tileSizeLabels  READ tileSizeLabels  CONSTANT)
 
     // @brief Tile orientation names for the tiled-paper orientation ComboBox.
@@ -222,12 +205,8 @@ public:
     QString    unit()          const { return m_unit;          }
     QString    mediaType()     const { return m_mediaType;     }
     QString    paperType()     const { return m_paperType;     }
-    QString    paperTypeChoice() const;
-    QString    sheetName()     const { return m_sheetName;     }
     double     pageWidth()     const { return m_pageWidth;     }
     double     pageHeight()    const { return m_pageHeight;    }
-    int        pageWidthPx()   const;
-    int        pageHeightPx()  const;
     QString    rollSize()      const { return m_rollSize;      }
     double     rollWidth()     const { return m_rollWidth;     }
     int        rollWidthPx()   const;
@@ -244,8 +223,6 @@ public:
     double     selvedgeWidth() const { return m_selvedgeWidth; }
 
     QStringList paperTypeNames()  const;
-    QStringList paperSizeNames()  const;
-    QStringList paperSizeLabels() const;
     QStringList tileSizeNames()   const;
     QStringList tileSizeLabels()  const;
     QStringList tileOrientationNames() const;
@@ -264,8 +241,8 @@ public:
     void setPieceGap(double v);
     void setUnit(const QString &v);
     void setMediaType(const QString &v);
+    // @brief Set the paper type; any value but "roll" stores "tiled".
     void setPaperType(const QString &v);
-    void setSheetName(const QString &v);
     // @brief Set page width in active units; invalid dimensions are ignored.
     // @param v Positive, finite width in the selected unit.
     void setPageWidth(double v);
@@ -324,14 +301,6 @@ public:
     // @param toUnit   Target unit ("in", "mm", "cm").
     Q_INVOKABLE void convertAllUnits(const QString &fromUnit, const QString &toUnit);
 
-    // @brief Apply a Paper Type dropdown choice.
-    // @param choice One of paperTypeNames; "custom" stores paperType "sheet" and sheetName "Custom".
-    Q_INVOKABLE void selectPaperType(const QString& choice);
-
-    // @brief Select a paper size by name and update pageWidth/pageHeight.
-    // @param name Paper size name (e.g., "ARCH E", "A4").
-    Q_INVOKABLE void selectPaperSize(const QString &name);
-
     // @brief Select a tile size by name (tile dimensions are stored internally).
     // @param name Tile size name (e.g., "Letter", "A4").
     Q_INVOKABLE void selectTileSize(const QString &name);
@@ -353,16 +322,12 @@ signals:
     void unitChanged();
     void mediaTypeChanged();
     void paperTypeChanged();
-    void paperTypeChoiceChanged();
-    void sheetNameChanged();
     void pageWidthChanged();
     void pageHeightChanged();
     void rollSizeChanged();
     void rollWidthChanged();
     void rollWidthPxChanged();
     void rollLengthChanged();
-    void pageWidthPxChanged();
-    void pageHeightPxChanged();
     void tileSizeChanged();
     void tileOrientationChanged();
     void marginTopChanged();
@@ -397,8 +362,7 @@ private:
     double  m_pieceGap      = 0.05;  // active-unit clearance between adjacent pieces (default ≈ 5 px @ 96 dpi)
     QString m_unit          = QStringLiteral("in");
     QString m_mediaType     = QStringLiteral("paper");
-    QString m_paperType     = QStringLiteral("sheet");
-    QString m_sheetName     = QStringLiteral("ARCH E");
+    QString m_paperType     = QStringLiteral("tiled");
     double  m_pageWidth     = 36.0;  // ARCH E width in inches
     double  m_pageHeight    = 48.0;  // ARCH E height in inches
     QString m_rollSize      = QStringLiteral("36 in");

@@ -2,6 +2,17 @@
 
 ## Current status
 
+### 2026-11-12 — Paper > Sheet removed (Layout.999)
+
+- Paper Type is tiled or roll. Custom sheet removed with it. Saved "sheet" or "custom" loads as "tiled".
+- Deleted `sheets.rs`, `oversized.rs`, `remaining.rs`, `media_can_grow`, `refuse_sheet_layout`, sheet PDF export.
+- Piece divider splits columns only. "Make the media bigger" always enabled.
+- New `LayoutSettings::is_tiled_paper`: fabric with default paper type "tiled" was treated as tiled paper; fixed.
+- Layout.300 obsolete → `TODO_COMPLETED.md`. Rotation.4.2, 4.3 obsolete.
+- Docs: rules, SVG-DATA-ATTRIBUTES, workflow docs, `AGENT_CHECKLIST.md` §10, §12, `TEST_CHECKLIST.md`.
+- Checked: `cargo test --workspace` 665 pass; `ctest --preset debug` 8/8.
+- Open: Layout.999.4, Layout.72.8 installed-app check with the next MSI.
+
 ### 2026-11-12 — Layout Mode Any ignores the fold edge (Rotation.0)
 
 - `LayoutSettings::places_fold_lines_on_left_edge()`: false in Any. `do_process_layout`, `layout_divide_spec`, sheet PDF (`lib.rs`) and `margin_left_value` read it.
@@ -38,14 +49,6 @@
 - Local build scripts: stamp revert logic removed.
 - Checked: qmake default + parse, version.sh (leading zeros), cl + rc (`FILEVERSION 26,11,1214,0`), qmake deps list the header.
 - Open: macOS Info.plist substitution and Linux untested locally. Merge without skip-ci; run `ci.yml`.
-
-### 2026-11-12 — .gitignore broad rules narrowed
-
-- `*.json` → `AGENT_STATE.json`, `CMakeUserPresets.json`, `compile_commands.json` (+ signing key rule).
-- `test*.*`, `Test*.*`, `docs/` → repository root only. `man/` deleted.
-- Track: `packaging/macos/**/Info.plist`, `.claude/rules/`, `.claude/skills/`, `.claude/settings.json`, `src/libs/xerces-c/*/lib/*`.
-- Ignore: `.cmake/`, `.qt/`, `scripts/**/*.txt`, `**/.claude/settings.local.json`.
-- Check: no new file became visible; `scripts/2026-11-10-prompt.txt` is ignored now.
 
 ## Decisions to retain
 

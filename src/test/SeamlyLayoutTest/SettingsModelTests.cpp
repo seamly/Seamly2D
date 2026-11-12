@@ -7,7 +7,7 @@
 //
 // Covers:
 //   • Default field values after construction
-//   • Paper Type choices, including the custom sheet and its dialog fields
+//   • Paper Type choices: tiled and roll; a saved "sheet" loads as tiled
 //   • Roll Width choices, including the custom roll width and its dialog field
 //   • Legacy layoutMode schema migration (pre-2026-05 → current)
 //   • Save/load round-trip preserving all fields
@@ -58,17 +58,15 @@ private slots:
     // Default values
     void defaults_unitIsInches();
     void defaults_mediaTypeIsPaper();
-    void defaults_paperTypeIsSheet();
+    void defaults_paperTypeIsTiled();
     void defaults_layoutModeIsAlongGrainline();
-    void paperSizeLabels_includeDimensions();
-    void tileSizes_matchPredefinedSheets();
+    void tileSizes_listPredefinedSizes();
     void tileSizes_selectAndRoundtripNames();
     void tileSizeDropdown_displaysDimensionsAndRestoresSelection();
-    void selectPaperSize_customKeepsPageDimensions();
-    void paperType_customChoiceStoresSheet();
-    void paperTypeDropdown_customShowsSizeFields();
+    void paperType_acceptsOnlyTiledOrRoll();
+    void paperTypeDropdown_offersTiledAndRoll();
     void pageDimensions_rejectInvalidValues();
-    void customPaperDimensions_roundtrip();
+    void pageDimensions_roundtrip();
     void rollSize_customKeepsRollWidth();
     void rollSizeDropdown_customShowsWidthField();
 
@@ -132,12 +130,12 @@ void SettingsModelTests::defaults_mediaTypeIsPaper()
     QCOMPARE(m.mediaType(), QStringLiteral("paper"));
 }
 
-// @brief Freshly constructed model reports "sheet" as the paper type.
-void SettingsModelTests::defaults_paperTypeIsSheet()
+// @brief Freshly constructed model reports "tiled" as the paper type.
+void SettingsModelTests::defaults_paperTypeIsTiled()
 {
     SettingsModel m;
-    QCOMPARE(m.paperType(), QStringLiteral("sheet"));
-}
+    QCOMPARE(m.paperType(), QStringLiteral("tiled"));
+} // defaults_paperTypeIsTiled()
 
 // @brief Freshly constructed model reports "alongGrainline" as the layout mode.
 void SettingsModelTests::defaults_layoutModeIsAlongGrainline()
@@ -146,30 +144,17 @@ void SettingsModelTests::defaults_layoutModeIsAlongGrainline()
     QCOMPARE(m.layoutMode(), QStringLiteral("alongGrainline"));
 }
 
-// @brief Paper size labels show imperial and metric dimensions; Custom moved to the Paper Type list.
-void SettingsModelTests::paperSizeLabels_includeDimensions()
-{
-    SettingsModel m;
-    const QStringList names = m.paperSizeNames();
-    const QStringList labels = m.paperSizeLabels();
-
-    QCOMPARE(names.size(), labels.size());
-    QCOMPARE(labels.at(names.indexOf(QStringLiteral("Letter"))),
-             QStringLiteral("Letter (8.5 × 11 in; 216 × 279 mm)"));
-    QVERIFY(!names.contains(QStringLiteral("Custom")));
-    QVERIFY(!labels.contains(QStringLiteral("Custom")));
-}
-
-// @brief Tile choices reuse every predefined sheet name and dimension label.
-void SettingsModelTests::tileSizes_matchPredefinedSheets()
+// @brief Tile choices list every predefined paper size with imperial and metric dimensions.
+void SettingsModelTests::tileSizes_listPredefinedSizes()
 {
     SettingsModel model;
-    const QStringList names = model.paperSizeNames();
-    const QStringList labels = model.paperSizeLabels();
+    const QStringList names = model.tileSizeNames();
+    const QStringList labels = model.tileSizeLabels();
 
-    QCOMPARE(model.tileSizeNames(), names);
-    QCOMPARE(model.tileSizeLabels(), labels);
+    QCOMPARE(names.size(), labels.size());
     QCOMPARE(names.size(), 27);
+    QCOMPARE(labels.at(names.indexOf(QStringLiteral("Letter"))),
+             QStringLiteral("Letter (8.5 × 11 in; 216 × 279 mm)"));
     QVERIFY(!names.contains(QStringLiteral("None")));
     QVERIFY(!names.contains(QStringLiteral("Custom")));
     QCOMPARE(labels.at(names.indexOf(QStringLiteral("ANSI E"))),
@@ -208,7 +193,6 @@ void SettingsModelTests::tileSizes_selectAndRoundtripNames()
     writer.selectTileSize(QStringLiteral("unknown"));
     writer.selectTileSize(writer.tileSizeLabels().first());
     QCOMPARE(writer.tileSize(), previous);
-    QCOMPARE(writer.sheetName(), QStringLiteral("ARCH E"));
 }
 
 // @brief The real dropdown displays labels, selects stable names, and refreshes after loading settings.
@@ -252,70 +236,51 @@ void SettingsModelTests::tileSizeDropdown_displaysDimensionsAndRestoresSelection
     QCOMPARE(combo->property("currentText").toString(), labels.at(names.indexOf(QStringLiteral("A0"))));
 }
 
-// @brief Selecting Custom preserves the current dimensions for editing.
-void SettingsModelTests::selectPaperSize_customKeepsPageDimensions()
-{
-    SettingsModel m;
-    m.setPageWidth(400.5);
-    m.setPageHeight(650.25);
-
-    m.selectPaperSize(QStringLiteral("Custom"));
-
-    QCOMPARE(m.sheetName(), QStringLiteral("Custom"));
-    QCOMPARE(m.pageWidth(), 400.5);
-    QCOMPARE(m.pageHeight(), 650.25);
-}
-
-// @brief The custom Paper Type stores a sheet named Custom; "sheet" restores a predefined size.
-void SettingsModelTests::paperType_customChoiceStoresSheet()
+// @brief Paper type is "tiled" or "roll"; any other value, such as a saved "sheet", becomes "tiled".
+void SettingsModelTests::paperType_acceptsOnlyTiledOrRoll()
 {
     SettingsModel model;
     QCOMPARE(model.paperTypeNames(),
-             QStringList({QStringLiteral("sheet"), QStringLiteral("custom"),
-                          QStringLiteral("tiled"), QStringLiteral("roll")}));
-    QCOMPARE(model.paperTypeChoice(), QStringLiteral("sheet"));
+             QStringList({QStringLiteral("tiled"), QStringLiteral("roll")}));
 
-    QSignalSpy choice_spy(&model, &SettingsModel::paperTypeChoiceChanged);
-    model.setPageWidth(40.5);
-    model.setPageHeight(60.25);
-    model.selectPaperType(QStringLiteral("custom"));
+    QSignalSpy type_spy(&model, &SettingsModel::paperTypeChanged);
+    model.setPaperType(QStringLiteral("roll"));
+    QCOMPARE(model.paperType(), QStringLiteral("roll"));
+    QCOMPARE(type_spy.count(), 1);
 
-    // The layout core reads paperType "sheet" and the page dimensions.
-    QCOMPARE(model.paperType(), QStringLiteral("sheet"));
-    QCOMPARE(model.sheetName(), QStringLiteral("Custom"));
-    QCOMPARE(model.paperTypeChoice(), QStringLiteral("custom"));
-    QCOMPARE(model.pageWidth(), 40.5);
-    QCOMPARE(model.pageHeight(), 60.25);
-    QVERIFY(choice_spy.count() >= 1);
-    const QJsonObject json = QJsonDocument::fromJson(model.toJson().toUtf8()).object();
-    QCOMPARE(json.value(QStringLiteral("paperType")).toString(), QStringLiteral("sheet"));
+    // Each value that is not "roll" stores "tiled".
+    for (const QString &value : {QStringLiteral("sheet"), QStringLiteral("custom"),
+                                 QStringLiteral("unknown"), QString()})
+    {
+        model.setPaperType(QStringLiteral("roll"));
+        model.setPaperType(value);
+        QCOMPARE(model.paperType(), QStringLiteral("tiled"));
+    } // for each value that is not "roll"
 
-    // Another paper type and back to custom keeps the custom size.
-    model.selectPaperType(QStringLiteral("tiled"));
-    QCOMPARE(model.paperTypeChoice(), QStringLiteral("tiled"));
-    model.selectPaperType(QStringLiteral("custom"));
-    QCOMPARE(model.pageWidth(), 40.5);
+    // A settings file saved with "sheet" loads and saves as "tiled".
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString path = dir.filePath(QStringLiteral("sheet.settings"));
+    QJsonObject obj;
+    obj[QStringLiteral("mediaType")] = QStringLiteral("paper");
+    obj[QStringLiteral("paperType")] = QStringLiteral("sheet");
+    obj[QStringLiteral("sheetName")] = QStringLiteral("ARCH E");
+    QFile file(path);
+    QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::Truncate));
+    file.write(QJsonDocument(obj).toJson());
+    file.close();
 
-    // "sheet" replaces the custom size with the default predefined sheet.
-    model.selectPaperType(QStringLiteral("sheet"));
-    QCOMPARE(model.paperTypeChoice(), QStringLiteral("sheet"));
-    QCOMPARE(model.sheetName(), QStringLiteral("ARCH E"));
-    QCOMPARE(model.pageWidth(), 36.0);
-    QCOMPARE(model.pageHeight(), 48.0);
+    SettingsModel reader;
+    reader.setPaperType(QStringLiteral("roll"));
+    QVERIFY(reader.load(path));
+    QCOMPARE(reader.paperType(), QStringLiteral("tiled"));
+    const QJsonObject json = QJsonDocument::fromJson(reader.toJson().toUtf8()).object();
+    QCOMPARE(json.value(QStringLiteral("paperType")).toString(), QStringLiteral("tiled"));
+    QVERIFY(!json.contains(QStringLiteral("sheetName")));
+} // paperType_acceptsOnlyTiledOrRoll()
 
-    // "sheet" keeps a predefined size.
-    model.selectPaperSize(QStringLiteral("A4"));
-    model.selectPaperType(QStringLiteral("roll"));
-    model.selectPaperType(QStringLiteral("sheet"));
-    QCOMPARE(model.sheetName(), QStringLiteral("A4"));
-
-    model.selectPaperType(QStringLiteral("unknown"));
-    QCOMPARE(model.paperType(), QStringLiteral("sheet"));
-    QCOMPARE(model.sheetName(), QStringLiteral("A4"));
-} // paperType_customChoiceStoresSheet()
-
-// @brief The dialog offers custom in Paper Type; its width and height fields edit the sheet.
-void SettingsModelTests::paperTypeDropdown_customShowsSizeFields()
+// @brief The dialog offers tiled and roll in Paper Type; a choice updates the model.
+void SettingsModelTests::paperTypeDropdown_offersTiledAndRoll()
 {
     register_theme_singleton();
     SettingsModel model;
@@ -327,55 +292,35 @@ void SettingsModelTests::paperTypeDropdown_customShowsSizeFields()
     }));
     QVERIFY2(dialog, qPrintable(component.errorString()));
     QObject* combo = dialog->findChild<QObject*>(QStringLiteral("paperTypeCombo"));
-    QObject* width_field = dialog->findChild<QObject*>(QStringLiteral("customPaperWidthField"));
-    QObject* height_field = dialog->findChild<QObject*>(QStringLiteral("customPaperHeightField"));
     QVERIFY(combo);
-    QVERIFY(width_field);
-    QVERIFY(height_field);
-    QCOMPARE(combo->property("count").toInt(), 4);
-    QVERIFY(dialog->property("isPredefinedSheet").toBool());
-    QVERIFY(!dialog->property("isCustomPaper").toBool());
+    QCOMPARE(combo->property("count").toInt(), 2);
+    QCOMPARE(combo->property("currentText").toString(), QStringLiteral("tiled"));
+    QVERIFY(dialog->property("isTiledPaper").toBool());
+    QVERIFY(!dialog->property("isRollPaper").toBool());
 
-    // Select custom as a user does: the index changes, then activated fires.
-    const int custom_index = model.paperTypeNames().indexOf(QStringLiteral("custom"));
-    combo->setProperty("currentIndex", custom_index);
-    QCOMPARE(combo->property("currentText").toString(), QStringLiteral("custom"));
-    QVERIFY(QMetaObject::invokeMethod(combo, "activated", Q_ARG(int, custom_index)));
-    QCOMPARE(model.paperTypeChoice(), QStringLiteral("custom"));
-    QVERIFY(dialog->property("isCustomPaper").toBool());
-    QVERIFY(!dialog->property("isPredefinedSheet").toBool());
-    QCOMPARE(width_field->property("text").toString(), QStringLiteral("36.00"));
+    // Select roll as a user does: the index changes, then activated fires.
+    const int roll_index = model.paperTypeNames().indexOf(QStringLiteral("roll"));
+    combo->setProperty("currentIndex", roll_index);
+    QVERIFY(QMetaObject::invokeMethod(combo, "activated", Q_ARG(int, roll_index)));
+    QCOMPARE(model.paperType(), QStringLiteral("roll"));
+    QVERIFY(dialog->property("isRollPaper").toBool());
+    QVERIFY(!dialog->property("isTiledPaper").toBool());
 
-    // Typed values go to the model in the active unit.
-    width_field->setProperty("text", QStringLiteral("91.5"));
-    QVERIFY(QMetaObject::invokeMethod(width_field, "editingFinished"));
-    height_field->setProperty("text", QStringLiteral("120"));
-    QVERIFY(QMetaObject::invokeMethod(height_field, "editingFinished"));
-    QCOMPARE(model.pageWidth(), 91.5);
-    QCOMPARE(model.pageHeight(), 120.0);
-    QCOMPARE(width_field->property("text").toString(), QStringLiteral("91.50"));
-
-    // A value that is not positive restores the model value.
-    height_field->setProperty("text", QStringLiteral("0"));
-    QVERIFY(QMetaObject::invokeMethod(height_field, "editingFinished"));
-    QCOMPARE(model.pageHeight(), 120.0);
-    QCOMPARE(height_field->property("text").toString(), QStringLiteral("120.00"));
-
-    // Loading a saved custom sheet restores the dropdown and the fields.
-    const QString path = QDir(QCoreApplication::applicationDirPath())
-                             .filePath(QStringLiteral("custom-ui-%1.settings").arg(QCoreApplication::applicationPid()));
-    SettingsModel writer;
-    writer.selectPaperType(QStringLiteral("custom"));
-    writer.setPageWidth(50.0);
-    writer.setPageHeight(70.0);
-    QVERIFY(writer.save(path));
-    combo->setProperty("currentIndex", 0);
+    // Loading a settings file saved with "sheet" selects tiled.
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString path = dir.filePath(QStringLiteral("sheet-ui.settings"));
+    QJsonObject obj;
+    obj[QStringLiteral("mediaType")] = QStringLiteral("paper");
+    obj[QStringLiteral("paperType")] = QStringLiteral("sheet");
+    QFile file(path);
+    QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::Truncate));
+    file.write(QJsonDocument(obj).toJson());
+    file.close();
     QVERIFY(model.load(path));
-    QVERIFY(QFile::remove(path));
-    QCOMPARE(combo->property("currentIndex").toInt(), custom_index);
-    QCOMPARE(width_field->property("text").toString(), QStringLiteral("50.00"));
-    QCOMPARE(height_field->property("text").toString(), QStringLiteral("70.00"));
-} // paperTypeDropdown_customShowsSizeFields()
+    QCOMPARE(combo->property("currentText").toString(), QStringLiteral("tiled"));
+    QVERIFY(dialog->property("isTiledPaper").toBool());
+} // paperTypeDropdown_offersTiledAndRoll()
 
 // @brief Page dimensions reject zero, negative, and non-finite values.
 void SettingsModelTests::pageDimensions_rejectInvalidValues()
@@ -395,24 +340,22 @@ void SettingsModelTests::pageDimensions_rejectInvalidValues()
     QCOMPARE(m.pageHeight(), originalHeight);
 }
 
-// @brief Custom sheet dimensions survive a save/load cycle.
-void SettingsModelTests::customPaperDimensions_roundtrip()
+// @brief Page dimensions survive a save/load cycle; fabric media uses them when fabricWidth is 0.
+void SettingsModelTests::pageDimensions_roundtrip()
 {
-    const QString fileName = QStringLiteral("custom-paper-%1.settings")
+    const QString fileName = QStringLiteral("page-size-%1.settings")
                                  .arg(QCoreApplication::applicationPid());
     const QString path = QDir(QCoreApplication::applicationDirPath()).filePath(fileName);
     QFile::remove(path);
 
     SettingsModel writer;
     writer.setUnit(QStringLiteral("mm"));
-    writer.setSheetName(QStringLiteral("Custom"));
     writer.setPageWidth(400.5);
     writer.setPageHeight(650.25);
     QVERIFY(writer.save(path));
 
     SettingsModel reader;
     QVERIFY(reader.load(path));
-    QCOMPARE(reader.sheetName(), QStringLiteral("Custom"));
     QCOMPARE(reader.pageWidth(), 400.5);
     QCOMPARE(reader.pageHeight(), 650.25);
     QFile::remove(path);
@@ -470,7 +413,7 @@ void SettingsModelTests::rollSizeDropdown_customShowsWidthField()
 {
     register_theme_singleton();
     SettingsModel model;
-    model.selectPaperType(QStringLiteral("roll"));
+    model.setPaperType(QStringLiteral("roll"));
     QQmlEngine engine;
     QQmlComponent component(&engine, QUrl(QStringLiteral("qrc:/qml/SettingsDialog.qml")));
     QVERIFY2(component.isReady(), qPrintable(component.errorString()));
@@ -515,7 +458,7 @@ void SettingsModelTests::rollSizeDropdown_customShowsWidthField()
     const QString path = QDir(QCoreApplication::applicationDirPath())
                              .filePath(QStringLiteral("custom-roll-ui-%1.settings").arg(QCoreApplication::applicationPid()));
     SettingsModel writer;
-    writer.selectPaperType(QStringLiteral("roll"));
+    writer.setPaperType(QStringLiteral("roll"));
     writer.setRollSize(QStringLiteral("custom"));
     writer.setRollWidth(66.0);
     QVERIFY(writer.save(path));
@@ -991,12 +934,8 @@ void SettingsModelTests::load_emitsAllPropertySignals()
     QSignalSpy spyUnit            (&m, &SettingsModel::unitChanged);
     QSignalSpy spyMediaType       (&m, &SettingsModel::mediaTypeChanged);
     QSignalSpy spyPaperType       (&m, &SettingsModel::paperTypeChanged);
-    QSignalSpy spyPaperTypeChoice (&m, &SettingsModel::paperTypeChoiceChanged);
-    QSignalSpy spySheetName       (&m, &SettingsModel::sheetNameChanged);
     QSignalSpy spyPageWidth       (&m, &SettingsModel::pageWidthChanged);
     QSignalSpy spyPageHeight      (&m, &SettingsModel::pageHeightChanged);
-    QSignalSpy spyPageWidthPx     (&m, &SettingsModel::pageWidthPxChanged);
-    QSignalSpy spyPageHeightPx    (&m, &SettingsModel::pageHeightPxChanged);
     QSignalSpy spyRollSize        (&m, &SettingsModel::rollSizeChanged);
     QSignalSpy spyRollWidth       (&m, &SettingsModel::rollWidthChanged);
     QSignalSpy spyRollWidthPx     (&m, &SettingsModel::rollWidthPxChanged);
@@ -1022,12 +961,8 @@ void SettingsModelTests::load_emitsAllPropertySignals()
     QVERIFY(spyUnit.count()            >= 1);
     QVERIFY(spyMediaType.count()       >= 1);
     QVERIFY(spyPaperType.count()       >= 1);
-    QVERIFY(spyPaperTypeChoice.count() >= 1);
-    QVERIFY(spySheetName.count()       >= 1);
     QVERIFY(spyPageWidth.count()       >= 1);
     QVERIFY(spyPageHeight.count()      >= 1);
-    QVERIFY(spyPageWidthPx.count()     >= 1);
-    QVERIFY(spyPageHeightPx.count()    >= 1);
     QVERIFY(spyRollSize.count()        >= 1);
     QVERIFY(spyRollWidth.count()       >= 1);
     QVERIFY(spyRollWidthPx.count()     >= 1);
@@ -1075,7 +1010,6 @@ void SettingsModelTests::bc2_loadFile_allFieldsUpdate()
     obj[QStringLiteral("unit")]            = QStringLiteral("mm");
     obj[QStringLiteral("mediaType")]       = QStringLiteral("paper");
     obj[QStringLiteral("paperType")]       = QStringLiteral("tiled");
-    obj[QStringLiteral("sheetName")]       = QStringLiteral("A4");
     obj[QStringLiteral("pageWidth")]       = 210.0;
     obj[QStringLiteral("pageHeight")]      = 297.0;
     obj[QStringLiteral("rollSize")]        = QStringLiteral("1200 mm");
@@ -1106,7 +1040,6 @@ void SettingsModelTests::bc2_loadFile_allFieldsUpdate()
     QCOMPARE(m.unit(),            QStringLiteral("mm"));
     QCOMPARE(m.mediaType(),       QStringLiteral("paper"));
     QCOMPARE(m.paperType(),       QStringLiteral("tiled"));
-    QCOMPARE(m.sheetName(),       QStringLiteral("A4"));
     QCOMPARE(m.pageWidth(),       210.0);
     QCOMPARE(m.pageHeight(),      297.0);
     QCOMPARE(m.rollSize(),        QStringLiteral("1200 mm"));
@@ -1154,14 +1087,14 @@ void SettingsModelTests::bc2_saveAfterLoad_savedJsonContainsAllKeys()
     QCOMPARE(err.error, QJsonParseError::NoError);
     const QJsonObject savedObj = doc.object();
 
-    // All 23 keys that save() is contractually required to write.
+    // All 22 keys that save() is contractually required to write.
     const QStringList expectedKeys = {
         QStringLiteral("layoutMode"),    QStringLiteral("rotationStep"),
         QStringLiteral("noGrainlineRotation"),
         QStringLiteral("fabricFolded"),  QStringLiteral("unit"),
         QStringLiteral("mediaType"),     QStringLiteral("paperType"),
-        QStringLiteral("sheetName"),     QStringLiteral("pageWidth"),
-        QStringLiteral("pageHeight"),    QStringLiteral("rollSize"),
+        QStringLiteral("pageWidth"),     QStringLiteral("pageHeight"),
+        QStringLiteral("rollSize"),
         QStringLiteral("rollWidth"),     QStringLiteral("tileSize"),
         QStringLiteral("tileOrientation"), QStringLiteral("marginTop"),
         QStringLiteral("marginBottom"),  QStringLiteral("marginLeft"),
@@ -1174,6 +1107,8 @@ void SettingsModelTests::bc2_saveAfterLoad_savedJsonContainsAllKeys()
         QVERIFY2(savedObj.contains(key),
                  qPrintable(QStringLiteral("Missing key in saved JSON: ") + key));
     } // for key
+    // Settings files no longer store a sheet name.
+    QVERIFY(!savedObj.contains(QStringLiteral("sheetName")));
 } // bc2_saveAfterLoad_savedJsonContainsAllKeys()
 
 // @brief Every JSON value in the saved file matches the model's current property.
@@ -1193,8 +1128,7 @@ void SettingsModelTests::bc2_savedJson_fieldValuesMatchModel()
     fixture[QStringLiteral("fabricFolded")]    = true;
     fixture[QStringLiteral("unit")]            = QStringLiteral("mm");
     fixture[QStringLiteral("mediaType")]       = QStringLiteral("paper");
-    fixture[QStringLiteral("paperType")]       = QStringLiteral("sheet");
-    fixture[QStringLiteral("sheetName")]       = QStringLiteral("A3");
+    fixture[QStringLiteral("paperType")]       = QStringLiteral("roll");
     fixture[QStringLiteral("pageWidth")]       = 297.0;
     fixture[QStringLiteral("pageHeight")]      = 420.0;
     fixture[QStringLiteral("rollSize")]        = QStringLiteral("900 mm");
@@ -1232,8 +1166,8 @@ void SettingsModelTests::bc2_savedJson_fieldValuesMatchModel()
         QStringLiteral("layoutMode"),    QStringLiteral("rotationStep"),
         QStringLiteral("fabricFolded"),  QStringLiteral("unit"),
         QStringLiteral("mediaType"),     QStringLiteral("paperType"),
-        QStringLiteral("sheetName"),     QStringLiteral("pageWidth"),
-        QStringLiteral("pageHeight"),    QStringLiteral("rollSize"),
+        QStringLiteral("pageWidth"),     QStringLiteral("pageHeight"),
+        QStringLiteral("rollSize"),
         QStringLiteral("rollWidth"),     QStringLiteral("tileSize"),
         QStringLiteral("tileOrientation"), QStringLiteral("marginTop"),
         QStringLiteral("marginBottom"),  QStringLiteral("marginLeft"),
@@ -1252,7 +1186,6 @@ void SettingsModelTests::bc2_savedJson_fieldValuesMatchModel()
     QCOMPARE(obj[QStringLiteral("unit")].toString(),             m.unit());
     QCOMPARE(obj[QStringLiteral("mediaType")].toString(),        m.mediaType());
     QCOMPARE(obj[QStringLiteral("paperType")].toString(),        m.paperType());
-    QCOMPARE(obj[QStringLiteral("sheetName")].toString(),        m.sheetName());
     QCOMPARE(obj[QStringLiteral("pageWidth")].toDouble(),        m.pageWidth());
     QCOMPARE(obj[QStringLiteral("pageHeight")].toDouble(),       m.pageHeight());
     QCOMPARE(obj[QStringLiteral("rollSize")].toString(),         m.rollSize());
@@ -1286,7 +1219,7 @@ void SettingsModelTests::bc2_fullPipeline_loadEditSaveReload_fieldsMatch()
     initial[QStringLiteral("layoutMode")] = QStringLiteral("alongGrainline");
     initial[QStringLiteral("unit")]       = QStringLiteral("in");
     initial[QStringLiteral("mediaType")]  = QStringLiteral("paper");
-    initial[QStringLiteral("paperType")]  = QStringLiteral("sheet");
+    initial[QStringLiteral("paperType")]  = QStringLiteral("tiled");
     initial[QStringLiteral("marginTop")]  = 0.5;
     initial[QStringLiteral("marginBottom")] = 0.5;
     initial[QStringLiteral("marginLeft")] = 0.5;
