@@ -933,8 +933,9 @@ fn enlarged_media_message(
 
 /// @brief Why "Make the media bigger" is unavailable on a paper sheet: the reader goes to PDF (tiled).
 pub const SHEET_CANNOT_GROW_MESSAGE: &str =
-    "A paper sheet keeps its size. Split the pieces, or select PDF (tiled) in Layout Settings \
-     to print pieces larger than the sheet.";
+    "You selected 'Paper > Sheet'. Paper sheets cannot be made bigger.  \
+    Instead, create a larger layout by returning to Layout Settings  \
+    and selecting 'Paper > Tiled' with your current paper size.";
 
 /// @brief True when the media may grow: every media but a paper sheet.
 ///
@@ -946,12 +947,15 @@ pub fn media_can_grow(settings: &LayoutSettings) -> bool {
 
 /// @brief Error when the pieces, whole or split, do not all fit on one paper sheet.
 pub const SHEET_OVERFLOW_MESSAGE: &str =
-    "All pieces cannot fit on one sheet. Select PDF (tiled) in Layout Settings and create the layout again.";
+    "You selected 'Paper > Sheet'. All pieces cannot fit on one paper sheet. \
+    Instead, create a larger layout by returning to Layout Settings \
+    and selecting 'Paper > Tiled' with your current paper size.";
 
 /// @brief Error when the legend or scale grid pushes the layout past one paper sheet.
 pub const SHEET_ANNOTATION_OVERFLOW_MESSAGE: &str =
-    "The pieces and layout annotations cannot fit on one sheet. \
-     Select PDF (tiled) in Layout Settings and create the layout again.";
+    "You selected 'Paper > Sheet'. The pieces and layout annotations cannot fit on one sheet. \
+    Instead, create a larger layout by returning to Layout Settings \
+    and selecting 'Paper > Tiled' with your current paper size.";
 
 /// @brief True when `error` refuses a layout because it overflows one paper sheet.
 ///
