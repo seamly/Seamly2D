@@ -1,52 +1,5 @@
 # TODO: remove entries related to testing after SeamlyLayout is fully tested
 
-# TRACK THESE FILES =======
-
-# track third-party license notices - shipped in every installer
-!packaging/licenses/*.txt
-
-# track xerces lib
-!xerces-c_3D.lib
-!xerces-c_3_2D.dll
-
-# -------------------------------------------
-# TODO: Remove these after testing is complete
-# track claude Session handover file during development
-!SESSION_HANDOVER.md
-
-# track utility scripts during development
-!scripts/*
-!scripts/cli/*
-
-# track test files during development
-!test-seamly-layout/
-
-# track project docs during development
-!project-docs/
-
-# track qtCreator files during development
-!*.pro.user
-!*.pro.user.*
-!*.qbs.user
-
-# track seamlylayout .claude & .vs files for testing
-!src/app/seamlylayout/.claude/
-!src/app/seamlylayout/.vs/
-
-# track seamlylayout output files, and top-level test input, for testing
-!test-seamly-layout/*.png
-!src/app/seamlylayout/output/
-
-# track seamlylayout local build files for testing
-!src/app/seamlylayout/qt_frontend/CMakeFiles/
-!src/app/seamlylayout/qt_frontend/CMakeCache.txt
-!src/app/seamlylayout/qt_frontend/.cmake/
-!src/app/seamlylayout/qt_frontend/.qt/
-!src/app/seamlylayout/qt_frontend/*.user
-!src/app/seamlylayout//qt_frontend/*.user.*
-
-# END TRACK FILES ==========
-
 # claude
 CLAUDE.md
 .claude
@@ -246,10 +199,6 @@ build/
 .AppleDouble
 .LSOverride
 
-# Icon must end with two \r
-Icon
-# core.ignorecase makes "Icon" match the icon/ resource folders too; keep them tracked.
-!icon/
 
 # Thumbnails
 ._*
@@ -310,10 +259,66 @@ target_wrapper.bat
 # Ignore doxygen directory
 docs/
 
-# Ignore build outputs and local state (also covered by src/app/seamlylayout/.gitignore,
+# Ignore build outputs and local state
 src/app/seamlylayout/target/
 src/app/seamlylayout/logs/
 src/app/seamlylayout/qt_frontend/build/
+CMakeFiles/
+CMakeCache.txt
+node_modules/
 
+# Qt test logs written to SEAMLY_TEST_LOG_DIR
+testlogs*/
 
+# TRACK THESE FILES =======
+# Git uses the last rule that matches a path. Keep this block at the end of the file.
 
+# track third-party license notices - shipped in every installer
+!packaging/licenses/*.txt
+
+# track xerces lib
+!xerces-c_3D.lib
+!xerces-c_3_2D.dll
+
+# track build configuration files
+!CMakeLists.txt
+!CMakePresets.json
+
+# track icons and other resource images
+!icon/
+!src/app/seamly2d/share/resources/toolicon/
+!src/app/seamly2d/share/resources/toolicon/**
+!**/share/resources/**/*.png
+!src/app/seamlylayout/qt_frontend/assets/**/*.png
+!packaging/assets/*.png
+
+# -------------------------------------------
+# TODO: Remove these after testing is complete
+# track claude Session handover file during development
+!SESSION_HANDOVER.md
+
+# track utility scripts during development
+!scripts/*
+!scripts/cli/*
+
+# track project docs during development
+!project-docs/
+
+# track qtCreator files during development
+!*.pro.user
+!*.pro.user.*
+!*.qbs.user
+
+# track seamlylayout .claude files for testing
+!src/app/seamlylayout/.claude/
+
+# track seamlylayout output files for testing
+!src/app/seamlylayout/output/
+
+# track seamlylayout local build files for testing
+!src/app/seamlylayout/qt_frontend/.cmake/
+!src/app/seamlylayout/qt_frontend/.qt/
+!src/app/seamlylayout/qt_frontend/*.user
+!src/app/seamlylayout//qt_frontend/*.user.*
+
+# END TRACK FILES ==========
