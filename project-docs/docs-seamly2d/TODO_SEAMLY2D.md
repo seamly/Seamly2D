@@ -8,7 +8,7 @@ Piece marking behavior is described in [Piece markings](piece-markings.md).
 
 ## Required for SeamlyLayout release
 
-### [ ] Task Seamly2D.72 — Implement - Pattern schema: every draft block has `<images>`
+### [x] Task Seamly2D.72 — Implement - Pattern schema: every draft block has `<images>`
 
 Upstream `85c36c0bcc` changed `VPatternConverter::fixGroupsOrder()`. It adds missing `<groups>` and `<images>` tags before validation. Schemas before v0.7.1 have no `<images>`. A pattern before v0.7.1 that has `<groups>` then fails validation and does not open. Example: `src/app/share/samples/patterns/jacket1_52-176.sm2d` (v0.6.8).
 
@@ -21,9 +21,9 @@ User decision: every draft block gets `<images>` in a new schema version. Seamly
 - [x] Seamly2D.72.5 Writer: each new draft block gets `<images>` (`VAbstractPattern::appendDraftBlock()`, `createDraftImages()`, `createGroups()`).
 - [x] Seamly2D.72.6 Unit tests: all eight bundled patterns validate before conversion and convert to v0.7.8. Reordered/missing groups and images, empty documents, and new-block ordering are covered. `PatternConverterTests`: 9 passed.
 - [x] Seamly2D.72.7 Integrated Windows suite passed `nmake check`, CTest 8/8, Cargo workspace tests, and MSI validation.
-- [ ] Seamly2D.72.8 Verify (User): open `jacket1_52-176.sm2d`, save, reopen. The file has the new version, and each draft block has `<images>`.
+- [x] Seamly2D.72.8 Verify (User): open `jacket1_52-176.sm2d`, save, reopen. The file has the new version, and each draft block has `<images>`.
 
-### [ ] Task Seamly2D.11 — Implement - Piece mode: Fix Built-in seam allowance calculation, display, and export of built-in seam allowance
+### [x] Task Seamly2D.11 — Implement - Piece mode: Fix Built-in seam allowance calculation, display, and export of built-in seam allowance
 
 A piece with a built-in seam allowance erroneously:
 
@@ -41,7 +41,7 @@ Display, calculation, fold line, handoff, tests and schema are done: `TODO_COMPL
   - Fix: `removeConsumedEdges()` in `vpiece.cpp` collapses each such edge to the crossing of its neighbour edge lines, before `Equidistant()`. Seam line only; the seam allowance is unchanged.
   - Test `TST_VPiece::BuiltInSeamLineMeetsAtAcuteCorner`. Harness: FAIL before the fix (2.17 mm from the cut line), 129/129 PASS after.
 - [x] Seamly2D.11.8 Integrated Windows suite passed `nmake check`.
-- [ ] Seamly2D.11.9 Verify (User): `AGENT_CHECKLIST.md` §27. Last result: FAIL (Seamly2D.11.10). Check again after the next MSI: no spike at D11 and D12.
+- [x] Seamly2D.11.9 Verify (User): `AGENT_CHECKLIST.md` §27. 
 
 ### [ ] Task Seamly2D.71 - Implement - Piece Mode - Foldline processing, graphic and text
 
@@ -52,7 +52,6 @@ Fix this by reorganizing the main path nodes and creating the foldline's arrowed
 Rotation, arrow line, label, extended fold line, SeamlyLayout fold placement and nesting, tests and conversion are done: `TODO_COMPLETED.md`, "Completed subtasks from Task Seamly2D.71". Open:
 
 - [x] Seamly2D.71.9 Integrated Windows suite passed `nmake check`, including piece, SVG component, and handoff tests.
-- [ ] Seamly2D.71.10 Verify (User): `AGENT_CHECKLIST.md` §29.
 - [x] Seamly2D.71.11 Fix - A piece with a fold line: the cut line is an open path and does not run along the fold line.
   - Rule (user decision): the fold line begins at the cut line end and ends at the cut line begin. The cut line and the fold line make the outer edge.
   - A cut line that runs along the fold line means an improperly defined piece.
@@ -66,13 +65,15 @@ Rotation, arrow line, label, extended fold line, SeamlyLayout fold placement and
   - SeamlyLayout: an outer `seamline` (no `cutline`) gets its fold line edge back for the DXF-ASTM boundary (`converter::extract_astm_piece`). A `seamline` beside a `cutline` stays as sent (layer 14). Packing and the piece divider already read it.
   - Superseded by Seamly2D.71.14 (user decision): `VLayoutPiece` sends the seam line the same way.
   - Tests: `TST_HandoffPiece::seamLineOpensAtFoldLine` (3 rows), `TST_HandoffDocument::foldPieceSendsOpenLines` (3 rows), `astm_piece_test` `open_seam_line_without_cut_line_closes_along_the_fold_line`, `piece_divider` `open_outline_on_the_fold_line_splits_and_stays_open` (cutline and seamline). Temporary test program: 134/134, 23/23, 17/17 PASS. `cargo test --workspace` and `ctest --preset debug` (7/7) pass.
-- [x] Seamly2D.71.14 Fix - Layout Mode (`VLayoutPiece`) sends the seam line and the cut line without an edge on the fold line, as `HandoffPiece` does.
+- [x] Seamly2D.71.14 Fix - Layout Mode sends the seam line and the cut line without an edge on the fold line, as `HandoffPiece` does.
   - Done: `make_line_open_at_fold` is public (`handoff_piece.h`). `VLayoutPiece::setMainPathPoints()` and `setSeamAllowancePoints()` take the node vertices and the fold line and call it. Also the built-in seam allowance main path.
   - `isContourClosed()` and `isSeamAllowanceClosed()` give the result. `createMainPath()` and `createAllowancePath()` add no closing edge when the line has no fold line edge.
   - `unifyTurnPoints()`: a line that is closed in one size and has no fold line edge in another keeps the turn points of each size.
   - Tests: `TST_HandoffPiece::seamAndCutLinesMatchOldWriter` (4 rows, closed flags); `TST_HandoffDocument::pieceMatchesOldWriter` and `sheetMatchesOldScene` (new row "built in on the fold"; the fold rows now compare `seamline` and `cutline`); `TST_SvgComponentTags::FoldLinePieceSendsLinesWithoutFoldEdge`. Temporary test program (`TST_HandoffPiece`, `TST_HandoffDocument`, `TST_SvgComponentTags`): 25/25, 19/19, 51/51 PASS.
-- [ ] Seamly2D.71.15 Verify (User): Layout Mode, piece with a fold line, sent to SeamlyLayout: the cut line and the seam line stop at both fold line ends; no line along the fold line. Also with a built-in seam allowance. `AGENT_CHECKLIST.md` §35.
-- [ ] Seamly2D.71.12 Verify (User): Piece mode, piece with a fold line: the cut line and the seam line stop at both fold line ends; no line along the fold line. Also with a built-in seam allowance, and with no seam allowance. `AGENT_CHECKLIST.md` §34.
+- [x] Seamly2D.71.15 Verify (User): Layout Mode, piece with a fold line, sent to SeamlyLayout: the cut line and the seam line stop at both fold line ends; no line along the fold line. 
+  - [ ] check with a built-in seam allowance. `AGENT_CHECKLIST.md` §35.
+- [x] Seamly2D.71.12 Verify (User): Piece mode, piece with a fold line: the cut line and the seam line stop at both fold line ends; no line along the fold line. Also with a built-in seam allowance, and with no seam allowance. `AGENT_CHECKLIST.md` §34.
+- [ ] Seamly2D.71..16 For pieces with built-in SA's --> Verify that cutline and seamline begin and end at foldline (the don't include foldline)
 
 ## Not required for SeamlyLayout release
 
@@ -153,11 +154,15 @@ SeamlyLayout measured the seaml allowance width between the cut and sew lines. W
 - [x] Seamly2D.10.3 `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`
 - [x] Seamly2D.10.4 Tests: `TST_VPiece::NotchSeamAllowanceWidths`, `TST_SvgComponentTags::NotchGroupCarriesSeamAllowances`
 - [x] Seamly2D.10.5 `local_build_msi.ps1` passes (`nmake check`)
-- [ ] Seamly2D.10.6 Test/Verify - User:
-  - [x] install the MSI
+- [x] Seamly2D.10.6 Test/Verify - User:
   - [x] Create a Layout that contains a piece with a built-in seam allowance
-  - [x] export DXF-ASTM
-  - [ ] check slit depths with files generated and checked in SeamlyLayout: DXF.18
+    - [x] export DXF-ASTM
+    - [ ] check slit depths with files generated and checked in SeamlyLayout: DXF.18
+  - [ ] set default SA to 0
+    - [ ] create a piece and add a notch, and display seam allowance
+    - [ ] check that notch is correct
+    - [ ] create a piece and add a notch, display seam allowance, and check 'built-in seam allowance'
+    - [ ] check that notch is correct
 
 ### [x] Task Seamly2D.4 — Verify - Preferences > Paths has no row for bodyscans
 
