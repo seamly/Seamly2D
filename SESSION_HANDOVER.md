@@ -2,6 +2,15 @@
 
 ## Current status
 
+### 2026-11-12 — .gitignore track rules
+
+- Git uses the last matching rule: the track block now sits at the end of `.gitignore`. Keep it there.
+- Deleted the macOS `Icon` rule; with `core.ignorecase` it matched only `icon/` folders.
+- Track: new `CMakeLists.txt`, `CMakePresets.json`, PNGs in `share/resources/`, `qt_frontend/assets/`, `packaging/assets/`.
+- Ignore: `CMakeFiles/`, `CMakeCache.txt`, `node_modules/`, `testlogs*/`, `.vs`, `test-seamly-layout/`.
+- Untracked (files kept on disk): `test-seamly-layout/`, `qt_frontend/node_modules/`, `src/test/Seamly2DTest/testlogs_check/`.
+- Open: `scripts/2026-11-10-prompt.txt` is now visible to git (`!scripts/*` beats `*.txt`); not committed.
+
 ### 2026-11-11 — Reference lines icon restored
 
 - Cause: MSI build stopped in vmisc: `icon.qrc` lists `icon/svg/reference_lines.svg`; the file was never committed.
@@ -33,14 +42,6 @@
 - `layout_utils::is_sheet_overflow` recognizes `SHEET_OVERFLOW_MESSAGE` and `SHEET_ANNOTATION_OVERFLOW_MESSAGE`.
 - `refuse_sheet_layout`: blank canvases, tabs and split cleared, `cancel_layout`, error names PDF (tiled). Any material's overflow ends the run.
 - `cargo test --workspace`: pass. Installed-app check runs with the next MSI.
-
-### 2026-11-11 — Custom sheet in Paper Type
-
-- Cause: 'Custom' sat last in the 27-size Paper Size list; users could not find it.
-- Paper Type lists sheet, custom, tiled, roll. Custom shows Paper Size as width × height fields in the Layout Settings unit.
-- Data format unchanged: paperType 'sheet', sheetName 'Custom'. Rust unchanged.
-- `SettingsModel::selectPaperType`, `paperTypeChoice`, `paperTypeNames`; Paper Size lists hold predefined sizes only.
-- SettingsModel tests (temporary test program): 42 pass. `cargo test --workspace`: pass. Installed-app check runs with the next MSI.
 
 ## Decisions to retain
 
