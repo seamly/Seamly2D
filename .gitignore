@@ -2,7 +2,6 @@
 
 # claude
 CLAUDE.md
-.claude
 .claude/*
 SESSION_HANDOVER.md
 
@@ -18,8 +17,10 @@ SESSION_HANDOVER.md
 # lock files
 *.locked
 
-# .json files
-*.json
+# local state .json files
+AGENT_STATE.json
+CMakeUserPresets.json
+compile_commands.json
 
 # bundle files
 *.bundle
@@ -68,9 +69,9 @@ project-version.*
 # Linux trash folder which might appear on any partition or disk
 .Trash-*
 
-# don't track other Test files and directories
-test*.*
-Test*.*
+# don't track test files in the repository root, or test output folders
+/test*.*
+/Test*.*
 test-seamly-layout/
 test-seamly-layout/*
 test-seamly-layout/layouts/
@@ -98,7 +99,6 @@ moc/
 obj/
 uic/
 rcc/
-man/
 build/
 logs/
 .vs
@@ -254,10 +254,10 @@ target_wrapper.bat
 # permission grant, accumulating absolute paths and session ids that have no
 # business in a repository headed for the upstream pull request.
 # (Was "!.claude/settings.local.json" — force-tracked — until 2026-07-27.)
-.claude/settings.local.json
+**/.claude/settings.local.json
 
-# Ignore doxygen directory
-docs/
+# Ignore the Doxygen output directory (Doxyfile OUTPUT_DIRECTORY)
+/docs/
 
 # Ignore build outputs and local state
 src/app/seamlylayout/target/
@@ -266,6 +266,8 @@ src/app/seamlylayout/qt_frontend/build/
 CMakeFiles/
 CMakeCache.txt
 node_modules/
+.cmake/
+.qt/
 
 # Qt test logs written to SEAMLY_TEST_LOG_DIR
 testlogs*/
@@ -276,13 +278,13 @@ testlogs*/
 # track third-party license notices - shipped in every installer
 !packaging/licenses/*.txt
 
-# track xerces lib
-!xerces-c_3D.lib
-!xerces-c_3_2D.dll
+# track the prebuilt xerces libraries
+!src/libs/xerces-c/*/lib/*
 
 # track build configuration files
 !CMakeLists.txt
 !CMakePresets.json
+!packaging/macos/**/Info.plist
 
 # track icons and other resource images
 !icon/
@@ -292,14 +294,20 @@ testlogs*/
 !src/app/seamlylayout/qt_frontend/assets/**/*.png
 !packaging/assets/*.png
 
+# track shared project settings, rules and skills
+!.claude/rules/
+!.claude/skills/
+!.claude/settings.json
+
 # -------------------------------------------
 # TODO: Remove these after testing is complete
 # track claude Session handover file during development
 !SESSION_HANDOVER.md
 
-# track utility scripts during development
+# track utility scripts during development, but not text files
 !scripts/*
 !scripts/cli/*
+scripts/**/*.txt
 
 # track project docs during development
 !project-docs/
@@ -315,10 +323,8 @@ testlogs*/
 # track seamlylayout output files for testing
 !src/app/seamlylayout/output/
 
-# track seamlylayout local build files for testing
-!src/app/seamlylayout/qt_frontend/.cmake/
-!src/app/seamlylayout/qt_frontend/.qt/
+# track seamlylayout QtCreator user files for testing
 !src/app/seamlylayout/qt_frontend/*.user
-!src/app/seamlylayout//qt_frontend/*.user.*
+!src/app/seamlylayout/qt_frontend/*.user.*
 
 # END TRACK FILES ==========
