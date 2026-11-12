@@ -2,6 +2,16 @@
 
 ## Current status
 
+### 2026-11-12 — Version numbers move to a generated header
+
+- `packaging/version.sh` writes only `src/libs/vmisc/project_version_number.h` (git-ignored). Builds change no tracked file.
+- `projectversion.h/.cpp` read `PROJECT_VERSION_*` macros; both `Info.plist` use `${QMAKE_FULL_VERSION}`.
+- `common.pri`: writes a 0.0.0 header when missing (Qt Creator, CI `linux-test`); sets `PROJECT_VERSION`. Apps set macOS `VERSION` from it.
+- SeamlyLayout CMake parses the new header; 0.0.0 when missing.
+- Local build scripts: stamp revert logic removed.
+- Checked: qmake default + parse, version.sh (leading zeros), cl + rc (`FILEVERSION 26,11,1214,0`), qmake deps list the header.
+- Open: macOS Info.plist substitution and Linux untested locally. Merge without skip-ci; run `ci.yml`.
+
 ### 2026-11-12 — .gitignore broad rules narrowed
 
 - `*.json` → `AGENT_STATE.json`, `CMakeUserPresets.json`, `compile_commands.json` (+ signing key rule).
@@ -35,14 +45,6 @@
   `trousers_split_on_a_narrow_paper_roll_keep_roll_width` (16 in roll, Back divides).
 - Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW_DESCRIPTION.
 - Installed-app check runs with the next MSI.
-
-### 2026-11-11 — Custom roll width
-
-- Roll Width lists 'custom' last. It shows a width field in the Layout Settings unit; a predefined size hides it.
-- `setRollSize("custom")` keeps rollWidth; `setRollWidth` ignores zero, negative, and non-finite values.
-- QML: `isRollPaper`, `isCustomRoll`, `customRollWidthField`; `refreshCustomPaperFields` also copies rollWidth.
-- Rust unchanged: the layout core reads `rollWidth`.
-- SettingsModel tests (temporary test program): 44 pass. Installed-app check runs with the next MSI.
 
 ## Decisions to retain
 
