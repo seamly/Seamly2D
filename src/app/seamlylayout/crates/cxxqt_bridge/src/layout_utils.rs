@@ -1353,12 +1353,12 @@ mod tests {
         assert!(!labels.iter().any(|label| label.contains("(1/")), "no split parts: {labels:?}");
     } // split_request_without_divided_pieces_keeps_regular_layout_state
 
-    // @brief Only a paper sheet refuses "Make the media bigger"; its message names PDF (tiled).
+    // @brief Only a paper sheet refuses "Make the media bigger"; its message names 'Paper > Tiled'.
     #[test]
     fn paper_sheet_media_cannot_grow() {
         let sheet = LayoutSettings::from_json(&paper_sheet_settings_json(36.0, 36.0)).expect("sheet settings parse");
         assert!(!media_can_grow(&sheet));
-        assert!(SHEET_CANNOT_GROW_MESSAGE.contains("PDF (tiled)"));
+        assert!(SHEET_CANNOT_GROW_MESSAGE.contains("'Paper > Tiled'"));
 
         for (media, paper) in [("paper", "roll"), ("paper", "tiled"), ("fabric", "sheet"), ("fabric", "roll")] {
             let mut settings = sheet.clone();
@@ -1522,8 +1522,8 @@ mod tests {
             });
             for extend in [false, true] {
                 let error = process_placement_fixture(settings.clone(), split, extend).err().expect("sheet must fail");
-                assert!(error.contains("All pieces cannot fit on one sheet."), "{error}");
-                assert!(error.contains("Select PDF (tiled) in Layout Settings"), "{error}");
+                assert!(error.contains("All pieces cannot fit on one paper sheet."), "{error}");
+                assert!(error.contains("selecting 'Paper > Tiled'"), "{error}");
                 assert!(error.contains("Long") || error.contains("Wide"), "{error}");
                 assert!(is_sheet_overflow(&error), "the controller must refuse the layout: {error}");
             } // for extension requests
@@ -1580,7 +1580,7 @@ mod tests {
                 "layoutMode": "alongGrainline", "scaleGrid": scale_grid
             });
             let error = process_placement_fixture(settings, true, true).err().expect("fixed media must fail");
-            assert!(error.contains("Select PDF (tiled) in Layout Settings"), "{error}");
+            assert!(error.contains("selecting 'Paper > Tiled'"), "{error}");
             assert!(is_sheet_overflow(&error), "the controller must refuse the layout: {error}");
         } // for piece and annotation overflow
     } // placement_paper_split_cannot_enlarge_media
@@ -1591,8 +1591,8 @@ mod tests {
         let pieces = format!("{SHEET_OVERFLOW_MESSAGE}\nPieces that could not be placed:\nBack");
         assert!(is_sheet_overflow(&pieces));
         assert!(is_sheet_overflow(SHEET_ANNOTATION_OVERFLOW_MESSAGE));
-        assert!(SHEET_OVERFLOW_MESSAGE.contains("PDF (tiled)"));
-        assert!(SHEET_ANNOTATION_OVERFLOW_MESSAGE.contains("PDF (tiled)"));
+        assert!(SHEET_OVERFLOW_MESSAGE.contains("'Paper > Tiled'"));
+        assert!(SHEET_ANNOTATION_OVERFLOW_MESSAGE.contains("'Paper > Tiled'"));
 
         for other in [
             SHEET_CANNOT_GROW_MESSAGE,
