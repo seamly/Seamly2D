@@ -2,6 +2,14 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-11 — Reference lines icon restored
+
+- Cause: MSI build stopped in vmisc: `icon.qrc` lists `icon/svg/reference_lines.svg`; the file was never committed.
+- `.gitignore` rule `Icon` (macOS) matched every `icon/` folder because `core.ignorecase` is true; `git add` skipped new icons.
+- `.gitignore`: `!icon/` keeps the resource folders tracked.
+- `reference_lines.svg` recreated: stripe and plaid symbols; edges on whole pixels.
+- Temporary test program: the 8 pixel checks of `tst_piecemarkings.cpp` pass. Full Qt suites run with the next MSI.
+
 ### 2026-11-11 — Split paper roll keeps media
 
 - Split on a paper roll keeps the selected roll width and margins; only the length follows the content.

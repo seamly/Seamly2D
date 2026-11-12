@@ -2,6 +2,16 @@
 
 ## Current status
 
+### 2026-11-12 — Paper sheets never grow (Layout.300)
+
+- `do_process_layout`: `extend_media` is off when `media_can_grow` is false. Multisize tabs on a sheet now fail with `SHEET_OVERFLOW_MESSAGE` (PDF (tiled)).
+- Dead code removed: the "extended sheet keeps its own length" trim branch.
+- Tests deleted: `jacket2_marker_extends_paper_sheet`, `trousers_long_pieces_extend_a_sheet`.
+- `placement_enlargement_dimensions_and_notifications` uses a paper roll; the sheet overflow test also runs with `extend_media` on.
+- Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW_DESCRIPTION, `TEST_CHECKLIST.md`, `AGENT_CHECKLIST.md` §10, §12.
+- Checked: `cargo test --workspace` pass; `ctest --preset debug` 8/8.
+- Open: Layout.300 user check with the next MSI.
+
 ### 2026-11-12 — Marking test pinned to a solid seam line
 
 - MSI build stopped: `TST_HandoffDocument::markingsKeepTheirGeometryAndRejectInvalidData` failed.
@@ -37,16 +47,9 @@
 - Untracked (files kept on disk): `test-seamly-layout/`, `qt_frontend/node_modules/`, `src/test/Seamly2DTest/testlogs_check/`.
 - Open: `scripts/2026-11-10-prompt.txt` is now visible to git (`!scripts/*` beats `*.txt`); not committed.
 
-### 2026-11-11 — Reference lines icon restored
-
-- Cause: MSI build stopped in vmisc: `icon.qrc` lists `icon/svg/reference_lines.svg`; the file was never committed.
-- `.gitignore` rule `Icon` (macOS) matched every `icon/` folder because `core.ignorecase` is true; `git add` skipped new icons.
-- `.gitignore`: `!icon/` keeps the resource folders tracked.
-- `reference_lines.svg` recreated: stripe and plaid symbols; edges on whole pixels.
-- Temporary test program: the 8 pixel checks of `tst_piecemarkings.cpp` pass. Full Qt suites run with the next MSI.
-
 ## Decisions to retain
 
+- A paper sheet never grows, multisize tabs included. Overflow directs the user to PDF (tiled) (user, 2026-11-12).
 - Keep `data-notch-type`. Only DXF export converts every notch to a layer 4 slit.
 - Notch attributes: one value per notch (D1, 2026-10-12). Replaces "one value per segment" (2026-10-11).
 - Built-in seam line corners are plain offset corners; node corner types shape only the cut line (user, 2026-10-12).

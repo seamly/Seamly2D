@@ -191,10 +191,11 @@ The application workflow loop consists of:
      * "Size 34", "Size 36", …: each size alone, one unit per piece. The base size tab repeats the Base Size layout.
      * One tab per UI tick (`processNextTabLayout`); the progress popup names the tab: "Laying out Size 36 (5 of 6)…".
      * 'Adjust Layout' and 'Export' stay disabled until the last tab finishes.
-     * Every tab extends its sheet, roll or fabric until every piece is placed (`ProcessLayoutArgs::extend_media`).
-       * Wider: a piece wider than the media widens it to the right. Both side margins are kept.
-       * Longer: the media grows downwards. The canvas ends at the lowest piece. An extended sheet keeps at least its own length.
+     * Every tab extends its roll or fabric until every piece is placed (`ProcessLayoutArgs::extend_media`).
+       * Wider: a piece wider than the paper roll widens it to the right. Both side margins are kept.
+       * Longer: the media grows downwards. The canvas ends at the lowest piece.
        * No piece is left out. Tiled paper does not extend.
+       * A paper sheet does not grow. When the pieces do not fit, no layout; the error directs the user to PDF (tiled).
        * An individual pattern: see "Oversized pieces" below.
      * One warning after the last tab lists every layout that left pieces out or failed.
        * One bullet per piece, named as DXF-ASTM names it, then its sizes: "Detail (3): 220, 240".

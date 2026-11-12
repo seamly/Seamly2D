@@ -132,12 +132,14 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
 
 Every multisize tab sets `ProcessLayoutArgs::extend_media`. An individual pattern sets it only when the user chose "Make the media bigger".
 
-- Paper width: `packing::required_bin_width` finds the widest required bin. A wider value widens paper sheets and rolls.
+- A paper sheet never grows: `do_process_layout` ignores `extend_media` when `media_can_grow` is false.
+  Pieces that do not fit give `SHEET_OVERFLOW_MESSAGE`, which directs the user to PDF (tiled).
+- Paper width: `packing::required_bin_width` finds the widest required bin. A wider value widens paper rolls.
 - Fabric keeps its configured width, including the folded half-width and selvedge margins. Only its height can enlarge.
 - `packing::pack_polygons_extending` packs into a bin as tall as all pieces that fit its width, stacked.
 - Pieces that cannot fit the fixed fabric width remain unplaced and appear in the warning popup.
 - `set_content_width` widens the canvas to the right. contentRect keeps its x; both side margins are kept.
-- `trim_bottom` sets the canvas height. Roll and fabric end at the lowest piece. A sheet ends at the lowest piece, but not above its own length.
+- `trim_bottom` sets the canvas height. Roll and fabric end at the lowest piece.
 - Canvas, Adjust Mode and exports read the size from `layout_dom`. Exception: the paper-sheet PDF export packs the pieces again on sheets of the set size.
 - Tiled paper does not extend: its candidate-width search sets the width.
 - User-requested enlargement shows the resulting width and height in the active unit. Folded fabric reports its full configured width.
