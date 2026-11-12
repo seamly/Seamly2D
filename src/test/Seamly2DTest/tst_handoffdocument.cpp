@@ -648,7 +648,9 @@ void TST_HandoffDocument::markingsKeepTheirGeometryAndRejectInvalidData() const
     set_label_templates(&document, &piece);
     HandoffPlacedPiece placed = placed_piece(piece, data.data(), &document, QString(), QString());
     qApp->setCurrentDocument(previous);
-    const HandoffStyle style = HandoffStyle::from_settings(*qApp->Settings());
+    HandoffStyle style = HandoffStyle::from_settings(*qApp->Settings());
+    // A stripe takes the configured seam line type; pin it so the user's settings do not change the result.
+    style.seam.type = Qt::SolidLine;
     const QRectF extent = piece_extent(placed.piece, style);
     QVERIFY(placed.piece.set_markings({{QPointF(120, 130), 8}},
         {{QLineF(20, 30, 240, 250), QStringLiteral("stripe")},
