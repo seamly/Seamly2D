@@ -86,9 +86,6 @@ Menu {
     // @brief Label text of the imported SVG: "text", "pathsOnly" or "noLabels".
     property string labelTextState: "noLabels"
 
-    // @brief Last SVG text mode used; its submenu item shows a check mark.
-    property string lastSvgTextMode: ""
-
     // @brief True when the three text modes apply; false when labels are already paths.
     readonly property bool svgTextModesEnabled: root.labelTextState !== "pathsOnly"
 
@@ -343,7 +340,7 @@ Menu {
         onTriggered: root.exportSvgRequested()
     } // MenuItem SVG
 
-    // @brief One SVG text mode: checkable item with a tooltip.
+    // @brief One SVG text mode: an item with a tooltip.
     // Self-contained: inline components cannot rely on ids of this file.
     component SvgModeItem: MenuItem {
         id: modeItem
@@ -354,22 +351,13 @@ Menu {
         // @brief Trade-off summary shown on hover.
         required property string hint
 
-        // @brief True when this mode was the last one used; shows the check mark.
-        property bool isLast: false
-
         // @brief Emitted when the user picks this mode.
         signal chosen(string textMode)
 
-        checkable: true
-        checked: modeItem.isLast
         ToolTip.visible: modeItem.hovered
         ToolTip.text:    modeItem.hint
         ToolTip.delay:   500
-        onTriggered: {
-            // A click toggles `checked`; rebind it so the mark follows isLast.
-            modeItem.checked = Qt.binding(function() { return modeItem.isLast })
-            modeItem.chosen(modeItem.mode)
-        } // onTriggered
+        onTriggered: modeItem.chosen(modeItem.mode)
     } // component SvgModeItem
 
     Menu {
@@ -384,27 +372,26 @@ Menu {
             text: "Text: use current designer font"
             mode: "designerFont"
             enabled: root.svgTextModesEnabled
-            isLast: root.lastSvgTextMode === "designerFont"
             onChosen: function(textMode) { root.exportSvgModeRequested(textMode) }
             hint: "Labels stay searchable, editable text in the current label font.\n"
                 + "The font is embedded when its license allows."
         } // SvgModeItem designerFont
 
         SvgModeItem {
+            objectName: "svgSingleLineFontItem"
             text: "Text: convert to single-line font"
             mode: "singleLineFont"
             enabled: root.svgTextModesEnabled
-            isLast: root.lastSvgTextMode === "singleLineFont"
             onChosen: function(textMode) { root.exportSvgModeRequested(textMode) }
             hint: "Labels stay searchable, editable text, in the single-line font Relief SingleLine CAD.\n"
                 + "CAD/CAM tools with that font installed draw one-stroke letters."
         } // SvgModeItem singleLineFont
 
         SvgModeItem {
+            objectName: "svgHersheyStrokesItem"
             text: "Paths: convert to single-stroke (Hershey)"
             mode: "hersheyStrokes"
             enabled: root.svgTextModesEnabled
-            isLast: root.lastSvgTextMode === "hersheyStrokes"
             onChosen: function(textMode) { root.exportSvgModeRequested(textMode) }
             hint: "Labels become single-stroke paths for plotters, cutters and engravers.\n"
                 + "No font needed. The text is kept in 'data-text' but is not editable."

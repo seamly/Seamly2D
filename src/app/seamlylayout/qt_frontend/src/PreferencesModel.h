@@ -81,10 +81,6 @@ class PreferencesModel : public QObject
     // never overwritten by a later installer read (see load()/adoptInstallerDataRootIfEmpty()).
     Q_PROPERTY(QString dataRoot        READ dataRoot        WRITE setDataRoot        NOTIFY dataRootChanged)
 
-    // @brief Last SVG label text mode used: "designerFont", "singleLineFont" or "hersheyStrokes".
-    // The Export > SVG submenu marks it. Not reset by resetToDefaults(): it records a choice, not a path.
-    Q_PROPERTY(QString svgTextMode     READ svgTextMode     WRITE setSvgTextMode     NOTIFY svgTextModeChanged)
-
     // @brief HPGL pen (1-8) for cut lines, marks and labels. The Export > HPGL pen submenus mark them.
     Q_PROPERTY(int hpglCutPen          READ hpglCutPen      WRITE setHpglCutPen      NOTIFY hpglCutPenChanged)
     Q_PROPERTY(int hpglMarkPen         READ hpglMarkPen     WRITE setHpglMarkPen     NOTIFY hpglMarkPenChanged)
@@ -123,7 +119,6 @@ public:
     QString projectorPath()   const { return m_projectorPath;   }
     QString hpglViewerPath()  const { return m_hpglViewerPath;  }
     QString dataRoot()        const { return m_dataRoot;        }
-    QString svgTextMode()     const { return m_svgTextMode;     }
     int hpglCutPen()          const { return m_hpglCutPen;      }
     int hpglMarkPen()         const { return m_hpglMarkPen;     }
     int hpglLabelPen()        const { return m_hpglLabelPen;    }
@@ -142,7 +137,6 @@ public:
     void setProjectorPath(const QString &v);
     void setHpglViewerPath(const QString &v);
     void setDataRoot(const QString &v);
-    void setSvgTextMode(const QString &v);
     void setHpglCutPen(int v);
     void setHpglMarkPen(int v);
     void setHpglLabelPen(int v);
@@ -166,16 +160,6 @@ public:
     // @param extension "plt" or "hpgl"; other values are rejected.
     // @return true when the extension is valid and the INI file was written.
     Q_INVOKABLE bool saveHpglExtension(const QString &path, const QString &extension);
-
-    // @brief True when `mode` is one of the three SVG label text mode names.
-    static bool isSvgTextMode(const QString &mode);
-
-    // @brief Set svgTextMode and write only that key to the INI file.
-    // Writing one key keeps unapplied Preferences edits out of the file.
-    // @param path Application preferences INI file path.
-    // @param mode SVG label text mode name; other values are rejected.
-    // @return true when the mode is valid and the INI file was written.
-    Q_INVOKABLE bool saveSvgTextMode(const QString &path, const QString &mode);
 
     // @brief Load preferences from an INI file or a legacy JSON defaults file.
     // @param path Absolute or relative file path.
@@ -332,7 +316,6 @@ signals:
     void projectorPathChanged();
     void hpglViewerPathChanged();
     void dataRootChanged();
-    void svgTextModeChanged();
     void hpglCutPenChanged();
     void hpglMarkPenChanged();
     void hpglLabelPenChanged();
@@ -371,7 +354,6 @@ private:
     QString m_projectorPath   = QStringLiteral("");
     QString m_hpglViewerPath  = QStringLiteral("https://tiny-online.tools/embroidery-cnc-tools/hpgl-plt-viewer");
     QString m_dataRoot        = QStringLiteral("");
-    QString m_svgTextMode     = QStringLiteral("designerFont");
     int m_hpglCutPen          = 1;
     int m_hpglMarkPen         = 2;
     int m_hpglLabelPen        = 3;

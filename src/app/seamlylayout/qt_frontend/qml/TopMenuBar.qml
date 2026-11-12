@@ -70,9 +70,6 @@ ToolBar {
     // Bound by Main.qml from appController.labelTextState.
     property string labelTextState: "noLabels"
 
-    // @brief Last SVG text mode used; marked in the SVG submenu.
-    property string lastSvgTextMode: ""
-
     // @brief HPGL pens (1-8) and file extension; marked in the Export > HPGL submenus.
     property int hpglCutPen: 1
     property int hpglMarkPen: 2
@@ -251,7 +248,6 @@ ToolBar {
             onExportAllTabsToggled: function(checked) { root.exportAllTabsToggled(checked) }
             svgModeSubmenu:  true
             labelTextState:  root.labelTextState
-            lastSvgTextMode: root.lastSvgTextMode
             showDxfVariants:           true
             onExportDxfAstmR13Requested:   root.exportDxfAstmR13Requested()
             onExportDxfAstmClo3dRequested: root.exportDxfAstmClo3dRequested()

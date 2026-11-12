@@ -2,6 +2,15 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-12 — Layout Mode Any ignores the fold edge (Rotation.0)
+
+- `LayoutSettings::places_fold_lines_on_left_edge()`: false in Any. `do_process_layout`, `layout_divide_spec`, sheet PDF (`lib.rs`) and `margin_left_value` read it.
+- Removed: `Rect::fold_edge_conflict`, `FoldEdgePlan::conflicts`, the `apply_piece_rotation_rules` argument, and the "cannot satisfy both its rotation rule and the fold edge" errors.
+- `layout_engine::piece_trial_set`: a left-edge piece always has its one planned angle.
+- Sheet overflow tests now match the 'Paper > Tiled' message text.
+- Checked: `cargo test --workspace` 704 pass; `ctest --preset debug` 8/8.
+- Open: Rotation.0.4 installed-app check with the next MSI.
+
 ### 2026-11-12 — Paper sheets never grow (Layout.300)
 
 - `do_process_layout`: `extend_media` is off when `media_can_grow` is false. Multisize tabs on a sheet now fail with `SHEET_OVERFLOW_MESSAGE` (PDF (tiled)).

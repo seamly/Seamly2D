@@ -2,6 +2,15 @@
 
 ## Current status
 
+### 2026-11-12 — Export > SVG has no check boxes (Layout.800)
+
+- `ExportMenu.qml`: the three SVG text mode items are plain items. A click exports.
+- Removed: `lastSvgTextMode` (QML), `PreferencesModel` `svgTextMode`, `isSvgTextMode`, `saveSvgTextMode`, INI key `svg_text_mode`. An old INI keeps the key; SeamlyLayout ignores it.
+- Kept: the headless `--svg-text-mode` option (`StartupOptions`), Rust `SvgTextMode`.
+- Test: `ExportMenuTests::svgModeItemsHaveNoCheckBox` (3 rows). 3 `PreferencesModelTests` removed.
+- Checked: `ctest --preset debug` 8/8. `cargo test` not run: no Rust change.
+- Open: Layout.800.3 installed-app check with the next MSI (`AGENT_CHECKLIST.md` §36).
+
 ### 2026-11-12 — TODO_DXF.md cleaned
 
 - Closed → `TODO_COMPLETED.md`: DXF.21, DXF.3, DXF.8 (completed); DXF.22 (obsolete). Findings table moved there too.
@@ -41,15 +50,6 @@
 - Docs: rules, SVG-DATA-ATTRIBUTES, workflow docs, `AGENT_CHECKLIST.md` §10, §12, `TEST_CHECKLIST.md`.
 - Checked: `cargo test --workspace` 665 pass; `ctest --preset debug` 8/8.
 - Open: Layout.999.4, Layout.72.8 installed-app check with the next MSI.
-
-### 2026-11-12 — Layout Mode Any ignores the fold edge (Rotation.0)
-
-- `LayoutSettings::places_fold_lines_on_left_edge()`: false in Any. `do_process_layout`, `layout_divide_spec`, sheet PDF (`lib.rs`) and `margin_left_value` read it.
-- Removed: `Rect::fold_edge_conflict`, `FoldEdgePlan::conflicts`, the `apply_piece_rotation_rules` argument, and the "cannot satisfy both its rotation rule and the fold edge" errors.
-- `layout_engine::piece_trial_set`: a left-edge piece always has its one planned angle.
-- Sheet overflow tests now match the 'Paper > Tiled' message text.
-- Checked: `cargo test --workspace` 704 pass; `ctest --preset debug` 8/8.
-- Open: Rotation.0.4 installed-app check with the next MSI.
 
 ## Decisions to retain
 

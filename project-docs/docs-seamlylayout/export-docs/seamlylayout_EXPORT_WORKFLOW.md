@@ -37,7 +37,6 @@ ExportMenu.MenuItem("PNG").onTriggered
 ExportMenu SvgModeItem.onTriggered → chosen(mode) → exportSvgModeRequested(mode)
   → TopMenuBar.exportSvgRequested(mode)
     → Main.qml onExportSvgRequested(mode)
-      → preferencesModel.saveSvgTextMode(iniPath, mode)   last mode, marked next time
       → pendingExportSettings = mode; exportStartTimer
         → appController.exportSvg(path, mode)
           → clone_export_layout_doc()                    Nested: smallest size's drills, grainline and labels only

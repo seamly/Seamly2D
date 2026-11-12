@@ -52,6 +52,7 @@ MALE_SHIRT
 | Seamly2D.71.15 | 35 | S2D > male_shirt > Layout > SL, BackPanel and CollarTopInterface-Built-in-SA: seam line and cut line stop at the fold line | ?
 | Layout.98.6 | 24 | S2D > male_shirt > Piece Properties: Flip radio buttons, Flip submenu | FAIL --> Flip selection appears in piece context menu but without a checkbox, and the submenu appears when 'Flip' is selected, but the piece isn't flipped. The fix for this problem is Layout.110.
 | Layout.88.2 | 3 | SL > male_shirt > Export menu: DXF-ASTM note reads in full | FAIL --> Note did not appear
+| Layout.800.3 | 36 | SL > male_shirt > Export > SVG: no check boxes; each item exports | ?
 | Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Fabric | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Lining | ?
@@ -569,3 +570,12 @@ Needs the next MSI. (Seamly2D.71.15) Do not save the pattern changes.
 - [ ] Create Layout: no piece overlaps BackPanel or CollarTopInterface-Built-in-SA at the fold line.
 - [ ] Export > DXF > DXF-ASTM (R13), upload to https://aw.fyi/dxf: the BackPanel layer 1 boundary is closed. The layer 6 line lies on its fold line edge.
 - [ ] jacket2, Layout, Back: the same checks as BackPanel.
+
+## 36. Export > SVG has no check boxes
+
+Needs the next MSI. (Layout.800.3)
+
+- [ ] Open male_shirt. Press Layout. Create Layout.
+- [ ] Export > SVG: no item shows a check box or a check mark.
+- [ ] Click "Text: use current designer font". The Save dialog opens. Save. The SVG file exports.
+- [ ] Export > SVG again: still no check mark. Repeat for "Text: convert to single-line font" and "Paths: convert to single-stroke (Hershey)".

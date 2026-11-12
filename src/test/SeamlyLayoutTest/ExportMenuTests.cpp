@@ -10,6 +10,8 @@
 #include <QTest>
 #include <QUrl>
 
+#include <memory>
+
 class ExportMenuTests final : public QObject
 {
     Q_OBJECT
@@ -21,6 +23,8 @@ private slots:
     void splitLayoutsAllowSupportedFormats();
     void supportedSplitExportsEmitRequests_data();
     void supportedSplitExportsEmitRequests();
+    void svgModeItemsHaveNoCheckBox_data();
+    void svgModeItemsHaveNoCheckBox();
 }; // class ExportMenuTests
 
 void ExportMenuTests::dxfVariantsStayDisabledWhenLayoutContainsAllSizes()
@@ -235,6 +239,47 @@ void ExportMenuTests::supportedSplitExportsEmitRequests()
 
     delete menu;
 }
+
+/// @brief Lists the three Export > SVG text mode items and the mode each one requests.
+void ExportMenuTests::svgModeItemsHaveNoCheckBox_data()
+{
+    QTest::addColumn<QString>("item_name");
+    QTest::addColumn<QString>("mode");
+
+    QTest::newRow("designer-font") << QStringLiteral("svgDesignerFontItem") << QStringLiteral("designerFont");
+    QTest::newRow("single-line-font") << QStringLiteral("svgSingleLineFontItem") << QStringLiteral("singleLineFont");
+    QTest::newRow("hershey-strokes") << QStringLiteral("svgHersheyStrokesItem") << QStringLiteral("hersheyStrokes");
+} // ExportMenuTests::svgModeItemsHaveNoCheckBox_data
+
+/// @brief An SVG text mode item has no check box, stays unchecked after a click, and requests its mode.
+void ExportMenuTests::svgModeItemsHaveNoCheckBox()
+{
+    QFETCH(QString, item_name);
+    QFETCH(QString, mode);
+
+    QQmlEngine engine;
+    QQmlComponent component(&engine, QUrl(QStringLiteral("qrc:/qml/ExportMenu.qml")));
+    QVERIFY2(component.isReady(), qPrintable(component.errorString()));
+    // unique_ptr deletes the menu when a QVERIFY returns early.
+    const std::unique_ptr<QObject> menu(component.createWithInitialProperties({
+        {QStringLiteral("layoutReady"), true},
+        {QStringLiteral("svgModeSubmenu"), true},
+        {QStringLiteral("labelTextState"), QStringLiteral("text")},
+    }));
+    QVERIFY2(menu != nullptr, qPrintable(component.errorString()));
+
+    QSignalSpy request(menu.get(), SIGNAL(exportSvgModeRequested(QString)));
+    QVERIFY(request.isValid());
+    QObject *mode_item = menu->findChild<QObject *>(item_name);
+    QVERIFY(mode_item);
+    QVERIFY(mode_item->property("enabled").toBool());
+    QVERIFY(!mode_item->property("checkable").toBool());
+
+    QVERIFY(QMetaObject::invokeMethod(mode_item, "click"));
+    QVERIFY(!mode_item->property("checked").toBool());
+    QCOMPARE(request.count(), 1);
+    QCOMPARE(request.at(0).at(0).toString(), mode);
+} // ExportMenuTests::svgModeItemsHaveNoCheckBox
 
 QTEST_MAIN(ExportMenuTests)
 #include "ExportMenuTests.moc"

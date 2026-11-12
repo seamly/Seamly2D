@@ -442,37 +442,6 @@ void PreferencesModel::setHpglViewerPath(const QString &v)
     emit hpglViewerPathChanged();
 } // setHpglViewerPath
 
-// @brief Set the SVG label text mode; ignores unknown names; emits svgTextModeChanged if changed.
-void PreferencesModel::setSvgTextMode(const QString &v)
-{
-    if (!isSvgTextMode(v) || m_svgTextMode == v) return;
-    m_svgTextMode = v;
-    emit svgTextModeChanged();
-} // setSvgTextMode
-
-// @brief True when mode names one of the three SVG label text modes.
-bool PreferencesModel::isSvgTextMode(const QString &mode)
-{
-    return mode == QLatin1String("designerFont")
-        || mode == QLatin1String("singleLineFont")
-        || mode == QLatin1String("hersheyStrokes");
-} // isSvgTextMode
-
-// @brief Set svgTextMode and persist only that key.
-bool PreferencesModel::saveSvgTextMode(const QString &path, const QString &mode)
-{
-    if (!isSvgTextMode(mode)) {
-        Logger::log(QStringLiteral("PreferencesModel::saveSvgTextMode(): rejected mode=") + mode);
-        return false;
-    } // if unknown mode
-    setSvgTextMode(mode);
-
-    QSettings settings(QFileInfo(path).absoluteFilePath(), QSettings::IniFormat);
-    settings.setValue(QStringLiteral("svg_text_mode"), m_svgTextMode);
-    settings.sync();
-    return settings.status() == QSettings::NoError;
-} // saveSvgTextMode
-
 // @brief Set the HPGL cut-line pen; ignores pens outside 1-8.
 void PreferencesModel::setHpglCutPen(int v)
 {
@@ -622,7 +591,6 @@ bool PreferencesModel::load(const QString &path)
     setHpglViewerPath(settings.value(QStringLiteral("hpgl_viewer_path"),
                                      QString::fromUtf8(kDefaultHpglViewerPath)).toString());
     setDataRoot(settings.value(QStringLiteral("data_root"), m_dataRoot).toString());
-    setSvgTextMode(settings.value(QStringLiteral("svg_text_mode"), m_svgTextMode).toString());
     setHpglCutPen(settings.value(QStringLiteral("hpgl_cut_pen"), m_hpglCutPen).toInt());
     setHpglMarkPen(settings.value(QStringLiteral("hpgl_mark_pen"), m_hpglMarkPen).toInt());
     setHpglLabelPen(settings.value(QStringLiteral("hpgl_label_pen"), m_hpglLabelPen).toInt());
@@ -812,7 +780,6 @@ bool PreferencesModel::save(const QString &path)
     settings.setValue(QStringLiteral("projector_path"), m_projectorPath);
     settings.setValue(QStringLiteral("hpgl_viewer_path"), m_hpglViewerPath);
     settings.setValue(QStringLiteral("data_root"), m_dataRoot);
-    settings.setValue(QStringLiteral("svg_text_mode"), m_svgTextMode);
     settings.setValue(QStringLiteral("hpgl_cut_pen"), m_hpglCutPen);
     settings.setValue(QStringLiteral("hpgl_mark_pen"), m_hpglMarkPen);
     settings.setValue(QStringLiteral("hpgl_label_pen"), m_hpglLabelPen);
