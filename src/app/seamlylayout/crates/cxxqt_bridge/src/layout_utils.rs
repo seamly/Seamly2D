@@ -163,8 +163,8 @@ pub struct ProcessLayoutArgs<'a> {
     pub nested_multisize: bool,
     /// `true` extends media in height, and in width unless it is fabric.
     /// Fabric pieces that cannot fit the configured width remain unplaced.
-    /// `false` rejects incomplete paper sheets; other media keep unplaced warnings.
-    /// Tiled paper ignores it; splitting paper sheets takes precedence.
+    /// Paper sheets and tiled paper ignore it: a sheet keeps its size and
+    /// rejects an incomplete layout; PDF (tiled) prints larger layouts.
     pub extend_media: bool,
     /// `true` splits each piece wider or longer than the media into parts that
     /// fit (individual pattern, the user's choice).  Tiled paper ignores it.
@@ -202,8 +202,9 @@ pub fn do_process_layout(
 
     let is_paper_sheet = settings.media_type == "paper" && settings.paper_type == "sheet";
     let is_paper_roll = settings.media_type == "paper" && settings.paper_type == "roll";
-    // Splitting a paper sheet overrides extension; a paper roll may still extend in length.
-    let extend_media = args.extend_media && !(is_paper_sheet && args.split_oversized);
+    // A paper sheet never grows, for any caller: pieces that do not fit fail with
+    // SHEET_OVERFLOW_MESSAGE, which sends the user to PDF (tiled).
+    let extend_media = args.extend_media && media_can_grow(&settings);
 
     // Build the per-piece rotation trial set from layoutMode + rotationStep.
     // Passed to every packing call below; the dispatcher in `packing` routes
@@ -731,7 +732,7 @@ pub fn do_process_layout(
         content_bottom = grid_top + grid.height_px();
     } // if scale_grid
 
-    if is_paper_sheet && !extend_media && content_bottom > bin_h {
+    if is_paper_sheet && content_bottom > bin_h {
         // Legends and scale grids must not silently enlarge fixed sheet media.
         return Err(SHEET_ANNOTATION_OVERFLOW_MESSAGE.to_string());
     } // if annotations exceed the fixed sheet
@@ -753,10 +754,8 @@ pub fn do_process_layout(
 
     // 7b. Content height the canvas ends at.  Roll and fabric end at the lowest
     // piece when the blank space below it is large.  Extended media always ends
-    // at the lowest piece, but an extended sheet keeps at least its own length.
-    let fitted_content_h = if extended && !settings.is_roll_form() {
-        Some(content_bottom.max(bin_h))
-    } else if extended || (settings.is_roll_form() && blank_bottom > MIN_THRESHOLD_PX) {
+    // at the lowest piece.  A paper sheet keeps its own size.
+    let fitted_content_h = if extended || (settings.is_roll_form() && blank_bottom > MIN_THRESHOLD_PX) {
         Some(content_bottom)
     } else {
         None
@@ -937,9 +936,10 @@ pub const SHEET_CANNOT_GROW_MESSAGE: &str =
     "A paper sheet keeps its size. Split the pieces, or select PDF (tiled) in Layout Settings \
      to print pieces larger than the sheet.";
 
-/// @brief True when "Make the media bigger" may grow the media: every media but a paper sheet.
+/// @brief True when the media may grow: every media but a paper sheet.
 ///
 /// A paper sheet is a printer page, so it cannot grow. PDF (tiled) prints a larger piece whole.
+/// The oversized-pieces dialog and `do_process_layout` both use it.
 pub fn media_can_grow(settings: &LayoutSettings) -> bool {
     !(settings.media_type == "paper" && settings.paper_type == "sheet")
 } // fn media_can_grow
@@ -1257,7 +1257,7 @@ mod tests {
         }).to_string()
     } // fn paper_sheet_settings_json
 
-    // @brief Lay out the trousers on a paper sheet, splitting or extending as asked.
+    // @brief Lay out the trousers, splitting or extending as asked.
     fn process_trousers_sheet(settings_json: &str, split: bool, extend: bool) -> ProcessLayoutResult {
         let input_dom = Document::parse(TROUSERS_HANDOFF_SVG).expect("trousers fixture should parse");
         let init = do_initialize_layout(settings_json, Some(&input_dom)).expect("initialize_layout should succeed");
@@ -1348,17 +1348,6 @@ mod tests {
         assert!(labels.contains(&"Back".to_string()), "whole Back piece remains: {labels:?}");
         assert!(!labels.iter().any(|label| label.contains("(1/")), "no split parts: {labels:?}");
     } // split_request_without_divided_pieces_keeps_regular_layout_state
-
-    // @brief "Make the media bigger": the sheet grows until every piece is placed whole.
-    #[test]
-    fn trousers_long_pieces_extend_a_sheet() {
-        let settings_json = paper_sheet_settings_json(36.0, 36.0);
-        let result = process_trousers_sheet(&settings_json, false, true);
-        assert!(result.unplaced_labels.is_empty(), "unplaced: {:?}", result.unplaced_labels);
-        assert!(result.divide_spec.is_none());
-        assert_eq!(placed_count(&result), 12, "no piece split");
-        assert!(result.layout_h_px > 36 * 96, "the sheet grows past 36 in: {} px", result.layout_h_px);
-    } // trousers_long_pieces_extend_a_sheet
 
     // @brief Only a paper sheet refuses "Make the media bigger"; its message names PDF (tiled).
     #[test]
@@ -1517,6 +1506,7 @@ mod tests {
     } // fn process_placement_fixture
 
     // @brief Paper rejects overflowing whole pieces and split parts instead of stacking sheets.
+    // A request to extend the media (multisize tabs) does not grow the sheet.
     #[test]
     fn placement_paper_sheet_overflow_requires_tiled_pdf() {
         for (split, width, height) in [(false, 6.0, 2.0), (true, 1.0, 1.0)] {
@@ -1526,11 +1516,13 @@ mod tests {
                 "marginLeft": 0.0, "marginRight": 0.0, "marginTop": 0.0, "marginBottom": 0.0,
                 "layoutMode": "alongGrainline", "scaleGrid": false
             });
-            let error = process_placement_fixture(settings, split, false).err().expect("sheet must fail");
-            assert!(error.contains("All pieces cannot fit on one sheet."), "{error}");
-            assert!(error.contains("Select PDF (tiled) in Layout Settings"), "{error}");
-            assert!(error.contains("Long") || error.contains("Wide"), "{error}");
-            assert!(is_sheet_overflow(&error), "the controller must refuse the layout: {error}");
+            for extend in [false, true] {
+                let error = process_placement_fixture(settings.clone(), split, extend).err().expect("sheet must fail");
+                assert!(error.contains("All pieces cannot fit on one sheet."), "{error}");
+                assert!(error.contains("Select PDF (tiled) in Layout Settings"), "{error}");
+                assert!(error.contains("Long") || error.contains("Wide"), "{error}");
+                assert!(is_sheet_overflow(&error), "the controller must refuse the layout: {error}");
+            } // for extension requests
         } // for whole and split pieces
     } // placement_paper_sheet_overflow_requires_tiled_pdf
 
@@ -1545,7 +1537,7 @@ mod tests {
                 "layoutMode": "alongGrainline", "scaleGrid": false
             });
             for extend in [false, true] {
-                // Split wins even if a caller also requests enlargement.
+                // The sheet keeps its size even if a caller also requests enlargement.
                 let result = process_placement_fixture(settings.clone(), true, extend).expect("split fits");
                 assert!(result.unplaced_labels.is_empty(), "{:?}", result.unplaced_labels);
                 assert_eq!(placed_count(&result), 3, "two split parts and one whole piece");
@@ -1733,12 +1725,12 @@ mod tests {
         } // for folded and unfolded
     } // placement_fabric_enlargement_keeps_width
 
-    // @brief Paper still widens; enlargement notices use active units and ignore unchanged media.
+    // @brief A paper roll widens; enlargement notices use active units and ignore unchanged media.
     #[test]
     fn placement_enlargement_dimensions_and_notifications() {
         let settings = serde_json::json!({
-            "unit": "in", "mediaType": "paper", "paperType": "sheet",
-            "pageWidth": 1.0, "pageHeight": 1.0, "pieceGap": 0.0,
+            "unit": "in", "mediaType": "paper", "paperType": "roll",
+            "rollWidth": 1.0, "pieceGap": 0.0,
             "marginLeft": 0.0, "marginRight": 0.0, "marginTop": 0.0, "marginBottom": 0.0,
             "layoutMode": "alongGrainline", "scaleGrid": false
         });
@@ -2551,30 +2543,6 @@ mod tests {
         let content_h = assert_canvas_holds_pieces(&marker);
         assert!(content_h > 500 * 96, "the roll grows past 500 in, content height {content_h} px");
     } // jacket2_marker_extends_paper_roll
-
-    // @brief Marker on a 48 in × 48 in paper sheet: the sheet grows until every piece is placed.
-    #[test]
-    fn jacket2_marker_extends_paper_sheet() {
-        let settings_json = serde_json::json!({
-            "unit": "in",
-            "mediaType": "paper",
-            "paperType": "sheet",
-            "pageWidth": 48.0,
-            "pageHeight": 48.0,
-            "marginLeft": 0.5,
-            "marginRight": 0.5,
-            "marginTop": 0.5,
-            "marginBottom": 0.5,
-            "pieceGap": 0.125,
-            "layoutMode": "alongGrainline"
-        }).to_string();
-        let marker = process_jacket2_extended(&settings_json);
-        assert!(marker.unplaced_labels.is_empty(), "unplaced: {:?}", marker.unplaced_labels);
-        assert_eq!(placed_count(&marker), 208, "Marker: pieces x sizes");
-
-        let content_h = assert_canvas_holds_pieces(&marker);
-        assert!(content_h > 47 * 96, "the sheet grows past its length, content height {content_h} px");
-    } // jacket2_marker_extends_paper_sheet
 
     // @brief Marker on a 10 in paper roll: the pieces are wider than the roll.
     // The roll widens to the right for the widest piece, keeps both side margins,
