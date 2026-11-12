@@ -3188,7 +3188,7 @@ mod tests {
         assert!((h * unit - 36000.0).abs() < 0.01, "height at true size is 500 in, got {} pt", h * unit);
     } // pdf_page_longer_than_200_in_sets_user_unit
 
-    // @brief Tiled Letter and A4 pages keep exact paper dimensions and source geometry scale.
+    // @brief Tiled Letter, A4, and custom pages keep exact paper dimensions and source geometry scale.
     #[test]
     fn tiled_pdf_paper_sizes_and_geometry_scale_are_exact() {
         let doc = Document::parse(
@@ -3213,12 +3213,19 @@ mod tests {
                     "layoutMode": "alongGrainline",
                     "rotationStep": 180,
                     "tileSize": "{tile_size}",
+                    "tileWidth": 250.0,
+                    "tileHeight": 300.0,
                     "tileOrientation": "portrait"
                 }}"#
             ))
             .expect("metric tiled settings parse")
         };
-        let cases = [("Letter", 612.0, 792.0), ("A4", 595.2756, 841.8898)];
+        // Custom uses tileWidth × tileHeight: 250 × 300 mm.
+        let cases = [
+            ("Letter", 612.0, 792.0),
+            ("A4", 595.2756, 841.8898),
+            ("Custom", 708.6614, 850.3937),
+        ];
 
         for (tile_size, expected_width, expected_height) in cases {
             let pages = collect_tiled_pdf_page_bytes(&doc, &settings_for(tile_size))

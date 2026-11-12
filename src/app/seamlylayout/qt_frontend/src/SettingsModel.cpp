@@ -6,7 +6,8 @@
 // @brief Implementation of SettingsModel — layout settings QObject.
 //
 // Tile controls use the paper size table and its dimension labels.
-// Tile dimensions are resolved by the Rust tiling TILE_SIZES_DATA table.
+// Predefined tile dimensions come from the Rust tiling TILE_SIZES_DATA table.
+// The "Custom" tile size takes its dimensions from tileWidth and tileHeight.
 // JSON keys match the Rust #[serde(rename_all = "camelCase")] annotation.
 
 #include "SettingsModel.h"
@@ -77,6 +78,9 @@ constexpr QLatin1StringView TILED_PAPER_TYPE{"tiled"};
 
 // @brief Paper type of a roll: fixed width, open length.
 constexpr QLatin1StringView ROLL_PAPER_TYPE{"roll"};
+
+// @brief Tile size that uses tileWidth × tileHeight; matches CUSTOM_TILE_SIZE in Rust.
+constexpr QLatin1StringView CUSTOM_TILE_SIZE{"Custom"};
 
 // @brief Format a paper dimension without unnecessary trailing zeroes.
 QString formatPaperDimension(double dimension)
@@ -171,22 +175,23 @@ QStringList SettingsModel::paperTypeNames() const
     return { QString(TILED_PAPER_TYPE), QString(ROLL_PAPER_TYPE) };
 } // paperTypeNames()
 
-// @brief Return predefined tile size names in table order.
+// @brief Return predefined tile size names in table order, then "Custom".
 QStringList SettingsModel::tileSizeNames() const
 {
     QStringList names;
-    names.reserve(PAPER_SIZES_COUNT);
+    names.reserve(PAPER_SIZES_COUNT + 1);
     for (int i = 0; i < PAPER_SIZES_COUNT; ++i) {
         names.append(QString::fromUtf8(PAPER_SIZES[i].name));
     } // for i
+    names.append(QString(CUSTOM_TILE_SIZE));
     return names;
 } // tileSizeNames()
 
-// @brief Return tile size labels with both standard unit dimensions.
+// @brief Return tile size labels with both standard unit dimensions, then "Custom".
 QStringList SettingsModel::tileSizeLabels() const
 {
     QStringList labels;
-    labels.reserve(PAPER_SIZES_COUNT);
+    labels.reserve(PAPER_SIZES_COUNT + 1);
     for (int i = 0; i < PAPER_SIZES_COUNT; ++i) {
         const SizeEntry &size = PAPER_SIZES[i];
         labels.append(QStringLiteral("%1 (%2 × %3 in; %4 × %5 mm)")
@@ -196,6 +201,7 @@ QStringList SettingsModel::tileSizeLabels() const
                                formatPaperDimension(size.widthMm),
                                formatPaperDimension(size.heightMm)));
     } // for i
+    labels.append(QString(CUSTOM_TILE_SIZE));   // the user enters the dimensions
     return labels;
 } // tileSizeLabels()
 
@@ -486,6 +492,50 @@ void SettingsModel::setTileOrientation(const QString &v)
     emit tileOrientationChanged();
 } // setTileOrientation()
 
+// @brief Set the custom tile width in active units; invalid widths are ignored.
+void SettingsModel::setTileWidth(double width)
+{
+    const bool is_valid = std::isfinite(width) && width > 0.0;
+    if (is_valid && !qFuzzyCompare(m_tile_width, width)) {
+        m_tile_width = width;
+        emit tileWidthChanged();
+    } // if valid and changed
+} // setTileWidth()
+
+// @brief Set the custom tile height in active units; invalid heights are ignored.
+void SettingsModel::setTileHeight(double height)
+{
+    const bool is_valid = std::isfinite(height) && height > 0.0;
+    if (is_valid && !qFuzzyCompare(m_tile_height, height)) {
+        m_tile_height = height;
+        emit tileHeightChanged();
+    } // if valid and changed
+} // setTileHeight()
+
+// @brief Copy the predefined tile size in m_tileSize into the custom tile size.
+//
+// Inches take the imperial size; mm and cm take the metric size, as the Rust
+// tile table does. A name without a table entry changes nothing.
+void SettingsModel::copyTileSizeToCustom()
+{
+    for (int i = 0; i < PAPER_SIZES_COUNT; ++i) {
+        const SizeEntry& size = PAPER_SIZES[i];
+        if (m_tileSize == QString::fromUtf8(size.name)) {
+            double width  = size.widthIn;
+            double height = size.heightIn;
+            if (m_unit == QStringLiteral("mm")) {
+                width  = size.widthMm;
+                height = size.heightMm;
+            } else if (m_unit == QStringLiteral("cm")) {
+                width  = size.widthMm / 10.0;
+                height = size.heightMm / 10.0;
+            } // if metric unit
+            setTileWidth(width);
+            setTileHeight(height);
+        } // if current tile size
+    } // for each paper size
+} // copyTileSizeToCustom()
+
 void SettingsModel::setMarginTop(double v)
 {
     if (qFuzzyCompare(m_marginTop, v)) return;
@@ -718,6 +768,12 @@ bool SettingsModel::load(const QString &path)
     if (obj.contains(QStringLiteral("tileOrientation")))
         setTileOrientation(obj[QStringLiteral("tileOrientation")].toString());
 
+    if (obj.contains(QStringLiteral("tileWidth")))
+        setTileWidth(obj[QStringLiteral("tileWidth")].toDouble(m_tile_width));
+
+    if (obj.contains(QStringLiteral("tileHeight")))
+        setTileHeight(obj[QStringLiteral("tileHeight")].toDouble(m_tile_height));
+
     if (obj.contains(QStringLiteral("marginTop")))
         setMarginTop(obj[QStringLiteral("marginTop")].toDouble(m_marginTop));
 
@@ -769,6 +825,8 @@ bool SettingsModel::load(const QString &path)
     emit rollWidthChanged();
     emit tileSizeChanged();
     emit tileOrientationChanged();
+    emit tileWidthChanged();
+    emit tileHeightChanged();
     emit marginTopChanged();
     emit marginBottomChanged();
     emit marginLeftChanged();
@@ -809,6 +867,8 @@ bool SettingsModel::save(const QString &path)
     obj[QStringLiteral("rollWidth")]     = m_rollWidth;
     obj[QStringLiteral("tileSize")]      = m_tileSize;
     obj[QStringLiteral("tileOrientation")] = m_tileOrientation;
+    obj[QStringLiteral("tileWidth")]     = m_tile_width;
+    obj[QStringLiteral("tileHeight")]    = m_tile_height;
     obj[QStringLiteral("marginTop")]     = m_marginTop;
     obj[QStringLiteral("marginBottom")]  = m_marginBottom;
     obj[QStringLiteral("marginLeft")]    = m_marginLeft;
@@ -852,6 +912,8 @@ QString SettingsModel::toJson() const
     obj[QStringLiteral("rollWidth")]     = m_rollWidth;
     obj[QStringLiteral("tileSize")]      = m_tileSize;
     obj[QStringLiteral("tileOrientation")] = m_tileOrientation;
+    obj[QStringLiteral("tileWidth")]     = m_tile_width;
+    obj[QStringLiteral("tileHeight")]    = m_tile_height;
     obj[QStringLiteral("marginTop")]     = m_marginTop;
     obj[QStringLiteral("marginBottom")]  = m_marginBottom;
     obj[QStringLiteral("marginLeft")]    = m_marginLeft;
@@ -883,6 +945,8 @@ void SettingsModel::resetToDefaults()
     setRollWidth(36.0);
     setTileSize(QStringLiteral("Letter"));
     setTileOrientation(QStringLiteral("landscape"));
+    setTileWidth(8.5);
+    setTileHeight(11.0);
     setMarginTop(0.25);
     setMarginBottom(0.25);
     setMarginLeft(0.25);
@@ -901,6 +965,8 @@ void SettingsModel::convertAllUnits(const QString &fromUnit, const QString &toUn
     setPageWidth(convertUnit(m_pageWidth, fromUnit, toUnit));
     setPageHeight(convertUnit(m_pageHeight, fromUnit, toUnit));
     setRollWidth(convertUnit(m_rollWidth, fromUnit, toUnit));
+    setTileWidth(convertUnit(m_tile_width, fromUnit, toUnit));
+    setTileHeight(convertUnit(m_tile_height, fromUnit, toUnit));
     setMarginTop(convertUnit(m_marginTop, fromUnit, toUnit));
     setMarginBottom(convertUnit(m_marginBottom, fromUnit, toUnit));
     setMarginLeft(convertUnit(m_marginLeft, fromUnit, toUnit));
@@ -915,13 +981,16 @@ void SettingsModel::convertAllUnits(const QString &fromUnit, const QString &toUn
     setPieceGap(convertUnit(m_pieceGap, fromUnit, toUnit));
 } // convertAllUnits()
 
-// @brief Look up a tile size by name and update tileSize property.
-void SettingsModel::selectTileSize(const QString &name)
+// @brief Select a tile size by name; "Custom" starts from the current predefined size.
+void SettingsModel::selectTileSize(const QString& name)
 {
-    if (tileSizeNames().contains(name))
-    {
+    if (tileSizeNames().contains(name)) {
+        // Copy before the switch: the copy reads the predefined size in m_tileSize.
+        if (name == CUSTOM_TILE_SIZE) {
+            copyTileSizeToCustom();
+        } // if custom size
         setTileSize(name);
-    }
+    } // if known name
 } // selectTileSize()
 
 // @brief Return the appropriate default margin value for the given unit.

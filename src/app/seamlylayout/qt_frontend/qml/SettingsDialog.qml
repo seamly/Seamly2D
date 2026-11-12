@@ -48,6 +48,8 @@ Dialog {
         : false
     // @brief True when Roll Width is "custom": the user enters the roll width.
     readonly property bool isCustomRoll: root.isRollPaper && root.model.rollSize === "custom"
+    // @brief True when Tile Size is "Custom": the user enters the tile width and height.
+    readonly property bool isCustomTile: root.isTiledPaper && root.model.tileSize === "Custom"
     readonly property bool showFabricSection: root.model
         ? root.model.mediaType === "fabric"
         : false
@@ -61,6 +63,14 @@ Dialog {
         if (!root.model) return;
         customRollWidthField.text = root.model.rollWidth.toFixed(2);
     } // function refreshCustomRollWidthField
+
+    // @brief Copy the model custom tile size into the custom tile size fields.
+    // An edit replaces the field's text binding, so model changes need this call.
+    function refreshCustomTileSizeFields() {
+        if (!root.model) return;
+        customTileWidthField.text  = root.model.tileWidth.toFixed(2);
+        customTileHeightField.text = root.model.tileHeight.toFixed(2);
+    } // function refreshCustomTileSizeFields
 
     title:           "Layout Settings"
     modal:           true
@@ -505,6 +515,7 @@ Dialog {
                             root.model.convertAllUnits(oldUnit, newUnit);
                             root.model.unit = newUnit;
                             root.refreshCustomRollWidthField();
+                            root.refreshCustomTileSizeFields();
                         } // if unit changed
                     } // onActivated
                 } // ComboBox unitCombo
@@ -587,9 +598,94 @@ Dialog {
                     model:            root.model ? root.model.tileSizeLabels : []
                     currentIndex:     root.model ? Math.max(0, root.model.tileSizeNames.indexOf(root.model.tileSize)) : 0
                     onActivated: {
-                        if (root.model) root.model.selectTileSize(root.model.tileSizeNames[currentIndex])
+                        if (!root.model) return;
+                        root.model.selectTileSize(root.model.tileSizeNames[currentIndex]);
+                        root.refreshCustomTileSizeFields();   // Custom starts from the current size
                     } // onActivated
                 } // ComboBox tileSize
+
+                // Custom tile size: width × height in the Layout Settings unit.
+                Text {
+                    visible:        root.isCustomTile
+                    text:           "Custom Size:"
+                    color:          Theme.fieldLabel
+                    font.pixelSize: Theme.fontSizeNormal
+                    Layout.preferredWidth: scrollView.labelWidth
+                } // Text customTileSizeLabel
+                RowLayout {
+                    id:               customTileSizeRow
+                    visible:          root.isCustomTile
+                    Layout.fillWidth: true
+                    spacing:          6
+
+                    TextField {
+                        id:               customTileWidthField
+                        objectName:       "customTileWidthField"
+                        Layout.fillWidth: true
+                        placeholderText:  "Width"
+                        ToolTip.visible:  hovered
+                        ToolTip.text:     "Tile width (" + (root.model ? root.model.unit : "in") + ")"
+                        text:             root.model ? root.model.tileWidth.toFixed(2) : "8.50"
+                        validator:        DoubleValidator {
+                            bottom: 0.000001
+                            top: 1000000000
+                            decimals: 6
+                            notation: DoubleValidator.StandardNotation
+                            locale: "C"   // the locale name: a decimal point in every system locale
+                        }
+                        onEditingFinished: {
+                            if (!root.model) return;
+                            var value = parseFloat(text);
+                            // The model ignores a value that is not positive and finite.
+                            if (acceptableInput && isFinite(value) && value > 0) {
+                                root.model.tileWidth = value;
+                            } // if valid width
+                            text = root.model.tileWidth.toFixed(2);
+                        } // onEditingFinished
+                        color:            Theme.fieldText
+                        background:       Rectangle { color: Theme.fieldBackground; radius: 2 }
+                    } // TextField customTileWidth
+
+                    Text {
+                        text:           "\u00D7"
+                        color:          Theme.textOnDark
+                        font.pixelSize: Theme.fontSizeNormal
+                    } // Text customTileSizeTimes
+
+                    TextField {
+                        id:               customTileHeightField
+                        objectName:       "customTileHeightField"
+                        Layout.fillWidth: true
+                        placeholderText:  "Height"
+                        ToolTip.visible:  hovered
+                        ToolTip.text:     "Tile height (" + (root.model ? root.model.unit : "in") + ")"
+                        text:             root.model ? root.model.tileHeight.toFixed(2) : "11.00"
+                        validator:        DoubleValidator {
+                            bottom: 0.000001
+                            top: 1000000000
+                            decimals: 6
+                            notation: DoubleValidator.StandardNotation
+                            locale: "C"   // the locale name: a decimal point in every system locale
+                        }
+                        onEditingFinished: {
+                            if (!root.model) return;
+                            var value = parseFloat(text);
+                            // The model ignores a value that is not positive and finite.
+                            if (acceptableInput && isFinite(value) && value > 0) {
+                                root.model.tileHeight = value;
+                            } // if valid height
+                            text = root.model.tileHeight.toFixed(2);
+                        } // onEditingFinished
+                        color:            Theme.fieldText
+                        background:       Rectangle { color: Theme.fieldBackground; radius: 2 }
+                    } // TextField customTileHeight
+
+                    Text {
+                        text:           root.model ? root.model.unit : "in"
+                        color:          Theme.textOnDark
+                        font.pixelSize: Theme.fontSizeNormal
+                    } // Text customTileUnit
+                } // RowLayout customTileSizeRow
 
                 Text {
                     visible:        root.isTiledPaper
@@ -1044,6 +1140,7 @@ Dialog {
             fabricWidthField.text   = root.model.fabricWidth.toFixed(2)
             selvedgeWidthField.text  = root.model.selvedgeWidth.toFixed(2)
             root.refreshCustomRollWidthField()
+            root.refreshCustomTileSizeFields()
         } // onSettingsLoaded
     } // Connections settingsLoaded
 } // Dialog root

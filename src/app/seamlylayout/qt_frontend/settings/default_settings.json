@@ -18,7 +18,9 @@
     "rotationStep": 180,
     "noGrainlineRotation": "upright",
     "selvedgeWidth": 0,
+    "tileHeight": 11,
     "tileOrientation": "portrait",
     "tileSize": "Letter",
+    "tileWidth": 8.5,
     "unit": "in"
 }

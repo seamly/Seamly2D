@@ -63,6 +63,8 @@ private slots:
     void tileSizes_listPredefinedSizes();
     void tileSizes_selectAndRoundtripNames();
     void tileSizeDropdown_displaysDimensionsAndRestoresSelection();
+    void tileSize_customStartsFromCurrentSize();
+    void tileSizeDropdown_customShowsSizeFields();
     void paperType_acceptsOnlyTiledOrRoll();
     void paperTypeDropdown_offersTiledAndRoll();
     void pageDimensions_rejectInvalidValues();
@@ -144,7 +146,7 @@ void SettingsModelTests::defaults_layoutModeIsAlongGrainline()
     QCOMPARE(m.layoutMode(), QStringLiteral("alongGrainline"));
 }
 
-// @brief Tile choices list every predefined paper size with imperial and metric dimensions.
+// @brief Tile choices list every predefined paper size with imperial and metric dimensions, then Custom.
 void SettingsModelTests::tileSizes_listPredefinedSizes()
 {
     SettingsModel model;
@@ -152,16 +154,19 @@ void SettingsModelTests::tileSizes_listPredefinedSizes()
     const QStringList labels = model.tileSizeLabels();
 
     QCOMPARE(names.size(), labels.size());
-    QCOMPARE(names.size(), 27);
+    QCOMPARE(names.size(), 28);   // 27 predefined sizes and Custom
     QCOMPARE(labels.at(names.indexOf(QStringLiteral("Letter"))),
              QStringLiteral("Letter (8.5 × 11 in; 216 × 279 mm)"));
     QVERIFY(!names.contains(QStringLiteral("None")));
-    QVERIFY(!names.contains(QStringLiteral("Custom")));
+    QCOMPARE(names.last(), QStringLiteral("Custom"));
+    QCOMPARE(labels.last(), QStringLiteral("Custom"));
+    QCOMPARE(names.count(QStringLiteral("Custom")), 1);
     QCOMPARE(labels.at(names.indexOf(QStringLiteral("ANSI E"))),
              QStringLiteral("ANSI E (34 × 44 in; 864 × 1118 mm)"));
     QCOMPARE(labels.at(names.indexOf(QStringLiteral("A0"))),
              QStringLiteral("A0 (33.11 × 46.81 in; 841 × 1189 mm)"));
-    QCOMPARE(labels.last(), QStringLiteral("B6 (4.92 × 6.93 in; 125 × 176 mm)"));
+    QCOMPARE(labels.at(names.indexOf(QStringLiteral("B6"))),
+             QStringLiteral("B6 (4.92 × 6.93 in; 125 × 176 mm)"));
 }
 
 // @brief Selecting and saving any tile size preserves its stable name and orientation.
@@ -189,7 +194,6 @@ void SettingsModelTests::tileSizes_selectAndRoundtripNames()
 
     const QString previous = writer.tileSize();
     writer.selectTileSize(QStringLiteral("None"));
-    writer.selectTileSize(QStringLiteral("Custom"));
     writer.selectTileSize(QStringLiteral("unknown"));
     writer.selectTileSize(writer.tileSizeLabels().first());
     QCOMPARE(writer.tileSize(), previous);
@@ -211,7 +215,7 @@ void SettingsModelTests::tileSizeDropdown_displaysDimensionsAndRestoresSelection
     QVERIFY2(dialog, qPrintable(component.errorString()));
     QObject *combo = dialog->findChild<QObject *>(QStringLiteral("tileSizeCombo"));
     QVERIFY(combo);
-    QCOMPARE(combo->property("count").toInt(), 27);
+    QCOMPARE(combo->property("count").toInt(), model.tileSizeNames().size());
     const QStringList names = model.tileSizeNames();
     const QStringList labels = model.tileSizeLabels();
     QCOMPARE(combo->property("currentIndex").toInt(), names.indexOf(QStringLiteral("ANSI D")));
@@ -235,6 +239,144 @@ void SettingsModelTests::tileSizeDropdown_displaysDimensionsAndRestoresSelection
     QCOMPARE(combo->property("currentIndex").toInt(), names.indexOf(QStringLiteral("A0")));
     QCOMPARE(combo->property("currentText").toString(), labels.at(names.indexOf(QStringLiteral("A0"))));
 }
+
+// @brief Custom tile size starts from the current size, keeps edits, converts units, and round-trips.
+void SettingsModelTests::tileSize_customStartsFromCurrentSize()
+{
+    SettingsModel model;
+    QCOMPARE(model.tileWidth(), 8.5);
+    QCOMPARE(model.tileHeight(), 11.0);
+
+    // Custom copies the predefined size in the active unit: metric for mm and cm.
+    model.setUnit(QStringLiteral("mm"));
+    model.selectTileSize(QStringLiteral("Legal"));
+    model.selectTileSize(QStringLiteral("Custom"));
+    QCOMPARE(model.tileSize(), QStringLiteral("Custom"));
+    QCOMPARE(model.tileWidth(), 216.0);
+    QCOMPARE(model.tileHeight(), 356.0);
+
+    // A second Custom selection keeps the user's edits.
+    model.setTileWidth(250.0);
+    model.selectTileSize(QStringLiteral("Custom"));
+    QCOMPARE(model.tileWidth(), 250.0);
+
+    // Invalid dimensions leave the custom size unchanged.
+    model.setTileWidth(0.0);
+    model.setTileWidth(-1.0);
+    model.setTileHeight(std::numeric_limits<double>::quiet_NaN());
+    model.setTileHeight(std::numeric_limits<double>::infinity());
+    QCOMPARE(model.tileWidth(), 250.0);
+    QCOMPARE(model.tileHeight(), 356.0);
+
+    // The layout core reads tileWidth and tileHeight from the settings JSON.
+    const QJsonObject json = QJsonDocument::fromJson(model.toJson().toUtf8()).object();
+    QCOMPARE(json.value(QStringLiteral("tileSize")).toString(), QStringLiteral("Custom"));
+    QCOMPARE(json.value(QStringLiteral("tileWidth")).toDouble(), 250.0);
+    QCOMPARE(json.value(QStringLiteral("tileHeight")).toDouble(), 356.0);
+
+    const QString path = QDir(QCoreApplication::applicationDirPath())
+                             .filePath(QStringLiteral("custom-tile-%1.settings").arg(QCoreApplication::applicationPid()));
+    QVERIFY(model.save(path));
+    SettingsModel reader;
+    QVERIFY(reader.load(path));
+    QVERIFY(QFile::remove(path));
+    QCOMPARE(reader.tileSize(), QStringLiteral("Custom"));
+    QCOMPARE(reader.tileWidth(), 250.0);
+    QCOMPARE(reader.tileHeight(), 356.0);
+
+    // A unit change converts the custom size.
+    reader.convertAllUnits(QStringLiteral("mm"), QStringLiteral("cm"));
+    QCOMPARE(reader.tileWidth(), 25.0);
+    QCOMPARE(reader.tileHeight(), 35.6);
+
+    // Inches copy the imperial size; cm copies the metric size ÷ 10.
+    SettingsModel imperial;
+    imperial.selectTileSize(QStringLiteral("A4"));
+    imperial.selectTileSize(QStringLiteral("Custom"));
+    QCOMPARE(imperial.tileWidth(), 8.27);
+    QCOMPARE(imperial.tileHeight(), 11.69);
+    SettingsModel centimetres;
+    centimetres.setUnit(QStringLiteral("cm"));
+    centimetres.selectTileSize(QStringLiteral("A4"));
+    centimetres.selectTileSize(QStringLiteral("Custom"));
+    QCOMPARE(centimetres.tileWidth(), 21.0);
+    QCOMPARE(centimetres.tileHeight(), 29.7);
+
+    // Reset restores Letter in inches.
+    reader.resetToDefaults();
+    QCOMPARE(reader.tileSize(), QStringLiteral("Letter"));
+    QCOMPARE(reader.tileWidth(), 8.5);
+    QCOMPARE(reader.tileHeight(), 11.0);
+} // tileSize_customStartsFromCurrentSize()
+
+// @brief The dialog offers Custom in Tile Size; its fields edit the tile width and height.
+void SettingsModelTests::tileSizeDropdown_customShowsSizeFields()
+{
+    register_theme_singleton();
+    SettingsModel model;
+    model.setPaperType(QStringLiteral("tiled"));
+    QQmlEngine engine;
+    QQmlComponent component(&engine, QUrl(QStringLiteral("qrc:/qml/SettingsDialog.qml")));
+    QVERIFY2(component.isReady(), qPrintable(component.errorString()));
+    QScopedPointer<QObject> dialog(component.createWithInitialProperties({
+        {QStringLiteral("model"), QVariant::fromValue(&model)}
+    }));
+    QVERIFY2(dialog, qPrintable(component.errorString()));
+    QObject* combo = dialog->findChild<QObject*>(QStringLiteral("tileSizeCombo"));
+    QObject* width_field = dialog->findChild<QObject*>(QStringLiteral("customTileWidthField"));
+    QObject* height_field = dialog->findChild<QObject*>(QStringLiteral("customTileHeightField"));
+    QVERIFY(combo);
+    QVERIFY(width_field);
+    QVERIFY(height_field);
+    QVERIFY(dialog->property("isTiledPaper").toBool());
+    QVERIFY(!dialog->property("isCustomTile").toBool());
+
+    // Select A4, then Custom, as a user does: the index changes, then activated fires.
+    const QStringList names = model.tileSizeNames();
+    const int size_index = names.indexOf(QStringLiteral("A4"));
+    combo->setProperty("currentIndex", size_index);
+    QVERIFY(QMetaObject::invokeMethod(combo, "activated", Q_ARG(int, size_index)));
+    const int custom_index = names.indexOf(QStringLiteral("Custom"));
+    combo->setProperty("currentIndex", custom_index);
+    QCOMPARE(combo->property("currentText").toString(), QStringLiteral("Custom"));
+    QVERIFY(QMetaObject::invokeMethod(combo, "activated", Q_ARG(int, custom_index)));
+    QCOMPARE(model.tileSize(), QStringLiteral("Custom"));
+    QVERIFY(dialog->property("isCustomTile").toBool());
+    QCOMPARE(width_field->property("text").toString(), QStringLiteral("8.27"));
+    QCOMPARE(height_field->property("text").toString(), QStringLiteral("11.69"));
+
+    // A typed value goes to the model in the active unit.
+    width_field->setProperty("text", QStringLiteral("10"));
+    QVERIFY(QMetaObject::invokeMethod(width_field, "editingFinished"));
+    height_field->setProperty("text", QStringLiteral("12.5"));
+    QVERIFY(QMetaObject::invokeMethod(height_field, "editingFinished"));
+    QCOMPARE(model.tileWidth(), 10.0);
+    QCOMPARE(model.tileHeight(), 12.5);
+    QCOMPARE(width_field->property("text").toString(), QStringLiteral("10.00"));
+    QCOMPARE(height_field->property("text").toString(), QStringLiteral("12.50"));
+
+    // A value that is not positive restores the model value.
+    height_field->setProperty("text", QStringLiteral("0"));
+    QVERIFY(QMetaObject::invokeMethod(height_field, "editingFinished"));
+    QCOMPARE(model.tileHeight(), 12.5);
+    QCOMPARE(height_field->property("text").toString(), QStringLiteral("12.50"));
+
+    // Loading a saved custom tile size restores the dropdown and the fields.
+    const QString path = QDir(QCoreApplication::applicationDirPath())
+                             .filePath(QStringLiteral("custom-tile-ui-%1.settings").arg(QCoreApplication::applicationPid()));
+    SettingsModel writer;
+    writer.setPaperType(QStringLiteral("tiled"));
+    writer.selectTileSize(QStringLiteral("Custom"));
+    writer.setTileWidth(14.0);
+    writer.setTileHeight(20.0);
+    QVERIFY(writer.save(path));
+    combo->setProperty("currentIndex", 0);
+    QVERIFY(model.load(path));
+    QVERIFY(QFile::remove(path));
+    QCOMPARE(combo->property("currentIndex").toInt(), custom_index);
+    QCOMPARE(width_field->property("text").toString(), QStringLiteral("14.00"));
+    QCOMPARE(height_field->property("text").toString(), QStringLiteral("20.00"));
+} // tileSizeDropdown_customShowsSizeFields()
 
 // @brief Paper type is "tiled" or "roll"; any other value, such as a saved "sheet", becomes "tiled".
 void SettingsModelTests::paperType_acceptsOnlyTiledOrRoll()
@@ -1087,7 +1229,7 @@ void SettingsModelTests::bc2_saveAfterLoad_savedJsonContainsAllKeys()
     QCOMPARE(err.error, QJsonParseError::NoError);
     const QJsonObject savedObj = doc.object();
 
-    // All 22 keys that save() is contractually required to write.
+    // All 24 keys that save() is contractually required to write.
     const QStringList expectedKeys = {
         QStringLiteral("layoutMode"),    QStringLiteral("rotationStep"),
         QStringLiteral("noGrainlineRotation"),
@@ -1097,6 +1239,7 @@ void SettingsModelTests::bc2_saveAfterLoad_savedJsonContainsAllKeys()
         QStringLiteral("rollSize"),
         QStringLiteral("rollWidth"),     QStringLiteral("tileSize"),
         QStringLiteral("tileOrientation"), QStringLiteral("marginTop"),
+        QStringLiteral("tileWidth"),     QStringLiteral("tileHeight"),
         QStringLiteral("marginBottom"),  QStringLiteral("marginLeft"),
         QStringLiteral("marginRight"),   QStringLiteral("fabricWidth"),
         QStringLiteral("fabricHeight"),  QStringLiteral("selvedgeWidth"),
@@ -1170,6 +1313,7 @@ void SettingsModelTests::bc2_savedJson_fieldValuesMatchModel()
         QStringLiteral("rollSize"),
         QStringLiteral("rollWidth"),     QStringLiteral("tileSize"),
         QStringLiteral("tileOrientation"), QStringLiteral("marginTop"),
+        QStringLiteral("tileWidth"),     QStringLiteral("tileHeight"),
         QStringLiteral("marginBottom"),  QStringLiteral("marginLeft"),
         QStringLiteral("marginRight"),   QStringLiteral("fabricWidth"),
         QStringLiteral("fabricHeight"),  QStringLiteral("selvedgeWidth"),
@@ -1192,6 +1336,8 @@ void SettingsModelTests::bc2_savedJson_fieldValuesMatchModel()
     QCOMPARE(obj[QStringLiteral("rollWidth")].toDouble(),        m.rollWidth());
     QCOMPARE(obj[QStringLiteral("tileSize")].toString(),         m.tileSize());
     QCOMPARE(obj[QStringLiteral("tileOrientation")].toString(),  m.tileOrientation());
+    QCOMPARE(obj[QStringLiteral("tileWidth")].toDouble(),        m.tileWidth());
+    QCOMPARE(obj[QStringLiteral("tileHeight")].toDouble(),       m.tileHeight());
     QCOMPARE(obj[QStringLiteral("marginTop")].toDouble(),        m.marginTop());
     QCOMPARE(obj[QStringLiteral("marginBottom")].toDouble(),     m.marginBottom());
     QCOMPARE(obj[QStringLiteral("marginLeft")].toDouble(),       m.marginLeft());

@@ -18,12 +18,14 @@
         >>> if unit='mm' then default is 10 for all margins.
         >>> if unit='in' then default is .25 for all margins.
     > if paperType='tiled':
-      >> tileSize -- dropdown of 27 predefined sizes with imperial and metric dimension labels; default is Letter.
-      >> Sizes include Letter, Legal, Ledger, ANSI C–E, ARCH A–E/E1–E3, ISO A0–A5, and ISO B0–B6.
-      >> No custom size: tile output requires a predefined physical page size. None is not a selectable tile size.
-      >> Settings store the size name, not the dimension label; orientation remains independent.
-      >> tileWidth = tileSize width converted to user units; default is 8.5.
-      >> tileHeight = tileSize height converted to user units; default is 11.
+      >> tileSize -- dropdown of 27 predefined sizes with imperial and metric dimension labels, then 'Custom'; default is Letter.
+      >> Sizes include Letter, Legal, Ledger, ANSI C–E, ARCH A–E/E1–E3, ISO A0–A5, and ISO B0–B6. None is not a selectable tile size.
+      >> 'Custom' shows Custom Size fields: the user enters the tile width and height in the user unit.
+        >>> Selecting 'Custom' copies the current predefined size into the fields: imperial for 'in', metric for 'mm' and 'cm'.
+        >>> The fields reject a value that is not above zero.
+      >> Settings store the size name, not the dimension label. Tile orientation applies to every size, 'Custom' included.
+      >> tileWidth, tileHeight = the custom tile size in user units; default is 8.5 × 11. A unit change converts them.
+        >>> Used only when tileSize = 'Custom'. A predefined tileSize takes its dimensions from the size table.
       >> Margins - marginLeft, marginRight, marginTop, marginBottom
         >>> if unit='cm' then default is 1 for all margins.
         >>> if unit='mm' then default is 10 for all margins.

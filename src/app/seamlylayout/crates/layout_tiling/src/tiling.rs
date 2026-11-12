@@ -19,7 +19,7 @@
 
 use xmltree::{Element, XMLNode};
 
-use crate::layout_settings::{LayoutSettings, LAYOUT_PPI};
+use crate::layout_settings::{LayoutSettings, CUSTOM_TILE_SIZE, LAYOUT_PPI};
 
 // ---------------------------------------------------------------------------
 // Tile size lookup table
@@ -139,6 +139,19 @@ fn tile_size_px(name: &str, unit: &str) -> Option<(f64, f64)> {
     None
 } // fn tile_size_px
 
+// @brief Resolve the tile page size of the settings, before orientation.
+//
+// @param settings  Parsed LayoutSettings.
+// @return          (width_px, height_px), or None for "None", an unknown name,
+//                  or a custom size that is not above zero.
+fn tile_page_px(settings: &LayoutSettings) -> Option<(f64, f64)> {
+    if settings.tile_size == CUSTOM_TILE_SIZE {
+        settings.custom_tile_px()
+    } else {
+        tile_size_px(&settings.tile_size, &settings.unit)
+    } // if custom size
+} // fn tile_page_px
+
 // ---------------------------------------------------------------------------
 // TileDimensions
 // ---------------------------------------------------------------------------
@@ -189,7 +202,8 @@ pub struct TileDimensions {
 // Implements the Calculations section of TILING_CALCULATION_WORKFLOW.md.
 //
 // Steps:
-//   1. Resolve tile page size via tile_size_px(); error if "None" or unknown.
+//   1. Resolve tile page size via tile_page_px(); error if "None", unknown,
+//      or a custom size that is not above zero.
 //   2. Convert margins from userUnit to pixels via to_inches() * LAYOUT_PPI.
 //   3. trimTileW = paperSizeWPx - ml - mr;  trimTileH = paperSizeHPx - mt - mb.
 //   4. tileCols = ceil((inputW - ml - mr) / trimTileW).
@@ -214,12 +228,17 @@ pub fn compute_tile_dims(
 
     // --- 1 get tile page size f64 ---
     let (paper_size_w_px_f, paper_size_h_px_f) =
-        tile_size_px(&settings.tile_size, &settings.unit)
-            .ok_or_else(|| format!(
-                "Tile size '{}' is not valid or has no dimensions. \
-                 Select a tile size other than 'None'.",
-                settings.tile_size
-            ))?; // if tile_size invalid
+        tile_page_px(settings).ok_or_else(|| {
+            if settings.tile_size == CUSTOM_TILE_SIZE {
+                "The custom tile size needs a width and a height above zero.".to_string()
+            } else {
+                format!(
+                    "Tile size '{}' is not valid or has no dimensions. \
+                     Select a tile size other than 'None'.",
+                    settings.tile_size
+                )
+            } // if custom size
+        })?; // if tile size invalid
 
     // --- 2 get margins f64 ---
     let (ml_f, mr_f, mt_f, mb_f) = {
@@ -884,6 +903,41 @@ mod tests {
         assert!(tile_size_px("Custom", "in").is_none());
         assert!(tile_size_px("unknown", "in").is_none());
     }
+
+    // @brief compute_tile_dims: a custom size sets the page size; landscape swaps it.
+    #[test]
+    fn compute_tile_dims_custom_size() {
+        for (unit, width, height) in [("in", 10.0, 12.0), ("mm", 254.0, 304.8), ("cm", 25.4, 30.48)] {
+            for orientation in ["portrait", "landscape"] {
+                let mut settings = LayoutSettings::default_for_test();
+                settings.unit = unit.to_string();
+                settings.tile_size = CUSTOM_TILE_SIZE.to_string();
+                settings.tile_width = width;
+                settings.tile_height = height;
+                settings.tile_orientation = orientation.to_string();
+                let td = compute_tile_dims(5000, 7000, &settings)
+                    .unwrap_or_else(|error| panic!("{unit} {orientation}: {error}"));
+                // 10 × 12 in = 960 × 1152 px in every unit.
+                let (expected_w, expected_h) = if orientation == "portrait" {
+                    (960.0, 1152.0)
+                } else {
+                    (1152.0, 960.0)
+                }; // if portrait
+                assert!((td.paper_w_px - expected_w).abs() < 1e-8, "{unit} {orientation} width");
+                assert!((td.paper_h_px - expected_h).abs() < 1e-8, "{unit} {orientation} height");
+            } // for each orientation
+        } // for each unit
+    } // compute_tile_dims_custom_size
+
+    // @brief compute_tile_dims: a custom size that is not above zero returns Err.
+    #[test]
+    fn compute_tile_dims_invalid_custom_size_errors() {
+        let mut settings = LayoutSettings::default_for_test();
+        settings.tile_size = CUSTOM_TILE_SIZE.to_string();
+        settings.tile_width = 0.0;
+        let error = compute_tile_dims(2000, 3000, &settings).expect_err("zero width");
+        assert!(error.contains("custom tile size"), "message: {error}");
+    } // compute_tile_dims_invalid_custom_size_errors
 
     // @brief compute_tile_dims: "None" tile size returns Err.
     #[test]
