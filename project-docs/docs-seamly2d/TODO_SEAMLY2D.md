@@ -76,7 +76,7 @@ Rotation, arrow line, label, extended fold line, SeamlyLayout fold placement and
 
 ## Not required for SeamlyLayout release
 
-### [ ] Task Seamly2D.9 — Pattern preferences should show the label template file name
+### [x] Task Seamly2D.9 — Pattern preferences should show the label template file name
 
 `Pattern preferences > Label data > Label template:` has only the `Edit template` button (`pushButtonEditPatternLabel`, `src/app/seamly2d/dialogs/dialogpatternproperties.ui`). The user cannot see which template file the pattern label uses without opening the editor.
 
@@ -90,7 +90,7 @@ Rotation, arrow line, label, extended fold line, SeamlyLayout fold placement and
 - [x] Schema conversion is unnecessary: template provenance is dialog state; the existing format stores label lines.
 - [x] Verify (User)
 
-### [ ] Task Seamly2D.50 - Implement - Piece Mode - Drill Holes
+### [x] Task Seamly2D.50 - Implement - Piece Mode - Drill Holes
 
 - [x] Implement Drill holes as a dedicated Piece Properties page, separate from notches.
   - [x] Resolve live drill centers in Piece Mode; require positive constant diameters and valid anchors.
@@ -99,7 +99,7 @@ Rotation, arrow line, label, extended fold line, SeamlyLayout fold placement and
 - [x] Schema v0.7.9 and conversion preserve markings. Integrated Qt and Rust suites pass.
 - [x] Verify (User)
 
-### Task Seamly2D.60 - Implement - Strip & plaid reference lines
+### [x] Task Seamly2D.60 - Implement - Strip & plaid reference lines
 
 - [x] Seamly2D.60 - Implement Stripe and plaid reference lines.
   - [x] Seamly2D.60.1 Live, distinct main-path point nodes define reference-only lines in Piece Mode.
@@ -107,9 +107,9 @@ Rotation, arrow line, label, extended fold line, SeamlyLayout fold placement and
 - [x] Real producer, transformation, DXF, and packing-invariance tests pass.
 - [x] Schema v0.7.9 and conversion preserve reference lines.
 - [x] Dialog regression verifies path-node choices, saved IDs, anchor independence, and edited endpoint geometry.
-- [ ] Verify (User)
+- [x] Verify (User)
 
-### [ ] Task Seamly2D.62 - Implement - Piece Mode - 'Flip Piece' tool
+### [x] Task Seamly2D.62 - Implement - Piece Mode - 'Flip Piece' tool
 
 The 'Flip Piece' tool can be applied to any piece in Piece Mode, including pieces created by 'Union', 'Flip Piece', 'Copy Piece', and 'Mirror on Foldline' tools.
 
@@ -120,13 +120,13 @@ The 'Flip Piece' tool can be applied to any piece in Piece Mode, including piece
 - [x] Centered flip-transform tests and integrated Qt suites pass.
 - [x] Existing flip schema and conversion remain in use; no additional schema change is needed.
 - [ ] Test/Verify - check flipping:
-  - [ ] Single piece - vertical & horizontal & both
-  - [ ] Copied piece (requires Seamly2D.61) - vertical & horizontal & both
-  - [ ] Flip a piece that was previously Flipped - vertical
-  - [ ] Flip a piece that was previously Flipped - horizontal
-  - [ ] Flip a piece that was previously Flipped - both
+  - [x] Single piece - vertical & horizontal & both
+  - [x] Copied piece (requires Seamly2D.61) - vertical & horizontal & both
+  - [x] Flip a piece that was previously Flipped - vertical
+  - [x] Flip a piece that was previously Flipped - horizontal
+  - [x] Flip a piece that was previously Flipped - both
 
-### [ ] Task Seamly2D.61 - Implement - Piece Mode - 'Copy Piece' tool
+### [x] Task Seamly2D.61 - Implement - Piece Mode - 'Copy Piece' tool
 
 - [x] Reconstruct independent private modeling nodes and paths while retaining live draft links, including Union producers.
 - [x] Add piece-name suffixes, including copies of copies.
@@ -135,10 +135,10 @@ The 'Flip Piece' tool can be applied to any piece in Piece Mode, including piece
 - [x] Copies remain editable with Pattern Piece Tool; placement and one-step undo/redo are implemented.
 - [x] Copy/recopy, source deletion, live draft updates, and marked-piece tests pass; integrated Qt suites pass.
 - [x] Existing schema records represent independent copies; no conversion is needed.
-- [ ] Verify - 'Copy' tool can be applied to any piece in Piece Mode, including pieces created by:
+- [x] Verify - 'Copy' tool can be applied to any piece in Piece Mode, including pieces created by:
   - [x] Union
-  - [ ] Flip Piece - Vertical
-  - [ ] Flip Piece - Horizontal
+  - [x] Flip Piece - Vertical
+  - [x] Flip Piece - Horizontal
   - [x] Copy Piece
   - [x] Mirror on Foldline
 
@@ -160,3 +160,9 @@ SeamlyLayout measured the seaml allowance width between the cut and sew lines. W
   - [ ] check slit depths with files generated and checked in SeamlyLayout: DXF.18
 
 ### [x] Task Seamly2D.4 — Verify - Preferences > Paths has no row for bodyscans
+
+### [ ] Task Seamly2D.200 - Implement - Preferences > Paths: remove the entry for the SeamlyLayout application
+
+The Application Preferences > Paths section displays the path to SeamlyLayout. This display adds no value - the user should not be able to change it, and it provides no value for the user to view it here.
+
+ [ ] Seamly2D.200.1 - remove the SeamlyLayout path from displaying/editing in Application Preferences > Paths.
