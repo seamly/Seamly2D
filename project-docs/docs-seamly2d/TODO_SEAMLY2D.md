@@ -88,7 +88,7 @@ Rotation, arrow line, label, extended fold line, SeamlyLayout fold placement and
 - [x] Tooltip shows the full absolute path.
 - [x] Selected/default/no-file tests pass; integrated Qt suites pass.
 - [x] Schema conversion is unnecessary: template provenance is dialog state; the existing format stores label lines.
-- [ ] Verify (User)
+- [x] Verify (User)
 
 ### [ ] Task Seamly2D.50 - Implement - Piece Mode - Drill Holes
 
@@ -97,7 +97,7 @@ Rotation, arrow line, label, extended fold line, SeamlyLayout fold placement and
   - [x] Export DXF R13 layer 13 with group 30 diameter.
   - [x] Model, editor, mirror/union/copy, real producer, DXF, inch-unit, and packing-invariance tests pass.
 - [x] Schema v0.7.9 and conversion preserve markings. Integrated Qt and Rust suites pass.
-- [ ] Verify (User)
+- [x] Verify (User)
 
 ### Task Seamly2D.60 - Implement - Strip & plaid reference lines
 

@@ -44,6 +44,10 @@ Document intent, contracts, constraints, and non-obvious behavior. Do not docume
 - Inline comments: only non-obvious logic, invariants, workarounds, or constraints. SeamlyLayout adds its own rule.
 - Do not narrate control flow line by line. Prefer clearer code over explanatory comments.
 
+## Build Versions
+
+The version number is based on the day and time of the build. Do not undo version numbers in info.plist and other files as this provides no value and wastes tokens.
+
 ## Seamly Apps
 
 All apps use Qt 6.11.3.
