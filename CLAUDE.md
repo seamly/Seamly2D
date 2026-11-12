@@ -35,6 +35,14 @@ The global `~/.claude/CLAUDE.md` sets the writing style. After changes, report o
 2. Verification status.
 3. Required user decisions or actions.
 
+## Plain Descriptions
+
+Applies to chat replies, docs, TODO files, comments, and commits.
+
+- Tersely describe literal actions and data.
+- Do not make up names for changes, points, or groups.
+- Don't use inaccurate jargon to describe code behavior.
+
 ## Code Documentation
 
 Tersely Document workflow, intent, contracts, constraints, and non-obvious behavior with inline comments and doxygen-compatible briefs. Do not document obvious code behaviors. Do not mention task labels, dates, or AI agents in comments, briefs, or commit messages.
