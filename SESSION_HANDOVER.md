@@ -40,7 +40,7 @@
 - Tests deleted: `jacket2_marker_extends_paper_sheet`, `trousers_long_pieces_extend_a_sheet`.
 - `placement_enlargement_dimensions_and_notifications` uses a paper roll; the sheet overflow test also runs with `extend_media` on.
 - Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW_DESCRIPTION, `TEST_CHECKLIST.md`, `AGENT_CHECKLIST.md` §10, §12.
-- Checked: `cargo test --workspace` 669 pass; `ctest --preset debug` 8/8.
+- Checked: `cargo test --workspace` pass; `ctest --preset debug` 8/8.
 - Open: Layout.300 user check with the next MSI.
 
 ### 2026-11-12 — Marking test pinned to a solid seam line
