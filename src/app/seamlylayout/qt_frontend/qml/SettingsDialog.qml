@@ -447,7 +447,7 @@ Dialog {
 
                 // Fold lines on the left edge: each piece cut on the fold lies with its
                 // fold line on the left content edge.  Fabric: the edge is the fold, with
-                // no left margin.  Paper keeps its left margin.
+                // no left margin.  Paper keeps its left margin.  Layout Mode Any ignores it.
                 CheckBox {
                     id:                foldLinesOnLeftEdgeCheck
                     Layout.columnSpan: 2

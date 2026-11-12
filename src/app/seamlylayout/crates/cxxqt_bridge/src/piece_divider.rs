@@ -76,6 +76,7 @@ pub struct DivideSpec {
     // Clearance from the fold edge for pieces without a fold line.
     pub fold_edge_gap_px: u32,
     // Pin fold-line pieces to the fold edge while measuring and splitting.
+    // False in Layout Mode Any (`LayoutSettings::places_fold_lines_on_left_edge`).
     pub fold_lines_on_left_edge: bool,
 }
 
@@ -178,7 +179,7 @@ pub fn divide_oversized_pieces(doc: &mut Document, spec: &DivideSpec) -> Vec<Div
     let uu_per_px = svg_uu_per_px(&doc.root);
     if spec.fold_lines_on_left_edge {
         // Turn and mirror in place, so each grid cuts the piece as the packer places it.
-        crate::fold_line_edge::plan_fold_line_edge(doc, &spec.trial_angles_deg, spec.apply_piece_rotation);
+        crate::fold_line_edge::plan_fold_line_edge(doc, &spec.trial_angles_deg);
     } // if fold lines go on the left edge
     let pieces = prepared_pieces(doc, spec);
 
@@ -217,9 +218,6 @@ pub fn divide_oversized_pieces(doc: &mut Document, spec: &DivideSpec) -> Vec<Div
 
 // @brief Columns and rows a piece splits into; (1, 1) when it fits at one of its trial angles.
 fn grid(rect: Rect, spec: &DivideSpec) -> (usize, usize) {
-    if rect.fold_edge_conflict {
-        return (1, 1);
-    } // leave fold conflicts whole for the packer to report as unplaced
     let bin_h = if spec.limit_length { spec.bin_h } else { u32::MAX };
     if packing::fits_bin(rect, spec.bin_w, bin_h, &spec.trial_angles_deg) {
         return (1, 1);
@@ -233,11 +231,7 @@ fn grid(rect: Rect, spec: &DivideSpec) -> (usize, usize) {
 fn prepared_pieces(doc: &Document, spec: &DivideSpec) -> Vec<crate::piece_extractor::PieceRect> {
     let mut measured_doc = doc.clone();
     let fold_plan = if spec.fold_lines_on_left_edge {
-        crate::fold_line_edge::plan_fold_line_edge(
-            &mut measured_doc,
-            &spec.trial_angles_deg,
-            spec.apply_piece_rotation,
-        )
+        crate::fold_line_edge::plan_fold_line_edge(&mut measured_doc, &spec.trial_angles_deg)
     } else {
         crate::fold_line_edge::FoldEdgePlan::default()
     };

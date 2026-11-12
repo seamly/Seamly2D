@@ -97,6 +97,7 @@ pub struct LayoutSettings {
     // True places every piece with a fold line so the fold line lies on the
     // left edge of the content.  Fabric media: the left edge is the fold, with
     // no left margin (`margin_left_value`).  Paper keeps its left margin.
+    // Layout Mode Any ignores it: read `places_fold_lines_on_left_edge`.
     #[serde(default)]
     pub fold_lines_on_left_edge: bool,
 
@@ -384,9 +385,21 @@ impl LayoutSettings {
         self.layout_mode == "any"
     } // fn applies_piece_rotation_rules
 
+    // @brief True when pieces with a fold line go on the left edge.
+    //
+    // Layout Mode Any ignores the fold edge rule (user decision): Piece Properties
+    // rotation decides the angle, and no fold line is pinned to the edge.
+    pub fn places_fold_lines_on_left_edge(&self) -> bool {
+        self.fold_lines_on_left_edge && !self.applies_piece_rotation_rules()
+    } // fn places_fold_lines_on_left_edge
+
     // @brief Left margin in the active unit: 0 on the fold edge of fabric (folded, or fold lines on the left edge), else `margin_left`.
     fn margin_left_value(&self) -> f64 {
-        if (self.fold_lines_on_left_edge || self.fabric_folded) && self.media_type == "fabric" { 0.0 } else { self.margin_left }
+        if (self.places_fold_lines_on_left_edge() || self.fabric_folded) && self.media_type == "fabric" {
+            0.0
+        } else {
+            self.margin_left
+        } // if fabric fold edge
     } // fn margin_left_value
 
     // @brief True when pieces without a grain direction may be quarter-turned.
@@ -660,7 +673,7 @@ mod tests {
         let json = |media: &str, folded: bool, on_edge: bool| format!(
             r#"{{"unit": "in", "mediaType": "{media}", "paperType": "sheet", "pageWidth": 40.0, "pageHeight": 48.0,
                 "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
-                "fabricFolded": {folded}, "foldLinesOnLeftEdge": {on_edge}}}"#);
+                "fabricFolded": {folded}, "foldLinesOnLeftEdge": {on_edge}, "layoutMode": "alongGrainline"}}"#);
         let fold = LayoutSettings::from_json(&json("fabric", true, true)).expect("parse ok");
         assert!(fold.fold_lines_on_left_edge);
         assert_eq!(fold.margin_px(), (0, 48, 48, 48));
@@ -676,6 +689,26 @@ mod tests {
             assert_eq!(s.margin_px().0, 48, "{media} folded={folded} on_edge={on_edge}");
         } // for each case that keeps the margin
     } // fold_lines_on_left_edge_drop_the_left_margin_of_fabric_only
+
+    // @brief Layout Mode Any ignores the fold edge rule: no fold line on the edge, and open fabric keeps its left margin.
+    #[test]
+    fn any_mode_ignores_fold_lines_on_left_edge() {
+        let json = |mode: &str, folded: bool| format!(
+            r#"{{"unit": "in", "mediaType": "fabric", "pageWidth": 40.0, "pageHeight": 48.0,
+                "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
+                "fabricFolded": {folded}, "foldLinesOnLeftEdge": true, "layoutMode": "{mode}"}}"#);
+        for mode in ["alongGrainline", "withNap"] {
+            let s = LayoutSettings::from_json(&json(mode, false)).expect("parse ok");
+            assert!(s.places_fold_lines_on_left_edge(), "{mode}");
+            assert_eq!(s.margin_px().0, 0, "{mode}");
+        } // for each mode that keeps the fold edge rule
+        let any = LayoutSettings::from_json(&json("any", false)).expect("parse ok");
+        assert!(any.fold_lines_on_left_edge, "the saved option stays on");
+        assert!(!any.places_fold_lines_on_left_edge());
+        assert_eq!(any.margin_px().0, 48, "open fabric keeps its left margin");
+        let any_folded = LayoutSettings::from_json(&json("any", true)).expect("parse ok");
+        assert_eq!(any_folded.margin_px().0, 0, "folded fabric has no left margin");
+    } // any_mode_ignores_fold_lines_on_left_edge
 
     // @brief Millimetre units are converted correctly.
     #[test]
