@@ -37,10 +37,10 @@ The global `~/.claude/CLAUDE.md` sets the writing style. After changes, report o
 
 ## Code Documentation
 
-Document intent, contracts, constraints, and non-obvious behavior. Do not document what the code shows.
+Tersely Document workflow, intent, contracts, constraints, and non-obvious behavior with inline comments and doxygen-compatible briefs. Do not document obvious code behaviors. Do not mention task labels, dates, or AI agents in comments, briefs, or commit messages.
 
 - `@brief`: one sentence.
-- `@param` / `@return`: only when the meaning or a constraint needs it.
+- `@param` / `@return`: Terse definitions of each input parameter and each returned value or object or structure or signal, etc.
 - Inline comments: only non-obvious logic, invariants, workarounds, or constraints. SeamlyLayout adds its own rule.
 - Do not narrate control flow line by line. Prefer clearer code over explanatory comments.
 
@@ -63,6 +63,10 @@ All apps use Qt 6.11.3.
 - SeamlyLayout license split: `.claude/rules/seamlylayout_licensing.md`.
 - `.claude/rules/seamlylayout.md` loads when you touch SeamlyLayout files.
 - `.claude/rules/seamlylayout-handoff.md` (the Seamly2D → SeamlyLayout `--svg-stdin` contract) loads when you touch either side of it.
+
+Adhere to code style guidelines, always.
+
+Remove dead, obsolete, orphaned, and deprecated code because it makes code maintenance more difficult and bloats the size of the code base.
 
 ## Build Rules
 
