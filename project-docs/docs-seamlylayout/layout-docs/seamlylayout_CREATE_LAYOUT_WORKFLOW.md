@@ -19,9 +19,11 @@ With "Place fold lines on the left edge": before step 4,
 the packer angle (0 or 180) that brings its fold line to the left. When the
 layout mode forbids that angle, the piece is mirrored across its fold line.
 A fold line across or aslant the grain turns its piece until the fold line is
-vertical; the fold edge outranks the layout mode. In Layout Mode Any, an
-explicit Piece Properties rotation must allow the turn. "Split the pieces"
+vertical; the fold edge outranks the layout mode. "Split the pieces"
 turns the pieces the same way before it measures them.
+Layout Mode Any ignores the option (`LayoutSettings::places_fold_lines_on_left_edge`):
+Piece Properties Rotation alone sets each angle, no fold line goes on the edge,
+and fabric keeps its left margin unless it is folded.
 The packer then puts the piece against the left bin edge (`Rect::with_left_edge`).
 Fabric has no left margin then; paper keeps it. The paper-sheet PDF export
 does the same (`sheets::build_sheet_export_inputs`).

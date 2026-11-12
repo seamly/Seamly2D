@@ -354,6 +354,7 @@ Needs the next MSI. jacket2 Back has a fold line.
 - [ ] Adjust Mode: drag Back. The fold line moves with it. Apply.
 - [ ] Layout Mode With Nap, Pieces point Up. Create Layout. Size 220 tab: Back on the left edge. Its labels read forward, not mirrored.
 - [ ] Uncheck the option. Create Layout: Back leaves the edge; the left margin is back.
+- [ ] Check the option. Layout Mode Any. Create Layout: no error message. Back keeps its Piece Properties rotation; its fold line can lie off the edge.
 - [ ] Option on, Media Paper, Paper Type Roll. Create Layout. Size 220 tab: Back's fold line on the left edge of the content, inside the left margin.
 - [ ] Paper Type Sheet, 36 × 48 in. Create Layout. Size 220 tab, Export > PDF: Back's fold line on the left content edge of its page.
 - [ ] Option on, Along Grainline. Base Size 500 tab, Export > DXF > DXF-ASTM (R13). Open the `.dxf`:

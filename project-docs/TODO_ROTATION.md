@@ -71,10 +71,21 @@ Normalize angles to integers in `[0,359]`; prefer ascending angles, beginning wi
 Missing values retain the existing quarter-turn fallback for backward compatibility.
 Do not silently treat None as piece Any.
 
-Fold-edge placement remains a geometric constraint, not permission to bypass Rotation.
-In Any, choose an allowed angle that keeps the fold line on the left edge.
-If none exists, report the conflict and leave the piece unplaced.
-Do not introduce a mirror to evade Rotation. Preserve existing non-Any fold behavior.
+**Fold edge decision (user):** Layout Mode Any ignores "Place fold lines on the left edge".
+Piece Properties Rotation alone sets each angle. No piece is pinned, turned, or mirrored for the fold.
+No conflict is reported. Preserve existing non-Any fold behavior.
+
+## [ ] Task Rotation.0 — Layout Mode Any ignores the fold edge rule
+
+![alt text]("C:\Users\susan\Projects\Seamly2D-private\test-seamly-layout\screenshots\Foldline-not-placed-on-left-edge-with-rotation-Any-Screenshot 2026-11-12 140846.png")
+When Rotation is 'Any' then this message is unnecessary, there is no error. Create the layout with foldlines NOT placed along folded edge, and don't generate this error message "Piece <piecname> cannot satisfy both its rotation rule and the fold edge.".
+The  'Rotation > Any' layout settings option means that the fold edge rule is ignored."
+
+- [x] Rotation.0.1 `LayoutSettings::places_fold_lines_on_left_edge()` is false in Layout Mode Any. Layout, "Split the pieces", and the paper-sheet PDF read it.
+  Open fabric keeps its left margin in Any; folded fabric has none.
+- [x] Rotation.0.2 Removed the fold edge conflict: `Rect::fold_edge_conflict`, `FoldEdgePlan::conflicts`, and the error message.
+- [x] Rotation.0.3 Tests: `any_mode_ignores_fold_lines_on_left_edge`, `any_mode_ignores_the_fold_edge`, `any_mode_divide_spec_ignores_the_fold_edge`. `cargo test --workspace`: pass. `ctest --preset debug`: 8/8.
+- [ ] Rotation.0.4 Installed-app check with the next MSI: option on, Layout Mode Any, a fold line piece with Rotation None. No error; the layout is created.
 
 ## [ ] Task Rotation.1 — Pin the policy and compatibility rules
 
@@ -85,7 +96,7 @@ Do not introduce a mirror to evade Rotation. Preserve existing non-Any fold beha
 - [ ] Rotation.1.2 Encode the table as data-driven tests for every mode, every piece value, and invalid input.
 - [ ] Rotation.1.3 Assert that `alongGrainline`, nap-up, nap-down, unknown modes, and legacy settings retain their current results.
 - [ ] Rotation.1.4 Keep `rotationStep` as nap direction. Test that stale No Grainline settings cannot expand an explicit Any-mode piece rule.
-- [ ] Rotation.1.5 Test fold-rule conflicts and the normalized-angle convention. Keep the existing grain-up baseline, including hidden grainlines.
+- [ ] Rotation.1.5 Test the normalized-angle convention. Keep the existing grain-up baseline, including hidden grainlines.
 
 ## [ ] Task Rotation.2 — Carry rotation rules from SVG to packing data
 
@@ -111,8 +122,7 @@ Do not introduce a mirror to evade Rotation. Preserve existing non-Any fold beha
 
 - [ ] Rotation.3.1 Extend the shared effective-angle resolver used by `piece_trial_set()`.
   Activate piece rules only for Any; otherwise preserve current mode and `free_rotation` behavior.
-- [ ] Rotation.3.2 Intersect Any-mode rules with fold-edge angles.
-  An empty intersection must remain unplaceable; never convert it to the existing empty-global-set fallback `[0]`.
+- [x] Rotation.3.2 Superseded: Layout Mode Any ignores the fold edge rule (Rotation.0).
 - [ ] Rotation.3.3 Use the resolver in strict, lenient, extending, `fits_bin()`, `required_bin_width()`, and stacked-height calculations.
   Keep `Placed.id` aligned with original inputs, including skipped pieces.
 - [ ] Rotation.3.4 Reuse `rotated_rect_dims()` and the existing MaxRects backend.
@@ -140,8 +150,7 @@ Do not introduce a mirror to evade Rotation. Preserve existing non-Any fold beha
   Retain rules on every generated part.
 - [ ] Rotation.4.5 Audit `layout_tiling` candidate-width and page-count calculations for the same per-piece policy.
   Preserve individual, Marker, Nested, per-size, paper-sheet, tiled, roll, and fabric behavior.
-- [ ] Rotation.4.6 Resolve fold-edge eligibility against each piece's rules before pinning or mirroring the DOM.
-  Do not leave an unauthorized `left_edge_angle` capable of overriding the shared resolver.
+- [x] Rotation.4.6 Superseded: Layout Mode Any pins no piece, so no `left_edge_angle` overrides the resolver (Rotation.0).
 - [ ] Rotation.4.7 Test preview/export agreement and oversized/split decisions with identical input/settings.
   Include Any-only, non-quarter-turn fits and restrictions that prevent an otherwise possible quarter turn.
 
@@ -157,7 +166,7 @@ Do not introduce a mirror to evade Rotation. Preserve existing non-Any fold beha
 - [ ] Rotation.5.3 Add a deterministic free-angle regression: a 100×10 rectangle fits a 78×78 bin at 45°, but not at quarter turns.
   Disable media enlargement, splitting, and gaps for this fixture.
   Piece Any must fit at an allowed non-quarter angle; 1-Way, 2-Way, and 4-Way must remain unplaced.
-- [ ] Rotation.5.4 Add mixed-value, hidden/absent-grainline, nested-size intersection, material, and fold-conflict integration fixtures.
+- [ ] Rotation.5.4 Add mixed-value, hidden/absent-grainline, nested-size intersection, material, and fold line integration fixtures.
   Test repeated layout and reload, not only the parser.
 - [ ] Rotation.5.5 Repeat those fixtures under Along Grainline, Nap Up, and Nap Down.
   Changing Piece Rotation must not change their existing output or No Grainline behavior.
@@ -215,7 +224,7 @@ Keep GUI acceptance and performance results separate from automated test results
 
 ## Completion criteria
 
-- Each Any-mode placement uses an angle permitted by its piece rule and any fold constraint.
+- Each Any-mode placement uses an angle permitted by its piece rule.
 - Piece Any can select a non-quarter angle when the input requires one.
 - Packing, fit warnings, splitting, tiled candidates, and sheet exports agree.
 - Along Grainline, With Nap, legacy migration, Piece Mode, and DXF rotation metadata retain their existing contracts.

@@ -19,8 +19,8 @@
 //     keeps reading forward; only its position is mirrored.
 // A fold line across or aslant the grain outranks the layout mode: the piece
 // turns in the DOM until its fold line is vertical on the side the packer angle
-// turns to the left. In Layout Mode Any, an explicit Piece Properties rotation
-// must allow the whole turn.
+// turns to the left. Layout Mode Any ignores the fold edge rule and never plans
+// (`LayoutSettings::places_fold_lines_on_left_edge`).
 // The packer then puts the piece against the left bin edge (`Rect::with_left_edge`).
 //
 // The fold line is the first path of the piece's `fold_line` group
@@ -32,10 +32,9 @@
 // without length, and an outline on both sides of its fold line. Each gets a
 // warning line. A second plan of the planned DOM changes nothing.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use geometry::{Path, PathSegment, Point};
-use packing::PieceRotationRule;
 use xmltree::Element;
 
 use crate::piece_extractor::PieceRect;
@@ -55,20 +54,13 @@ pub(crate) struct FoldEdgePlan {
     pub angles: HashMap<usize, u16>,
     // One line per piece with a fold line that stays off the edge: its name and why.
     pub warnings: Vec<String>,
-    // Piece indices that cannot satisfy both the fold edge and explicit rotation rule.
-    pub conflicts: HashSet<usize>,
 } // struct FoldEdgePlan
 
 // @brief Turn or mirror each piece with a fold line so its fold line can go on the left edge.
-// @param doc                         Pre-processed DOM; a turned or mirrored piece changes in place.
-// @param trial_angles_deg            The layout mode's trial angles.
-// @param apply_piece_rotation_rules  True only for Layout Mode Any.
+// @param doc               Pre-processed DOM; a turned or mirrored piece changes in place.
+// @param trial_angles_deg  The layout mode's trial angles.
 // @return The packer angle per piece, and the pieces that stay off the edge.
-pub(crate) fn plan_fold_line_edge(
-    doc: &mut svg_dom::Document,
-    trial_angles_deg: &[u16],
-    apply_piece_rotation_rules: bool,
-) -> FoldEdgePlan {
+pub(crate) fn plan_fold_line_edge(doc: &mut svg_dom::Document, trial_angles_deg: &[u16]) -> FoldEdgePlan {
     let mut plan = FoldEdgePlan::default();
     let mut changed = false;
     let groups = doc.root.children.iter_mut().filter_map(|n| n.as_mut_element()).filter(|e| e.name == "g");
@@ -102,23 +94,12 @@ pub(crate) fn plan_fold_line_edge(
             plan.warnings.push(format!("{name}: the outline lies on both sides of the fold line"));
             continue;
         }; // toward the outline
-        let rule = apply_piece_rotation_rules.then(|| crate::piece_extractor::piece_rotation_rule(piece, &name));
-        let allowed_angles = match rule {
-            Some(rule) => rule.angles_for_any_mode(trial_angles_deg),
-            None => trial_angles_deg.to_vec(),
-        }; // allowed_angles
 
         if dx > dy * VERTICAL_TOLERANCE {
             // Across or aslant the grain: turn the piece so a later plan sees a vertical fold line.
             let turn = edge_turn_deg(toward);
-            let explicit_rule = rule.filter(|rule| *rule != PieceRotationRule::Unspecified);
-            if explicit_rule.is_some_and(|rule| !rule.angles_for_any_mode(trial_angles_deg).contains(&(turn.round() as u16 % 360))) {
-                plan.warnings.push(format!("{name}: Piece Properties rotation conflicts with the fold edge"));
-                plan.conflicts.insert(index);
-                continue;
-            } // if the piece rule forbids the turn
             // The angle a vertical fold line takes without a mirror, so a second plan keeps it.
-            let angle = if allowed_angles.contains(&0) || !allowed_angles.contains(&180) { 0 } else { 180 };
+            let angle = if trial_angles_deg.contains(&0) || !trial_angles_deg.contains(&180) { 0 } else { 180 };
             let centre = Point::new((a.x + b.x) / 2.0, (a.y + b.y) / 2.0);
             prepend_transform(piece, &format!("rotate({} {} {})", turn - f32::from(angle), centre.x, centre.y));
             changed = true;
@@ -129,22 +110,16 @@ pub(crate) fn plan_fold_line_edge(
         // 0 keeps a fold line on the left; 180 turns a fold line on the right to the left.
         let fold_x = (a.x + b.x) / 2.0;
         let (wanted, other) = if toward.0 > 0.0 { (0, 180) } else { (180, 0) };
-        let angle = if allowed_angles.contains(&wanted) {
-            wanted
-        } else if allowed_angles.contains(&other) && !apply_piece_rotation_rules {
+        let angle = if trial_angles_deg.contains(&wanted) {
+            wanted // the layout mode allows the turn
+        } else if trial_angles_deg.contains(&other) {
+            // The mode forbids the turn: mirror the piece so the other angle brings the fold line left.
             mirror_across(piece, fold_x);
             changed = true;
             other
         } else {
-            let reason = if apply_piece_rotation_rules {
-                "Piece Properties rotation conflicts with the fold edge"
-            } else {
-                "the layout mode turns the piece off the fold"
-            };
-            plan.warnings.push(format!("{name}: {reason}"));
-            if apply_piece_rotation_rules {
-                plan.conflicts.insert(index);
-            }
+            // Neither angle: the piece stays off the edge.
+            plan.warnings.push(format!("{name}: the layout mode turns the piece off the fold"));
             continue;
         }; // selected angle
         plan.angles.insert(index, angle);
@@ -185,9 +160,7 @@ fn edge_turn_deg(toward: (f32, f32)) -> f32 {
 // @brief Set the left-edge angle on every planned piece.
 pub(crate) fn pin_fold_line_pieces(pieces: &mut [PieceRect], plan: &FoldEdgePlan) {
     for piece in pieces.iter_mut() {
-        if plan.conflicts.contains(&piece.group_index) {
-            piece.rect = piece.rect.with_fold_edge_conflict();
-        } else if let Some(&angle) = plan.angles.get(&piece.group_index) {
+        if let Some(&angle) = plan.angles.get(&piece.group_index) {
             piece.rect = piece.rect.with_left_edge(angle);
         } // if planned
     } // for each piece
@@ -368,49 +341,20 @@ mod tests {
         for (fold_x, angle) in [(0, 0), (100, 180)] {
             let mut d = doc(fold_x);
             let before = d.to_string();
-            let plan = plan_fold_line_edge(&mut d, &[0, 180], false);
+            let plan = plan_fold_line_edge(&mut d, &[0, 180]);
             assert_eq!(plan.angles, HashMap::from([(0, angle)]), "fold at x {fold_x}");
             assert!(plan.warnings.is_empty());
             assert_eq!(d.to_string(), before, "fold at x {fold_x}: nothing mirrored");
         } // for each side
     } // turn_brings_the_fold_line_left
 
-    // @brief Any mode respects a fixed piece rule and leaves an impossible fold rule unplaced.
-    #[test]
-    fn any_mode_fold_edges_intersect_piece_rotation() {
-        let fixed = svg("M0,190 L0,10").replace(
-            "data-on-fold=\"true\"",
-            "data-on-fold=\"true\" data-rotation=\"0\"",
-        );
-        let mut left = svg_dom::Document::parse(&fixed).expect("valid SVG");
-        let plan = plan_fold_line_edge(&mut left, &[0, 90, 180, 270], true);
-        assert_eq!(plan.angles, HashMap::from([(0, 0)]));
-        assert!(plan.conflicts.is_empty());
-
-        let mut right = svg_dom::Document::parse(&fixed.replace("M0,190 L0,10", "M100,190 L100,10"))
-            .expect("valid SVG");
-        let plan = plan_fold_line_edge(&mut right, &[0, 90, 180, 270], true);
-        assert!(plan.angles.is_empty());
-        assert_eq!(plan.conflicts, HashSet::from([0]));
-
-        let mut pieces = crate::piece_extractor::extract_piece_rects(&right);
-        crate::piece_extractor::set_piece_rotation_for_layout_mode(&mut pieces, true);
-        pin_fold_line_pieces(&mut pieces, &plan);
-        assert!(pieces[0].rect.fold_edge_conflict);
-        assert!(!packing::fits_bin(
-            pieces[0].rect,
-            200,
-            200,
-            &[0, 90, 180, 270],
-        ));
-    } // any_mode_fold_edges_intersect_piece_rotation
 
     // @brief With nap up (0 only), a fold line on the right is mirrored to the left;
     // the text reads forward and covers the mirrored area.
     #[test]
     fn mirror_brings_the_fold_line_left_when_the_mode_forbids_the_turn() {
         let mut d = doc(100);
-        let plan = plan_fold_line_edge(&mut d, &[0], false);
+        let plan = plan_fold_line_edge(&mut d, &[0]);
         assert_eq!(plan.angles, HashMap::from([(0, 0)]));
         // Mirrored across x 100: the outline now spans x 100..200, the fold line on its left.
         let bbox = bbox_of(&d, "piece_Back");
@@ -426,7 +370,7 @@ mod tests {
 
         // With nap down (180 only), a fold line on the left is mirrored to the right, then turned.
         let mut down = doc(0);
-        assert_eq!(plan_fold_line_edge(&mut down, &[180], false).angles, HashMap::from([(0, 180)]));
+        assert_eq!(plan_fold_line_edge(&mut down, &[180]).angles, HashMap::from([(0, 180)]));
         let bbox = bbox_of(&down, "piece_Back");
         assert_eq!((bbox.min.x, bbox.max.x), (-100.0, 0.0), "fold line on the right edge");
     } // mirror_brings_the_fold_line_left_when_the_mode_forbids_the_turn
@@ -450,7 +394,7 @@ mod tests {
         // Fold line along the bottom edge: 90 brings it left, about its middle (50, 200).
         for (trial, angle, fold_on_left) in [(vec![0, 180], 0, true), (vec![0], 0, true), (vec![180], 180, false)] {
             let mut d = svg_dom::Document::parse(&svg("M0,200 L100,200")).expect("valid SVG");
-            let plan = plan_fold_line_edge(&mut d, &trial, false);
+            let plan = plan_fold_line_edge(&mut d, &trial);
             assert_eq!(plan.angles, HashMap::from([(0, angle)]), "trial {trial:?}");
             assert!(plan.warnings.is_empty(), "trial {trial:?}: {:?}", plan.warnings);
 
@@ -462,7 +406,7 @@ mod tests {
             assert!(near(bbox.max.x - bbox.min.x, 200.0), "trial {trial:?}: quarter turn");
 
             let planned = d.to_string();
-            assert_eq!(plan_fold_line_edge(&mut d, &trial, false), plan, "trial {trial:?}: second plan");
+            assert_eq!(plan_fold_line_edge(&mut d, &trial), plan, "trial {trial:?}: second plan");
             assert_eq!(d.to_string(), planned, "trial {trial:?}: second plan changes nothing");
         } // for each trial set
     } // fold_line_across_the_grain_turns_the_piece
@@ -477,44 +421,24 @@ mod tests {
   </g>
 </svg>"#;
         let mut d = svg_dom::Document::parse(triangle).expect("valid SVG");
-        let plan = plan_fold_line_edge(&mut d, &[0, 180], false);
+        let plan = plan_fold_line_edge(&mut d, &[0, 180]);
         assert_eq!(plan.angles, HashMap::from([(0, 0)]));
         let (a, b) = back_fold_line(&d);
         assert!(near(a.x, b.x), "vertical fold line: {a:?} {b:?}");
         assert!(near(bbox_of(&d, "piece_Gusset").min.x, a.x), "fold line on the left");
     } // slanted_fold_line_turns_the_piece
 
-    // @brief Layout Mode Any: an explicit Piece Properties rotation must allow the quarter turn.
-    #[test]
-    fn any_mode_turn_needs_the_piece_rotation() {
-        for (rotation, turned) in [("0", false), ("180", false), ("90", true), ("1", true)] {
-            let source = svg("M0,200 L100,200").replace(
-                "data-on-fold=\"true\"",
-                &format!("data-on-fold=\"true\" data-rotation=\"{rotation}\""),
-            );
-            let mut d = svg_dom::Document::parse(&source).expect("valid SVG");
-            let plan = plan_fold_line_edge(&mut d, &[0, 90, 180, 270], true);
-            if turned {
-                assert_eq!(plan.angles, HashMap::from([(0, 0)]), "rotation {rotation}");
-                assert!(plan.conflicts.is_empty(), "rotation {rotation}");
-            } else {
-                assert!(plan.angles.is_empty(), "rotation {rotation}");
-                assert_eq!(plan.conflicts, HashSet::from([0]), "rotation {rotation}");
-                assert_eq!(bbox_of(&d, "piece_Back").max.x, 100.0, "rotation {rotation}: not turned");
-            } // if turned
-        } // for each rotation
-    } // any_mode_turn_needs_the_piece_rotation
 
     // @brief A fold line without length, or inside the outline, stays off the edge with a warning.
     #[test]
     fn fold_line_off_the_edge_is_reported() {
         let mut point = svg_dom::Document::parse(&svg("M10,0 L10,0.5")).expect("valid SVG");
-        let plan = plan_fold_line_edge(&mut point, &[0, 180], false);
+        let plan = plan_fold_line_edge(&mut point, &[0, 180]);
         assert!(plan.angles.is_empty());
         assert_eq!(plan.warnings, vec!["Back: the fold line has no length".to_string()]);
 
         let mut inside = doc(50);
-        let plan = plan_fold_line_edge(&mut inside, &[0, 180], false);
+        let plan = plan_fold_line_edge(&mut inside, &[0, 180]);
         assert!(plan.angles.is_empty());
         assert_eq!(plan.warnings, vec!["Back: the outline lies on both sides of the fold line".to_string()]);
     } // fold_line_off_the_edge_is_reported
@@ -541,12 +465,12 @@ mod tests {
     #[test]
     fn piece_set_on_a_shared_fold_line_is_pinned() {
         let mut shared = svg_dom::Document::parse(&nested_svg([0, 0])).expect("valid SVG");
-        let plan = plan_fold_line_edge(&mut shared, &[0, 180], false);
+        let plan = plan_fold_line_edge(&mut shared, &[0, 180]);
         assert_eq!(plan.angles, HashMap::from([(0, 0)]));
         assert!(plan.warnings.is_empty());
 
         let mut apart = svg_dom::Document::parse(&nested_svg([0, 30])).expect("valid SVG");
-        let plan = plan_fold_line_edge(&mut apart, &[0, 180], false);
+        let plan = plan_fold_line_edge(&mut apart, &[0, 180]);
         assert!(plan.angles.is_empty());
         assert_eq!(plan.warnings, vec!["Back: the sizes do not share one fold line".to_string()]);
     } // piece_set_on_a_shared_fold_line_is_pinned
@@ -567,12 +491,12 @@ mod tests {
   </g>
 </svg>"#, size(0, 100), size(1, 60));
         let mut d = svg_dom::Document::parse(&source).expect("valid SVG");
-        let plan = plan_fold_line_edge(&mut d, &[0, 180], false);
+        let plan = plan_fold_line_edge(&mut d, &[0, 180]);
         assert_eq!(plan.angles, HashMap::from([(0, 0)]));
         assert!(plan.warnings.is_empty(), "{:?}", plan.warnings);
 
         let planned = d.to_string();
-        assert_eq!(plan_fold_line_edge(&mut d, &[0, 180], false), plan);
+        assert_eq!(plan_fold_line_edge(&mut d, &[0, 180]), plan);
         assert_eq!(d.to_string(), planned, "the turned set has a vertical fold line");
     } // piece_set_on_a_shared_fold_line_across_the_grain_is_pinned
 
@@ -589,7 +513,7 @@ mod tests {
         let mut d = svg_dom::Document::parse(&handoff).expect("valid SVG");
         assert_eq!(fold_line_ends(d.root.children.iter().filter_map(|n| n.as_element()).next().expect("Back")),
                    Some((Point::new(0.0, 210.0), Point::new(0.0, -10.0))));
-        let plan = plan_fold_line_edge(&mut d, &[0, 180], false);
+        let plan = plan_fold_line_edge(&mut d, &[0, 180]);
         assert_eq!(plan.angles, HashMap::from([(0, 0)]));
         assert!(plan.warnings.is_empty());
     } // fold_line_group_with_arrow_and_label_reads_the_fold_line
@@ -598,7 +522,7 @@ mod tests {
     #[test]
     fn pin_marks_the_planned_pieces() {
         let mut d = doc(100);
-        let plan = plan_fold_line_edge(&mut d, &[0, 180], false);
+        let plan = plan_fold_line_edge(&mut d, &[0, 180]);
         let mut pieces = crate::piece_extractor::extract_piece_rects(&d);
         pin_fold_line_pieces(&mut pieces, &plan);
         let angles: Vec<Option<u16>> = pieces.iter().map(|p| p.rect.left_edge_angle).collect();

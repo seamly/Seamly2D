@@ -49,7 +49,7 @@ use crate::exports::{
 // @param nested_multisize       `true` packs each multisize piece-set as one unit (Nested layout).
 // @param divide                 The media the layout split its pieces for; None when it did not split.
 // @param fold_line_trial        The layout mode's trial angles when fold lines go on the left
-//                               edge (`fold_line_edge`); None otherwise.
+//                               edge (`LayoutSettings::places_fold_lines_on_left_edge`); None otherwise.
 // @return Tuple of `(flat_dom, pieces)` ready for L.2.1/L.2.2 export logic.
 pub(crate) fn build_sheet_export_inputs(
     input_dom: &Document,
@@ -81,7 +81,7 @@ pub(crate) fn build_sheet_export_inputs(
     } // if split
     // Fold lines on the left edge, as the layout put them.
     let fold_plan = fold_line_trial
-        .map(|trial| crate::fold_line_edge::plan_fold_line_edge(&mut flat_dom, trial, apply_piece_rotation))
+        .map(|trial| crate::fold_line_edge::plan_fold_line_edge(&mut flat_dom, trial))
         .unwrap_or_default();
     svg_dom::translate_dom(&mut flat_dom);
     svg_dom::flatten_dom(&mut flat_dom);
@@ -129,13 +129,6 @@ pub(crate) fn do_export_sheets_pdf(
 ) -> Result<(), String> {
 
     use std::fs;
-
-    if let Some(piece) = all_pieces.iter().find(|piece| piece.rect.fold_edge_conflict) {
-        return Err(format!(
-            "Sheets PDF: {} cannot satisfy both its rotation rule and the fold edge.",
-            piece.label()
-        ));
-    } // if a fold edge conflicts with piece rotation
 
     // Derive content-rect dimensions from settings.
     // effective_bin_px() = (page_w - margins - selvedge) × (page_h - margins).
@@ -398,43 +391,6 @@ mod tests {
         } // for each rule
     } // sheet_export_oversize_check_uses_piece_rotation_rules
 
-    // @brief Sheet PDF export names a piece whose fixed rule conflicts with its fold edge.
-    #[test]
-    fn sheet_export_reports_fold_rotation_conflict() {
-        let settings = LayoutSettings::from_json(
-            r#"{
-                "unit": "in", "mediaType": "paper", "paperType": "sheet",
-                "pageWidth": 20.0, "pageHeight": 20.0,
-                "marginLeft": 0.0, "marginRight": 0.0, "marginTop": 0.0, "marginBottom": 0.0,
-                "pieceGap": 0.0, "layoutMode": "any", "rotationStep": 0,
-                "foldLinesOnLeftEdge": true
-            }"#,
-        )
-        .expect("test settings should parse");
-        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">
-  <g id="piece-Back" data-type="piece" data-name="Back" data-on-fold="true" data-rotation="0">
-    <g data-type="cutline"><path d="M0,0 L100,0 L100,200 L0,200 Z"/></g>
-    <g data-type="fold_line"><path d="M100,190 L100,10"/></g>
-  </g>
-</svg>"#;
-        let input = Document::parse(svg).expect("test SVG should parse");
-        let trial_angles = settings.rotation_trial_set_deg();
-        let (flat_dom, pieces) = build_sheet_export_inputs(
-            &input,
-            false,
-            true,
-            false,
-            None,
-            Some(&trial_angles),
-        )
-        .expect("sheet export inputs should build");
-
-        assert!(pieces[0].rect.fold_edge_conflict);
-        let error = do_export_sheets_pdf(&flat_dom, &pieces, "unused.pdf", &settings)
-            .expect_err("rotation and fold edge conflict");
-        assert!(error.contains("Back"), "{error}");
-        assert!(error.contains("fold edge"), "{error}");
-    } // sheet_export_reports_fold_rotation_conflict
 
     // @brief Pure remaining-piece export yields one PDF page per packed sheet.
     #[test]

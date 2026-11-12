@@ -3029,7 +3029,7 @@ impl qobject::AppController {
                 settings.applies_piece_rotation_rules(),
                 nested_multisize,
                 divide_spec.as_ref(),
-                settings.fold_lines_on_left_edge.then_some(trial_angles_deg.as_slice()),
+                settings.places_fold_lines_on_left_edge().then_some(trial_angles_deg.as_slice()),
             ) {
                 Ok(v) => v,
                 Err(e) => {

@@ -2,6 +2,15 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-12 — .gitignore track rules
+
+- Git uses the last matching rule: the track block now sits at the end of `.gitignore`. Keep it there.
+- Deleted the macOS `Icon` rule; with `core.ignorecase` it matched only `icon/` folders.
+- Track: new `CMakeLists.txt`, `CMakePresets.json`, PNGs in `share/resources/`, `qt_frontend/assets/`, `packaging/assets/`.
+- Ignore: `CMakeFiles/`, `CMakeCache.txt`, `node_modules/`, `testlogs*/`, `.vs`, `test-seamly-layout/`.
+- Untracked (files kept on disk): `test-seamly-layout/`, `qt_frontend/node_modules/`, `src/test/Seamly2DTest/testlogs_check/`.
+- Open: `scripts/2026-11-10-prompt.txt` is now visible to git (`!scripts/*` beats `*.txt`); not committed.
+
 ### 2026-11-11 — Reference lines icon restored
 
 - Cause: MSI build stopped in vmisc: `icon.qrc` lists `icon/svg/reference_lines.svg`; the file was never committed.

@@ -345,15 +345,10 @@ pub fn do_process_layout(
 
     // 3d-fold: fold lines on the left edge: turn or mirror each piece with a fold
     // line so its fold line can lie on the edge.  After the split, so each part
-    // with a stretch of fold line goes on the edge.
-    let fold_plan = settings.fold_lines_on_left_edge
-        .then(|| {
-            crate::fold_line_edge::plan_fold_line_edge(
-                &mut flat_dom,
-                &trial_angles_deg,
-                settings.applies_piece_rotation_rules(),
-            )
-        })
+    // with a stretch of fold line goes on the edge.  Layout Mode Any ignores the
+    // fold edge rule: Piece Properties rotation alone decides each angle.
+    let fold_plan = settings.places_fold_lines_on_left_edge()
+        .then(|| crate::fold_line_edge::plan_fold_line_edge(&mut flat_dom, &trial_angles_deg))
         .unwrap_or_default();
     if !fold_plan.angles.is_empty() || !fold_plan.warnings.is_empty() {
         log_to_file(&format!(
@@ -500,13 +495,6 @@ pub fn do_process_layout(
         //           than the user already sees.
         let floor_cols = widest_piece_tile_cols(&rects, trim_w, gap_px, &trial_angles_deg);
         let ceil_cols  = initial_td.tile_cols.max(floor_cols);
-
-        if let Some(piece) = pieces.iter().find(|piece| piece.rect.fold_edge_conflict) {
-            return Err(format!(
-                "Piece \"{}\" cannot satisfy both its rotation rule and the fold edge.",
-                piece.label()
-            ));
-        } // if rotation conflicts with the fold edge
 
         // Log the search range for diagnostics — narrow inputs or bad settings
         // can collapse floor==ceil, making the picker a no-op.
@@ -657,12 +645,6 @@ pub fn do_process_layout(
         let unplaced_labels = crate::piece_extractor::unplaced_piece_lines(&flat_dom, &pieces, &unplaced_ids);
 
         if is_paper_sheet && !unplaced_ids.is_empty() {
-            if let Some(piece) = pieces.iter().find(|piece| piece.rect.fold_edge_conflict) {
-                return Err(format!(
-                    "Piece \"{}\" cannot satisfy both its rotation rule and the fold edge.",
-                    piece.label()
-                ));
-            } // if rotation conflicts with the fold edge
             // Reject incomplete sheets before assembling or publishing a layout.
             return Err(format!(
                 "{SHEET_OVERFLOW_MESSAGE}\nPieces that could not be placed:\n{}",
@@ -980,7 +962,7 @@ pub fn layout_divide_spec(settings: &LayoutSettings, bin_w: u32, bin_h: u32) -> 
         } else {
             0
         },
-        fold_lines_on_left_edge: settings.fold_lines_on_left_edge,
+        fold_lines_on_left_edge: settings.places_fold_lines_on_left_edge(),
     }
 } // fn layout_divide_spec
 
@@ -1353,12 +1335,12 @@ mod tests {
         assert!(!labels.iter().any(|label| label.contains("(1/")), "no split parts: {labels:?}");
     } // split_request_without_divided_pieces_keeps_regular_layout_state
 
-    // @brief Only a paper sheet refuses "Make the media bigger"; its message names PDF (tiled).
+    // @brief Only a paper sheet refuses "Make the media bigger"; its message names 'Paper > Tiled'.
     #[test]
     fn paper_sheet_media_cannot_grow() {
         let sheet = LayoutSettings::from_json(&paper_sheet_settings_json(36.0, 36.0)).expect("sheet settings parse");
         assert!(!media_can_grow(&sheet));
-        assert!(SHEET_CANNOT_GROW_MESSAGE.contains("PDF (tiled)"));
+        assert!(SHEET_CANNOT_GROW_MESSAGE.contains("'Paper > Tiled'"));
 
         for (media, paper) in [("paper", "roll"), ("paper", "tiled"), ("fabric", "sheet"), ("fabric", "roll")] {
             let mut settings = sheet.clone();
@@ -1522,8 +1504,8 @@ mod tests {
             });
             for extend in [false, true] {
                 let error = process_placement_fixture(settings.clone(), split, extend).err().expect("sheet must fail");
-                assert!(error.contains("All pieces cannot fit on one sheet."), "{error}");
-                assert!(error.contains("Select PDF (tiled) in Layout Settings"), "{error}");
+                assert!(error.contains("All pieces cannot fit on one paper sheet."), "{error}");
+                assert!(error.contains("selecting 'Paper > Tiled'"), "{error}");
                 assert!(error.contains("Long") || error.contains("Wide"), "{error}");
                 assert!(is_sheet_overflow(&error), "the controller must refuse the layout: {error}");
             } // for extension requests
@@ -1580,7 +1562,7 @@ mod tests {
                 "layoutMode": "alongGrainline", "scaleGrid": scale_grid
             });
             let error = process_placement_fixture(settings, true, true).err().expect("fixed media must fail");
-            assert!(error.contains("Select PDF (tiled) in Layout Settings"), "{error}");
+            assert!(error.contains("selecting 'Paper > Tiled'"), "{error}");
             assert!(is_sheet_overflow(&error), "the controller must refuse the layout: {error}");
         } // for piece and annotation overflow
     } // placement_paper_split_cannot_enlarge_media
@@ -1591,13 +1573,12 @@ mod tests {
         let pieces = format!("{SHEET_OVERFLOW_MESSAGE}\nPieces that could not be placed:\nBack");
         assert!(is_sheet_overflow(&pieces));
         assert!(is_sheet_overflow(SHEET_ANNOTATION_OVERFLOW_MESSAGE));
-        assert!(SHEET_OVERFLOW_MESSAGE.contains("PDF (tiled)"));
-        assert!(SHEET_ANNOTATION_OVERFLOW_MESSAGE.contains("PDF (tiled)"));
+        assert!(SHEET_OVERFLOW_MESSAGE.contains("'Paper > Tiled'"));
+        assert!(SHEET_ANNOTATION_OVERFLOW_MESSAGE.contains("'Paper > Tiled'"));
 
         for other in [
             SHEET_CANNOT_GROW_MESSAGE,
             "No SVG imported. Please import an SVG file first.",
-            "Piece \"Back\" cannot satisfy both its rotation rule and the fold edge.",
             "",
         ] {
             assert!(!is_sheet_overflow(other), "{other}");
@@ -2943,6 +2924,31 @@ mod tests {
         assert_eq!(off.output_doc.get_attr_by_id("contentRect", "x"), Some("0"), "folded fabric has no left margin");
         assert!(fold_line_xs(&off.output_doc).iter().all(|x| x.abs() > 1.0), "fold line off the edge");
     } // fold_line_lies_on_the_left_edge
+
+    // @brief Layout Mode Any ignores the fold edge rule.  Back keeps its fixed rotation (None),
+    // so its fold line stays on its right edge, off the left edge.  No error, no warning.
+    #[test]
+    fn any_mode_ignores_the_fold_edge() {
+        let svg = FOLD_PIECES_SVG.replace("data-name=\"Back\"", "data-name=\"Back\" data-rotation=\"0\"");
+        for (media, content_x) in [("paper", 48.0), ("fabric", 0.0)] {
+            let result = process_fold_svg(&svg, media, "any", 0.0, true, 40.0, false);
+            assert!(result.unplaced_labels.is_empty(), "{media}: unplaced {:?}", result.unplaced_labels);
+            assert!(result.fold_line_warnings.is_empty(), "{media}: {:?}", result.fold_line_warnings);
+            let xs = fold_line_xs(&result.output_doc);
+            assert!(xs.iter().all(|x| x - content_x > 1.0), "{media}: fold line at x {xs:?}");
+        } // for each media
+    } // any_mode_ignores_the_fold_edge
+
+    // @brief "Split the pieces" follows the layout: Layout Mode Any pins no fold line while it measures.
+    #[test]
+    fn any_mode_divide_spec_ignores_the_fold_edge() {
+        for (mode, on_edge) in [("alongGrainline", true), ("withNap", true), ("any", false)] {
+            let settings = LayoutSettings::from_json(&format!(
+                r#"{{"unit": "in", "mediaType": "fabric", "fabricWidth": 40.0, "foldLinesOnLeftEdge": true, "layoutMode": "{mode}"}}"#
+            )).expect("settings parse");
+            assert_eq!(layout_divide_spec(&settings, 1000, 1000).fold_lines_on_left_edge, on_edge, "{mode}");
+        } // for each layout mode
+    } // any_mode_divide_spec_ignores_the_fold_edge
 
     // @brief Split folded-fabric pieces keep the fold at x=0 and the configured fold-edge gap.
     #[test]

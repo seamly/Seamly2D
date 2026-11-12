@@ -30,8 +30,6 @@ pub struct Rect {
     pub piece_rotation: PieceRotationRule,
     // True only when the active layout mode applies per-piece rotation rules.
     pub apply_piece_rotation: bool,
-    // True when a fold-edge requirement has no angle permitted by the piece rule.
-    pub fold_edge_conflict: bool,
 }
 
 impl Rect {
@@ -48,7 +46,6 @@ impl Rect {
             min_left_gap_px: 0,
             piece_rotation: PieceRotationRule::Unspecified,
             apply_piece_rotation: false,
-            fold_edge_conflict: false,
         }
     }
 
@@ -75,11 +72,6 @@ impl Rect {
     // @brief Enable or disable applying the source rule in Any layout mode.
     pub const fn with_piece_rotation_enabled(self, apply_piece_rotation: bool) -> Self {
         Self { apply_piece_rotation, ..self }
-    }
-
-    // @brief Return a copy that cannot be placed because its fold rule conflicts with rotation.
-    pub const fn with_fold_edge_conflict(self) -> Self {
-        Self { fold_edge_conflict: true, ..self }
     }
 }
 

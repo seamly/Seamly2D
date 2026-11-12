@@ -285,9 +285,9 @@ pub fn fits_bin(r: Rect, bin_w: u32, bin_h: u32, trial_angles_deg: &[u16]) -> bo
 // first, so ties keep the mode's preferred orientation.  A piece on the left
 // edge has its one angle.
 fn piece_trial_set(trial_angles_deg: &[u16], r: &Rect) -> Vec<u16> {
-    if r.fold_edge_conflict {
-        return Vec::new();
-    } // if fold and rotation conflict
+    if let Some(angle) = r.left_edge_angle {
+        return vec![angle]; // the fold line plan chose the angle
+    } // if on the left edge
     let mut angles = if r.apply_piece_rotation {
         r.piece_rotation.angles_for_any_mode(trial_angles_deg)
     } else {
@@ -300,12 +300,6 @@ fn piece_trial_set(trial_angles_deg: &[u16], r: &Rect) -> Vec<u16> {
             }
         }
     } // if free rotation is active
-    if let Some(angle) = r.left_edge_angle {
-        if !r.apply_piece_rotation {
-            return vec![angle]; // preserve legacy fold-edge behavior outside Any mode
-        } // if piece rules are inactive
-        angles.retain(|candidate| *candidate % 360 == angle % 360);
-    } // if on the left edge
     angles
 } // fn piece_trial_set
 
@@ -761,15 +755,6 @@ mod tests {
         assert!(validate_placements(78, 78, &placed));
     } // mixed_piece_rules_keep_allowed_angles_and_unplaced_ids
 
-    // @brief A fold edge that conflicts with a fixed rotation cannot fall back to baseline.
-    #[test]
-    fn fold_edge_rotation_conflict_has_no_allowed_angle() {
-        let rect = Rect::new(12, 10)
-            .with_piece_rotation(PieceRotationRule::Fixed)
-            .with_piece_rotation_enabled(true)
-            .with_left_edge(180);
-        assert!(!fits_bin(rect, 100, 100, &[0, 90, 180, 270]));
-    } // fold_edge_rotation_conflict_has_no_allowed_angle
 
     // @brief Smallest clearance between any two placements; u32::MAX for fewer than two.
     fn min_clearance(placed: &[Placed]) -> u32 {
