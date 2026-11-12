@@ -197,6 +197,9 @@ Export all tabs unchecked.
 
 - [ ] Settings: Paper Type lists Tiled and Roll only. No sheet size fields.
 - [ ] Paper, Tiled, Letter. Submit. Create Layout: the tabs lay out. Export > PDF (Tiled) is enabled and saves.
+- [ ] Paper, Tiled, A4, then Tile Size Custom: the Custom Size fields show 8.27 × 11.69 in.
+- [ ] Custom 10 × 12 in, Portrait. Submit. Create Layout. Export > PDF (Tiled): each page is 10 × 12 in.
+- [ ] Unit mm: the Custom Size fields show 254 × 304.8. Save and load the settings: Custom and the size stay.
 - [ ] Paper, Roll 36 in. Submit. Create Layout: the tabs lay out. Export > PDF (Tiled) is disabled.
 - [ ] Fabric, width 60 in, Folded on. Submit. Create Layout: the tabs lay out on the folded half.
 - [ ] Fabric, width 60 in, Folded off. Submit. Create Layout: the tabs lay out on the full width.

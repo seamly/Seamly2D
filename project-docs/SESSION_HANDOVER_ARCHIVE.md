@@ -2,6 +2,16 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-12 — Version numbers move to a generated header
+
+- `packaging/version.sh` writes only `src/libs/vmisc/project_version_number.h` (git-ignored). Builds change no tracked file.
+- `projectversion.h/.cpp` read `PROJECT_VERSION_*` macros; both `Info.plist` use `${QMAKE_FULL_VERSION}`.
+- `common.pri`: writes a 0.0.0 header when missing (Qt Creator, CI `linux-test`); sets `PROJECT_VERSION`. Apps set macOS `VERSION` from it.
+- SeamlyLayout CMake parses the new header; 0.0.0 when missing.
+- Local build scripts: stamp revert logic removed.
+- Checked: qmake default + parse, version.sh (leading zeros), cl + rc (`FILEVERSION 26,11,1214,0`), qmake deps list the header.
+- Open: macOS Info.plist substitution and Linux untested locally. Merge without skip-ci; run `ci.yml`.
+
 ### 2026-11-12 — .gitignore broad rules narrowed
 
 - `*.json` → `AGENT_STATE.json`, `CMakeUserPresets.json`, `compile_commands.json` (+ signing key rule).

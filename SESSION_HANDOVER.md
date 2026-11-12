@@ -2,9 +2,20 @@
 
 ## Current status
 
+### 2026-11-12 — Tile Size offers Custom
+
+- The removed custom size was a Paper Type choice. Tile Size had no Custom.
+- Tile Size lists the 27 sizes, then Custom. Custom Size fields: width × height in the user unit.
+- New keys `tileWidth`, `tileHeight` (default 8.5 × 11), not `pageWidth`/`pageHeight`: page width is the fabric width fallback.
+- Selecting Custom copies the current predefined size. Orientation applies. Unit change converts.
+- Rust: `CUSTOM_TILE_SIZE`, `LayoutSettings::custom_tile_px`, `tiling::tile_page_px`.
+- Docs: SETTINGS_WORKFLOW, settings rule, TODO Layout.999.1 and .4, `AGENT_CHECKLIST.md` §10.
+- Checked: `cargo test --workspace` 669 pass; `ctest --preset debug` 8/8.
+- Open: Layout.999.4 installed-app check with the next MSI.
+
 ### 2026-11-12 — Paper > Sheet removed (Layout.999)
 
-- Paper Type is tiled or roll. Custom sheet removed with it. Saved "sheet" or "custom" loads as "tiled".
+- Paper Type is tiled or roll. The custom size moved to Tile Size. Saved "sheet" or "custom" loads as "tiled".
 - Deleted `sheets.rs`, `oversized.rs`, `remaining.rs`, `media_can_grow`, `refuse_sheet_layout`, sheet PDF export.
 - Piece divider splits columns only. "Make the media bigger" always enabled.
 - New `LayoutSettings::is_tiled_paper`: fabric with default paper type "tiled" was treated as tiled paper; fixed.
@@ -29,7 +40,7 @@
 - Tests deleted: `jacket2_marker_extends_paper_sheet`, `trousers_long_pieces_extend_a_sheet`.
 - `placement_enlargement_dimensions_and_notifications` uses a paper roll; the sheet overflow test also runs with `extend_media` on.
 - Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW_DESCRIPTION, `TEST_CHECKLIST.md`, `AGENT_CHECKLIST.md` §10, §12.
-- Checked: `cargo test --workspace` pass; `ctest --preset debug` 8/8.
+- Checked: `cargo test --workspace` 669 pass; `ctest --preset debug` 8/8.
 - Open: Layout.300 user check with the next MSI.
 
 ### 2026-11-12 — Marking test pinned to a solid seam line
@@ -40,18 +51,9 @@
 - Fix: the test sets `style.seam.type = Qt::SolidLine`.
 - Checked: temporary test program, all 39 Seamly2DTests suites pass. Other Qt suites run with the next MSI.
 
-### 2026-11-12 — Version numbers move to a generated header
-
-- `packaging/version.sh` writes only `src/libs/vmisc/project_version_number.h` (git-ignored). Builds change no tracked file.
-- `projectversion.h/.cpp` read `PROJECT_VERSION_*` macros; both `Info.plist` use `${QMAKE_FULL_VERSION}`.
-- `common.pri`: writes a 0.0.0 header when missing (Qt Creator, CI `linux-test`); sets `PROJECT_VERSION`. Apps set macOS `VERSION` from it.
-- SeamlyLayout CMake parses the new header; 0.0.0 when missing.
-- Local build scripts: stamp revert logic removed.
-- Checked: qmake default + parse, version.sh (leading zeros), cl + rc (`FILEVERSION 26,11,1214,0`), qmake deps list the header.
-- Open: macOS Info.plist substitution and Linux untested locally. Merge without skip-ci; run `ci.yml`.
-
 ## Decisions to retain
 
+- Custom page size lives in Tile Size > Custom (`tileWidth`, `tileHeight`). Paper Type has no custom size (user, 2026-11-12).
 - Layout Mode Any ignores "Place fold lines on the left edge": no pin, no turn, no mirror, no conflict error (user, 2026-11-12).
 - A paper sheet never grows, multisize tabs included. Overflow directs the user to PDF (tiled) (user, 2026-11-12).
 - Keep `data-notch-type`. Only DXF export converts every notch to a layer 4 slit.

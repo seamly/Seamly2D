@@ -9,7 +9,9 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 The complexity of generating a layout on a single sheet has revealed that all layouts that can be successfully created for 'Paper > Sheet' can be created by 'Paper > Tiled'. This means that 'Paper > Sheet' is redundant and its complex procesing is unnecessary. 
 
 - [x] Layout.999.1 - Remove the option for 'Sheet' in Layout settings
-  - Paper Type lists Tiled and Roll. The custom sheet size goes too.
+  - Paper Type lists Tiled and Roll.
+  - The custom size moves to Tile Size > Custom: `tileWidth` × `tileHeight` in the user unit, with tile orientation.
+  - Tests: `compute_tile_dims_custom_size`, `compute_tile_dims_invalid_custom_size_errors`, `from_json_reads_custom_tile_size`, `custom_tile_px_rejects_invalid_dimensions`, `tileSize_customStartsFromCurrentSize`, `tileSizeDropdown_customShowsSizeFields`.
   - A saved "sheet" or "custom" loads as "tiled" (`SettingsModel::setPaperType`, `LayoutSettings::from_json`). `sheetName` removed.
 - [x] Layout.999.2 - Remove the code functions that process 'Paper > Sheet' without removing functionality for 'Paper > Tile' and 'Paper > Roll' and 'Fabric > Folded' and 'Fabric > not Folded'
   - Deleted `sheets.rs`, `oversized.rs`, `remaining.rs`, `media_can_grow`, `refuse_sheet_layout`, sheet overflow checks, sheet PDF export.
@@ -21,6 +23,7 @@ The complexity of generating a layout on a single sheet has revealed that all la
   - `cargo test --workspace`: 665 pass. `ctest --preset debug`: 8/8.
 - [ ] Layout.999.4 - Verify that: (next MSI, `AGENT_CHECKLIST.md` §10, §12)
   - [ ] 'Paper > Tile' operates properly
+  - [ ] 'Paper > Tile > Custom' operates properly
   - [ ] 'Paper > Roll' operates properly
   - [ ] 'Fabric > Folded' operates properly
   - [ ] 'Fabric > Not Folded' operates properly

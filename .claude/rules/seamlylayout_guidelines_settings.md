@@ -29,7 +29,7 @@ See full documentation in [`settings-docs/SETTINGS_WORKFLOW.md`](../../project-d
 | Media | Sub-type | Default |
 |-------|----------|---------|
 | `paper` | `roll` | 36 in width |
-| `paper` | `tiled` | Letter (8.5×11 in) |
+| `paper` | `tiled` | Letter (8.5×11 in); `Custom` uses `tileWidth` × `tileHeight` |
 | `fabric` | — | User-defined dimensions |
 
 ## Key Constraints

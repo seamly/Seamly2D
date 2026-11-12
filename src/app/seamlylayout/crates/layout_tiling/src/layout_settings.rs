@@ -18,6 +18,9 @@ use serde::Deserialize;
 // 96 px/in is the standard CSS/SVG baseline; used to convert physical measurements to pixels.
 pub const LAYOUT_PPI: f64 = 96.0;
 
+// Tile size name that takes the page size from `tile_width` and `tile_height`.
+pub const CUSTOM_TILE_SIZE: &str = "Custom";
+
 // Full roll length sentinel in inches: 500 in = one standard fabric bolt.
 // Used for fabric, legacy `media_type == "roll"`, and paper `paper_type == "roll"`.
 // Roll length is unbounded at layout time. Trimmed after packing.
@@ -137,6 +140,13 @@ pub struct LayoutSettings {
     #[serde(default)]
     pub tile_size: String,
 
+    // Custom tile page size in the active unit. Used only when
+    // `tile_size` is `CUSTOM_TILE_SIZE`; tile_orientation still applies.
+    #[serde(default = "default_tile_width")]
+    pub tile_width: f64,
+    #[serde(default = "default_tile_height")]
+    pub tile_height: f64,
+
     #[serde(default = "default_tile_orientation")]
     pub tile_orientation: String,
 
@@ -161,6 +171,8 @@ fn default_layout_mode()   -> String { "alongGrainline".to_string() } // default
 fn default_rotation_step() -> f64    { 0.0                      } // default withNap direction: head-up
 fn default_no_grainline_rotation() -> String { "upright".to_string() } // keep no-grainline pieces as drafted
 fn default_tile_orientation() -> String { "landscape".to_string() } // default tiled-paper orientation
+fn default_tile_width()    -> f64    { 8.5                      } // custom tile width: Letter, in inches
+fn default_tile_height()   -> f64    { 11.0                     } // custom tile height: Letter, in inches
 fn default_piece_gap()     -> f64    { 0.05                     } // 0.05 in ≈ 5 px @ 96 dpi (historic GAP_PX)
 
 // ---------------------------------------------------------------------------
@@ -216,6 +228,19 @@ impl LayoutSettings {
             _    => value,         // "in" or unknown — treat as inches
         } // match unit
     } // fn to_inches
+
+    // @brief Custom tile page size in pixels at `LAYOUT_PPI`, before orientation.
+    //
+    // @return (width_px, height_px), or None when a dimension is not finite or not above zero.
+    pub fn custom_tile_px(&self) -> Option<(f64, f64)> {
+        let u = self.unit.as_str();
+        let width_px  = Self::to_inches(self.tile_width, u) * LAYOUT_PPI;
+        let height_px = Self::to_inches(self.tile_height, u) * LAYOUT_PPI;
+        // NaN fails `> 0.0`; infinity fails `is_finite`.
+        let is_valid = width_px.is_finite() && height_px.is_finite()
+            && width_px > 0.0 && height_px > 0.0;
+        is_valid.then_some((width_px, height_px))
+    } // fn custom_tile_px
 
     // @brief Return all four margins converted to pixels at `LAYOUT_PPI`.
     //
@@ -457,6 +482,8 @@ impl LayoutSettings {
             no_grainline_rotation: "upright".to_string(),
             roll_size:      "".to_string(),
             tile_size:      "Letter".to_string(),
+            tile_width:     8.5,
+            tile_height:    11.0,
             tile_orientation: "landscape".to_string(),
             output_format:  "pdf".to_string(),
         } // Self
@@ -496,6 +523,8 @@ mod tests {
             no_grainline_rotation: "upright".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
+            tile_width:     8.5,
+            tile_height:    11.0,
             tile_orientation: "landscape".to_string(),
             output_format:  "svg".to_string(),
         };
@@ -531,6 +560,8 @@ mod tests {
             no_grainline_rotation: "upright".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "none".to_string(),
+            tile_width:     8.5,
+            tile_height:    11.0,
             tile_orientation: "landscape".to_string(),
             output_format:  "svg".to_string(),
         };
@@ -570,6 +601,8 @@ mod tests {
             no_grainline_rotation: "upright".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
+            tile_width:     8.5,
+            tile_height:    11.0,
             tile_orientation: "landscape".to_string(),
             output_format:  "svg".to_string(),
         };
@@ -607,6 +640,8 @@ mod tests {
             no_grainline_rotation: "upright".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
+            tile_width:     8.5,
+            tile_height:    11.0,
             tile_orientation: "landscape".to_string(),
             output_format:  "svg".to_string(),
         };
@@ -640,6 +675,8 @@ mod tests {
             no_grainline_rotation: "upright".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
+            tile_width:     8.5,
+            tile_height:    11.0,
             tile_orientation: "landscape".to_string(),
             output_format:  "svg".to_string(),
         };
@@ -743,6 +780,8 @@ mod tests {
             no_grainline_rotation: "upright".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
+            tile_width:     8.5,
+            tile_height:    11.0,
             tile_orientation: "landscape".to_string(),
             output_format:  "svg".to_string(),
         };
@@ -788,6 +827,33 @@ mod tests {
         assert_eq!(w, 3408);
         assert_eq!(h, 4560);
     } // from_json_parses_camel_case
+
+    // @brief from_json reads the custom tile keys; missing keys give Letter in inches.
+    #[test]
+    fn from_json_reads_custom_tile_size() {
+        let json = r#"{"unit": "cm", "tileSize": "Custom", "tileWidth": 25.4, "tileHeight": 30.48}"#;
+        let s = LayoutSettings::from_json(json).expect("parse ok");
+        assert_eq!(s.tile_size, CUSTOM_TILE_SIZE);
+        let (w, h) = s.custom_tile_px().expect("valid custom size");
+        assert!((w - 960.0).abs() < 1e-9, "25.4 cm = 10 in = 960 px, got {w}");
+        assert!((h - 1152.0).abs() < 1e-9, "30.48 cm = 12 in = 1152 px, got {h}");
+
+        let d = LayoutSettings::from_json("{}").expect("parse ok");
+        assert!((d.tile_width - 8.5).abs() < 1e-9, "default tile width");
+        assert!((d.tile_height - 11.0).abs() < 1e-9, "default tile height");
+    } // from_json_reads_custom_tile_size
+
+    // @brief custom_tile_px rejects a zero, negative, or non-finite dimension.
+    #[test]
+    fn custom_tile_px_rejects_invalid_dimensions() {
+        let cases = [(0.0, 11.0), (8.5, -1.0), (f64::NAN, 11.0), (8.5, f64::INFINITY)];
+        for (width, height) in cases {
+            let mut s = LayoutSettings::default_for_test();
+            s.tile_width = width;
+            s.tile_height = height;
+            assert!(s.custom_tile_px().is_none(), "width={width} height={height}");
+        } // for each invalid size
+    } // custom_tile_px_rejects_invalid_dimensions
 
     // @brief alongGrainline → [0, 180] regardless of rotation_step.
     #[test]

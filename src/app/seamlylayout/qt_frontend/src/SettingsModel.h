@@ -124,11 +124,17 @@ class SettingsModel : public QObject
     // Tiled paper
     // -----------------------------------------------------------------------
 
-    // @brief Tile page size name (e.g., "Letter", "A4").
+    // @brief Tile page size name (e.g., "Letter", "A4"), or "Custom" for tileWidth × tileHeight.
     Q_PROPERTY(QString tileSize      READ tileSize      WRITE setTileSize      NOTIFY tileSizeChanged)
 
     // @brief Tile orientation: "landscape" | "portrait".
     Q_PROPERTY(QString tileOrientation READ tileOrientation WRITE setTileOrientation NOTIFY tileOrientationChanged)
+
+    // @brief Custom tile width in active units; zero, negative, and non-finite values are ignored.
+    Q_PROPERTY(double  tileWidth     READ tileWidth     WRITE setTileWidth     NOTIFY tileWidthChanged)
+
+    // @brief Custom tile height in active units; zero, negative, and non-finite values are ignored.
+    Q_PROPERTY(double  tileHeight    READ tileHeight    WRITE setTileHeight    NOTIFY tileHeightChanged)
 
     // -----------------------------------------------------------------------
     // Margins (in active units)
@@ -166,10 +172,10 @@ class SettingsModel : public QObject
     // @brief Paper Type dropdown choices: "tiled", "roll".
     Q_PROPERTY(QStringList paperTypeNames  READ paperTypeNames  CONSTANT)
 
-    // @brief Tile size names for the tile size ComboBox.
+    // @brief Tile size names for the tile size ComboBox; "Custom" comes last.
     Q_PROPERTY(QStringList tileSizeNames   READ tileSizeNames   CONSTANT)
 
-    // @brief Tile size labels with imperial and metric dimensions.
+    // @brief Tile size labels with imperial and metric dimensions; "Custom" comes last.
     Q_PROPERTY(QStringList tileSizeLabels  READ tileSizeLabels  CONSTANT)
 
     // @brief Tile orientation names for the tiled-paper orientation ComboBox.
@@ -214,6 +220,8 @@ public:
     int        rollLengthPx()  const { return 48000;           }
     QString    tileSize()      const { return m_tileSize;      }
     QString    tileOrientation() const { return m_tileOrientation; }
+    double     tileWidth()     const { return m_tile_width;    }
+    double     tileHeight()    const { return m_tile_height;   }
     double     marginTop()     const { return m_marginTop;     }
     double     marginBottom()  const { return m_marginBottom;  }
     double     marginLeft()    const { return m_marginLeft;    }
@@ -253,6 +261,10 @@ public:
     void setRollWidth(double v);
     void setTileSize(const QString &v);
     void setTileOrientation(const QString &v);
+    // @brief Set the custom tile width in active units; invalid widths are ignored.
+    void setTileWidth(double width);
+    // @brief Set the custom tile height in active units; invalid heights are ignored.
+    void setTileHeight(double height);
     void setMarginTop(double v);
     void setMarginBottom(double v);
     void setMarginLeft(double v);
@@ -301,9 +313,12 @@ public:
     // @param toUnit   Target unit ("in", "mm", "cm").
     Q_INVOKABLE void convertAllUnits(const QString &fromUnit, const QString &toUnit);
 
-    // @brief Select a tile size by name (tile dimensions are stored internally).
-    // @param name Tile size name (e.g., "Letter", "A4").
-    Q_INVOKABLE void selectTileSize(const QString &name);
+    // @brief Select a tile size by name; unknown names are ignored.
+    //
+    // "Custom" copies the current predefined size into tileWidth and tileHeight,
+    // so the custom fields start from a known page size.
+    // @param name Tile size name (e.g., "Letter", "A4", "Custom").
+    Q_INVOKABLE void selectTileSize(const QString& name);
 
     // @brief Return the default margin for a given unit system.
     // @param unit Unit string ("in", "mm", "cm").
@@ -330,6 +345,8 @@ signals:
     void rollLengthChanged();
     void tileSizeChanged();
     void tileOrientationChanged();
+    void tileWidthChanged();
+    void tileHeightChanged();
     void marginTopChanged();
     void marginBottomChanged();
     void marginLeftChanged();
@@ -352,6 +369,9 @@ private:
     // @brief Keep hidden fabric-mode margins aligned with selvedge width.
     void syncFabricMarginsFromSelvedge();
 
+    // @brief Copy the predefined tile size in m_tileSize into the custom tile size.
+    void copyTileSizeToCustom();
+
     // Fields — defaults match LayoutSettings::default() in Rust
     QString m_layoutMode    = QStringLiteral("alongGrainline");
     double  m_rotationStep  = 0.0;  // degrees; used by withNap (0 up, 180 down)
@@ -369,6 +389,8 @@ private:
     double  m_rollWidth     = 36.0;
     QString m_tileSize      = QStringLiteral("Letter");
     QString m_tileOrientation = QStringLiteral("landscape");
+    double  m_tile_width    = 8.5;   // custom tile width; Letter in inches
+    double  m_tile_height   = 11.0;  // custom tile height; Letter in inches
     double  m_marginTop     = 0.25;
     double  m_marginBottom  = 0.25;
     double  m_marginLeft    = 0.25;
