@@ -568,7 +568,6 @@ ApplicationWindow {
         pdfTiledTabAllowed:   appController.pdfTiledExportAllowed || root.exportAllTabsActive
         onExportAllTabsToggled: function(checked) { root.exportAllTabs = checked }
         labelTextState:       appController.labelTextState
-        lastSvgTextMode:      preferencesModel.svgTextMode
         // Paid formats stay hidden until the Rust gate reports their module as usable.
         gcodeExportAvailable: appController.isPaidExportAvailable("gcode")
         meshExportAvailable:  appController.isPaidExportAvailable("3mf")
@@ -737,10 +736,6 @@ ApplicationWindow {
                 root.pendingExportPath = path
                 root.pendingExportFormat = "svg"
                 root.pendingExportSettings = mode
-                if (mode !== "asSupplied") {
-                    // Remember the text mode; the submenu marks it next time.
-                    preferencesModel.saveSvgTextMode(preferencesModel.defaultPreferencesFilePath(), mode)
-                } // if text mode
                 exportSuccessDialog.warningText = "" // clear caveats of a previous export
                 exportProgressPopup.open()
                 exportStartTimer.restart()

@@ -79,10 +79,6 @@ private slots:
     void projectorPath_roundTripsThroughIni();
     void projectorPath_emitsSignalOnChange();
 
-    void svgTextMode_defaultsToDesignerFont();
-    void svgTextMode_rejectsUnknownName();
-    void saveSvgTextMode_writesOnlyThatKey();
-
     void hpglOptions_haveDefaults();
     void hpglOptions_rejectInvalidValues();
     void saveHpglPen_writesOnlyThatKey();
@@ -363,50 +359,6 @@ void PreferencesModelTests::projectorPath_emitsSignalOnChange()
     // Distinct value emits again.
     m.setProjectorPath(QStringLiteral("http://other.example/"));
     QCOMPARE(spy.count(), 2);
-}
-
-// ---------------------------------------------------------------------------
-// svgTextMode — last SVG label text mode, marked in Export > SVG
-// ---------------------------------------------------------------------------
-
-void PreferencesModelTests::svgTextMode_defaultsToDesignerFont()
-{
-    PreferencesModel m;
-    QCOMPARE(m.svgTextMode(), QStringLiteral("designerFont"));
-}
-
-void PreferencesModelTests::svgTextMode_rejectsUnknownName()
-{
-    PreferencesModel m;
-    QSignalSpy spy(&m, &PreferencesModel::svgTextModeChanged);
-    m.setSvgTextMode(QStringLiteral("asSupplied")); // an export choice, not a text mode
-    QCOMPARE(m.svgTextMode(), QStringLiteral("designerFont"));
-    QCOMPARE(spy.count(), 0);
-
-    m.setSvgTextMode(QStringLiteral("hersheyStrokes"));
-    QCOMPARE(m.svgTextMode(), QStringLiteral("hersheyStrokes"));
-    QCOMPARE(spy.count(), 1);
-}
-
-void PreferencesModelTests::saveSvgTextMode_writesOnlyThatKey()
-{
-    QTemporaryDir tempDir;
-    QVERIFY(tempDir.isValid());
-    const QString path = tempDir.filePath(QStringLiteral("preferences.ini"));
-
-    // An unapplied Preferences edit must not reach the file.
-    PreferencesModel writer;
-    writer.setProjectorPath(QStringLiteral("https://unapplied.example/"));
-    QVERIFY(writer.saveSvgTextMode(path, QStringLiteral("singleLineFont")));
-    QVERIFY(!writer.saveSvgTextMode(path, QStringLiteral("bogus")));
-
-    QSettings settings(path, QSettings::IniFormat);
-    QCOMPARE(settings.value(QStringLiteral("svg_text_mode")).toString(), QStringLiteral("singleLineFont"));
-    QVERIFY(!settings.contains(QStringLiteral("projector_path")));
-
-    PreferencesModel reader;
-    QVERIFY(reader.load(path));
-    QCOMPARE(reader.svgTextMode(), QStringLiteral("singleLineFont"));
 }
 
 void PreferencesModelTests::hpglOptions_haveDefaults()

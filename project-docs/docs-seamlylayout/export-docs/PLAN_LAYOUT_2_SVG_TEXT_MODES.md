@@ -120,4 +120,4 @@ Approved plan implemented. Differences from the plan:
 | Mode 2 stroked text | Mode 2 filled text | Outline glyphs are filled shapes |
 | One `<path>` per glyph | One `<path>` per label line | Same polylines, smaller file |
 | Separate `export_warning` popup | Warning text inside the Export Complete dialog | One dialog per export |
-| — | `PreferencesModel::saveSvgTextMode` writes one INI key | A full `save()` would store unapplied Preferences edits |
+| `PreferencesModel` `svgTextMode`; check mark on the last used mode | Removed (Layout.800): no preference, no check box | The check boxes did not work and added no information (user decision) |

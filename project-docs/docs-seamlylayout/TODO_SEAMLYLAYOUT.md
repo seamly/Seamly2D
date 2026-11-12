@@ -54,7 +54,14 @@ When the user clicks 'Horizontal', 'Vertical', or 'Both' then the piece is flipp
 - [x] Layout.110.1 Cause: the Flip choice only set the `flip` attribute for the layout; Piece Mode drew no mirror.
 - [x] Layout.110.2 `PatternPieceTool::applyFlipToGeometry` mirrors the drawn outline (seam line, cut line, allowance fill, notches, fold line) about the outline center, using `pieceFlipTransform` (`def.cpp`). Horizontal mirrors left to right, Vertical top to bottom. Labels and grainline keep their place and stay readable. Decision: the mirror is a display of the choice; the stored piece path does not change.
 - [x] Layout.110.3 Test: `TST_VPiece::PieceFlipTransformMirrorsAboutCenter`. `cl /Zs` OK on `def.cpp`, `pattern_piece_tool.cpp`, `tst_vpiece.cpp`. Not run: Qt suites (next build).
-- [ ] Layout.110.4 The MSI build and the Qt test suites passed. Still to do, in the app: in Piece mode, right-click a male_shirt piece > Flip > Horizontal, Vertical, Both, None. The outline on the canvas mirrors as chosen. Note whether the Flip submenu shows a check mark or a dot next to the current choice. Steps: `AGENT_CHECKLIST.md` section 24.
+- [ ] Layout.110.4 In Piece mode, right-click a male_shirt piece > Flip > Horizontal, Vertical, Both, None. The outline on the canvas mirrors as chosen. Note whether the Flip submenu shows a check mark or a dot next to the current choice. Steps: `AGENT_CHECKLIST.md` section 24.
+
+### [ ] Task Layout.800 - Implement - Remove the checkboxes from the SVG export submenu
+
+- [x] Remove the 'Export > SVG' submenu checkboxes. The checkboxes aren't operating properly; the selected submenu option is highlighted and exports the file. The checkboxes don't add value so remove them; remove any code and comments that are obsoleted during this task.
+  - [x] Layout.800.1 `ExportMenu.qml`: the three SVG text mode items have no check box. Removed: `lastSvgTextMode` (`ExportMenu.qml`, `TopMenuBar.qml`, `Main.qml`), `PreferencesModel::svgTextMode`, `isSvgTextMode`, `saveSvgTextMode`. SeamlyLayout no longer reads or writes the INI key `svg_text_mode`.
+  - [x] Layout.800.2 Test: `ExportMenuTests::svgModeItemsHaveNoCheckBox` (3 rows). Removed the 3 `svgTextMode` tests in `PreferencesModelTests`. `ctest --preset debug` 8/8.
+  - [ ] Layout.800.3 In the next MSI build: Export > SVG shows no check box next to any item. Click each item: the Save dialog opens and the file exports. Steps: `AGENT_CHECKLIST.md` section 36.
 
 ## VERIFY
 
