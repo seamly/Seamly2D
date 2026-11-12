@@ -9,7 +9,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 |---|---|---|
 | Layout.38.6 | 1 | Multisize pattern: Nested and Marker tabs | PASS
 | Layout.67.8 | 1, 3, 5–8 | Multisize tabs and exports | PASS
-| Layout.25.7 | 2, 10 | Media grows to fit | PASS
+| Layout.25.7 | 2 | Media grows to fit | PASS
 | Layout.68.5 | 4 | PDF true size | PASS
 | Layout.24.7 | 4–7, 12 | Export file names | Material - PASS (Fabric - PASS, Lining - PASS), Nested - PASS, Marker - PASS
 | Layout.26.7 | 5 | Missing Piece Data dialog scrolls |PASS 
@@ -42,6 +42,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 ## OPEN
 
 JACKET_2
+| Layout.300 | 10 | SL > jacket_2 > Paper sheet keeps its size; error directs to PDF (tiled) | ?
 | Layout.93.7 | 23 | SL > jacket_2 > DXF piece properties: Material, Missing Piece Data, Rotation, Flip, Tilt, Fold | --> export DXF (R13), upload to https://aw.fyi/dxf
 | Seamly2D.71.12 | 34 | S2D > jacket2 > Piece mode, Back: seam line and cut line stop at the fold line | ?
 | Seamly2D.71.15 | 35 | S2D > jacket2 > Layout > SL, Back: seam line and cut line stop at the fold line | ?
@@ -192,11 +193,12 @@ Export all tabs unchecked.
 - [ ] GIMP, Image > Print Size: 96 pixels/in, not 72. Check both files.
 - [ ] Print the PNG at "Actual size". A known piece length measures true.
 
-## 10. Media grows on a sheet
+## 10. Paper sheet keeps its size
 
 - [ ] Settings: Paper, Sheet 36 × 48 in. Submit. Create Layout.
-- [ ] Marker sheet longer than 48 in. No piece left out. No warning.
-  - `TEST_CHECKLIST.md` §7 expects a warning for pieces wider than 35.5 in. Layout.71 removed it: the media now widens.
+- [ ] No layout. The error names the pieces that do not fit and directs to PDF (tiled).
+- [ ] Only 'Layout Settings' stays active.
+- [ ] Settings: Paper, Tiled. Submit. Create Layout: the tabs lay out.
 
 ## 11. Media grows in width
 
@@ -223,8 +225,7 @@ Pattern: `C:\Users\susan\seamly2d\patterns\trousers.sm2d` (individual).
   - [ ] Left-out pieces warning: one bullet per piece. A long list scrolls. OK stays visible.
   - [ ] Export > PDF: save dialog offers `trousers_<stamp>.pdf`, with no tab. The split parts appear.
   - [ ] Export > DXF > DXF-ASTM (R13): blocks named `Back (1/2)` and `Back (2/2)`.
-- [ ] Create Layout. Choose "Make the media bigger". OK.
-  - [ ] Sheet longer than 36 in. No split pieces. No warning.
+- [ ] Create Layout. "Make the media bigger" is disabled. Its text directs to PDF (tiled) in Layout Settings.
 - [ ] Close both apps.
 
 ## 13. male_shirt: built-in seam line

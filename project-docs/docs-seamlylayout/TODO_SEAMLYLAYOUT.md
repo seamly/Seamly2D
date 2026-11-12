@@ -4,7 +4,19 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Implement
 
+### [ ] Task Layout.300 - Remove the capability of extending the media for media=paper and paperType=sheet
 
+- [x] remove capability to extend media length or width when media=paper and paperType=sheet.
+  - `do_process_layout` ignores `extend_media` when `media_can_grow` is false. Multisize tabs on a sheet now fail with `SHEET_OVERFLOW_MESSAGE` (PDF (tiled)).
+- [x] delete tests for this capability
+  - Deleted `jacket2_marker_extends_paper_sheet`, `trousers_long_pieces_extend_a_sheet`.
+  - `placement_enlargement_dimensions_and_notifications` now uses a paper roll.
+  - `placement_paper_sheet_overflow_requires_tiled_pdf` also runs with `extend_media` on.
+- [ ] verify that this capability has been removed
+  - `cargo test --workspace` pass; `ctest --preset debug` 8/8.
+  - [ ] in layout with pieces longer or wider than sheet size, the dialog directs user to select 'tiled' instead of 'sheet'. User check with the next MSI: `AGENT_CHECKLIST.md` §10, §12.
+- [x] verify that the tests for this capability have been removed
+  - No test lays out a paper sheet with `extend_media` and expects growth.
 
 ### [ ] Task Layout.108 — Implement - Seamly2D: stack multisize grainlines and labels in `layout_handoff`, inside every size's cut line
 
