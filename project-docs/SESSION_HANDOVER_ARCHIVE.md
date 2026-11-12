@@ -2,6 +2,15 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-11 — Split paper roll keeps media
+
+- Split on a paper roll keeps the selected roll width and margins; only the length follows the content.
+- Code unchanged: an individual roll split packs on fixed `bin_w` columns and never widens.
+- New tests: `placement_paper_roll_split_keeps_media_dimensions` (margins, extend off and on),
+  `trousers_split_on_a_narrow_paper_roll_keep_roll_width` (16 in roll, Back divides).
+- Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW_DESCRIPTION.
+- Installed-app check runs with the next MSI.
+
 ### 2026-11-11 — Custom roll width
 
 - Roll Width lists 'custom' last. It shows a width field in the Layout Settings unit; a predefined size hides it.

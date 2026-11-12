@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-11-12 — Marking test pinned to a solid seam line
+
+- MSI build stopped: `TST_HandoffDocument::markingsKeepTheirGeometryAndRejectInvalidData` failed.
+- Cause: the test read the user's settings; `defaultSeamLinetype=dashLine` gave the stripe a `stroke-dasharray`.
+- Writer unchanged: stripes keep the configured seam style (SVG-DATA-ATTRIBUTES.md).
+- Fix: the test sets `style.seam.type = Qt::SolidLine`.
+- Checked: temporary test program, all 39 Seamly2DTests suites pass. Other Qt suites run with the next MSI.
+
 ### 2026-11-12 — Version numbers move to a generated header
 
 - `packaging/version.sh` writes only `src/libs/vmisc/project_version_number.h` (git-ignored). Builds change no tracked file.
@@ -36,15 +44,6 @@
 - `.gitignore`: `!icon/` keeps the resource folders tracked.
 - `reference_lines.svg` recreated: stripe and plaid symbols; edges on whole pixels.
 - Temporary test program: the 8 pixel checks of `tst_piecemarkings.cpp` pass. Full Qt suites run with the next MSI.
-
-### 2026-11-11 — Split paper roll keeps media
-
-- Split on a paper roll keeps the selected roll width and margins; only the length follows the content.
-- Code unchanged: an individual roll split packs on fixed `bin_w` columns and never widens.
-- New tests: `placement_paper_roll_split_keeps_media_dimensions` (margins, extend off and on),
-  `trousers_split_on_a_narrow_paper_roll_keep_roll_width` (16 in roll, Back divides).
-- Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW_DESCRIPTION.
-- Installed-app check runs with the next MSI.
 
 ## Decisions to retain
 
