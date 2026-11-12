@@ -153,7 +153,8 @@ Seamly2D sends no source data for these. Tracked in `TODO_SEAMLYLAYOUT.md`.
 
 ## aw.fyi results
 
-Reports live beside the DXF files in `test-seamly-layout/layouts/<pattern>/`.
+Reports live beside the DXF files in `test-seamly-layout/layouts/<pattern>/` or `test-seamly-layout/patterns/validation/layouts_<pattern>/`.
+Report deviations carry an inch sign but match millimetres. Not verified.
 
 | Report | Departures | Open findings |
 |---|---|---|
@@ -163,6 +164,10 @@ Reports live beside the DXF files in `test-seamly-layout/layouts/<pattern>/`.
 | `jacket2_40-146_nested_allsizes_R13_202610121136.dxf` | 2 | Both from 6 pieces named "Detail" (Layout.26.5); layer 5 mismatch, same cause; duplicate vertices (Layout.27.9) |
 | `jacket2_40-146_nested_size240_R13_202610121142.dxf` | 3 | 2 from the "Detail" names; Detail (4) and Detail (6) bends not turn points: reader advisory (DXF.23) |
 | `jacket2_40-146_marker_allsizes_R13_202610121149.dxf` | 3 | 2 from the "Detail" names; Detail (4) bend: reader advisory (DXF.23). Nothing graded (Layout.25, 27.3) |
+| `jacket2_40-146_R13_Fabric_BaseSize500_202610231417.dxf` | 0 | Advisories only |
+| `male_shirt_R13_202611012029.dxf` | 1 | ShortSleeve_M `Flip:XY`; Layout.93.5 now writes `Flip:Y`. Advisory: points that "may be" miscategorized: FullSleeve_M 2, CollarTop_M 2, CollarTopInterface-Built-in-SA_M 1, ShortSleeve_M 1 |
+| `jacket2_40-146_CLO3D_Lining_BaseSize500_202611071550.dxf` | 0 | Advisories only |
+| `jacket2_40-146_R13_Lining_BaseSize500_202611080853.dxf` | 0 | Advisories only |
 
 Advisories in the 2026-10-10 report: 4 pieces with no densified points (straight-sided pieces); FullSleeve hem turn point and ShortSleeve L14 pt 31 "maybe". Notch depths, curve tolerance and validation spans pass.
 

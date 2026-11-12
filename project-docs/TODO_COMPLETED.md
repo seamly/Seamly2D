@@ -1793,3 +1793,81 @@ The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`sr
   - Obsolete: Paper > Sheet is removed (Layout.999). The installed-app check no longer applies.
 - [x] verify that the tests for this capability have been removed
 
+
+## Task DXF.21 — A straight internal line declares no turn or curve points (completed 2026-11-12)
+
+aw.fyi report on `male_shirt_R13_202610101837.dxf`: FullSleeve_M, 10 of 80 declared points miscategorized. They are both ends of the 4 pleat lines (L8) and the slit (L11), each a 2-vertex straight line. The 2026-10-07 report flagged the same ends as layer 2 points; this one flags them as layer 3 points. Both "not needed – definite".
+
+- [x] DXF.21.1 `AstmContour::declares_points`: an open contour with 2 key points writes nothing on layers 2 and 3. Slit ends are never turn points (user decision)
+- [x] DXF.21.2 `writer.rs` `write_astm_block` skips those contours on layers 2 and 3
+- [x] DXF.21.3 Tests: `straight_open_line_declares_no_points`; `writer_astm_test.rs` layer 3 count and male_shirt declared-point count
+- [x] DXF.21.4 Compliance doc "Contour rules"
+- [x] DXF.21.5 User: re-export male_shirt DXF-ASTM (R13); run aw.fyi (DXF.8)
+  - Done: `male_shirt_R13_202611012029.dxf` report in `test-seamly-layout/layouts/male_shirt/20261030_male_shirt/`. Pleat and slit ends not flagged. FullSleeve_M: 2 points "may be" miscategorized (advisory).
+- Checked on `male_shirt_202610101837.svg`: FullSleeve_M layer 3 70 → 60 points. No other block changed.
+
+## Task DXF.22 — FrontPanel L1 junction: aw.fyi contradicts itself (obsolete 2026-11-12)
+
+FrontPanel_M top edge, where the straight line meets the curve (L1 71.10, 1068.59; L14 71.35, 1058.59).
+
+| Report | L1 junction | aw.fyi | L14 junction | aw.fyi |
+|---|---|---|---|---|
+| 2026-10-07 | not a key point | turn point missing | curve point | should be turn |
+| 2026-10-10 | turn point | should be curve | turn point | agree |
+
+- Geometry is the same on both lines: tangent break 2.79° (L1) / 2.85° (L14) at the junction, 1.15° / 1.05° at the next dense vertex. Key-point angles 4.86° / 6.29° on both. Arc tangent through the next two key points: 1.57° / 1.62°.
+- No code change: the turn point stays. Any rule that changes L1 also changes L14.
+- [x] DXF.22.1 User: report the contradiction to ApparelWerks after every other open task is complete. Until then, accept it as a reader advisory (user decision)
+  - Include jacket2 Detail (4) size 240, L1 pt 14: aw.fyi reads a 6.5° bend over 10 mm as a missing corner (DXF.23)
+  - Obsolete: no later report repeats either finding. `male_shirt_R13_202611012029.dxf`: FrontPanel_M not flagged. jacket2 Base Size 500 reports (R13 Fabric 2026-10-23, CLO3D Lining 2026-11-07, R13 Lining 2026-11-08): 0 departures.
+
+## Task DXF.3 — Write DXF R13 (AC1012) (completed 2026-11-12)
+
+D6673 §1.2 / 4.1 names AutoCAD R13. `$ACADVER` was `AC1009` (R12 syntax). R13 needs entity handles, a full TABLES section, CLASSES, and OBJECTS.
+
+Menu (user decision): **DXF-ASTM (R13)**, **DXF-ASTM (CLO3D)**. CLO3D writes R13: it must be D6673-10 compliant (user decision, reverses "CLO3D stays R12"). The View menu keeps one **DXF-ASTM** item.
+
+- [x] DXF.3.1 Study a known-good R13 file: required header variables, tables (LTYPE, LAYER, STYLE, BLOCK_RECORD), handles, OBJECTS dictionary. The repo's `seamlylayout_Skirt_ASTMD6673.dxf` says AC1012 but has no handles; libdxfrw's writer (`src/libs/vdxf/libdxfrw/libdxfrw.cpp`) was the reference
+- [x] DXF.3.2 `ezdxf2dxfastm/src/r13.rs`: write `$ACADVER` `AC1012`, `$HANDSEED`, handles on every entity, subclass markers (group 100). `Drawing::version` selects the version
+- [x] DXF.3.3 Write CLASSES, TABLES, BLOCK_RECORD entries, and OBJECTS
+- [x] DXF.3.4 Keep CLO3D group 250 output working
+- [x] DXF.3.5 Check import in CLO3D and one other reader (e.g. ezdxf `audit`, LibreCAD). Done: ezdxf 1.4.4 `audit` 0 errors / 0 fixes; libdxfrw reads the same entity counts as R12. aw.fyi reads `AC1012` (`male_shirt_R13_202611012029.dxf`)
+  - Moved: the CLO3D import check is Layout.102.5 (`AGENT_CHECKLIST.md` section 8).
+- [x] DXF.3.6 Rust tests: header version, unique handles, required sections present (`writer_r13_test.rs`, `exports.rs` `do_export_dxf_writes_r13_when_asked`)
+- [x] DXF.3.7 Update the compliance doc "Decisions" row for DXF version
+
+## Task DXF.8 — Re-validate (completed 2026-11-12)
+
+- [x] DXF.8.1 Export male_shirt as DXF-ASTM and DXF-ASTM (CLO3D) after each task
+- [x] DXF.8.2 User: run the files through https://aw.fyi/dxf; save the report beside the files
+- [x] DXF.8.3 Record the result in the compliance doc ("aw.fyi results")
+- [x] DXF.8.4 User: re-run aw.fyi after DXF.21 and Layout.61
+  - Done: male_shirt R13 2026-11-01; jacket2 Base Size 500 R13 Fabric 2026-10-23, CLO3D Lining 2026-11-07, R13 Lining 2026-11-08. Results: compliance doc "aw.fyi results". Layout.61.7.2 records the Lining check.
+
+## DXF-ASTM report findings and their tasks (closed 2026-11-12)
+
+Reports on male_shirt (2026-10-03 to 2026-10-10) and jacket2 (2026-10-12).
+
+| Finding | Severity | Task |
+|---|---|---|
+| Declared points miscategorized: curve points on layer 2 (7 pieces) | departure | DXF.1 |
+| Reconstruction from layers 2/3 off layer 84 by 0.532 (ShortSleeve_M), layer 87 by 0.942 (FullSleeve_M); limit 0.5 | extension | DXF.2 |
+| File is AC1009, not R13 (AC1012) | departure | DXF.3 |
+| More curve points than the curves need (Yoke_M L14, PocketFlapRound_M L1) | advisory | DXF.4 |
+| Pieces with no `Quantity:`, label, or grainline (CollarTopInterface, CollarBaseInterface, CuffInterface) | report table | DXF.5 |
+| `Style Name:` is the output file stem with timestamp | report header | DXF.6 |
+| Category, Material, Size columns blank | report table | DXF.7 |
+| `Author` not `vendor;application;release #` | departure | DXF.9 |
+| Reconstruction from layers 2/3 off layer 84 by 0.8469 (CollarTopInterface_M), layer 87 by 0.8423 (CollarTop_M) | extension | DXF.11 |
+| FrontPanel_M: layer 2 misses 1 of 14 corners (line meets curve at ~3°) | departure | DXF.15 |
+| FullSleeve_M: 10 of 80 points miscategorized on a straight hem run between curves | departure | DXF.16 |
+| ShortSleeve_M: 1 point may be miscategorized | advisory | DXF.16; still "may be" on 2026-11-01 |
+| FrontPanel_M L1 + L14: line→curve junction not a turn point | departure | DXF.19 |
+| FullSleeve_M: pleat (L8) and slit (L11) ends as layer 2 points | departure | DXF.19, DXF.21 |
+| CollarBaseInterface_M, CollarBase_M: turn point on a 1.7° curve | advisory | DXF.19 |
+| Yoke_M L14 turn point mid straight edge; ShortSleeve_M pt 31; FullSleeve_M slit end 0.21 mm from a turn point | advisory | DXF.20 |
+| Notch depth 2.5 and 1.25 mm; 3 notches on layer 83 (U) | gap | DXF.17 |
+| FrontPanel_M L1 pt 3 "should be curve"; L14 pt 39, same geometry, agrees | departure | DXF.22 (obsolete) |
+| FullSleeve_M L1 pt 1 / L14 pt 36 hem turn point "maybe curve" | advisory | No action (DXF.20.2) |
+| jacket2 Detail (4) and Detail (6) size 240: bend not a turn point | departure | Reader advisory (DXF.23) |
+| jacket2 piece-113 L14 16 curve points, Detail (4) size 500 L1 13 curve points; each fits 3 primitives | advisory | No action |

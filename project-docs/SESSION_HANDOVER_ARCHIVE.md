@@ -2,6 +2,16 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-12 — Paper sheets never grow (Layout.300)
+
+- `do_process_layout`: `extend_media` is off when `media_can_grow` is false. Multisize tabs on a sheet now fail with `SHEET_OVERFLOW_MESSAGE` (PDF (tiled)).
+- Dead code removed: the "extended sheet keeps its own length" trim branch.
+- Tests deleted: `jacket2_marker_extends_paper_sheet`, `trousers_long_pieces_extend_a_sheet`.
+- `placement_enlargement_dimensions_and_notifications` uses a paper roll; the sheet overflow test also runs with `extend_media` on.
+- Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW_DESCRIPTION, `TEST_CHECKLIST.md`, `AGENT_CHECKLIST.md` §10, §12.
+- Checked: `cargo test --workspace` pass; `ctest --preset debug` 8/8.
+- Open: Layout.300 user check with the next MSI.
+
 ### 2026-11-12 — Marking test pinned to a solid seam line
 
 - MSI build stopped: `TST_HandoffDocument::markingsKeepTheirGeometryAndRejectInvalidData` failed.
