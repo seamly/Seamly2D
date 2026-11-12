@@ -4,6 +4,19 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Implement
 
+### [ ] Layout.999 - Remove the option for 'Sheet' in Layout settings
+
+The complexity of generating a layout on a single sheet has revealed that all layouts that can be successfully created for 'Paper > Sheet' can be created by 'Paper > Tiled'. This means that 'Paper > Sheet' is redundant and its complex procesing is unnecessary. 
+
+- [ ] Layout.999.1 - Remove the option for 'Sheet' in Layout settings
+- [ ] Layout.999.2 - Remove the code functions that process 'Paper > Sheet' without removing functionality for 'Paper > Tile' and 'Paper > Roll' and 'Fabric > Folded' and 'Fabric > not Folded'
+- [ ] Layout.999.3 - Remove the tests for 'Paper > Sheet' without removing tests for 'Paper > Tile', 'Paper > Roll', 'Fabric > Folded', 'Fabric > not Folded'
+- [ ] Layout.999.4 - Verify that:
+  - [ ] 'Paper > Tile' operates properly
+  - [ ] 'Paper > Roll' operates properly
+  - [ ] 'Fabric > Folded' operates properly
+  - [ ] 'Fabric > Not Folded' operates properly
+
 ### [ ] Task Layout.300 - Remove the capability of extending the media for media=paper and paperType=sheet
 
 - [x] remove capability to extend media length or width when media=paper and paperType=sheet.

@@ -37,7 +37,7 @@ Some recorded checks still have blank evidence fields. Keep their checked boxes,
 - [x] Record jacket2's displayed Base Size from section 9: `500`.
 - [x] Record the turn-point warning, affected pieces, size comparison, and export file from section 13.
 
-## 1. Prepare the test files
+## 1. [x] Prepare the test files
 
 Run from the repository root. Save edited patterns under new names; do not overwrite these originals.
 
@@ -56,7 +56,7 @@ Run from the repository root. Save edited patterns under new names; do not overw
 - [x] Use separate export folders for jacket2, male_shirt, and trousers.
 - [x] Keep unmodified copies for baseline comparisons and separate copies for marking, copy, and flip tests.
 
-## 2. SeamlyMe — measurements and file pickers
+## 2. [x] SeamlyMe — measurements and file pickers
 
 - [x] Open `male_chest_102cm.smis`. Measurements and units appear correctly.
 - [x] Open `trousers.smis`. Measurements and units appear correctly.
@@ -81,7 +81,7 @@ Run from the repository root. Save edited patterns under new names; do not overw
 
 Use a disposable data root for path tests. Do not rename or make the working measurement folders unwritable.
 
-## 3. Seamly2D — conversion, save, and reopen
+## 3. [x] Seamly2D — conversion, save, and reopen
 
 Repeat for jacket2, male_shirt, and trousers.
 
@@ -93,7 +93,7 @@ Repeat for jacket2, male_shirt, and trousers.
 - [x] Measurement links, custom formulas, piece labels, seam allowances, and fold lines survive reopening.
 - [x] Existing hidden labels/grainlines remain hidden; do not treat intentionally hidden objects as missing.
 
-## 4. Seamly2D — label template filenames
+## 4. [x] Seamly2D — label template filenames
 
 Use male_shirt. Repeat the pattern-label checks on jacket2.
 
@@ -111,7 +111,7 @@ Use male_shirt. Repeat the pattern-label checks on jacket2.
 - [x] `%pFileName%` and `%mFileName%` include extensions in rendered labels and editor previews; merged from the feature worktree. Targeted Qt tests pass.
 - [x] Verify filename extensions in installed-app pattern labels, piece labels, and editor previews. Remove appended `%pExt%` or `%mExt%` from existing templates.
 
-## 5. Seamly2D — Flip and placement properties
+## 5. [x] Seamly2D — Flip and placement properties
 
 Use an asymmetric male_shirt piece, such as FrontPanel.
 
@@ -138,7 +138,7 @@ Use an asymmetric male_shirt piece, such as FrontPanel.
 The flip changes the displayed choice. It must not flatten or rewrite the stored draft geometry.
 Section 6 records copied-source checks as passed. Section 5's unchecked row covers Horizontal, Vertical, and Both on copied, united, and Mirror-on-Fold pieces.
 
-## 6. Seamly2D — independent Copy Piece
+## 6. [x] Seamly2D — independent Copy Piece
 
 Use male_shirt, then a jacket2 piece.
 
@@ -156,7 +156,7 @@ Use male_shirt, then a jacket2 piece.
 - [x] Repeat with a Mirror-on-Fold piece and a copy of a copy.
 - [x] In a disposable copy, remove the source piece. The copied piece still recalculates and exports.
 
-## 7. Seamly2D — drill holes and stripe/plaid references
+## 7. [ ] Seamly2D — drill holes and stripe/plaid references
 
 Use a male_shirt test copy and jacket2 Back. Add suitable live anchors if the piece has none.
 
@@ -175,12 +175,12 @@ Anchor points are required to define drill holes and reference lines, so correct
   - [x] 'Redo anchor point' becomes an icon in the bar menu
 - [x] A Drill hole with a missing or removed center anchor displays an error.
   - [x] Piece Mode: Trying to delete an anchor point that is in use will remove the anchor from the list but 'OK' and 'Apply' buttons do nothing so the deletion can't be saved. Add a display a message that the anchor point is in use and list the items where it is used, the user can click 'Close' button on this popup message to close it. Fix this in a worktree as a feature branch then merge into run-seamlyLayout.
-  - [ ] YY Piece Mode > Pattern Piece Tool > Drill Holes: Drill Holes needs its own icon. Above the label 'Drill Holes' display an icon of two concentric circles that are blue with black outline.
+  - [x] Piece Mode > Pattern Piece Tool > Drill Holes: Drill Holes needs its own icon. Above the label 'Drill Holes' display an icon of two concentric circles that are blue with black outline.
 --> Fix this in a worktree as a feature branch then merge into run-seamlyLayout.
   - [x] Draft Mode: Adding an anchor point to a piece when that anchor point has already been added generates a 'Bad Id' message. It should generate a popup message that the anchor point has already been added, the user can click 'Close' to close the popup message.
 - [x] Add Stripe and Plaid references using path-node endpoints, not anchors.
   - The path-node behavior already existed. Regression coverage verifies node-only choices, dialog refresh, and serialization.
-- [ ] YY Display Plaid reference line as double line in piece mode and layout canvases; for DXF exports the Plaid reference line is a single line, for all other exports Plaid reference line is a dboule line. 
+- [x] Display Plaid reference line as dashed line in piece mode and layout canvases; for DXF exports the Plaid reference line is a single line, for all other exports Plaid reference line is a dboule line.
 --> Fix this in a worktree as a feature branch then merge into run-seamlyLayout.
 - [x] WW Piece Mode > Pattern Piece Tool > Reference Lines: The 'Reference Lines' label needs an icon. Above the 'Reference Lines' label display an icon composed of two side-by-side symbols: for stripe symbol show two blue vertical parallel lines with black outine; for plaid symbol show the same two vertical parallel lines crossed by two blue horizontal lines with black outline.
   - Render check: 8/8 pixels pass. `TST_PieceMarkings` and installed-app check run with the next MSI.
