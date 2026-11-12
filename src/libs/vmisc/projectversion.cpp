@@ -24,14 +24,16 @@
  ************************************************************************
  **
  **  @file   projectversion.cpp
- **  @author Roman Telezhynskyi <dismine(at)gmail.com>
- **  @date   8 7, 2015
+ **  @author slspencer
+ **  @date   2026
  **
  **  @brief
+ **  Defines the application version and the compiler description.
+ **
  **  @copyright
  **  This source code is part of the Valentine project, a pattern making
  **  program, whose allow create and modeling patterns of clothing.
- **  Copyright (C) 2015 Seamly2D project
+ **  Copyright (C) 2026 Seamly2D Project
  **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
  **
  **  Seamly2D is free software: you can redistribute it and/or modify
@@ -60,11 +62,9 @@
 #include <QSysInfo>
 #include <QtGlobal>
 
-// Start: Do not edit here, use packaging/version.sh to update
-extern const int MAJOR_VERSION = 26;
-extern const int MINOR_VERSION = 11;
-extern const int DEBUG_VERSION = 910;
-// End: Do not edit here
+extern const int MAJOR_VERSION = PROJECT_VERSION_MAJOR;
+extern const int MINOR_VERSION = PROJECT_VERSION_MINOR;
+extern const int DEBUG_VERSION = PROJECT_VERSION_DAY_HOUR;
 
 extern const QString APP_VERSION_STR(QStringLiteral("%1.%2.%3").arg(MAJOR_VERSION).arg(MINOR_VERSION)
                                  .arg(DEBUG_VERSION));

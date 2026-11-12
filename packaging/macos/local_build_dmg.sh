@@ -77,17 +77,8 @@ if [ -z "${VERSION}" ]; then
 fi
 echo "version: ${VERSION}"
 
-VERSION_STAMPED_FILES=(
-    src/libs/vmisc/projectversion.cpp
-    src/libs/vmisc/projectversion.h
-    packaging/macos/seamly2d/Info.plist
-    packaging/macos/seamlyme/Info.plist
-)
-VERSION_FILES_WERE_CLEAN=1
-if [ -n "$(git status --porcelain -- "${VERSION_STAMPED_FILES[@]}")" ]; then
-    VERSION_FILES_WERE_CLEAN=0
-fi
-echo "stamping version into projectversion.cpp/.h and Info.plist..."
+# version.sh writes the generated, git-ignored src/libs/vmisc/project_version_number.h.
+echo "writing the version into src/libs/vmisc/project_version_number.h..."
 bash packaging/version.sh "${VERSION}"
 
 # --- Locate the Qt kit ------------------------------------------------------------
@@ -184,9 +175,3 @@ else
     echo "unit tests: PASSED (make check, ctest, cargo test)"
 fi
 echo "DMG OK: ${REPO_ROOT}/packaging/macos/Seamly2D-macos.dmg (unsigned, not notarized)"
-if [ "${VERSION_FILES_WERE_CLEAN}" -eq 1 ]; then
-    echo "reverting the version stamp (projectversion.cpp/.h, both Info.plist) - packaging/version.sh regenerates it on demand, nothing to keep..."
-    git checkout -- "${VERSION_STAMPED_FILES[@]}"
-else
-    echo "projectversion.cpp/.h and/or Info.plist carried uncommitted changes before this build - not auto-reverting them; check 'git status' for what to keep."
-fi
