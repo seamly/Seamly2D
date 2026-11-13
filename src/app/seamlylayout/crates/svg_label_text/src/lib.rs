@@ -28,6 +28,7 @@ mod hershey_strokes;
 use xmltree::{Element, XMLNode};
 
 pub use font_embedding::SINGLE_LINE_FONT_FAMILY;
+pub use hershey_strokes::stroke_text_width;
 
 /// `data-type` values of the groups whose text this crate rewrites.
 const LABEL_TYPES: [&str; 6] =

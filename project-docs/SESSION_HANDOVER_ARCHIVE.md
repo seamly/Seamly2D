@@ -2,6 +2,17 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-12 — Paper > Sheet removed (Layout.999)
+
+- Paper Type is tiled or roll. The custom size moved to Tile Size. Saved "sheet" or "custom" loads as "tiled".
+- Deleted `sheets.rs`, `oversized.rs`, `remaining.rs`, `media_can_grow`, `refuse_sheet_layout`, sheet PDF export.
+- Piece divider splits columns only. "Make the media bigger" always enabled.
+- New `LayoutSettings::is_tiled_paper`: fabric with default paper type "tiled" was treated as tiled paper; fixed.
+- Layout.300 obsolete → `TODO_COMPLETED.md`. Rotation.4.2, 4.3 obsolete.
+- Docs: rules, SVG-DATA-ATTRIBUTES, workflow docs, `AGENT_CHECKLIST.md` §10, §12, `TEST_CHECKLIST.md`.
+- Checked: `cargo test --workspace` 665 pass; `ctest --preset debug` 8/8.
+- Open: Layout.999.4, Layout.72.8 installed-app check with the next MSI.
+
 ### 2026-11-12 — Layout Mode Any ignores the fold edge (Rotation.0)
 
 - `LayoutSettings::places_fold_lines_on_left_edge()`: false in Any. `do_process_layout`, `layout_divide_spec`, sheet PDF (`lib.rs`) and `margin_left_value` read it.

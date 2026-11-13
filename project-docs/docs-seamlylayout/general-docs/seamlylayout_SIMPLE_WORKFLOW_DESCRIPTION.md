@@ -174,6 +174,7 @@ The application workflow loop consists of:
        "• Back: width 16.61 in, media 15.50 in". A long list scrolls; the buttons stay visible.
        * "Split the pieces" (default; SVG, PDF, HPGL, EPS, PS, PNG, JPG): each such piece splits into equal parts that fit.
          Each part gets a label "<name> part i of n, joins j" and 2 match notches per shared cut edge. No seam allowance on a cut edge.
+         A label wider than its cut edge shrinks to the edge length.
          See `SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout split parts".
          A paper roll keeps the selected roll width and margins; only its length follows the content.
        * "Make the media bigger" (DXF): fabric keeps its configured width and grows longer. Other media can grow wider and longer.

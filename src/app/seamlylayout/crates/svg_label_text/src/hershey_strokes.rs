@@ -93,6 +93,12 @@ fn advance_units(text: &str) -> i32 {
         .sum()
 } // fn advance_units
 
+/// @brief Width of `text` drawn in the single-stroke mode at `font_size`.
+/// @return Width in the units of `font_size`.
+pub fn stroke_text_width(text: &str, font_size: f64) -> f64 {
+    f64::from(advance_units(text)) * font_size / EM_UNITS
+} // fn stroke_text_width
+
 /// @brief SVG path data for `text` drawn from baseline point (`x`, `y`) at `scale`.
 /// @return Path data (empty for blank text) and the number of missing glyphs.
 pub(crate) fn text_path_data(text: &str, x: f64, y: f64, scale: f64) -> (String, usize) {
@@ -149,7 +155,7 @@ fn convert_text(text: &mut Element, style: &TextStyle) -> usize {
     // Baseline start; text-anchor moves it left by all or half the width.
     let mut x = first_number(text.attributes.get("x"));
     let y = first_number(text.attributes.get("y"));
-    let width = f64::from(advance_units(&string)) * scale;
+    let width = stroke_text_width(&string, font_size);
     match style.text_anchor.as_deref() {
         Some("middle") => x -= width / 2.0, // centred on x
         Some("end") => x -= width,          // ends at x

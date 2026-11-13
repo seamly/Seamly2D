@@ -2,6 +2,17 @@
 
 ## Current status
 
+### 2026-11-12 — Split part label no wider than its cut edge (Layout.801)
+
+- `piece_divider.rs` `fit_label_to_edge`: a part label wider than its longest cut edge gets a smaller font. Width = edge length.
+- The shrunk `<text>` gets `textLength` (edge length) and `lengthAdjust="spacingAndGlyphs"`.
+- Measure: `svg_label_text::stroke_text_width` (Hershey). No system font. Wider than Arial for part labels.
+- Test: `part_label_is_no_wider_than_its_cut_edge`. Richmond shirt, roll 8 in: Collar, Collar Stand shrink; trousers 8–16 in: none.
+- Checked: `cargo test --workspace` 670 pass; `ctest --preset debug` 8/8.
+- Docs: SVG-DATA-ATTRIBUTES "split parts", SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §37.
+- Open: Layout.801.4 installed-app check with the next MSI.
+- Not committed, found in the working copy: user edits in `TODO_SEAMLYLAYOUT.md` (Layout.999.4, Layout.110 checks; Layout.800 subtasks removed).
+
 ### 2026-11-12 — Export > SVG has no check boxes (Layout.800)
 
 - `ExportMenu.qml`: the three SVG text mode items are plain items. A click exports.
@@ -39,17 +50,6 @@
 - Docs: SETTINGS_WORKFLOW, settings rule, TODO Layout.999.1 and .4, `AGENT_CHECKLIST.md` §10.
 - Checked: `cargo test --workspace` 669 pass; `ctest --preset debug` 8/8.
 - Open: Layout.999.4 installed-app check with the next MSI.
-
-### 2026-11-12 — Paper > Sheet removed (Layout.999)
-
-- Paper Type is tiled or roll. The custom size moved to Tile Size. Saved "sheet" or "custom" loads as "tiled".
-- Deleted `sheets.rs`, `oversized.rs`, `remaining.rs`, `media_can_grow`, `refuse_sheet_layout`, sheet PDF export.
-- Piece divider splits columns only. "Make the media bigger" always enabled.
-- New `LayoutSettings::is_tiled_paper`: fabric with default paper type "tiled" was treated as tiled paper; fixed.
-- Layout.300 obsolete → `TODO_COMPLETED.md`. Rotation.4.2, 4.3 obsolete.
-- Docs: rules, SVG-DATA-ATTRIBUTES, workflow docs, `AGENT_CHECKLIST.md` §10, §12, `TEST_CHECKLIST.md`.
-- Checked: `cargo test --workspace` 665 pass; `ctest --preset debug` 8/8.
-- Open: Layout.999.4, Layout.72.8 installed-app check with the next MSI.
 
 ## Decisions to retain
 

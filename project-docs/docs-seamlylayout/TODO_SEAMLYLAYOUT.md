@@ -63,6 +63,14 @@ When the user clicks 'Horizontal', 'Vertical', or 'Both' then the piece is flipp
   - [x] Layout.800.2 Test: `ExportMenuTests::svgModeItemsHaveNoCheckBox` (3 rows). Removed the 3 `svgTextMode` tests in `PreferencesModelTests`. `ctest --preset debug` 8/8.
   - [ ] Layout.800.3 In the next MSI build: Export > SVG shows no check box next to any item. Click each item: the Save dialog opens and the file exports. Steps: `AGENT_CHECKLIST.md` section 36.
 
+### [ ] Task Layout.801 - Implement - Improve the split pieces' labels
+
+- [x] If a split piece's "split" label is wider than the "splitline" of the piece then set the width of the label to the width of the "splitline"
+  - [x] Layout.801.1 `piece_divider.rs` `fit_label_to_edge`: a part label wider than the part's longest cut edge gets a smaller font, so its width equals the edge length. Its `<text>` gets `textLength` (the edge length) and `lengthAdjust="spacingAndGlyphs"`. A label that fits keeps the 0.25 in font.
+  - [x] Layout.801.2 Decision: the Hershey font (`svg_label_text::stroke_text_width`) measures the label. It needs no system font. Its spaces and lower-case letters are wider than Arial's, so a renderer that ignores `textLength` draws a part label shorter than the edge.
+  - [x] Layout.801.3 Test: `piece_divider` `part_label_is_no_wider_than_its_cut_edge`. `cargo test --workspace` 670 pass; `ctest --preset debug` 8/8. Richmond shirt test input, roll 8 in: Collar and Collar Stand labels shrink.
+  - [ ] Layout.801.4 In the next MSI build: male_shirt, Paper Roll 8 in, Split the pieces. Each part label is no longer than its cut edge; collar part labels are exactly as long as the edge. Steps: `AGENT_CHECKLIST.md` section 37.
+
 ## VERIFY
 
 ### [ ] Task Layout.6 — Verify - DXF-ASTM grading
