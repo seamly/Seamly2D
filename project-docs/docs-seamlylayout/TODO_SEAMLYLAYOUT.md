@@ -22,8 +22,8 @@ The complexity of generating a layout on a single sheet has revealed that all la
   - New: `paper_type_loads_as_tiled_or_roll`, `is_tiled_paper_truth_table`, `trousers_wide_pieces_split_on_a_paper_roll`, `retired_sheet_settings_lay_out_as_tiled_paper`, `paperType_acceptsOnlyTiledOrRoll`, `paperTypeDropdown_offersTiledAndRoll`.
   - `cargo test --workspace`: 665 pass. `ctest --preset debug`: 8/8.
 - [ ] Layout.999.4 - In the next MSI build, check that each media type lays out jacket2 and trousers. Steps: `AGENT_CHECKLIST.md` sections 10 and 12.
-  - [ ] 'Paper > Tile' operates properly
-  - [ ] 'Paper > Tile > Custom' operates properly
+  - [x] 'Paper > Tile' operates properly
+  - [x] 'Paper > Tile > Custom' operates properly
   - [ ] 'Paper > Roll' operates properly
   - [ ] 'Fabric > Folded' operates properly
   - [ ] 'Fabric > Not Folded' operates properly
@@ -47,21 +47,18 @@ Seamly2D moves the grainline, piece label and pattern label of every size of a p
 - [ ] Layout.108.7 Update the docs: `SVG-DATA-ATTRIBUTES.md` section "Multisize grainline and label positions", and `AGENT_CHECKLIST.md` section 26.
 - [ ] Layout.108.8 In the next MSI build: open jacket2 in Seamly2D and press Layout. SeamlyLayout shows no import warning. On the Size 220 tab, Back's piece label is inside the cut line.
 
-### [ ] Task Layout.110 - Implement - Fix "| Layout.98.6 | 24 | S2D > male_shirt > Piece Properties: Flip radio buttons, Flip submenu | FAIL --> Flip selection appears in piece context menu but without a checkbox, and the submenu appears when 'Flip' is selected, but the piece isn't flipped."
+### [x] Task Layout.110 - Implement - Fix "| Layout.98.6 | 24 | S2D > male_shirt > Piece Properties: Flip radio buttons, Flip submenu | FAIL --> Flip selection appears in piece context menu but without a checkbox, and the submenu appears when 'Flip' is selected, but the piece isn't flipped."
 
 When the user clicks 'Horizontal', 'Vertical', or 'Both' then the piece is flipped in the direction(s) selected then displayed on the piece Mode canvas.
 
 - [x] Layout.110.1 Cause: the Flip choice only set the `flip` attribute for the layout; Piece Mode drew no mirror.
 - [x] Layout.110.2 `PatternPieceTool::applyFlipToGeometry` mirrors the drawn outline (seam line, cut line, allowance fill, notches, fold line) about the outline center, using `pieceFlipTransform` (`def.cpp`). Horizontal mirrors left to right, Vertical top to bottom. Labels and grainline keep their place and stay readable. Decision: the mirror is a display of the choice; the stored piece path does not change.
 - [x] Layout.110.3 Test: `TST_VPiece::PieceFlipTransformMirrorsAboutCenter`. `cl /Zs` OK on `def.cpp`, `pattern_piece_tool.cpp`, `tst_vpiece.cpp`. Not run: Qt suites (next build).
-- [ ] Layout.110.4 In Piece mode, right-click a male_shirt piece > Flip > Horizontal, Vertical, Both, None. The outline on the canvas mirrors as chosen. Note whether the Flip submenu shows a check mark or a dot next to the current choice. Steps: `AGENT_CHECKLIST.md` section 24.
+- [x] Layout.110.4 In Piece mode, right-click a male_shirt piece > Flip > Horizontal, Vertical, Both, None. The outline on the canvas mirrors as chosen. The Flip submenu shows a dot next to the current choice. Steps: `AGENT_CHECKLIST.md` section 24.S
 
 ### [ ] Task Layout.800 - Implement - Remove the checkboxes from the SVG export submenu
 
-- [x] Remove the 'Export > SVG' submenu checkboxes. The checkboxes aren't operating properly; the selected submenu option is highlighted and exports the file. The checkboxes don't add value so remove them; remove any code and comments that are obsoleted during this task.
-  - [x] Layout.800.1 `ExportMenu.qml`: the three SVG text mode items have no check box. Removed: `lastSvgTextMode` (`ExportMenu.qml`, `TopMenuBar.qml`, `Main.qml`), `PreferencesModel::svgTextMode`, `isSvgTextMode`, `saveSvgTextMode`. SeamlyLayout no longer reads or writes the INI key `svg_text_mode`.
-  - [x] Layout.800.2 Test: `ExportMenuTests::svgModeItemsHaveNoCheckBox` (3 rows). Removed the 3 `svgTextMode` tests in `PreferencesModelTests`. `ctest --preset debug` 8/8.
-  - [ ] Layout.800.3 In the next MSI build: Export > SVG shows no check box next to any item. Click each item: the Save dialog opens and the file exports. Steps: `AGENT_CHECKLIST.md` section 36.
+- [ ] Remove the 'Export > SVG' submenu checkboxes. The checkboxes aren't operating properly; the selected submenu option is highlighted and exports the file. The checkboxes don't add value so remove them; remove any code and comments that are obsoleted during this task.
 
 ### [ ] Task Layout.801 - Implement - Improve the split pieces' labels
 
@@ -70,6 +67,10 @@ When the user clicks 'Horizontal', 'Vertical', or 'Both' then the piece is flipp
   - [x] Layout.801.2 Decision: the Hershey font (`svg_label_text::stroke_text_width`) measures the label. It needs no system font. Its spaces and lower-case letters are wider than Arial's, so a renderer that ignores `textLength` draws a part label shorter than the edge.
   - [x] Layout.801.3 Test: `piece_divider` `part_label_is_no_wider_than_its_cut_edge`. `cargo test --workspace` 670 pass; `ctest --preset debug` 8/8. Richmond shirt test input, roll 8 in: Collar and Collar Stand labels shrink.
   - [ ] Layout.801.4 In the next MSI build: male_shirt, Paper Roll 8 in, Split the pieces. Each part label is no longer than its cut edge; collar part labels are exactly as long as the edge. Steps: `AGENT_CHECKLIST.md` section 37.
+
+### [ ] Task Layout.802 - Implement - Fix test for piece too wide.
+
+- [ ] If a piece is too wide to fit on the media, and if Layout Mode is Any then check if the piece could fit if rotated 90degrees; then if the piece doesn't fit then display the message that begins with "These pieces do not fit the media inside it's margins", else proceeed with the layout processing.
 
 ## VERIFY
 
