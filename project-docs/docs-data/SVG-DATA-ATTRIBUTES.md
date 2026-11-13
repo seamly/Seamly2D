@@ -334,7 +334,9 @@ When a piece of an individual pattern is wider or longer than the media, the use
 - `data-turn-points`: kept vertices keep their flag; new vertices on a cut line are turn points.
 - Notches, `piece_label`, `pattern_label`: whole, on the part that holds them.
 - A part without a grainline gets a new vertical one when the piece had one.
-- New `piece_label` per part: `<name> part <i> of <n>, joins <j>`.
+- New `piece_label` per part: `<name> part <i> of <n>, joins <j>`, along the part's longest cut edge, 0.25 in font.
+  A label wider than that edge gets a smaller font, `textLength` equal to the edge length, and `lengthAdjust="spacingAndGlyphs"`.
+  The Hershey (single-stroke) font measures the label width.
 - 2 match notches per shared cut edge, in the part's `notch` group: `data-notch-type` `slit`, `data-seam-allowances` `12.70` (6.35 mm deep).
 
 ## SeamlyLayout SVG export — label text modes
