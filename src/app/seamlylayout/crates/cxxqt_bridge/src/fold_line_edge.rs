@@ -26,7 +26,7 @@
 // The fold line is the first path of the piece's `fold_line` group
 // (`svg_dom::fold_line_d`): the fold line out to the cut line, not the arrow
 // line or the label inside the group. A Nested piece-set uses the fold line its
-// sizes share: `svg_dom::center_piece_sets` stacks them on their fold line start.
+// sizes share: `svg_dom::center_piece_sets` stacks them on the lower end of their fold line.
 //
 // Not pinned: a piece-set whose sizes do not share one fold line, a fold line
 // without length, and an outline on both sides of its fold line. Each gets a
@@ -174,8 +174,8 @@ fn fold_line_ends(piece: &Element) -> Option<(Point, Point)> {
 } // fn fold_line_ends
 
 // @brief Fold line of a Nested piece-set: the largest size's, when every size has one on the same line.
-// @details `svg_dom::center_piece_sets` puts the largest size first and stacks the sizes on their fold
-//          line start, so the fold lines of the sizes lie on one line.
+// @details `svg_dom::center_piece_sets` puts the largest size first and stacks the sizes on the lower
+//          end of their fold line, so the fold lines of the sizes lie on one line.
 // @return Ok(None) when a size has no fold line; Err with the reason when the sizes' fold lines lie apart.
 fn piece_set_fold_line_ends(set: &Element) -> Result<Option<(Point, Point)>, &'static str> {
     let mut first: Option<(Point, Point)> = None;
@@ -443,8 +443,8 @@ mod tests {
         assert_eq!(plan.warnings, vec!["Back: the outline lies on both sides of the fold line".to_string()]);
     } // fold_line_off_the_edge_is_reported
 
-    // @brief Back as a Nested piece-set of two sizes, stacked on their fold line start: each size's fold line
-    //        at x `fold_x`, from y 200 up to y `top`.
+    // @brief Back as a Nested piece-set of two sizes, stacked on the lower end of their fold line: each
+    //        size's fold line at x `fold_x`, from y 200 up to y `top`.
     fn nested_svg(fold_x: [u32; 2]) -> String {
         let size = |n: usize, top: u32| {
             format!(r#"<g id="piece_Back_s{n}" data-type="piece" data-name="Back" data-on-fold="true">
@@ -475,7 +475,8 @@ mod tests {
         assert_eq!(plan.warnings, vec!["Back: the sizes do not share one fold line".to_string()]);
     } // piece_set_on_a_shared_fold_line_is_pinned
 
-    // @brief Sizes stacked on the start of a fold line across the grain share that fold line; the set turns once.
+    // @brief Sizes stacked on the left end of a fold line across the grain share that fold line; the set
+    //        turns once.
     #[test]
     fn piece_set_on_a_shared_fold_line_across_the_grain_is_pinned() {
         let size = |n: usize, right: u32| {

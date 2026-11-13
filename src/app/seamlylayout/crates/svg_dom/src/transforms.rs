@@ -14,6 +14,7 @@
 use geometry::{Matrix2D, Path, PathSegment, Point};
 use xmltree::{Element, XMLNode};
 
+use crate::stack_point::{stack_points, GRAIN_UP};
 use crate::Document;
 
 // ---------------------------------------------------------------------------
@@ -679,7 +680,21 @@ pub fn verticalize_dom(doc: &mut Document) {
 fn vertical_rotation(elem: &Element) -> Option<String> {
     // Locate the grainline angle (θ in degrees from the X axis).
     let theta_deg = grainline_angle(elem)?; // no grainline — keep drafted orientation
+    let angle_deg = vertical_rotation_angle(theta_deg)?; // already vertical
 
+    // The bounding-box centre is the rotation pivot.
+    let (cx, cy) = bbox_centre(elem)?; // no geometry — cannot compute centre
+
+    // SVG rotate(angle, cx, cy) is equivalent to
+    //   translate(cx,cy) rotate(angle) translate(-cx,-cy),
+    // matching the matrix chain in the original apply_rotation_angle_to_piece().
+    Some(format!("rotate({},{},{})", fmt_f64(angle_deg), fmt_f32(cx), fmt_f32(cy)))
+} // fn vertical_rotation
+
+/// @brief Rotation that turns a grainline at θ to point up: −90° − θ, normalised to [−180, 180].
+/// @param theta_deg  Grainline angle in degrees from the X axis (SVG, clockwise).
+/// @return Rotation in degrees, or `None` below 0.1°: the grainline is vertical already.
+fn vertical_rotation_angle(theta_deg: f64) -> Option<f64> {
     // Compute rotation needed to make the grainline point up (-90° in SVG, Y axis down).
     let mut angle_deg = -90.0 - theta_deg;
     // Normalise to [-180, 180] to choose the shortest rotation.
@@ -694,15 +709,22 @@ fn vertical_rotation(elem: &Element) -> Option<String> {
     if angle_deg.abs() < 0.1 {
         return None; // already vertical — no rotation needed
     } // if negligible rotation
+    Some(angle_deg)
+} // fn vertical_rotation_angle
 
-    // The bounding-box centre is the rotation pivot.
-    let (cx, cy) = bbox_centre(elem)?; // no geometry — cannot compute centre
-
-    // SVG rotate(angle, cx, cy) is equivalent to
-    //   translate(cx,cy) rotate(angle) translate(-cx,-cy),
-    // matching the matrix chain in the original apply_rotation_angle_to_piece().
-    Some(format!("rotate({},{},{})", fmt_f64(angle_deg), fmt_f32(cx), fmt_f32(cy)))
-} // fn vertical_rotation
+/// @brief Grain direction of a piece as a unit vector in the piece's own frame (SVG, Y axis down).
+/// @details The direction that `verticalize_dom` turns to point up. A piece that it does not turn has
+///          `GRAIN_UP`: no grain direction, or a grainline within 0.1° of vertical.
+/// @param piece  Piece `<g>`, before `verticalize_dom`.
+pub fn grain_direction(piece: &Element) -> (f64, f64) {
+    match grainline_angle(piece) {
+        Some(theta_deg) if vertical_rotation_angle(theta_deg).is_some() => {
+            let theta = theta_deg.to_radians();
+            (theta.cos(), theta.sin()) // verticalize_dom turns this direction up
+        } // Some(θ) not vertical
+        _ => GRAIN_UP, // not turned
+    } // match grainline angle
+} // fn grain_direction
 
 /// @brief Prepend a transform to an element's `transform` attribute.
 /// @details Prepending makes the new transform the outermost one, so it applies
@@ -732,14 +754,20 @@ pub fn is_piece_set(elem: &Element) -> bool {
 /// @param piece  Piece `<g>`.
 /// @return `None` when the piece has no fold line.
 pub fn fold_line_d(piece: &Element) -> Option<&str> {
+    own_first_path_d(fold_line_group(piece)?)
+} // fn fold_line_d
+
+/// @brief A piece's `fold_line` group: found by `data-type`, or by an id that starts with `fold_line`.
+/// @param piece  Piece `<g>`.
+/// @return `None` when the piece has no fold line.
+pub(crate) fn fold_line_group(piece: &Element) -> Option<&Element> {
     let is_fold_line = |e: &Element| {
         e.name == "g"
             && (e.attributes.get("data-type").is_some_and(|t| t == "fold_line")
                 || e.attributes.get("id").is_some_and(|id| id.to_lowercase().starts_with("fold_line")))
     }; // is_fold_line
-    let fold = piece.children.iter().filter_map(|n| n.as_element()).find(|e| is_fold_line(e))?;
-    own_first_path_d(fold)
-} // fn fold_line_d
+    piece.children.iter().filter_map(|n| n.as_element()).find(|e| is_fold_line(e))
+} // fn fold_line_group
 
 /// @brief `d` of the first `<path>` in `elem`'s subtree, outside child groups with their own `data-type`.
 fn own_first_path_d(elem: &Element) -> Option<&str> {
@@ -753,16 +781,6 @@ fn own_first_path_d(elem: &Element) -> Option<&str> {
         .find_map(own_first_path_d)
 } // fn own_first_path_d
 
-/// @brief First point of a piece's fold line (`fold_line_d`).
-/// @return `None` when the piece has no fold line, or its path does not start with a move.
-fn fold_line_start(piece: &Element) -> Option<(f32, f32)> {
-    let path = Path::parse_path_attribute(fold_line_d(piece)?).ok()?;
-    match path.segments.first()? {
-        PathSegment::MoveTo(p) => Some((p.x, p.y)), // the fold line start node
-        _ => None,                                  // no start point
-    } // match first segment
-} // fn fold_line_start
-
 // ---------------------------------------------------------------------------
 // Public API — center_piece_sets
 // ---------------------------------------------------------------------------
@@ -774,9 +792,8 @@ fn fold_line_start(piece: &Element) -> Option<(f32, f32)> {
 ///             drawn last (on top) and the outline search finds the largest
 ///             size's outline first.
 ///          3. Prepends `translate(dx,dy)` to every other member so its
-///             stack point matches the largest member's stack point. When every
-///             size has a fold line, the stack point is the fold line start
-///             (`fold_line_start`), so the fold lines line up. Otherwise it is the
+///             stack point (`stack_points`) matches the largest member's stack
+///             point: the lower fold line end, else a corner, else the outline
 ///             bounding-box centre.
 ///          Call after the grainlines are vertical and flattened; call
 ///          `flatten_dom` afterwards to bake the translations.
@@ -796,40 +813,36 @@ pub fn center_piece_sets(doc: &mut Document) -> usize {
         } // if not piece-set
         count += 1;
 
-        // Split the children: measurable member groups, and everything else.
+        // Stack points in document order, as the import and Seamly2D compute them. Every grainline points up.
+        let mut points = {
+            let groups: Vec<(&Element, (f64, f64))> =
+                set.children.iter().filter_map(|n| n.as_element()).filter(|e| e.name == "g").map(|e| (e, GRAIN_UP)).collect();
+            stack_points(&groups).into_iter()
+        }; // points
+
+        // Split the children: member groups, and everything else.
         // Members without geometry sort last and do not move.
         let children = std::mem::take(&mut set.children);
-        let mut members: Vec<(f32, Option<(f32, f32)>, Option<(f32, f32)>, XMLNode)> = Vec::new();
+        let mut members: Vec<(f32, Option<Point>, XMLNode)> = Vec::new();
         let mut others: Vec<XMLNode> = Vec::new();
         for node in children {
-            let measured = match &node {
-                XMLNode::Element(e) if e.name == "g" => Some((outline_area_centre(e), fold_line_start(e))),
-                _ => None, // text, comments, non-group elements stay in front
-            }; // match node
-            match measured {
-                Some((Some((area, centre)), fold)) => members.push((area, Some(centre), fold, node)),
-                Some((None, _)) => members.push((-1.0, None, None, node)),
-                None => others.push(node),
-            } // match measured
+            match &node {
+                XMLNode::Element(e) if e.name == "g" => {
+                    let area = outline_area(e).unwrap_or(-1.0);
+                    members.push((area, points.next().flatten(), node));
+                } // member group
+                _ => others.push(node), // text, comments, non-group elements stay in front
+            } // match node
         } // for node
 
         // Largest area first; the stable sort keeps equal-area members in size order.
         members.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
+        let anchor = members.first().and_then(|m| m.1);
 
-        // Stack point of each member: the fold line start when every measurable size has a fold line, so
-        // the fold lines line up; else the outline centre.
-        let on_fold = members.iter().filter(|m| m.1.is_some()).all(|m| m.2.is_some());
-        let stack_point = |m: &(f32, Option<(f32, f32)>, Option<(f32, f32)>, XMLNode)| {
-            if on_fold { m.2 } else { m.1 }
-        }; // stack_point
-        let anchor = members.first().and_then(stack_point);
-
-        for member in members {
-            let point = stack_point(&member);
-            let mut node = member.3;
-            if let (Some((ax, ay)), Some((cx, cy)), XMLNode::Element(ref mut e)) = (anchor, point, &mut node) {
-                let dx = ax - cx;
-                let dy = ay - cy;
+        for (_, point, mut node) in members {
+            if let (Some(a), Some(p), XMLNode::Element(ref mut e)) = (anchor, point, &mut node) {
+                let dx = a.x - p.x;
+                let dy = a.y - p.y;
                 if dx.abs() > TOLERANCE || dy.abs() > TOLERANCE {
                     prepend_transform(e, &format!("translate({},{})", fmt_f32(dx), fmt_f32(dy)));
                 } // if not centred
@@ -843,13 +856,13 @@ pub fn center_piece_sets(doc: &mut Document) -> usize {
     count
 } // fn center_piece_sets
 
-/// @brief AABB area and centre of a piece outline: its `cutline` groups, else its `seamline`
-///        groups, else every point of the `<g>`.
-/// @details A grainline or label that sticks out of the outline does not move the centre, so
-///          sizes whose annotations share an offset from the outline centre stack them exactly.
+/// @brief AABB area of a piece outline: its `cutline` groups, else its `seamline` groups, else
+///        every point of the `<g>`.
+/// @details Orders the sizes of a piece-set, largest first. A grainline or label that sticks out
+///          of the outline does not count.
 /// @param member  Piece `<g>` of a piece-set.
-/// @return (area, (cx, cy)), or `None` if no geometry was found.
-fn outline_area_centre(member: &Element) -> Option<(f32, (f32, f32))> {
+/// @return Area, or `None` if no geometry was found.
+fn outline_area(member: &Element) -> Option<f32> {
     let outline_of = |data_type: &str| -> Vec<&Element> {
         member.children.iter()
             .filter_map(|n| match n { XMLNode::Element(e) => Some(e), _ => None })
@@ -861,28 +874,13 @@ fn outline_area_centre(member: &Element) -> Option<(f32, (f32, f32))> {
         outline = outline_of("seamline");
     } // if no cut line
     if outline.is_empty() {
-        return bbox_area_centre(member); // untagged member: every point
+        outline = vec![member]; // untagged member: every point
     } // if no outline
 
     let mut points: Vec<Point> = Vec::new();
     for group in outline {
         collect_all_points(group, &mut points);
     } // for each outline group
-    points_area_centre(&points)
-} // fn outline_area_centre
-
-/// @brief Compute the AABB area and centre of a `<g>`.
-/// @param group  `<g>` element to measure.
-/// @return (area, (cx, cy)), or `None` if no geometry was found.
-fn bbox_area_centre(group: &Element) -> Option<(f32, (f32, f32))> {
-    let mut points: Vec<Point> = Vec::new();
-    collect_all_points(group, &mut points);
-    points_area_centre(&points)
-} // fn bbox_area_centre
-
-/// @brief AABB area and centre of a point set.
-/// @return (area, (cx, cy)), or `None` for no points.
-fn points_area_centre(points: &[Point]) -> Option<(f32, (f32, f32))> {
     if points.is_empty() {
         return None; // no geometry
     } // if no points
@@ -891,9 +889,8 @@ fn points_area_centre(points: &[Point]) -> Option<(f32, (f32, f32))> {
     let max_x = points.iter().map(|p| p.x).fold(f32::NEG_INFINITY, f32::max);
     let min_y = points.iter().map(|p| p.y).fold(f32::INFINITY, f32::min);
     let max_y = points.iter().map(|p| p.y).fold(f32::NEG_INFINITY, f32::max);
-
-    Some(((max_x - min_x) * (max_y - min_y), ((min_x + max_x) / 2.0, (min_y + max_y) / 2.0)))
-} // fn points_area_centre
+    Some((max_x - min_x) * (max_y - min_y))
+} // fn outline_area
 
 // ---------------------------------------------------------------------------
 // Public API — translate_dom
@@ -1928,7 +1925,7 @@ mod tests {
         let XMLNode::Element(small) = &set.children.iter().filter(|n| matches!(n, XMLNode::Element(_))).nth(1).unwrap().clone() else {
             unreachable!()
         };
-        let (_, (cx, cy)) = bbox_area_centre(small).expect("small size has geometry");
+        let (cx, cy) = bbox_centre(small).expect("small size has geometry");
         assert!((cx - 120.0).abs() < 1e-3 && (cy - 120.0).abs() < 1e-3, "small size centre ({cx},{cy})");
     } // center_piece_sets_stacks_on_largest
 
@@ -1950,29 +1947,42 @@ mod tests {
   </g>
 </svg>"#;
 
-    // @brief Sizes that all have a fold line stack on its start point, not on the outline centre: the
-    //        small size moves from fold start (0,60) to (100,180).
+    // @brief Sizes that all have a fold line stack on its lower end, not on the outline centre: the
+    //        small size moves from (0,60) to (100,180), whichever way the fold lines run.
     #[test]
-    fn center_piece_sets_stacks_fold_lines_on_their_start() {
+    fn center_piece_sets_stacks_fold_lines_on_their_lower_end() {
         let mut doc = Document::parse(FOLD_PIECE_SET).unwrap();
         assert_eq!(center_piece_sets(&mut doc), 1);
 
         assert_eq!(piece_set_member_ids(&doc), vec!["piece_Back_s36", "piece_Back_s34"]);
         assert!(doc.get_attr_by_id("piece_Back_s36", "transform").is_none(), "the largest size must not move");
         assert_eq!(doc.get_attr_by_id("piece_Back_s34", "transform"), Some("translate(100,120)"));
-    } // center_piece_sets_stacks_fold_lines_on_their_start
 
-    // @brief A size without a fold line puts the whole set back on the outline centre.
+        // The fold lines run down: the stack point is their end, not their start.
+        let down = FOLD_PIECE_SET.replace("M 0,60 L 0,0", "M 0,0 L 0,60").replace("M 100,180 L 100,100", "M 100,100 L 100,180");
+        let mut doc = Document::parse(&down).unwrap();
+        center_piece_sets(&mut doc);
+        assert_eq!(doc.get_attr_by_id("piece_Back_s34", "transform"), Some("translate(100,120)"));
+    } // center_piece_sets_stacks_fold_lines_on_their_lower_end
+
+    // @brief A size without a fold line puts the whole set on a corner, or with no turn points on the
+    //        outline centre.
     #[test]
-    fn center_piece_sets_centres_when_a_size_has_no_fold_line() {
+    fn center_piece_sets_without_a_fold_line_uses_a_corner_or_the_centre() {
         let mixed = FOLD_PIECE_SET.replace(
             r#"<g id="fold_line_Back_s36" data-type="fold_line"><path d="M 100,180 L 100,100"/></g>"#,
             "",
         );
         let mut doc = Document::parse(&mixed).unwrap();
         center_piece_sets(&mut doc);
-        assert_eq!(doc.get_attr_by_id("piece_Back_s34", "transform"), Some("translate(105,110)"));
-    } // center_piece_sets_centres_when_a_size_has_no_fold_line
+        assert_eq!(doc.get_attr_by_id("piece_Back_s34", "transform"), Some("translate(105,110)"), "centre");
+
+        // Turn points at the rectangle corners: the lower left corners stack, (0,60) on (100,180).
+        let cornered = mixed.replace(r#"<g data-type="cutline">"#, r#"<g data-type="cutline" data-turn-points="0 1 2 3">"#);
+        let mut doc = Document::parse(&cornered).unwrap();
+        center_piece_sets(&mut doc);
+        assert_eq!(doc.get_attr_by_id("piece_Back_s34", "transform"), Some("translate(100,120)"), "corner");
+    } // center_piece_sets_without_a_fold_line_uses_a_corner_or_the_centre
 
     // @brief fold_line_d reads the fold line, not a tagged part inside its group.
     #[test]

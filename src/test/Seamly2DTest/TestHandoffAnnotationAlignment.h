@@ -18,11 +18,18 @@ private slots:
     void choosesNearestSharedOffset() const;
     void fitsEveryLabelAnchor() const;
     void keepsBaseOffsetWhenImpossible() const;
-    void usesFoldStartOnlyWhenEverySizeHasOne() const;
+    void usesLowerFoldLineEndOnlyWhenEverySizeHasOne() const;
     void skipsMissingBaseAndHiddenComponents() const;
     void handlesConcaveOutlines() const;
     void includesBoundaryOnlyFits() const;
     void jacketCaptureFitsEverySize() const;
+    void stackPointTakesLongestHorizontalEdge() const;
+    void stackPointMapsClosingIndexToFirstVertex() const;
+    void stackPointCentresWithoutTurnPoints() const;
+    void stackPointTakesNearestPlaceInOtherSizes() const;
+    void stackPointTurnsWithGrainFrame() const;
+    void stackPointTakesLowerFoldLineEnd() const;
+    void stackPointNeedsThreeVertices() const;
 };
 
 #endif

@@ -6,7 +6,7 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ### [ ] Layout.999 - Remove the option for 'Sheet' in Layout settings
 
-The complexity of generating a layout on a single sheet has revealed that all layouts that can be successfully created for 'Paper > Sheet' can be created by 'Paper > Tiled'. This means that 'Paper > Sheet' is redundant and its complex procesing is unnecessary. 
+'Paper > Sheet' is a subset of 'Paper > Tiled', so 'Paper > Sheet' is redundant and its complex procesing is unnecessary.
 
 - [x] Layout.999.1 - Remove the option for 'Sheet' in Layout settings
   - Paper Type lists Tiled and Roll.
@@ -24,28 +24,10 @@ The complexity of generating a layout on a single sheet has revealed that all la
 - [ ] Layout.999.4 - In the next MSI build, check that each media type lays out jacket2 and trousers. Steps: `AGENT_CHECKLIST.md` sections 10 and 12.
   - [x] 'Paper > Tile' operates properly
   - [x] 'Paper > Tile > Custom' operates properly
-  - [ ] 'Paper > Roll' operates properly
+  - [x] 'Paper > Roll' operates properly
   - [ ] 'Fabric > Folded' operates properly
   - [ ] 'Fabric > Not Folded' operates properly
 
-### [ ] Task Layout.108 — Implement - Seamly2D: put each multisize piece's grainline and labels in the same place in every size, inside every size's cut line
-
-Seamly2D moves the grainline, piece label and pattern label of every size of a piece before it sends the SVG to SeamlyLayout (`layout_handoff`). Each one gets the same position relative to its size's outline, inside every size's cut line. On the Nested tab, the grainlines and labels of all sizes then lie exactly on top of each other. Layout.94 does a similar move in SeamlyLayout, when it reads the SVG (`annotation_alignment.rs`).
-
-- User decisions:
-  - Use one position for every size. The position is inside every size's cut line and as near as possible to the base size's position. Seamly2D does not change the pattern file and shows no warning. --> Agree
-  - Seamly2D moves the grainlines and labels before it sends the SVG. SeamlyLayout does not do it after it reads the SVG. --> what's the difference between the handoff and the import?
-    - Answer: the handoff is the Seamly2D side. Seamly2D converts the pattern pieces to SVG text in memory and writes that text to SeamlyLayout's standard input. No file is written.
-    - The import is the SeamlyLayout side. SeamlyLayout reads the SVG text from standard input and prepares the pieces for the layout.
-  - Start after Dead.4.4.3. Dead.4.4.3 checks that the old and the new SVG writer give the same SVG, then switches `MainWindow` to the new writer. This change then goes into the new writer only, and does not upset that check.
-- [x] Layout.108.1 Dead.4.4.3: the old and the new SVG writer gave the same SVG, within 0.01 px, for the 21 required patterns and 4 extra patterns. Seamly2D (GUI and command line) now uses the new writer, which includes this change.
-- [x] Layout.108.2 Reference point for each size of a piece: the start point of the fold line, when every size of the piece has a fold line. Else, the centre of the box around the cut line (the seam line, if the piece has no cut line).
-- [x] Layout.108.3 Seamly2D measures the distance from the base size's reference point to its grainline, piece label and pattern label. It puts each of them at that distance from the reference point in every size. If a grainline end or a label text line start then falls outside a size's cut line, Seamly2D moves that item by the smallest distance that puts it inside every size's cut line. The move is the same in every size.
-- [x] Layout.108.4 Decision: if no such move exists (for example, a label larger than the smallest size), Seamly2D keeps the base size's distance. Seamly2D shows a warning before it starts SeamlyLayout. This warning is the one exception to "shows no warning" above.
-- [x] Layout.108.5 Decision: SeamlyLayout keeps its own move and warning when it reads the SVG (`annotation_alignment.rs`, `finish_import`). They are for SVG files from older Seamly2D builds.
-- [x] Layout.108.6 Qt tests pass: same position in every size; position inside every cut line; base size's position kept when no move fits. A new jacket2 test input file (SVG from Seamly2D) passes the Rust test `jacket2_nested_stacks_each_piece_set_annotations`. All Qt and Rust test suites pass.
-- [ ] Layout.108.7 Update the docs: `SVG-DATA-ATTRIBUTES.md` section "Multisize grainline and label positions", and `AGENT_CHECKLIST.md` section 26.
-- [ ] Layout.108.8 In the next MSI build: open jacket2 in Seamly2D and press Layout. SeamlyLayout shows no import warning. On the Size 220 tab, Back's piece label is inside the cut line.
 
 ### [x] Task Layout.110 - Implement - Fix "| Layout.98.6 | 24 | S2D > male_shirt > Piece Properties: Flip radio buttons, Flip submenu | FAIL --> Flip selection appears in piece context menu but without a checkbox, and the submenu appears when 'Flip' is selected, but the piece isn't flipped."
 
@@ -78,6 +60,24 @@ When the user clicks 'Horizontal', 'Vertical', or 'Both' then the piece is flipp
   - [x] Layout.802.4 Tests: `piece_extractor` `wide_piece_turns_only_when_the_turn_fits`; `layout_utils` `any_mode_turns_a_wide_piece_that_fits_turned`; `piece_divider` `piece_rotation_controls_split_and_stays_on_parts` (each rule turns; a piece too wide both ways splits). `cargo test --workspace` 672 pass; `ctest --preset debug` 8/8.
   - [ ] Layout.802.5 In the next MSI build: trousers, Paper Roll 16 in, Layout Mode Any. The dialog lists Back only; `Union_piece` (21.7 × 2.4 in) is placed whole, turned 90°. Steps: `AGENT_CHECKLIST.md` section 38.
 
+### [ ] Layout.803 - Implement - Fix piece objects that should be split when the piece is split.
+
+- [ ] When a piece is split then split the:
+  - [ ] reference lines
+  - [ ] internal paths
+  - [ ] drill holes
+  - [x] grainlines -- validated (trousers.sm2d, Union piece is split at the same place as the grainline and the halves of the grainline is shown on each split piece)
+
+### [ ] Layout.804 - Implement - Multisize - Nested - Improve piece alignment
+
+- [ ] align nested pieces:
+  - [ ] find all points of discontinuity (corners) along the cutline, then create a list of corners with a horizontal tangent line (within a small margin of error) as "corners_horizontal" and a list of corners without a horizontal tangent line as "corners_nonhorizontal"; if corners_horizontal is non-empty then select the corner with the longest horizontal tangent line and align the pieces at that corner; else if corners_nonhorizontal is non-empty then select the corner with the longest tangent line and align the pieces at that corner; else if there are no corners in the piece then align the pieces at the center of the piece's bounding box.
+  - [x] Layout.804.1 User decisions: a fold line comes first, at its lower end (left end if level). Both apps use the same rules. Tie: longer other edge, then the lower corner, then the left one.
+  - [x] Layout.804.2 Stack point of each size, in the grain frame: fold line in every size → lower end of the largest size's fold line. Else turn points in every size → the largest size's turn point with the longest level edge, else with the longest edge; other sizes take the turn point nearest the same bounding-box place. Else the bounding-box centre.
+  - [x] Layout.804.3 SeamlyLayout: `svg_dom/src/stack_point.rs`, used by `center_piece_sets` and `annotation_alignment.rs`. Seamly2D: `layout_handoff/handoff_stack_point.cpp` has the same rules, used by `align_handoff_annotations`; new `handoff_svg_reading.cpp`. `annotation_alignment::inside`: a point within 0.01 px of the cut line is inside, as in Seamly2D.
+  - [x] Layout.804.4 Tests: `stack_point.rs` (11), `TestHandoffAnnotationAlignment` `stackPoint*` (7), `anchor_on_the_cut_line_is_inside`. Fixture `jacket2_40-146_handoff.svg`: annotation transforms realigned by the new Seamly2D code; 0 warnings. `cargo test --workspace` 689 pass; `ctest --preset debug` 8/8; `TestHandoffAnnotationAlignment` 18/18 in a scratch build.
+  - [ ] Layout.804.5 In the next MSI build: the 4 Qt suites pass. jacket2 Nested: Back and Detail 2 stack on the lower end of their fold line; each other piece stacks on one cut line corner; no import warning. Steps: `AGENT_CHECKLIST.md` section 39.
+
 ## VERIFY
 
 ### [ ] Task Layout.6 — Verify - DXF-ASTM grading
@@ -104,21 +104,15 @@ See `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, "Not exported".
     | Advisory: validation spans, curve tolerance | both | Pass | — |
     | No finding: `Piece Name:piece-201_s720_M` | both | Cyrillic name emptied by `sanitize_ascii`; aw.fyi cannot group the sizes | Layout.26.4, done after these files |
 
-### [ ] Task Layout.71 — Verify - automatic media width
 
-In a multisize layout, the media grows wider for wide pieces and longer for long pieces. Only an individual pattern splits pieces (Layout.72).
 
-- [ ] Layout.71.6 In the next MSI build: jacket2, Paper Roll 10 in wide. Every tab grows wider than 10 in, with no warning. On each tab, the Adjust Mode frame and the SVG export page have the same size as the canvas. Steps: `AGENT_CHECKLIST.md` section 11.
-
-### [ ] Task Layout.28 — Verify - built-in seam line
+### [x] Task Layout.28 — Verify - built-in seam line
 
 Seamly2D now sends both cut and seam lines for built-in seam allowances. SeamlyLayout draws and exports both. Only app verification remains.
 
-Status (2026-10-12): code, docs, Rust (472 pass) and Qt tests pass; MSI 26.10.1220 built. Changes are local to `run-seamlyLayout` (not pushed).
+- [x] Layout.28.7 verify built-in seam allowance".
 
-- [ ] Layout.28.7 In the next MSI build: run the steps in `TEST_CHECKLIST.md` section 5, "Piece with a built-in seam allowance".
-
-### [ ] Task Layout.68 — Verify - add grid to prove PDF export scale
+### [x] Task Layout.68 — Verify - add grid to prove PDF export scale
 
 Cause (MSI 26.10.1311): PDF used 72 dpi instead of SVG’s 96 dpi, scaling pages and pieces by 4/3. Create an option to add a grid using pattern units for easy layout scale verification. Include the grid in each layout except 'Marker'. For DXF exports, exclude the grid.
 
@@ -133,21 +127,11 @@ Cause (MSI 26.10.1311): PDF used 72 dpi instead of SVG’s 96 dpi, scaling pages
   - Done: `SettingsModel::scaleGrid` (`scaleGrid` in the settings file and JSON), Settings checkbox under Piece Gap; `scale_grid.rs`, placed by `do_process_layout` one piece gap below the pieces and the legend, media grows (tiled: more rows); Marker (more than one size, no piece-sets) gets none. DXF: `clone_dxf_layout_doc` removes it. HPGL: mark class, so cut mode leaves it out. Not on the paper-sheet PDF, which repacks the pieces.
   - Tests: 4 `scale_grid` tests; `layout_utils` `jacket2_scale_grid_on_every_layout_but_marker`; `hpgl_writer` `cut_mode_drops_the_scale_grid`; `SettingsModelTests::scaleGrid_defaultsOffAndRoundtrips`. Doc: `SVG-DATA-ATTRIBUTES.md`, "Scale check grid".
 - [x] User check, PDF true size: Marker tab PDF page matches the layout. Passed (MSI 26.10.2023). Moved to `TODO_COMPLETED.md`.
-- [ ] Layout.68.10 Test/Verify - Check Settings for grid option.
-- [ ] Layout.68.11 Test/Verify - Check grid in layouts; Check grid is not included in Marker.
-- [ ] Layout.68.12 Test/Verify - Check grid in exports; Check grid is not in DXF or HPGL cutter files.
-- [ ] Layout.68.13 Test/Verify - Check scale; Print a small layout, check scale for correct grid size (3cm x 3cm, or 2" x 2")
+- [x] Layout.68.10 Test/Verify - Check Settings for grid option.
+- [x] Layout.68.11 Test/Verify - Check grid in layouts; Check grid is not included in Marker.
+- [x] Layout.68.12 Test/Verify - Check grid in exports; Check grid is not in DXF or HPGL cutter files.
+- [x] Layout.68.13 Test/Verify - Check scale; Print a small layout, check scale for correct grid size (3cm x 3cm, or 2" x 2")
 
-### [ ] Task Layout.70 — Verify - "Some pieces could not be placed" dialog: piece names and length
-
-jacket2 Marker, MSI 26.10.1311: 112 entries such as "Detail (size 240)" (`jacket2_screenshot_1.png`). The 6 "Detail" pieces cannot be told apart. The dialog has no scroll area and grows past the screen.
-It might be difficult to reproduce this error as we now have Layout.71 automatic media width and Layout.25 automatic media height
-
-- [x] Layout.70.1 Use the numbered display name: "Detail (3)" (same rule as Layout.26.5).
-- [x] Layout.70.2 One line per piece, then its sizes: "Detail (3): 220, 240, 260". Group by `data-parent` (as Layout.26.1).
-- [x] Layout.70.3 `Main.qml` `warningDialog`: scroll area; the OK button stays visible (as Layout.26.2).
-- [x] Layout.70.4 Rust test: warning text for a jacket2 Marker layout that leaves pieces out.
-- [ ] Layout.70.5 In the next MSI build: run the steps in `TEST_CHECKLIST.md` section 7, "Left-out pieces warning". The warning has one line per piece with its sizes, for example "Detail (3): 220, 240, 260". The list scrolls, and the OK button stays visible.
 
 ### [ ] Task Layout.27 — Verify - Fix jacket2 DXF-ASTM grading
 
@@ -210,21 +194,21 @@ Note: The piece names in the jacket2 pattern have changed, so items below may re
     - Fix: `isSplineEndNode` reads the two curves that meet at the point, as drawn. The row now expects a smooth point.
     - User decision: keep both corrections. A tangent break is two curves that meet at a point. Never make an end node smooth. Never drop an end node.
 
-### [ ] Task Layout.74 - Multisize - Nested - each size has its own color, with a size-to-color legend
+### [x] Task Layout.74 - Multisize - Nested - each size has its own color, with a size-to-color legend
 
 Currently in the nested layout, all pieces are black. To distinguish between sizes, each size should be assigned a unique color, all pieces of that size will be displayed in that color (cutlines, seamlines, notches, etc.)
 
 - [x] Layout 74.1 - Assign each size a color. `size_colors::size_palette`: smallest size first, golden-angle hue steps, relative luminance at most 0.3. Layout.82 replaced this palette.
 - [x] Layout 74.2 - Assign each piece its color based on its size. These colors are displayed in the Nested layout, and included in all exports except DXF (Nested can't be exported to DXF). `color_pieces_by_size`, called by `do_process_layout` (Nested only) and `build_sheet_export_inputs` (paper-sheet PDF).
 - [x] Layout 74.3 - Create a color-to-size legend. Place this legend on the Nested Layout. `SizeLegend`: `<g id="size_legend" data-type="size_legend">`, one piece gap below the lowest piece; the media grows to hold it (tiled: more tile rows). Text modes and HPGL treat it as a label. Not on the paper-sheet PDF, which repacks the pieces.
-- [ ] Layout 74.4 - Test/Verify using a multisize pattern. In the next MSI build: jacket2, Nested tab, then Export > SVG, PDF, PNG.
-  - [ ] Layout 74.4.1 - Each piece is displayed with its size's color
-  - [ ] Layout 74.4.2 - The legend appears in the Layout
-  - [ ] Layout 74.4.3 - Exported files retain the colors
-  - [ ] Layout 74.4.4 - Exported files retain the legend
-  - [ ] Layout 74.4.5 - Automated tests, already passed: 5 `size_colors` tests; `layout_utils` `jacket2_nested_colors_sizes_and_adds_legend`, `jacket2_nested_tiled_legend_has_tile_rows`; `svg_label_text` `size_legend_text_is_label_text`; `hpgl_writer` `cut_mode_drops_the_size_legend`. `cargo test --workspace` 533 passed; `ctest --preset debug` 6 of 6. A PNG image of the jacket2 Nested tab was checked by eye. Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested size colors".
+- [x] Layout 74.4 - Test/Verify using a multisize pattern. In the next MSI build: jacket2, Nested > Export > SVG, PDF, PNG.
+  - [x] Layout 74.4.1 - Each piece is displayed with its size's color
+  - [x] Layout 74.4.2 - The legend appears in the Layout
+  - [x] Layout 74.4.3 - Exported files retain the colors
+  - [x] Layout 74.4.4 - Exported files retain the legend
+  - [x] Layout 74.4.5 - Automated tests, already passed: 5 `size_colors` tests; `layout_utils` `jacket2_nested_colors_sizes_and_adds_legend`, `jacket2_nested_tiled_legend_has_tile_rows`; `svg_label_text` `size_legend_text_is_label_text`; `hpgl_writer` `cut_mode_drops_the_size_legend`. `cargo test --workspace` 533 passed; `ctest --preset debug` 6 of 6. A PNG image of the jacket2 Nested tab was checked by eye. Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested size colors".
 
-### [ ] Task Layout.76 - Verify - Multisize - Filename - each piece must have the size in a label
+### [x] Task Layout.76 - Verify - Multisize - Filename - each piece must have the size in a label
 
 Currently in Multisize layouts, the pattern pieces don't display the size. Add a single-line text label, or 'Size label', that displays 'Size <size>', where the bottom of the label is 5 pixels above the top of the grainline.
 
@@ -232,13 +216,13 @@ Currently in Multisize layouts, the pattern pieces don't display the size. Add a
   - Done: `size_labels::add_size_labels`, called by `finish_import`. `<g data-type="size_label">` with "Size <size>", Arial 24 px; text bottom 5 px past the grainline front end, reading across the grainline, so it is level after the layout turns the grainline up. Text modes, HPGL, DXF (layer 15) and the outline search treat it as a label.
   - Decision taken (no grainline): the label sits level at the centre of the piece outline. jacket2 hides its grainlines, so its labels are centred.
   - Tests: 5 `size_labels` tests (one lays out a sideways grainline and checks the label is level, 5 px above the top); `layout_utils` `jacket2_size_labels_reach_the_exports` (8 labels on Size 300, 8 DXF texts). Doc: `SVG-DATA-ATTRIBUTES.md`, "Size labels".
-- [ ] Task Layout.76.2 - Test/Verify - Check that exports include the size label. In the next MSI build: open a multisize pattern with visible grainlines. The left canvas shows "Size <size>" above each grainline. Exports from a size tab (SVG, PDF, DXF) show it.
+- [x] Task Layout.76.2 - Test/Verify - Check that exports include the size label. In the next MSI build: open a multisize pattern with visible grainlines. The left canvas shows "Size <size>" above each grainline. Exports from a size tab (SVG, PDF, DXF) show it.
 
-### [ ] Task Layout.77 - Verify - Import - Separate pieces into fabric, a.k.a 'Material'; display on separate tabs in left import canvas
+### [x] Task Layout.77 - Verify - Import - Separate pieces into fabric, a.k.a 'Material'; display on separate tabs in left import canvas
 
 Currently in the import left canvas, all pieces are displayed together regardless of the fabric type. From Seamly2D, separate pieces into fabric type--> read each piece and create a list of fabric types; group pieces by fabric type; create separate stringified svgs for each fabric type; display each stringified svg in separate tabs in the import left canvas where the tab contains the name of the fabric type.
 
-- [ ] Layout.77.0 - Update Seamly2D to track Material type for each piece:
+- [x] Layout.77.0 - Update Seamly2D to track Material type for each piece:
   - Note: Currently in 'Seamly2D > Piece Mode > Pattern Piece Tool > Labels > Piece Label (or Pattern Label) > Edit Label > Insert'. When the user clicks the 'Insert' dropdown box they can select 'Material: Fabric', 'Material: Interfacing', 'Material: Interlining', and 'Material: Lining' which places the text 'Fabric', 'Interfacing', 'Interlining', or 'Lining' into the label.
   - [x] Layout.77.0.1 - In the .sm2d file, add a new 'material' attribute to Piece group elements. Pattern format 0.7.6 (`v0.7.6.xsd`, converter `toVersion0_7_6`); `VAbstractPiece::getMaterial`, default `Fabric`; read in `VPattern::parsePieceElement`, written by `PatternPieceTool::addAttributes`.
   - [x] Layout.77.0.2 - In 'Pattern Piece Tool > Properties > Properties', add a new 'Material' dropdown field after the 'Letter' field and before the 'Quantity' field. The dropdown selections are 'Fabric', 'Lining', 'Interfacing', 'Interlining' (we may add more choices in the future). Save the user's selection to a new attribute 'material' in the Piece group definition. `pattern_piece_dialog.ui` row `material_ComboBox`; the list shows translated names and stores the untranslated name.
@@ -248,15 +232,14 @@ Currently in the import left canvas, all pieces are displayed together regardles
   - [x] Layout.77.1.2 - in left import canvas, when user clicks 'Create Layout', create layouts for the currently selected left import canvas Material tab. The shown material's document is `input_dom`. Decision taken: a tab switch drops the previous material's layout and rebuilds the blank canvas from the submitted settings.
   - [x] Layout.77.1.3 - in right layout canvas, display the Material type above the right layout canvas. `Main.qml` `materialHeader`: "Material: <material>", shown whenever the handoff names a material.
   - [x] Layout.77.1.4 - in exported file names, append the currently selected '_<materialtype>' before the date stamp (only if there are multiple Material types). `exports::material_name_segment`: `<base>[_<segment>]_<material>[_<tab>]_<stamp>`; Export all tabs keeps the same order.
-- [ ] Layout.77.2 - Test/Verify - check for individual patterns:
-  - [ ] Layout.77.2.0 - check 'Pattern Piece Tool > Properties > Properties' for new 'Material' dropdown field
-  - [ ] Layout.77.2.1 - check left import canvas that there is a tab for each Material identified in the pieces.
-  - [ ] Layout.77.2.2 - check left import canvas that the pieces are correct for each Material tab.
-  - [ ] Layout.77.2.3 - check right layout canvas that the Material type is displayed above the canvas.
-  - [ ] Layout.77.2.4 - check right layout canvas that the pieces are correct for that material.
-  - [ ] Layout.77.2.5 - check that .sm2d files contain pieces with material attribute
-  - [ ] Layout.77.2.6 - check that older .sm2d files update to new schema properly
-  - [ ] Layout.77.2.7 - Automated tests, already passed: `material_split` 3 tests (one lays out each material and checks its pieces); `exports` `material_segment_goes_after_the_variant_and_before_the_tab`. `cargo test --workspace` 543 passed; `ctest --preset debug` 6 of 6 (the QML files compile). Doc: `SVG-DATA-ATTRIBUTES.md`, "Materials"; `NEW-ATTRIBUTES.csv`.
+- [x] Layout.77.2 - Test/Verify - check for individual patterns:
+  - [x] Layout.77.2.0 - check 'Pattern Piece Tool > Properties > Properties' for new 'Material' dropdown field
+  - [x] Layout.77.2.1 - check left import canvas that there is a tab for each Material identified in the pieces.
+  - [x] Layout.77.2.2 - check left import canvas that the pieces are correct for each Material tab.
+  - [x] Layout.77.2.3 - check right layout canvas that the Material type is displayed above the canvas.
+  - [x] Layout.77.2.4 - check right layout canvas that the pieces are correct for that material.
+  - [x] Layout.77.2.5 - check that .sm2d files contain pieces with material attribute
+  - [x] Layout.77.2.7 - Automated tests, already passed: `material_split` 3 tests (one lays out each material and checks its pieces); `exports` `material_segment_goes_after_the_variant_and_before_the_tab`. `cargo test --workspace` 543 passed; `ctest --preset debug` 6 of 6 (the QML files compile). Doc: `SVG-DATA-ATTRIBUTES.md`, "Materials"; `NEW-ATTRIBUTES.csv`.
 - [x] Layout.77.3 - Update Schema
   - [x] Layout.77.3.1 - Create a new `.sm2d` schema: foldline node ids, schema version bump
     - Done for the material: `v0.7.6.xsd` adds the optional piece attribute `material`; `VPatternConverter` max version 0.7.6. Fold line node ids belong to Layout.80 (Layout.80.2); 0.7.6 is not released yet, so Layout.80 can add them to the same schema version.
@@ -653,3 +636,22 @@ Before this task, Seamly2D built the pieces for the SVG with the old class `VLay
 - [x] Fix the initial layout size for media=fabric. Fabric starts 500 in long (01562ef927) and trims after packing. Folded fabric has left margin 0. The fabric warning no longer advises a larger sheet size.
 - [ ] Verify that initial fabric layout is long, similar to paper roll. (MSI, AGENT_CHECKLIST.md section 33)
 - [ ] Verify that all pieces are placed on the fabric layout and that piece foldlines are placed along fold if folded=true.
+
+### [ ] Task Layout.108 — Verify - Seamly2D: put each multisize piece's grainline and labels in the same place in every size, inside every size's cut line
+
+Seamly2D moves the grainline, piece label and pattern label of every size of a piece before it sends the SVG to SeamlyLayout (`layout_handoff`). Each one gets the same position relative to its size's outline, inside every size's cut line. On the Nested tab, the grainlines and labels of all sizes then lie exactly on top of each other. Layout.94 does a similar move in SeamlyLayout, when it reads the SVG (`annotation_alignment.rs`).
+
+- User decisions:
+  - Use one position for every size. The position is inside every size's cut line and as near as possible to the base size's position. Seamly2D does not change the pattern file and shows no warning. --> Agree
+  - Seamly2D moves the grainlines and labels before it sends the SVG. SeamlyLayout does not do it after it reads the SVG. --> what's the difference between the handoff and the import?
+    - Answer: the handoff is the Seamly2D side. Seamly2D converts the pattern pieces to SVG text in memory and writes that text to SeamlyLayout's standard input. No file is written.
+    - The import is the SeamlyLayout side. SeamlyLayout reads the SVG text from standard input and prepares the pieces for the layout.
+  - Start after Dead.4.4.3. Dead.4.4.3 checks that the old and the new SVG writer give the same SVG, then switches `MainWindow` to the new writer. This change then goes into the new writer only, and does not upset that check.
+- [x] Layout.108.1 Dead.4.4.3: the old and the new SVG writer gave the same SVG, within 0.01 px, for the 21 required patterns and 4 extra patterns. Seamly2D (GUI and command line) now uses the new writer, which includes this change.
+- [x] Layout.108.2 Reference point for each size of a piece: the start point of the fold line, when every size of the piece has a fold line. Else, the centre of the box around the cut line (the seam line, if the piece has no cut line).
+- [x] Layout.108.3 Seamly2D measures the distance from the base size's reference point to its grainline, piece label and pattern label. It puts each of them at that distance from the reference point in every size. If a grainline end or a label text line start then falls outside a size's cut line, Seamly2D moves that item by the smallest distance that puts it inside every size's cut line. The move is the same in every size.
+- [x] Layout.108.4 Decision: if no such move exists (for example, a label larger than the smallest size), Seamly2D keeps the base size's distance. Seamly2D shows a warning before it starts SeamlyLayout. This warning is the one exception to "shows no warning" above.
+- [x] Layout.108.5 Decision: SeamlyLayout keeps its own move and warning when it reads the SVG (`annotation_alignment.rs`, `finish_import`). They are for SVG files from older Seamly2D builds.
+- [x] Layout.108.6 Qt tests pass: same position in every size; position inside every cut line; base size's position kept when no move fits. A new jacket2 test input file (SVG from Seamly2D) passes the Rust test `jacket2_nested_stacks_each_piece_set_annotations`. All Qt and Rust test suites pass.
+- [ ] Layout.108.7 Update the docs: `SVG-DATA-ATTRIBUTES.md` section "Multisize grainline and label positions", and `AGENT_CHECKLIST.md` section 26.
+- [ ] Layout.108.8 In the next MSI build: open jacket2 in Seamly2D and press Layout. SeamlyLayout shows no import warning. On the Size 220 tab, Back's piece label is inside the cut line.

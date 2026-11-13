@@ -2,6 +2,20 @@
 
 ## Current status
 
+### 2026-11-12 — Nested sizes stack on a corner (Layout.804)
+
+- Merged into `run-seamlyLayout` without skip-ci (`.pri`/`.pro` changed). Branch `task-nested-stack-corner` deleted.
+- Stack point: Rust `svg_dom/src/stack_point.rs`; C++ `layout_handoff/handoff_stack_point.cpp` mirrors it. Users: `center_piece_sets`, `annotation_alignment.rs`, `align_handoff_annotations`.
+- Rules: fold line in every size → its lower end (left end if level). Else turn points in every size → largest size's turn point with the longest level edge, else longest edge. Else bbox centre.
+- User decisions: fold line first, lower end; both apps; tie → longer other edge, then lower, then left.
+- New C++ `handoff_svg_reading.h/.cpp` (`find_tagged_child`, `read_matrix`, `collect_points`).
+- Rust `annotation_alignment::inside`: within 0.01 px of the cut line counts as inside (matches C++). Test `anchor_on_the_cut_line_is_inside`.
+- `test_data/jacket2_40-146_handoff.svg`: 227 annotation transforms realigned by the new C++ code (scratch `realign.exe`). On the old fixture it gives 0 warnings: Back's size 220 import warning is gone. A fresh jacket2 export is still needed.
+- Checked: scratch QtTest `TestHandoffAnnotationAlignment` 18/18; `cargo test --workspace` 689 pass; `ctest --preset debug` 8/8. MSI Qt suites not run.
+- Docs: SVG-DATA-ATTRIBUTES "Multisize stack point"; SETTINGS_WORKFLOW fold line; `AGENT_CHECKLIST.md` §26 (no import warning), §39, OPEN row; TODO Layout.804.1–.4.
+- Open: Layout.804.5 with the next MSI: 4 Qt suites, `AGENT_CHECKLIST.md` §39.
+- Scratch: `build/scratch_corners/` (`fix_*.py`, `qttest/` QtTest build, `realign.exe`, `ctest_debug.bat`).
+
 ### 2026-11-12 — Layout Mode Any turns a wide piece that fits turned (Layout.802)
 
 - Cause: the oversized-piece check used each piece's `data-rotation`. Seamly2D writes `0` (None) by default, so Any tried 0° only.
@@ -42,15 +56,6 @@
 - Open: DXF.18.5, rewritten with steps and expected result. `male_shirt` CollarTopInterface-Built-in-SA has no notch.
 - Found, not investigated: the 2026-11-01 and 2026-11-07 male_shirt DXF files have 0 notches. `male_shirt.sm2d` FrontPanel and BackPanel have 1 notch each.
 - Compliance doc "aw.fyi results": 4 new rows.
-
-### 2026-11-12 — Plain words in the TODO file
-
-- Rule added: describe literal actions and data; no made-up names, no wrong jargon. `CLAUDE.md` (d4809bc650). Agent file `.claude/agents/seamlylayout-developer.md` too: local only, gitignored.
-- `TODO_SEAMLYLAYOUT.md` open items rewritten in plain words (bd756c7227). Each "Next MSI: user check" line now holds the steps and the expected result. Checked lines unchanged, except Layout.108 and the "harness" and "scratch" words.
-- Fixed: the "Layout.58.13" cross-reference is Layout.68.13.
-- Answer recorded in Layout.108: Seamly2D writes the SVG as text to SeamlyLayout's standard input. No file is written. SeamlyLayout reads the text and imports the pieces.
-- `AGENT_CHECKLIST.md` OPEN list: Layout.88.2 "FAIL --> Note did not appear" (male_shirt).
-- Next: Layout.108.7 docs, in plain words. `AGENT_CHECKLIST.md` section 26 and `SVG-DATA-ATTRIBUTES.md` "Multisize grainline and label positions" both use "stack".
 
 ## Decisions to retain
 

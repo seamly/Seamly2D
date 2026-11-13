@@ -288,8 +288,8 @@ pub fn do_process_layout(
     svg_dom::flatten_dom(&mut flat_dom);
     save_debug_dom(&flat_dom, "flat2_dom.svg");
 
-    // 3d': Nested multisize — stack the sizes of each piece-set on the largest
-    // size's centre, then bake the offsets.  Needs vertical, flattened sizes,
+    // 3d': Nested multisize — stack the sizes of each piece-set on one stack
+    // point, then bake the offsets.  Needs vertical, flattened sizes,
     // and must run before translate_dom measures each set's bounding box.
     let piece_sets = svg_dom::center_piece_sets(&mut flat_dom);
     if piece_sets > 0 {
@@ -1649,8 +1649,8 @@ mod tests {
         assert_eq!(placed_count(&marker), 4, "Marker: pieces x sizes");
     } // multisize_nested_packs_sets_and_marker_packs_sizes
 
-    // @brief Nested: the smaller size sits centred on the larger one, largest first,
-    // and each placed piece keeps its data-size.
+    // @brief Nested: a piece without a fold line or turn points stacks its sizes on their centres,
+    // largest first, and each placed piece keeps its data-size.
     #[test]
     fn multisize_nested_centres_sizes_on_largest() {
         let nested = process_multisize(true);
@@ -1847,7 +1847,7 @@ mod tests {
             let mut input = part.doc;
             let report = crate::annotation_alignment::align_size_annotations(&mut input);
             assert_eq!(report.moved, 0, "material {}: producer already aligns annotation positions", part.name);
-            assert!(report.outside.is_empty(), "material {}: producer keeps annotations inside every cut line", part.name);
+            assert!(report.outside.is_empty(), "material {}: producer keeps annotations inside every cut line: {:?}", part.name, report.outside);
 
             let nested = process_jacket2_input(&input, true, 60.0, 300.0);
             for set in nested

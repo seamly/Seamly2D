@@ -46,6 +46,7 @@ JACKET_2
 | Layout.93.7 | 23 | SL > jacket_2 > DXF piece properties: Material, Missing Piece Data, Rotation, Flip, Tilt, Fold | --> export DXF (R13), upload to https://aw.fyi/dxf
 | Seamly2D.71.12 | 34 | S2D > jacket2 > Piece mode, Back: seam line and cut line stop at the fold line | ?
 | Seamly2D.71.15 | 35 | S2D > jacket2 > Layout > SL, Back: seam line and cut line stop at the fold line | ?
+| Layout.804.5 | 39 | SL > jacket_2 > Nested: Back and Detail 2 stack on the lower fold line end; other pieces on one corner | ?
 
 MALE_SHIRT
 | Seamly2D.71.12 | 34 | S2D > male_shirt > Piece mode, BackPanel and CollarTopInterface-Built-in-SA: seam line and cut line stop at the fold line | ?
@@ -448,7 +449,7 @@ Needs the next MSI. jacket2 handoff: Fabric and Lining. Settings from section 1.
 
 Needs the next MSI. jacket2 handoff (grainlines and labels shown).
 
-- [ ] Import: one popup, title "Import warning", names "Back: piece label past the cut line in size 220" (Back's sizes stack on their fold line start).
+- [ ] Import: no "Import warning" popup. Back's sizes stack on the lower end of their fold line, and every label fits there.
 - [ ] Nested tab, Fabric: each piece shows one grainline stack and one label stack; the sizes' copies lie exactly on top of each other.
 - [ ] Size 220 and Size 720 tabs: each piece's grainline and labels sit in the same place inside the piece as on the Base Size 500 tab.
 - [ ] Lining, Nested tab: Detail 4's grainline, piece label and pattern label each stack as one.
@@ -473,8 +474,6 @@ Needs the next MSI. Do not save the pattern changes.
 
 ## 28. Old Seamly2D layout, print, console export and Export Pieces removed
 
-Needs the next MSI.
-
 - [ ] File menu: no Print, no Preview, no Export As.
 - [ ] Tools menu: no Layout submenu. Toolbox toolbar: no Layout Tools button.
 - [ ] View > Toolbars: no Layout ToolBar. View menu: no Layout Pages dock.
@@ -488,7 +487,7 @@ Needs the next MSI.
 
 ## 29. jacket2: fold line arrow line, label and extended fold line
 
-Needs the next MSI. jacket2 Back has a fold line. Do not save the pattern changes.
+jacket2 Back has a fold line. Do not save the pattern changes.
 
 - [ ] Open jacket2. Piece mode, Back > Piece Properties > Path: the list ends with the two fold line nodes.
 - [ ] Back on the canvas:
@@ -505,8 +504,6 @@ Needs the next MSI. jacket2 Back has a fold line. Do not save the pattern change
 
 ## 30. Seam allowances and labels after the AbstractPiece and LabelTextManager move
 
-Needs the next MSI. Nothing should look different from the previous MSI.
-
 - [ ] male_shirt and jacket2, Piece mode: every seam allowance, corner and notch is where it was. Built-in seam lines and fold lines too.
 - [ ] Piece Properties > Seam Allowance: change a node's angle type to each of the six types. The corner follows, as before.
 - [ ] Piece labels and the pattern label: same text, same font size. Resize a label: the text refits.
@@ -514,8 +511,6 @@ Needs the next MSI. Nothing should look different from the previous MSI.
 - [ ] Press Layout. SeamlyLayout opens with every size; turn points and seam allowances as before.
 
 ## 31. DXF export menu, units and DXF-AAMA piece text
-
-Needs the next MSI.
 
 - [ ] Export > DXF lists DXF-ASTM (R13), DXF-ASTM (CLO3D) and DXF-AAMA (R11). No R12 item. (Layout.100.6)
 - [ ] View > DXF-ASTM still opens a `.dxf` file. (Layout.100.6)
@@ -529,7 +524,7 @@ Needs the next MSI.
 
 ## 32. SEAMLY_DATA_DIR for SeamlyLayout
 
-Needs the next MSI. (Layout.101.4)
+(Layout.101.4)
 
 - [ ] Set `SEAMLY_DATA_DIR=D:/sl_job`. Run `seamlylayout.exe`. Expect `D:/sl_job/settings/qt6_seamlylayout.ini` and `D:/sl_job/logs/seamlylayout/log_*.txt`. Nothing new in `%LOCALAPPDATA%\Seamly\SeamlyLayout`.
 - [ ] Set a relative value, for example `sl_job`. SeamlyLayout exits with code 78.
@@ -539,7 +534,7 @@ Needs the next MSI. (Layout.101.4)
 
 ## 33. Fabric layout: initial length, fold margin, warning
 
-Needs the next MSI. (Layout.109)
+(Layout.109)
 
 - [ ] Open trousers.sm2d. Layout Settings: Media Fabric, width 36 in, Folded on. Create Layout. All pieces placed, no "could not be placed" popup.
 - [ ] Layout is trimmed to the pieces (not 500 in long). Left margin is 0; fold lines lie on the left edge.
@@ -547,7 +542,7 @@ Needs the next MSI. (Layout.109)
 
 ## 34. Seam line and cut line stop at the fold line
 
-Needs the next MSI. (Seamly2D.71.12) Do not save the pattern changes.
+(Seamly2D.71.12) Do not save the pattern changes.
 
 - [ ] male_shirt, Piece mode, BackPanel:
   - [ ] The cut line starts at one end of the dashed fold line and ends at the other end. No cut line along the fold line.
@@ -562,7 +557,7 @@ Needs the next MSI. (Seamly2D.71.12) Do not save the pattern changes.
 
 ## 35. Layout Mode: seam line and cut line stop at the fold line
 
-Needs the next MSI. (Seamly2D.71.15) Do not save the pattern changes.
+(Seamly2D.71.15) Do not save the pattern changes.
 
 - [ ] Open male_shirt. Press Layout. SeamlyLayout shows the pieces.
   - [ ] BackPanel: the cut line starts at one end of the dashed fold line and ends at the other end. No cut line along the fold line.
@@ -575,7 +570,7 @@ Needs the next MSI. (Seamly2D.71.15) Do not save the pattern changes.
 
 ## 36. Export > SVG has no check boxes
 
-Needs the next MSI. (Layout.800.3)
+(Layout.800.3)
 
 - [ ] Open male_shirt. Press Layout. Create Layout.
 - [ ] Export > SVG: no item shows a check box or a check mark.
@@ -584,7 +579,7 @@ Needs the next MSI. (Layout.800.3)
 
 ## 37. Split part label on a short cut edge
 
-Needs the next MSI. (Layout.801.4)
+(Layout.801.4)
 
 Pattern: `test-seamly-layout/patterns/validation/trousers.sm2d` (has `Union_piece`, the mirrored waistband).
 
@@ -598,7 +593,7 @@ Pattern: `test-seamly-layout/patterns/validation/trousers.sm2d` (has `Union_piec
 
 ## 38. Layout Mode Any turns a wide piece that fits turned
 
-Needs the next MSI. (Layout.802.5)
+(Layout.802.5)
 
 Pattern: `test-seamly-layout/patterns/validation/trousers.sm2d`. `Union_piece` (the mirrored waistband) is 21.7 × 2.4 in.
 
@@ -607,3 +602,17 @@ Pattern: `test-seamly-layout/patterns/validation/trousers.sm2d`. `Union_piece` (
 - [ ] Dialog "Pieces do not fit the media" lists `Back` only. It does not list `Union_piece`.
 - [ ] Choose "Split the pieces". OK. `Back` is 2 parts. `Union_piece` is 1 piece, turned 90° (vertical on the roll).
 - [ ] Settings: Layout Mode: Along Grainline. Submit. Create Layout. The dialog lists `Back` and `Union_piece`.
+
+## 39. jacket2 Nested: sizes stack on a fold line end or a cut line corner
+
+(Layout.804.5)
+
+Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is Lining.
+
+- [ ] Seamly2D: open jacket2. Press Layout. No "Import warning" popup.
+- [ ] Create Layout. Fabric, Nested tab: the Back sizes stack on the lower end of their fold line. The fold lines of all sizes lie on one line.
+- [ ] Detail 2: the same as Back.
+- [ ] Подборт, Комір, Detail 3, Sleeve 1, Sleeve 2: the cut lines of all sizes meet at one corner of the cut line.
+- [ ] Each piece: one grainline stack and one label stack. The sizes' copies lie on top of each other.
+- [ ] Lining, Nested tab: the Detail 4 cut lines meet at one corner. Its grainline and labels each stack as one.
+- [ ] Settings: Layout Mode: Along Grainline. "Place fold lines on the left edge" on. Submit. Create Layout. The Back and Detail 2 stacks lie on the left edge. No warning.

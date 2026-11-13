@@ -80,7 +80,7 @@ Each piece is a `piece-set` group holding that piece once per size.
 
 - Producer: `MainWindow::prepareMultisizePieceLists()` → `MainWindowsNoGUI::generateHandoffSvgDocument(&warnings)` → `HandoffDocument::set_multisize()` and `to_aligned_dom()`.
 - The same piece is matched across sizes by its `VPiece` id.
-- Each size keeps its drafted position. The Nested tab stacks the sizes on the centre of each outline's bounding box: the `cutline` groups, else the `seamline` groups (`svg_dom::center_piece_sets`). When every size has a `fold_line`, the sizes stack on the first point of the fold line instead, so the fold lines lie on top of each other; Settings > "Place fold lines on the left edge" then lays the whole stack on the left edge (`fold_line_edge.rs`). Sizes whose fold lines do not share one line stay off the edge with a warning.
+- Each size keeps its drafted position. The Nested tab stacks the sizes on one stack point per size (`svg_dom::center_piece_sets`, see "Multisize stack point"). When every size has a `fold_line`, the stack point is a fold line end, so the fold lines lie on top of each other; Settings > "Place fold lines on the left edge" then lays the whole stack on the left edge (`fold_line_edge.rs`). Sizes whose fold lines do not share one line stay off the edge with a warning.
 - Tests: `TST_SvgComponentTags::Multisize*` (producer), `piece_extractor` and `layout_utils` `multisize` tests (consumer).
 
 ### Drill holes and reference lines
@@ -125,13 +125,31 @@ Seamly2D hands off one pattern group per material, in the order the materials fi
 - A material switch keeps every layout: the controller parks the shown material's layouts, shown tab and Adjust edits in `layout_views::MaterialLayout` and takes out the new material's. Exports, Export all tabs and Adjust Mode work on the shown material.
 - One material: the right canvas shows "Material: <material>" above the layout instead of tabs. With several materials, a default export name has `_<material>` after the variant segment: `<base>[_<segment>]_<material>[_<tab>]_<stamp>`.
 
+### Multisize stack point
+
+The Nested tab stacks the sizes of a piece-set on one point in each size. SeamlyLayout (`svg_dom/src/stack_point.rs`) and Seamly2D (`layout_handoff/handoff_stack_point.cpp`) find the same point, so the annotations of every size stack exactly.
+
+- Outline: the first `cutline` group, else the first `seamline` group; its segment end points. A last point within 0.01 px of the first point is dropped.
+- Grain frame: the rules measure each size with its grain up, as `verticalize_dom` turns it. Grain direction: the first path of the first element whose `id` contains "grainline", else `data-grainline-angle`. Within 0.1° of vertical counts as up.
+- Largest size: the first size with the largest bounding-box area.
+- Rule 1, fold line: when every size has a `fold_line`, the lower end of the largest size's fold line; the left end when it is level. Every size takes the same end, start or end.
+- Rule 2, corner: when every size has a non-empty `data-turn-points`, a turn point of the largest size.
+  - Edge: from the turn point to the next turn point, in each direction, through points within 0.5 px of its line.
+  - Horizontal edge: within 1° of horizontal.
+  - The turn point with the longest horizontal edge wins. With no horizontal edge, the turn point with the longest edge wins.
+  - Tie (within 0.01 px): the longer other edge, then the lower turn point, then the left one.
+  - Every other size takes its turn point nearest the same place in its bounding box.
+  - An index for the closing point of the path names the first point.
+- Rule 3, centre: else the centre of each size's bounding box.
+- A size with fewer than three outline points has no stack point. SeamlyLayout does not stack it. Seamly2D does not align the annotations of its piece-set.
+
 ### Multisize grainline and label positions
 
-At import, SeamlyLayout moves the `grainline`, `piece_label` and `pattern_label` group of every size of a piece-set to the place the base size (`data-base-size`) has it: the same offset from the stack point `center_piece_sets` uses: the start of the fold line when every size has one, else the centre of the outline's bounding box. On the Nested tab each stack then reads as one; every tab shows them in the same place in each size.
+At import, SeamlyLayout moves the `grainline`, `piece_label` and `pattern_label` group of every size of a piece-set to the place the base size (`data-base-size`) has it: the same offset from the stack point (see "Multisize stack point"). On the Nested tab each stack then reads as one; every tab shows them in the same place in each size.
 
 - Reference point: a grainline's middle; a label's first text line anchor; a label drawn as paths, the centre of its points. The move is a `translate` prepended to the group's `transform`.
 - Only groups the handoff has move: Seamly2D sends none for a hidden grainline or label. A piece-set without a base size piece is not changed.
-- A grainline end or label line anchor that then lies outside a size's cut line is reported in one import warning: "Back: pattern label past the cut line in sizes 220, 240, 260, 280". Move the label toward the middle of the piece in the base size in Seamly2D.
+- A grainline end or label line anchor that then lies more than 0.01 px outside a size's cut line is reported in one import warning: "Back: pattern label past the cut line in sizes 220, 240, 260, 280". Move the label toward the middle of the piece in the base size in Seamly2D.
 - Size labels follow: `add_size_labels` runs after the move, 5 px past the moved grainline.
 - Code: `cxxqt_bridge/src/annotation_alignment.rs`, called by `finish_import` before the piece names.
 
@@ -145,7 +163,7 @@ The developer comparison switch is removed. The standalone comparison test remai
 - Polygon edges count as inside. A missing cut line uses the seam line.
 - If no shared offset fits, every size retains the base offset. The returned warning must appear before launch.
 - This API changes only the generated document. It does not edit pattern data or alter `to_dom()` and `to_svg_string()`.
-- `TestHandoffAnnotationAlignment` covers fitting, nearest placement, concavity, fold points, hidden components, and fallback.
+- `TestHandoffAnnotationAlignment` covers fitting, nearest placement, concavity, fold lines, hidden components, fallback, and the stack point rules.
 
 Writer comparison uses a test-only application probe, not a shipped environment switch.
 Run these commands from the checkout with Qt and MSVC available:

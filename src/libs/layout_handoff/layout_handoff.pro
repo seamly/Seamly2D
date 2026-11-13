@@ -26,6 +26,8 @@
 # - HandoffIds: unique SVG ids for pieces and components.
 # - handoff_turn_points: turn points matched across the sizes of a multisize piece.
 # - handoff_sheet: piece bounds and the flat sheet, with no QGraphicsScene.
+# - handoff_stack_point: the point of each size where SeamlyLayout stacks the sizes of a multisize piece.
+# - handoff_svg_reading: tagged groups, matrix transforms and points read back from the written SVG.
 #
 #-------------------------------------------------
 

@@ -7,9 +7,10 @@
 //
 // A piece-set holds one piece per size. At import each size's drill holes,
 // grainline, piece label and pattern label move to the base size's place,
-// measured from the stack point: the start of the fold line when every size has
-// one, else the centre of the piece outline's bounding box. The Nested tab
-// stacks the sizes on the same point, so these annotations stack exactly.
+// measured from the stack point (`svg_dom::stack_points`): the lower end of the
+// fold line when every size has one, else a corner of the cut line, else the
+// centre of the outline's bounding box. The Nested tab stacks the sizes on the
+// same point, so these annotations stack exactly.
 //
 // Seamly2D sends no group for a hidden annotation, so nothing moves for it. A
 // moved annotation that leaves the cut line of a smaller size is reported.
@@ -25,7 +26,8 @@ const ANNOTATION_TYPES: [(&str, &str); 4] = [
     ("pattern_label", "pattern label"),
 ];
 
-// @brief Offset below which an annotation counts as in place, in px.
+// @brief Offset below which an annotation counts as in place, and distance from the cut line within which it
+//        counts as inside, in px.
 const TOLERANCE_PX: f32 = 0.01;
 
 // @brief What `align_size_annotations` did.
@@ -68,20 +70,19 @@ pub(crate) fn align_size_annotations(doc: &mut svg_dom::Document) -> AlignmentRe
 
 // @brief Align the sizes of one piece-set on its base size piece.
 fn align_piece_set(set: &mut Element, base_size: &str, report: &mut AlignmentReport) {
-    // Stack point of a size: its fold line start when every size has a fold line, else its outline centre.
-    let on_fold = set.children.iter().filter_map(|n| n.as_element())
-        .filter(|e| is_type(e, "piece"))
-        .all(|piece| fold_line_start(piece).is_some());
-    let stack_point = |piece: &Element| if on_fold { fold_line_start(piece) } else { outline_centre(piece) };
+    // Stack point of each size, in document order, as `svg_dom::center_piece_sets` and Seamly2D find it.
+    let stack_points = piece_stack_points(set);
 
     // Offset of each annotation of the base size from its stack point.
     let base_offsets: Vec<(&str, &str, Point)> = {
-        let Some(base) = set.children.iter().filter_map(|n| n.as_element())
-            .find(|e| is_type(e, "piece") && e.attributes.get("data-size").is_some_and(|s| s == base_size))
+        let Some((base, base_point)) = set.children.iter().filter_map(|n| n.as_element())
+            .filter(|e| is_type(e, "piece"))
+            .zip(&stack_points)
+            .find(|(e, _)| e.attributes.get("data-size").is_some_and(|s| s == base_size))
         else {
             return; // the base size is not handed off
         }; // base piece
-        let Some(centre) = stack_point(base) else {
+        let Some(centre) = *base_point else {
             return; // no outline to measure from
         }; // centre
         ANNOTATION_TYPES.iter()
@@ -100,8 +101,9 @@ fn align_piece_set(set: &mut Element, base_size: &str, report: &mut AlignmentRep
         .unwrap_or_default();
     // Sizes whose moved annotation leaves the cut line, per annotation name.
     let mut outside: Vec<(&str, Vec<String>)> = Vec::new();
-    for piece in set.children.iter_mut().filter_map(|n| n.as_mut_element()).filter(|e| is_type(e, "piece")) {
-        let Some(centre) = stack_point(piece) else {
+    let pieces = set.children.iter_mut().filter_map(|n| n.as_mut_element()).filter(|e| is_type(e, "piece"));
+    for (piece, stack_point) in pieces.zip(stack_points) {
+        let Some(centre) = stack_point else {
             continue; // no outline to measure from
         }; // centre
         let outline = cut_outline(piece);
@@ -131,6 +133,17 @@ fn align_piece_set(set: &mut Element, base_size: &str, report: &mut AlignmentRep
         report.outside.push(format!("{piece_name}: {name} past the cut line in {}", size_list(&sizes)));
     } // for each annotation past the cut line
 } // fn align_piece_set
+
+// @brief Stack point of each `piece` group of `set`, in document order, in the piece frame.
+// @details Each piece's grain direction is the one `svg_dom::verticalize_dom` turns up, so the point is the
+//          one `svg_dom::center_piece_sets` stacks the sizes on.
+pub(crate) fn piece_stack_points(set: &Element) -> Vec<Option<Point>> {
+    let pieces: Vec<(&Element, (f64, f64))> = set.children.iter().filter_map(|n| n.as_element())
+        .filter(|e| is_type(e, "piece"))
+        .map(|piece| (piece, svg_dom::grain_direction(piece)))
+        .collect();
+    svg_dom::stack_points(&pieces)
+} // fn piece_stack_points
 
 // @brief "size 220" for one size, "sizes 220, 240" for more.
 fn size_list(sizes: &[String]) -> String {
@@ -162,45 +175,11 @@ fn outline_groups(piece: &Element) -> Vec<&Element> {
     if cut.is_empty() { groups("seamline") } else { cut }
 } // fn outline_groups
 
-// @brief Centre of the bounding box of the outline, control points included, in the piece frame.
-//
-// `svg_dom::center_piece_sets` measures the same points after the transforms are baked in.
-fn outline_centre(piece: &Element) -> Option<Point> {
-    let mut points = Vec::new();
-    for group in outline_groups(piece) {
-        collect_points(group, Matrix2D::IDENTITY, true, &mut points);
-    } // for each outline group
-    bbox_centre(&points)
-} // fn outline_centre
-
-// @brief Start of the fold line, in the piece frame: the first point of the first path of the `fold_line`
-//        group, outside its tagged arrow line and label groups. `svg_dom::fold_line_d` reads the same path.
-// @return None when the piece has no fold line.
-fn fold_line_start(piece: &Element) -> Option<Point> {
-    own_path_start(child_of_type(piece, "fold_line")?, Matrix2D::IDENTITY)
-} // fn fold_line_start
-
-// @brief First point of the first `<path>` in `elem`'s subtree, outside child groups with their own
-//        `data-type`, with the transforms down to it applied.
-fn own_path_start(elem: &Element, parent: Matrix2D) -> Option<Point> {
-    let matrix = parent.mul(&own_transform(elem));
-    if elem.name == "path" {
-        let path = Path::parse_path_attribute(elem.attributes.get("d")?).ok()?;
-        return match path.segments.first()? {
-            PathSegment::MoveTo(p) => Some(matrix.apply_to_point(*p)), // the fold line start node
-            _ => None,                                                 // no start point
-        }; // match first segment
-    } // if path
-    elem.children.iter().filter_map(|n| n.as_element())
-        .filter(|c| !c.attributes.contains_key("data-type")) // a tagged part is not the fold line
-        .find_map(|c| own_path_start(c, matrix))
-} // fn own_path_start
-
 // @brief The cut line (else seam line) as a polygon of segment end points, in the piece frame.
 fn cut_outline(piece: &Element) -> Vec<Point> {
     let mut points = Vec::new();
     if let Some(group) = outline_groups(piece).first() {
-        collect_points(group, Matrix2D::IDENTITY, false, &mut points);
+        collect_points(group, Matrix2D::IDENTITY, &mut points);
     } // if outline
     points
 } // fn cut_outline
@@ -219,7 +198,7 @@ pub(crate) fn reference_point(group: &Element) -> Option<Point> {
     } // if grainline
     first_text_anchor(group, Matrix2D::IDENTITY).or_else(|| {
         let mut points = Vec::new();
-        collect_points(group, Matrix2D::IDENTITY, false, &mut points);
+        collect_points(group, Matrix2D::IDENTITY, &mut points);
         bbox_centre(&points)
     }) // or the centre of its points
 } // fn reference_point
@@ -274,26 +253,25 @@ fn collect_text_anchors(elem: &Element, parent: Matrix2D, anchors: &mut Vec<Poin
     } // for child
 } // fn collect_text_anchors
 
-// @brief Path points in `elem`'s subtree, in the piece frame.
-// @param with_controls True adds curve control points, as `svg_dom` bounding boxes do.
-fn collect_points(elem: &Element, parent: Matrix2D, with_controls: bool, points: &mut Vec<Point>) {
+// @brief Path segment end points in `elem`'s subtree, in the piece frame.
+fn collect_points(elem: &Element, parent: Matrix2D, points: &mut Vec<Point>) {
     let matrix = parent.mul(&own_transform(elem));
     if elem.name == "path" {
         if let Some(path) = elem.attributes.get("d").and_then(|d| Path::parse_path_attribute(d).ok()) {
             for segment in &path.segments {
-                let segment_points: Vec<Point> = match segment {
-                    PathSegment::MoveTo(p) | PathSegment::LineTo(p) => vec![*p],
-                    PathSegment::QuadTo { ctrl, to } if with_controls => vec![*ctrl, *to],
-                    PathSegment::CubicTo { ctrl1, ctrl2, to } if with_controls => vec![*ctrl1, *ctrl2, *to],
-                    PathSegment::QuadTo { to, .. } | PathSegment::CubicTo { to, .. } | PathSegment::ArcTo { to, .. } => vec![*to],
-                    PathSegment::Close => Vec::new(),
-                }; // segment_points
-                points.extend(segment_points.into_iter().map(|p| matrix.apply_to_point(p)));
+                let end = match segment {
+                    PathSegment::MoveTo(p) | PathSegment::LineTo(p) => Some(*p), // a line node
+                    PathSegment::QuadTo { to, .. }
+                    | PathSegment::CubicTo { to, .. }
+                    | PathSegment::ArcTo { to, .. } => Some(*to), // a curve end node; control points are not on the line
+                    PathSegment::Close => None, // no new point
+                }; // match segment
+                points.extend(end.map(|p| matrix.apply_to_point(p)));
             } // for each segment
         } // if path data
     } // if path
     for child in elem.children.iter().filter_map(|n| n.as_element()) {
-        collect_points(child, matrix, with_controls, points);
+        collect_points(child, matrix, points);
     } // for child
 } // fn collect_points
 
@@ -309,7 +287,8 @@ fn bbox_centre(points: &[Point]) -> Option<Point> {
     Some(Point::new((min_x + max_x) / 2.0, (min_y + max_y) / 2.0))
 } // fn bbox_centre
 
-// @brief True when `point` lies inside `polygon` (even-odd rule).
+// @brief True when `point` lies inside `polygon` (even-odd rule) or on its edge.
+// @details Seamly2D counts the cut line as inside, so it can fit an annotation anchor exactly on it.
 fn inside(polygon: &[Point], point: Point) -> bool {
     let mut is_inside = false;
     let mut previous = polygon[polygon.len() - 1];
@@ -320,8 +299,18 @@ fn inside(polygon: &[Point], point: Point) -> bool {
         } // if the edge crosses the ray
         previous = current;
     } // for each edge
-    is_inside
+    is_inside || on_edge(polygon, point)
 } // fn inside
+
+// @brief True when `point` lies within TOLERANCE_PX of an edge of the closed `polygon`.
+fn on_edge(polygon: &[Point], point: Point) -> bool {
+    let xy = |p: Point| (f64::from(p.x), f64::from(p.y));
+    // Each vertex with the one before it, the last vertex before the first.
+    let previous = polygon.iter().cycle().skip(polygon.len() - 1);
+    polygon.iter().zip(previous).any(|(&current, &previous)| {
+        geometry::fold_line_join::distance_to_segment(xy(point), xy(previous), xy(current)) <= f64::from(TOLERANCE_PX)
+    }) // any edge
+} // fn on_edge
 
 // @brief The element's own `transform`, or identity.
 pub(crate) fn own_transform(elem: &Element) -> Matrix2D {
@@ -354,7 +343,7 @@ mod tests {
     use super::*;
 
     // @brief Two sizes of Front: the base size 36 and a larger size 38 drafted 50 px right and down.
-    // Size 38 has its annotations elsewhere; size 36 has them near the outline centre.
+    // Size 38 has its annotations elsewhere; size 36 has them near the outline centre, its stack point.
     const TWO_SIZES: &str = r#"<svg xmlns="http://www.w3.org/2000/svg">
   <g id="pattern-1" data-type="pattern" data-measurements="multisize" data-sizes="36,38" data-base-size="36">
     <g id="piece-set-1" data-type="piece-set" data-name="Front">
@@ -383,10 +372,15 @@ mod tests {
             .expect("piece of that size")
     } // fn piece
 
-    // @brief Offset of an annotation's reference point from the outline centre.
+    // @brief Offset of an annotation's reference point from the size's stack point.
     fn offset(doc: &svg_dom::Document, size: &str, data_type: &str) -> Point {
+        let set = doc.root.children.iter().filter_map(|n| n.as_element()).next().expect("pattern")
+            .children.iter().filter_map(|n| n.as_element()).next().expect("piece-set");
+        let index = set.children.iter().filter_map(|n| n.as_element())
+            .position(|e| e.attributes.get("data-size").is_some_and(|s| s == size))
+            .expect("piece of that size");
         let piece = piece(doc, size);
-        let centre = outline_centre(piece).expect("outline");
+        let centre = piece_stack_points(set)[index].expect("outline");
         let reference = child_of_type(piece, data_type).and_then(reference_point).expect("annotation");
         Point::new(reference.x - centre.x, reference.y - centre.y)
     } // fn offset
@@ -395,7 +389,7 @@ mod tests {
         assert!((a.x - b.x).abs() < 0.01 && (a.y - b.y).abs() < 0.01, "{a:?} != {b:?}");
     } // fn approx
 
-    // @brief Every size takes the base size's annotation offsets from its outline centre.
+    // @brief Every size takes the base size's annotation offsets from its stack point.
     #[test]
     fn sizes_take_the_base_size_offsets() {
         let mut doc = svg_dom::Document::parse(TWO_SIZES).expect("fixture parses");
@@ -426,6 +420,16 @@ mod tests {
         let report = align_size_annotations(&mut doc);
         assert_eq!(report.outside, vec!["Front: piece label past the cut line in size 36".to_string()]);
     } // annotation_past_a_smaller_cut_line_is_reported
+
+    // @brief An anchor on the cut line, where Seamly2D can fit it, counts as inside.
+    #[test]
+    fn anchor_on_the_cut_line_is_inside() {
+        let square = [Point::new(0.0, 0.0), Point::new(100.0, 0.0), Point::new(100.0, 100.0), Point::new(0.0, 100.0)];
+        assert!(inside(&square, Point::new(50.0, 50.0)), "inside");
+        assert!(inside(&square, Point::new(100.0, 40.0)), "on the right edge");
+        assert!(inside(&square, Point::new(0.0, 0.005)), "within the tolerance of the first vertex");
+        assert!(!inside(&square, Point::new(100.1, 40.0)), "past the right edge");
+    } // anchor_on_the_cut_line_is_inside
 
     // @brief The warning lists one bullet per line and says what to do.
     #[test]

@@ -7,6 +7,7 @@
 
 #include "TestHandoffAnnotationAlignment.h"
 #include "../../libs/layout_handoff/handoff_annotation_alignment.h"
+#include "../../libs/layout_handoff/handoff_stack_point.h"
 
 #include <QDomDocument>
 #include <QFile>
@@ -15,6 +16,8 @@
 #include <QRegularExpression>
 #include <QTransform>
 #include <QtTest>
+
+#include <optional>
 
 namespace
 {
@@ -137,6 +140,63 @@ bool contains(const QPolygonF &polygon, const QPointF &point)
     }
     return false;
 }
+
+/**
+ * @brief Builds one piece-set of two trapezoid sizes, each with its wide edge at the top.
+ * @param small_path  cut line of size 34.
+ * @param small_turns turn point indices of size 34; empty leaves out data-turn-points.
+ * @param big_path    cut line of size 36, the largest size.
+ * @param big_turns   turn point indices of size 36; empty leaves out data-turn-points.
+ */
+QString trapezoids(const QString& small_path = QStringLiteral("M 0,0 L 40,0 L 30,30 L 10,30 Z"),
+                   const QString& small_turns = QStringLiteral("0 1 2 3 4"),
+                   const QString& big_path = QStringLiteral("M 100,100 L 180,100 L 160,160 L 120,160 Z"),
+                   const QString& big_turns = QStringLiteral("0 1 2 3 4"))
+{
+    const auto cutline = [](const QString& path, const QString& turns)
+    {
+        const QString attribute = turns.isEmpty() ? QString() : QStringLiteral(" data-turn-points='%1'").arg(turns);
+        return QStringLiteral("<g data-type='cutline'%1><path d='%2'/></g>").arg(attribute, path);
+    };
+    return QStringLiteral("<svg><g data-type='piece-set'><g data-type='piece' data-size='34'>%1</g>"
+                          "<g data-type='piece' data-size='36'>%2</g></g></svg>")
+        .arg(cutline(small_path, small_turns), cutline(big_path, big_turns));
+}
+
+/**
+ * @brief Finds the stack points of the pieces in @p svg.
+ * @return one point per `piece` group, in document order.
+ */
+QVector<std::optional<QPointF>> find_set_stack_points(const QString& svg)
+{
+    QDomDocument doc;
+    const auto   parsed = doc.setContent(svg);
+    Q_ASSERT(parsed);
+    QVector<QDomElement> pieces;
+    for (int i = 0; !group(doc, QStringLiteral("piece"), i).isNull(); ++i)
+    {
+        pieces.append(group(doc, QStringLiteral("piece"), i));
+    }
+    return layout_handoff::find_stack_points(pieces);
+}
+
+/**
+ * @brief Compares stack points within the test tolerance.
+ * @param actual   points from find_stack_points.
+ * @param expected points to match; no value matches only no value.
+ */
+void same_points(const QVector<std::optional<QPointF>>& actual, const QVector<std::optional<QPointF>>& expected)
+{
+    QCOMPARE(actual.size(), expected.size());
+    for (int i = 0; i < actual.size(); ++i)
+    {
+        QCOMPARE(actual[i].has_value(), expected[i].has_value());
+        if (expected[i].has_value())
+        {
+            close(actual[i].value(), expected[i].value());
+        }
+    }
+}
 }
 
 void TestHandoffAnnotationAlignment::retainsFittingBaseOffset() const
@@ -178,25 +238,28 @@ void TestHandoffAnnotationAlignment::keepsBaseOffsetWhenImpossible() const
     close(translation(group(doc, QStringLiteral("grainline"), 1)), {});
 }
 
-void TestHandoffAnnotationAlignment::usesFoldStartOnlyWhenEverySizeHasOne() const
+void TestHandoffAnnotationAlignment::usesLowerFoldLineEndOnlyWhenEverySizeHasOne() const
 {
     for (bool all_folded : {false, true})
     {
-        QDomDocument doc = document(QStringLiteral("M20,30 L20,50"), QStringLiteral("M30,40 L30,60"));
+        QDomDocument doc = document(QStringLiteral("M20,60 L20,80"), QStringLiteral("M30,160 L30,180"));
         for (int i = 0; i < (all_folded ? 2 : 1); ++i)
         {
+            // The fold line runs down the left edge, so its lower end is the bottom left corner.
             QDomElement fold = doc.createElement(QStringLiteral("g"));
             fold.setAttribute(QStringLiteral("data-type"), QStringLiteral("fold_line"));
             QDomElement path = doc.createElement(QStringLiteral("path"));
             path.setAttribute(QStringLiteral("d"), i == 0 ? QStringLiteral("M0,0 L0,100")
-                                                          : QStringLiteral("M0,10 L0,200"));
+                                                          : QStringLiteral("M0,0 L0,200"));
             fold.appendChild(path);
             group(doc, QStringLiteral("piece"), i).appendChild(fold);
         }
         QVERIFY(layout_handoff::align_handoff_annotations(doc).isEmpty());
-        // A mixed set uses outline centres and fits at the nearest feasible offset.
+        // A mixed set uses outline centres and fits at the nearest shared offset.
         close(translation(group(doc, QStringLiteral("grainline"), 0)),
-              all_folded ? QPointF(10, 0) : QPointF(-20, -30));
+              all_folded ? QPointF(10, 0) : QPointF(-20, 20));
+        close(translation(group(doc, QStringLiteral("grainline"), 1)),
+              all_folded ? QPointF(0, 0) : QPointF(20, -30));
     }
 }
 
@@ -287,31 +350,17 @@ void TestHandoffAnnotationAlignment::jacketCaptureFitsEverySize() const
     QVERIFY(verified_anchors > 500);
     for (int i = 0; !group(doc, QStringLiteral("piece-set"), i).isNull(); ++i)
     {
-        const QDomElement set = group(doc, QStringLiteral("piece-set"), i);
+        const QDomElement    set = group(doc, QStringLiteral("piece-set"), i);
         QVector<QDomElement> pieces;
-        QVector<QPointF> stack_points;
-        QVector<QPointF> fold_starts;
-        bool folded = true;
         for (QDomElement piece = set.firstChildElement(); !piece.isNull(); piece = piece.nextSiblingElement())
         {
-            QVector<QPointF> cut;
-            QVector<QPointF> fold;
-            for (QDomElement child = piece.firstChildElement(); !child.isNull(); child = child.nextSiblingElement())
+            if (piece.attribute(QStringLiteral("data-type")) == QLatin1String("piece"))
             {
-                if (child.attribute(QStringLiteral("data-type")) == QLatin1String("cutline"))
-                {
-                    cut = coordinates(child, false);
-                }
-                if (child.attribute(QStringLiteral("data-type")) == QLatin1String("fold_line"))
-                {
-                    fold = coordinates(child, false);
-                }
+                pieces.append(piece);
             }
-            pieces.append(piece);
-            stack_points.append(QPolygonF(cut).boundingRect().center());
-            fold_starts.append(fold.isEmpty() ? QPointF() : fold.first());
-            folded = folded && !fold.isEmpty();
         }
+        // SeamlyLayout stacks the sizes on the same points, so every size must keep one offset from them.
+        const QVector<std::optional<QPointF>> stack_points = layout_handoff::find_stack_points(pieces);
         for (const QString &type : {QStringLiteral("grainline"), QStringLiteral("piece_label"),
                                     QStringLiteral("pattern_label")})
         {
@@ -331,7 +380,8 @@ void TestHandoffAnnotationAlignment::jacketCaptureFitsEverySize() const
                     QVERIFY(!points.isEmpty());
                     const QPointF anchor = type == QLatin1String("grainline")
                         ? (points.first() + points.last()) / 2 : points.first();
-                    const QPointF offset = anchor - (folded ? fold_starts[size] : stack_points[size]);
+                    QVERIFY(stack_points[size].has_value());
+                    const QPointF offset = anchor - stack_points[size].value();
                     if (found)
                     {
                         close(offset, reference);
@@ -365,4 +415,75 @@ void TestHandoffAnnotationAlignment::jacketCaptureFitsEverySize() const
             close(translation(group(doc, type, i)), first[index++]);
         }
     }
+}
+
+void TestHandoffAnnotationAlignment::stackPointTakesLongestHorizontalEdge() const
+{
+    // The top edge is the longest horizontal edge; its left end wins the tie between its two corners.
+    same_points(find_set_stack_points(trapezoids()), {QPointF(0, 0), QPointF(100, 100)});
+}
+
+void TestHandoffAnnotationAlignment::stackPointMapsClosingIndexToFirstVertex() const
+{
+    // Index 4 names the closing vertex, the same place as vertex 0. Without it, corner 1 would win.
+    same_points(find_set_stack_points(trapezoids(QStringLiteral("M 0,0 L 40,0 L 30,30 L 10,30 Z"),
+                                                 QStringLiteral("0 1 2 3 4"),
+                                                 QStringLiteral("M 100,100 L 180,100 L 160,160 L 120,160 L 100,100 Z"),
+                                                 QStringLiteral("1 2 3 4"))),
+                {QPointF(0, 0), QPointF(100, 100)});
+}
+
+void TestHandoffAnnotationAlignment::stackPointCentresWithoutTurnPoints() const
+{
+    // One size without turn points puts every size on its bounding-box centre.
+    same_points(find_set_stack_points(trapezoids(QStringLiteral("M 0,0 L 40,0 L 30,30 L 10,30 Z"), QString())),
+                {QPointF(20, 15), QPointF(140, 130)});
+}
+
+void TestHandoffAnnotationAlignment::stackPointTakesNearestPlaceInOtherSizes() const
+{
+    // Size 34 starts at (4,0). Its turn point nearest the top left of its bounding box is vertex 4 at (0,0).
+    same_points(find_set_stack_points(trapezoids(QStringLiteral("M 4,0 L 40,0 L 30,30 L 10,30 L 0,0 Z"),
+                                                 QStringLiteral("0 1 2 3 4 5"))),
+                {QPointF(0, 0), QPointF(100, 100)});
+}
+
+void TestHandoffAnnotationAlignment::stackPointTurnsWithGrainFrame() const
+{
+    const QString rectangle = QStringLiteral(
+        "<svg><g data-type='piece-set'><g data-type='piece' %1>"
+        "<g data-type='cutline' data-turn-points='0 1 2 3'><path d='M 0,0 L 40,0 L 40,80 L 0,80 Z'/></g>%2"
+        "</g></g></svg>");
+    // Grain up: the 40 px edges are horizontal, and the lower left corner is SVG (0,80).
+    same_points(find_set_stack_points(rectangle.arg(QStringLiteral("data-grainline-angle='90'"), QString())),
+                {QPointF(0, 80)});
+    // Grain to the right: the 80 px edges are horizontal, and the lower left corner is SVG (0,0).
+    same_points(find_set_stack_points(rectangle.arg(QStringLiteral("data-grainline-angle='0'"), QString())),
+                {QPointF(0, 0)});
+    // A grainline path drawn down turns the piece 180 degrees, so the lower left corner is SVG (40,0).
+    same_points(find_set_stack_points(
+                    rectangle.arg(QString(), QStringLiteral("<g id='back_grainline'><path d='M 20,10 L 20,70'/></g>"))),
+                {QPointF(40, 0)});
+}
+
+void TestHandoffAnnotationAlignment::stackPointTakesLowerFoldLineEnd() const
+{
+    // The fold line comes before the corners. The arrow group is not part of the fold line.
+    const QString svg = QStringLiteral(
+        "<svg><g data-type='piece-set'><g data-type='piece' data-size='34'>"
+        "<g data-type='cutline' data-turn-points='0 1 2 3 4'><path d='M 0,0 L 30,0 L 30,60 L 0,60 Z'/></g>"
+        "<g data-type='fold_line'><g data-type='fold_line_arrow'><path d='M 2,40 L 5,40'/></g>"
+        "<path d='M 0,0 L 0,60'/></g></g>"
+        "<g data-type='piece' data-size='36'>"
+        "<g data-type='cutline' data-turn-points='0 1 2 3 4'>"
+        "<path d='M 100,100 L 140,100 L 140,180 L 100,180 Z'/></g>"
+        "<g data-type='fold_line' transform='matrix(1,0,0,1,1,0)'><path d='M 99,100 L 99,180'/></g>"
+        "</g></g></svg>");
+    same_points(find_set_stack_points(svg), {QPointF(0, 60), QPointF(100, 180)});
+}
+
+void TestHandoffAnnotationAlignment::stackPointNeedsThreeVertices() const
+{
+    same_points(find_set_stack_points(trapezoids(QStringLiteral("M 0,0 L 40,0"))),
+                {std::nullopt, QPointF(100, 100)});
 }
