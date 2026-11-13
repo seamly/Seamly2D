@@ -63,10 +63,11 @@ When the user clicks 'Horizontal', 'Vertical', or 'Both' then the piece is flipp
 ### [ ] Task Layout.801 - Implement - Improve the split pieces' labels
 
 - [x] If a split piece's "split" label is wider than the "splitline" of the piece then set the width of the label to the width of the "splitline"
-  - [x] Layout.801.1 `piece_divider.rs` `fit_label_to_edge`: a part label wider than the part's longest cut edge gets a smaller font, so its width equals the edge length. Its `<text>` gets `textLength` (the edge length) and `lengthAdjust="spacingAndGlyphs"`. A label that fits keeps the 0.25 in font.
+  - [x] Layout.801.1 A part label wider than the part's longest cut edge gets a smaller font, so its width equals the edge length. Its `<text>` gets `textLength` (the edge length) and `lengthAdjust="spacingAndGlyphs"`. A label that fits keeps the 0.25 in font. Since Layout.801.5 this is the fallback in `part_label_placement.rs`.
   - [x] Layout.801.2 Decision: the Hershey font (`svg_label_text::stroke_text_width`) measures the label. It needs no system font. Its spaces and lower-case letters are wider than Arial's, so a renderer that ignores `textLength` draws a part label shorter than the edge.
-  - [x] Layout.801.3 Test: `piece_divider` `part_label_is_no_wider_than_its_cut_edge`. `cargo test --workspace` 670 pass; `ctest --preset debug` 8/8. Test case from trousers `Union_piece` (mirrored waistband, 2079 × 227 px, 16 in roll): the label font goes from 24 px to 11.06 px.
-  - [ ] Layout.801.4 In the next MSI build: trousers, Paper Roll 16 in, Split the pieces. The `Union_piece` part labels are exactly as long as the 2.4 in cut edge. Steps: `AGENT_CHECKLIST.md` section 37.
+  - [x] Layout.801.3 Test: `piece_divider` `part_label_is_no_wider_than_its_cut_edge` (now `part_label_fits_its_part`). `cargo test --workspace` 670 pass; `ctest --preset debug` 8/8. Test case from trousers `Union_piece` (mirrored waistband, 2079 × 227 px, 16 in roll): the label font goes from 24 px to 11.06 px.
+  - [ ] Layout.801.4 In the next MSI build: trousers, Paper Roll 16 in, Layout Mode Along Grainline, Split the pieces. The `Union_piece` part labels are level, 0.25 in, inside the seam line, and cross no line or label. Steps: `AGENT_CHECKLIST.md` section 37.
+  - [x] Layout.801.5 User decision: keep the 0.25 in text. `part_label_placement.rs` `place_part_label`: a label wider than its cut edge lies level across the part, in the clear row nearest the cut edge. Clear: no outline edge, path or other text within 0.25 em. No clear row: the 801.1 shrink. Tests: `part_label_placement` (5), `piece_divider` `part_label_fits_its_part`. `cargo test --workspace` 677 pass; `ctest --preset debug` 8/8. Real trousers export: both `Union_piece` labels 24 px, inside the seam line, below the existing labels.
 
 ### [ ] Task Layout.802 - Implement - Fix test for piece too wide.
 

@@ -51,6 +51,8 @@ pub use layout_assembler::{create_layout, create_initial_layout_dom, remove_colo
 
 // Splits a piece wider or longer than the media into parts that fit (individual patterns).
 mod piece_divider;
+// Size and place the new label of each part of a split piece.
+mod part_label_placement;
 
 // @brief What an individual layout does with a piece wider or longer than the media.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
