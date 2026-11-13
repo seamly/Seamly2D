@@ -53,7 +53,6 @@ MALE_SHIRT
 | Layout.98.6 | 24 | S2D > male_shirt > Piece Properties: Flip radio buttons, Flip submenu | FAIL --> Flip selection appears in piece context menu but without a checkbox, and the submenu appears when 'Flip' is selected, but the piece isn't flipped. The fix for this problem is Layout.110.
 | Layout.88.2 | 3 | SL > male_shirt > Export menu: DXF-ASTM note reads in full | FAIL --> Note did not appear
 | Layout.800.3 | 36 | SL > male_shirt > Export > SVG: no check boxes; each item exports | ?
-| Layout.801.3 | 37 | SL > male_shirt > Roll 8 in, split: each part label is no longer than its cut edge | ?
 | Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Fabric | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Lining | ?
@@ -61,6 +60,7 @@ MALE_SHIRT
 TROUSERS
 | Layout.71.6 | 11 | SL > trousers > Media grows in width | ?
 | Layout.72.8 | 12 | SL > trousers > Settings > Paper Roll 16 in: Oversized pieces - split or enlarge | ?
+| Layout.801.4 | 37 | SL > trousers > Paper Roll 16 in, split: waistband part labels no longer than the cut edge | ?
 
 ## [x] 0. Install
 
@@ -583,12 +583,14 @@ Needs the next MSI. (Layout.800.3)
 
 ## 37. Split part label on a short cut edge
 
-Needs the next MSI. (Layout.801.3)
+Needs the next MSI. (Layout.801.4)
 
-- [ ] Open male_shirt. Press Layout.
-- [ ] Settings: Paper, Roll, custom width 8 in. Submit. Create Layout.
+Pattern: `test-seamly-layout/patterns/validation/trousers.sm2d` (has `Union_piece`, the mirrored waistband).
+
+- [ ] Open trousers. Press Layout.
+- [ ] Settings: Paper, Roll, custom width 16 in. Submit. Create Layout.
 - [ ] Dialog "Pieces do not fit the media": choose "Split the pieces". OK.
-- [ ] Each blue part label `<name> part i of n, joins j` is no longer than the cut edge beside it.
-- [ ] A label on a short cut edge (collar parts) has smaller text and is exactly as long as the edge.
+- [ ] `Union_piece` is 2 parts. Each blue label `<name> part i of 2, joins j` is exactly as long as the cut edge beside it (about 2.4 in). Its text is smaller (about 0.12 in) than on other split pieces.
+- [ ] No part label reaches past its part.
 - [ ] Export > PDF. The labels in the PDF are as long as on the canvas.
-- [ ] Export > SVG > "Paths: convert to single-stroke (Hershey)". Open the file in a browser. Each shrunk label is as long as its cut edge.
+- [ ] Export > SVG > "Paths: convert to single-stroke (Hershey)". Open the file in a browser. The `Union_piece` labels are as long as the cut edge.

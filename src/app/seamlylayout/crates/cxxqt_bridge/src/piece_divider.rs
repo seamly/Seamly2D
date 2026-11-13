@@ -1408,6 +1408,21 @@ mod tests {
             assert_eq!((attr(text, "textLength"), attr(text, "lengthAdjust")), ("100", "spacingAndGlyphs"));
         } // for each part label
 
+        // trousers mirrored waistband, 2079 × 227 uu, on a 16 in roll (1488 px inside the margins).
+        // At 24 uu its 40-character labels reached past the 227 uu cut edge.
+        let waistband = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-4" data-type="piece" data-name="Piece_4_Union_piece">
+            <g data-type="cutline"><path d="M0,0 L2079,0 L2079,227 L0,227 Z"/></g></g></svg>"#;
+        let mut doc = Document::parse(waistband).expect("parses");
+        divide_oversized_pieces(&mut doc, &spec(1488));
+        let texts = part_label_texts(&doc);
+        assert_eq!(texts.len(), 2);
+        for text in texts {
+            let font: f64 = attr(text, "font-size").parse().expect("font size");
+            let label = text.get_text().expect("label text");
+            assert!((svg_label_text::stroke_text_width(&label, font) - 227.0).abs() < 0.01, "{label} at {font} uu");
+            assert_eq!(attr(text, "textLength"), "227");
+        } // for each part label
+
         // 400 × 2000 piece: the label fits the 2000 uu cut edge.
         let tall = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece_Back" data-type="piece" data-name="Back">
             <g data-type="cutline"><path d="M0,0 L400,0 L400,2000 L0,2000 Z"/></g></g></svg>"#;
