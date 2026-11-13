@@ -9,7 +9,8 @@
 // grain up, with transforms baked (text keeps its own transform), before
 // `translate_dom` moves each piece to the origin.
 //
-// A piece that fits at one of its trial angles is not split.  Otherwise its
+// A piece that fits at one of its trial angles is not split.  In Layout Mode
+// Any, a piece that fits turned 90° is not split either.  Otherwise its
 // outline bounding box splits into equal columns (vertical cut lines).  Roll and
 // fabric media have no length limit, so only the width limits a piece.  Each
 // region of the outline inside one column is a part.
@@ -45,7 +46,7 @@ use xmltree::{Element, XMLNode};
 
 use crate::piece_extractor::{
     extract_piece_rects, set_free_rotation_without_grainline, set_piece_rotation_for_layout_mode,
-    svg_uu_per_px,
+    svg_uu_per_px, turn_wide_pieces_to_fit,
 };
 
 // Match notch length; DXF-ASTM slit depth is half the seam allowance written for it.
@@ -216,6 +217,8 @@ fn prepared_pieces(doc: &Document, spec: &DivideSpec) -> Vec<crate::piece_extrac
             piece.rect = piece.rect.with_min_left_gap(spec.fold_edge_gap_px);
         }
     }
+    // Layout Mode Any: a piece that fits turned 90° turns; it is not split.
+    turn_wide_pieces_to_fit(&mut pieces, spec.bin_w, &spec.trial_angles_deg);
     pieces
 } // fn prepared_pieces
 
@@ -1455,8 +1458,8 @@ mod tests {
         assert!(find_oversized_pieces(&doc, &free).is_empty());
     } // long_piece_and_turned_piece
 
-    // @brief Any-mode piece rules decide the split: a piece that may turn a quarter is not split;
-    // a piece held to 0 and 180 degrees splits, and its parts keep the rule.
+    // @brief Layout Mode Any: a 350 x 10 piece on 300 px media turns 90° whatever its rule, so it
+    // is not split.  A 350 x 320 piece fits at no angle: it splits, and its parts keep the rule.
     #[test]
     fn piece_rotation_controls_split_and_stays_on_parts() {
         let any_svg = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-Bias" data-type="piece" data-name="Bias" data-rotation="1">
@@ -1465,18 +1468,25 @@ mod tests {
             apply_piece_rotation: true,
             ..spec(300)
         };
-        for rule in ["1", "90"] {
+        // 1 = any angle, 90 = 4-way, 180 = 2-way, 0 = none, 360 = 1-way, 1.5 = unsupported.
+        for rule in ["1", "90", "180", "0", "360", "1.5"] {
             let turning_svg = any_svg.replace("data-rotation=\"1\"", &format!("data-rotation=\"{rule}\""));
             let mut turning_doc = Document::parse(&turning_svg).expect("fixture parses");
             assert!(find_oversized_pieces(&turning_doc, &any_spec).is_empty(), "rule {rule}");
             assert!(divide_oversized_pieces(&mut turning_doc, &any_spec).is_empty(), "rule {rule}");
-        } // for each rule that allows a quarter turn
+        } // for each rule
 
-        let restricted_svg = any_svg.replace("data-rotation=\"1\"", "data-rotation=\"180\"");
-        let mut restricted_doc = Document::parse(&restricted_svg).expect("fixture parses");
-        assert_eq!(find_oversized_pieces(&restricted_doc, &any_spec).len(), 1);
-        assert_eq!(divide_oversized_pieces(&mut restricted_doc, &any_spec)[0].parts, 2);
-        assert!(part_groups(&restricted_doc).iter().all(|part| attr(part, "data-rotation") == "180"));
+        // Other layout modes do not turn a piece held to 0 and 180 degrees.
+        let fixed_doc = Document::parse(&any_svg.replace("data-rotation=\"1\"", "data-rotation=\"0\"")).expect("fixture parses");
+        assert_eq!(find_oversized_pieces(&fixed_doc, &spec(300)).len(), 1, "Along Grainline");
+
+        let too_wide_svg = any_svg
+            .replace("data-rotation=\"1\"", "data-rotation=\"180\"")
+            .replace("L350,10 L0,10", "L350,320 L0,320");
+        let mut too_wide_doc = Document::parse(&too_wide_svg).expect("fixture parses");
+        assert_eq!(find_oversized_pieces(&too_wide_doc, &any_spec).len(), 1);
+        assert_eq!(divide_oversized_pieces(&mut too_wide_doc, &any_spec)[0].parts, 2);
+        assert!(part_groups(&too_wide_doc).iter().all(|part| attr(part, "data-rotation") == "180"));
     } // piece_rotation_controls_split_and_stays_on_parts
 
     // @brief Fold-line pieces use the fold edge while other pieces keep its configured clearance.

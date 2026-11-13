@@ -103,7 +103,8 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
 ## Oversized Pieces (individual pattern)
 
 - `process_layout` first runs `layout_utils::do_find_oversized_pieces`: pre-processing up to grain-up pieces, then `piece_divider::find_oversized_pieces`.
-- A piece is oversized when no trial angle fits the content width. Paper roll and fabric limit only the width. Warnings report each offending piece width and the media width inside the margins. Tiled paper is never checked.
+- A piece is oversized when no trial angle fits the content width. Paper roll and fabric limit only the width.
+- Layout Mode Any: a piece too wide at its `data-rotation` angles gets quarter turns if a 90° turn fits (`piece_extractor::turn_wide_pieces_to_fit`). It is not oversized. The packer gets the same angles. Warnings report each offending piece width and the media width inside the margins. Tiled paper is never checked.
 - Oversized pieces: the `oversized_pieces_found` signal, no layout. QML asks the user, then calls `process_layout_oversized(settings, "split" | "extend")` or `cancel_layout()`.
 - "split": `ProcessLayoutArgs::split_oversized`. `piece_divider::divide_oversized_pieces` runs after the piece-set centring and before `translate_dom`.
   - Equal columns for a piece too wide. Each outline region in a column is one part.

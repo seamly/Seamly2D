@@ -61,6 +61,7 @@ TROUSERS
 | Layout.71.6 | 11 | SL > trousers > Media grows in width | ?
 | Layout.72.8 | 12 | SL > trousers > Settings > Paper Roll 16 in: Oversized pieces - split or enlarge | ?
 | Layout.801.4 | 37 | SL > trousers > Paper Roll 16 in, split: waistband part labels no longer than the cut edge | ?
+| Layout.802.5 | 38 | SL > trousers > Paper Roll 16 in, Layout Mode Any: waistband turns 90°, not listed as too wide | ?
 
 ## [x] 0. Install
 
@@ -594,3 +595,15 @@ Pattern: `test-seamly-layout/patterns/validation/trousers.sm2d` (has `Union_piec
 - [ ] No part label reaches past its part.
 - [ ] Export > PDF. The labels in the PDF are as long as on the canvas.
 - [ ] Export > SVG > "Paths: convert to single-stroke (Hershey)". Open the file in a browser. The `Union_piece` labels are as long as the cut edge.
+
+## 38. Layout Mode Any turns a wide piece that fits turned
+
+Needs the next MSI. (Layout.802.5)
+
+Pattern: `test-seamly-layout/patterns/validation/trousers.sm2d`. `Union_piece` (the mirrored waistband) is 21.7 × 2.4 in.
+
+- [ ] Open trousers. Press Layout.
+- [ ] Settings: Paper, Roll, custom width 16 in. Layout Mode: Any. Submit. Create Layout.
+- [ ] Dialog "Pieces do not fit the media" lists `Back` only. It does not list `Union_piece`.
+- [ ] Choose "Split the pieces". OK. `Back` is 2 parts. `Union_piece` is 1 piece, turned 90° (vertical on the roll).
+- [ ] Settings: Layout Mode: Along Grainline. Submit. Create Layout. The dialog lists `Back` and `Union_piece`.

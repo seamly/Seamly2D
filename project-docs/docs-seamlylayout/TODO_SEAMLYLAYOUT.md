@@ -71,6 +71,11 @@ When the user clicks 'Horizontal', 'Vertical', or 'Both' then the piece is flipp
 ### [ ] Task Layout.802 - Implement - Fix test for piece too wide.
 
 - [ ] If a piece is too wide to fit on the media, and if Layout Mode is Any then check if the piece could fit if rotated 90degrees; then if the piece doesn't fit then display the message that begins with "These pieces do not fit the media inside it's margins", else proceeed with the layout processing.
+  - [x] Layout.802.1 Cause: the check used the piece's `data-rotation` rule. Seamly2D writes `0` (Rotation None) by default, so Layout Mode Any tried 0° only.
+  - [x] Layout.802.2 `piece_extractor::turn_wide_pieces_to_fit`: in Layout Mode Any, a piece wider than the media at its rule's angles gets quarter turns if a 90° turn fits. The oversized-piece check (`piece_divider` `prepared_pieces`) and the packer (`do_process_layout`) both call it. Tiled paper: no change.
+  - [x] Layout.802.3 Decision: the turn replaces the piece's Rotation rule (None, 1-Way, 2-Way) for that piece only. Without it, the packer cannot place the piece. Other pieces keep their rule.
+  - [x] Layout.802.4 Tests: `piece_extractor` `wide_piece_turns_only_when_the_turn_fits`; `layout_utils` `any_mode_turns_a_wide_piece_that_fits_turned`; `piece_divider` `piece_rotation_controls_split_and_stays_on_parts` (each rule turns; a piece too wide both ways splits). `cargo test --workspace` 672 pass; `ctest --preset debug` 8/8.
+  - [ ] Layout.802.5 In the next MSI build: trousers, Paper Roll 16 in, Layout Mode Any. The dialog lists Back only; `Union_piece` (21.7 × 2.4 in) is placed whole, turned 90°. Steps: `AGENT_CHECKLIST.md` section 38.
 
 ## VERIFY
 

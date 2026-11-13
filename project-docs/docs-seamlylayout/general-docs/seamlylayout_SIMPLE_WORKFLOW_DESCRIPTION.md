@@ -168,6 +168,7 @@ The application workflow loop consists of:
    * Oversized pieces (individual pattern, not tiled paper):
      * Before the layout, `do_find_oversized_pieces` lists each piece wider than the media at every trial angle.
        Paper roll and fabric have no length limit.
+       Layout Mode Any: a piece that fits turned 90° is not listed, whatever its Rotation rule. The layout turns it.
      * None: the layout runs as before. A piece that fits but runs out of room is left out, and a warning names it.
      * Some: no layout yet. Dialog "Pieces do not fit the media" lists them, with two radio buttons.
        One line per piece names each dimension that does not fit, and the media size inside the margins, in the settings unit:

@@ -2,6 +2,17 @@
 
 ## Current status
 
+### 2026-11-12 — Layout Mode Any turns a wide piece that fits turned (Layout.802)
+
+- Cause: the oversized-piece check used each piece's `data-rotation`. Seamly2D writes `0` (None) by default, so Any tried 0° only.
+- `piece_extractor::turn_wide_pieces_to_fit`: Any, piece too wide at its rule's angles, 90° turn fits → rule becomes quarter turns.
+- Called by `piece_divider` `prepared_pieces` (check and split) and `do_process_layout` (packer). Tiled paper: not called.
+- Tests: `wide_piece_turns_only_when_the_turn_fits`, `any_mode_turns_a_wide_piece_that_fits_turned`; `piece_rotation_controls_split_and_stays_on_parts` updated.
+- Checked: `cargo test --workspace` 672 pass; `ctest --preset debug` 8/8.
+- Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, LAYOUT_ROTATION_PLAN, SVG-DATA-ATTRIBUTES `data-rotation`, `AGENT_CHECKLIST.md` §38.
+- Open: Layout.802.5 installed-app check (trousers, roll 16 in, Any: `Union_piece` not listed).
+- Found, not changed: dead code warnings `piece_extractor::piece_bbox`, `exports::build_tiled_pdf_tile_doc`.
+
 ### 2026-11-12 — Split part label no wider than its cut edge (Layout.801)
 
 - `piece_divider.rs` `fit_label_to_edge`: a part label wider than its longest cut edge gets a smaller font. Width = edge length.
@@ -41,19 +52,9 @@
 - `AGENT_CHECKLIST.md` OPEN list: Layout.88.2 "FAIL --> Note did not appear" (male_shirt).
 - Next: Layout.108.7 docs, in plain words. `AGENT_CHECKLIST.md` section 26 and `SVG-DATA-ATTRIBUTES.md` "Multisize grainline and label positions" both use "stack".
 
-### 2026-11-12 — Tile Size offers Custom
-
-- The removed custom size was a Paper Type choice. Tile Size had no Custom.
-- Tile Size lists the 27 sizes, then Custom. Custom Size fields: width × height in the user unit.
-- New keys `tileWidth`, `tileHeight` (default 8.5 × 11), not `pageWidth`/`pageHeight`: page width is the fabric width fallback.
-- Selecting Custom copies the current predefined size. Orientation applies. Unit change converts.
-- Rust: `CUSTOM_TILE_SIZE`, `LayoutSettings::custom_tile_px`, `tiling::tile_page_px`.
-- Docs: SETTINGS_WORKFLOW, settings rule, TODO Layout.999.1 and .4, `AGENT_CHECKLIST.md` §10.
-- Checked: `cargo test --workspace` 669 pass; `ctest --preset debug` 8/8.
-- Open: Layout.999.4 installed-app check with the next MSI.
-
 ## Decisions to retain
 
+- Layout Mode Any: a piece too wide at its Rotation rule's angles turns 90° if that fits. This replaces the rule for that piece only; the packer cannot place it otherwise (Layout.802 task text, 2026-11-12).
 - Custom page size lives in Tile Size > Custom (`tileWidth`, `tileHeight`). Paper Type has no custom size (user, 2026-11-12).
 - Layout Mode Any ignores "Place fold lines on the left edge": no pin, no turn, no mirror, no conflict error (user, 2026-11-12).
 - A paper sheet never grows, multisize tabs included. Overflow directs the user to PDF (tiled) (user, 2026-11-12).

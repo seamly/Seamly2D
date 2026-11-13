@@ -25,7 +25,7 @@ use layout_tiling::{
 
 use crate::piece_extractor::{
     extract_piece_rects_and_polygons, hoist_layout_units, keep_size, set_free_rotation_without_grainline,
-    set_piece_rotation_for_layout_mode,
+    set_piece_rotation_for_layout_mode, turn_wide_pieces_to_fit,
 };
 use crate::layout_assembler::{create_layout, create_initial_layout_dom, set_content_width, trim_bottom};
 use crate::piece_divider::{self, DivideSpec, OversizedPiece};
@@ -396,6 +396,12 @@ pub fn do_process_layout(
             }
         }
     }
+    // Layout Mode Any: a piece wider than the media turns 90° when the turn fits,
+    // as the oversized-piece check (`piece_divider::find_oversized_pieces`) expects.
+    // Tiled paper has no width limit: its pages cover a wide piece.
+    if !is_tiled {
+        turn_wide_pieces_to_fit(&mut pieces, bin_w, &trial_angles_deg);
+    } // if not tiled
     if pieces.is_empty() {
         return Err(
             "[ERROR] layout_utils::do_process_layout(): 8 No pattern pieces found in the imported SVG. \
@@ -1258,6 +1264,51 @@ mod tests {
         assert!(labels.contains(&"Back".to_string()), "whole Back piece remains: {labels:?}");
         assert!(!labels.iter().any(|label| label.contains("(1/")), "no split parts: {labels:?}");
     } // split_request_without_divided_pieces_keeps_regular_layout_state
+
+    // @brief Layout Mode Any, 12 in paper roll (11.5 in between the margins): a 15.6 x 3.1 in
+    // piece with Rotation None fits turned 90°.  No oversized-piece dialog; the layout turns it.
+    // Along Grainline does not turn it, so the dialog names it.
+    #[test]
+    fn any_mode_turns_a_wide_piece_that_fits_turned() {
+        let input_dom = Document::parse(r#"<svg xmlns="http://www.w3.org/2000/svg" width="20in" height="10in" viewBox="0 0 1920 960">
+  <g id="pattern-1" data-type="pattern">
+    <g id="piece-1" data-type="piece" data-name="Waistband" data-rotation="0">
+      <g data-type="cutline"><path d="M0,0 L1500,0 L1500,300 L0,300 Z"/></g>
+    </g>
+  </g>
+</svg>"#).expect("fixture parses");
+        let mut any_settings: serde_json::Value =
+            serde_json::from_str(&paper_roll_settings_json(12.0)).expect("settings JSON");
+        any_settings["layoutMode"] = serde_json::json!("any");
+        let any_json = any_settings.to_string();
+
+        let init = do_initialize_layout(&any_json, Some(&input_dom)).expect("initialize_layout should succeed");
+        let oversized = do_find_oversized_pieces(&any_json, &input_dom, &init.initial_dom).expect("check runs");
+        assert!(oversized.is_empty(), "the piece fits turned: {oversized:?}");
+
+        let mut progress = |_pct: i32, _status: Option<&str>| {};
+        let result = do_process_layout(
+            ProcessLayoutArgs {
+                settings_json: &any_json,
+                input_dom: &input_dom,
+                initial_layout_dom: &init.initial_dom,
+                layout_h_px: init.h_px,
+                nested_multisize: false,
+                extend_media: false,
+                split_oversized: false,
+            },
+            &mut progress,
+        ).expect("process_layout should succeed");
+        assert!(result.unplaced_labels.is_empty(), "unplaced: {:?}", result.unplaced_labels);
+        let bbox: serde_json::Value = serde_json::from_str(&result.bbox_json).expect("valid JSON");
+        let piece = &bbox["pieces"][0];
+        assert!(piece["w"].as_u64().unwrap_or(u64::MAX) < piece["h"].as_u64().unwrap_or(0), "placed turned: {piece}");
+
+        let along_json = paper_roll_settings_json(12.0);
+        let init = do_initialize_layout(&along_json, Some(&input_dom)).expect("initialize_layout should succeed");
+        let oversized = do_find_oversized_pieces(&along_json, &input_dom, &init.initial_dom).expect("check runs");
+        assert_eq!(oversized.len(), 1, "Along Grainline keeps the piece upright");
+    } // any_mode_turns_a_wide_piece_that_fits_turned
 
     // @brief 36 in fabric folded to 18 in: the trousers go on the fabric, not on the
     // B0 page size that the settings keep from paper media.  The initial 500 in
