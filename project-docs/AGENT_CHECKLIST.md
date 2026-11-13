@@ -46,6 +46,7 @@ JACKET_2
 | Layout.93.7 | 23 | SL > jacket_2 > DXF piece properties: Material, Missing Piece Data, Rotation, Flip, Tilt, Fold | --> export DXF (R13), upload to https://aw.fyi/dxf
 | Seamly2D.71.12 | 34 | S2D > jacket2 > Piece mode, Back: seam line and cut line stop at the fold line | ?
 | Seamly2D.71.15 | 35 | S2D > jacket2 > Layout > SL, Back: seam line and cut line stop at the fold line | ?
+| Layout.804.5 | 39 | SL > jacket_2 > Nested: Back and Detail 2 stack on the lower fold line end; other pieces on one corner | ?
 
 MALE_SHIRT
 | Seamly2D.71.12 | 34 | S2D > male_shirt > Piece mode, BackPanel and CollarTopInterface-Built-in-SA: seam line and cut line stop at the fold line | ?
@@ -448,7 +449,7 @@ Needs the next MSI. jacket2 handoff: Fabric and Lining. Settings from section 1.
 
 Needs the next MSI. jacket2 handoff (grainlines and labels shown).
 
-- [ ] Import: one popup, title "Import warning", names "Back: piece label past the cut line in size 220" (Back's sizes stack on their fold line start).
+- [ ] Import: no "Import warning" popup. Back's sizes stack on the lower end of their fold line, and every label fits there.
 - [ ] Nested tab, Fabric: each piece shows one grainline stack and one label stack; the sizes' copies lie exactly on top of each other.
 - [ ] Size 220 and Size 720 tabs: each piece's grainline and labels sit in the same place inside the piece as on the Base Size 500 tab.
 - [ ] Lining, Nested tab: Detail 4's grainline, piece label and pattern label each stack as one.
@@ -601,3 +602,17 @@ Pattern: `test-seamly-layout/patterns/validation/trousers.sm2d`. `Union_piece` (
 - [ ] Dialog "Pieces do not fit the media" lists `Back` only. It does not list `Union_piece`.
 - [ ] Choose "Split the pieces". OK. `Back` is 2 parts. `Union_piece` is 1 piece, turned 90° (vertical on the roll).
 - [ ] Settings: Layout Mode: Along Grainline. Submit. Create Layout. The dialog lists `Back` and `Union_piece`.
+
+## 39. jacket2 Nested: sizes stack on a fold line end or a cut line corner
+
+(Layout.804.5)
+
+Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is Lining.
+
+- [ ] Seamly2D: open jacket2. Press Layout. No "Import warning" popup.
+- [ ] Create Layout. Fabric, Nested tab: the Back sizes stack on the lower end of their fold line. The fold lines of all sizes lie on one line.
+- [ ] Detail 2: the same as Back.
+- [ ] Подборт, Комір, Detail 3, Sleeve 1, Sleeve 2: the cut lines of all sizes meet at one corner of the cut line.
+- [ ] Each piece: one grainline stack and one label stack. The sizes' copies lie on top of each other.
+- [ ] Lining, Nested tab: the Detail 4 cut lines meet at one corner. Its grainline and labels each stack as one.
+- [ ] Settings: Layout Mode: Along Grainline. "Place fold lines on the left edge" on. Submit. Create Layout. The Back and Detail 2 stacks lie on the left edge. No warning.

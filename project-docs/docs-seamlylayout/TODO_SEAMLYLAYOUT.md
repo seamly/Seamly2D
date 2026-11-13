@@ -72,6 +72,11 @@ When the user clicks 'Horizontal', 'Vertical', or 'Both' then the piece is flipp
 
 - [ ] align nested pieces:
   - [ ] find all points of discontinuity (corners) along the cutline, then create a list of corners with a horizontal tangent line (within a small margin of error) as "corners_horizontal" and a list of corners without a horizontal tangent line as "corners_nonhorizontal"; if corners_horizontal is non-empty then select the corner with the longest horizontal tangent line and align the pieces at that corner; else if corners_nonhorizontal is non-empty then select the corner with the longest tangent line and align the pieces at that corner; else if there are no corners in the piece then align the pieces at the center of the piece's bounding box.
+  - [x] Layout.804.1 User decisions: a fold line comes first, at its lower end (left end if level). Both apps use the same rules. Tie: longer other edge, then the lower corner, then the left one.
+  - [x] Layout.804.2 Stack point of each size, in the grain frame: fold line in every size → lower end of the largest size's fold line. Else turn points in every size → the largest size's turn point with the longest level edge, else with the longest edge; other sizes take the turn point nearest the same bounding-box place. Else the bounding-box centre.
+  - [x] Layout.804.3 SeamlyLayout: `svg_dom/src/stack_point.rs`, used by `center_piece_sets` and `annotation_alignment.rs`. Seamly2D: `layout_handoff/handoff_stack_point.cpp` has the same rules, used by `align_handoff_annotations`; new `handoff_svg_reading.cpp`. `annotation_alignment::inside`: a point within 0.01 px of the cut line is inside, as in Seamly2D.
+  - [x] Layout.804.4 Tests: `stack_point.rs` (11), `TestHandoffAnnotationAlignment` `stackPoint*` (7), `anchor_on_the_cut_line_is_inside`. Fixture `jacket2_40-146_handoff.svg`: annotation transforms realigned by the new Seamly2D code; 0 warnings. `cargo test --workspace` 689 pass; `ctest --preset debug` 8/8; `TestHandoffAnnotationAlignment` 18/18 in a scratch build.
+  - [ ] Layout.804.5 In the next MSI build: the 4 Qt suites pass. jacket2 Nested: Back and Detail 2 stack on the lower end of their fold line; each other piece stacks on one cut line corner; no import warning. Steps: `AGENT_CHECKLIST.md` section 39.
 
 ## VERIFY
 

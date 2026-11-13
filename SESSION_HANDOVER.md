@@ -2,21 +2,18 @@
 
 ## Current status
 
-### 2026-11-12 — Nested sizes stack on a corner (Layout.804): not committed
+### 2026-11-12 — Nested sizes stack on a corner (Layout.804)
 
-- Branch `task-nested-stack-corner`. Code, tests, fixture done and checked. Nothing committed yet.
+- Merged into `run-seamlyLayout` without skip-ci (`.pri`/`.pro` changed). Branch `task-nested-stack-corner` deleted.
 - Stack point: Rust `svg_dom/src/stack_point.rs`; C++ `layout_handoff/handoff_stack_point.cpp` mirrors it. Users: `center_piece_sets`, `annotation_alignment.rs`, `align_handoff_annotations`.
 - Rules: fold line in every size → its lower end (left end if level). Else turn points in every size → largest size's turn point with the longest level edge, else longest edge. Else bbox centre.
 - User decisions: fold line first, lower end; both apps; tie → longer other edge, then lower, then left.
-- New C++ `handoff_svg_reading.h/.cpp` (`find_tagged_child`, `read_matrix`, `collect_points`). `.pri`/`.pro` changed → merge WITHOUT skip-ci.
+- New C++ `handoff_svg_reading.h/.cpp` (`find_tagged_child`, `read_matrix`, `collect_points`).
 - Rust `annotation_alignment::inside`: within 0.01 px of the cut line counts as inside (matches C++). Test `anchor_on_the_cut_line_is_inside`.
-- `test_data/jacket2_40-146_handoff.svg`: 227 annotation transforms realigned by the new C++ code (scratch `realign.exe`). A fresh jacket2 export is still needed.
+- `test_data/jacket2_40-146_handoff.svg`: 227 annotation transforms realigned by the new C++ code (scratch `realign.exe`). On the old fixture it gives 0 warnings: Back's size 220 import warning is gone. A fresh jacket2 export is still needed.
 - Checked: scratch QtTest `TestHandoffAnnotationAlignment` 18/18; `cargo test --workspace` 689 pass; `ctest --preset debug` 8/8. MSI Qt suites not run.
-- Docs done: SVG-DATA-ATTRIBUTES "Multisize stack point".
-- Next docs: `seamlylayout_SETTINGS_WORKFLOW.md:80` and `AGENT_CHECKLIST.md:451` "fold line start" → "lower end of the fold line".
-- Next docs: `AGENT_CHECKLIST.md` §39 (jacket2 Nested Fabric/Lining: Back on lower fold line end, others on one corner, no warning) plus OPEN row; TODO Layout.804 checked subtasks plus open MSI check.
-- Then commit. Uncommitted edits already in `AGENT_CHECKLIST.md` (22 lines) and `TODO_SEAMLYLAYOUT.md` (125 lines) go in too: tell Sue.
-- Then merge `--no-ff` without skip-ci, report the ahead count, delete the branch.
+- Docs: SVG-DATA-ATTRIBUTES "Multisize stack point"; SETTINGS_WORKFLOW fold line; `AGENT_CHECKLIST.md` §26 (no import warning), §39, OPEN row; TODO Layout.804.1–.4.
+- Open: Layout.804.5 with the next MSI: 4 Qt suites, `AGENT_CHECKLIST.md` §39.
 - Scratch: `build/scratch_corners/` (`fix_*.py`, `qttest/` QtTest build, `realign.exe`, `ctest_debug.bat`).
 
 ### 2026-11-12 — Layout Mode Any turns a wide piece that fits turned (Layout.802)
