@@ -2,6 +2,15 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-12 — Plain words in the TODO file
+
+- Rule added: describe literal actions and data; no made-up names, no wrong jargon. `CLAUDE.md` (d4809bc650). Agent file `.claude/agents/seamlylayout-developer.md` too: local only, gitignored.
+- `TODO_SEAMLYLAYOUT.md` open items rewritten in plain words (bd756c7227). Each "Next MSI: user check" line now holds the steps and the expected result. Checked lines unchanged, except Layout.108 and the "harness" and "scratch" words.
+- Fixed: the "Layout.58.13" cross-reference is Layout.68.13.
+- Answer recorded in Layout.108: Seamly2D writes the SVG as text to SeamlyLayout's standard input. No file is written. SeamlyLayout reads the text and imports the pieces.
+- `AGENT_CHECKLIST.md` OPEN list: Layout.88.2 "FAIL --> Note did not appear" (male_shirt).
+- Next: Layout.108.7 docs, in plain words. `AGENT_CHECKLIST.md` section 26 and `SVG-DATA-ATTRIBUTES.md` "Multisize grainline and label positions" both use "stack".
+
 ### 2026-11-12 — Tile Size offers Custom
 
 - The removed custom size was a Paper Type choice. Tile Size had no Custom.

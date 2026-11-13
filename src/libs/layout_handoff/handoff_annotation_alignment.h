@@ -16,7 +16,8 @@ namespace layout_handoff
 /**
  * @brief Aligns the generated handoff's multisize annotations without changing pattern data.
  * @details Supports the absolute polylines and matrix transforms emitted by HandoffDocument.
- *          Uses fold starts when every size has one, otherwise outline bounding-box centres.
+ *          Measures from the stack points of find_stack_points: the lower fold line end, else a corner,
+ *          else the outline bounding-box centre.
  *          Each component keeps the base offset if it fits; otherwise uses the nearest shared offset.
  *          Hidden components and sets without a base size remain unchanged.
  * @return Components with no shared fit; these retain the base offset in every size.
