@@ -108,6 +108,30 @@ pub fn set_piece_rotation_for_layout_mode(pieces: &mut [PieceRect], enabled: boo
     } // for each piece
 } // fn set_piece_rotation_for_layout_mode
 
+// @brief Layout Mode Any: let a piece wider than the media turn 90° when the turn makes it fit.
+//
+// Such a piece gets quarter turns in place of its Piece Properties rotation rule.
+// A piece that fits at its own angles, or that is too wide either way, keeps its rule.
+// Only the width counts: roll and fabric media have no length limit.
+//
+// @param pieces           Extracted pieces with layout mode rules, left edge angle and left gap set.
+// @param bin_w            Media content width, in layout pixels.
+// @param trial_angles_deg The layout mode's trial angles.
+pub fn turn_wide_pieces_to_fit(pieces: &mut [PieceRect], bin_w: u32, trial_angles_deg: &[u16]) {
+    for piece in pieces.iter_mut() {
+        // Other layout modes keep their trial set; a fitting piece keeps its rule.
+        if !piece.rect.apply_piece_rotation
+            || packing::fits_bin(piece.rect, bin_w, u32::MAX, trial_angles_deg)
+        {
+            continue;
+        } // if not Layout Mode Any, or the piece fits
+        let turned = piece.rect.with_piece_rotation(PieceRotationRule::FourWay);
+        if packing::fits_bin(turned, bin_w, u32::MAX, trial_angles_deg) {
+            piece.rect = turned;
+        } // if the piece fits turned 90°
+    } // for each piece
+} // fn turn_wide_pieces_to_fit
+
 // @brief Warning lines for the pieces a layout left out: one line per piece, then its sizes.
 //
 // Names follow the DXF-ASTM numbering ("Detail (3)"), so a dialog names a piece
@@ -1188,6 +1212,36 @@ pub(crate) mod tests {
         set_piece_rotation_for_layout_mode(&mut active, true);
         assert!(active.iter().all(|piece| piece.rect.apply_piece_rotation));
     } // rotation_rules_parse_in_both_extractors
+
+    // @brief Layout Mode Any on 30 px media: only a piece that fits turned 90° gets quarter turns.
+    #[test]
+    fn wide_piece_turns_only_when_the_turn_fits() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+    <g id="wide" data-type="piece" data-rotation="0"><path d="M0 0 L40 0 L40 20 L0 20 Z"/></g>
+    <g id="fits" data-type="piece" data-rotation="0"><path d="M0 0 L25 0 L25 20 L0 20 Z"/></g>
+    <g id="square" data-type="piece" data-rotation="180"><path d="M0 0 L40 0 L40 35 L0 35 Z"/></g>
+</svg>"#;
+        let doc = svg_dom::Document::parse(svg).expect("parse ok");
+        let quarter_turns = [0, 90, 180, 270];
+
+        let mut any_mode = extract_piece_rects(&doc);
+        set_piece_rotation_for_layout_mode(&mut any_mode, true);
+        turn_wide_pieces_to_fit(&mut any_mode, 30, &quarter_turns);
+        let rules: Vec<PieceRotationRule> = any_mode.iter().map(|piece| piece.rect.piece_rotation).collect();
+        assert_eq!(rules, [PieceRotationRule::FourWay, PieceRotationRule::Fixed, PieceRotationRule::TwoWay]);
+
+        // A 15 px left gap: the turned piece needs 35 px, so it keeps its rule.
+        let mut with_gap = extract_piece_rects(&doc);
+        set_piece_rotation_for_layout_mode(&mut with_gap, true);
+        with_gap[0].rect = with_gap[0].rect.with_min_left_gap(15);
+        turn_wide_pieces_to_fit(&mut with_gap, 30, &quarter_turns);
+        assert_eq!(with_gap[0].rect.piece_rotation, PieceRotationRule::Fixed);
+
+        // Other layout modes do not use the piece rule; nothing changes.
+        let mut along_grainline = extract_piece_rects(&doc);
+        turn_wide_pieces_to_fit(&mut along_grainline, 30, &[0, 180]);
+        assert_eq!(along_grainline[0].rect.piece_rotation, PieceRotationRule::Fixed);
+    } // wide_piece_turns_only_when_the_turn_fits
 
     // @brief Nested piece-set rotation is the intersection of its member-size rules.
     #[test]

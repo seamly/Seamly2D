@@ -2,6 +2,17 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-12 — Tile Size offers Custom
+
+- The removed custom size was a Paper Type choice. Tile Size had no Custom.
+- Tile Size lists the 27 sizes, then Custom. Custom Size fields: width × height in the user unit.
+- New keys `tileWidth`, `tileHeight` (default 8.5 × 11), not `pageWidth`/`pageHeight`: page width is the fabric width fallback.
+- Selecting Custom copies the current predefined size. Orientation applies. Unit change converts.
+- Rust: `CUSTOM_TILE_SIZE`, `LayoutSettings::custom_tile_px`, `tiling::tile_page_px`.
+- Docs: SETTINGS_WORKFLOW, settings rule, TODO Layout.999.1 and .4, `AGENT_CHECKLIST.md` §10.
+- Checked: `cargo test --workspace` 669 pass; `ctest --preset debug` 8/8.
+- Open: Layout.999.4 installed-app check with the next MSI.
+
 ### 2026-11-12 — Paper > Sheet removed (Layout.999)
 
 - Paper Type is tiled or roll. The custom size moved to Tile Size. Saved "sheet" or "custom" loads as "tiled".
