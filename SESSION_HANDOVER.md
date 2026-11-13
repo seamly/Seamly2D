@@ -13,16 +13,16 @@
 - Open: Layout.802.5 installed-app check (trousers, roll 16 in, Any: `Union_piece` not listed).
 - Found, not changed: dead code warnings `piece_extractor::piece_bbox`, `exports::build_tiled_pdf_tile_doc`.
 
-### 2026-11-12 — Split part label no wider than its cut edge (Layout.801)
+### 2026-11-12 — Split part label on a short cut edge (Layout.801)
 
-- `piece_divider.rs` `fit_label_to_edge`: a part label wider than its longest cut edge gets a smaller font. Width = edge length.
-- The shrunk `<text>` gets `textLength` (edge length) and `lengthAdjust="spacingAndGlyphs"`.
-- Measure: `svg_label_text::stroke_text_width` (Hershey). No system font. Wider than Arial for part labels.
-- Test: `part_label_is_no_wider_than_its_cut_edge`, incl. trousers `Union_piece` (mirrored waistband, 227 px cut edge): font 24 → 11.06 px.
-- Found by the user: trousers `Union_piece` split on a 16 in roll; 24 px label (~431 px) ran past the 227 px cut edge.
-- `trousers-handoff_pieces.svg` test input has no `Union_piece`; it is older than the pattern.
-- Checked: `cargo test --workspace` 670 pass; `ctest --preset debug` 8/8.
-- Docs: SVG-DATA-ATTRIBUTES "split parts", SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §37.
+- Found by the user: trousers `Union_piece` split on a 16 in roll; 24 px label (~492 px Hershey) ran past the 227 px cut edge.
+- First fix: shrink the label to the edge (font 24 → ~11 px, `textLength`). User decision: keep the 0.25 in text.
+- New `cxxqt_bridge/src/part_label_placement.rs` `place_part_label`: label fits edge → along the edge, as before.
+- Label wider than edge → level, 24 px, clear row nearest the cut edge. Clear: no outline edge, path or text within 0.25 em.
+- No clear row → shrink along the edge (old fallback). `piece_divider.rs` `fit_label_to_edge` removed.
+- Real trousers export: both labels 24 px, inside the seam line, below the existing labels, past the notches.
+- Tests: `part_label_placement` (5), `piece_divider` `part_label_fits_its_part`. `cargo test --workspace` 677 pass; `ctest --preset debug` 8/8.
+- Docs: SVG-DATA-ATTRIBUTES "split parts", SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §37 (now Layout Mode Along Grainline: Any turns `Union_piece`).
 - Open: Layout.801.4 installed-app check with the next MSI.
 
 ### 2026-11-12 — Export > SVG has no check boxes (Layout.800)

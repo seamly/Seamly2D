@@ -27,8 +27,9 @@
 //   - notches, labels and other groups: whole, on the nearest part;
 //   - a part without grainline gets a new vertical grainline when the piece had one;
 //   - a new `piece_label`: "<name> part i of n, joins j", along the longest cut
-//     edge. A label wider than that edge gets a smaller font and `textLength`
-//     equal to the edge length;
+//     edge. A label wider than that edge lies level across the part, clear of the
+//     other paths and text; with no clear place, it shrinks to the edge
+//     (`part_label_placement.rs`);
 //   - two match notches on each cut edge it shares with another part;
 //   - `data-split-of`, `data-split-part`, `data-split-count`; each id gets `_part<i>`.
 // The cut edge has no seam allowance: the parts join edge to edge.
@@ -44,6 +45,7 @@ use packing::Rect;
 use svg_dom::Document;
 use xmltree::{Element, XMLNode};
 
+use crate::part_label_placement::{place_part_label, CutEdge};
 use crate::piece_extractor::{
     extract_piece_rects, set_free_rotation_without_grainline, set_piece_rotation_for_layout_mode,
     svg_uu_per_px, turn_wide_pieces_to_fit,
@@ -912,23 +914,6 @@ fn grainline_d(part: &Part, uu_per_in: f64) -> Option<String> {
     ))
 } // fn grainline_d
 
-// @brief Font size and width of a part label that must not be wider than its cut edge.
-//
-// The single-stroke font measures the label: no system font is needed, and the
-// single-stroke text export then draws the label exactly as long as the edge.
-//
-// @param text Label text.
-// @param edge Length of the cut edge beside the label; None when the part has no cut edge.
-// @param font Font size the label gets when it fits, in user units.
-// @return Font size, and the edge length when the label at `font` is wider than the edge, else None.
-fn fit_label_to_edge(text: &str, edge: Option<f64>, font: f64) -> (f64, Option<f64>) {
-    let width = svg_label_text::stroke_text_width(text, font);
-    match edge.filter(|&edge| width > edge && edge > 0.0) {
-        Some(edge) => (font * edge / width, Some(edge)), // too wide: scale the font to the edge
-        None => (font, None),                            // fits, or no cut edge
-    } // match the label is wider than the edge
-} // fn fit_label_to_edge
-
 // @brief Split one piece group into part groups; None when it cannot be split.
 fn divide_piece(piece: &Element, columns: usize, uu_per_px: f64) -> Option<Vec<Element>> {
     let uu_per_in = uu_per_px * layout_tiling::LAYOUT_PPI;
@@ -1211,7 +1196,7 @@ fn divide_piece(piece: &Element, columns: usize, uu_per_px: f64) -> Option<Vec<E
             } // match notch group
         } // if match notches
 
-        // Part label beside the longest cut edge, reading up along it.
+        // Part label beside the longest cut edge, or level across the part when the edge is too short.
         let mut others: Vec<usize> = joins[i].iter().map(|j| j + 1).collect();
         others.sort_unstable();
         let joins_text = others.iter().map(usize::to_string).collect::<Vec<_>>().join(", ");
@@ -1220,18 +1205,19 @@ fn divide_piece(piece: &Element, columns: usize, uu_per_px: f64) -> Option<Vec<E
         } else {
             format!("{shown} part {number} of {count}, joins {joins_text}")
         }; // text
-        let longest_edge = part.cut_edges().into_iter().max_by(|a, b| (a.2 - a.1).total_cmp(&(b.2 - b.1)));
-        let (font, text_length) = fit_label_to_edge(&text, longest_edge.map(|(_, lo, hi)| hi - lo), PART_LABEL_FONT_IN * uu_per_in);
-        let transform = match longest_edge {
-            Some((line, lo, hi)) => {
-                let (x, y) = off_line(line, (lo + hi) / 2.0, inward(part, line) * 1.5 * font);
-                format!("translate({} {}) rotate(-90)", fmt_coord(x), fmt_coord(y))
-            } // Some
-            None => {
-                let (x, y) = part.centre();
-                format!("translate({} {})", fmt_coord(x), fmt_coord(y))
-            } // None
-        }; // transform
+        let longest_edge = part
+            .cut_edges()
+            .into_iter()
+            .max_by(|a, b| (a.2 - a.1).total_cmp(&(b.2 - b.1)))
+            .map(|(line, lo, hi)| CutEdge { x: line.at, lo, hi, inward: inward(part, line) });
+        let outline: Vec<(f64, f64)> = part.polygon.iter().map(|v| v.point).collect();
+        let place = place_part_label(&text, PART_LABEL_FONT_IN * uu_per_in, &outline, longest_edge, &children);
+        let (x, y) = (fmt_coord(place.centre.0), fmt_coord(place.centre.1));
+        let transform = if place.along_edge {
+            format!("translate({x} {y}) rotate(-90)") // reads up along the cut edge
+        } else {
+            format!("translate({x} {y})") // level
+        }; // if along the edge
         let mut label = new_element("g", &[
             ("id", format!("piece_label_split_{piece_id}")),
             ("data-type", "piece_label".to_string()),
@@ -1244,13 +1230,13 @@ fn divide_piece(piece: &Element, columns: usize, uu_per_px: f64) -> Option<Vec<E
             ("y", "0".to_string()),
             ("transform", transform),
             ("font-family", "Arial".to_string()),
-            ("font-size", fmt_coord(font)),
+            ("font-size", fmt_coord(place.font)),
             ("fill", "#0000ff".to_string()),
             ("stroke", "none".to_string()),
             ("text-anchor", "middle".to_string()),
             ("dominant-baseline", "middle".to_string()),
         ]);
-        if let Some(length) = text_length {
+        if let Some(length) = place.text_length {
             // Renderers that read textLength draw the label exactly as long as the edge.
             text_el.attributes.insert("textLength".to_string(), fmt_coord(length));
             text_el.attributes.insert("lengthAdjust".to_string(), "spacingAndGlyphs".to_string());
@@ -1394,11 +1380,66 @@ mod tests {
             .collect()
     } // fn part_label_texts
 
-    // @brief A part label wider than its cut edge gets a smaller font and `textLength`
-    // equal to the edge length. A label that fits keeps the 0.25 in (24 uu) font.
+    // @brief Centre of a level part label, from its `translate(x y)` transform.
+    fn translate_xy(text: &Element) -> (f64, f64) {
+        let transform = attr(text, "transform").trim_start_matches("translate(").trim_end_matches(')');
+        let numbers: Vec<f64> = transform.split_whitespace().map(|v| v.parse().expect("number")).collect();
+        (numbers[0], numbers[1])
+    } // fn translate_xy
+
+    // @brief A part label keeps the 0.25 in (24 uu) font: along a cut edge it fits, else level
+    // across the part. With no clear level place, it shrinks to the edge: smaller font and
+    // `textLength` equal to the edge length.
     #[test]
-    fn part_label_is_no_wider_than_its_cut_edge() {
-        // 400 × 100 piece: the label is wider than the 100 uu cut edge.
+    fn part_label_fits_its_part() {
+        // 400 × 2000 piece: the label fits the 2000 uu cut edge.
+        let tall = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece_Back" data-type="piece" data-name="Back">
+            <g data-type="cutline"><path d="M0,0 L400,0 L400,2000 L0,2000 Z"/></g></g></svg>"#;
+        let mut doc = Document::parse(tall).expect("parses");
+        divide_oversized_pieces(&mut doc, &spec(250));
+        let texts = part_label_texts(&doc);
+        assert_eq!(texts.len(), 2);
+        for text in texts {
+            assert_eq!(attr(text, "font-size"), "24");
+            assert!(attr(text, "transform").ends_with("rotate(-90)"), "{:?}", text.attributes);
+            assert!(!text.attributes.contains_key("textLength") && !text.attributes.contains_key("lengthAdjust"));
+        } // for each part label
+
+        // trousers mirrored waistband, 2079 × 227 uu, on a 16 in roll (1488 px inside the margins).
+        // The label is wider than the 227 uu cut edge. It lies level, inside the seam line and
+        // clear of the pattern label beside the cut line at x 1039.5.
+        let waistband = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-4" data-type="piece" data-name="Piece_4_Union_piece">
+            <g data-type="cutline"><path d="M0,0 L2079,0 L2079,227 L0,227 Z"/></g>
+            <g data-type="seamline"><path d="M38,38 L2041,38 L2041,189 L38,189 Z"/></g>
+            <g id="pattern_label_1" data-type="pattern_label" font-size="18">
+              <text x="0" y="19" transform="matrix(1 0 0 1 700 38)">trousers.sm2d, trousers.smis</text>
+              <text x="0" y="19" transform="matrix(1 0 0 1 830 62)">11-12-2026</text>
+              <text x="0" y="19" transform="matrix(1 0 0 1 900 110)">Cut 1</text>
+            </g></g></svg>"#;
+        // Left end, baseline and text of each pattern label line.
+        let pattern_lines =
+            [(700.0, 57.0, "trousers.sm2d, trousers.smis"), (830.0, 81.0, "11-12-2026"), (900.0, 129.0, "Cut 1")];
+        let mut doc = Document::parse(waistband).expect("parses");
+        divide_oversized_pieces(&mut doc, &spec(1488));
+        let texts = part_label_texts(&doc);
+        assert_eq!(texts.len(), 2);
+        for text in texts {
+            assert_eq!(attr(text, "font-size"), "24");
+            assert!(!text.attributes.contains_key("textLength"), "{:?}", text.attributes);
+            let (x, y) = translate_xy(text);
+            let half_width = svg_label_text::stroke_text_width(&text.get_text().expect("label text"), 24.0) / 2.0;
+            let (left, top, right, bottom) = (x - half_width, y - 12.0, x + half_width, y + 12.0);
+            assert!(left > 38.0 && top > 38.0 && right < 2041.0 && bottom < 189.0, "label at ({x}, {y})");
+            assert!(right <= 1039.5 || left >= 1039.5, "label at ({x}, {y}) crosses the cut line");
+            for (line_left, baseline, line) in pattern_lines {
+                let line_right = line_left + svg_label_text::stroke_text_width(line, 18.0);
+                let beside = right <= line_left || left >= line_right;
+                let clear = beside || bottom <= baseline - 18.0 || top >= baseline + 4.5;
+                assert!(clear, "label at ({x}, {y}) covers \"{line}\"");
+            } // for each pattern label line
+        } // for each part label
+
+        // 400 × 100 piece: no clear level place in a 200 uu part; the label shrinks to the 100 uu edge.
         let mut doc = Document::parse(WIDE_PIECE_SVG).expect("fixture parses");
         divide_oversized_pieces(&mut doc, &spec(250));
         let texts = part_label_texts(&doc);
@@ -1410,34 +1451,7 @@ mod tests {
             assert!((svg_label_text::stroke_text_width(&label, font) - 100.0).abs() < 0.01, "{label} at {font} uu");
             assert_eq!((attr(text, "textLength"), attr(text, "lengthAdjust")), ("100", "spacingAndGlyphs"));
         } // for each part label
-
-        // trousers mirrored waistband, 2079 × 227 uu, on a 16 in roll (1488 px inside the margins).
-        // At 24 uu its 40-character labels reached past the 227 uu cut edge.
-        let waistband = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-4" data-type="piece" data-name="Piece_4_Union_piece">
-            <g data-type="cutline"><path d="M0,0 L2079,0 L2079,227 L0,227 Z"/></g></g></svg>"#;
-        let mut doc = Document::parse(waistband).expect("parses");
-        divide_oversized_pieces(&mut doc, &spec(1488));
-        let texts = part_label_texts(&doc);
-        assert_eq!(texts.len(), 2);
-        for text in texts {
-            let font: f64 = attr(text, "font-size").parse().expect("font size");
-            let label = text.get_text().expect("label text");
-            assert!((svg_label_text::stroke_text_width(&label, font) - 227.0).abs() < 0.01, "{label} at {font} uu");
-            assert_eq!(attr(text, "textLength"), "227");
-        } // for each part label
-
-        // 400 × 2000 piece: the label fits the 2000 uu cut edge.
-        let tall = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece_Back" data-type="piece" data-name="Back">
-            <g data-type="cutline"><path d="M0,0 L400,0 L400,2000 L0,2000 Z"/></g></g></svg>"#;
-        let mut doc = Document::parse(tall).expect("parses");
-        divide_oversized_pieces(&mut doc, &spec(250));
-        let texts = part_label_texts(&doc);
-        assert_eq!(texts.len(), 2);
-        for text in texts {
-            assert_eq!(attr(text, "font-size"), "24");
-            assert!(!text.attributes.contains_key("textLength") && !text.attributes.contains_key("lengthAdjust"));
-        } // for each part label
-    } // part_label_is_no_wider_than_its_cut_edge
+    } // part_label_fits_its_part
 
     // @brief The media has no length limit: a long piece is not split.
     // A wide piece that fits turned is not split when it may turn.

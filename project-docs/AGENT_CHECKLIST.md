@@ -60,7 +60,7 @@ MALE_SHIRT
 TROUSERS
 | Layout.71.6 | 11 | SL > trousers > Media grows in width | ?
 | Layout.72.8 | 12 | SL > trousers > Settings > Paper Roll 16 in: Oversized pieces - split or enlarge | ?
-| Layout.801.4 | 37 | SL > trousers > Paper Roll 16 in, split: waistband part labels no longer than the cut edge | ?
+| Layout.801.4 | 37 | SL > trousers > Paper Roll 16 in, split: waistband part labels level, 0.25 in, inside each part | ?
 | Layout.802.5 | 38 | SL > trousers > Paper Roll 16 in, Layout Mode Any: waistband turns 90°, not listed as too wide | ?
 
 ## [x] 0. Install
@@ -589,12 +589,12 @@ Needs the next MSI. (Layout.801.4)
 Pattern: `test-seamly-layout/patterns/validation/trousers.sm2d` (has `Union_piece`, the mirrored waistband).
 
 - [ ] Open trousers. Press Layout.
-- [ ] Settings: Paper, Roll, custom width 16 in. Submit. Create Layout.
+- [ ] Settings: Paper, Roll, custom width 16 in. Layout Mode: Along Grainline (Any turns `Union_piece` and does not split it). Submit. Create Layout.
 - [ ] Dialog "Pieces do not fit the media": choose "Split the pieces". OK.
-- [ ] `Union_piece` is 2 parts. Each blue label `<name> part i of 2, joins j` is exactly as long as the cut edge beside it (about 2.4 in). Its text is smaller (about 0.12 in) than on other split pieces.
-- [ ] No part label reaches past its part.
-- [ ] Export > PDF. The labels in the PDF are as long as on the canvas.
-- [ ] Export > SVG > "Paths: convert to single-stroke (Hershey)". Open the file in a browser. The `Union_piece` labels are as long as the cut edge.
+- [ ] `Union_piece` is 2 parts. Each blue label `<name> part i of 2, joins j` is level (not turned), the same text size as on other split pieces (0.25 in).
+- [ ] Each label is inside its part's seam line, near the cut edge. It crosses no line and no other label.
+- [ ] Export > PDF. The labels in the PDF are where they are on the canvas.
+- [ ] Export > SVG > "Paths: convert to single-stroke (Hershey)". Open the file in a browser. The `Union_piece` labels cross no line and no other label.
 
 ## 38. Layout Mode Any turns a wide piece that fits turned
 
