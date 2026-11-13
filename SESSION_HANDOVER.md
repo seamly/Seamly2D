@@ -7,11 +7,12 @@
 - `piece_divider.rs` `fit_label_to_edge`: a part label wider than its longest cut edge gets a smaller font. Width = edge length.
 - The shrunk `<text>` gets `textLength` (edge length) and `lengthAdjust="spacingAndGlyphs"`.
 - Measure: `svg_label_text::stroke_text_width` (Hershey). No system font. Wider than Arial for part labels.
-- Test: `part_label_is_no_wider_than_its_cut_edge`. Richmond shirt, roll 8 in: Collar, Collar Stand shrink; trousers 8–16 in: none.
+- Test: `part_label_is_no_wider_than_its_cut_edge`, incl. trousers `Union_piece` (mirrored waistband, 227 px cut edge): font 24 → 11.06 px.
+- Found by the user: trousers `Union_piece` split on a 16 in roll; 24 px label (~431 px) ran past the 227 px cut edge.
+- `trousers-handoff_pieces.svg` test input has no `Union_piece`; it is older than the pattern.
 - Checked: `cargo test --workspace` 670 pass; `ctest --preset debug` 8/8.
 - Docs: SVG-DATA-ATTRIBUTES "split parts", SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §37.
 - Open: Layout.801.4 installed-app check with the next MSI.
-- Not committed, found in the working copy: user edits in `TODO_SEAMLYLAYOUT.md` (Layout.999.4, Layout.110 checks; Layout.800 subtasks removed).
 
 ### 2026-11-12 — Export > SVG has no check boxes (Layout.800)
 
