@@ -19,6 +19,7 @@ class ExportMenuTests final : public QObject
 private slots:
     void dxfVariantsStayDisabledWhenLayoutContainsAllSizes();
     void tiledPdfStaysDisabledForMarker();
+    void plainPdfIsDisabledWhenPdfDisabled();
     void splitLayoutsAllowSupportedFormats_data();
     void splitLayoutsAllowSupportedFormats();
     void supportedSplitExportsEmitRequests_data();
@@ -85,6 +86,29 @@ void ExportMenuTests::tiledPdfStaysDisabledForMarker()
 
     delete menu;
 } // ExportMenuTests::tiledPdfStaysDisabledForMarker
+
+/// @brief Plain PDF is disabled when pdfEnabled is false; tiled PDF stays enabled.
+void ExportMenuTests::plainPdfIsDisabledWhenPdfDisabled()
+{
+    QQmlEngine engine;
+    QQmlComponent component(&engine, QUrl(QStringLiteral("qrc:/qml/ExportMenu.qml")));
+    QVERIFY2(component.isReady(), qPrintable(component.errorString()));
+
+    QObject *menu = component.createWithInitialProperties({
+        {QStringLiteral("layoutReady"), true},
+        {QStringLiteral("pdfEnabled"), false},
+    });
+    QVERIFY2(menu != nullptr, qPrintable(component.errorString()));
+
+    QObject *pdfItem = menu->findChild<QObject *>(QStringLiteral("pdfItem"));
+    QObject *pdfTiledItem = menu->findChild<QObject *>(QStringLiteral("pdfTiledItem"));
+    QVERIFY(pdfItem);
+    QVERIFY(pdfTiledItem);
+    QVERIFY(!pdfItem->property("enabled").toBool());
+    QVERIFY(pdfTiledItem->property("enabled").toBool());
+
+    delete menu;
+} // ExportMenuTests::plainPdfIsDisabledWhenPdfDisabled
 
 /// @brief Covers split and unsplit readiness with both SVG menu presentations.
 void ExportMenuTests::splitLayoutsAllowSupportedFormats_data()

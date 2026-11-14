@@ -74,6 +74,9 @@ Menu {
     // View menu can keep this true because it opens already-exported files.
     property bool pdfTiledEnabled: true
 
+    // @brief False disables the plain PDF item. Export menu binds this to false on tiled paper.
+    property bool pdfEnabled: true
+
     // @brief True when the active layout split oversized pieces; disables DXF, tiled PDF and paid formats.
     property bool splitLayout: false
 
@@ -285,8 +288,8 @@ Menu {
 
     MenuItem {
         objectName: "pdfItem"
-        text: "PDF"
-        enabled: root.layoutReady // Phase 10: enabled when layout is ready
+        text: root.pdfEnabled ? "PDF" : "PDF: use PDF (Tiled) for tiled paper"
+        enabled: root.layoutReady && root.pdfEnabled
         onTriggered: root.exportPdfRequested()
     } // MenuItem PDF
 
