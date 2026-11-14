@@ -24,7 +24,9 @@
 //     lines that end at the cut lines; a part the fold line misses has none. The
 //     fold line arrow line and label (`fold_line_arrow`, `fold_line_label`) go
 //     whole into the fold line group of the nearest part;
-//   - notches, labels and other groups: whole, on the nearest part;
+//   - notches, labels and other groups: whole, on the nearest part. A pattern, piece
+//     or fold line label not wholly inside the part outline moves inside it
+//     (`label_inside_part.rs`);
 //   - a part without grainline gets a new vertical grainline when the piece had one;
 //   - a new `piece_label`: "<name> part i of n, joins j", along the longest cut
 //     edge. A label wider than that edge lies level across the part, clear of the
@@ -45,7 +47,8 @@ use packing::Rect;
 use svg_dom::Document;
 use xmltree::{Element, XMLNode};
 
-use crate::part_label_placement::{place_part_label, CutEdge};
+use crate::label_inside_part::move_labels_inside_part;
+use crate::part_label_placement::{along_edge_bounds, place_part_label, CutEdge};
 use crate::piece_extractor::{
     extract_piece_rects, set_free_rotation_without_grainline, set_piece_rotation_for_layout_mode,
     svg_uu_per_px, turn_wide_pieces_to_fit,
@@ -1196,7 +1199,6 @@ fn divide_piece(piece: &Element, columns: usize, uu_per_px: f64) -> Option<Vec<E
             } // match notch group
         } // if match notches
 
-        // Part label beside the longest cut edge, or level across the part when the edge is too short.
         let mut others: Vec<usize> = joins[i].iter().map(|j| j + 1).collect();
         others.sort_unstable();
         let joins_text = others.iter().map(usize::to_string).collect::<Vec<_>>().join(", ");
@@ -1211,7 +1213,14 @@ fn divide_piece(piece: &Element, columns: usize, uu_per_px: f64) -> Option<Vec<E
             .max_by(|a, b| (a.2 - a.1).total_cmp(&(b.2 - b.1)))
             .map(|(line, lo, hi)| CutEdge { x: line.at, lo, hi, inward: inward(part, line) });
         let outline: Vec<(f64, f64)> = part.polygon.iter().map(|v| v.point).collect();
-        let place = place_part_label(&text, PART_LABEL_FONT_IN * uu_per_in, &outline, longest_edge, &children);
+        let font = PART_LABEL_FONT_IN * uu_per_in;
+
+        // The piece's labels go inside the part first, clear of the part label along the cut edge.
+        let reserved = longest_edge.and_then(|edge| along_edge_bounds(&text, font, edge));
+        move_labels_inside_part(&outline, &mut children, reserved.as_slice(), uu_per_in);
+
+        // Part label beside the longest cut edge, or level across the part when the edge is too short.
+        let place = place_part_label(&text, font, &outline, longest_edge, &children);
         let (x, y) = (fmt_coord(place.centre.0), fmt_coord(place.centre.1));
         let transform = if place.along_edge {
             format!("translate({x} {y}) rotate(-90)") // reads up along the cut edge
@@ -1452,6 +1461,54 @@ mod tests {
             assert_eq!((attr(text, "textLength"), attr(text, "lengthAdjust")), ("100", "spacingAndGlyphs"));
         } // for each part label
     } // part_label_fits_its_part
+
+    // @brief A label across the cut line, or past the outline, moves wholly inside its part,
+    // at full size and clear of the part label along the cut edge.
+    #[test]
+    fn labels_outside_a_part_move_inside_it() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece_Back" data-type="piece" data-name="Back">
+            <g data-type="cutline"><path d="M0,0 L400,0 L400,600 L0,600 Z"/></g>
+            <g id="pattern_label_Back" data-type="pattern_label" font-size="18">
+              <text x="0" y="19" transform="matrix(1 0 0 1 170 280)">Back pattern</text>
+              <text x="0" y="19" transform="matrix(1 0 0 1 170 304)">Cut 2</text>
+            </g>
+            <g id="piece_label_Back" data-type="piece_label" font-size="18">
+              <text x="0" y="19" transform="matrix(1 0 0 1 380 100)">Back</text>
+            </g></g></svg>"#;
+        let mut doc = Document::parse(svg).expect("parses");
+        let label_boxes = |doc: &Document| -> Vec<(usize, &'static str, crate::part_label_placement::Bounds)> {
+            let mut out = Vec::new();
+            for (i, part) in part_groups(doc).into_iter().enumerate() {
+                for data_type in ["pattern_label", "piece_label"] {
+                    let labels = part.children.iter().filter_map(|n| n.as_element());
+                    for label in labels.filter(|e| attr(e, "data-type") == data_type) {
+                        let kind = if attr(label, "id").starts_with("piece_label_split_") { "part_label" } else { data_type };
+                        out.push((i, kind, crate::part_label_placement::drawn_bounds(label).expect("label draws")));
+                    } // for each label
+                } // for each label type
+            } // for each part
+            out
+        };
+        let piece = doc.root.get_child("g").expect("piece");
+        let before = component(piece, "pattern_label").and_then(crate::part_label_placement::drawn_bounds).expect("pattern label");
+        assert!(before.left < 200.0 && before.right > 200.0, "the pattern label crosses the cut line: {before:?}");
+
+        divide_oversized_pieces(&mut doc, &spec(250));
+        let boxes = label_boxes(&doc);
+        let part_label = |part: usize| boxes.iter().find(|(i, kind, _)| *i == part && *kind == "part_label").expect("part label").2;
+        let mut moved = 0;
+        for &(part, kind, b) in boxes.iter().filter(|(_, kind, _)| *kind != "part_label") {
+            // Part 1 spans x 0..200, part 2 x 200..400; both y 0..600.
+            let (left, right) = if part == 0 { (0.0, 200.0) } else { (200.0, 400.0) };
+            assert!(b.left > left && b.right < right && b.top > 0.0 && b.bottom < 600.0, "{kind} in part {part}: {b:?}");
+            assert!(!b.overlaps(&part_label(part)), "{kind} covers the part label: {b:?}");
+            if kind == "pattern_label" {
+                assert!((b.right - b.left - (before.right - before.left)).abs() < 1e-3, "full size: {b:?}");
+            } // if pattern label
+            moved += 1;
+        } // for each label of the piece
+        assert_eq!(moved, 2, "{boxes:?}");
+    } // labels_outside_a_part_move_inside_it
 
     // @brief The media has no length limit: a long piece is not split.
     // A wide piece that fits turned is not split when it may turn.

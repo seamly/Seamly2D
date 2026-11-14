@@ -53,6 +53,8 @@ pub use layout_assembler::{create_layout, create_initial_layout_dom, remove_colo
 mod piece_divider;
 // Size and place the new label of each part of a split piece.
 mod part_label_placement;
+// Move each label of a split part inside the part outline.
+mod label_inside_part;
 
 // @brief What an individual layout does with a piece wider or longer than the media.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

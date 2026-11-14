@@ -4,6 +4,8 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Little things to take care of:
 - [ ] Layout.X1 - when a piece is split, check if any label lies wholly or partially outside a split piece cutline, if yes then move the label(s) to lie 100% within the split piece cutline.
+  - [x] Layout.X1.1 - `label_inside_part.rs`: a `pattern_label`, `piece_label` or `fold_line_label` not wholly inside its part outline moves to the nearest place inside, 1/16 in clear; clear of other labels and the part label place first; shrinks in 10% steps when too large (user decision pending). Tests: `label_inside_part` (6), `labels_outside_a_part_move_inside_it`. Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, SVG-DATA-ATTRIBUTES, `AGENT_CHECKLIST.md` §44.
+  - [ ] Layout.X1.2 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §44.
 - [ ] Layout.X2 - when a piece is split, simplify the split piece's text to "<piecename> part <n> of <m>"; e.g. for piece with name="Union_piece" change it from the current text "Piece_12_Union_piece part 1 of 3, joins 2" to "Union_piece part 1 of 3"
 - [ ] Layout.X3 - in labels, "<empty>" should be displayed as a blank line. Currently labels containing "<empty>" incorrectly display the literal text "<empty>".
   - [x] Layout.X3.1 - `LabelTextManager::isBlankLineMarker`: a template line `<empty>` (English, or the editor or reader translation) becomes a line with no text that keeps one line height. Covers the Seamly2D piece and pattern labels, the handoff SVG (no `<text>`, next line moves down), and the Edit template Preview tab. Test: `TST_LabelTextManager::blankLineMarker`. Docs: SVG-DATA-ATTRIBUTES `piece_label`, `AGENT_CHECKLIST.md` §43.
