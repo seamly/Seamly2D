@@ -10,6 +10,10 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 - [ ] Layout.X5 - Display the media dimensions (WxH) in each layout tab, of the layout displayed in that tab.
 - [ ] Layout.X6 - Remove redundancies from multisize layout piece names, e.g. name="Collar" and multisize name is currently "Size_640_Piece_1_Collar_H: 640". Simplify this to be
 'Size_<sizenumber>' followed by '_<piecename>' if piecename exists else '_Piece_<num>', followed by '_<letter>' if letter exists.
+  - [x] Layout.X6.1 - `piece_naming.rs`: multisize `Size_<size>_<name>[_<letter>]`, else `Size_<size>_Piece_<n>[_<letter>]`. A name that two pieces share keeps `Piece_<n>`, so names stay unique. Individual names do not change.
+  - [x] Layout.X6.2 - `unplaced_piece_lines`: an assigned name is the whole line; no `: <size>`.
+  - [x] Layout.X6.3 - Tests and docs: `piece_naming` (2), `piece_extractor` (2), jacket2 export test; SVG-DATA-ATTRIBUTES "SeamlyLayout piece names"; `AGENT_CHECKLIST.md` §5, §41.
+  - [ ] Layout.X6.4 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §41.
 - [ ] Layout.X7 - 'Fabric (folded)' > Width=30.0 > 'Split the pieces' in jacket 2 incorrectly generates message "Some layouts left pieces out". The pieces should be split so that they fit on the media for each size, for each material.
 - [ ] Layout.X8 - Update the 'Rotation' setting to display only when 'Layout Mode' is 'Any' which allows pieces to be rotated.
   - User decision: Seamly2D does not know the SeamlyLayout Layout Mode, so Rotation stays visible. Label "Rotation:" becomes "Layout rotation:". New line below the radio buttons: "Rotation applies when Layout Mode=Any in SeamlyLayout."

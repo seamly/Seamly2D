@@ -56,7 +56,7 @@ pub struct ProcessLayoutResult {
     /// Top margin in pixels (from contentRect y attribute).
     pub mt_px: u32,
     /// Warning lines for pieces that could not be placed in the layout: one per
-    /// piece, then its sizes (`piece_extractor::unplaced_piece_lines`).
+    /// piece (`piece_extractor::unplaced_piece_lines`).
     /// Empty on a fully successful pack.  Non-empty when the (non-tiled) packer
     /// ran out of room or a piece was larger than the media: those pieces are
     /// omitted from the rendered layout and reported to the user as a warning,
@@ -640,8 +640,8 @@ pub fn do_process_layout(
             (placements, created_rects, unplaced_ids, bin_h)
         }; // if extend_media
 
-        // Map the unplaced original indices to warning lines: one per piece, named as
-        // DXF-ASTM names it ("Detail (3)"), then its sizes.
+        // Map the unplaced original indices to warning lines: one per piece, by its
+        // assigned name, else named as DXF-ASTM names it ("Detail (3)") with its sizes.
         let unplaced_labels = crate::piece_extractor::unplaced_piece_lines(&flat_dom, &pieces, &unplaced_ids);
 
         log_to_file(&format!(
@@ -2507,16 +2507,16 @@ mod tests {
         let mut listed: Vec<&str> =
             text.lines().filter_map(|l| l.strip_prefix("\u{2022} ")).map(|l| l.split(':').next().unwrap()).collect();
         listed.sort_unstable();
-        // Piece number and letter of each piece-set, in document order: Fabric, then Lining.
+        // Name and letter of each piece-set, in document order: Fabric, then Lining.
+        // Every name is unique, so no name has a piece number.
         let expected: Vec<String> = [
-            (1, "Подборт_G"), (2, "Комір_H"), (3, "Back_A"), (4, "Detail_2_B"),
-            (5, "Detail_3_C"), (6, "Sleeve_2_F"), (7, "Sleeve_1_E"), (8, "Detail_4_D"),
+            "Подборт_G", "Комір_H", "Back_A", "Detail_2_B", "Detail_3_C", "Sleeve_2_F", "Sleeve_1_E", "Detail_4_D",
         ]
             .iter()
-            .map(|(n, name)| format!("Size_500_Piece_{n}_{name}"))
+            .map(|name| format!("Size_500_{name}"))
             .collect();
         // Only Подборт hides its grainline.
-        assert_eq!(listed, vec!["Size_500_Piece_1_Подборт_G"], "{text}");
+        assert_eq!(listed, vec!["Size_500_Подборт_G"], "{text}");
 
         // `Piece Name:` escapes the non-ASCII characters.
         let grading = crate::exports::DxfGradingSource { input, sizes, base_size: JACKET2_BASE_SIZE.to_string() };
@@ -2531,7 +2531,7 @@ mod tests {
         // Detail 4 stays ungraded, named as the dialog names it.
         assert_eq!(
             warnings,
-            vec!["Size_500_Piece_8_Detail_4_D: not graded, size 220 has other turn points than size 500 on the cut line.".to_string()]
+            vec!["Size_500_Detail_4_D: not graded, size 220 has other turn points than size 500 on the cut line.".to_string()]
         );
         assert!(rul.is_some(), "graded pieces write the rule table");
     } // jacket2_assigned_names_reach_the_base_size_export

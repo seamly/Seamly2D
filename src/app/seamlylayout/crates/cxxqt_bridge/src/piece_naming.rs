@@ -6,20 +6,24 @@
 // @brief Gives every tagged pattern piece a unique `data-name` before a layout.
 //
 // A pattern can give several pieces one name ("Detail"), or no name. The import
-// renames each `data-type="piece"` group from its number, name and letter:
+// renames each `data-type="piece"` group from its size, number, name and letter:
 //
 //   * Individual pattern: `Piece_<n>[_<name>][_<letter>]`.
-//   * Multisize pattern:  `Size_<size>_Piece_<n>[_<name>][_<letter>]`.
+//   * Multisize pattern:  `Size_<size>_<name>[_<letter>]`; without a name, `Size_<size>_Piece_<n>[_<letter>]`.
 //
-// Each run of whitespace in the name becomes one `_`: "Detail  1" gives `Piece_3_Detail_1`.
+// Each run of whitespace in a size, name or letter becomes one `_`: "Detail  1" gives `Detail_1`.
 //
 // `<n>` is the 1-based position of the piece among the pieces of its size, in
 // document order, so one piece has the same number in every size. The number
-// ends at the first `_` after `Piece_`, so no two pieces of one size get the same
-// name. A multisize piece-set gets the name of its pieces without the size.
+// ends at the first `_` after `Piece_`, so two numbered pieces never get the same
+// name. Named multisize pieces that would get the same name keep the number:
+// `Size_<size>_Piece_<n>_<name>[_<letter>]`. A multisize piece-set gets the name
+// of its pieces without the size.
 //
 // Each renamed group carries `data-name-assigned="true"`. A second import of a
 // SeamlyLayout export keeps those names and does not number them again.
+
+use std::collections::HashMap;
 
 use xmltree::{Element, XMLNode};
 
@@ -46,38 +50,129 @@ pub(crate) fn is_name_assigned(elem: &Element) -> bool {
 pub(crate) fn assign_unique_piece_names(doc: &mut svg_dom::Document) -> PieceNaming {
     // The pattern group lists the sizes of the measurement file; empty for an individual pattern.
     let sizes = crate::piece_extractor::read_measurements_info(doc).sizes;
-    let mut state = NamingState::default();
+    // A piece's name depends on the names of the other pieces, so read every piece first.
+    let mut counts = Vec::new();
+    let mut pieces = Vec::new();
+    collect_pieces(&doc.root, &mut counts, &mut pieces);
+    // Then write the names, in the same document order.
+    let mut state = NamingState { names: planned_names(&pieces).into_iter(), renamed: 0, set_name: None };
     rename_children(&mut doc.root, &mut state);
-    PieceNaming { renamed: state.renamed, warning: piece_count_warning(&sizes, &state.counts) }
+    PieceNaming { renamed: state.renamed, warning: piece_count_warning(&sizes, &counts) }
 } // fn assign_unique_piece_names
 
-// @brief Running totals of one naming pass.
-#[derive(Default)]
+// @brief What a piece name is made of, read from one piece group.
+struct PieceFacts {
+    // `data-size` with `_` for whitespace; None for an individual piece.
+    size: Option<String>,
+    // 1-based position among the pieces of its size, in document order.
+    number: usize,
+    // `data-name` with `_` for whitespace.
+    name: Option<String>,
+    // `data-letter` with `_` for whitespace.
+    letter: Option<String>,
+    // `data-name` from an earlier import; the piece keeps it.
+    assigned: Option<String>,
+}
+
+impl PieceFacts {
+    // @brief The piece name without the size: `[Piece_<n>][_<name>][_<letter>]`.
+    // @param numbered True to start with `Piece_<n>`. A piece without a name always starts with it.
+    fn base(&self, numbered: bool) -> String {
+        let number = (numbered || self.name.is_none()).then(|| format!("Piece_{}", self.number));
+        [number.as_deref(), self.name.as_deref(), self.letter.as_deref()].into_iter().flatten().collect::<Vec<_>>().join("_")
+    } // fn base
+
+    // @brief The piece's `data-name`: the assigned name, else `[Size_<size>_]` and the base.
+    // @param numbered Passed to `base`.
+    fn full_name(&self, numbered: bool) -> String {
+        match (&self.assigned, &self.size) {
+            (Some(assigned), _) => assigned.clone(),
+            (None, Some(size)) => format!("Size_{size}_{}", self.base(numbered)),
+            (None, None) => self.base(numbered),
+        } // match assigned name and size
+    } // fn full_name
+} // impl PieceFacts
+
+// @brief Read the pieces below `parent`, in the document order `rename_children` uses.
+// @details A piece that keeps an assigned name is counted also, so the pieces after it
+//          keep their document positions as numbers.
+// @param counts Pieces seen per size, in first-seen order; `None` is the size of an individual piece.
+// @param out    One entry per piece group.
+fn collect_pieces(parent: &Element, counts: &mut Vec<(Option<String>, usize)>, out: &mut Vec<PieceFacts>) {
+    for child in parent.children.iter().filter_map(XMLNode::as_element) {
+        if crate::piece_extractor::is_tagged_piece(child) {
+            // A piece group: its children are its components.
+            let size = attr(child, "data-size");
+            let number = next_number(counts, &size);
+            out.push(PieceFacts {
+                size: size.as_deref().map(underscore_spaces),
+                number,
+                name: attr(child, "data-name").as_deref().map(underscore_spaces),
+                letter: attr(child, "data-letter").as_deref().map(underscore_spaces),
+                assigned: is_name_assigned(child).then(|| child.attributes.get("data-name").cloned().unwrap_or_default()),
+            });
+        } else {
+            // Piece-set, pattern group or another wrapper: the pieces are further down.
+            collect_pieces(child, counts, out);
+        } // if piece or wrapper
+    } // for each child element
+} // fn collect_pieces
+
+// @brief Count one more piece of `size`.
+// @return The piece's 1-based number among the pieces of its size.
+fn next_number(counts: &mut Vec<(Option<String>, usize)>, size: &Option<String>) -> usize {
+    match counts.iter_mut().find(|(s, _)| s == size) {
+        Some((_, count)) => {
+            *count += 1;
+            *count
+        } // Some: size seen before
+        None => {
+            counts.push((size.clone(), 1));
+            1
+        } // None: first piece of this size
+    } // match size
+} // fn next_number
+
+// @brief The new names, in document order.
+// @details An individual piece is numbered. A named multisize piece is numbered only
+//          when another piece has the same name without the number.
+// @return Per piece: (`data-name`, name without the size); None for a piece that keeps an assigned name.
+fn planned_names(pieces: &[PieceFacts]) -> Vec<Option<(String, String)>> {
+    let mut numbered: Vec<bool> = pieces.iter().map(|p| p.size.is_none()).collect();
+    loop {
+        let names: Vec<String> = pieces.iter().zip(&numbered).map(|(p, &n)| p.full_name(n)).collect();
+        let mut uses: HashMap<&str, usize> = HashMap::new();
+        for name in &names {
+            *uses.entry(name.as_str()).or_default() += 1;
+        } // for each name
+
+        // Each pass numbers at least one more piece, so the loop ends.
+        let shared: Vec<usize> = (0..pieces.len())
+            .filter(|&i| !numbered[i] && pieces[i].assigned.is_none() && uses[names[i].as_str()] > 1)
+            .collect();
+        if shared.is_empty() {
+            return pieces
+                .iter()
+                .zip(names)
+                .zip(&numbered)
+                .map(|((p, name), &n)| p.assigned.is_none().then(|| (name, p.base(n))))
+                .collect();
+        } // if every name is unique
+        for i in shared {
+            numbered[i] = true;
+        } // for each piece that shares its name
+    } // loop until every name is unique
+} // fn planned_names
+
+// @brief State of the pass that writes the names.
 struct NamingState {
-    // Pieces seen per size, in first-seen order; `None` is the size of an individual piece.
-    counts: Vec<(Option<String>, usize)>,
+    // `planned_names` result, taken one piece at a time.
+    names: std::vec::IntoIter<Option<(String, String)>>,
     // Pieces renamed so far.
     renamed: usize,
     // Name without the size of the first renamed piece in the current piece-set.
     set_name: Option<String>,
 }
-
-impl NamingState {
-    // @brief Count one more piece of `size`.
-    // @return The piece's 1-based number among the pieces of its size.
-    fn next_number(&mut self, size: &Option<String>) -> usize {
-        match self.counts.iter_mut().find(|(s, _)| s == size) {
-            Some((_, count)) => {
-                *count += 1;
-                *count
-            } // Some: size seen before
-            None => {
-                self.counts.push((size.clone(), 1));
-                1
-            } // None: first piece of this size
-        } // match size
-    } // fn next_number
-} // impl NamingState
 
 // @brief Rename the pieces below `parent`, in document order.
 // @details A piece group is renamed and not searched further: its children are its
@@ -104,21 +199,12 @@ fn rename_children(parent: &mut Element, state: &mut NamingState) {
     } // for each child
 } // fn rename_children
 
-// @brief Give one piece group its unique name.
-// @details The piece is counted also when it keeps an assigned name, so the pieces
-//          after it keep their document positions as numbers.
+// @brief Give one piece group its planned name.
 fn rename_piece(piece: &mut Element, state: &mut NamingState) {
-    let size = attr(piece, "data-size");
-    let number = state.next_number(&size);
-    if is_name_assigned(piece) {
+    // `collect_pieces` planned one entry per piece group, in this order.
+    let Some(Some((name, base))) = state.names.next() else {
         return;
-    } // if named by an earlier import
-
-    let base = underscore_spaces(&piece_base_name(number, attr(piece, "data-name").as_deref(), attr(piece, "data-letter").as_deref()));
-    let name = match &size {
-        Some(size) => format!("Size_{}_{base}", underscore_spaces(size)),
-        None => base.clone(),
-    }; // match size
+    }; // if named by an earlier import
 
     // Components name their piece in `data-parent`; keep them pointing at it.
     for node in piece.children.iter_mut() {
@@ -134,16 +220,6 @@ fn rename_piece(piece: &mut Element, state: &mut NamingState) {
     state.renamed += 1;
     state.set_name.get_or_insert(base);
 } // fn rename_piece
-
-// @brief `Piece_<number>`, then `_<name>` and `_<letter>` for each one the piece has.
-fn piece_base_name(number: usize, name: Option<&str>, letter: Option<&str>) -> String {
-    match (name, letter) {
-        (None, None) => format!("Piece_{number}"),
-        (None, Some(letter)) => format!("Piece_{number}_{letter}"),
-        (Some(name), None) => format!("Piece_{number}_{name}"),
-        (Some(name), Some(letter)) => format!("Piece_{number}_{name}_{letter}"),
-    } // match name and letter
-} // fn piece_base_name
 
 // @brief Replace each run of whitespace with one `_`.
 fn underscore_spaces(text: &str) -> String {
@@ -268,8 +344,8 @@ mod tests {
   </g>
 </svg>"#;
 
-    // @brief Multisize pattern: `Size_<size>` leads each name, the number counts within the size,
-    // and two pieces named "Detail" get different names. A piece-set drops the size.
+    // @brief Multisize pattern: `Size_<size>` leads each name. A unique name drops the number;
+    // the two pieces named "Detail" keep it, so their names differ. A piece-set drops the size.
     #[test]
     fn multisize_pieces_get_size_and_number() {
         let mut doc = svg_dom::Document::parse(MULTISIZE_SVG).expect("parse ok");
@@ -278,7 +354,7 @@ mod tests {
         assert_eq!(
             names(&doc),
             vec![
-                "Piece_1_Front_A", "Size_34_Piece_1_Front_A", "Size_36_Piece_1_Front_A",
+                "Front_A", "Size_34_Front_A", "Size_36_Front_A",
                 "Piece_2_Detail", "Size_34_Piece_2_Detail", "Size_36_Piece_2_Detail",
                 "Piece_3_Detail", "Size_34_Piece_3_Detail", "Size_36_Piece_3_Detail",
             ]
@@ -286,6 +362,27 @@ mod tests {
         // The piece-set id still groups the sizes of one piece.
         assert_eq!(doc.get_attr_by_id("piece_Detail_s36-6", "data-parent"), Some("piece-set-3"));
     } // multisize_pieces_get_size_and_number
+
+    // @brief Multisize names: `Size_<size>_<name>[_<letter>]`, else `Size_<size>_Piece_<n>[_<letter>]`.
+    // A name that equals another piece's numbered name takes the number.
+    #[test]
+    fn multisize_name_drops_the_number() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <g id="pattern-1" data-type="pattern" data-measurements="multisize" data-sizes="640">
+    <g id="collar" data-type="piece" data-name="Collar" data-letter="H" data-size="640"><path d="M 0 0 L 9 0 L 9 9 Z"/></g>
+    <g id="unnamed" data-type="piece" data-letter="B" data-size="640"><path d="M 0 0 L 9 0 L 9 9 Z"/></g>
+    <g id="yoke" data-type="piece" data-name=" Back  Yoke " data-size="640"><path d="M 0 0 L 9 0 L 9 9 Z"/></g>
+    <g id="like-a-number" data-type="piece" data-name="Piece 5" data-size="640"><path d="M 0 0 L 9 0 L 9 9 Z"/></g>
+    <g id="bare" data-type="piece" data-size="640"><path d="M 0 0 L 9 0 L 9 9 Z"/></g>
+  </g>
+</svg>"#;
+        let mut doc = svg_dom::Document::parse(svg).expect("parse ok");
+        assert_eq!(assign_unique_piece_names(&mut doc).renamed, 5);
+        assert_eq!(
+            names(&doc),
+            vec!["Size_640_Collar_H", "Size_640_Piece_2_B", "Size_640_Back_Yoke", "Size_640_Piece_4_Piece_5", "Size_640_Piece_5"]
+        );
+    } // multisize_name_drops_the_number
 
     // @brief A second pass keeps the assigned names: a re-imported export is not numbered again.
     #[test]

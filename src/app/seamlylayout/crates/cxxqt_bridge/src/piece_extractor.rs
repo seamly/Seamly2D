@@ -134,27 +134,35 @@ pub fn turn_wide_pieces_to_fit(pieces: &mut [PieceRect], bin_w: u32, trial_angle
 
 // @brief Warning lines for the pieces a layout left out: one line per piece, then its sizes.
 //
-// Names follow the DXF-ASTM numbering ("Detail (3)"), so a dialog names a piece
-// as the export does.  The sizes of one piece share its piece-set key.
+// A name that `piece_naming` assigned is unique and holds the size, so it is the
+// whole line. Other names follow the DXF-ASTM numbering ("Detail (3)"), so a dialog
+// names a piece as the export does; the sizes of one piece share its piece-set key.
 //
 // @param doc      Document the pieces were extracted from.
 // @param pieces   Extracted pieces.
 // @param unplaced Indices into `pieces` of the pieces left out.
-// @return "Detail (3): 220, 240" for multisize pieces; "Front" for an individual or Nested piece.
+// @return "Size_220_Collar_H" for an assigned name; "Detail (3): 220, 240" for other
+//         multisize pieces; "Front" for an individual or Nested piece.
 pub fn unplaced_piece_lines(doc: &svg_dom::Document, pieces: &[PieceRect], unplaced: &[usize]) -> Vec<String> {
     let names = seamly_svg2ezdxf::tagged_piece_names(&doc.root);
     // (key, display name, sizes) per left-out piece, in first-appearance order.
     let mut groups: Vec<(String, String, Vec<String>)> = Vec::new();
     for &i in unplaced {
         let Some(piece) = pieces.get(i) else { continue; };
-        // A piece is a tagged piece itself, or a Nested piece-set whose key is its id.
-        let (key, name, size) = match names.iter().find(|n| n.id == piece.id) {
-            Some(n) => (n.key.clone(), n.display_name.clone(), n.size.clone()),
-            None => match names.iter().find(|n| n.key == piece.id) {
-                Some(n) => (n.key.clone(), n.display_name.clone(), None),
-                None => (piece.id.clone(), piece.label().to_string(), None), // untagged SVG
-            }, // None: not a tagged piece
-        }; // (key, name, size)
+        let assigned = doc.get_attr_by_id(&piece.id, crate::piece_naming::NAME_ASSIGNED_ATTR) == Some("true");
+        let (key, name, size) = if assigned {
+            // The piece's own key gives it its own line, with no sizes.
+            (piece.id.clone(), piece.label().to_string(), None)
+        } else if let Some(n) = names.iter().find(|n| n.id == piece.id) {
+            // A tagged piece.
+            (n.key.clone(), n.display_name.clone(), n.size.clone())
+        } else if let Some(n) = names.iter().find(|n| n.key == piece.id) {
+            // A Nested piece-set: its key is its id.
+            (n.key.clone(), n.display_name.clone(), None)
+        } else {
+            // An untagged SVG.
+            (piece.id.clone(), piece.label().to_string(), None)
+        }; // if assigned, tagged piece, piece-set or untagged
         let pos = match groups.iter().position(|(k, _, _)| *k == key) {
             Some(pos) => pos,
             None => {
@@ -2018,7 +2026,7 @@ pub(crate) mod tests {
         crate::piece_naming::assign_unique_piece_names(&mut doc);
         hoist_layout_units(&mut doc, false);
         let labels: Vec<String> = extract_piece_rects(&doc).iter().map(|p| p.label().to_string()).collect();
-        assert_eq!(labels, vec!["Size_34_Piece_1_Front_A", "Size_36_Piece_1_Front_A", "Size_34_Piece_2_Back_B", "Size_36_Piece_2_Back_B"]);
+        assert_eq!(labels, vec!["Size_34_Front_A", "Size_36_Front_A", "Size_34_Back_B", "Size_36_Back_B"]);
     } // assigned_name_label_has_no_size_suffix
 
     // @brief An individual handoff hoists the same way in both modes.
@@ -2126,6 +2134,30 @@ pub(crate) mod tests {
         let pieces = extract_piece_rects(&doc);
         assert_eq!(unplaced_piece_lines(&doc, &pieces, &[1, 0]), vec!["Back Bodice", "Front Bodice"]);
     } // unplaced_piece_lines_group_sizes_per_piece
+
+    // @brief Left-out pieces with assigned names: each line is the name alone, with no ": <size>".
+    #[test]
+    fn unplaced_piece_lines_use_assigned_names() {
+        // Marker: one line per left-out size.
+        let mut doc = svg_dom::Document::parse(SHARED_NAMES_SVG).expect("parse ok");
+        crate::piece_naming::assign_unique_piece_names(&mut doc);
+        hoist_layout_units(&mut doc, false);
+        let pieces = extract_piece_rects(&doc);
+        let index = |id: &str| pieces.iter().position(|p| p.id == id).expect("piece extracted");
+        let unplaced = [index("d1_s34"), index("f_s36"), index("d1_s36")];
+        assert_eq!(
+            unplaced_piece_lines(&doc, &pieces, &unplaced),
+            vec!["Size_34_Piece_1_Detail", "Size_36_Front", "Size_36_Piece_1_Detail"]
+        );
+
+        // Nested: a piece-set has the name without the size.
+        let mut doc = svg_dom::Document::parse(SHARED_NAMES_SVG).expect("parse ok");
+        crate::piece_naming::assign_unique_piece_names(&mut doc);
+        hoist_layout_units(&mut doc, true);
+        let pieces = extract_piece_rects(&doc);
+        let index = |id: &str| pieces.iter().position(|p| p.id == id).expect("piece-set extracted");
+        assert_eq!(unplaced_piece_lines(&doc, &pieces, &[index("set-2"), index("set-3")]), vec!["Piece_2_Detail", "Front"]);
+    } // unplaced_piece_lines_use_assigned_names
 
 
     // @brief A fold line is read as a piece component, by `data-type` or by id, never as the outline.

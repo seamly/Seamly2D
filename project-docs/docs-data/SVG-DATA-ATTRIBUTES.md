@@ -326,17 +326,21 @@ SeamlyLayout gives every tagged piece a unique `data-name` at import, before any
 | Pattern | Piece `data-name` |
 |---|---|
 | Individual | `Piece_<n>[_<name>][_<letter>]` |
-| Multisize | `Size_<size>_Piece_<n>[_<name>][_<letter>]` |
+| Multisize, with a name | `Size_<size>_<name>[_<letter>]` |
+| Multisize, no name | `Size_<size>_Piece_<n>[_<letter>]` |
+| Multisize, name shared in one size | `Size_<size>_Piece_<n>_<name>[_<letter>]` |
 
 - `<n>`: 1-based position of the piece among the pieces of its size, in document order. One piece has the same number in every size.
 - `<name>`, `<letter>`: the Seamly2D `data-name` and `data-letter`, trimmed. Each is left out when absent.
-- Each run of whitespace in the name becomes one `_`: `Detail 1` and `Detail  1` give `Detail_1`.
-- Examples: `Piece_1`, `Piece_2_B`, `Piece_3_Front`, `Piece_4_Back_D`, `Size_220_Piece_3_Detail_1_C`.
-- A multisize piece-set gets the name of its pieces without the size: `Piece_3_Detail_1_C`.
+- Each run of whitespace in a size, name or letter becomes one `_`: `Detail 1` and `Detail  1` give `Detail_1`.
+- A named multisize piece keeps `Piece_<n>` only when another piece has the same name without it. Two pieces named `Detail`, no letter: `Size_34_Piece_2_Detail`, `Size_34_Piece_3_Detail`.
+- Examples: `Piece_1`, `Piece_2_B`, `Piece_3_Front`, `Piece_4_Back_D`, `Size_640_Collar_H`, `Size_640_Piece_2_B`.
+- A multisize piece-set gets the name of its pieces without the size: `Collar_H`.
 - Component `data-parent` takes the new name.
 - Each renamed group gets `data-name-assigned="true"`. A group that has it keeps its name, so a re-imported export is not numbered again.
 - Sizes with different piece counts: the import still names the pieces and shows a warning that lists those sizes.
 - The layout, the Adjust overlay, the dialogs and DXF-ASTM `Piece Name:` use the new name. A multisize label adds no "(size N)".
+- The "left out of the layout" warnings list a piece by its new name alone, with no `: <size>`. One line per left-out size.
 - The label text drawn on a piece does not change.
 
 ## SeamlyLayout split parts (individual pattern)
