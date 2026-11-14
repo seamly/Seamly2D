@@ -2,6 +2,15 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-14 — Piece Properties: Layout rotation (Layout.X8)
+
+- User decision: Seamly2D does not know the SeamlyLayout Layout Mode, so Rotation stays visible. Rename and add a line instead of hiding.
+- `pattern_piece_dialog.ui`: label "Rotation:" → "Layout rotation:". New `rotationLayoutMode_Label` below the radio buttons: "Rotation applies when Layout Mode=Any in SeamlyLayout."
+- SeamlyLayout `SettingsDialog.qml` Piece Gap tip and docs (SVG-DATA-ATTRIBUTES, NEW-ATTRIBUTES, SETTINGS_WORKFLOW, LAYOUT_ROTATION_PLAN) say "Layout rotation".
+- Checked: `uic` builds the `.ui`; `ctest --preset debug` 8/8. `cargo test` not run: no Rust change. Seamly2D Qt suites not run (next MSI).
+- Open: Layout.X8.2 installed-app check, `AGENT_CHECKLIST.md` §40.
+- `.ts` translation files not updated: lupdate picks up the new strings.
+
 ### 2026-11-12 — Nested sizes stack on a corner (Layout.804)
 
 - Merged into `run-seamlyLayout` without skip-ci (`.pri`/`.pro` changed). Branch `task-nested-stack-corner` deleted.

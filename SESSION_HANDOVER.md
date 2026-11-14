@@ -2,6 +2,17 @@
 
 ## Current status
 
+### 2026-11-14 — Split part label, tiled PDF, multisize split on fabric (Layout.X2, X4, X7)
+
+- Three task branches built and tested in parallel worktrees; merged `--no-ff` into `run-seamlyLayout`; branches and worktrees deleted.
+- X2: part label `<name> part i of n`; join list code removed. New `data-source-name` keeps the imported `data-name`; the label uses it, else the shown name.
+- X4: `ExportMenu.qml` `pdfEnabled`: Export > PDF disabled on tiled paper; PDF (Tiled) enabled; View menu PDF unchanged.
+- X7: multisize fabric runs the oversized-pieces dialog; "Split the pieces" splits on every layout of the run; a Nested piece-set too wide is cut on the same lines per size into piece-sets `<set id>_part<k>`.
+- Checked per branch and on the merged tree: `cargo test --workspace` 704 pass, 0 failed; `ctest` debug 8/8.
+- Docs: SVG-DATA-ATTRIBUTES, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW; `AGENT_CHECKLIST.md` §45–§47 and OPEN rows; §41 now uses jacket2 and "Make the media bigger".
+- Decision for Sue: keep `data-source-name`, or label parts with the shown name (plain name since X6.5, except shared names).
+- Open: X2.2, X4.2, X7.2 installed-app checks; X7.3 DXF refused on every tab of a split material; X7.4 dialog misses a too-wide Nested set with no too-wide size piece.
+
 ### 2026-11-14 — Split part labels move inside the cut line (Layout.X1)
 
 - New `label_inside_part.rs`: after a split, a `pattern_label`, `piece_label` or `fold_line_label` not wholly inside its part outline moves inside it.
@@ -48,15 +59,6 @@
 - Checked: `cargo test --workspace` 691 pass; `ctest --preset debug` equivalent 8/8 (worktree build dir `x6dbg`; preset path passed MAX_PATH).
 - Docs: SVG-DATA-ATTRIBUTES "SeamlyLayout piece names"; `AGENT_CHECKLIST.md` §5, §41; TODO Layout.X6.1–.3.
 - Open: Layout.X6.4 installed-app check with the next MSI (§41).
-
-### 2026-11-14 — Piece Properties: Layout rotation (Layout.X8)
-
-- User decision: Seamly2D does not know the SeamlyLayout Layout Mode, so Rotation stays visible. Rename and add a line instead of hiding.
-- `pattern_piece_dialog.ui`: label "Rotation:" → "Layout rotation:". New `rotationLayoutMode_Label` below the radio buttons: "Rotation applies when Layout Mode=Any in SeamlyLayout."
-- SeamlyLayout `SettingsDialog.qml` Piece Gap tip and docs (SVG-DATA-ATTRIBUTES, NEW-ATTRIBUTES, SETTINGS_WORKFLOW, LAYOUT_ROTATION_PLAN) say "Layout rotation".
-- Checked: `uic` builds the `.ui`; `ctest --preset debug` 8/8. `cargo test` not run: no Rust change. Seamly2D Qt suites not run (next MSI).
-- Open: Layout.X8.2 installed-app check, `AGENT_CHECKLIST.md` §40.
-- `.ts` translation files not updated: lupdate picks up the new strings.
 
 ## Decisions to retain
 
