@@ -1,5 +1,5 @@
 // project: SeamlyLayout
-// author: slspencer, copyright 2026
+// author: slspencer, copyright 2026 Seamly2D Project
 // MIT License: https://opensource.org/licenses/MIT
 
 // @file layout_utils.rs
@@ -164,8 +164,8 @@ pub struct ProcessLayoutArgs<'a> {
     /// Fabric pieces that cannot fit the configured width remain unplaced.
     /// Tiled paper ignores it: its pages cover a larger layout.
     pub extend_media: bool,
-    /// `true` splits each piece wider than the media into parts that fit
-    /// (individual pattern, the user's choice).  Tiled paper ignores it.
+    /// `true` splits each piece or Nested piece-set wider than the media into
+    /// parts that fit (the user's choice).  Tiled paper ignores it.
     pub split_oversized: bool,
 }
 
@@ -2007,6 +2007,62 @@ mod tests {
         assert_eq!((info.sizes.len(), info.sizes[0].as_str(), info.sizes[25].as_str()), (26, "220", "720"));
         assert_eq!(info.base_size, JACKET2_BASE_SIZE);
     } // jacket2_handoff_is_multisize
+
+    // @brief Folded fabric, 30 in wide, "Split the pieces": the dialog lists size pieces wider
+    // than the 15 in half width, and no layout of either material leaves a piece out.
+    // Marker, Nested and every size tab split as the app runs them, on extended media.
+    #[test]
+    fn jacket2_folded_fabric_split_leaves_no_piece_out() {
+        let settings_json = serde_json::json!({
+            "unit": "in",
+            "mediaType": "fabric",
+            "paperType": "roll",
+            "fabricWidth": 30.0,
+            "fabricHeight": 0.0,
+            "fabricFolded": true,
+            "marginLeft": 0.0,
+            "marginRight": 0.0,
+            "marginTop": 0.0,
+            "marginBottom": 0.0,
+            "pieceGap": 0.05,
+            "layoutMode": "withNap",
+            "rotationStep": 180
+        }).to_string();
+        let (doc, sizes) = jacket2_handoff();
+        for mut part in crate::material_split::split_by_material(doc) {
+            // Piece names as the import assigns them.
+            crate::annotation_alignment::align_size_annotations(&mut part.doc);
+            crate::piece_naming::assign_unique_piece_names(&mut part.doc);
+            let init = do_initialize_layout(&settings_json, Some(&part.doc)).expect("initialize_layout should succeed");
+            let oversized = do_find_oversized_pieces(&settings_json, &part.doc, &init.initial_dom).expect("settings parse");
+            assert!(!oversized.is_empty(), "{}: the dialog lists the pieces too wide", part.name);
+            assert!(oversized.iter().all(|piece| piece.label.starts_with("Size_")), "{}: {oversized:?}", part.name);
+
+            let lay_out = |nested: bool, size: Option<&str>| {
+                let args = ProcessLayoutArgs {
+                    settings_json: &settings_json,
+                    input_dom: &part.doc,
+                    initial_layout_dom: &init.initial_dom,
+                    layout_h_px: init.h_px,
+                    nested_multisize: nested,
+                    extend_media: true,
+                    split_oversized: true,
+                };
+                let mut progress = |_pct: i32, _status: Option<&str>| {};
+                match size {
+                    Some(size) => do_process_size_layout(args, size, &mut progress),
+                    None => do_process_layout(args, &mut progress),
+                }
+                .expect("layout should succeed")
+            }; // lay_out
+            let mut layouts = vec![("Marker".to_string(), lay_out(false, None)), ("Nested".to_string(), lay_out(true, None))];
+            layouts.extend(sizes.iter().map(|size| (format!("Size {size}"), lay_out(false, Some(size)))));
+            for (view, result) in &layouts {
+                assert!(result.unplaced_labels.is_empty(), "{} {view} left out {:?}", part.name, result.unplaced_labels);
+            } // for each layout
+            assert!(layouts[1].1.divide_spec.is_some(), "{}: Nested splits a piece-set", part.name);
+        } // for each material
+    } // jacket2_folded_fabric_split_leaves_no_piece_out
 
     // @brief Nested packs the 8 piece-sets, every size stacked inside its set.
     #[test]

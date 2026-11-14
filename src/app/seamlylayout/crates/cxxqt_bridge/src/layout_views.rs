@@ -1,5 +1,5 @@
 // project: SeamlyLayout
-// author: slspencer, copyright 2026
+// author: slspencer, copyright 2026 Seamly2D Project
 // MIT License: https://opensource.org/licenses/MIT
 
 // @file layout_views.rs
@@ -453,7 +453,7 @@ pub struct TabLayoutQueue {
     pub layout_h_px: u32,
     // First layouts of the other materials extend the media, as the shown material's did.
     pub extend_media: bool,
-    // First layouts of the other materials split oversized pieces, as the shown material's did.
+    // Every layout of the run splits oversized pieces, as the shown material's first layout did.
     pub split_oversized: bool,
     // Layouts not yet made, in order.
     pending: VecDeque<LayoutJob>,
