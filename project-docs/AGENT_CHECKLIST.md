@@ -54,6 +54,7 @@ MALE_SHIRT
 | Layout.98.6 | 24 | S2D > male_shirt > Piece Properties: Flip radio buttons, Flip submenu | FAIL --> Flip selection appears in piece context menu but without a checkbox, and the submenu appears when 'Flip' is selected, but the piece isn't flipped. The fix for this problem is Layout.110.
 | Layout.88.2 | 3 | SL > male_shirt > Export menu: DXF-ASTM note reads in full | FAIL --> Note did not appear
 | Layout.800.3 | 36 | SL > male_shirt > Export > SVG: no check boxes; each item exports | ?
+| Layout.X8.2 | 40 | S2D > male_shirt > Piece Properties: "Layout rotation:" label and Layout Mode=Any line | ?
 | Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Fabric | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Lining | ?
@@ -616,3 +617,12 @@ Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is 
 - [ ] Each piece: one grainline stack and one label stack. The sizes' copies lie on top of each other.
 - [ ] Lining, Nested tab: the Detail 4 cut lines meet at one corner. Its grainline and labels each stack as one.
 - [ ] Settings: Layout Mode: Along Grainline. "Place fold lines on the left edge" on. Submit. Create Layout. The Back and Detail 2 stacks lie on the left edge. No warning.
+
+## 40. Piece Properties: Layout rotation
+
+(Layout.X8.2)
+
+- [ ] Seamly2D: open male_shirt. Piece mode, open a piece's Piece Properties > Properties.
+- [ ] The label left of the None, 1-Way, 2-Way, 4-Way, Any radio buttons reads "Layout rotation:".
+- [ ] Below the radio buttons, one line reads "Rotation applies when Layout Mode=Any in SeamlyLayout." No text is cut off.
+- [ ] Press Layout. SeamlyLayout: Settings. The Piece Gap tip reads "Any applies each piece's Layout rotation rule; Layout rotation Any samples 1° steps."
