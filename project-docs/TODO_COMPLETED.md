@@ -1691,7 +1691,7 @@ The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`sr
   - MSI 26.10.1311: the staged copy and the installed copy (`C:\Program Files\SeamlyApps\samples\patterns\`) match the repo copy
 - [x] Layout.40.3 `common.pri` is a `*.pri` change: the merge commit runs full CI (no skip-ci token)
 
-## Completed subtasks from Task Layout.28 — Built-in seam allowance: show the seam line
+## Task Layout.28 — Built-in seam allowance: show the seam line (completed 2026-11-14)
 
 - [x] Layout.28.1 Seamly2D: seam line = main path offset inward by each node's width (wider of before and after; piece width when the node sets none)
   - `VPiece::builtInSeamLinePoints()`. A curve spreads the widths of its ends along its length. Corner types shape only the cut line: seam line corners are plain offset corners (user confirmed)
@@ -1871,3 +1871,27 @@ Reports on male_shirt (2026-10-03 to 2026-10-10) and jacket2 (2026-10-12).
 | FullSleeve_M L1 pt 1 / L14 pt 36 hem turn point "maybe curve" | advisory | No action (DXF.20.2) |
 | jacket2 Detail (4) and Detail (6) size 240: bend not a turn point | departure | Reader advisory (DXF.23) |
 | jacket2 piece-113 L14 16 curve points, Detail (4) size 500 L1 13 curve points; each fits 3 primitives | advisory | No action |
+
+## Task Layout.999 — Remove the option for 'Sheet' in Layout settings (completed 2026-11-14)
+
+'Paper > Sheet' is a subset of 'Paper > Tiled', so 'Paper > Sheet' is redundant and its complex procesing is unnecessary.
+
+- [x] Layout.999.1 - Remove the option for 'Sheet' in Layout settings
+  - Paper Type lists Tiled and Roll.
+  - The custom size moves to Tile Size > Custom: `tileWidth` × `tileHeight` in the user unit, with tile orientation.
+  - Tests: `compute_tile_dims_custom_size`, `compute_tile_dims_invalid_custom_size_errors`, `from_json_reads_custom_tile_size`, `custom_tile_px_rejects_invalid_dimensions`, `tileSize_customStartsFromCurrentSize`, `tileSizeDropdown_customShowsSizeFields`.
+  - A saved "sheet" or "custom" loads as "tiled" (`SettingsModel::setPaperType`, `LayoutSettings::from_json`). `sheetName` removed.
+- [x] Layout.999.2 - Remove the code functions that process 'Paper > Sheet' without removing functionality for 'Paper > Tile' and 'Paper > Roll' and 'Fabric > Folded' and 'Fabric > not Folded'
+  - Deleted `sheets.rs`, `oversized.rs`, `remaining.rs`, `media_can_grow`, `refuse_sheet_layout`, sheet overflow checks, sheet PDF export.
+  - `piece_divider` splits columns only. "Make the media bigger" is always enabled.
+  - New `LayoutSettings::is_tiled_paper`: fabric with the default paper type "tiled" is no longer treated as tiled paper.
+- [x] Layout.999.3 - Remove the tests for 'Paper > Sheet' without removing tests for 'Paper > Tile', 'Paper > Roll', 'Fabric > Folded', 'Fabric > not Folded'
+  - Sheet tests deleted; fold and rotation tests moved to roll or fabric.
+  - New: `paper_type_loads_as_tiled_or_roll`, `is_tiled_paper_truth_table`, `trousers_wide_pieces_split_on_a_paper_roll`, `retired_sheet_settings_lay_out_as_tiled_paper`, `paperType_acceptsOnlyTiledOrRoll`, `paperTypeDropdown_offersTiledAndRoll`.
+  - `cargo test --workspace`: 665 pass. `ctest --preset debug`: 8/8.
+- [x] Layout.999.4 - In the next MSI build, check that each media type lays out jacket2 and trousers. Steps: `AGENT_CHECKLIST.md` sections 10 and 12.
+  - [x] 'Paper > Tile' operates properly
+  - [x] 'Paper > Tile > Custom' operates properly
+  - [x] 'Paper > Roll' operates properly
+  - [x] 'Fabric > Folded' operates properly
+  - [x] 'Fabric > Not Folded' operates properly

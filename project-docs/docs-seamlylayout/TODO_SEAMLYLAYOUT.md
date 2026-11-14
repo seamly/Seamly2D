@@ -2,32 +2,14 @@
 
 Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to `project-docs/TODO_COMPLETED.md`. Task IDs start with `Layout.`
 
+## Little things to take care of:
+- [ ] when a piece is split, check if any label lies wholly or partially outside a split piece cutline, if yes then move the label(s) to lie 100% within the split piece cutline.
+- [ ] when a piece is split, simplify the split piece's text to "<piecename> part <n> of <m>"; e.g. for piece with name="Union_piece" change it from the current text "Piece_12_Union_piece part 1 of 3, joins 2" to "Union_piece part 1 of 3"
+- [ ] in labels, "<empty>" should be displayed as a blank line. Currently labels containing "<empty>" incorrectly display the literal text "<empty>".
+- [ ] When paperType='tiled', disable the export option 'PDF'. 
+- [ ] Display the media dimensions (WxH) in each layout tab, of the layout displayed in that tab.
+
 ## Implement
-
-### [ ] Layout.999 - Remove the option for 'Sheet' in Layout settings
-
-'Paper > Sheet' is a subset of 'Paper > Tiled', so 'Paper > Sheet' is redundant and its complex procesing is unnecessary.
-
-- [x] Layout.999.1 - Remove the option for 'Sheet' in Layout settings
-  - Paper Type lists Tiled and Roll.
-  - The custom size moves to Tile Size > Custom: `tileWidth` × `tileHeight` in the user unit, with tile orientation.
-  - Tests: `compute_tile_dims_custom_size`, `compute_tile_dims_invalid_custom_size_errors`, `from_json_reads_custom_tile_size`, `custom_tile_px_rejects_invalid_dimensions`, `tileSize_customStartsFromCurrentSize`, `tileSizeDropdown_customShowsSizeFields`.
-  - A saved "sheet" or "custom" loads as "tiled" (`SettingsModel::setPaperType`, `LayoutSettings::from_json`). `sheetName` removed.
-- [x] Layout.999.2 - Remove the code functions that process 'Paper > Sheet' without removing functionality for 'Paper > Tile' and 'Paper > Roll' and 'Fabric > Folded' and 'Fabric > not Folded'
-  - Deleted `sheets.rs`, `oversized.rs`, `remaining.rs`, `media_can_grow`, `refuse_sheet_layout`, sheet overflow checks, sheet PDF export.
-  - `piece_divider` splits columns only. "Make the media bigger" is always enabled.
-  - New `LayoutSettings::is_tiled_paper`: fabric with the default paper type "tiled" is no longer treated as tiled paper.
-- [x] Layout.999.3 - Remove the tests for 'Paper > Sheet' without removing tests for 'Paper > Tile', 'Paper > Roll', 'Fabric > Folded', 'Fabric > not Folded'
-  - Sheet tests deleted; fold and rotation tests moved to roll or fabric.
-  - New: `paper_type_loads_as_tiled_or_roll`, `is_tiled_paper_truth_table`, `trousers_wide_pieces_split_on_a_paper_roll`, `retired_sheet_settings_lay_out_as_tiled_paper`, `paperType_acceptsOnlyTiledOrRoll`, `paperTypeDropdown_offersTiledAndRoll`.
-  - `cargo test --workspace`: 665 pass. `ctest --preset debug`: 8/8.
-- [ ] Layout.999.4 - In the next MSI build, check that each media type lays out jacket2 and trousers. Steps: `AGENT_CHECKLIST.md` sections 10 and 12.
-  - [x] 'Paper > Tile' operates properly
-  - [x] 'Paper > Tile > Custom' operates properly
-  - [x] 'Paper > Roll' operates properly
-  - [ ] 'Fabric > Folded' operates properly
-  - [ ] 'Fabric > Not Folded' operates properly
-
 
 ### [x] Task Layout.110 - Implement - Fix "| Layout.98.6 | 24 | S2D > male_shirt > Piece Properties: Flip radio buttons, Flip submenu | FAIL --> Flip selection appears in piece context menu but without a checkbox, and the submenu appears when 'Flip' is selected, but the piece isn't flipped."
 
@@ -68,15 +50,15 @@ When the user clicks 'Horizontal', 'Vertical', or 'Both' then the piece is flipp
   - [ ] drill holes
   - [x] grainlines -- validated (trousers.sm2d, Union piece is split at the same place as the grainline and the halves of the grainline is shown on each split piece)
 
-### [ ] Layout.804 - Implement - Multisize - Nested - Improve piece alignment
+### [x] Layout.804 - Implement - Multisize - Nested - Improve piece alignment
 
-- [ ] align nested pieces:
-  - [ ] find all points of discontinuity (corners) along the cutline, then create a list of corners with a horizontal tangent line (within a small margin of error) as "corners_horizontal" and a list of corners without a horizontal tangent line as "corners_nonhorizontal"; if corners_horizontal is non-empty then select the corner with the longest horizontal tangent line and align the pieces at that corner; else if corners_nonhorizontal is non-empty then select the corner with the longest tangent line and align the pieces at that corner; else if there are no corners in the piece then align the pieces at the center of the piece's bounding box.
+- [x] align nested pieces:
+  - find all points of discontinuity (corners) along the cutline, then create a list of corners with a horizontal tangent line (within a small margin of error) as "corners_horizontal" and a list of corners without a horizontal tangent line as "corners_nonhorizontal"; if corners_horizontal is non-empty then select the corner with the longest horizontal tangent line and align the pieces at that corner; else if corners_nonhorizontal is non-empty then select the corner with the longest tangent line and align the pieces at that corner; else if there are no corners in the piece then align the pieces at the center of the piece's bounding box.
   - [x] Layout.804.1 User decisions: a fold line comes first, at its lower end (left end if level). Both apps use the same rules. Tie: longer other edge, then the lower corner, then the left one.
   - [x] Layout.804.2 Stack point of each size, in the grain frame: fold line in every size → lower end of the largest size's fold line. Else turn points in every size → the largest size's turn point with the longest level edge, else with the longest edge; other sizes take the turn point nearest the same bounding-box place. Else the bounding-box centre.
   - [x] Layout.804.3 SeamlyLayout: `svg_dom/src/stack_point.rs`, used by `center_piece_sets` and `annotation_alignment.rs`. Seamly2D: `layout_handoff/handoff_stack_point.cpp` has the same rules, used by `align_handoff_annotations`; new `handoff_svg_reading.cpp`. `annotation_alignment::inside`: a point within 0.01 px of the cut line is inside, as in Seamly2D.
   - [x] Layout.804.4 Tests: `stack_point.rs` (11), `TestHandoffAnnotationAlignment` `stackPoint*` (7), `anchor_on_the_cut_line_is_inside`. Fixture `jacket2_40-146_handoff.svg`: annotation transforms realigned by the new Seamly2D code; 0 warnings. `cargo test --workspace` 689 pass; `ctest --preset debug` 8/8; `TestHandoffAnnotationAlignment` 18/18 in a scratch build.
-  - [ ] Layout.804.5 In the next MSI build: the 4 Qt suites pass. jacket2 Nested: Back and Detail 2 stack on the lower end of their fold line; each other piece stacks on one cut line corner; no import warning. Steps: `AGENT_CHECKLIST.md` section 39.
+  - [x] Layout.804.5 In the next MSI build: the 4 Qt suites pass. jacket2 Nested: Back and Detail 2 stack on the lower end of their fold line; each other piece stacks on one cut line corner; no import warning. Steps: `AGENT_CHECKLIST.md` section 39.
 
 ## VERIFY
 

@@ -46,7 +46,7 @@ JACKET_2
 | Layout.93.7 | 23 | SL > jacket_2 > DXF piece properties: Material, Missing Piece Data, Rotation, Flip, Tilt, Fold | --> export DXF (R13), upload to https://aw.fyi/dxf
 | Seamly2D.71.12 | 34 | S2D > jacket2 > Piece mode, Back: seam line and cut line stop at the fold line | ?
 | Seamly2D.71.15 | 35 | S2D > jacket2 > Layout > SL, Back: seam line and cut line stop at the fold line | ?
-| Layout.804.5 | 39 | SL > jacket_2 > Nested: Back and Detail 2 stack on the lower fold line end; other pieces on one corner | ?
+| Layout.804.5 | 39 | SL > jacket_2 > Nested: Back and Detail 2 stack on the lower fold line end; other pieces on one corner | PASS
 
 MALE_SHIRT
 | Seamly2D.71.12 | 34 | S2D > male_shirt > Piece mode, BackPanel and CollarTopInterface-Built-in-SA: seam line and cut line stop at the fold line | ?
@@ -86,16 +86,16 @@ Save exports in `test-seamly-layout\layouts\jacket2\`.
 - [x] Nested tab: each piece once, its sizes stacked. Grainlines vertical. Sizes centered on the largest size.
 - [x] Marker tab: every size of every piece placed alone. The size is inserted before the date, e.g. `jacket2_40-146_Fabric_Size340_202610211332.'
 
-## 2. Media grows in length
+## 2. [x] Media grows in length
 
 Settings from section 1: Paper, Roll, 48 in.
 
 - [x] No warning names the Marker tab. Before Layout.25 it named 112 pieces.
 - [x] Marker tab: roll longer than 500 in (about 800 in). No piece outside the frame.
 - [x] Marker tab, Adjust Layout: the frame shows the full length.
-- [ ] Marker tab, Export > SVG: page height matches the canvas.
+- [x] Marker tab, Export > SVG: page height matches the canvas.
 
-## 3. Export menu on Marker and Nested
+## 3. [ ]Export menu on Marker and Nested
 
 - [x] Marker tab, Export menu: DXF-ASTM items disabled.
 - [ ] A note reads "DXF: select Base Size or a size tab". Layout.85 changed the text from "DXF-ASTM: …".
