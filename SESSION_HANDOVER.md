@@ -2,6 +2,17 @@
 
 ## Current status
 
+### 2026-11-14 — Labels show `<empty>` as a blank line (Layout.X3)
+
+- `LabelTextManager::isBlankLineMarker`: `<empty>`, or its editor (`EditLabelTemplateDialog`) or reader (`VDomDocument`) translation.
+- `prepareLines`: a marker line becomes a `TextLine` with no text; it keeps its font size increment and one line height. A line that the placeholders leave empty is still dropped.
+- Covers the Seamly2D scene labels and the handoff SVG (`add_label` writes no `<text>`, moves the next line down). Edit template Preview tab shows a blank row.
+- `seamly_svg2ezdxf` converter still drops `<empty>` text: it comes only from SVG files of older Seamly2D builds.
+- Test: `TST_LabelTextManager::blankLineMarker`.
+- Checked: test program `TST_LabelTextManager` 12/12 pass (`build/scratch_label_empty/`, in-tree libs). `cargo test` not run: Rust comment only. Qt suites run with the next MSI.
+- Docs: SVG-DATA-ATTRIBUTES `piece_label`; `AGENT_CHECKLIST.md` §43 and OPEN row; TODO Layout.X3.1.
+- Open: Layout.X3.2 installed-app check with the next MSI (§43).
+
 ### 2026-11-14 — Layout tabs show the media size (Layout.X5)
 
 - Each layout tab shows `<W> x <H> <unit>` below its label, in a smaller font: "36.00 x 52.25 in".
@@ -48,17 +59,6 @@
 - Docs: SVG-DATA-ATTRIBUTES "Multisize stack point"; SETTINGS_WORKFLOW fold line; `AGENT_CHECKLIST.md` §26 (no import warning), §39, OPEN row; TODO Layout.804.1–.4.
 - Open: Layout.804.5 with the next MSI: 4 Qt suites, `AGENT_CHECKLIST.md` §39.
 - Scratch: `build/scratch_corners/` (`fix_*.py`, `qttest/` QtTest build, `realign.exe`, `ctest_debug.bat`).
-
-### 2026-11-12 — Layout Mode Any turns a wide piece that fits turned (Layout.802)
-
-- Cause: the oversized-piece check used each piece's `data-rotation`. Seamly2D writes `0` (None) by default, so Any tried 0° only.
-- `piece_extractor::turn_wide_pieces_to_fit`: Any, piece too wide at its rule's angles, 90° turn fits → rule becomes quarter turns.
-- Called by `piece_divider` `prepared_pieces` (check and split) and `do_process_layout` (packer). Tiled paper: not called.
-- Tests: `wide_piece_turns_only_when_the_turn_fits`, `any_mode_turns_a_wide_piece_that_fits_turned`; `piece_rotation_controls_split_and_stays_on_parts` updated.
-- Checked: `cargo test --workspace` 672 pass; `ctest --preset debug` 8/8.
-- Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, LAYOUT_ROTATION_PLAN, SVG-DATA-ATTRIBUTES `data-rotation`, `AGENT_CHECKLIST.md` §38.
-- Open: Layout.802.5 installed-app check (trousers, roll 16 in, Any: `Union_piece` not listed).
-- Found, not changed: dead code warnings `piece_extractor::piece_bbox`, `exports::build_tiled_pdf_tile_doc`.
 
 ## Decisions to retain
 

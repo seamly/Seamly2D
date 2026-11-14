@@ -59,6 +59,7 @@
 #include "../ifc/xml/vlabeltemplateconverter.h"
 #include "../ifc/xml/vabstractpattern.h"
 #include "../ifc/exception/vexception.h"
+#include "../vpatterndb/LabelTextManager.h"
 #include "../vpatterndb/vcontainer.h"
 #include "../vpatterndb/vpiece.h"
 #include "../vpatterndb/floatItemData/vpiecelabeldata.h"
@@ -665,7 +666,11 @@ void EditLabelTemplateDialog::SetPiece(const VPiece &piece)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void EditLabelTemplateDialog::InitPreviewLines(const QVector<VLabelTemplateLine> &lines)
+/**
+ * @brief InitPreviewLines fills the preview list with the template lines, with the placeholders replaced.
+ * @param lines template lines with placeholders.
+ */
+void EditLabelTemplateDialog::InitPreviewLines(const QVector<VLabelTemplateLine>& lines)
 {
     ui->listWidgetPreview->clear();
 
@@ -673,7 +678,13 @@ void EditLabelTemplateDialog::InitPreviewLines(const QVector<VLabelTemplateLine>
 
     for (int i=0; i<lines.size(); ++i)
     {
-        QListWidgetItem *item = new QListWidgetItem(ReplacePlaceholders(lines.at(i).line));
+        // The preview shows a blank line marker as a blank line, as the label does.
+        QString text = ReplacePlaceholders(lines.at(i).line);
+        if (LabelTextManager::isBlankLineMarker(text))
+        {
+            text.clear();
+        }
+        QListWidgetItem* item = new QListWidgetItem(text);
         item->setTextAlignment(lines.at(i).alignment);
         item->setData(Qt::UserRole, lines.at(i).fontSizeIncrement);
 

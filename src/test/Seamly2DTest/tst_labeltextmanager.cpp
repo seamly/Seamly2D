@@ -140,6 +140,59 @@ void TST_LabelTextManager::fileNamePlaceholders() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief blankLineMarker checks that an "<empty>" line is a blank line with one line height in the label and preview.
+ */
+void TST_LabelTextManager::blankLineMarker() const
+{
+    VLabelTemplateLine first_line{};
+    first_line.line = QStringLiteral("Front");
+    VLabelTemplateLine blank_line{};
+    blank_line.line = QStringLiteral("<empty>");
+    blank_line.fontSizeIncrement = 2;
+    VLabelTemplateLine last_line{};
+    last_line.line = QStringLiteral("Cut 2");
+    const QVector<VLabelTemplateLine> lines{first_line, blank_line, last_line};
+
+    TestPatternDocument document;
+    document.setPatternLabelTemplate(lines);
+    VPieceLabelData piece_data;
+    piece_data.SetLabelTemplate(lines);
+
+    VAbstractPattern* previous_document = qApp->getCurrentDocument();
+    qApp->setCurrentDocument(&document);
+
+    LabelTextManager pattern_label;
+    pattern_label.Update(&document);
+    LabelTextManager piece_label;
+    piece_label.Update(QStringLiteral("Front"), piece_data);
+
+    qApp->setCurrentDocument(previous_document);
+
+    // The blank line keeps its place and its font size increment, so it takes one line height.
+    for (const LabelTextManager* label : {&pattern_label, &piece_label})
+    {
+        QCOMPARE(label->GetSourceLinesCount(), 3);
+        QCOMPARE(label->GetSourceLine(0).text, QStringLiteral("Front"));
+        QCOMPARE(label->GetSourceLine(1).text, QString());
+        QCOMPARE(label->GetSourceLine(1).font_size_increment, 2);
+        QCOMPARE(label->GetSourceLine(2).text, QStringLiteral("Cut 2"));
+    }
+
+    EditLabelTemplateDialog editor(&document);
+    editor.SetTemplate(lines);
+    auto* tabs = editor.findChild<QTabWidget*>(QStringLiteral("tabWidget"));
+    auto* preview = editor.findChild<QListWidget*>(QStringLiteral("listWidgetPreview"));
+    auto* preview_tab = editor.findChild<QWidget*>(QStringLiteral("tabPreview"));
+    QVERIFY(tabs != nullptr);
+    QVERIFY(preview != nullptr);
+    QVERIFY(preview_tab != nullptr);
+    tabs->setCurrentWidget(preview_tab);
+    QCOMPARE(preview->count(), 3);
+    QCOMPARE(preview->item(1)->text(), QString());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 TST_LabelTextManager::TST_LabelTextManager(QObject *parent)
     : QObject(parent)
 {

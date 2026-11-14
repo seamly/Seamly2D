@@ -46,6 +46,7 @@ private slots:
     void LargestFittingSize() const;
     void fileNamePlaceholders_data() const;
     void fileNamePlaceholders() const;
+    void blankLineMarker() const;
 };
 
 #endif // TST_LABELTEXTMANAGER_H

@@ -55,6 +55,7 @@ MALE_SHIRT
 | Layout.88.2 | 3 | SL > male_shirt > Export menu: DXF-ASTM note reads in full | FAIL --> Note did not appear
 | Layout.800.3 | 36 | SL > male_shirt > Export > SVG: no check boxes; each item exports | ?
 | Layout.X8.2 | 40 | S2D > male_shirt > Piece Properties: "Layout rotation:" label and Layout Mode=Any line | ?
+| Layout.X3.2 | 43 | S2D > male_shirt > Piece label `<empty>` line: blank line in Piece mode, Preview and SL | ?
 | Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Fabric | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Lining | ?
@@ -650,3 +651,14 @@ Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is 
 - [ ] Settings: Fabric (folded), width 60.0. Submit. Create Layout. Each tab reads `60.00 x <length> in`.
 - [ ] Settings: unit cm. Submit. Create Layout. Each tab reads `<width> x <length> cm`.
 - [ ] Lining material tab: its layout tabs show the Lining layout lengths.
+
+## 43. Labels show `<empty>` as a blank line
+
+(Layout.X3.2)
+
+- [ ] Seamly2D: open male_shirt. Piece mode, open a piece's Piece Properties > Labels.
+- [ ] Piece label > Edit template. Select the first line. Add a line. The new line reads `<empty>`. Leave it as it is.
+- [ ] Preview tab: the new line is a blank row between the first and the third line. No `<empty>`.
+- [ ] OK, OK. The piece label shows a blank line in that place. No `<empty>`.
+- [ ] Press Layout. SeamlyLayout: Create Layout. The piece label shows the same blank line. No `<empty>`.
+- [ ] Export > SVG. Open the SVG in a browser. The label shows the blank line. No `<empty>`.
