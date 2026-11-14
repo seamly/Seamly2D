@@ -2,6 +2,15 @@
 
 ## Current status
 
+### 2026-11-14 — Piece Properties: Layout rotation (Layout.X8)
+
+- User decision: Seamly2D does not know the SeamlyLayout Layout Mode, so Rotation stays visible. Rename and add a line instead of hiding.
+- `pattern_piece_dialog.ui`: label "Rotation:" → "Layout rotation:". New `rotationLayoutMode_Label` below the radio buttons: "Rotation applies when Layout Mode=Any in SeamlyLayout."
+- SeamlyLayout `SettingsDialog.qml` Piece Gap tip and docs (SVG-DATA-ATTRIBUTES, NEW-ATTRIBUTES, SETTINGS_WORKFLOW, LAYOUT_ROTATION_PLAN) say "Layout rotation".
+- Checked: `uic` builds the `.ui`; `ctest --preset debug` 8/8. `cargo test` not run: no Rust change. Seamly2D Qt suites not run (next MSI).
+- Open: Layout.X8.2 installed-app check, `AGENT_CHECKLIST.md` §40.
+- `.ts` translation files not updated: lupdate picks up the new strings.
+
 ### 2026-11-12 — Nested sizes stack on a corner (Layout.804)
 
 - Merged into `run-seamlyLayout` without skip-ci (`.pri`/`.pro` changed). Branch `task-nested-stack-corner` deleted.
@@ -47,15 +56,6 @@
 - Test: `ExportMenuTests::svgModeItemsHaveNoCheckBox` (3 rows). 3 `PreferencesModelTests` removed.
 - Checked: `ctest --preset debug` 8/8. `cargo test` not run: no Rust change.
 - Open: Layout.800.3 installed-app check with the next MSI (`AGENT_CHECKLIST.md` §36).
-
-### 2026-11-12 — TODO_DXF.md cleaned
-
-- Closed → `TODO_COMPLETED.md`: DXF.21, DXF.3, DXF.8 (completed); DXF.22 (obsolete). Findings table moved there too.
-- Evidence: aw.fyi `male_shirt_R13_202611012029.dxf` (2026-11-01): pleat and slit ends not flagged; FrontPanel_M not flagged. jacket2 Base Size 500 reports (2026-10-23, 11-07, 11-08): 0 departures.
-- DXF.3.5 CLO3D import check now lives only in Layout.102.5 (`AGENT_CHECKLIST.md` section 8).
-- Open: DXF.18.5, rewritten with steps and expected result. `male_shirt` CollarTopInterface-Built-in-SA has no notch.
-- Found, not investigated: the 2026-11-01 and 2026-11-07 male_shirt DXF files have 0 notches. `male_shirt.sm2d` FrontPanel and BackPanel have 1 notch each.
-- Compliance doc "aw.fyi results": 4 new rows.
 
 ## Decisions to retain
 

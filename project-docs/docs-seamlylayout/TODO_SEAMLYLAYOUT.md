@@ -12,6 +12,9 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 'Size_<sizenumber>' followed by '_<piecename>' if piecename exists else '_Piece_<num>', followed by '_<letter>' if letter exists.
 - [ ] Layout.X7 - 'Fabric (folded)' > Width=30.0 > 'Split the pieces' in jacket 2 incorrectly generates message "Some layouts left pieces out". The pieces should be split so that they fit on the media for each size, for each material.
 - [ ] Layout.X8 - Update the 'Rotation' setting to display only when 'Layout Mode' is 'Any' which allows pieces to be rotated.
+  - User decision: Seamly2D does not know the SeamlyLayout Layout Mode, so Rotation stays visible. Label "Rotation:" becomes "Layout rotation:". New line below the radio buttons: "Rotation applies when Layout Mode=Any in SeamlyLayout."
+  - [x] Layout.X8.1 `pattern_piece_dialog.ui`: label and line. SeamlyLayout Settings tip, SVG-DATA-ATTRIBUTES, NEW-ATTRIBUTES, SETTINGS_WORKFLOW, LAYOUT_ROTATION_PLAN say "Layout rotation".
+  - [ ] Layout.X8.2 Installed-app check with the next MSI (`AGENT_CHECKLIST.md` §40).
 
 ## Implement
 
