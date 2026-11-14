@@ -1748,7 +1748,7 @@ mod tests {
         let out = doc.to_string();
         assert!(out.contains("Union_piece part 1 of 2<"), "{out}");
         assert!(!out.contains("Piece_12_Union_piece part"), "{out}");
-    } // concave_piece_gives_one_part_per_region
+    } // part_label_uses_source_name
 
     // @brief Equal parts with one pixel of slack.
     #[test]
