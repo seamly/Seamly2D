@@ -58,6 +58,7 @@ MALE_SHIRT
 | Layout.X3.2 | 43 | S2D > male_shirt > Piece label `<empty>` line: blank line in Piece mode, Preview and SL | ?
 | Layout.X1.2 | 44 | SL > male_shirt > Paper Roll 8 in, split: pattern and piece labels wholly inside each part | ?
 | Layout.X4.2 | 45 | SL > male_shirt > Paper Tiled: Export > PDF disabled, PDF (Tiled) enabled | ?
+| Layout.X2.2 | 46 | SL > trousers > Paper Roll 16 in, split: part labels read `<piece name> part i of n` | ?
 | Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Fabric | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Lining | ?
@@ -232,7 +233,7 @@ Pattern: `C:\Users\susan\seamly2d\patterns\trousers.sm2d` (individual).
 - [ ] Submit the settings: Create Layout is enabled.
 - [ ] Create Layout. Choose "Split the pieces". OK.
   - [ ] Back is 2 parts.
-  - [ ] Each part has a blue label `<name> part i of 2, joins j`.
+  - [ ] Each part has a blue label `<name> part i of 2`.
   - [ ] Each cut edge has 2 green match notches.
   - [ ] Export > PDF: save dialog offers `trousers_<stamp>.pdf`, with no tab. The split parts appear.
   - [ ] Export > DXF > DXF-ASTM (R13): blocks named `Back (1/2)` and `Back (2/2)`.
@@ -590,7 +591,7 @@ Pattern: `test-seamly-layout/patterns/validation/trousers.sm2d` (has `Union_piec
 - [ ] Open trousers. Press Layout.
 - [ ] Settings: Paper, Roll, custom width 16 in. Layout Mode: Along Grainline (Any turns `Union_piece` and does not split it). Submit. Create Layout.
 - [ ] Dialog "Pieces do not fit the media": choose "Split the pieces". OK.
-- [ ] `Union_piece` is 2 parts. Each blue label `<name> part i of 2, joins j` is level (not turned), the same text size as on other split pieces (0.25 in).
+- [ ] `Union_piece` is 2 parts. Each blue label `<name> part i of 2` is level (not turned), the same text size as on other split pieces (0.25 in).
 - [ ] Each label is inside its part's seam line, near the cut edge. It crosses no line and no other label.
 - [ ] Export > PDF. The labels in the PDF are where they are on the canvas.
 - [ ] Export > SVG > "Paths: convert to single-stroke (Hershey)". Open the file in a browser. The `Union_piece` labels cross no line and no other label.
@@ -634,7 +635,7 @@ Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is 
 
 (Layout.X6)
 
-- [ ] Open jacket2. Press Layout.
+- [ ] Open trousers (`test-seamly-layout/patterns/validation/trousers.sm2d`). Press Layout.
 - [ ] Settings: Fabric (folded), width 30.0. Submit. Create Layout. "Pieces do not fit the media": the list names pieces `Size_<size>_<name>_<letter>`, for example `Size_640_Комір_H`. No `Piece_<n>`.
 - [ ] Choose "Split the pieces". OK. If "Some layouts left pieces out" appears, each line is `Size_<size>_<name>_<letter>` alone. No `: <size>` after the name.
 - [ ] Base Size 500 tab > Export > DXF-ASTM (R13). "Missing Piece Data" lists `Size_500_Подборт_G`.
@@ -646,7 +647,7 @@ Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is 
 
 (Layout.X5.2)
 
-- [ ] Open jacket2. Press Layout.
+- [ ] Open trousers (`test-seamly-layout/patterns/validation/trousers.sm2d`). Press Layout.
 - [ ] Settings: Paper, Roll, 36 in. Submit. Create Layout. Below each tab label (Marker, Nested, Base Size 500, Size …) one smaller line reads `36.00 x <length> in`.
 - [ ] The lengths differ between tabs. Each length matches the height of the layout on that tab.
 - [ ] Select a size tab. Adjust Layout. Move the lowest piece up. Apply. Done Adjusting. The tab's length is shorter. The other tabs do not change.
@@ -672,7 +673,7 @@ Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is 
 - [ ] Settings: Paper, Roll, custom width 8 in. Layout Mode: Along Grainline. Submit. Create Layout.
 - [ ] Dialog "Pieces do not fit the media": choose "Split the pieces". OK.
 - [ ] Each pattern label and piece label lies wholly inside the cut line of one part. No label crosses a cut line.
-- [ ] No moved label overlaps another label or the blue part label `<name> part i of n, joins j`.
+- [ ] No moved label overlaps another label or the blue part label `<name> part i of n`.
 - [ ] A label is smaller than before only when its part is too small for it at full size.
 - [ ] Export > DXF is disabled. Export > PDF: the labels are where the layout shows them.
 
@@ -686,3 +687,14 @@ Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is 
 - [ ] Export > PDF (Tiled) is enabled and exports.
 - [ ] Settings: Paper Type Roll. Submit. Create Layout. Export > PDF is enabled. PDF (Tiled) is disabled.
 - [ ] View menu: PDF is enabled.
+
+## 46. Split part label text
+
+(Layout.X2.2)
+
+- [ ] Open trousers (`test-seamly-layout/patterns/validation/trousers.sm2d`). Press Layout.
+- [ ] Settings: Paper, Roll, custom width 16 in. Layout Mode: Along Grainline. Submit. Create Layout.
+- [ ] Dialog "Pieces do not fit the media": choose "Split the pieces". OK.
+- [ ] Each blue part label reads `<piece name> part i of n`, e.g. `Union_piece part 1 of 2`. No `Piece_<n>_` prefix, no `, joins`.
+- [ ] Part numbers run 1 to n; n is the part count of that piece.
+- [ ] Each label lies along a cut edge, or level when the edge is too short.
