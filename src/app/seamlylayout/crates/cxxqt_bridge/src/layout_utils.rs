@@ -874,31 +874,45 @@ fn enlarged_media_message(
     initial: &Document,
     output: &Document,
 ) -> Option<String> {
-    let dimension = |doc: &Document, name: &str| -> f64 {
-        doc.root.attributes.get(name).and_then(|value| value.parse().ok()).unwrap_or(0.0)
-    };
-    let width_px = dimension(output, "width");
-    let height_px = dimension(output, "height");
-    if width_px <= dimension(initial, "width") && height_px <= dimension(initial, "height") {
+    let grew = canvas_dimension_px(output, "width") > canvas_dimension_px(initial, "width")
+        || canvas_dimension_px(output, "height") > canvas_dimension_px(initial, "height");
+    if !grew {
         return None;
     } // if no enlargement
+    let (width, height) = media_size_in_unit(settings, output);
+    Some(format!(
+        "Media enlarged: width {width:.2} {unit}, height {height:.2} {unit}.",
+        unit = settings.unit,
+    ))
+} // fn enlarged_media_message
+
+/// @brief Width and height of the media of a layout canvas, in the settings unit.
+///
+/// @param settings Settings of the layout run: unit, media type, fabric width.
+/// @param doc      Layout canvas. Its root `width` and `height` are in px; a missing value reads as 0.
+/// @return `(width, height)`. Fabric gives the nominal bolt width: a folded
+///         canvas holds half of it, and a fabric layout never widens.
+pub fn media_size_in_unit(settings: &LayoutSettings, doc: &Document) -> (f64, f64) {
     let units_per_inch = match settings.unit.as_str() {
         "mm" => 25.4,
         "cm" => 2.54,
-        _ => 1.0,
-    };
+        _ => 1.0, // "in"; `LayoutSettings` also reads an unknown unit as inches
+    }; // match unit
+    let px_to_unit = |px: f64| px / layout_tiling::LAYOUT_PPI * units_per_inch;
     let width = if settings.media_type == "fabric" {
-        // Report the nominal bolt width, not the rounded folded pixel width.
+        // The nominal bolt width, not the rounded folded pixel width.
         if settings.fabric_width > 0.0 { settings.fabric_width } else { settings.page_width }
     } else {
-        width_px / layout_tiling::LAYOUT_PPI * units_per_inch
+        // Paper: the canvas width, which a paper roll can widen.
+        px_to_unit(canvas_dimension_px(doc, "width"))
     }; // if fabric
-    Some(format!(
-        "Media enlarged: width {:.2} {}, height {:.2} {}.",
-        width, settings.unit,
-        height_px / layout_tiling::LAYOUT_PPI * units_per_inch, settings.unit,
-    ))
-} // fn enlarged_media_message
+    (width, px_to_unit(canvas_dimension_px(doc, "height")))
+} // fn media_size_in_unit
+
+/// @brief Root `width` or `height` of a canvas in px; 0 when absent or not a number.
+fn canvas_dimension_px(doc: &Document, name: &str) -> f64 {
+    doc.root.attributes.get(name).and_then(|value| value.parse().ok()).unwrap_or(0.0)
+} // fn canvas_dimension_px
 
 /// @brief The media a piece must fit to stay whole: the content rect width, of no length limit.
 pub fn layout_divide_spec(settings: &LayoutSettings, bin_w: u32) -> DivideSpec {

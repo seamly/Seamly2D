@@ -2,6 +2,18 @@
 
 ## Current status
 
+### 2026-11-14 — Layout tabs show the media size (Layout.X5)
+
+- Each layout tab shows `<W> x <H> <unit>` below its label, in a smaller font: "36.00 x 52.25 in".
+- Width: paper canvas width (a roll can widen); fabric: the bolt width, folded too (as "Media enlarged"). Height: the tab's layout length.
+- Rust: `layout_utils::media_size_in_unit` (shared with `enlarged_media_message`), `layout_views::media_size_text`, `LayoutViews::media_sizes`.
+- Bridge: QML property `layoutViewMediaSizes`; `run_layout` keeps the parsed `layout_settings`; `exit_adjust_mode` refreshes the tab properties.
+- `Main.qml`: tab `contentItem` is a Column: label, then media size.
+- Tests: `media_size_text_uses_the_settings_unit`, `media_sizes_follow_each_tab_layout`.
+- Checked: `cargo test --workspace` 693 pass; `ctest` 8/8 pass (build dir `Seamly2D-private-worktrees/x5dbg`: the preset path in a worktree passes MAX_PATH).
+- Docs: SIMPLE_WORKFLOW tab list; `AGENT_CHECKLIST.md` §42; TODO Layout.X5.1.
+- Open: Layout.X5.2 installed-app check with the next MSI (§42).
+
 ### 2026-11-14 — Multisize piece names without the piece number (Layout.X6)
 
 - `piece_naming.rs`: multisize `Size_<size>_<name>[_<letter>]`; no name → `Size_<size>_Piece_<n>[_<letter>]`. Piece-set: same without the size.
@@ -46,18 +58,6 @@
 - Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, LAYOUT_ROTATION_PLAN, SVG-DATA-ATTRIBUTES `data-rotation`, `AGENT_CHECKLIST.md` §38.
 - Open: Layout.802.5 installed-app check (trousers, roll 16 in, Any: `Union_piece` not listed).
 - Found, not changed: dead code warnings `piece_extractor::piece_bbox`, `exports::build_tiled_pdf_tile_doc`.
-
-### 2026-11-12 — Split part label on a short cut edge (Layout.801)
-
-- Found by the user: trousers `Union_piece` split on a 16 in roll; 24 px label (~492 px Hershey) ran past the 227 px cut edge.
-- First fix: shrink the label to the edge (font 24 → ~11 px, `textLength`). User decision: keep the 0.25 in text.
-- New `cxxqt_bridge/src/part_label_placement.rs` `place_part_label`: label fits edge → along the edge, as before.
-- Label wider than edge → level, 24 px, clear row nearest the cut edge. Clear: no outline edge, path or text within 0.25 em.
-- No clear row → shrink along the edge (old fallback). `piece_divider.rs` `fit_label_to_edge` removed.
-- Real trousers export: both labels 24 px, inside the seam line, below the existing labels, past the notches.
-- Tests: `part_label_placement` (5), `piece_divider` `part_label_fits_its_part`. `cargo test --workspace` 677 pass; `ctest --preset debug` 8/8.
-- Docs: SVG-DATA-ATTRIBUTES "split parts", SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §37 (now Layout Mode Along Grainline: Any turns `Union_piece`).
-- Open: Layout.801.4 installed-app check with the next MSI.
 
 ## Decisions to retain
 

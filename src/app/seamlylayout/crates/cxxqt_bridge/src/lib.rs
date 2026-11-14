@@ -270,6 +270,15 @@ fn cleanup_adjust_output_artifacts() -> usize {
 #[inline(always)]
 fn cleanup_adjust_output_artifacts() -> usize { 0 } // fn cleanup_adjust_output_artifacts (no-op when debug_assertions is disabled)
 
+// @brief Copy strings into a QStringList for a QML property.
+fn string_list(items: &[String]) -> cxx_qt_lib::QStringList {
+    let mut list = cxx_qt_lib::QList::<cxx_qt_lib::QString>::default();
+    for item in items {
+        list.append(cxx_qt_lib::QString::from(item.as_str()));
+    } // for item
+    cxx_qt_lib::QStringList::from(&list)
+} // fn string_list
+
 // @brief Compute a bounding box from descendant geometry inside one top-level piece group.
 // Uses path, line, and rect descendants so reloaded adjust_dom.svg does not depend on
 // cached data-* attributes that may be absent after Apply/reload.
@@ -607,6 +616,8 @@ pub mod qobject {
         // Tab labels of a multisize layout: "Marker", "Nested", "Base Size <n>",
         // then "Size <n>"; empty otherwise.
         #[qproperty(QStringList, layout_view_labels)]
+        // Media size under each tab label, "36.00 x 52.25 in"; one entry per tab in `layout_view_labels`.
+        #[qproperty(QStringList, layout_view_media_sizes)]
         // Index of the selected tab in `layout_view_labels`.
         #[qproperty(i32, active_layout_view)]
         // True while tabs are still queued for `process_next_tab_layout`.
@@ -1008,6 +1019,10 @@ pub struct AppControllerRust {
     // Reset to false on new import.
     is_roll_layout: bool,
 
+    // Settings of the last layout run; `None` before a run or when its settings do not parse.
+    // Read by `refresh_layout_view_properties` for the unit and the fabric width of the tab media sizes.
+    layout_settings: Option<LayoutSettings>,
+
     // JSON object with layout metadata and piece bounding boxes, built during process_layout.
     // Format: {ml_px, mt_px, pieces: [{id, x, y, w, h, origin_x_px, origin_y_px}, ...]}
     // All coordinates are in layout pixels (piece.x/y are absolute canvas-pixel positions).
@@ -1065,6 +1080,9 @@ pub struct AppControllerRust {
 
     // Tab labels mirrored from `layout_views` for QML.
     layout_view_labels: cxx_qt_lib::QStringList,
+
+    // Tab media sizes mirrored from `layout_views` for QML.
+    layout_view_media_sizes: cxx_qt_lib::QStringList,
 
     // Selected tab, mirrored from `layout_views`.
     active_layout_view: i32,
@@ -1141,6 +1159,7 @@ impl Default for AppControllerRust {
             layout_ml_px:              0,                              // default until first layout
             layout_mt_px:              0,                              // default until first layout
             is_roll_layout:            false,                          // set by process_layout
+            layout_settings:           None,                           // set by run_layout
             piece_bboxes_json:         String::new(),                  // no layout computed yet
             piece_bboxes_json_snapshot: String::new(),                  // no snapshot until adjust mode
             error_message:             cxx_qt_lib::QString::default(), // no active error
@@ -1153,6 +1172,7 @@ impl Default for AppControllerRust {
             multisize_sizes:           cxx_qt_lib::QString::default(), // no sizes until a multisize import
             multisize_height:          cxx_qt_lib::QString::default(), // no height until a multisize import
             layout_view_labels:        cxx_qt_lib::QStringList::default(), // no tabs until a multisize layout
+            layout_view_media_sizes:   cxx_qt_lib::QStringList::default(), // no tabs until a multisize layout
             active_layout_view:        0,                              // first tab
             is_tab_layout_pending:     false,                          // no tab run queued
             dxf_export_allowed:        true,                           // no tabs: an individual layout exports DXF-ASTM
@@ -1415,11 +1435,7 @@ impl qobject::AppController {
 
                 // Several materials get tabs; one material gets none.
                 let labels: Vec<String> = if parts.len() > 1 { parts.iter().map(|p| p.name.clone()).collect() } else { Vec::new() };
-                let mut material_labels = cxx_qt_lib::QList::<cxx_qt_lib::QString>::default();
-                for label in &labels {
-                    material_labels.append(cxx_qt_lib::QString::from(label.as_str()));
-                } // for label
-                self.as_mut().set_material_labels(cxx_qt_lib::QStringList::from(&material_labels));
+                self.as_mut().set_material_labels(string_list(&labels));
                 self.as_mut().set_active_material(0);
                 self.as_mut().set_active_material_name(cxx_qt_lib::QString::from(parts[0].name.as_str()));
                 log_to_file(&format!("[finish_import] materials: {labels:?}"));
@@ -1744,6 +1760,8 @@ impl qobject::AppController {
         // Remember the media form so Adjust Apply knows whether to trim the bottom.
         // Invalid JSON fails inside do_process_layout, which reports the error.
         let settings = LayoutSettings::from_json(&json_str).ok();
+        // Every tab of the run uses these settings; the tab media sizes read them.
+        self.as_mut().rust_mut().layout_settings = settings.clone();
         let is_roll_layout = settings.as_ref().is_some_and(LayoutSettings::is_roll_form);
         let is_fabric_layout = settings.as_ref().is_some_and(|settings| settings.media_type == "fabric");
         let is_tiled_multisize = *self.is_multisize()
@@ -2205,19 +2223,22 @@ impl qobject::AppController {
         self.as_mut().refresh_layout_view_properties();
     } // fn clear_layout_views
 
-    // Copy the tab labels, export capabilities, and split state to the QML properties.
+    // Copy the tab labels, media sizes, export capabilities, and split state to the QML properties.
     fn refresh_layout_view_properties(mut self: std::pin::Pin<&mut Self>) {
-        let (labels, active, dxf_allowed, tiled_allowed) = {
-            let views = &self.rust().layout_views;
-            let mut list = cxx_qt_lib::QList::<cxx_qt_lib::QString>::default();
-            for label in views.labels() {
-                list.append(cxx_qt_lib::QString::from(label.as_str()));
-            } // for label
+        let (labels, media_sizes, active, dxf_allowed, tiled_allowed) = {
+            let rust = self.rust();
+            let views = &rust.layout_views;
+            // The active tab's layout is the controller's layout_dom.
+            let media_sizes = rust.layout_settings.as_ref()
+                .map(|settings| views.media_sizes(rust.layout_dom.as_ref(), settings))
+                .unwrap_or_default(); // no layout run: no tabs either
             // No tabs: an individual layout, which DXF-ASTM and PDF (Tiled) always export.
             let dxf_allowed = views.active_kind().map_or(true, ViewKind::exports_dxf);
             let tiled_allowed = views.active_kind().map_or(true, ViewKind::exports_pdf_tiled);
-            (cxx_qt_lib::QStringList::from(&list), views.active() as i32, dxf_allowed, tiled_allowed)
-        }; // views borrow dropped
+            (string_list(&views.labels()), string_list(&media_sizes), views.active() as i32, dxf_allowed, tiled_allowed)
+        }; // rust borrow dropped
+        // Sizes first: a new tab delegate reads its size when the labels change.
+        self.as_mut().set_layout_view_media_sizes(media_sizes);
         self.as_mut().set_layout_view_labels(labels);
         self.as_mut().set_active_layout_view(active);
         self.as_mut().set_dxf_export_allowed(dxf_allowed);
@@ -2537,6 +2558,7 @@ impl qobject::AppController {
 
         self.as_mut().set_is_adjust_mode(false);
         self.as_mut().set_is_adjust_dirty(false);
+        self.as_mut().refresh_layout_view_properties(); // the adjusted layout can be shorter
         self.as_mut().layout_finished(); // reload right canvas with final adjusted layout
     } // fn exit_adjust_mode
 

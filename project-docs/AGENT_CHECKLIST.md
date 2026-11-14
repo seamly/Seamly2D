@@ -635,3 +635,15 @@ Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is 
 - [ ] Settings: Fabric (folded), width 30.0. Submit. Create Layout. "Pieces do not fit the media": the list names pieces `Size_<size>_<name>_<letter>`, for example `Size_640_Комір_H`. No `Piece_<n>`.
 - [ ] Choose "Split the pieces". OK. If "Some layouts left pieces out" appears, each line is `Size_<size>_<name>_<letter>` alone. No `: <size>` after the name.
 - [ ] Base Size 500 tab > Export > DXF-ASTM (R13). "Missing Piece Data" lists `Size_500_Подборт_G`.
+
+## 42. Layout tabs show the media size
+
+(Layout.X5.2)
+
+- [ ] Open jacket2. Press Layout.
+- [ ] Settings: Paper, Roll, 36 in. Submit. Create Layout. Below each tab label (Marker, Nested, Base Size 500, Size …) one smaller line reads `36.00 x <length> in`.
+- [ ] The lengths differ between tabs. Each length matches the height of the layout on that tab.
+- [ ] Select a size tab. Adjust Layout. Move the lowest piece up. Apply. Done Adjusting. The tab's length is shorter. The other tabs do not change.
+- [ ] Settings: Fabric (folded), width 60.0. Submit. Create Layout. Each tab reads `60.00 x <length> in`.
+- [ ] Settings: unit cm. Submit. Create Layout. Each tab reads `<width> x <length> cm`.
+- [ ] Lining material tab: its layout tabs show the Lining layout lengths.
