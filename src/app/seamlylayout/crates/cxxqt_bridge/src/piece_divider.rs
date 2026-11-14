@@ -28,7 +28,7 @@
 //     or fold line label not wholly inside the part outline moves inside it
 //     (`label_inside_part.rs`);
 //   - a part without grainline gets a new vertical grainline when the piece had one;
-//   - a new `piece_label`: "<name> part i of n, joins j", along the longest cut
+//   - a new `piece_label`: "<name> part i of n", along the longest cut
 //     edge. A label wider than that edge lies level across the part, clear of the
 //     other paths and text; with no clear place, it shrinks to the edge
 //     (`part_label_placement.rs`);
@@ -1093,8 +1093,7 @@ fn divide_piece(piece: &Element, columns: usize, uu_per_px: f64) -> Option<Vec<E
         } // for each part
     } // if the piece has a grainline
 
-    // Which parts join, and the shared stretches of cut line.
-    let mut joins: Vec<Vec<usize>> = vec![Vec::new(); count];
+    // The shared stretches of cut line.
     let mut match_notches: Vec<Vec<((f64, f64), (f64, f64))>> = vec![Vec::new(); count];
     let notch_length = MATCH_NOTCH_IN * uu_per_in;
     for a in 0..count {
@@ -1103,8 +1102,6 @@ fn divide_piece(piece: &Element, columns: usize, uu_per_px: f64) -> Option<Vec<E
             if shared.is_empty() {
                 continue;
             }
-            joins[a].push(b);
-            joins[b].push(a);
             for (line, lo, hi) in shared {
                 if hi - lo < 4.0 * notch_length {
                     continue; // too short for two notches
@@ -1122,7 +1119,10 @@ fn divide_piece(piece: &Element, columns: usize, uu_per_px: f64) -> Option<Vec<E
 
     let piece_id = attr(piece, "id").to_string();
     let name = attr(piece, "data-name").to_string();
-    let shown = display_name(piece);
+    // The part label shows the piece name from the import, else the shown name.
+    let label_name = Some(attr(piece, crate::piece_naming::SOURCE_NAME_ATTR))
+        .filter(|n| !n.is_empty())
+        .map_or_else(|| display_name(piece), str::to_string);
     // Components name their piece in data-parent: data-name, else the piece id.
     let component_parent = if name.is_empty() { piece_id.clone() } else { name.clone() };
     let next_label_number = children
@@ -1199,14 +1199,7 @@ fn divide_piece(piece: &Element, columns: usize, uu_per_px: f64) -> Option<Vec<E
             } // match notch group
         } // if match notches
 
-        let mut others: Vec<usize> = joins[i].iter().map(|j| j + 1).collect();
-        others.sort_unstable();
-        let joins_text = others.iter().map(usize::to_string).collect::<Vec<_>>().join(", ");
-        let text = if joins_text.is_empty() {
-            format!("{shown} part {number} of {count}")
-        } else {
-            format!("{shown} part {number} of {count}, joins {joins_text}")
-        }; // text
+        let text = format!("{label_name} part {number} of {count}");
         let longest_edge = part
             .cut_edges()
             .into_iter()
@@ -1365,10 +1358,10 @@ mod tests {
             assert_eq!((attr(notch, "data-notch-type"), attr(notch, "data-seam-allowances")), (kind, sa));
         } // for each part
 
-        // Part labels name the part and the part it joins.
+        // Part labels give the piece name, the part number and the part count.
         let svg = doc.to_string();
-        assert!(svg.contains("Front part 1 of 2, joins 2"), "{svg}");
-        assert!(svg.contains("Front part 2 of 2, joins 1"), "{svg}");
+        assert!(svg.contains("Front part 1 of 2<"), "{svg}");
+        assert!(svg.contains("Front part 2 of 2<"), "{svg}");
         // The original label stays whole, on the part that holds it.
         assert!(component(parts[1], "piece_label").is_some_and(|l| attr(l, "id") == "piece_label_1_Front_part2"));
         // Ids stay unique.
@@ -1740,9 +1733,21 @@ mod tests {
         let divided = divide_oversized_pieces(&mut doc, &spec(160));
         assert_eq!(divided[0].parts, 3);
         let svg = doc.to_string();
-        assert!(svg.contains("U part 1 of 3, joins 2, 3"), "{svg}");
-        assert!(svg.contains("U part 2 of 3, joins 1"), "{svg}");
-        assert!(svg.contains("U part 3 of 3, joins 1"), "{svg}");
+        assert!(svg.contains("U part 1 of 3<"), "{svg}");
+        assert!(svg.contains("U part 2 of 3<"), "{svg}");
+        assert!(svg.contains("U part 3 of 3<"), "{svg}");
+    } // concave_piece_gives_one_part_per_region
+
+    // @brief The part label uses the imported piece name, not the numbered `data-name`.
+    #[test]
+    fn part_label_uses_source_name() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece_U" data-type="piece" data-name="Piece_12_Union_piece" data-source-name="Union_piece">
+            <g data-type="cutline"><path d="M0,0 L300,0 L300,300 L0,300 L0,0 Z"/></g></g></svg>"#;
+        let mut doc = Document::parse(svg).expect("parses");
+        divide_oversized_pieces(&mut doc, &spec(160));
+        let out = doc.to_string();
+        assert!(out.contains("Union_piece part 1 of 2<"), "{out}");
+        assert!(!out.contains("Piece_12_Union_piece part"), "{out}");
     } // concave_piece_gives_one_part_per_region
 
     // @brief Equal parts with one pixel of slack.

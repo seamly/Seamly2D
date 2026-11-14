@@ -174,7 +174,7 @@ The application workflow loop consists of:
        One line per piece names each dimension that does not fit, and the media size inside the margins, in the settings unit:
        "• Back: width 16.61 in, media 15.50 in". A long list scrolls; the buttons stay visible.
        * "Split the pieces" (default; SVG, PDF, HPGL, EPS, PS, PNG, JPG): each such piece splits into equal parts that fit.
-         Each part gets a label "<name> part i of n, joins j" and 2 match notches per shared cut edge. No seam allowance on a cut edge.
+         Each part gets a label "<name> part i of n" and 2 match notches per shared cut edge. No seam allowance on a cut edge.
          A label wider than its cut edge lies level across the part, near the cut edge, clear of other lines and text.
          With no clear place, it shrinks to the edge length.
          A pattern or piece label that crosses a cut line moves wholly inside its part. It shrinks only when the part is too small.

@@ -21,6 +21,7 @@
 //
 // Each renamed group carries `data-name-assigned="true"`. A second import of a
 // SeamlyLayout export keeps those names and does not number them again.
+// The piece's own `data-name` goes to `data-source-name`; a split part label uses it.
 
 use std::collections::HashMap;
 
@@ -28,6 +29,9 @@ use xmltree::{Element, XMLNode};
 
 // @brief Attribute that marks a `data-name` this module assigned.
 pub(crate) const NAME_ASSIGNED_ATTR: &str = "data-name-assigned";
+
+// @brief Attribute that holds the piece's `data-name` from the import, trimmed. Absent when the piece had none.
+pub(crate) const SOURCE_NAME_ATTR: &str = "data-source-name";
 
 // @brief Result of `assign_unique_piece_names`.
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -214,6 +218,10 @@ fn rename_piece(piece: &mut Element, state: &mut NamingState) {
         } // if element
     } // for each component
 
+    let source_name = piece.attributes.get("data-name").map(|n| n.trim().to_string()).filter(|n| !n.is_empty());
+    if let Some(source_name) = source_name {
+        piece.attributes.insert(SOURCE_NAME_ATTR.to_string(), source_name);
+    } // if the piece had a name
     piece.attributes.insert("data-name".to_string(), name);
     piece.attributes.insert(NAME_ASSIGNED_ATTR.to_string(), "true".to_string());
     state.renamed += 1;
