@@ -8,17 +8,16 @@
 // A pattern can give several pieces one name ("Detail"), or no name. The import
 // renames each `data-type="piece"` group from its size, number, name and letter:
 //
-//   * Individual pattern: `Piece_<n>[_<name>][_<letter>]`.
-//   * Multisize pattern:  `Size_<size>_<name>[_<letter>]`; without a name, `Size_<size>_Piece_<n>[_<letter>]`.
+//   * Individual pattern: `<name>[_<letter>]`; without a name, `Piece_<n>[_<letter>]`.
+//   * Multisize pattern:  `Size_<size>_` and the individual name.
 //
 // Each run of whitespace in a size, name or letter becomes one `_`: "Detail  1" gives `Detail_1`.
 //
 // `<n>` is the 1-based position of the piece among the pieces of its size, in
-// document order, so one piece has the same number in every size. The number
-// ends at the first `_` after `Piece_`, so two numbered pieces never get the same
-// name. Named multisize pieces that would get the same name keep the number:
-// `Size_<size>_Piece_<n>_<name>[_<letter>]`. A multisize piece-set gets the name
-// of its pieces without the size.
+// document order, so one piece has the same number in every size. Named pieces
+// that would get the same name keep the number: `[Size_<size>_]Piece_<n>_<name>[_<letter>]`.
+// The number ends at the first `_` after `Piece_`, so two numbered pieces never get
+// the same name. A multisize piece-set gets the name of its pieces without the size.
 //
 // Each renamed group carries `data-name-assigned="true"`. A second import of a
 // SeamlyLayout export keeps those names and does not number them again.
@@ -134,11 +133,11 @@ fn next_number(counts: &mut Vec<(Option<String>, usize)>, size: &Option<String>)
 } // fn next_number
 
 // @brief The new names, in document order.
-// @details An individual piece is numbered. A named multisize piece is numbered only
-//          when another piece has the same name without the number.
+// @details A named piece is numbered only when another piece has the same name
+//          without the number.
 // @return Per piece: (`data-name`, name without the size); None for a piece that keeps an assigned name.
 fn planned_names(pieces: &[PieceFacts]) -> Vec<Option<(String, String)>> {
-    let mut numbered: Vec<bool> = pieces.iter().map(|p| p.size.is_none()).collect();
+    let mut numbered = vec![false; pieces.len()];
     loop {
         let names: Vec<String> = pieces.iter().zip(&numbered).map(|(p, &n)| p.full_name(n)).collect();
         let mut uses: HashMap<&str, usize> = HashMap::new();
@@ -306,15 +305,32 @@ mod tests {
   </g>
 </svg>"#;
 
-    // @brief Individual pattern: each combination of name and letter gives its own form,
-    // and each run of spaces in a name becomes one `_`.
+    // @brief Individual pattern: `<name>[_<letter>]`, else `Piece_<n>[_<letter>]`.
+    // Each run of spaces in a name becomes one `_`.
     #[test]
-    fn individual_pieces_get_numbered_names() {
+    fn individual_name_drops_the_number() {
         let mut doc = svg_dom::Document::parse(INDIVIDUAL_SVG).expect("parse ok");
         let naming = assign_unique_piece_names(&mut doc);
         assert_eq!(naming, PieceNaming { renamed: 4, warning: None });
-        assert_eq!(names(&doc), vec!["Piece_1", "Piece_2_B", "Piece_3_Front", "Piece_4_Back_Yoke_D"]);
-    } // individual_pieces_get_numbered_names
+        assert_eq!(names(&doc), vec!["Piece_1", "Piece_2_B", "Front", "Back_Yoke_D"]);
+    } // individual_name_drops_the_number
+
+    // @brief Individual pieces that share a name keep the number, so their names differ.
+    #[test]
+    fn individual_shared_name_keeps_the_number() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <g id="pattern-1" data-type="pattern" data-measurements="individual">
+    <g id="front" data-type="piece" data-name="Front"><path d="M 0 0 L 9 0 L 9 9 Z"/></g>
+    <g id="detail-1" data-type="piece" data-name="Detail"><path d="M 0 0 L 9 0 L 9 9 Z"/></g>
+    <g id="detail-2" data-type="piece" data-name="Detail"><path d="M 0 0 L 9 0 L 9 9 Z"/></g>
+    <g id="like-a-number" data-type="piece" data-name="Piece 5"><path d="M 0 0 L 9 0 L 9 9 Z"/></g>
+    <g id="bare" data-type="piece"><path d="M 0 0 L 9 0 L 9 9 Z"/></g>
+  </g>
+</svg>"#;
+        let mut doc = svg_dom::Document::parse(svg).expect("parse ok");
+        assert_eq!(assign_unique_piece_names(&mut doc).renamed, 5);
+        assert_eq!(names(&doc), vec!["Front", "Piece_2_Detail", "Piece_3_Detail", "Piece_4_Piece_5", "Piece_5"]);
+    } // individual_shared_name_keeps_the_number
 
     // @brief A component's `data-parent` follows its piece to the new name.
     #[test]
@@ -322,7 +338,7 @@ mod tests {
         let mut doc = svg_dom::Document::parse(INDIVIDUAL_SVG).expect("parse ok");
         assign_unique_piece_names(&mut doc);
         assert_eq!(doc.get_attr_by_id("piece-1-cutline-1", "data-parent"), Some("Piece_1"));
-        assert_eq!(doc.get_attr_by_id("cutline_Front", "data-parent"), Some("Piece_3_Front"));
+        assert_eq!(doc.get_attr_by_id("cutline_Front", "data-parent"), Some("Front"));
         // The piece itself still names the pattern group.
         assert_eq!(doc.get_attr_by_id("piece_Front", "data-parent"), Some("pattern-1"));
     } // components_name_the_renamed_piece

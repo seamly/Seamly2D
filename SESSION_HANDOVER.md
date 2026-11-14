@@ -17,7 +17,8 @@
 ### 2026-11-14 — Multisize piece names without the piece number (Layout.X6)
 
 - `piece_naming.rs`: multisize `Size_<size>_<name>[_<letter>]`; no name → `Size_<size>_Piece_<n>[_<letter>]`. Piece-set: same without the size.
-- Decision: names stay unique. A named piece whose name another piece also gets keeps `Piece_<n>` (`Size_34_Piece_2_Detail`). Individual names unchanged (task scope).
+- User decision: names stay unique. A named piece whose name another piece also gets keeps `Piece_<n>` (`Size_34_Piece_2_Detail`).
+- User decision (Layout.X6.5): individual `<name>[_<letter>]`; no name → `Piece_<n>[_<letter>]`. Same shared-name rule. Tests: `individual_name_drops_the_number`, `individual_shared_name_keeps_the_number`; cargo 692 pass, ctest 8/8. §41 trousers step.
 - Naming now reads every piece first (`collect_pieces`, `planned_names`), then writes.
 - `unplaced_piece_lines`: an assigned name is the whole line; no `: <size>`. One line per left-out size.
 - Tests: `multisize_name_drops_the_number`, `unplaced_piece_lines_use_assigned_names`; jacket2 export test now expects `Size_500_<name>_<letter>`.

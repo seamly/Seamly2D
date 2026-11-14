@@ -627,7 +627,7 @@ Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is 
 - [ ] Below the radio buttons, one line reads "Rotation applies when Layout Mode=Any in SeamlyLayout." No text is cut off.
 - [ ] Press Layout. SeamlyLayout: Settings. The Piece Gap tip reads "Any applies each piece's Layout rotation rule; Layout rotation Any samples 1° steps."
 
-## 41. jacket2: multisize piece names without the piece number
+## 41. Piece names without the piece number
 
 (Layout.X6)
 
@@ -635,6 +635,9 @@ Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is 
 - [ ] Settings: Fabric (folded), width 30.0. Submit. Create Layout. "Pieces do not fit the media": the list names pieces `Size_<size>_<name>_<letter>`, for example `Size_640_Комір_H`. No `Piece_<n>`.
 - [ ] Choose "Split the pieces". OK. If "Some layouts left pieces out" appears, each line is `Size_<size>_<name>_<letter>` alone. No `: <size>` after the name.
 - [ ] Base Size 500 tab > Export > DXF-ASTM (R13). "Missing Piece Data" lists `Size_500_Подборт_G`.
+- [ ] Open `test-seamly-layout/patterns/validation/trousers.sm2d` (individual). Press Layout.
+- [ ] Settings: Paper, Roll, custom width 16 in. Layout Mode: Along Grainline. Submit. Create Layout. "Pieces do not fit the media" lists `Back`, not `Piece_<n>_Back`.
+- [ ] Choose "Split the pieces". OK. Each `Union_piece` part label starts with `Union_piece part`. No `Piece_<n>`.
 
 ## 42. Layout tabs show the media size
 
