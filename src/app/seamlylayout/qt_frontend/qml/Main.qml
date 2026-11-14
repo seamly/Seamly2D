@@ -1099,15 +1099,26 @@ ApplicationWindow {
                                 id: layoutViewTab
                                 required property string modelData
                                 required property int index
+                                // Media width x height of this tab's layout; empty when unknown.
+                                readonly property string mediaSize: appController.layoutViewMediaSizes[index] ?? ""
                                 text:  modelData
                                 width: implicitWidth
-                                contentItem: Text {
-                                    text:  layoutViewTab.text
-                                    color: layoutViewTab.checked ? Theme.violetDark : Theme.textOnDark
-                                    font.pixelSize: Theme.fontSizeNormal
-                                    horizontalAlignment: Text.AlignHCenter
-                                    verticalAlignment:   Text.AlignVCenter
-                                } // Text contentItem
+                                // Tab label, with the media size below it.
+                                contentItem: Column {
+                                    Text {
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        text:  layoutViewTab.text
+                                        color: layoutViewTab.checked ? Theme.violetDark : Theme.textOnDark
+                                        font.pixelSize: Theme.fontSizeNormal
+                                    } // Text label
+                                    Text {
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        visible: layoutViewTab.mediaSize !== ""
+                                        text:    layoutViewTab.mediaSize
+                                        color:   layoutViewTab.checked ? Theme.violetDark : Theme.textOnDark
+                                        font.pixelSize: Theme.fontSizeSmall
+                                    } // Text media size
+                                } // Column contentItem
                                 background: Rectangle {
                                     color: layoutViewTab.checked ? Theme.canvasBackground
                                          : layoutViewTab.hovered ? Theme.violetMedium : Theme.violet

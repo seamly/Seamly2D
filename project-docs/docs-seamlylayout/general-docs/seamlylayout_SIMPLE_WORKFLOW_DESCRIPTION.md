@@ -189,6 +189,9 @@ The application workflow loop consists of:
      * For tiled paper, Marker and Nested are not generated. The first tab is the Base Size when available, then one tab covers each size.
      * "Base Size 36": the base size (`data-base-size`) alone. Left out when the base size is not in `data-sizes`.
      * "Size 34", "Size 36", …: each size alone, one unit per piece. The base size tab repeats the Base Size layout.
+     * Each tab shows its media size below its label, in the settings unit: "36.00 x 52.25 in" (`layoutViewMediaSizes`).
+       * Width: the paper canvas width, or the fabric width (folded fabric too). Height: the length of the tab's layout.
+       * Done Adjusting updates the size of the shown tab.
      * One tab per UI tick (`processNextTabLayout`); the progress popup names the tab: "Laying out Size 36 (5 of 6)…".
      * 'Adjust Layout' and 'Export' stay disabled until the last tab finishes.
      * Every tab extends its roll or fabric until every piece is placed (`ProcessLayoutArgs::extend_media`).

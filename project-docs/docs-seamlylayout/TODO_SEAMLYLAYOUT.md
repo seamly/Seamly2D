@@ -8,6 +8,8 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 - [ ] Layout.X3 - in labels, "<empty>" should be displayed as a blank line. Currently labels containing "<empty>" incorrectly display the literal text "<empty>".
 - [ ] Layout.X4 - When paperType='tiled', disable the export option 'PDF'. 
 - [ ] Layout.X5 - Display the media dimensions (WxH) in each layout tab, of the layout displayed in that tab.
+  - [x] Layout.X5.1 - Each tab shows `<W> x <H> <unit>` below its label (`layoutViewMediaSizes`, `LayoutViews::media_sizes`). Width: paper canvas width, or the fabric width (folded too). Height: the tab's layout length. Done Adjusting updates the shown tab. Tests: `media_size_text_uses_the_settings_unit`, `media_sizes_follow_each_tab_layout`. Docs: SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §42.
+  - [ ] Layout.X5.2 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §42.
 - [ ] Layout.X6 - Remove redundancies from multisize layout piece names, e.g. name="Collar" and multisize name is currently "Size_640_Piece_1_Collar_H: 640". Simplify this to be
 'Size_<sizenumber>' followed by '_<piecename>' if piecename exists else '_Piece_<num>', followed by '_<letter>' if letter exists.
   - [x] Layout.X6.1 - `piece_naming.rs`: multisize `Size_<size>_<name>[_<letter>]`, else `Size_<size>_Piece_<n>[_<letter>]`. A name that two pieces share keeps `Piece_<n>`, so names stay unique. Individual names do not change.

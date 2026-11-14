@@ -21,7 +21,7 @@ use std::collections::VecDeque;
 
 use svg_dom::Document;
 
-use crate::layout_utils::ProcessLayoutResult;
+use crate::layout_utils::{media_size_in_unit, ProcessLayoutResult};
 use crate::piece_divider::DivideSpec;
 use layout_tiling::layout_settings::LayoutSettings;
 
@@ -40,6 +40,15 @@ pub fn size_label(size: &str) -> String {
 pub fn base_size_label(size: &str) -> String {
     format!("Base Size {size}")
 } // fn base_size_label
+
+// @brief Media size under a tab label: "36.00 x 52.25 in".
+//
+// @param settings Settings of the layout run; give the unit.
+// @param doc      Layout canvas of the tab.
+pub fn media_size_text(settings: &LayoutSettings, doc: &Document) -> String {
+    let (width, height) = media_size_in_unit(settings, doc);
+    format!("{width:.2} x {height:.2} {}", settings.unit)
+} // fn media_size_text
 
 // @brief Advice that ends every "pieces left out" warning.
 // @param is_fabric True for fabric media; false for a paper roll. Tiled paper places every piece.
@@ -291,6 +300,19 @@ impl LayoutViews {
     pub fn labels(&self) -> Vec<String> {
         self.views.iter().map(|v| v.label.clone()).collect()
     } // fn labels
+
+    // @brief Media size text of each tab, in display order.
+    //
+    // @param active_doc Layout of the active view, which the controller holds.
+    // @param settings   Settings of the layout run.
+    // @return One entry per tab; an empty entry for a tab without a layout.
+    pub fn media_sizes(&self, active_doc: Option<&Document>, settings: &LayoutSettings) -> Vec<String> {
+        self.views.iter().enumerate().map(|(index, view)| {
+            // The active view's state is empty: the controller holds its layout.
+            let doc = if index == self.active { active_doc } else { view.state.layout_dom.as_ref() };
+            doc.map(|doc| media_size_text(settings, doc)).unwrap_or_default()
+        }).collect()
+    } // fn media_sizes
 
     // @brief Label of view `index`; `None` when out of range.
     pub fn label(&self, index: usize) -> Option<&str> {
@@ -589,6 +611,55 @@ mod tests {
             assert!(!kinds.iter().any(|k| matches!(k, ViewKind::BaseSize(_))), "base size {base:?}");
         } // for each unknown base size
     } // queued_kinds_follow_tab_order
+
+    // @brief Settings with only a unit and a media type.
+    fn media_settings(unit: &str, media_type: &str) -> LayoutSettings {
+        let json = serde_json::json!({"unit": unit, "mediaType": media_type, "paperType": "roll"});
+        LayoutSettings::from_json(&json.to_string()).expect("settings")
+    } // fn media_settings
+
+    // @brief A layout canvas of `width` x `height` px.
+    fn canvas(width: u32, height: u32) -> Document {
+        Document::parse(&format!(r#"<svg width="{width}" height="{height}"/>"#)).expect("canvas")
+    } // fn canvas
+
+    // @brief Paper shows the canvas size in the settings unit; fabric shows its bolt width.
+    #[test]
+    fn media_size_text_uses_the_settings_unit() {
+        let doc = canvas(3456, 5016); // 36 x 52.25 in
+        assert_eq!(media_size_text(&media_settings("in", "paper"), &doc), "36.00 x 52.25 in");
+        assert_eq!(media_size_text(&media_settings("cm", "paper"), &doc), "91.44 x 132.72 cm");
+        assert_eq!(media_size_text(&media_settings("mm", "paper"), &doc), "914.40 x 1327.15 mm");
+
+        // Folded 60 in fabric: the canvas holds half the bolt width.
+        let json = serde_json::json!({"unit": "in", "mediaType": "fabric", "fabricWidth": 60.0, "fabricFolded": true});
+        let folded = LayoutSettings::from_json(&json.to_string()).expect("settings");
+        assert_eq!(media_size_text(&folded, &canvas(2880, 4800)), "60.00 x 50.00 in");
+    } // media_size_text_uses_the_settings_unit
+
+    // @brief Each tab shows the size of its own layout; the active tab reads the controller's layout.
+    #[test]
+    fn media_sizes_follow_each_tab_layout() {
+        let settings = media_settings("in", "paper");
+        let state = |height: u32| LayoutState { layout_dom: Some(canvas(960, height)), ..LayoutState::default() };
+        let mut views = LayoutViews::default();
+        views.start(ViewKind::Marker);
+        views.push(ViewKind::Nested, state(1920));
+        views.push(ViewKind::Size("34".into()), LayoutState::default()); // no layout
+
+        let marker = canvas(960, 2880);
+        assert_eq!(views.media_sizes(Some(&marker), &settings), vec!["10.00 x 30.00 in", "10.00 x 20.00 in", ""]);
+
+        // Select Nested: Marker's layout parks in its view; the controller now holds Nested's.
+        let Ok(nested) = views.select(1, LayoutState { layout_dom: Some(marker), ..LayoutState::default() }) else {
+            panic!("select Nested");
+        }; // let select
+        assert_eq!(
+            views.media_sizes(nested.layout_dom.as_ref(), &settings),
+            vec!["10.00 x 30.00 in", "10.00 x 20.00 in", ""]
+        );
+        assert!(views.media_sizes(None, &settings)[1].is_empty(), "active tab without a layout");
+    } // media_sizes_follow_each_tab_layout
 
     // @brief Tiled multisize tabs contain only the Base Size and per-size views.
     #[test]

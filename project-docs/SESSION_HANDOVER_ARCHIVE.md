@@ -2,6 +2,18 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-12 — Split part label on a short cut edge (Layout.801)
+
+- Found by the user: trousers `Union_piece` split on a 16 in roll; 24 px label (~492 px Hershey) ran past the 227 px cut edge.
+- First fix: shrink the label to the edge (font 24 → ~11 px, `textLength`). User decision: keep the 0.25 in text.
+- New `cxxqt_bridge/src/part_label_placement.rs` `place_part_label`: label fits edge → along the edge, as before.
+- Label wider than edge → level, 24 px, clear row nearest the cut edge. Clear: no outline edge, path or text within 0.25 em.
+- No clear row → shrink along the edge (old fallback). `piece_divider.rs` `fit_label_to_edge` removed.
+- Real trousers export: both labels 24 px, inside the seam line, below the existing labels, past the notches.
+- Tests: `part_label_placement` (5), `piece_divider` `part_label_fits_its_part`. `cargo test --workspace` 677 pass; `ctest --preset debug` 8/8.
+- Docs: SVG-DATA-ATTRIBUTES "split parts", SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §37 (now Layout Mode Along Grainline: Any turns `Union_piece`).
+- Open: Layout.801.4 installed-app check with the next MSI.
+
 ### 2026-11-12 — Export > SVG has no check boxes (Layout.800)
 
 - `ExportMenu.qml`: the three SVG text mode items are plain items. A click exports.
