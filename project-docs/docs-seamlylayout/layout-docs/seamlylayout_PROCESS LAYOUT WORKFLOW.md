@@ -110,6 +110,10 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
   - Equal columns for a piece too wide. Each outline region in a column is one part.
   - On folded fabric with fold lines on the left edge, true fold-line pieces remain pinned to the fold. Layout Mode Any pins none. Other pieces and split parts keep at least `pieceGap` from the fold edge. Oversize checks and split sizing use that same reduced width.
   - Cutting: `geometry::half_plane_clip` (`cut_closed`, `cut_open`). Each output vertex keeps its source vertex index, so `data-turn-points` stay valid.
+  - Labels: `pattern_label`, `piece_label` and `fold_line_label` go whole to the nearest part.
+    A label not wholly inside the part outline moves to the nearest place inside it, 1/16 in clear (`label_inside_part.rs`).
+    It keeps clear of other labels and of the part label place along the cut edge when it can.
+    A label too large for the part shrinks in 10% steps. A label with no place at 10% stays where it is.
   - `ProcessLayoutResult::divide_spec` is set only when at least one piece was divided. `is_split_layout_active` follows it.
   - Paper rolls keep the selected roll width and margins when splitting, even if a caller requests enlargement. Only the length follows the content.
   - Roll and fabric retry the remaining pieces on successive media lengths (`packing::pack_polygons_on_sheets`). Fabric keeps its fixed width.

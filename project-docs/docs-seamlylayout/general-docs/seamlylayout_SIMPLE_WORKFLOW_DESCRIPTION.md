@@ -177,6 +177,7 @@ The application workflow loop consists of:
          Each part gets a label "<name> part i of n, joins j" and 2 match notches per shared cut edge. No seam allowance on a cut edge.
          A label wider than its cut edge lies level across the part, near the cut edge, clear of other lines and text.
          With no clear place, it shrinks to the edge length.
+         A pattern or piece label that crosses a cut line moves wholly inside its part. It shrinks only when the part is too small.
          See `SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout split parts".
          A paper roll keeps the selected roll width and margins; only its length follows the content.
        * "Make the media bigger" (DXF): fabric keeps its configured width and grows longer. Other media can grow wider and longer.

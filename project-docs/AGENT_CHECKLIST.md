@@ -56,6 +56,7 @@ MALE_SHIRT
 | Layout.800.3 | 36 | SL > male_shirt > Export > SVG: no check boxes; each item exports | ?
 | Layout.X8.2 | 40 | S2D > male_shirt > Piece Properties: "Layout rotation:" label and Layout Mode=Any line | ?
 | Layout.X3.2 | 43 | S2D > male_shirt > Piece label `<empty>` line: blank line in Piece mode, Preview and SL | ?
+| Layout.X1.2 | 44 | SL > male_shirt > Paper Roll 8 in, split: pattern and piece labels wholly inside each part | ?
 | Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Fabric | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Lining | ?
@@ -662,3 +663,14 @@ Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is 
 - [ ] OK, OK. The piece label shows a blank line in that place. No `<empty>`.
 - [ ] Press Layout. SeamlyLayout: Create Layout. The piece label shows the same blank line. No `<empty>`.
 - [ ] Export > SVG. Open the SVG in a browser. The label shows the blank line. No `<empty>`.
+## 44. Split part labels inside the cut line
+
+(Layout.X1.2)
+
+- [ ] Open male_shirt. Press Layout.
+- [ ] Settings: Paper, Roll, custom width 8 in. Layout Mode: Along Grainline. Submit. Create Layout.
+- [ ] Dialog "Pieces do not fit the media": choose "Split the pieces". OK.
+- [ ] Each pattern label and piece label lies wholly inside the cut line of one part. No label crosses a cut line.
+- [ ] No moved label overlaps another label or the blue part label `<name> part i of n, joins j`.
+- [ ] A label is smaller than before only when its part is too small for it at full size.
+- [ ] Export > DXF is disabled. Export > PDF: the labels are where the layout shows them.

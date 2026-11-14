@@ -2,6 +2,18 @@
 
 ## Current status
 
+### 2026-11-14 — Split part labels move inside the cut line (Layout.X1)
+
+- New `label_inside_part.rs`: after a split, a `pattern_label`, `piece_label` or `fold_line_label` not wholly inside its part outline moves inside it.
+- Search: grid of whole steps from the old centre, nearest first. Order: full size, 1/16 in clear of other labels and the part label place; full size anywhere inside; shrink about the centre in 10% steps.
+- No place at 10%: the label stays. The move and scale go in through `svg_dom::flatten_dom`.
+- `piece_divider::divide_piece` calls it before `place_part_label`; reserved box: `part_label_placement::along_edge_bounds`.
+- `part_label_placement.rs`: `drawn_bounds`, `along_edge_bounds`, `Bounds::grown`/`overlaps`, `inside`, `x_range_in_band` shared.
+- Checked: `cargo test --workspace` 701 pass; `ctest` debug 8/8. Fixtures richmond (8 in roll) and jacket2 (12 in roll): crossing labels moved inside; 155 calls, 61 ms debug.
+- Decision for Sue: shrink fallback for a label larger than its part (10% steps). Alternative: leave it at full size.
+- Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, SVG-DATA-ATTRIBUTES split parts and `fold_line`, `AGENT_CHECKLIST.md` §44.
+- Open: Layout.X1.2 installed-app check (male_shirt, roll 8 in, split).
+
 ### 2026-11-14 — Labels show `<empty>` as a blank line (Layout.X3)
 
 - `LabelTextManager::isBlankLineMarker`: `<empty>`, or its editor (`EditLabelTemplateDialog`) or reader (`VDomDocument`) translation.
@@ -45,20 +57,6 @@
 - Checked: `uic` builds the `.ui`; `ctest --preset debug` 8/8. `cargo test` not run: no Rust change. Seamly2D Qt suites not run (next MSI).
 - Open: Layout.X8.2 installed-app check, `AGENT_CHECKLIST.md` §40.
 - `.ts` translation files not updated: lupdate picks up the new strings.
-
-### 2026-11-12 — Nested sizes stack on a corner (Layout.804)
-
-- Merged into `run-seamlyLayout` without skip-ci (`.pri`/`.pro` changed). Branch `task-nested-stack-corner` deleted.
-- Stack point: Rust `svg_dom/src/stack_point.rs`; C++ `layout_handoff/handoff_stack_point.cpp` mirrors it. Users: `center_piece_sets`, `annotation_alignment.rs`, `align_handoff_annotations`.
-- Rules: fold line in every size → its lower end (left end if level). Else turn points in every size → largest size's turn point with the longest level edge, else longest edge. Else bbox centre.
-- User decisions: fold line first, lower end; both apps; tie → longer other edge, then lower, then left.
-- New C++ `handoff_svg_reading.h/.cpp` (`find_tagged_child`, `read_matrix`, `collect_points`).
-- Rust `annotation_alignment::inside`: within 0.01 px of the cut line counts as inside (matches C++). Test `anchor_on_the_cut_line_is_inside`.
-- `test_data/jacket2_40-146_handoff.svg`: 227 annotation transforms realigned by the new C++ code (scratch `realign.exe`). On the old fixture it gives 0 warnings: Back's size 220 import warning is gone. A fresh jacket2 export is still needed.
-- Checked: scratch QtTest `TestHandoffAnnotationAlignment` 18/18; `cargo test --workspace` 689 pass; `ctest --preset debug` 8/8. MSI Qt suites not run.
-- Docs: SVG-DATA-ATTRIBUTES "Multisize stack point"; SETTINGS_WORKFLOW fold line; `AGENT_CHECKLIST.md` §26 (no import warning), §39, OPEN row; TODO Layout.804.1–.4.
-- Open: Layout.804.5 with the next MSI: 4 Qt suites, `AGENT_CHECKLIST.md` §39.
-- Scratch: `build/scratch_corners/` (`fix_*.py`, `qttest/` QtTest build, `realign.exe`, `ctest_debug.bat`).
 
 ## Decisions to retain
 
