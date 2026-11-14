@@ -1,5 +1,5 @@
 // project: SeamlyLayout
-// author: slspencer, copyright 2026
+// author: slspencer, copyright 2026 Seamly2D Project
 // MIT License: https://opensource.org/licenses/MIT
 
 // @file piece_divider.rs
@@ -13,7 +13,9 @@
 // Any, a piece that fits turned 90° is not split either.  Otherwise its
 // outline bounding box splits into equal columns (vertical cut lines).  Roll and
 // fabric media have no length limit, so only the width limits a piece.  Each
-// region of the outline inside one column is a part.
+// region of the outline inside one column is a part.  A Nested piece-set too wide
+// splits as one unit: every size is cut on the same lines, and the parts of each
+// column make new piece-sets (`divide_piece_set`).
 //
 // Per part:
 //   - outline (`cutline`, else `seamline`) and `cut_path`: closed, with new
@@ -150,10 +152,10 @@ fn unit_length(px: u32, unit: &str) -> String {
 // A piece without a `cutline` or `seamline` group cannot be split; it stays whole.
 //
 // @param doc Pre-processed DOM, changed in place: each split piece's `<g>` is
-//            replaced, at the same position, by one `<g>` per part. With fold
-//            lines on the left edge, pieces also turn or mirror as
-//            `fold_line_edge::plan_fold_line_edge` plans.
-// @return The split pieces, in document order.
+//            replaced, at the same position, by one `<g>` per part; a split
+//            Nested piece-set by its new piece-sets. With fold lines on the left
+//            edge, pieces also turn or mirror as `fold_line_edge::plan_fold_line_edge` plans.
+// @return The split pieces and piece-sets, in document order.
 pub fn divide_oversized_pieces(doc: &mut Document, spec: &DivideSpec) -> Vec<DividedPiece> {
     let uu_per_px = svg_uu_per_px(&doc.root);
     if spec.fold_lines_on_left_edge {
@@ -184,7 +186,7 @@ pub fn divide_oversized_pieces(doc: &mut Document, spec: &DivideSpec) -> Vec<Div
             _ => None,
         }; // planned
         if let (Some(columns), XMLNode::Element(piece)) = (planned, &node) {
-            if let Some(parts) = divide_piece(piece, columns, uu_per_px) {
+            if let Some(parts) = divide_unit(piece, columns, uu_per_px) {
                 divided.push(DividedPiece { label: display_name(piece), parts: parts.len() });
                 doc.root.children.extend(parts.into_iter().map(XMLNode::Element));
                 continue;
@@ -194,6 +196,115 @@ pub fn divide_oversized_pieces(doc: &mut Document, spec: &DivideSpec) -> Vec<Div
     } // for each root child
     divided
 } // fn divide_oversized_pieces
+
+// @brief Parts of a piece, or the piece-sets a Nested piece-set splits into; None when it cannot be split.
+fn divide_unit(unit: &Element, columns: usize, uu_per_px: f64) -> Option<Vec<Element>> {
+    if svg_dom::is_piece_set(unit) {
+        return divide_piece_set(unit, columns, uu_per_px);
+    } // if Nested piece-set
+    let (x0, _, x1, _) = outline_bounds(unit)?;
+    let xs = cut_positions(x0, x1, columns, &all_points(unit));
+    divide_piece(unit, &xs, uu_per_px).map(|parts| parts.into_iter().map(|part| part.group).collect())
+} // fn divide_unit
+
+// @brief Split a Nested piece-set: every size is cut on the same lines.
+//
+// The cut lines divide the outline bounds of all sizes into equal columns. Each part
+// of the first member (the largest size, `svg_dom::center_piece_sets`) starts a new
+// piece-set, so the set outline stays the largest size's. A part of another size joins
+// the set in its column with the nearest outline centre. A size inside one column stays whole.
+//
+// @return One piece-set per part of the largest size, ids `<set id>_part<k>`, plus one per
+//         part of another size in a column the largest size misses. None when the largest
+//         size cannot be split.
+fn divide_piece_set(set: &Element, columns: usize, uu_per_px: f64) -> Option<Vec<Element>> {
+    let members: Vec<&Element> = set.children.iter().filter_map(XMLNode::as_element).filter(|e| e.name == "g").collect();
+    let (x0, x1) = members
+        .iter()
+        .filter_map(|member| outline_bounds(member))
+        .map(|(x0, _, x1, _)| (x0, x1))
+        .reduce(|a, b| (a.0.min(b.0), a.1.max(b.1)))?;
+    let points: Vec<(f64, f64)> = members.iter().flat_map(|member| all_points(member)).collect();
+    let xs = cut_positions(x0, x1, columns, &points);
+
+    let (largest, other_sizes) = members.split_first()?;
+    // (column, outline centre, member parts) of each new piece-set.
+    let mut sets: Vec<(usize, (f64, f64), Vec<Element>)> = divide_piece(largest, &xs, uu_per_px)?
+        .into_iter()
+        .map(|part| (part.column, part.centre, vec![part.group]))
+        .collect();
+    for member in other_sizes {
+        let parts = divide_piece(member, &xs, uu_per_px).unwrap_or_else(|| {
+            // Whole: no cut line crosses its outline, or it has no outline to cut.
+            let centre = outline_bounds(member)
+                .map_or((x0, 0.0), |(left, top, right, bottom)| ((left + right) / 2.0, (top + bottom) / 2.0));
+            let column = xs.iter().filter(|&&at| at < centre.0).count();
+            vec![PiecePart { column, centre, group: (*member).clone() }]
+        });
+        for part in parts {
+            let distance = |c: (f64, f64)| (c.0 - part.centre.0).hypot(c.1 - part.centre.1);
+            let nearest = sets
+                .iter()
+                .enumerate()
+                .filter(|(_, (column, _, _))| *column == part.column)
+                .min_by(|(_, (_, a, _)), (_, (_, b, _))| distance(*a).total_cmp(&distance(*b)))
+                .map(|(k, _)| k);
+            match nearest {
+                Some(k) => sets[k].2.push(part.group),
+                None => sets.push((part.column, part.centre, vec![part.group])),
+            } // match nearest set
+        } // for each part
+    } // for each other size
+
+    // Text and other non-member children stay with the first new set.
+    let mut rest: Vec<XMLNode> = set.children.iter().filter(|n| !matches!(n, XMLNode::Element(e) if e.name == "g")).cloned().collect();
+    let set_id = attr(set, "id").to_string();
+    let out = sets
+        .into_iter()
+        .enumerate()
+        .map(|(k, (_, _, parts))| {
+            let mut column_set = Element::new(&set.name);
+            column_set.attributes = set.attributes.clone();
+            column_set.attributes.insert("id".to_string(), format!("{set_id}_part{}", k + 1));
+            column_set.children = std::mem::take(&mut rest);
+            column_set.children.extend(parts.into_iter().map(XMLNode::Element));
+            column_set
+        })
+        .collect();
+    Some(out)
+} // fn divide_piece_set
+
+// @brief Bounds of a piece outline (`cutline`, else `seamline`): (min x, min y, max x, max y).
+// None without an outline, or when a path has curves or has no area.
+fn outline_bounds(piece: &Element) -> Option<(f64, f64, f64, f64)> {
+    let children: Vec<&Element> = piece.children.iter().filter_map(XMLNode::as_element).collect();
+    let of_type = |t: &str| children.iter().find(|c| attr(c, "data-type") == t).copied();
+    let outline = of_type("cutline").or_else(|| of_type("seamline"))?;
+    let mut ds = Vec::new();
+    path_ds(outline, &mut ds);
+    let mut points = Vec::new();
+    for d in &ds {
+        points.extend(straight_subpaths(d)?.into_iter().flat_map(|s| s.points));
+    } // for each outline path
+    let (x0, y0, x1, y1) = points.iter().fold(
+        (f64::INFINITY, f64::INFINITY, f64::NEG_INFINITY, f64::NEG_INFINITY),
+        |(x0, y0, x1, y1), p: &(f64, f64)| (x0.min(p.0), y0.min(p.1), x1.max(p.0), y1.max(p.1)),
+    );
+    (x1 > x0 && y1 > y0).then_some((x0, y0, x1, y1))
+} // fn outline_bounds
+
+// @brief `columns - 1` equal cut positions across x0..x1, each moved off every point in `points`.
+fn cut_positions(x0: f64, x1: f64, columns: usize, points: &[(f64, f64)]) -> Vec<f64> {
+    (1..columns)
+        .map(|k| {
+            let mut at = x0 + (x1 - x0) * k as f64 / columns as f64;
+            while points.iter().any(|p| (p.0 - at).abs() < 1e-3) {
+                at += 0.01;
+            } // while a vertex lies on the cut line
+            at
+        })
+        .collect()
+} // fn cut_positions
 
 // @brief Columns a piece splits into; 1 when it fits at one of its trial angles.
 fn columns_for(rect: Rect, spec: &DivideSpec) -> usize {
@@ -409,6 +520,15 @@ struct Part {
     path: usize,
     subpath: usize,
 } // struct Part
+
+// @brief A part group that `divide_piece` made.
+struct PiecePart {
+    // Index of the column between the cut lines, from the left.
+    column: usize,
+    // Centre of the part outline's bounding box.
+    centre: (f64, f64),
+    group: Element,
+} // struct PiecePart
 
 impl Part {
     // @brief Bounding box: (min x, min y, max x, max y).
@@ -918,7 +1038,9 @@ fn grainline_d(part: &Part, uu_per_in: f64) -> Option<String> {
 } // fn grainline_d
 
 // @brief Split one piece group into part groups; None when it cannot be split.
-fn divide_piece(piece: &Element, columns: usize, uu_per_px: f64) -> Option<Vec<Element>> {
+// @param xs Vertical cut lines, left to right, clear of the piece's vertices (`cut_positions`).
+// @return The parts in reading order; None without an outline, or when the cut lines miss it.
+fn divide_piece(piece: &Element, xs: &[f64], uu_per_px: f64) -> Option<Vec<PiecePart>> {
     let uu_per_in = uu_per_px * layout_tiling::LAYOUT_PPI;
     let children: Vec<&Element> = piece.children.iter().filter_map(|n| n.as_element()).collect();
     let of_type = |t: &str| children.iter().position(|c| attr(c, "data-type") == t);
@@ -955,17 +1077,7 @@ fn divide_piece(piece: &Element, columns: usize, uu_per_px: f64) -> Option<Vec<E
         return None;
     }
 
-    // Equal vertical cut positions, moved off any vertex of the piece.
-    let piece_points = all_points(piece);
-    let xs: Vec<f64> = (1..columns)
-        .map(|k| {
-            let mut at = x0 + (x1 - x0) * k as f64 / columns as f64;
-            while piece_points.iter().any(|p| (p.0 - at).abs() < 1e-3) {
-                at += 0.01;
-            } // while a vertex lies on the cut line
-            at
-        })
-        .collect();
+    let columns = xs.len() + 1;
     let cells: Vec<Cell> = (0..columns)
         .map(|c| Cell {
             x_lo: (c > 0).then(|| xs[c - 1]),
@@ -1249,7 +1361,7 @@ fn divide_piece(piece: &Element, columns: usize, uu_per_px: f64) -> Option<Vec<E
 
         group.children = children.into_iter().map(XMLNode::Element).collect();
         suffix_ids(&mut group, &format!("_part{number}"));
-        out.push(group);
+        out.push(PiecePart { column: part.cell, centre: part.centre(), group });
     } // for each part
     Some(out)
 } // fn divide_piece
@@ -1758,4 +1870,43 @@ mod tests {
         assert_eq!(parts_for(500, 250), 3, "2 parts of 250 leave no slack");
         assert_eq!(parts_for(400, 1), 1, "media too small to split for");
     } // parts_for_counts_equal_parts
+
+    // @brief A Nested piece-set of three sizes, stacked, largest first: 400, 300 and 130 wide.
+    const WIDE_PIECE_SET_SVG: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="2000">
+  <g id="set_Front" data-type="piece-set" data-name="Front">
+    <g id="piece_Front_s40" data-type="piece" data-name="Front" data-size="40">
+      <g id="cutline_Front_s40" data-type="cutline" data-parent="Front"><path d="M0,0 L400,0 L400,100 L0,100 L0,0 Z"/></g>
+    </g>
+    <g id="piece_Front_s34" data-type="piece" data-name="Front" data-size="34">
+      <g id="cutline_Front_s34" data-type="cutline" data-parent="Front"><path d="M50,10 L350,10 L350,90 L50,90 L50,10 Z"/></g>
+    </g>
+    <g id="piece_Front_s30" data-type="piece" data-name="Front" data-size="30">
+      <g id="cutline_Front_s30" data-type="cutline" data-parent="Front"><path d="M20,20 L150,20 L150,80 L20,80 L20,20 Z"/></g>
+    </g>
+  </g>
+</svg>"#;
+
+    // @brief Every size of a wide piece-set is cut on the same line; each column makes a piece-set.
+    #[test]
+    fn wide_piece_set_splits_into_one_piece_set_per_column() {
+        let mut doc = Document::parse(WIDE_PIECE_SET_SVG).expect("fixture parses");
+        let divided = divide_oversized_pieces(&mut doc, &spec(250));
+        assert_eq!(divided, vec![DividedPiece { label: "Front".to_string(), parts: 2 }]);
+
+        let sets: Vec<&Element> = doc.root.children.iter().filter_map(|n| n.as_element()).collect();
+        let ids = |set: &Element| -> Vec<String> {
+            set.children.iter().filter_map(|n| n.as_element()).map(|e| attr(e, "id").to_string()).collect()
+        };
+        let set_ids: Vec<(&str, &str)> = sets.iter().map(|s| (attr(s, "id"), attr(s, "data-type"))).collect();
+        assert_eq!(set_ids, vec![("set_Front_part1", "piece-set"), ("set_Front_part2", "piece-set")]);
+        // The largest size's part comes first; the size left of the cut line stays whole.
+        assert_eq!(ids(sets[0]), ["piece_Front_s40_part1", "piece_Front_s34_part1", "piece_Front_s30"]);
+        assert_eq!(ids(sets[1]), ["piece_Front_s40_part2", "piece_Front_s34_part2"]);
+        for set in &sets {
+            for member in set.children.iter().filter_map(|n| n.as_element()).take(2) {
+                let d = ds(component(member, "cutline").expect("cutline"));
+                assert!(d.contains("200,"), "{}: cut at x 200: {d}", attr(member, "id"));
+            } // for each cut size
+        } // for each new piece-set
+    } // wide_piece_set_splits_into_one_piece_set_per_column
 } // mod tests

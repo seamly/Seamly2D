@@ -261,7 +261,7 @@ first child of each piece group when it places the piece into a layout sheet
 | `data-set-number` | `piece` (multisize, SeamlyLayout only) | `data-type-number` of the piece-set the piece left. SeamlyLayout writes it when the Marker tab or a size tab dissolves the piece-sets, so the piece number survives in the layout and its exports. Not in the Seamly2D handoff. DXF-ASTM uses it to number pieces that share a name: `Detail (3)`. |
 | `data-name-assigned` | `piece`, `piece-set` (SeamlyLayout only) | `true` when SeamlyLayout assigned the `data-name`. A later import keeps that name. Not in the Seamly2D handoff. |
 | `data-source-name` | `piece` (SeamlyLayout only) | The Seamly2D `data-name`, trimmed, before SeamlyLayout renamed the piece. Omitted when the piece had no name. A split part label shows it. Not in the Seamly2D handoff. |
-| `data-split-of` | `piece` (SeamlyLayout only) | `id` of the piece this part was split from. SeamlyLayout writes it when the user chose "Split the pieces" for an individual pattern with a piece wider or longer than the media. Not in the Seamly2D handoff. |
+| `data-split-of` | `piece` (SeamlyLayout only) | `id` of the piece this part was split from. SeamlyLayout writes it when the user chose "Split the pieces" for a piece wider or longer than the media (individual pattern, or multisize on fabric). Not in the Seamly2D handoff. |
 | `data-split-part` | `piece` (SeamlyLayout only) | 1-based number of this part, in reading order (top row first, left to right). |
 | `data-split-count` | `piece` (SeamlyLayout only) | Number of parts the piece was split into. |
 | `data-sample-size` | `pattern` (individual) | Measurement `bust_circ`, else `waist_circ`, in `data-units`. Omitted when the pattern has neither. DXF-ASTM `Size Name:` piece text for every piece. |
@@ -346,12 +346,13 @@ SeamlyLayout gives every tagged piece a unique `data-name` at import, before any
 - The "left out of the layout" warnings list a piece by its new name alone, with no `: <size>`. One line per left-out size.
 - The label text drawn on a piece does not change.
 
-## SeamlyLayout split parts (individual pattern)
+## SeamlyLayout split parts (individual pattern, multisize fabric)
 
-When a piece of an individual pattern is wider or longer than the media, the user can split it. Code: `crates/cxxqt_bridge/src/piece_divider.rs`.
+When a piece of an individual pattern, or of a multisize pattern on fabric, is wider or longer than the media, the user can split it. Code: `crates/cxxqt_bridge/src/piece_divider.rs`.
 
 - Each part is a `data-type="piece"` group with the piece's attributes, plus `data-split-of`, `data-split-part`, `data-split-count`.
 - Part `id`: `<piece id>_part<i>`. Every id inside the part gets `_part<i>`.
+- A split Nested piece-set: one `data-type="piece-set"` group per part of its largest size, `id` `<set id>_part<k>`, other set attributes kept. It holds the size parts of that column.
 - Part `data-name`: `<name> (<i>/<n>)`, e.g. `Front (1/2)`. DXF-ASTM `Piece Name:` uses it.
 - `cutline` and `cut_path`: closed, with new edges on the cut lines. No seam allowance on a cut edge.
 - An outer line (`cutline`, or `seamline` without a `cutline`) with no `Z` and both ends on the fold line makes parts as if it had its fold line edge. A part on the fold line gets no edge on the fold line either; its stretch of fold line completes the outer edge.

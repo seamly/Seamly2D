@@ -100,9 +100,10 @@ trimmed_h = max(placed.y + placed.h for all placements) + margin_bottom_px
 
 Updates `<svg height>` and background `<rect height>`. Applied only when `trimmed_h < bin_h`.
 
-## Oversized Pieces (individual pattern)
+## Oversized Pieces (individual pattern, multisize fabric)
 
 - `process_layout` first runs `layout_utils::do_find_oversized_pieces`: pre-processing up to grain-up pieces, then `piece_divider::find_oversized_pieces`.
+- It runs for an individual pattern, and for a multisize pattern on fabric: fabric does not widen. Multisize lists each size piece alone, as Marker packs it.
 - A piece is oversized when no trial angle fits the content width. Paper roll and fabric limit only the width.
 - Layout Mode Any: a piece too wide at its `data-rotation` angles gets quarter turns if a 90° turn fits (`piece_extractor::turn_wide_pieces_to_fit`). It is not oversized. The packer gets the same angles. Warnings report each offending piece width and the media width inside the margins. Tiled paper is never checked.
 - Oversized pieces: the `oversized_pieces_found` signal, no layout. QML asks the user, then calls `process_layout_oversized(settings, "split" | "extend")` or `cancel_layout()`.
@@ -114,6 +115,9 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
     A label not wholly inside the part outline moves to the nearest place inside it, 1/16 in clear (`label_inside_part.rs`).
     It keeps clear of other labels and of the part label place along the cut edge when it can.
     A label too large for the part shrinks in 10% steps. A label with no place at 10% stays where it is.
+  - Multisize: every queued layout gets `split_oversized` (Marker, Nested, Base Size, each size, every material).
+  - Nested: `divide_piece_set` cuts every size of a piece-set on the same lines, from the outline bounds of all sizes.
+    Each part of the largest size starts a piece-set `<set id>_part<k>`. A part of another size joins the set in its column with the nearest outline centre.
   - `ProcessLayoutResult::divide_spec` is set only when at least one piece was divided. `is_split_layout_active` follows it.
   - Paper rolls keep the selected roll width and margins when splitting, even if a caller requests enlargement. Only the length follows the content.
   - Roll and fabric retry the remaining pieces on successive media lengths (`packing::pack_polygons_on_sheets`). Fabric keeps its fixed width.
@@ -132,7 +136,7 @@ Every multisize tab sets `ProcessLayoutArgs::extend_media`. An individual patter
 - Paper width: `packing::required_bin_width` finds the widest required bin. A wider value widens paper rolls.
 - Fabric keeps its configured width, including the folded half-width and selvedge margins. Only its height can enlarge.
 - `packing::pack_polygons_extending` packs into a bin as tall as all pieces that fit its width, stacked.
-- Pieces that cannot fit the fixed fabric width remain unplaced and appear in the warning popup.
+- Pieces that cannot fit the fixed fabric width remain unplaced and appear in the warning popup, unless the user chose "split".
 - `set_content_width` widens the canvas to the right. contentRect keeps its x; both side margins are kept.
 - `trim_bottom` sets the canvas height. Roll and fabric end at the lowest piece.
 - Canvas, Adjust Mode and exports read the size from `layout_dom`.

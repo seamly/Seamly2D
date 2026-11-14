@@ -56,10 +56,10 @@ mod part_label_placement;
 // Move each label of a split part inside the part outline.
 mod label_inside_part;
 
-// @brief What an individual layout does with a piece wider or longer than the media.
+// @brief What a layout does with a piece wider or longer than the media.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum OversizeChoice {
-    // Lay out as usual: no piece is too big, or the layout is multisize.
+    // Lay out as usual: no piece is too big, or the layout is multisize on paper.
     AsIs,
     // Split each such piece into parts that fit (the user's choice).
     Split,
@@ -1649,15 +1649,18 @@ impl qobject::AppController {
     } // fn initialize_layout
 
     // Run the layout pipeline: parse settings, extract pieces, pack, assemble output SVG.
-    // An individual pattern with a piece wider or longer than the media gets no
-    // layout yet: `oversized_pieces_found` asks the user to split the pieces or
-    // make the media bigger.
+    // An individual pattern, or a multisize pattern on fabric, with a piece wider or
+    // longer than the media gets no layout yet: `oversized_pieces_found` asks the user
+    // to split the pieces or make the media bigger. Multisize paper widens to fit.
     // Called by 'Create Layout' button handler in QML: onCreateLayout: appController.processLayout(settingsJson)
     fn process_layout(
         mut self: std::pin::Pin<&mut Self>,
         settings_json: &cxx_qt_lib::QString,
     ) -> bool {
-        if !*self.is_multisize() {
+        // Fabric keeps its width, so a multisize layout on fabric asks too.
+        let fabric = LayoutSettings::from_json(&settings_json.to_string())
+            .is_ok_and(|settings| settings.media_type == "fabric");
+        if !*self.is_multisize() || fabric {
             // Every material is laid out, so the dialog names the oversized pieces of each.
             let found = {
                 let rust = self.rust();
@@ -1686,7 +1689,7 @@ impl qobject::AppController {
                 self.as_mut().oversized_pieces_found(cxx_qt_lib::QString::from(message.as_str()));
                 return false;
             } // if oversized pieces
-        } // if individual
+        } // if individual or fabric
         self.run_layout(settings_json, OversizeChoice::AsIs)
     } // fn process_layout
 
@@ -2021,6 +2024,7 @@ impl qobject::AppController {
             Some(result) => Ok(result),
             None => {
                 // A first layout repeats the shown material's choices; every tab is a multisize tab.
+                // Every layout splits as the user chose.
                 let args = ProcessLayoutArgs {
                     settings_json: &settings_json,
                     input_dom: &input_dom,
@@ -2028,7 +2032,7 @@ impl qobject::AppController {
                     layout_h_px,
                     nested_multisize: job.kind.as_ref().is_some_and(ViewKind::nested),
                     extend_media: job.kind.is_some() || extend_media,
-                    split_oversized: job.kind.is_none() && split_oversized,
+                    split_oversized,
                 };
                 // Stage messages would hide the layout name; only the percentage moves.
                 let mut progress = |percent: i32, _status: Option<&str>| {

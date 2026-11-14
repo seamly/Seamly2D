@@ -165,8 +165,9 @@ The application workflow loop consists of:
      * Disable 'Create Layout' button
      * Enable 'Adjust Layout' button
      * Enable 'Export' button
-   * Oversized pieces (individual pattern, not tiled paper):
+   * Oversized pieces (individual pattern, or multisize on fabric; not tiled paper):
      * Before the layout, `do_find_oversized_pieces` lists each piece wider than the media at every trial angle.
+       Multisize: each size of each piece is listed alone: "Size_640_Комір_H". Multisize paper widens instead (below).
        Paper roll and fabric have no length limit.
        Layout Mode Any: a piece that fits turned 90° is not listed, whatever its Rotation rule. The layout turns it.
      * None: the layout runs as before. A piece that fits but runs out of room is left out, and a warning names it.
@@ -180,6 +181,8 @@ The application workflow loop consists of:
          A pattern or piece label that crosses a cut line moves wholly inside its part. It shrinks only when the part is too small.
          See `SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout split parts".
          A paper roll keeps the selected roll width and margins; only its length follows the content.
+         Multisize: every tab of every material splits. Nested cuts every size of a piece-set on the same lines;
+         the parts in each column make a new piece-set.
        * "Make the media bigger" (DXF): fabric keeps its configured width and grows longer. Other media can grow wider and longer.
          A completion popup reports the resulting dimensions. Pieces that cannot fit fabric width remain explicitly reported.
        * Split placement on roll and fabric retries remaining pieces on fresh media lengths until all fit or a fresh length makes no progress.
@@ -198,8 +201,8 @@ The application workflow loop consists of:
      * Every tab extends its roll or fabric until every piece is placed (`ProcessLayoutArgs::extend_media`).
        * Wider: a piece wider than the paper roll widens it to the right. Both side margins are kept.
        * Longer: the media grows downwards. The canvas ends at the lowest piece.
-       * No piece is left out. Tiled paper does not extend.
-       * An individual pattern: see "Oversized pieces" below.
+       * No piece is left out of paper. Tiled paper does not extend.
+       * Fabric does not widen: see "Oversized pieces" above.
      * One warning after the last tab lists every layout that left pieces out or failed.
        * One bullet per piece, named as DXF-ASTM names it, then its sizes: "Detail (3): 220, 240".
        * The warning scrolls; its OK button stays visible.
