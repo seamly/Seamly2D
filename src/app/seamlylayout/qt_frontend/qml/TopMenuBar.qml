@@ -239,6 +239,7 @@ ToolBar {
         ExportMenu {
             id: exportMenu
             layoutReady: root.layoutReady
+            pdfEnabled: !root.pdfTiledExportEnabled
             pdfTiledEnabled: root.pdfTiledExportEnabled
             pdfTiledTabAllowed: root.pdfTiledTabAllowed
             splitLayout: root.splitLayout
