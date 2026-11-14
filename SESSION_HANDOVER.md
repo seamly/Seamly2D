@@ -2,6 +2,17 @@
 
 ## Current status
 
+### 2026-11-14 — Multisize piece names without the piece number (Layout.X6)
+
+- `piece_naming.rs`: multisize `Size_<size>_<name>[_<letter>]`; no name → `Size_<size>_Piece_<n>[_<letter>]`. Piece-set: same without the size.
+- Decision: names stay unique. A named piece whose name another piece also gets keeps `Piece_<n>` (`Size_34_Piece_2_Detail`). Individual names unchanged (task scope).
+- Naming now reads every piece first (`collect_pieces`, `planned_names`), then writes.
+- `unplaced_piece_lines`: an assigned name is the whole line; no `: <size>`. One line per left-out size.
+- Tests: `multisize_name_drops_the_number`, `unplaced_piece_lines_use_assigned_names`; jacket2 export test now expects `Size_500_<name>_<letter>`.
+- Checked: `cargo test --workspace` 691 pass; `ctest --preset debug` equivalent 8/8 (worktree build dir `x6dbg`; preset path passed MAX_PATH).
+- Docs: SVG-DATA-ATTRIBUTES "SeamlyLayout piece names"; `AGENT_CHECKLIST.md` §5, §40; TODO Layout.X6.1–.3.
+- Open: Layout.X6.4 installed-app check with the next MSI (§40).
+
 ### 2026-11-12 — Nested sizes stack on a corner (Layout.804)
 
 - Merged into `run-seamlyLayout` without skip-ci (`.pri`/`.pro` changed). Branch `task-nested-stack-corner` deleted.
@@ -47,15 +58,6 @@
 - Test: `ExportMenuTests::svgModeItemsHaveNoCheckBox` (3 rows). 3 `PreferencesModelTests` removed.
 - Checked: `ctest --preset debug` 8/8. `cargo test` not run: no Rust change.
 - Open: Layout.800.3 installed-app check with the next MSI (`AGENT_CHECKLIST.md` §36).
-
-### 2026-11-12 — TODO_DXF.md cleaned
-
-- Closed → `TODO_COMPLETED.md`: DXF.21, DXF.3, DXF.8 (completed); DXF.22 (obsolete). Findings table moved there too.
-- Evidence: aw.fyi `male_shirt_R13_202611012029.dxf` (2026-11-01): pleat and slit ends not flagged; FrontPanel_M not flagged. jacket2 Base Size 500 reports (2026-10-23, 11-07, 11-08): 0 departures.
-- DXF.3.5 CLO3D import check now lives only in Layout.102.5 (`AGENT_CHECKLIST.md` section 8).
-- Open: DXF.18.5, rewritten with steps and expected result. `male_shirt` CollarTopInterface-Built-in-SA has no notch.
-- Found, not investigated: the 2026-11-01 and 2026-11-07 male_shirt DXF files have 0 notches. `male_shirt.sm2d` FrontPanel and BackPanel have 1 notch each.
-- Compliance doc "aw.fyi results": 4 new rows.
 
 ## Decisions to retain
 

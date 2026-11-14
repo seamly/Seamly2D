@@ -127,10 +127,10 @@ Export all tabs unchecked.
 - [x] "DXF-ASTM: Missing Piece Data" dialog appears. Expected: jacket2 hides labels and grainlines. "no piece label" means the hidden label block, not the name.
   - Next MSI: the dialog no longer names a hidden label. See §23.
   - [ ] One line per piece, not one per size.
-  - [ ] Each piece named `Size_500_Piece_<n>_<name>[_<letter>]`, n = 1 to 8. No spaces. All names differ. No "Detail (3)".
+  - [ ] Each piece named `Size_500_<name>[_<letter>]`. No `Piece_<n>`. No spaces. All names differ. No "Detail (3)".
   - [ ] Cyrillic names show: Подборт, Комір.
   - [x] The size tabs scrolls to the right. All size tabs are accessible.
-- [x] No warning "Size_500_Piece_<n>_<name>: not graded, size N has other turn points than size 500".
+- [x] No warning "Size_500_<name>_<letter>: not graded, size N has other turn points than size 500".
 - [x] The folder holds a `.dxf` and a `.rul` with the same name.
 - [x] "Export Complete" names the `.dxf` and the `.rul`.
 - [ ] Open the `.dxf` in VS Code:
@@ -616,3 +616,12 @@ Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is 
 - [ ] Each piece: one grainline stack and one label stack. The sizes' copies lie on top of each other.
 - [ ] Lining, Nested tab: the Detail 4 cut lines meet at one corner. Its grainline and labels each stack as one.
 - [ ] Settings: Layout Mode: Along Grainline. "Place fold lines on the left edge" on. Submit. Create Layout. The Back and Detail 2 stacks lie on the left edge. No warning.
+
+## 40. jacket2: multisize piece names without the piece number
+
+(Layout.X6)
+
+- [ ] Open jacket2. Press Layout.
+- [ ] Settings: Fabric (folded), width 30.0. Submit. Create Layout. "Pieces do not fit the media": the list names pieces `Size_<size>_<name>_<letter>`, for example `Size_640_Комір_H`. No `Piece_<n>`.
+- [ ] Choose "Split the pieces". OK. If "Some layouts left pieces out" appears, each line is `Size_<size>_<name>_<letter>` alone. No `: <size>` after the name.
+- [ ] Base Size 500 tab > Export > DXF-ASTM (R13). "Missing Piece Data" lists `Size_500_Подборт_G`.

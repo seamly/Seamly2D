@@ -2,6 +2,15 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-12 — TODO_DXF.md cleaned
+
+- Closed → `TODO_COMPLETED.md`: DXF.21, DXF.3, DXF.8 (completed); DXF.22 (obsolete). Findings table moved there too.
+- Evidence: aw.fyi `male_shirt_R13_202611012029.dxf` (2026-11-01): pleat and slit ends not flagged; FrontPanel_M not flagged. jacket2 Base Size 500 reports (2026-10-23, 11-07, 11-08): 0 departures.
+- DXF.3.5 CLO3D import check now lives only in Layout.102.5 (`AGENT_CHECKLIST.md` section 8).
+- Open: DXF.18.5, rewritten with steps and expected result. `male_shirt` CollarTopInterface-Built-in-SA has no notch.
+- Found, not investigated: the 2026-11-01 and 2026-11-07 male_shirt DXF files have 0 notches. `male_shirt.sm2d` FrontPanel and BackPanel have 1 notch each.
+- Compliance doc "aw.fyi results": 4 new rows.
+
 ### 2026-11-12 — Plain words in the TODO file
 
 - Rule added: describe literal actions and data; no made-up names, no wrong jargon. `CLAUDE.md` (d4809bc650). Agent file `.claude/agents/seamlylayout-developer.md` too: local only, gitignored.
