@@ -42,7 +42,7 @@ Open in `TODO_SEAMLY2D.md`: Seamly2D.71.9 (Qt suites, next MSI), Seamly2D.71.10 
 
 ## Completed subtasks from Task Seamly2D.11 — Built-in seam allowance: calculation, display and export
 
-Open in `TODO_SEAMLY2D.md`: Seamly2D.11.8 (Qt suites, next MSI), Seamly2D.11.9 (user check).
+Seamly2D.11.8–11.10: "Task Seamly2D.11" below.
 
 - [x] Seamly2D.11.1 Display the seam line
   - `PatternPieceTool::RefreshGeometry()`: the main path is the cut line (`m_cutLine`, cut line style). The item draws `VPiece::builtInSeamLinePath()` in the seam line style. The hatch fills the space between them while seam allowances are shown
@@ -1995,3 +1995,53 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 ## Task SeamlyMe.2 — Open dialog starts in measurements/individual (completed 2026-11-14)
 
 - [x] No subtasks. SeamlyMe.1.1 covers it: Open Individual starts in `<dataRoot>/measurements/individual`.
+
+## Task Seamly2D.72 — Pattern schema: every draft block has `<images>` (completed 2026-11-14)
+
+- [x] Cause: upstream `fixGroupsOrder()` added `<groups>` and `<images>` before validation. A pre-v0.7.1 pattern with `<groups>` failed (`jacket1_52-176.sm2d`).
+- [x] Decision (user): schema v0.7.8 requires `<images>` in each `draftBlock`, after `groups`. Seamly2D converts, then saves in v0.7.8.
+- [x] `VPatternConverter::toVersion0_7_8()` adds missing `<groups>` and `<images>`. `fixGroupsOrder()` only reorders. The writer adds `<images>` to each new draft block.
+- [x] Tests: `PatternConverterTests` 9 pass. `nmake check`, CTest 8/8, Cargo, MSI validation pass. User check pass.
+
+## Task Seamly2D.11 — Built-in seam allowance: calculation, display, export (completed 2026-11-14)
+
+- [x] Seamly2D.11.1–11.7: "Completed subtasks from Task Seamly2D.11".
+- [x] Seamly2D.11.10 Cause: the inward offset turned a short spline chord around at a 76° corner (`male_shirt.sm2d`, D11, D12). `CheckLoops()` missed the spike.
+  - Fix: `removeConsumedEdges()` (`vpiece.cpp`) before `Equidistant()`. Seam line only.
+  - Test: `TST_VPiece::BuiltInSeamLineMeetsAtAcuteCorner`.
+- [x] Seamly2D.11.8 `nmake check` pass. Seamly2D.11.9 user check (`AGENT_CHECKLIST.md` §27) pass.
+
+## Task Seamly2D.9 — Label template file name in Pattern Preferences and Piece Properties (completed 2026-11-14)
+
+- [x] File name beside `Edit template`. "none" when the stored lines match no known file. Tooltip: absolute path. Refreshes after an edit.
+- [x] Piece defaults resolve through `NewPieceDefaults::pieceLabelTemplateFile(lines)`.
+- [x] Decision: no schema change. The template file is dialog state; the pattern stores the label lines.
+- [x] Tests and Qt suites pass. User check pass.
+
+## Task Seamly2D.50 — Piece Mode: drill holes (completed 2026-11-14)
+
+- [x] Own Piece Properties page, separate from notches. Needs a positive constant diameter and a valid anchor.
+- [x] DXF R13 layer 13, group 30 = diameter.
+- [x] Schema v0.7.9 with conversion. Qt and Rust suites pass. User check pass.
+
+## Task Seamly2D.60 — Stripe and plaid reference lines (completed 2026-11-14)
+
+- [x] Main-path point nodes define reference-only lines in Piece Mode.
+- [x] DXF R13 layers 9 and 10. Packing bounds unchanged.
+- [x] Schema v0.7.9 with conversion. Producer, transform, DXF, packing and dialog tests pass. User check pass.
+
+## Task Seamly2D.62 — Piece Mode: Flip Piece tool (completed 2026-11-14)
+
+- [x] None, Horizontal, Vertical, Both, from Piece Properties and the Piece Mode context menu. Works on any piece, also Union, Flip, Copy and Mirror on Foldline results.
+- [x] Decision (Layout.110): the flip mirrors the displayed geometry. Labels and grainline keep their place and readability. Stored geometry and flip schema unchanged.
+- [x] Tests and Qt suites pass. User check: single, copied and re-flipped pieces, each direction.
+
+## Task Seamly2D.61 — Piece Mode: Copy Piece tool (completed 2026-11-14)
+
+- [x] The copy gets its own modeling nodes and paths. It keeps live draft links, also Union producers.
+- [x] Name and letter suffixes, also on copies of copies. Editable with Pattern Piece Tool. One-step undo and redo.
+- [x] No schema change. Tests and Qt suites pass. User check: copies of Union, Flip (V, H), Copy and Mirror on Foldline pieces.
+
+## Task Seamly2D.4 — Preferences > Paths has no bodyscans row (completed 2026-11-14)
+
+- [x] User check pass.
