@@ -1181,7 +1181,7 @@ mod tests {
     // @brief Parse a fixture path excerpt.
     #[test]
     fn parse_logo_path_fixture() {
-        // Snippet from seamly-layout.svg path74.
+        // Closed path with relative m, l, and c commands.
         let data = "m 2896.0528,408.62033 l -14.6201,-89.54234 c 76.6263,-31.36519 43.7069,-158.3149 43.7069,-158.3149 l 67.7364,-28.22212 c 8.3795,57.368 5.5872,107.61324 79.1968,108.71552 l 0.1356,167.37243 z";
         let p = Path::parse_path_attribute(data).unwrap();
         let pts = p.flatten(1.0);
