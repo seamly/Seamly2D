@@ -57,6 +57,7 @@ MALE_SHIRT
 | Layout.X8.2 | 40 | S2D > male_shirt > Piece Properties: "Layout rotation:" label and Layout Mode=Any line | ?
 | Layout.X3.2 | 43 | S2D > male_shirt > Piece label `<empty>` line: blank line in Piece mode, Preview and SL | ?
 | Layout.X1.2 | 44 | SL > male_shirt > Paper Roll 8 in, split: pattern and piece labels wholly inside each part | ?
+| Layout.X4.2 | 45 | SL > male_shirt > Paper Tiled: Export > PDF disabled, PDF (Tiled) enabled | ?
 | Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Fabric | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Lining | ?
@@ -674,3 +675,14 @@ Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is 
 - [ ] No moved label overlaps another label or the blue part label `<name> part i of n, joins j`.
 - [ ] A label is smaller than before only when its part is too small for it at full size.
 - [ ] Export > DXF is disabled. Export > PDF: the labels are where the layout shows them.
+
+## 45. Plain PDF export disabled on tiled paper
+
+(Layout.X4.2)
+
+- [ ] Open male_shirt. Press Layout.
+- [ ] Settings: Paper, Paper Type Tiled. Submit. Create Layout.
+- [ ] Export menu: "PDF" is disabled and reads "PDF: use PDF (Tiled) for tiled paper".
+- [ ] Export > PDF (Tiled) is enabled and exports.
+- [ ] Settings: Paper Type Roll. Submit. Create Layout. Export > PDF is enabled. PDF (Tiled) is disabled.
+- [ ] View menu: PDF is enabled.

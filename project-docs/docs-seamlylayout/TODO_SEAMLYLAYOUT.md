@@ -11,7 +11,9 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 - [ ] Layout.X3 - in labels, "<empty>" should be displayed as a blank line. Currently labels containing "<empty>" incorrectly display the literal text "<empty>".
   - [x] Layout.X3.1 - `LabelTextManager::isBlankLineMarker`: a template line `<empty>` (English, or the editor or reader translation) becomes a line with no text that keeps one line height. Covers the Seamly2D piece and pattern labels, the handoff SVG (no `<text>`, next line moves down), and the Edit template Preview tab. Test: `TST_LabelTextManager::blankLineMarker`. Docs: SVG-DATA-ATTRIBUTES `piece_label`, `AGENT_CHECKLIST.md` §43.
   - [ ] Layout.X3.2 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §43.
-- [ ] Layout.X4 - When paperType='tiled', disable the export option 'PDF'. 
+- [ ] Layout.X4 - When paperType='tiled', disable the export option 'PDF'.
+  - [x] Layout.X4.1 - `ExportMenu.qml` `pdfEnabled`: on tiled paper the Export menu item "PDF" is disabled and reads "PDF: use PDF (Tiled) for tiled paper"; "PDF (Tiled)" stays enabled. `TopMenuBar.qml` binds it for the Export menu only; the View menu keeps "PDF" enabled. Test: `ExportMenuTests::plainPdfIsDisabledWhenPdfDisabled`. Docs: `AGENT_CHECKLIST.md` §45.
+  - [ ] Layout.X4.2 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §45.
 - [ ] Layout.X5 - Display the media dimensions (WxH) in each layout tab, of the layout displayed in that tab.
   - [x] Layout.X5.1 - Each tab shows `<W> x <H> <unit>` below its label (`layoutViewMediaSizes`, `LayoutViews::media_sizes`). Width: paper canvas width, or the fabric width (folded too). Height: the tab's layout length. Done Adjusting updates the shown tab. Tests: `media_size_text_uses_the_settings_unit`, `media_sizes_follow_each_tab_layout`. Docs: SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §42.
   - [ ] Layout.X5.2 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §42.
