@@ -105,6 +105,8 @@ public:
     int             GetSourceLinesCount() const;
     const TextLine& GetSourceLine(int index) const;
 
+    static bool isBlankLineMarker(const QString& text);
+
     void Update(const QString& name, const VPieceLabelData& data);
     void Update(VAbstractPattern* document);
 

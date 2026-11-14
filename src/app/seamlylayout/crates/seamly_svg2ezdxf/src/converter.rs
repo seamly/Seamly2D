@@ -807,7 +807,7 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
         } // match component
     } // for each component
 
-    // Seamly2D prints "<empty>" for unset label fields; it carries no information.
+    // An SVG file from an older Seamly2D holds "<empty>" for a blank label line; it carries no information.
     block.annotations.retain(|a| !a.text.is_empty() && a.text != "<empty>");
     // The component loop set the mirror line from the fold line.
     let on_fold = piece_is_on_fold(piece, block.mirror_line.is_some());

@@ -77,6 +77,7 @@
 
 #include "LabelTextManager.h"
 
+#include <QCoreApplication>
 #include <QDate>
 #include <QDebug>
 #include <QFileInfo>
@@ -192,6 +193,9 @@ QString replacePlaceholders(const QMap<QString, QString>& placeholders, QString 
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief prepareLines makes a text line of each template line that is not empty.
+ *
+ * A line that the placeholders leave empty takes no space in the label. A blank line marker becomes a line with no
+ * text, so it keeps one line height.
  */
 QList<TextLine> prepareLines(const QVector<VLabelTemplateLine>& lines)
 {
@@ -201,7 +205,10 @@ QList<TextLine> prepareLines(const QVector<VLabelTemplateLine>& lines)
         if (!template_line.line.isEmpty())
         {
             TextLine text_line;
-            text_line.text = template_line.line;
+            if (!LabelTextManager::isBlankLineMarker(template_line.line))
+            {
+                text_line.text = template_line.line;
+            }
             text_line.alignment = static_cast<Qt::Alignment>(template_line.alignment);
             text_line.font_size_increment = template_line.fontSizeIncrement;
             text_line.bold = template_line.bold;
@@ -348,6 +355,22 @@ const TextLine& LabelTextManager::GetSourceLine(int index) const
     Q_ASSERT(index >= 0);
     Q_ASSERT(index < m_lines.count());
     return m_lines.at(index);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief isBlankLineMarker checks whether a template line holds only the "<empty>" marker of a blank line.
+ *
+ * The label template editor gives a new line the marker. The pattern reader gives it to a line with no text. Each
+ * writes its own translation; a template saved in English keeps the English marker.
+ * @param text template line text.
+ * @return true when the line is a blank line.
+ */
+bool LabelTextManager::isBlankLineMarker(const QString& text)
+{
+    return text == QLatin1String("<empty>")
+           || text == QCoreApplication::translate("EditLabelTemplateDialog", "<empty>")
+           || text == QCoreApplication::translate("VDomDocument", "<empty>");
 }
 
 //---------------------------------------------------------------------------------------------------------------------
