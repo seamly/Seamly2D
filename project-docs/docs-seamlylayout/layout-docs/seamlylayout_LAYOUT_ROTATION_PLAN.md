@@ -32,7 +32,7 @@ All pieces are preprocessed so the grainline points upward.
   - `0` = Pieces point Up, `180` = Pieces point Down.
 
 - `any`
-  - Default trial set: `{0°, 90°, 180°, 270°}` for legacy handoffs without a Piece Rotation rule.
+  - Default trial set: `{0°, 90°, 180°, 270°}` for legacy handoffs without a Piece Properties > Layout rotation rule.
   - When present, each piece's `data-rotation` rule restricts its own angles:
     `0`/`360` → `{0°}`, `180` → `{0°, 180°}`, `90` → quarter turns, and `1` → every integer angle from 0° through 359°.
   - `data-rotation="0"` means no rotation; omission preserves the legacy quarter-turn fallback.

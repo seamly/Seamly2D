@@ -659,7 +659,7 @@ QListWidget::item:selected {
                  </font>
                 </property>
                 <property name="text">
-                 <string>Rotation:</string>
+                 <string>Layout rotation:</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -762,6 +762,22 @@ QListWidget::item:selected {
                    <attribute name="buttonGroup">
                     <string notr="true">rotation_ButtonGroup</string>
                    </attribute>
+                  </widget>
+                 </item>
+                 <item row="2" column="0" colspan="3">
+                  <widget class="QLabel" name="rotationLayoutMode_Label">
+                   <property name="font">
+                    <font>
+                     <pointsize>9</pointsize>
+                     <bold>false</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Rotation applies when Layout Mode=Any in SeamlyLayout.</string>
+                   </property>
+                   <property name="wordWrap">
+                    <bool>true</bool>
+                   </property>
                   </widget>
                  </item>
                 </layout>
