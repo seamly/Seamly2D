@@ -3,35 +3,16 @@
 Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to `project-docs/TODO_COMPLETED.md`. Task IDs start with `Layout.`
 
 ## Little things to take care of:
-- [ ] when a piece is split, check if any label lies wholly or partially outside a split piece cutline, if yes then move the label(s) to lie 100% within the split piece cutline.
-- [ ] when a piece is split, simplify the split piece's text to "<piecename> part <n> of <m>"; e.g. for piece with name="Union_piece" change it from the current text "Piece_12_Union_piece part 1 of 3, joins 2" to "Union_piece part 1 of 3"
-- [ ] in labels, "<empty>" should be displayed as a blank line. Currently labels containing "<empty>" incorrectly display the literal text "<empty>".
-- [ ] When paperType='tiled', disable the export option 'PDF'. 
-- [ ] Display the media dimensions (WxH) in each layout tab, of the layout displayed in that tab.
+- [ ] Layout.X1 - when a piece is split, check if any label lies wholly or partially outside a split piece cutline, if yes then move the label(s) to lie 100% within the split piece cutline.
+- [ ] Layout.X2 - when a piece is split, simplify the split piece's text to "<piecename> part <n> of <m>"; e.g. for piece with name="Union_piece" change it from the current text "Piece_12_Union_piece part 1 of 3, joins 2" to "Union_piece part 1 of 3"
+- [ ] Layout.X3 - in labels, "<empty>" should be displayed as a blank line. Currently labels containing "<empty>" incorrectly display the literal text "<empty>".
+- [ ] Layout.X4 - When paperType='tiled', disable the export option 'PDF'. 
+- [ ] Layout.X5 - Display the media dimensions (WxH) in each layout tab, of the layout displayed in that tab.
+- [ ] Layout.X6 - Remove redundancies from multisize layout piece names, e.g. name="Collar" and multisize name is currently "Size_640_Piece_1_Collar_H: 640". Simplify this to be
+'Size_<sizenumber>' followed by '_<piecename>' if piecename exists else '_Piece_<num>', followed by '_<letter>' if letter exists.
+- [ ] Layout.X7 - 'Fabric (folded)' > Width=30.0 > 'Split the pieces' in jacket 2 incorrectly generates message "Some layouts left pieces out". The pieces should be split so that they fit on the media for each size, for each material. 
 
 ## Implement
-
-### [ ] Task Layout.800 - Implement - Remove the checkboxes from the SVG export submenu
-
-- [ ] Remove the 'Export > SVG' submenu checkboxes. The checkboxes aren't operating properly; the selected submenu option is highlighted and exports the file. The checkboxes don't add value so remove them; remove any code and comments that are obsoleted during this task.
-
-### [ ] Task Layout.801 - Implement - Improve the split pieces' labels
-
-- [x] If a split piece's "split" label is wider than the "splitline" of the piece then set the width of the label to the width of the "splitline"
-  - [x] Layout.801.1 A part label wider than the part's longest cut edge gets a smaller font, so its width equals the edge length. Its `<text>` gets `textLength` (the edge length) and `lengthAdjust="spacingAndGlyphs"`. A label that fits keeps the 0.25 in font. Since Layout.801.5 this is the fallback in `part_label_placement.rs`.
-  - [x] Layout.801.2 Decision: the Hershey font (`svg_label_text::stroke_text_width`) measures the label. It needs no system font. Its spaces and lower-case letters are wider than Arial's, so a renderer that ignores `textLength` draws a part label shorter than the edge.
-  - [x] Layout.801.3 Test: `piece_divider` `part_label_is_no_wider_than_its_cut_edge` (now `part_label_fits_its_part`). `cargo test --workspace` 670 pass; `ctest --preset debug` 8/8. Test case from trousers `Union_piece` (mirrored waistband, 2079 × 227 px, 16 in roll): the label font goes from 24 px to 11.06 px.
-  - [ ] Layout.801.4 In the next MSI build: trousers, Paper Roll 16 in, Layout Mode Along Grainline, Split the pieces. The `Union_piece` part labels are level, 0.25 in, inside the seam line, and cross no line or label. Steps: `AGENT_CHECKLIST.md` section 37.
-  - [x] Layout.801.5 User decision: keep the 0.25 in text. `part_label_placement.rs` `place_part_label`: a label wider than its cut edge lies level across the part, in the clear row nearest the cut edge. Clear: no outline edge, path or other text within 0.25 em. No clear row: the 801.1 shrink. Tests: `part_label_placement` (5), `piece_divider` `part_label_fits_its_part`. `cargo test --workspace` 677 pass; `ctest --preset debug` 8/8. Real trousers export: both `Union_piece` labels 24 px, inside the seam line, below the existing labels.
-
-### [ ] Task Layout.802 - Implement - Fix test for piece too wide.
-
-- [ ] If a piece is too wide to fit on the media, and if Layout Mode is Any then check if the piece could fit if rotated 90degrees; then if the piece doesn't fit then display the message that begins with "These pieces do not fit the media inside it's margins", else proceeed with the layout processing.
-  - [x] Layout.802.1 Cause: the check used the piece's `data-rotation` rule. Seamly2D writes `0` (Rotation None) by default, so Layout Mode Any tried 0° only.
-  - [x] Layout.802.2 `piece_extractor::turn_wide_pieces_to_fit`: in Layout Mode Any, a piece wider than the media at its rule's angles gets quarter turns if a 90° turn fits. The oversized-piece check (`piece_divider` `prepared_pieces`) and the packer (`do_process_layout`) both call it. Tiled paper: no change.
-  - [x] Layout.802.3 Decision: the turn replaces the piece's Rotation rule (None, 1-Way, 2-Way) for that piece only. Without it, the packer cannot place the piece. Other pieces keep their rule.
-  - [x] Layout.802.4 Tests: `piece_extractor` `wide_piece_turns_only_when_the_turn_fits`; `layout_utils` `any_mode_turns_a_wide_piece_that_fits_turned`; `piece_divider` `piece_rotation_controls_split_and_stays_on_parts` (each rule turns; a piece too wide both ways splits). `cargo test --workspace` 672 pass; `ctest --preset debug` 8/8.
-  - [ ] Layout.802.5 In the next MSI build: trousers, Paper Roll 16 in, Layout Mode Any. The dialog lists Back only; `Union_piece` (21.7 × 2.4 in) is placed whole, turned 90°. Steps: `AGENT_CHECKLIST.md` section 38.
 
 ### [ ] Layout.803 - Implement - Fix piece objects that should be split when the piece is split.
 

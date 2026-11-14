@@ -1957,3 +1957,41 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 - [x] Layout.77.2 App checks: Material dropdown; one import tab per material; correct pieces per tab and per layout; material header; `.sm2d` pieces have `material`.
   - Tests: 3 `material_split`; `material_segment_goes_after_the_variant_and_before_the_tab`. Doc: `SVG-DATA-ATTRIBUTES.md` "Materials", `NEW-ATTRIBUTES.csv`.
 - [x] Layout.77.3 Schema 0.7.6 adds optional `material`. `VPatternConverter::toVersion0_7_6` reads a 0.7.5 piece as Fabric. Fold line node ids belong to Layout.80.
+
+## Task Layout.800 — Export > SVG submenu: remove the checkboxes (completed 2026-11-14)
+
+- [x] Removed the checkboxes and their obsolete code. They did not work and added no value. The selected item highlights and exports the file.
+
+## Task Layout.801 — Split piece part labels (completed 2026-11-14)
+
+- [x] Layout.801.1 Fallback: a part label wider than the part's longest cut edge gets a smaller font, so its width equals the edge length. `<text>` gets `textLength` (edge length) and `lengthAdjust="spacingAndGlyphs"`.
+- [x] Layout.801.2 Decision: the Hershey font (`svg_label_text::stroke_text_width`) measures the label. It needs no system font. A renderer that ignores `textLength` draws the label shorter than the edge.
+- [x] Layout.801.3 Test case: trousers `Union_piece` (2079 × 227 px, 16 in roll), font 24 px → 11.06 px.
+- [x] Layout.801.4 App check: trousers, Paper Roll 16 in, Along Grainline, Split the pieces. `Union_piece` part labels level, 0.25 in, inside the seam line, cross no line or label (`AGENT_CHECKLIST.md` section 37).
+- [x] Layout.801.5 Decision (user): keep the 0.25 in text. `part_label_placement.rs` `place_part_label` lays a too-wide label level across the part, in the clear row nearest the cut edge. Clear: no outline edge, path or other text within 0.25 em. No clear row: the 801.1 shrink.
+  - Tests: `part_label_placement` (5), `piece_divider` `part_label_fits_its_part`. `cargo test --workspace` 677 pass; `ctest --preset debug` 8/8.
+
+## Task Layout.802 — Layout Mode Any: turn a too-wide piece 90° (completed 2026-11-14)
+
+- [x] Layout.802.1 Cause: the width check used the piece's `data-rotation` rule. Seamly2D writes `0` (Rotation None) by default, so Layout Mode Any tried 0° only.
+- [x] Layout.802.2 `piece_extractor::turn_wide_pieces_to_fit`: in Layout Mode Any, a piece wider than the media gets quarter turns if a 90° turn fits. Called by `piece_divider` `prepared_pieces` and `do_process_layout`. Tiled paper: no change.
+- [x] Layout.802.3 Decision: the turn replaces that piece's Rotation rule (None, 1-Way, 2-Way). Without it, the packer cannot place the piece. Other pieces keep their rule.
+- [x] Layout.802.4 Tests: `wide_piece_turns_only_when_the_turn_fits`, `any_mode_turns_a_wide_piece_that_fits_turned`, `piece_rotation_controls_split_and_stays_on_parts`. `cargo test --workspace` 672 pass; `ctest --preset debug` 8/8.
+- [x] Layout.802.5 App check: trousers, Paper Roll 16 in, Layout Mode Any. Dialog lists Back only; `Union_piece` (21.7 × 2.4 in) placed whole, turned 90° (`AGENT_CHECKLIST.md` section 38).
+
+## Task SeamlyMe.1 — Open pickers start in the user measurement directories (completed 2026-11-14)
+
+`TMainWindow::OpenIndividual()`, `OpenMultisize()`, `OpenTemplate()` start in the settings paths:
+
+- Open Individual: `getIndividualSizePath()` → `<dataRoot>/measurements/individual`
+- Open Multisize: `getMultisizePath()` → `<dataRoot>/measurements/multisize`
+- Open Template: `getTemplatePath()` → `<dataRoot>/templates`
+
+- [x] SeamlyMe.1.1 App check: each picker opens at its directory.
+- [x] SeamlyMe.1.2 Decision: keep `<dataRoot>/templates`, beside `measurements/`. It keeps existing settings and the shipped-template location; no migration.
+- [x] SeamlyMe.1.3 All three paths follow the configured or renamed data root. Pickers keep newly created start folders and report directory-creation failures. `TST_DataRoot`: 29 pass.
+- [x] SeamlyMe.1.4 Briefs updated.
+
+## Task SeamlyMe.2 — Open dialog starts in measurements/individual (completed 2026-11-14)
+
+- [x] No subtasks. SeamlyMe.1.1 covers it: Open Individual starts in `<dataRoot>/measurements/individual`.
