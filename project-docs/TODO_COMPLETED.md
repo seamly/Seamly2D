@@ -1715,7 +1715,11 @@ The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`sr
   - The first run found a bug: a main path that starts at a corner next to a curve lost most of its seam line. The inward offset loops at that corner, and `CheckLoops()` cut the wrong side of a loop at the path start. Fix: the offset starts in the middle of the longest edge
 - Not in this task: Seamly2D piece mode draws no seam line for a built-in piece. Filed as Seamly2D.11 in `TODO_SEAMLY2D.md` (user decision)
 
-## Completed subtasks from Task Layout.68 — PDF export: page and pieces 133 % too large
+- [x] Layout.28.7 App check: built-in seam allowance.
+
+## Task Layout.68 — PDF true size and scale check grid (completed 2026-11-14)
+
+Cause (MSI 26.10.1311): PDF used 72 dpi, not 96. Pages and pieces were 4/3 too large.
 
 - [x] Layout.68.1 One renderer for every PDF page: `exports::render_tree_to_pdf_bytes` passes `PageOptions { dpi: 96 }`. `app_core::render_pdf` removed
 
@@ -1729,6 +1733,13 @@ The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`sr
 - [x] Layout.68.6 Docs: `export-docs/seamlylayout_EXPORT_WORKFLOW.md` "PDF export — true size", simple workflow, codebase index
 
 - [x] User check, PDF true size: Marker tab PDF page matches the layout. Passed (MSI 26.10.2023). Inkscape: 47.510 × 601.217 in, without the content rect and background.
+
+- [x] Layout.68.5 Settings checkbox `scaleGrid` (under Piece Gap). mm or cm: 3 × 3 blocks, 3 cm square. Inches: 2 × 2 blocks, 2 in square.
+- [x] Layout.68.6 `scale_grid.rs`: `do_process_layout` places the grid one piece gap below the pieces and legend. Media grows (tiled: more rows). No grid on Marker.
+- [x] Layout.68.7 DXF: `clone_dxf_layout_doc` removes the grid.
+- [x] Layout.68.9 HPGL cut mode leaves the grid out.
+  - Tests: 4 `scale_grid`; `jacket2_scale_grid_on_every_layout_but_marker`; `cut_mode_drops_the_scale_grid`; `SettingsModelTests::scaleGrid_defaultsOffAndRoundtrips`. Doc: `SVG-DATA-ATTRIBUTES.md` "Scale check grid".
+- [x] Layout.68.10–68.13 App checks: Settings option; grid on every layout but Marker; grid in exports, not in DXF or HPGL cutter files; printed grid measures 3 cm or 2 in.
 
 ## Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
 
@@ -1895,3 +1906,54 @@ Reports on male_shirt (2026-10-03 to 2026-10-10) and jacket2 (2026-10-12).
   - [x] 'Paper > Roll' operates properly
   - [x] 'Fabric > Folded' operates properly
   - [x] 'Fabric > Not Folded' operates properly
+
+## Task Layout.110 — Piece mode: Flip choice mirrors the piece (completed 2026-11-14)
+
+Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Flip did not mirror the piece.
+
+- [x] Layout.110.1 Cause: Flip set only the `flip` attribute for the layout. Piece mode drew no mirror.
+- [x] Layout.110.2 `PatternPieceTool::applyFlipToGeometry` mirrors the outline (seam line, cut line, allowance fill, notches, fold line) about its center with `pieceFlipTransform` (`def.cpp`). Labels and grainline stay in place.
+  - Decision: the mirror is display only. The stored piece path does not change.
+- [x] Layout.110.3 Test: `TST_VPiece::PieceFlipTransformMirrorsAboutCenter`.
+- [x] Layout.110.4 App check, male_shirt Piece mode: Flip > Horizontal, Vertical, Both, None mirror the outline. A dot marks the current choice (`AGENT_CHECKLIST.md` section 24).
+
+## Task Layout.804 — Nested multisize: stack the sizes on one point (completed 2026-11-14)
+
+- [x] Layout.804.1 Decisions (user): fold line first, at its lower end (left end if level). Same rules in both apps. Tie: longer other edge, then lower corner, then left corner.
+- [x] Layout.804.2 Stack point per size, in the grain frame:
+  - Fold line in every size: lower end of the largest size's fold line.
+  - Else turn points in every size: largest size's turn point with the longest level edge, else the longest edge. Other sizes take the turn point nearest the same bounding-box place.
+  - Else bounding-box centre.
+- [x] Layout.804.3 SeamlyLayout: `svg_dom/src/stack_point.rs` (`center_piece_sets`, `annotation_alignment.rs`). Seamly2D: `layout_handoff/handoff_stack_point.cpp` (`align_handoff_annotations`), new `handoff_svg_reading.cpp`. A point within 0.01 px of the cut line is inside.
+- [x] Layout.804.4 Tests: `stack_point.rs` (11), `TestHandoffAnnotationAlignment` `stackPoint*` (7), `anchor_on_the_cut_line_is_inside`. Fixture `jacket2_40-146_handoff.svg` realigned. `cargo test --workspace` 689 pass; `ctest --preset debug` 8/8.
+- [x] Layout.804.5 MSI: 4 Qt suites pass. jacket2 Nested: Back and Detail 2 stack on the lower fold line end; other pieces on one cut line corner; no import warning (`AGENT_CHECKLIST.md` section 39).
+
+## Task Layout.74 — Nested multisize: one color per size, with a legend (completed 2026-11-14)
+
+- [x] Layout.74.1 Size colors: `size_colors::size_palette`. Layout.82 replaced the palette.
+- [x] Layout.74.2 `color_pieces_by_size` colors each piece by its size. Nested tab and every export except DXF.
+- [x] Layout.74.3 `SizeLegend`: `<g id="size_legend" data-type="size_legend">`, one piece gap below the lowest piece. Media grows (tiled: more tile rows). Text modes and HPGL treat it as a label.
+- [x] Layout.74.4 App check, jacket2 Nested, Export SVG, PDF, PNG: size colors and legend on the canvas and in the exports.
+  - Tests: 5 `size_colors`; `jacket2_nested_colors_sizes_and_adds_legend`, `jacket2_nested_tiled_legend_has_tile_rows`, `size_legend_text_is_label_text`, `cut_mode_drops_the_size_legend`. Doc: `SVG-DATA-ATTRIBUTES.md` "Nested size colors".
+
+## Task Layout.76 — Multisize: size label on each piece (completed 2026-11-14)
+
+- [x] Layout.76.1 `size_labels::add_size_labels` (in `finish_import`) adds `<g data-type="size_label">` "Size <size>", Arial 24 px, 5 px past the grainline front end, level after layout. Text modes, HPGL, DXF (layer 15) and the outline search treat it as a label.
+  - Decision: no grainline → label level at the outline centre. jacket2 hides its grainlines.
+  - Tests: 5 `size_labels`; `jacket2_size_labels_reach_the_exports`. Doc: `SVG-DATA-ATTRIBUTES.md` "Size labels".
+- [x] Layout.76.2 App check: import canvas and size-tab exports (SVG, PDF, DXF) show the size label.
+
+## Task Layout.77 — Piece material: one import tab and one layout per material (completed 2026-11-14)
+
+- [x] Layout.77.0 Seamly2D:
+  - [x] Layout.77.0.1 Piece attribute `material`, default `Fabric`. Pattern format 0.7.6 (`v0.7.6.xsd`). `VAbstractPiece::getMaterial`; read by `VPattern::parsePieceElement`; written by `PatternPieceTool::addAttributes`.
+  - [x] Layout.77.0.2 Piece Properties: `material_ComboBox` after Letter: Fabric, Lining, Interfacing, Interlining. The list shows translated names and stores untranslated names.
+  - [x] Layout.77.0.3 Decision: one stdin SVG, one pattern group per material (`pattern-n`, `data-material`). `SvgGenerator::mergeSvgDoms`. Tests: `TST_SvgComponentTags::PiecesOfEachMaterialShareAPatternGroup`, `OneMaterialKeepsOnePatternGroup`.
+- [x] Layout.77.1 SeamlyLayout:
+  - [x] Layout.77.1.1 Import canvas: one tab per material. `material_split::split_by_material` (in `finish_import`), `Main.qml` `materialTabs`, `AppController::select_material`.
+  - [x] Layout.77.1.2 Create Layout uses the selected material tab (`input_dom`). Decision: a tab switch drops the previous material's layout. Layout.92 replaced this: a switch keeps every layout.
+  - [x] Layout.77.1.3 `Main.qml` `materialHeader`: "Material: <material>" above the layout canvas.
+  - [x] Layout.77.1.4 Export file name with more than one material: `<base>[_<segment>]_<material>[_<tab>]_<stamp>` (`exports::material_name_segment`).
+- [x] Layout.77.2 App checks: Material dropdown; one import tab per material; correct pieces per tab and per layout; material header; `.sm2d` pieces have `material`.
+  - Tests: 3 `material_split`; `material_segment_goes_after_the_variant_and_before_the_tab`. Doc: `SVG-DATA-ATTRIBUTES.md` "Materials", `NEW-ATTRIBUTES.csv`.
+- [x] Layout.77.3 Schema 0.7.6 adds optional `material`. `VPatternConverter::toVersion0_7_6` reads a 0.7.5 piece as Fabric. Fold line node ids belong to Layout.80.
