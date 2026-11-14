@@ -14,6 +14,7 @@
 // and every other text of the part.
 // The single-stroke font measures all text. It needs no system font, and its lower-case
 // letters and spaces are wider than Arial's, so the measure leaves room to spare.
+// `label_inside_part.rs` uses the same measure (`drawn_bounds`) and outline tests.
 
 use geometry::{Path, PathSegment};
 use xmltree::{Element, XMLNode};
@@ -100,6 +101,22 @@ fn along_edge(edge: CutEdge, font: f64, text_length: Option<f64>) -> PartLabelPl
     PartLabelPlace { centre, along_edge: true, font, text_length }
 } // fn along_edge
 
+// @brief Box a full-size label along `edge` covers, plus its clearance.
+// @param text Label text.
+// @param font Full font size, in user units.
+// @param edge Longest cut edge of the part.
+// @return The box; None when the label is wider than the edge and so does not go along it.
+pub(crate) fn along_edge_bounds(text: &str, font: f64, edge: CutEdge) -> Option<Bounds> {
+    let width = svg_label_text::stroke_text_width(text, font);
+    if width > edge.length() {
+        return None; // the label goes level or shrinks: `place_part_label` keeps it clear
+    } // if too wide for the edge
+    let (x, y) = along_edge(edge, font, None).centre;
+    // The label reads up: its height runs across the edge, its width along it.
+    let (half_across, half_along) = (font / 2.0 + CLEARANCE_EM * font, width / 2.0 + CLEARANCE_EM * font);
+    Some(Bounds { left: x - half_across, top: y - half_along, right: x + half_across, bottom: y + half_along })
+} // fn along_edge_bounds
+
 // @brief Centre of the clear level place nearest the cut edge; None when the part has none.
 //
 // Each row is a band as high as the label plus its clearance. Rows step a quarter font
@@ -169,7 +186,7 @@ fn first_clear_start(
 } // fn first_clear_start
 
 // @brief True when `p` lies inside the closed polygon `outline` (even-odd rule).
-fn inside(outline: &[(f64, f64)], p: (f64, f64)) -> bool {
+pub(crate) fn inside(outline: &[(f64, f64)], p: (f64, f64)) -> bool {
     let n = outline.len();
     let crossings = (0..n)
         .filter(|&i| {
@@ -182,7 +199,7 @@ fn inside(outline: &[(f64, f64)], p: (f64, f64)) -> bool {
 } // fn inside
 
 // @brief x range of the part of segment `a`-`b` inside the band `top`..=`bottom`; None when it misses.
-fn x_range_in_band(a: (f64, f64), b: (f64, f64), top: f64, bottom: f64) -> Option<(f64, f64)> {
+pub(crate) fn x_range_in_band(a: (f64, f64), b: (f64, f64), top: f64, bottom: f64) -> Option<(f64, f64)> {
     let dy = b.1 - a.1;
     // Parameter range t in 0..=1 where a + t (b - a) lies in the band.
     let (t0, t1) = if dy.abs() < 1e-12 {
@@ -200,16 +217,26 @@ fn x_range_in_band(a: (f64, f64), b: (f64, f64), top: f64, bottom: f64) -> Optio
 
 // @brief Axis-aligned box.
 #[derive(Debug, Clone, Copy, PartialEq)]
-struct Bounds {
-    left: f64,
-    top: f64,
-    right: f64,
-    bottom: f64,
+pub(crate) struct Bounds {
+    pub left: f64,
+    pub top: f64,
+    pub right: f64,
+    pub bottom: f64,
 }
 
 impl Bounds {
+    // @brief The box grown by `by` on every side.
+    pub(crate) fn grown(&self, by: f64) -> Bounds {
+        Bounds { left: self.left - by, top: self.top - by, right: self.right + by, bottom: self.bottom + by }
+    } // fn grown
+
+    // @brief True when the two boxes share more than an edge.
+    pub(crate) fn overlaps(&self, other: &Bounds) -> bool {
+        self.left < other.right && other.left < self.right && self.top < other.bottom && other.top < self.bottom
+    } // fn overlaps
+
     // @brief Smallest box around `points`; None when there are none.
-    fn around(points: impl IntoIterator<Item = (f64, f64)>) -> Option<Bounds> {
+    pub(crate) fn around(points: impl IntoIterator<Item = (f64, f64)>) -> Option<Bounds> {
         points.into_iter().fold(None, |bounds: Option<Bounds>, (x, y)| {
             Some(match bounds {
                 Some(b) => Bounds {
@@ -223,6 +250,16 @@ impl Bounds {
         })
     } // fn around
 } // impl Bounds
+
+// @brief Box around all that `element` draws: its text, measured as a level label is, and its paths.
+// @return The box; None when the element draws nothing.
+pub(crate) fn drawn_bounds(element: &Element) -> Option<Bounds> {
+    let mut drawn = Obstacles::default();
+    drawn.add(element, &TextStyle::default());
+    let line_ends = drawn.segments.iter().flat_map(|&(a, b)| [a, b]);
+    let box_corners = drawn.boxes.iter().flat_map(|b| [(b.left, b.top), (b.right, b.bottom)]);
+    Bounds::around(line_ends.chain(box_corners))
+} // fn drawn_bounds
 
 // @brief Presentation attributes a `<text>` takes from itself and its ancestors.
 #[derive(Debug, Clone, Default)]
