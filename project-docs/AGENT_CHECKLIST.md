@@ -59,6 +59,7 @@ MALE_SHIRT
 | Layout.X1.2 | 44 | SL > male_shirt > Paper Roll 8 in, split: pattern and piece labels wholly inside each part | ?
 | Layout.X4.2 | 45 | SL > male_shirt > Paper Tiled: Export > PDF disabled, PDF (Tiled) enabled | ?
 | Layout.X2.2 | 46 | SL > trousers > Paper Roll 16 in, split: part labels read `<piece name> part i of n` | ?
+| Layout.X7.2 | 47 | SL > jacket_2 > Fabric folded 30.0, split: no layout leaves pieces out | ?
 | Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Fabric | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Lining | ?
@@ -635,9 +636,9 @@ Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is 
 
 (Layout.X6)
 
-- [ ] Open trousers (`test-seamly-layout/patterns/validation/trousers.sm2d`). Press Layout.
+- [ ] Open jacket2 (`test-seamly-layout/patterns/validation/jacket2_40-146.sm2d`). Press Layout.
 - [ ] Settings: Fabric (folded), width 30.0. Submit. Create Layout. "Pieces do not fit the media": the list names pieces `Size_<size>_<name>_<letter>`, for example `Size_640_Комір_H`. No `Piece_<n>`.
-- [ ] Choose "Split the pieces". OK. If "Some layouts left pieces out" appears, each line is `Size_<size>_<name>_<letter>` alone. No `: <size>` after the name.
+- [ ] Choose "Make the media bigger". OK. If "Some layouts left pieces out" appears, each line is `Size_<size>_<name>_<letter>` alone. No `: <size>` after the name.
 - [ ] Base Size 500 tab > Export > DXF-ASTM (R13). "Missing Piece Data" lists `Size_500_Подборт_G`.
 - [ ] Open `test-seamly-layout/patterns/validation/trousers.sm2d` (individual). Press Layout.
 - [ ] Settings: Paper, Roll, custom width 16 in. Layout Mode: Along Grainline. Submit. Create Layout. "Pieces do not fit the media" lists `Back`, not `Piece_<n>_Back`.
@@ -698,3 +699,14 @@ Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is 
 - [ ] Each blue part label reads `<piece name> part i of n`, e.g. `Union_piece part 1 of 2`. No `Piece_<n>_` prefix, no `, joins`.
 - [ ] Part numbers run 1 to n; n is the part count of that piece.
 - [ ] Each label lies along a cut edge, or level when the edge is too short.
+
+## 47. Multisize split on folded fabric
+
+(Layout.X7.2)
+
+- [ ] Open jacket2 (`test-seamly-layout/patterns/validation/jacket2_40-146.sm2d`). Press Layout.
+- [ ] Settings: Fabric (folded), width 30.0. Submit. Create Layout.
+- [ ] Dialog "Pieces do not fit the media" lists pieces by `Size_<size>_<name>_<letter>`, e.g. `Size_640_Комір_H`.
+- [ ] Choose "Split the pieces". OK. "Some layouts left pieces out" does not appear.
+- [ ] Nested tab: the collar stack and the Back stack are cut into parts on the same lines for every size.
+- [ ] Every material tab (Marker, Nested, every size) leaves no piece out.
