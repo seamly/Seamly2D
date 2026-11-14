@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-11-14 — Logo commit broke the MSI build
+
+- Cause: commit `3674fcfeab` moved `seamly-layout_512x512.png` and `seamly-layout.icns` to `assets/images/old-imgs/`; `qt_frontend/CMakeLists.txt` still names `assets/images/`.
+- New `seamly-layout_512x512.png` and `seamly-layout.icns`, rendered from the new `seamly-layout.svg` (Inkscape 1.4.4, Pillow).
+- `svg_dom` test `deep_id_lookup_in_nested_groups` uses inline SVG; the old test read id `Circle` from the logo.
+- Checked: `cargo test --workspace` 704 pass; `ctest --preset debug` 8/8.
+- Open (Sue): rerun `local_build_msi.ps1`; keep or delete `assets/images/old-imgs/`.
+
 ### 2026-11-14 — Split part label, tiled PDF, multisize split on fabric (Layout.X2, X4, X7)
 
 - Three task branches built and tested in parallel worktrees; merged `--no-ff` into `run-seamlyLayout`; branches and worktrees deleted.
@@ -47,18 +55,6 @@
 - Checked: `cargo test --workspace` 693 pass; `ctest` 8/8 pass (build dir `Seamly2D-private-worktrees/x5dbg`: the preset path in a worktree passes MAX_PATH).
 - Docs: SIMPLE_WORKFLOW tab list; `AGENT_CHECKLIST.md` §42; TODO Layout.X5.1.
 - Open: Layout.X5.2 installed-app check with the next MSI (§42).
-
-### 2026-11-14 — Multisize piece names without the piece number (Layout.X6)
-
-- `piece_naming.rs`: multisize `Size_<size>_<name>[_<letter>]`; no name → `Size_<size>_Piece_<n>[_<letter>]`. Piece-set: same without the size.
-- User decision: names stay unique. A named piece whose name another piece also gets keeps `Piece_<n>` (`Size_34_Piece_2_Detail`).
-- User decision (Layout.X6.5): individual `<name>[_<letter>]`; no name → `Piece_<n>[_<letter>]`. Same shared-name rule. Tests: `individual_name_drops_the_number`, `individual_shared_name_keeps_the_number`; cargo 692 pass, ctest 8/8. §41 trousers step.
-- Naming now reads every piece first (`collect_pieces`, `planned_names`), then writes.
-- `unplaced_piece_lines`: an assigned name is the whole line; no `: <size>`. One line per left-out size.
-- Tests: `multisize_name_drops_the_number`, `unplaced_piece_lines_use_assigned_names`; jacket2 export test now expects `Size_500_<name>_<letter>`.
-- Checked: `cargo test --workspace` 691 pass; `ctest --preset debug` equivalent 8/8 (worktree build dir `x6dbg`; preset path passed MAX_PATH).
-- Docs: SVG-DATA-ATTRIBUTES "SeamlyLayout piece names"; `AGENT_CHECKLIST.md` §5, §41; TODO Layout.X6.1–.3.
-- Open: Layout.X6.4 installed-app check with the next MSI (§41).
 
 ## Decisions to retain
 

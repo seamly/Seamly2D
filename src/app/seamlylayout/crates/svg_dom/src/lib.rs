@@ -426,14 +426,22 @@ mod tests {
         assert!(ids2.iter().all(|id| id.starts_with("qt_")));
     }
 
+    // @brief Get and set an attribute on an element three groups below the root.
     #[test]
-    fn deep_id_lookup_on_logo() {
-        let path = format!(
-            "{}/../../qt_frontend/assets/images/seamly-layout.svg",
-            env!("CARGO_MANIFEST_DIR")
-        );
-        let xml = fs::read_to_string(path).expect("read logo fixture");
-        let mut doc = Document::parse(&xml).unwrap();
+    fn deep_id_lookup_in_nested_groups() {
+        // Inline fixture: the logo SVG is artwork and can change at any time.
+        let xml = r#"
+<svg width="100" height="100">
+  <g id="layer">
+    <g id="outer">
+      <g id="inner">
+        <circle id="Circle" cx="575.22125" cy="10" r="5"/>
+      </g>
+    </g>
+  </g>
+</svg>
+"#;
+        let mut doc = Document::parse(xml).unwrap();
 
         let cx = doc.get_attr_by_id("Circle", "cx");
         assert_eq!(cx, Some("575.22125"));
