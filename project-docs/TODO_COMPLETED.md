@@ -1745,14 +1745,14 @@ Cause (MSI 26.10.1311): PDF used 72 dpi, not 96. Pages and pieces were 4/3 too l
 
 ## Task Layout.9 — Piece-mode handoff passes a stringified SVG document
 
-## Task Layout.100 — Remove the DXF-ASTM (R12) export code and menu option
+## Task Layout.100 — Remove the DXF-ASTM (R12) export code and menu option (completed 2026-11-14)
 
 - [x] Layout.100.1 `ExportMenu.qml` "DXF-ASTM (R12)" item removed; `TopMenuBar.qml` and `Main.qml` handlers removed. The View menu keeps its one "DXF-ASTM" item (opens a .dxf).
 - [x] Layout.100.2 `Main.qml` `pendingDxfVersion` defaults move to R13.
 - [x] Layout.100.3 `export_dxf` accepts "R11" and "R13"; absent or unknown writes R13.
 - [x] Layout.100.4 `DxfVersion::R12` removed. R11 stays as the AC1009 base (DXF-AAMA and the R13 rewrite). `DxfVersion` and converter default is R13. Tests that parsed AC1009 now ask for R11.
 - [x] Layout.100.5 File name segment R12 removed from tests; docs updated (`seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, `TODO_DXF.md`, `AGENT_CHECKLIST.md` section line 288).
-- [ ] Layout.100.6 NEEDS_USER_TEST: Export > DXF shows R13, CLO3D and AAMA (R11) only; View > DXF-ASTM still opens a .dxf.
+- [x] Layout.100.6 App check pass: Export > DXF shows R13, CLO3D and AAMA (R11) only; View > DXF-ASTM still opens a .dxf.
 - Verified: `cargo test --workspace` all pass (257 cxxqt_bridge, 44 ezdxf2dxfastm). QML not run (next MSI).
 - Commit: see git log "Remove DXF-ASTM (R12) export".
 
@@ -2045,3 +2045,120 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 ## Task Seamly2D.4 — Preferences > Paths has no bodyscans row (completed 2026-11-14)
 
 - [x] User check pass.
+
+## Task Layout.78 — Nested SVG export: one group per size (completed 2026-11-14)
+
+- [x] `size_groups::group_pieces_by_size` (in `export_svg`): `<g id="size_<size>" data-type="size" data-size="<size>">`, largest first. `flatten_dom` first; piece-sets removed. Only Nested changes.
+- [x] Tests: 4 `size_groups`; `jacket2_nested_svg_export_groups_pieces_by_size`. Doc: `SVG-DATA-ATTRIBUTES.md` "Nested SVG export".
+- [x] App check: Inkscape lists `size_720` … `size_220`; hiding a group hides one size.
+
+## Task Layout.80 — Fold lines (completed 2026-11-14)
+
+- [x] Seamly2D: Preferences > Pattern > Fold Lines defaults (`VCommonSettings::getDefaultFoldLine*`). Path node menu "Fold Line": two neighbouring point nodes (`VPiece::foldLineNodeIndexes`). No seam allowance on the fold line; it checks and locks "On fold".
+  - Decision (Seamly2D.71.11, 71.13, 71.14): seam line and cut line have no edge on the fold line, in Piece mode and in the handoff SVG.
+- [x] Schema: node attribute `foldLine="true"` in `v0.7.6.xsd`. No converter change.
+- [x] Piece Mirror tool (`PieceMirrorTool`, `PieceMirrorPath`): one Mirror by Line draft operation; new piece `<name> Mirrored`; half piece out of the layout by default; one undo step.
+  - Decision: a draft operation, not a piece tool element. The full piece follows draft changes; file format unchanged.
+  - Rule (user decision): the active draft block affects Draft mode only. Piece mode uses the chosen piece's block.
+- [x] Handoff: `data-on-fold` and a `fold_line` component group (`VLayoutPiece::createFoldLineItem`).
+- [x] SeamlyLayout: `fold_line` is a component, never the outline; `piece_divider` clips it per part. Setting `foldLinesOnLeftEdge` (off by default): fold line on the left media edge; fabric left margin 0. With nap: the piece mirrors across its fold line instead.
+  - Known limit: a mirrored piece does not grade in a Base Size DXF-ASTM export.
+- [x] DXF-ASTM layer 6 mirror line; boundary starts on it (`astm_mirror::align_mirror_lines`). Fold line off the cut line: no layer 6, export warning.
+- [x] Tests: `TST_VPiece` fold line and Piece Mirror tests; `TST_SvgComponentTags::FoldLineSendsFoldLineGroup`; Rust `fold_line_edge`, `astm_mirror`, layer 6 and left-edge tests. App checks pass (`AGENT_CHECKLIST.md` sections 20, 21).
+- [ ] Layout.80.6.3 Adjust Mode: fold line moves with its piece. Not checked off when the task moved here.
+
+## Task Layout.84 — Nested non-DXF exports: smallest size's grainline and labels only (completed 2026-11-14)
+
+- [x] `nested_annotations::keep_smallest_size_annotations` in `clone_export_layout_doc` and `sheets::build_sheet_export_inputs`. All exports but DXF-ASTM. Outlines, notches and fold lines of every size stay.
+- [x] SVG: kept groups go in `<g id="labels_and_grainlines">`, below the size groups.
+  - Decision: it takes the place of the stripped `Rectangles` group (`contentRect`).
+- [x] Tests: 5 `nested_annotations`; 2 jacket2 `layout_utils` tests. App check pass.
+
+## Task Layout.82 — Nested: wider range of size colors (completed 2026-11-14)
+
+- [x] `size_colors::palette_colors`: OKLCH, lightness 0.40–0.80, 10° hue steps. Each size takes the candidate farthest in OKLab from white and from earlier sizes. jacket2 closest pair 0.11 (was 0.012).
+- [x] Tests: 3 `size_colors`. Doc: `SVG-DATA-ATTRIBUTES.md` "Nested size colors". App check pass.
+
+## Task Layout.89 — Oversized-pieces dialog text too dark (completed 2026-11-14)
+
+- [x] Cause: the screenshot came from a `qml` preview with no Fusion style and no `Theme`. SeamlyLayout already used `Theme.textOnDark`.
+- [x] `Main.qml` `oversizedPiecesLabel`: `Theme.violetLight` (2.1:1) → `Theme.textOnDark` (7.9:1). App check pass.
+
+## Task Layout.88 — Export menu: DXF note cut off (completed 2026-11-14)
+
+- [x] Cause: a Qt Quick `Menu` keeps its 200 px implicit width and elides longer items.
+- [x] `ExportMenu.qml` `fittedWidth`: Export menu and SVG submenu take the width of their widest shown item. App check pass.
+
+## Task Layout.72 — Split oversized individual pieces (completed 2026-11-14)
+
+- [x] Layout.72.1–72.7: "Completed subtasks from Task Layout.72".
+- [x] Rules: split only if no allowed rotation fits; fewest equal parts; cut edges get no seam allowance and 2 match notches. Tiled paper: no dialog.
+- [x] Layout.72.9 Dialog names each too-large dimension with piece and media sizes, in the settings unit. The list scrolls past 40% of the window.
+- [x] Layout.72.8 App check (trousers, Paper Roll 16 in): dialog list, Cancel, Split, Make the media bigger; split PDF parts and DXF-ASTM blocks `Back (1/2)`, `Back (2/2)`.
+
+## Task Layout.83 — Nested legend: square color swatches (completed 2026-11-14)
+
+- [x] `SizeLegend::element`: one 32 × 32 px filled `rect` per size (was a 32 px line). Row height 24 → 40 px.
+- [x] Test: `legend_swatches_are_filled_squares`. App check pass.
+
+## Task Layout.86 — Export > DXF submenu (completed 2026-11-14)
+
+- [x] One "DXF" item. Submenu: DXF-ASTM (R13), DXF-ASTM (CLO3D), DXF-AAMA (R11). App check pass.
+
+## Task Layout.87 — Marker: PDF (Tiled) disabled (completed 2026-11-14)
+
+- [x] Marker tab: PDF (Tiled) disabled, because it locked up SeamlyLayout. "Export all tabs" writes the other tabs. App check pass.
+
+## Task Layout.85 — Export DXF-AAMA (R11) (completed 2026-11-14)
+
+- [x] Export > DXF > "DXF-AAMA (R11)": ANSI/AAMA-292 in DXF R11 (AC1009). DXF-ASTM writer; `DxfAstmExportOptions::aama` selects layers 1–14. Reference: `dxf-docs/seamlylayout_DXF_AAMA.md`.
+- [x] All notches V notches on layer 4; labels on layer 1; `.rul` first line `ANSI/AAMA VERSION:1.0.0`; mirror line starts the boundary.
+- [x] Decision (user): R11, not R10, for ANSI/AAMA-292 compliance.
+- [x] Decision: labels on layer 1, as the Seamly2D and Valentina AAMA writers do. No `Category:`: the handoff has no value for it.
+- [x] Tests: 7 `writer_astm_test` `aama_*`; `exports.rs` AAMA tests. ezdxf `recover`: 0 errors. App check pass.
+
+## Task Layout.95 — Piece Properties: Rotation radio buttons (completed 2026-11-14)
+
+- [x] None, 1-Way (360), 2-Way (180), 4-Way (90), Any (1). Default None; None writes no line. `PieceRotation`, `VPieceLabelData::getRotationWay`.
+- [x] Schema 0.7.7 `rotationWay` type `pieceRotation`. Converter `rotationWayToV0_7_7`: empty, unknown or translated value → None.
+  - Decision: new format 0.7.7, because builds already wrote 0.7.6 files with free-text values.
+- [x] Tests: `PieceRotationValuesRoundTrip`, `ConverterSetsRotationWay`. App check pass.
+
+## Task Layout.96 — Piece Properties: Tilt radio buttons and degrees (completed 2026-11-14)
+
+- [x] None, CCW, CW; "Degrees" spin box 0–90, enabled for CCW and CW. Default None, 0. `PieceTilt`, `VPieceLabelData::getTiltDegrees`.
+- [x] Schema 0.7.7: `tilt` type `pieceTilt`, new `tiltDegrees`. Converter `tiltToV0_7_7`: "CCW 15" → CCW, 15; past 90 → 0; other → None.
+- [x] Tests: `PieceTiltValuesRoundTrip`, `ConverterSplitsTilt`. App check pass.
+
+## Task Layout.98 — Piece Properties: Flip radio buttons (completed 2026-11-14)
+
+- [x] None, Horizontal, Vertical, Both; default None. `PieceFlip`, `VAbstractPiece::getFlip`. Replaces "Forbid flipping"; `IsForbidFlipping()` is true for None.
+- [x] Schema 0.7.7 `flip`; `forbidFlipping` removed (`removeForbidFlippingV0_7_7`).
+  - Decision: every converted piece gets None, also `forbidFlipping="false"`, because most old files hold the default only.
+  - Decision: the F key no longer toggles flipping (four states). Preferences "Forbid flipping" default removed.
+- [x] Piece context menu "Flip" submenu. The canvas flip fault is fixed by Layout.110 (Seamly2D.62).
+- [x] Tests: `PieceFlipValuesRoundTrip`, `LayoutPieceKeepsFlip`, `ConverterRemovesForbidFlipping`. App check pass.
+
+## Task Layout.92 — Layout canvas material tabs (completed 2026-11-14)
+
+- [x] Create Layout lays out every material: shown material first, then tab order. One progress popup names the material. `layout_views::layout_jobs`, `TabLayoutQueue`.
+- [x] Right canvas: material tabs above the layout tabs (`MaterialTabBar`). Exports use the shown material.
+  - Decision: both tab bars show the same material.
+  - Decision: a material switch keeps every layout, its shown tab and its Adjust edits (`layout_views::MaterialLayout`). Replaces Layout.77.1.2.
+- [x] Tests: 4 new `layout_views` tests. App check pass.
+
+## Task Layout.94 — Multisize: grainline and labels at the base size's place (completed 2026-11-14)
+
+- [x] `annotation_alignment.rs` (in `finish_import`): every size's grainline, piece label and pattern label at the base size's offset from the outline box centre.
+- [x] `svg_dom::center_piece_sets` centres on the cut line (else the seam line). Nested stacks within 0.5 px.
+- [x] Import warning names items past a size's cut line. Layout.108 fits every size in Seamly2D; the warning stays for older SVGs.
+- [x] Tests: 5 `annotation_alignment`; `jacket2_nested_stacks_each_piece_set_annotations`. App check pass.
+
+## Task Layout.108 — Seamly2D: multisize grainline and labels in one place, inside every cut line (completed 2026-11-14)
+
+- [x] `layout_handoff` (the new SVG writer, after Dead.4.4.3) moves each size's grainline and labels before the handoff.
+- [x] Reference point: fold line start when every size has one; else the cut line box centre (seam line if no cut line).
+- [x] Base size's offset in every size, then the smallest common move that puts each item inside every size's cut line.
+- [x] Decision: no such move → base size's offset, and a warning before SeamlyLayout starts.
+- [x] Decision: SeamlyLayout keeps `annotation_alignment.rs` for SVGs from older Seamly2D builds.
+- [x] Tests: Qt tests; `jacket2_nested_stacks_each_piece_set_annotations` with a new jacket2 input. App check: no import warning; Back's label inside the Size 220 cut line.
