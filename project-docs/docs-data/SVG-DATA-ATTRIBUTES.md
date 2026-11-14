@@ -260,6 +260,7 @@ first child of each piece group when it places the piece into a layout sheet
 | `data-size` | `piece` (multisize) | Size of this copy of the piece. Kept on placed pieces in the layout and its exports. DXF-ASTM `Size Name:`, DXF-AAMA `Size:` piece text, in `data-units`. |
 | `data-set-number` | `piece` (multisize, SeamlyLayout only) | `data-type-number` of the piece-set the piece left. SeamlyLayout writes it when the Marker tab or a size tab dissolves the piece-sets, so the piece number survives in the layout and its exports. Not in the Seamly2D handoff. DXF-ASTM uses it to number pieces that share a name: `Detail (3)`. |
 | `data-name-assigned` | `piece`, `piece-set` (SeamlyLayout only) | `true` when SeamlyLayout assigned the `data-name`. A later import keeps that name. Not in the Seamly2D handoff. |
+| `data-source-name` | `piece` (SeamlyLayout only) | The Seamly2D `data-name`, trimmed, before SeamlyLayout renamed the piece. Omitted when the piece had no name. A split part label shows it. Not in the Seamly2D handoff. |
 | `data-split-of` | `piece` (SeamlyLayout only) | `id` of the piece this part was split from. SeamlyLayout writes it when the user chose "Split the pieces" for an individual pattern with a piece wider or longer than the media. Not in the Seamly2D handoff. |
 | `data-split-part` | `piece` (SeamlyLayout only) | 1-based number of this part, in reading order (top row first, left to right). |
 | `data-split-count` | `piece` (SeamlyLayout only) | Number of parts the piece was split into. |
@@ -361,7 +362,7 @@ When a piece of an individual pattern is wider or longer than the media, the use
   It keeps clear of other labels and of the new part label when it can. A label too large for the part shrinks about its centre in 10% steps.
   A label with no place at 10% stays where it is. The move and scale go into the label's paths and `<text>` transforms.
 - A part without a grainline gets a new vertical one when the piece had one.
-- New `piece_label` per part: `<name> part <i> of <n>, joins <j>`, along the part's longest cut edge, 0.25 in font.
+- New `piece_label` per part: `<name> part <i> of <n>`, along the part's longest cut edge, 0.25 in font.
   A label wider than that edge lies level (not turned), 0.25 in font, inside the part, in the clear row nearest the cut edge.
   A clear row has no outline edge, path or other text within 0.25 em of the label box.
   With no clear row, the label stays along the edge with a smaller font, `textLength` equal to the edge length, and `lengthAdjust="spacingAndGlyphs"`.

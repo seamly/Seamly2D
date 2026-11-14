@@ -444,7 +444,7 @@ mod tests {
 
     // Full font size: 0.25 in at 96 user units per inch.
     const FONT: f64 = 24.0;
-    const TEXT: &str = "Piece_4_Union_piece part 1 of 2, joins 2";
+    const TEXT: &str = "Union_piece part 1 of 2";
 
     // @brief Closed rectangle outline.
     fn rectangle(left: f64, top: f64, right: f64, bottom: f64) -> Vec<(f64, f64)> {
