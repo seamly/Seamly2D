@@ -5,7 +5,7 @@
 ### 2026-11-14 — Logo commit broke the MSI build
 
 - Cause: commit `3674fcfeab` moved `seamly-layout_512x512.png` and `seamly-layout.icns` to `assets/images/old-imgs/`; `qt_frontend/CMakeLists.txt` still names `assets/images/`.
-- New `seamly-layout_512x512.png` and `seamly-layout.icns`, rendered from the new `seamly-layout.svg` (Inkscape 1.4.4, Pillow).
+- `CMakeLists.txt` `SEAMLY_ICON_PNG` now names `seamly-layout-512x512.png` (Sue made the PNG set). `seamly-layout.icns` rendered from the new `seamly-layout.svg` (Inkscape 1.4.4, Pillow).
 - `svg_dom` test `deep_id_lookup_in_nested_groups` uses inline SVG; the old test read id `Circle` from the logo.
 - Checked: `cargo test --workspace` 704 pass; `ctest --preset debug` 8/8.
 - Open (Sue): rerun `local_build_msi.ps1`; keep or delete `assets/images/old-imgs/`.

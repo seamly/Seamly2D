@@ -28,7 +28,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(SEAMLY_ICON_ICO  "${CMAKE_CURRENT_SOURCE_DIR}/assets/images/seamly-layout.ico")
 set(SEAMLY_ICON_ICNS "${CMAKE_CURRENT_SOURCE_DIR}/assets/images/seamly-layout.icns")
-set(SEAMLY_ICON_PNG  "${CMAKE_CURRENT_SOURCE_DIR}/assets/images/seamly-layout_512x512.png")
+set(SEAMLY_ICON_PNG  "${CMAKE_CURRENT_SOURCE_DIR}/assets/images/seamly-layout-512x512.png")
 set(SEAMLY_ICON_SVG  "${CMAKE_CURRENT_SOURCE_DIR}/assets/images/seamly-layout.svg")
 
 # ---------------------------------------------------------------------------
