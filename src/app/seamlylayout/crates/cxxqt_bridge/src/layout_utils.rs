@@ -381,7 +381,7 @@ pub fn do_process_layout(
         .filter(|warning| seen_rotation_warnings.insert(warning.clone()))
         .collect();
     crate::fold_line_edge::pin_fold_line_pieces(&mut pieces, &fold_plan);
-    if settings.media_type == "fabric" && settings.fabric_folded {
+    if settings.is_folded_fabric() {
         let fold_edge_gap_px = settings.piece_gap_px();
         for piece in &mut pieces {
             if piece.rect.left_edge_angle.is_none() {
@@ -900,7 +900,7 @@ pub fn layout_divide_spec(settings: &LayoutSettings, bin_w: u32) -> DivideSpec {
         trial_angles_deg: settings.rotation_trial_set_deg(),
         apply_piece_rotation: settings.applies_piece_rotation_rules(),
         free_rotation_without_grainline: settings.free_rotation_without_grainline(),
-        fold_edge_gap_px: if settings.media_type == "fabric" && settings.fabric_folded {
+        fold_edge_gap_px: if settings.is_folded_fabric() {
             settings.piece_gap_px()
         } else {
             0
@@ -2837,10 +2837,10 @@ mod tests {
         }).collect()
     } // fn fold_line_xs
 
-    // @brief Fold lines on the left edge.  Fabric: the fold line lies on the left
-    // media edge, which has no margin.  Paper: on the left content edge; the margin
-    // stays.  Along grainline turns the piece 180 degrees; with nap mirrors it.
-    // Off, the fold line stays where the packer puts it.
+    // @brief Fold lines on the left edge.  Folded fabric: the fold line lies on the
+    // left media edge, the fold, which has no margin.  Along grainline turns the piece
+    // 180 degrees; with nap mirrors it.  Paper ignores the option: the layout is the
+    // same with it on or off.  Off, the fold line stays where the packer puts it.
     #[test]
     fn fold_line_lies_on_the_left_edge() {
         for (mode, step) in [("alongGrainline", 0.0), ("withNap", 0.0), ("withNap", 180.0)] {
@@ -2852,10 +2852,10 @@ mod tests {
         } // for each layout mode
 
         let paper = process_fold_pieces("paper", "alongGrainline", 0.0, true);
+        let paper_off = process_fold_pieces("paper", "alongGrainline", 0.0, false);
         assert!(paper.unplaced_labels.is_empty() && paper.fold_line_warnings.is_empty());
         assert_eq!(paper.output_doc.get_attr_by_id("contentRect", "x"), Some("48"), "paper keeps its left margin");
-        let xs = fold_line_xs(&paper.output_doc);
-        assert!(xs.iter().all(|x| (x - 48.0).abs() < 1.0), "paper: fold line at x {xs:?}");
+        assert_eq!(paper.bbox_json, paper_off.bbox_json, "paper ignores the option");
 
         let off = process_fold_pieces("fabric", "alongGrainline", 0.0, false);
         assert_eq!(off.output_doc.get_attr_by_id("contentRect", "x"), Some("0"), "folded fabric has no left margin");
@@ -2876,14 +2876,19 @@ mod tests {
         } // for each media
     } // any_mode_ignores_the_fold_edge
 
-    // @brief "Split the pieces" follows the layout: Layout Mode Any pins no fold line while it measures.
+    // @brief "Split the pieces" follows the layout: Layout Mode Any and open fabric pin no fold line while it measures.
     #[test]
     fn any_mode_divide_spec_ignores_the_fold_edge() {
-        for (mode, on_edge) in [("alongGrainline", true), ("withNap", true), ("any", false)] {
+        let spec = |mode: &str, folded: bool| {
             let settings = LayoutSettings::from_json(&format!(
-                r#"{{"unit": "in", "mediaType": "fabric", "fabricWidth": 40.0, "foldLinesOnLeftEdge": true, "layoutMode": "{mode}"}}"#
+                r#"{{"unit": "in", "mediaType": "fabric", "fabricWidth": 40.0, "fabricFolded": {folded},
+                    "foldLinesOnLeftEdge": true, "layoutMode": "{mode}"}}"#
             )).expect("settings parse");
-            assert_eq!(layout_divide_spec(&settings, 1000).fold_lines_on_left_edge, on_edge, "{mode}");
+            layout_divide_spec(&settings, 1000)
+        };
+        for (mode, on_edge) in [("alongGrainline", true), ("withNap", true), ("any", false)] {
+            assert_eq!(spec(mode, true).fold_lines_on_left_edge, on_edge, "{mode}");
+            assert!(!spec(mode, false).fold_lines_on_left_edge, "{mode}: open fabric");
         } // for each layout mode
     } // any_mode_divide_spec_ignores_the_fold_edge
 
@@ -2915,25 +2920,25 @@ mod tests {
             .replace("M192,374 L192,10", &format!("M10,{height} L{},{height}", width - 10))
     } // fn fold_across_grain_svg
 
-    // @brief Paper roll: a fold line across the grain turns its piece onto the left content edge, whole
-    //        or split. Split, only the part with the fold line goes on the edge.
+    // @brief Folded fabric: a fold line across the grain turns its piece onto the fold, whole
+    //        or split. Split, only the part with the fold line goes on the fold.
     #[test]
     fn fold_line_across_the_grain_lies_on_the_left_edge() {
         // 4 x 10 in, fold line 4 in long: turned, it fits whole.
         for split in [false, true] {
-            let result = process_fold_svg(&fold_across_grain_svg(384, 960), "paper", "alongGrainline", 0.0, true, 40.0, split);
+            let result = process_fold_svg(&fold_across_grain_svg(384, 960), "fabric", "alongGrainline", 0.0, true, 40.0, split);
             assert!(result.unplaced_labels.is_empty(), "split {split}: unplaced {:?}", result.unplaced_labels);
             assert!(result.fold_line_warnings.is_empty(), "split {split}: {:?}", result.fold_line_warnings);
             let xs = fold_line_xs(&result.output_doc);
-            assert!(xs.iter().all(|x| (x - 48.0).abs() < 1.0), "split {split}: fold line at x {xs:?}");
+            assert!(xs.iter().all(|x| x.abs() < 1.0), "split {split}: fold line at x {xs:?}");
         } // for each split choice
 
-        // 12 x 25 in, fold line 12 in long: turned, 25 in wide; the 19 in content width splits it in two.
-        let result = process_fold_svg(&fold_across_grain_svg(1152, 2400), "paper", "alongGrainline", 0.0, true, 40.0, true);
+        // 12 x 25 in, fold line 12 in long: turned, 25 in wide; the 40 in fabric folded to 20 in splits it in two.
+        let result = process_fold_svg(&fold_across_grain_svg(1152, 2400), "fabric", "alongGrainline", 0.0, true, 40.0, true);
         assert!(result.unplaced_labels.is_empty(), "unplaced {:?}", result.unplaced_labels);
         assert!(result.fold_line_warnings.is_empty(), "{:?}", result.fold_line_warnings);
         let xs = fold_line_xs(&result.output_doc);
-        assert!(xs.iter().all(|x| (x - 48.0).abs() < 1.0), "fold line at x {xs:?}");
+        assert!(xs.iter().all(|x| x.abs() < 1.0), "fold line at x {xs:?}");
         let bbox: serde_json::Value = serde_json::from_str(&result.bbox_json).expect("valid bbox JSON");
         let backs = bbox["pieces"].as_array().expect("pieces")
             .iter().filter(|piece| piece["label"].as_str().is_some_and(|label| label.starts_with("Back ")))

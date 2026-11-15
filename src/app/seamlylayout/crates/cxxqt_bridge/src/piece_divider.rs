@@ -85,7 +85,7 @@ pub struct DivideSpec {
     // Clearance from the fold edge for pieces without a fold line.
     pub fold_edge_gap_px: u32,
     // Pin fold-line pieces to the fold edge while measuring and splitting.
-    // False in Layout Mode Any (`LayoutSettings::places_fold_lines_on_left_edge`).
+    // False for paper, open fabric, and Layout Mode Any (`LayoutSettings::places_fold_lines_on_left_edge`).
     pub fold_lines_on_left_edge: bool,
 }
 
