@@ -1,5 +1,5 @@
 // project: SeamlyLayout
-// author: slspencer, copyright 2026
+// author: slspencer, copyright 2026 Seamly2D Project
 // MIT License: https://opensource.org/licenses/MIT
 //
 // @file stack_point.rs
@@ -14,10 +14,14 @@
 // direction. When the grainline points up, x' is the SVG x and y' is the SVG y, so a larger y' is lower.
 // 1. Fold line: when every size has a fold line, the lower end of the largest size's fold line, or its
 //    left end when the fold line is level. Every size uses the same end, start or end.
-// 2. Corner: when every size has turn points, the corner (turn point) of the largest size with the longest
-//    horizontal edge; with no horizontal edge, the corner with the longest edge. On a tie: the longer other
-//    edge, then the lower corner, then the left one. Every other size uses the turn point nearest the same
-//    place in its bounding box.
+// 2. Corner: when every size has turn points, a corner (turn point) of the largest size. An edge is the
+//    straight part of the outline that leaves a corner.
+//    a. With a right-angle corner (90° within 1°): the corner with the longest horizontal edge; with no
+//       horizontal edge, the corner with the longest edge. On a tie: the longer other edge, then the lower
+//       corner, then the left one.
+//    b. With no right-angle corner: the lowest corner (largest y'), so the sizes align along its longest edge.
+//       On a level tie: the edge ranks of rule a, then the left corner.
+//    Every other size uses the turn point nearest the same place in its bounding box.
 // 3. Centre: else the centre of each size's outline bounding box.
 // The largest size is the first one with the largest bounding-box area.
 
@@ -37,6 +41,9 @@ const ON_EDGE_PX: f64 = 0.5;
 
 // @brief Sine of 1°: an edge whose direction rises or falls by this much or less is horizontal.
 const HORIZONTAL_SINE: f64 = 0.017_452_406_437_283_51;
+
+// @brief Cosine of 89°: two edges that meet within 1° of 90° make a right angle.
+const RIGHT_ANGLE_COSINE: f64 = 0.017_452_406_437_283_51;
 
 // @brief A point in a grain frame: (x', y').
 type FramePoint = (f64, f64);
@@ -59,6 +66,8 @@ struct Corner {
     index: usize,
     // True when one of its two edges is horizontal.
     horizontal: bool,
+    // True when its two edges meet at a right angle.
+    right_angle: bool,
     // The horizontal edge's length when only one edge is horizontal, else the longer edge's length.
     primary: f64,
     // The other edge's length.
@@ -124,16 +133,26 @@ fn lower_or_left(a: FramePoint, b: FramePoint) -> bool {
     a.0 < b.0 - SAME_PX
 } // fn lower_or_left
 
-// @brief Corner of the outline with the longest horizontal edge, else with the longest edge.
+// @brief Corner of the outline that every size stacks on.
+// @details With a right-angle corner: the corner with the longest horizontal edge, else with the longest edge.
+//          With no right-angle corner: the lowest corner, so the sizes align along its longest edge.
 // @return Vertex index; None when the outline has no turn points.
 fn best_corner(size: &SizeOutline) -> Option<usize> {
     let corners: Vec<Corner> = size.turn_points.as_deref()?.iter().map(|&i| size.corner(i)).collect();
+    let any_right_angle = corners.iter().any(|c| c.right_angle);
     let any_horizontal = corners.iter().any(|c| c.horizontal);
+    // With a right angle and a horizontal edge, only the corners on a horizontal edge compete.
+    let candidate = |c: &&Corner| !any_right_angle || !any_horizontal || c.horizontal;
     let mut best: Option<&Corner> = None;
     // Ascending index order: on a full tie the first corner stays.
-    for corner in corners.iter().filter(|c| c.horizontal || !any_horizontal) {
-        if best.is_none_or(|b| size.ranks_above(corner, b)) {
-            best = Some(corner); // first or better
+    for corner in corners.iter().filter(candidate) {
+        let better = match best {
+            None => true, // first candidate
+            Some(b) if any_right_angle => size.ranks_above(corner, b),
+            Some(b) => size.ranks_lower(corner, b),
+        }; // match best
+        if better {
+            best = Some(corner);
         } // if better
     } // for each candidate corner
     best.map(|c| c.index)
@@ -193,22 +212,29 @@ impl SizeOutline {
 
     // @brief The corner at vertex `index`, with its two edges measured.
     fn corner(&self, index: usize) -> Corner {
-        let (before, before_horizontal) = self.edge(index, false);
-        let (after, after_horizontal) = self.edge(index, true);
+        let (before, before_unit) = self.edge(index, false);
+        let (after, after_unit) = self.edge(index, true);
+        let is_horizontal = |unit: Option<FramePoint>| unit.is_some_and(|u| u.1.abs() <= HORIZONTAL_SINE);
+        let (before_horizontal, after_horizontal) = (is_horizontal(before_unit), is_horizontal(after_unit));
+        let right_angle = match (before_unit, after_unit) {
+            (Some(b), Some(a)) => (b.0 * a.0 + b.1 * a.1).abs() <= RIGHT_ANGLE_COSINE,
+            _ => false, // fewer than two edges
+        }; // right_angle
         let (primary, secondary) = match (before_horizontal, after_horizontal) {
             (true, false) => (before, after),                                // only the edge before is horizontal
             (false, true) => (after, before),                                // only the edge after is horizontal
             _ => (before.max(after), before.min(after)),                     // both or neither
         }; // match horizontal edges
-        Corner { index, horizontal: before_horizontal || after_horizontal, primary, secondary }
+        Corner { index, horizontal: before_horizontal || after_horizontal, right_angle, primary, secondary }
     } // fn corner
 
-    // @brief Length of the straight edge that leaves vertex `corner`, and whether it is horizontal.
+    // @brief Length and direction of the straight edge that leaves vertex `corner`.
     // @details The first vertex away from the corner sets the edge direction. The edge goes on through the
     //          vertices within `ON_EDGE_PX` of that line that move away from the corner, and stops at a
     //          turn point.
     // @param forward  True follows the vertex order; false goes against it.
-    fn edge(&self, corner: usize, forward: bool) -> (f64, bool) {
+    // @return The length and the unit direction; (0, None) when every vertex is on the corner.
+    fn edge(&self, corner: usize, forward: bool) -> (f64, Option<FramePoint>) {
         let count = self.vertices.len();
         let step = |k: usize| if forward { (k + 1) % count } else { (k + count - 1) % count };
         let origin = self.vertices[corner];
@@ -219,7 +245,7 @@ impl SizeOutline {
             k = step(k);
         } // while on the corner
         if k == corner {
-            return (0.0, false); // every vertex is on the corner
+            return (0.0, None); // every vertex is on the corner
         } // if no other vertex
 
         let mut length = distance(self.vertices[k], origin);
@@ -238,7 +264,7 @@ impl SizeOutline {
             length = along;
             k = next;
         } // while not at a turn point
-        (length, unit.1.abs() <= HORIZONTAL_SINE)
+        (length, Some(unit))
     } // fn edge
 
     // @brief True when corner `a` ranks above corner `b`: longer primary edge, longer secondary edge, lower,
@@ -252,6 +278,16 @@ impl SizeOutline {
         } // if secondary differs
         lower_or_left(self.vertices[a.index], self.vertices[b.index])
     } // fn ranks_above
+
+    // @brief True when corner `a` is lower than corner `b` by more than `SAME_PX`; when they are level, when
+    //        `a` ranks above `b`.
+    fn ranks_lower(&self, a: &Corner, b: &Corner) -> bool {
+        let (a_y, b_y) = (self.vertices[a.index].1, self.vertices[b.index].1);
+        if (a_y - b_y).abs() > SAME_PX {
+            return a_y > b_y; // not level: the larger y' is lower
+        } // if not level
+        self.ranks_above(a, b)
+    } // fn ranks_lower
 
     // @brief Map a grain frame point back to the piece frame: p = x'·r − y'·g, with r = (−g.y, g.x).
     fn to_piece(&self, p: FramePoint) -> Point {
@@ -410,19 +446,21 @@ mod tests {
         stack_points(&input).into_iter().map(|p| p.map(|p| (p.x, p.y))).collect()
     } // fn points_of
 
-    // @brief Two trapezoid sizes, wide edge at the top: the stack point is the top left corner.
+    // @brief Two trapezoid sizes, wide edge at the top, right angles on the right side: the stack point is the
+    //        top left corner.
     const TRAPEZOIDS: &str = r#"<svg>
   <g data-type="piece-set">
     <g data-type="piece" data-size="34">
-      <g data-type="cutline" data-turn-points="0 1 2 3 4"><path d="M 0,0 L 40,0 L 30,30 L 10,30 Z"/></g>
+      <g data-type="cutline" data-turn-points="0 1 2 3 4"><path d="M 0,0 L 40,0 L 40,30 L 10,30 Z"/></g>
     </g>
     <g data-type="piece" data-size="36">
-      <g data-type="cutline" data-turn-points="0 1 2 3 4"><path d="M 100,100 L 180,100 L 160,160 L 120,160 Z"/></g>
+      <g data-type="cutline" data-turn-points="0 1 2 3 4"><path d="M 100,100 L 180,100 L 180,160 L 120,160 Z"/></g>
     </g>
   </g>
 </svg>"#;
 
-    // @brief The longest horizontal edge wins; the left end of a level edge wins the tie.
+    // @brief With a right angle, the longest horizontal edge wins; of its two ends, the one with the longer
+    //        other edge (~63.2, not 60) wins.
     #[test]
     fn longest_horizontal_edge_wins() {
         assert_eq!(points_of(TRAPEZOIDS), vec![Some((0.0, 0.0)), Some((100.0, 100.0))]);
@@ -432,7 +470,7 @@ mod tests {
     #[test]
     fn closing_index_names_the_first_vertex() {
         let svg = TRAPEZOIDS
-            .replace("M 100,100 L 180,100 L 160,160 L 120,160 Z", "M 100,100 L 180,100 L 160,160 L 120,160 L 100,100 Z")
+            .replace("M 100,100 L 180,100 L 180,160 L 120,160 Z", "M 100,100 L 180,100 L 180,160 L 120,160 L 100,100 Z")
             .replace(r#"data-turn-points="0 1 2 3 4""#, r#"data-turn-points="2 3 4 9""#);
         let doc = Document::parse(&svg).expect("fixture parses");
         let size = size_outline(pieces(&doc)[1], GRAIN_UP).expect("outline");
@@ -450,18 +488,20 @@ mod tests {
     // @brief The edges run on through vertices on their line, up to the next turn point.
     #[test]
     fn edge_runs_through_vertices_on_its_line() {
-        // Bottom edge 0→1→2 (100 long) has a vertex at 50 that is not a turn point. The top edge is 60 long.
-        let size = outline(&[(0.0, 100.0), (50.0, 100.2), (100.0, 100.0), (80.0, 0.0), (20.0, 0.0)], &[0, 2, 3, 4]);
+        // Bottom edge 0→1→2 (100 long) has a vertex at 50 that is not a turn point. The top edge is 80 long.
+        // Corner 2 is a right angle.
+        let size = outline(&[(0.0, 100.0), (50.0, 100.2), (100.0, 100.0), (100.0, 0.0), (20.0, 0.0)], &[0, 2, 3, 4]);
         let corner = size.corner(0);
         assert!(corner.horizontal);
         assert!((corner.primary - 100.0).abs() < 0.01, "{}", corner.primary);
-        // Bottom corners 0 and 2 tie on both edges and on height, so the left one wins.
+        assert!(size.corner(2).right_angle);
+        // Bottom corners 0 and 2 tie on the bottom edge; corner 0's other edge (~102) is longer.
         assert_eq!(best_corner(&size), Some(0));
 
         // A turn point at the middle vertex stops the edge there.
         let split = outline(&size.vertices, &[0, 1, 2, 3, 4]);
         assert!((split.corner(0).primary - 50.0).abs() < 0.01, "{}", split.corner(0).primary);
-        assert_eq!(best_corner(&split), Some(4), "the top edge (60) is now the longest horizontal edge");
+        assert_eq!(best_corner(&split), Some(4), "the top edge (80) is now the longest horizontal edge");
     } // edge_runs_through_vertices_on_its_line
 
     // @brief With equal horizontal edges, the longer other edge wins, then the lower corner.
@@ -477,14 +517,44 @@ mod tests {
         assert_eq!(best_corner(&rectangle), Some(3));
     } // ties_take_the_longer_other_edge_then_the_lower_corner
 
-    // @brief With no horizontal edge, the corner with the longest edge wins.
+    // @brief With a right angle and no horizontal edge, the corner with the longest edge wins.
     #[test]
     fn without_a_horizontal_edge_the_longest_edge_wins() {
-        // The edge from 3 to 0 (~121.7) is the longest. Corner 3's other edge (~92.2) is longer than
-        // corner 0's (~31.6), so corner 3 wins.
-        let size = outline(&[(0.0, 0.0), (30.0, 10.0), (40.0, 50.0), (-20.0, 120.0)], &[0, 1, 2, 3]);
-        assert_eq!(best_corner(&size), Some(3));
+        // Corner 1 is a right angle. The edge from 0 to 1 (100) is the longest. Corner 0's other edge (~72.1)
+        // is longer than corner 1's (50), so corner 0 wins, although corner 2 is the lowest.
+        let size = outline(&[(0.0, 0.0), (80.0, 60.0), (50.0, 100.0), (-40.0, 60.0)], &[0, 1, 2, 3]);
+        assert!(size.corner(1).right_angle);
+        assert_eq!(best_corner(&size), Some(0));
     } // without_a_horizontal_edge_the_longest_edge_wins
+
+    // @brief Two edges that meet within 1° of 90° make a right angle.
+    #[test]
+    fn right_angle_is_within_one_degree() {
+        // Corner 1 meets at 90.5°: a right angle, so the longest horizontal edge (0→1) wins at its left end.
+        let near = outline(&[(0.0, 0.0), (100.0, 0.0), (100.5, 60.0), (10.0, 80.0)], &[0, 1, 2, 3]);
+        assert!(near.corner(1).right_angle);
+        assert_eq!(best_corner(&near), Some(0));
+
+        // Corner 1 meets at 92°: no corner is a right angle, so the lowest corner wins.
+        let far = outline(&[(0.0, 0.0), (100.0, 0.0), (102.1, 60.0), (10.0, 80.0)], &[0, 1, 2, 3]);
+        assert!(!far.corner(1).right_angle);
+        assert!((0..4).all(|i| !far.corner(i).right_angle));
+        assert_eq!(best_corner(&far), Some(3));
+    } // right_angle_is_within_one_degree
+
+    // @brief With no right-angle corner, every size stacks on the lowest corner of the largest size.
+    #[test]
+    fn without_a_right_angle_the_lowest_corner_wins() {
+        // Two isosceles trapezoids: the bottom corners are level and tie on their edges, so the left one wins.
+        let svg = TRAPEZOIDS
+            .replace("M 0,0 L 40,0 L 40,30 L 10,30 Z", "M 0,0 L 40,0 L 30,30 L 10,30 Z")
+            .replace("M 100,100 L 180,100 L 180,160 L 120,160 Z", "M 100,100 L 180,100 L 160,160 L 120,160 Z");
+        assert_eq!(points_of(&svg), vec![Some((10.0, 30.0)), Some((120.0, 160.0))]);
+
+        // Level bottom corners 2 and 3: corner 2's other edge (~102) is longer than corner 3's (~100.5).
+        let level = outline(&[(0.0, 0.0), (60.0, 0.0), (80.0, 100.0), (10.0, 100.0)], &[0, 1, 2, 3]);
+        assert_eq!(best_corner(&level), Some(2));
+    } // without_a_right_angle_the_lowest_corner_wins
 
     // @brief The grain frame decides what is horizontal and lower. A 40 x 80 rectangle with its grain up
     //        stacks on its lower left corner. With its grain pointing right, its 80 px SVG-vertical edges are
@@ -531,8 +601,8 @@ mod tests {
     fn other_sizes_take_the_nearest_place() {
         // The small size has an extra turn point near the top left, at 10% of its width.
         let svg = TRAPEZOIDS.replace(
-            r#"<g data-type="cutline" data-turn-points="0 1 2 3 4"><path d="M 0,0 L 40,0 L 30,30 L 10,30 Z"/>"#,
-            r#"<g data-type="cutline" data-turn-points="0 1 2 3 4 5"><path d="M 4,0 L 40,0 L 30,30 L 10,30 L 0,0 Z"/>"#,
+            r#"<g data-type="cutline" data-turn-points="0 1 2 3 4"><path d="M 0,0 L 40,0 L 40,30 L 10,30 Z"/>"#,
+            r#"<g data-type="cutline" data-turn-points="0 1 2 3 4 5"><path d="M 4,0 L 40,0 L 40,30 L 10,30 L 0,0 Z"/>"#,
         );
         // Largest size: top left (0, 0) of its bounding box. Small size: vertex 4 at (0,0), not vertex 0.
         assert_eq!(points_of(&svg), vec![Some((0.0, 0.0)), Some((100.0, 100.0))]);
@@ -541,7 +611,7 @@ mod tests {
     // @brief An outline with fewer than three vertices has no stack point.
     #[test]
     fn short_outline_has_no_stack_point() {
-        let svg = TRAPEZOIDS.replacen("M 0,0 L 40,0 L 30,30 L 10,30 Z", "M 0,0 L 40,0", 1);
+        let svg = TRAPEZOIDS.replacen("M 0,0 L 40,0 L 40,30 L 10,30 Z", "M 0,0 L 40,0", 1);
         assert_eq!(points_of(&svg), vec![None, Some((100.0, 100.0))]);
     } // short_outline_has_no_stack_point
 } // mod tests

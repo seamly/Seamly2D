@@ -23,10 +23,14 @@ namespace layout_handoff
  *          The rules measure each size in its grain frame: x' runs across the grain, y' against it.
  *          1. Fold line: when every size has one, the lower end of the largest size's fold line, or its left end
  *             when the fold line is level. Every size uses the same end, start or end.
- *          2. Corner: when every size has turn points, the turn point of the largest size with the longest
- *             horizontal edge; with no horizontal edge, the one with the longest edge. On a tie: the longer
- *             other edge, then the lower corner, then the left one. Every other size uses the turn point
- *             nearest the same place in its bounding box.
+ *          2. Corner: when every size has turn points, a turn point of the largest size. An edge is the
+ *             straight part of the outline that leaves a turn point.
+ *             a. With a right-angle corner (90 degrees within 1 degree): the turn point with the longest
+ *                horizontal edge; with no horizontal edge, the one with the longest edge. On a tie: the longer
+ *                other edge, then the lower corner, then the left one.
+ *             b. With no right-angle corner: the lowest turn point (largest y'), so the sizes align along its
+ *                longest edge. On a level tie: the edge ranks of rule a, then the left corner.
+ *             Every other size uses the turn point nearest the same place in its bounding box.
  *          3. Centre: else the centre of each size's outline bounding box.
  *          The largest size is the first one with the largest bounding-box area.
  *          Only the polylines and matrix transforms that HandoffDocument writes are read.

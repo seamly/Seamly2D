@@ -24,6 +24,7 @@ private slots:
     void includesBoundaryOnlyFits() const;
     void jacketCaptureFitsEverySize() const;
     void stackPointTakesLongestHorizontalEdge() const;
+    void stackPointTakesLowestCornerWithoutRightAngle() const;
     void stackPointMapsClosingIndexToFirstVertex() const;
     void stackPointCentresWithoutTurnPoints() const;
     void stackPointTakesNearestPlaceInOtherSizes() const;

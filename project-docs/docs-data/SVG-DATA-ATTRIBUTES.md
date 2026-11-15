@@ -136,8 +136,11 @@ The Nested tab stacks the sizes of a piece-set on one point in each size. Seamly
 - Rule 2, corner: when every size has a non-empty `data-turn-points`, a turn point of the largest size.
   - Edge: from the turn point to the next turn point, in each direction, through points within 0.5 px of its line.
   - Horizontal edge: within 1° of horizontal.
-  - The turn point with the longest horizontal edge wins. With no horizontal edge, the turn point with the longest edge wins.
-  - Tie (within 0.01 px): the longer other edge, then the lower turn point, then the left one.
+  - Right angle: the two edges of a turn point meet within 1° of 90°. The first point away from the turn point sets each edge's direction.
+  - Rule 2a, a right angle at one or more turn points: the turn point with the longest horizontal edge wins. With no horizontal edge, the turn point with the longest edge wins.
+    - Tie (within 0.01 px): the longer other edge, then the lower turn point, then the left one.
+  - Rule 2b, no right angle: the lowest turn point (largest y in the grain frame) wins. The sizes stack on it, so they align along its longest edge.
+    - Tie (level within 0.01 px): the edges as in Rule 2a, then the left one.
   - Every other size takes its turn point nearest the same place in its bounding box.
   - An index for the closing point of the path names the first point.
 - Rule 3, centre: else the centre of each size's bounding box.

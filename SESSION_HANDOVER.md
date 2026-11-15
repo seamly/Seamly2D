@@ -2,6 +2,20 @@
 
 ## Current status
 
+### 2026-11-14 — Nested: lowest corner without a right angle (Layout.Y3)
+
+- Stack point Rule 2a: a right angle at one or more turn points keeps the old rule.
+- Rule 2b, no right angle: the lowest turn point (largest y' in the grain frame) wins. A level tie uses the 2a edge ranks, then left.
+- Right angle: the two edges meet within 1° of 90°. The first point away from the turn point sets each edge's direction.
+- Same rule in `svg_dom/src/stack_point.rs` (`ranks_lower`, `RIGHT_ANGLE_COSINE`) and `layout_handoff/handoff_stack_point.cpp`.
+- jacket2: only Detail 3 changes. Detail 2 has no right angle but has a fold line (Rule 1).
+- Fixture `jacket2_40-146_handoff.svg` realigned: 25 Detail 3 grainline transforms.
+- Tests: `right_angle_is_within_one_degree`, `without_a_right_angle_the_lowest_corner_wins`, Qt `stackPointTakesLowestCornerWithoutRightAngle`. Trapezoid fixtures are right trapezoids.
+- Checked: `cargo test --workspace` 711 pass; `ctest` debug 8/8; `TestHandoffAnnotationAlignment` 19/19 in a scratch QtTest build. Full Qt suites run in the next MSI.
+- Built in worktree `nested-corner`; merged `--no-ff`; branch and worktree deleted.
+- Docs: SVG-DATA-ATTRIBUTES "Multisize stack point"; `AGENT_CHECKLIST.md` new §50 and OPEN row.
+- Open: Layout.Y3.1 installed-app check with the next MSI (§50).
+
 ### 2026-11-14 — Marker and Nested unavailable after a split (Layout.Y2)
 
 - Multisize "Split the pieces": the run lays out only Base Size and each size (`layout_views::size_kinds`, was `tiled_kinds`), every material.
@@ -47,16 +61,9 @@
 - Docs: SIMPLE_WORKFLOW; `AGENT_CHECKLIST.md` §42 (multisize part now jacket2; trousers is individual) and OPEN row; TODO Layout.X5.3.
 - Open: Layout.X5.2 installed-app check with the next MSI (§42).
 
-### 2026-11-14 — Logo commit broke the MSI build
-
-- Cause: commit `3674fcfeab` moved `seamly-layout_512x512.png` and `seamly-layout.icns` to `assets/images/old-imgs/`; `qt_frontend/CMakeLists.txt` still names `assets/images/`.
-- `CMakeLists.txt` `SEAMLY_ICON_PNG` now names `seamly-layout-512x512.png` (Sue made the PNG set). `seamly-layout.icns` rendered from the new `seamly-layout.svg` (Inkscape 1.4.4, Pillow).
-- `svg_dom` test `deep_id_lookup_in_nested_groups` uses inline SVG; the old test read id `Circle` from the logo.
-- Checked: `cargo test --workspace` 704 pass; `ctest --preset debug` 8/8.
-- Open (Sue): rerun `local_build_msi.ps1`; keep or delete `assets/images/old-imgs/`.
-
 ## Decisions to retain
 
+- Multisize stack point with no right-angle turn point: the lowest turn point wins; the sizes align along its longest edge. An edge is the straight part only (user, 2026-11-14).
 - Layout Mode Any: a piece too wide at its Rotation rule's angles turns 90° if that fits. This replaces the rule for that piece only; the packer cannot place it otherwise (Layout.802 task text, 2026-11-12).
 - Custom page size lives in Tile Size > Custom (`tileWidth`, `tileHeight`). Paper Type has no custom size (user, 2026-11-12).
 - Layout Mode Any ignores "Place fold lines on the left edge": no pin, no turn, no mirror, no conflict error (user, 2026-11-12).

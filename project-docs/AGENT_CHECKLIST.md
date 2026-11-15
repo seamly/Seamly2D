@@ -47,6 +47,7 @@ JACKET_2
 | Seamly2D.71.12 | 34 | S2D > jacket2 > Piece mode, Back: seam line and cut line stop at the fold line | ?
 | Seamly2D.71.15 | 35 | S2D > jacket2 > Layout > SL, Back: seam line and cut line stop at the fold line | ?
 | Layout.804.5 | 39 | SL > jacket_2 > Nested: Back and Detail 2 stack on the lower fold line end; other pieces on one corner | PASS
+| Layout.Y3.1 | 50 | SL > jacket_2 > Nested: Detail 3 sizes stack on the lowest cut line corner | ?
 
 MALE_SHIRT
 | Seamly2D.71.12 | 34 | S2D > male_shirt > Piece mode, BackPanel and CollarTopInterface-Built-in-SA: seam line and cut line stop at the fold line | ?
@@ -745,3 +746,15 @@ Individual pattern, two materials:
 - [ ] Every material tab: same Marker and Nested message.
 - [ ] Export > Export all tabs, SVG: no Marker or Nested file.
 - [ ] Settings: Paper, Roll. Create Layout. No dialog appears; Marker and Nested lay out as before.
+
+## 50. [ ] jacket2 Nested: Detail 3 stacks on its lowest corner
+
+(Layout.Y3.1)
+
+Detail 3 has corners on its cut line, but no corner is a right angle. Detail 3 is the only jacket2 piece with this shape and no fold line.
+
+- [ ] Open jacket2 (`test-seamly-layout/patterns/validation/jacket2_40-146.sm2d`). Press Layout. No "Import warning" popup.
+- [ ] Create Layout. Fabric, Nested tab: the Detail 3 sizes meet at the lowest corner of the cut line.
+- [ ] Detail 3: the longest edges from that corner start at one point and run in the same direction.
+- [ ] Detail 3: one grainline stack and one label stack.
+- [ ] Other pieces: the same as section 39.

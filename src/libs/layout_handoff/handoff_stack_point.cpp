@@ -33,6 +33,9 @@ constexpr qreal on_edge_px = 0.5;
 /// @brief Sine of 1 degree: an edge whose direction rises or falls by this much or less is horizontal.
 constexpr qreal horizontal_sine = 0.01745240643728351;
 
+/// @brief Cosine of 89 degrees: two edges that meet within 1 degree of 90 degrees make a right angle.
+constexpr qreal right_angle_cosine = 0.01745240643728351;
+
 /// @brief Distance at or below which a grainline point repeats the first point, per axis, in px.
 constexpr qreal grainline_same_px = 0.001;
 
@@ -51,10 +54,11 @@ struct SizeOutline
 /// @brief One corner of an outline, with the edge lengths that rank it.
 struct Corner
 {
-    int   index      = 0;     ///< vertex index
-    bool  horizontal = false; ///< true when one of its two edges is horizontal
-    qreal primary    = 0;     ///< the horizontal edge's length when only one edge is horizontal, else the longer edge
-    qreal secondary  = 0;     ///< the other edge's length
+    int   index       = 0;     ///< vertex index
+    bool  horizontal  = false; ///< true when one of its two edges is horizontal
+    bool  right_angle = false; ///< true when its two edges meet at a right angle
+    qreal primary     = 0;     ///< the horizontal edge's length when only one edge is horizontal, else the longer edge
+    qreal secondary   = 0;     ///< the other edge's length
 };
 
 /**
@@ -162,16 +166,16 @@ bool is_turn_point(const SizeOutline& size, int index)
  * @param size       the outline.
  * @param corner     the vertex index of the corner.
  * @param forward    true follows the vertex order; false goes against it.
- * @param horizontal receives true when the edge is horizontal.
+ * @param direction  receives the unit direction of the edge; (0, 0) when every vertex is on the corner.
  * @return the edge length; 0 when every vertex is on the corner.
  */
-qreal edge_length(const SizeOutline& size, int corner, bool forward, bool& horizontal)
+qreal edge_length(const SizeOutline& size, int corner, bool forward, QPointF& direction)
 {
     const int     count  = size.vertices.size();
     const auto    step   = [count, forward](int k) { return forward ? (k + 1) % count : (k + count - 1) % count; };
     const QPointF origin = size.vertices.at(corner);
     qreal         length = 0;
-    horizontal           = false;
+    direction            = QPointF();
 
     // Skip the vertices on the corner itself.
     int k = step(corner);
@@ -198,7 +202,7 @@ qreal edge_length(const SizeOutline& size, int corner, bool forward, bool& horiz
                 k      = next;
             }
         }
-        horizontal = std::abs(unit.y()) <= horizontal_sine;
+        direction = unit;
     }
     return length;
 }
@@ -208,13 +212,21 @@ qreal edge_length(const SizeOutline& size, int corner, bool forward, bool& horiz
  */
 Corner make_corner(const SizeOutline& size, int index)
 {
-    bool        before_horizontal = false;
-    bool        after_horizontal  = false;
-    const qreal before            = edge_length(size, index, false, before_horizontal);
-    const qreal after             = edge_length(size, index, true, after_horizontal);
+    QPointF     before_unit;
+    QPointF     after_unit;
+    const qreal before            = edge_length(size, index, false, before_unit);
+    const qreal after             = edge_length(size, index, true, after_unit);
+    const bool  before_horizontal = before > 0 && std::abs(before_unit.y()) <= horizontal_sine;
+    const bool  after_horizontal  = after > 0 && std::abs(after_unit.y()) <= horizontal_sine;
 
+    Corner corner;
+    corner.index       = index;
+    corner.horizontal  = before_horizontal || after_horizontal;
+    corner.right_angle = before > 0 && after > 0
+                         && std::abs(QPointF::dotProduct(before_unit, after_unit)) <= right_angle_cosine;
     // Both edges or neither edge horizontal: the longer edge ranks first.
-    Corner corner{index, before_horizontal || after_horizontal, std::max(before, after), std::min(before, after)};
+    corner.primary   = std::max(before, after);
+    corner.secondary = std::min(before, after);
     if (before_horizontal != after_horizontal)
     {
         // Only one edge is horizontal: it ranks first.
@@ -243,25 +255,49 @@ bool ranks_above(const SizeOutline& size, const Corner& a, const Corner& b)
 }
 
 /**
- * @brief Finds the corner of the outline with the longest horizontal edge, else with the longest edge.
+ * @brief Returns true when corner @p a is lower than corner @p b by more than same_px; when they are level, when
+ *        @p a ranks above @p b.
+ */
+bool ranks_lower(const SizeOutline& size, const Corner& a, const Corner& b)
+{
+    const qreal a_y   = size.vertices.at(a.index).y();
+    const qreal b_y   = size.vertices.at(b.index).y();
+    bool        lower = ranks_above(size, a, b);
+    if (std::abs(a_y - b_y) > same_px)
+    {
+        lower = a_y > b_y; // not level: the larger y' is lower
+    }
+    return lower;
+}
+
+/**
+ * @brief Finds the corner of the outline that every size stacks on.
+ * @details With a right-angle corner: the corner with the longest horizontal edge, else with the longest edge.
+ *          With no right-angle corner: the lowest corner, so the sizes align along its longest edge.
  * @return the vertex index; -1 when the outline has no turn points.
  */
 int best_corner(const SizeOutline& size)
 {
     QVector<Corner> corners;
-    bool            any_horizontal = false;
+    bool            any_horizontal  = false;
+    bool            any_right_angle = false;
     for (const int index : size.turn_points.value_or(QVector<int>()))
     {
         corners.append(make_corner(size, index));
-        any_horizontal = any_horizontal || corners.constLast().horizontal;
+        any_horizontal  = any_horizontal || corners.constLast().horizontal;
+        any_right_angle = any_right_angle || corners.constLast().right_angle;
     }
 
     // Ascending index order: on a full tie the first corner stays.
     int best = -1;
     for (int i = 0; i < corners.size(); ++i)
     {
-        const bool candidate = corners.at(i).horizontal || !any_horizontal;
-        if (candidate && (best < 0 || ranks_above(size, corners.at(i), corners.at(best))))
+        // With a right angle and a horizontal edge, only the corners on a horizontal edge compete.
+        const bool candidate = !any_right_angle || !any_horizontal || corners.at(i).horizontal;
+        const bool better    = best < 0
+                            || (any_right_angle ? ranks_above(size, corners.at(i), corners.at(best))
+                                                : ranks_lower(size, corners.at(i), corners.at(best)));
+        if (candidate && better)
         {
             best = i;
         }
