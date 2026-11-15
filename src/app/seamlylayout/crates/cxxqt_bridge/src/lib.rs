@@ -640,6 +640,9 @@ pub mod qobject {
         #[qproperty(i32, active_material)]
         // Material of the shown pieces; empty when the handoff names none.
         #[qproperty(QString, active_material_name)]
+        // Media size of each material's layout, "36.00 x 52.25 in"; one entry per material of the import,
+        // also for one material. Empty for a material without a finished layout or with layout tabs.
+        #[qproperty(QStringList, material_media_sizes)]
         type AppController = super::AppControllerRust;
 
         #[qsignal]
@@ -1123,6 +1126,9 @@ pub struct AppControllerRust {
     // `data-material` of the shown pieces; empty when the handoff names none.
     active_material_name: cxx_qt_lib::QString,
 
+    // Material media sizes mirrored for QML, indexed like `material_docs`.
+    material_media_sizes: cxx_qt_lib::QStringList,
+
     // One prepared document per material of the import; `input_dom` is a copy of the shown one.
     material_docs: Vec<material_split::MaterialDoc>,
 
@@ -1187,6 +1193,7 @@ impl Default for AppControllerRust {
             material_labels:           cxx_qt_lib::QStringList::default(), // no material tabs until an import
             active_material:           0,                              // first material
             active_material_name:      cxx_qt_lib::QString::default(), // no material until an import
+            material_media_sizes:      cxx_qt_lib::QStringList::default(), // no layout until a layout run
             material_docs:             Vec::new(),                     // nothing imported
             material_layouts:          Vec::new(),                     // no layouts
         } // Self
@@ -1607,8 +1614,6 @@ impl qobject::AppController {
 
         match results {
             Ok(results) => {
-                // New settings invalidate every tab of every material.
-                self.as_mut().clear_layout_views();
                 // Store results in rust state: the shown material's canvas in the controller,
                 // every other material's canvas in its parked layouts.
                 {
@@ -1635,6 +1640,9 @@ impl qobject::AppController {
 
                 // Emit signals to update QML state
                 self.as_mut().set_is_layout_ready(false);          // not a completed layout yet
+                // New settings invalidate every tab of every material. After the blank
+                // canvases and the flag above, so no material tab keeps an old media size.
+                self.as_mut().clear_layout_views();
                 self.as_mut().set_is_create_layout_enabled(true);  // enables 'Create Layout' button
                 self.as_mut().set_is_settings_required(false);     // new settings end a cancelled layout
                 self.as_mut().layout_finished();                   // notify QML right canvas to reload
@@ -1720,14 +1728,15 @@ impl qobject::AppController {
     ) -> bool {
         // Mark layout as in-progress and clear previous result, tabs included.
         // Every other material goes back to its blank canvas until its turn in the run.
-        // Drop the previous split first: clear_layout_views copies it to the split flag.
+        // Drop the previous split, the old layouts and the layout flag first:
+        // clear_layout_views copies them to the split flag and the material media sizes.
         self.as_mut().rust_mut().divide_spec = None;
-        self.as_mut().clear_layout_views();
         for layout in self.as_mut().rust_mut().material_layouts.iter_mut() {
             layout.reset_to_blank();
         } // for each material
-        self.as_mut().set_is_layout_in_progress(true);
         self.as_mut().set_is_layout_ready(false);
+        self.as_mut().clear_layout_views();
+        self.as_mut().set_is_layout_in_progress(true);
         self.as_mut().set_layout_progress(0);
         self.as_mut().set_layout_status_message(cxx_qt_lib::QString::from("Generating layout..."));
 
@@ -2128,12 +2137,12 @@ impl qobject::AppController {
     fn finish_tab_layouts(mut self: std::pin::Pin<&mut Self>) {
         let warning = self.as_mut().rust_mut().tab_queue.take().and_then(|q| q.final_warning());
 
-        self.as_mut().refresh_layout_view_properties();
         self.as_mut().set_is_tab_layout_pending(false);
         self.as_mut().set_is_layout_in_progress(false);
         self.as_mut().set_layout_progress(-1);
         self.as_mut().set_layout_status_message(cxx_qt_lib::QString::default());
         self.as_mut().set_is_layout_ready(true);
+        self.as_mut().refresh_layout_view_properties(); // after the flag: the shown material's media size
 
         if let Some(msg) = warning {
             // A non-tiled multisize tab extends its media until every piece fits, so left-out
@@ -2230,19 +2239,41 @@ impl qobject::AppController {
     } // fn clear_layout_views
 
     // Copy the tab labels, media sizes, export capabilities, and split state to the QML properties.
+    // Also the media size of each material's layout, which reads `is_layout_ready` for the shown one.
     fn refresh_layout_view_properties(mut self: std::pin::Pin<&mut Self>) {
-        let (labels, media_sizes, active, dxf_allowed, tiled_allowed) = {
+        let shown = usize::try_from(*self.active_material()).unwrap_or(0);
+        let is_shown_laid_out = *self.is_layout_ready();
+        let (labels, media_sizes, material_sizes, active, dxf_allowed, tiled_allowed) = {
             let rust = self.rust();
             let views = &rust.layout_views;
             // The active tab's layout is the controller's layout_dom.
             let media_sizes = rust.layout_settings.as_ref()
                 .map(|settings| views.media_sizes(rust.layout_dom.as_ref(), settings))
                 .unwrap_or_default(); // no layout run: no tabs either
+            // One size per material: the controller holds the shown material's layout,
+            // `material_layouts` the others.
+            let material_sizes: Vec<String> = rust.layout_settings.as_ref().map(|settings| {
+                (0..rust.material_docs.len()).map(|material| {
+                    if material == shown {
+                        layout_views::material_media_size(is_shown_laid_out, views, rust.layout_dom.as_ref(), settings)
+                    } else {
+                        rust.material_layouts.get(material).map(|layout| layout.media_size(settings)).unwrap_or_default()
+                    } // if shown
+                }).collect()
+            }).unwrap_or_default(); // no layout run: no sizes
             // No tabs: an individual layout, which DXF-ASTM and PDF (Tiled) always export.
             let dxf_allowed = views.active_kind().map_or(true, ViewKind::exports_dxf);
             let tiled_allowed = views.active_kind().map_or(true, ViewKind::exports_pdf_tiled);
-            (string_list(&views.labels()), string_list(&media_sizes), views.active() as i32, dxf_allowed, tiled_allowed)
+            (
+                string_list(&views.labels()),
+                string_list(&media_sizes),
+                string_list(&material_sizes),
+                views.active() as i32,
+                dxf_allowed,
+                tiled_allowed,
+            )
         }; // rust borrow dropped
+        self.as_mut().set_material_media_sizes(material_sizes);
         // Sizes first: a new tab delegate reads its size when the labels change.
         self.as_mut().set_layout_view_media_sizes(media_sizes);
         self.as_mut().set_layout_view_labels(labels);
