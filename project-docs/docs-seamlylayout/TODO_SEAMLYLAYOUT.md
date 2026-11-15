@@ -15,11 +15,13 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ### [ ] Layout.803 - Implement - Fix piece objects that should be split when the piece is split.
 
-- [ ] When a piece is split then split the:
-  - [ ] reference lines
-  - [ ] internal paths
-  - [ ] drill holes
+- [x] When a piece is split then split the:
+  - [x] reference lines -- `piece_divider.rs`: `stripe` and `plaid` are open lines that end at the cut lines, like `internal_path`. Before, each went whole to the nearest part.
+  - [x] internal paths -- no code change: already open lines that end at the cut lines; a closed internal path becomes one open line per part. New test pins the closed case.
+  - [x] drill holes -- a drill hole is a circle: it stays whole, on the part nearest its centre. Before, every drill hole went to part 1 (no anchor point). Cut lines move off drill centres.
   - [x] grainlines -- validated (trousers.sm2d, Union piece is split at the same place as the grainline and the halves of the grainline is shown on each split piece)
+  - Tests: `markings_split_with_the_piece`, `cut_line_misses_drill_centres`. Docs: SVG-DATA-ATTRIBUTES split parts, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §48.
+- [ ] Layout.803.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §48.
 
 ## VERIFY
 

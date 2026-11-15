@@ -2,6 +2,16 @@
 
 ## Current status
 
+### 2026-11-14 — Split pieces keep their markings (Layout.803)
+
+- `piece_divider.rs`: `stripe` and `plaid` reference lines are open lines that end at the cut lines, like `internal_path`.
+- Drill holes: `all_points` adds circle centres. A `drill` group goes whole to the part nearest its centre (before: always part 1). `cut_positions` keeps cut lines off drill centres.
+- Internal paths: no code change; already split. A closed one becomes one open line per part.
+- Tests: `markings_split_with_the_piece`, `cut_line_misses_drill_centres`.
+- Built and tested in worktree `split-markings`; merged `--no-ff`; branch and worktree deleted.
+- Docs: SVG-DATA-ATTRIBUTES split parts, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §48 and OPEN row.
+- Open: Layout.803.1 installed-app check with the next MSI (§48).
+
 ### 2026-11-14 — Media size for individual patterns (Layout.X5.3)
 
 - Individual pattern: the media size shows below each material tab name over the layout; one material: below "Material: <name>".
@@ -45,17 +55,6 @@
 - Decision for Sue: shrink fallback for a label larger than its part (10% steps). Alternative: leave it at full size.
 - Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, SVG-DATA-ATTRIBUTES split parts and `fold_line`, `AGENT_CHECKLIST.md` §44.
 - Open: Layout.X1.2 installed-app check (male_shirt, roll 8 in, split).
-
-### 2026-11-14 — Labels show `<empty>` as a blank line (Layout.X3)
-
-- `LabelTextManager::isBlankLineMarker`: `<empty>`, or its editor (`EditLabelTemplateDialog`) or reader (`VDomDocument`) translation.
-- `prepareLines`: a marker line becomes a `TextLine` with no text; it keeps its font size increment and one line height. A line that the placeholders leave empty is still dropped.
-- Covers the Seamly2D scene labels and the handoff SVG (`add_label` writes no `<text>`, moves the next line down). Edit template Preview tab shows a blank row.
-- `seamly_svg2ezdxf` converter still drops `<empty>` text: it comes only from SVG files of older Seamly2D builds.
-- Test: `TST_LabelTextManager::blankLineMarker`.
-- Checked: test program `TST_LabelTextManager` 12/12 pass (`build/scratch_label_empty/`, in-tree libs). `cargo test` not run: Rust comment only. Qt suites run with the next MSI.
-- Docs: SVG-DATA-ATTRIBUTES `piece_label`; `AGENT_CHECKLIST.md` §43 and OPEN row; TODO Layout.X3.1.
-- Open: Layout.X3.2 installed-app check with the next MSI (§43).
 
 ## Decisions to retain
 

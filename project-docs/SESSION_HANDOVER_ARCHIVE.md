@@ -2,6 +2,17 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-14 — Labels show `<empty>` as a blank line (Layout.X3)
+
+- `LabelTextManager::isBlankLineMarker`: `<empty>`, or its editor (`EditLabelTemplateDialog`) or reader (`VDomDocument`) translation.
+- `prepareLines`: a marker line becomes a `TextLine` with no text; it keeps its font size increment and one line height. A line that the placeholders leave empty is still dropped.
+- Covers the Seamly2D scene labels and the handoff SVG (`add_label` writes no `<text>`, moves the next line down). Edit template Preview tab shows a blank row.
+- `seamly_svg2ezdxf` converter still drops `<empty>` text: it comes only from SVG files of older Seamly2D builds.
+- Test: `TST_LabelTextManager::blankLineMarker`.
+- Checked: test program `TST_LabelTextManager` 12/12 pass (`build/scratch_label_empty/`, in-tree libs). `cargo test` not run: Rust comment only. Qt suites run with the next MSI.
+- Docs: SVG-DATA-ATTRIBUTES `piece_label`; `AGENT_CHECKLIST.md` §43 and OPEN row; TODO Layout.X3.1.
+- Open: Layout.X3.2 installed-app check with the next MSI (§43).
+
 ### 2026-11-14 — Layout tabs show the media size (Layout.X5)
 
 - Each layout tab shows `<W> x <H> <unit>` below its label, in a smaller font: "36.00 x 52.25 in".

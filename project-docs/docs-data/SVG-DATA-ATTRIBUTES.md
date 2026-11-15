@@ -356,8 +356,9 @@ When a piece of an individual pattern, or of a multisize pattern on fabric, is w
 - Part `data-name`: `<name> (<i>/<n>)`, e.g. `Front (1/2)`. DXF-ASTM `Piece Name:` uses it.
 - `cutline` and `cut_path`: closed, with new edges on the cut lines. No seam allowance on a cut edge.
 - An outer line (`cutline`, or `seamline` without a `cutline`) with no `Z` and both ends on the fold line makes parts as if it had its fold line edge. A part on the fold line gets no edge on the fold line either; its stretch of fold line completes the outer edge.
-- `seamline` (beside a cutline), `internal_path`, `grainline`: open lines that end at the cut lines.
+- `seamline` (beside a cutline), `internal_path`, `grainline`, `stripe`, `plaid`: open lines that end at the cut lines. A closed `internal_path` becomes one open line per part.
 - `data-turn-points`: kept vertices keep their flag; new vertices on a cut line are turn points.
+- `drill`: whole, on the part nearest its circle centre. No cut line passes through a drill centre.
 - Notches, `piece_label`, `pattern_label`: whole, on the part that holds them.
   A `piece_label`, `pattern_label` or `fold_line_label` not wholly inside the part's outer line moves to the nearest place inside it, 1/16 in clear.
   It keeps clear of other labels and of the new part label when it can. A label too large for the part shrinks about its centre in 10% steps.
