@@ -1,5 +1,5 @@
 // project: SeamlyLayout
-// author: slspencer, copyright 2026
+// author: slspencer, copyright 2026 Seamly2D Project
 // MIT License: https://opensource.org/licenses/MIT
 
 //! layout_engine — rectangle bin-packing implementations.
@@ -701,24 +701,27 @@ mod tests {
         let any = Rect::new(20, 10)
             .with_piece_rotation(PieceRotationRule::Any)
             .with_piece_rotation_enabled(true);
-        assert_eq!(piece_trial_set(&quarter_turns, &any), (0..360).collect::<Vec<_>>());
+        assert_eq!(piece_trial_set(&quarter_turns, &any), (0..36).map(|step| step * 10).collect::<Vec<u16>>());
 
         let inactive = any.with_piece_rotation_enabled(false);
         assert_eq!(piece_trial_set(&quarter_turns, &inactive), quarter_turns);
     } // piece_rotation_rules_resolve_by_layout_mode
 
-    // @brief A 1° rule fits a bin at 45° when the legacy quarter-turn set cannot fit.
+    // @brief An Any rule fits a bin at a 10° step when the legacy quarter-turn set cannot fit.
+    //
+    // 100×10 at 40° needs 84×72; at 50° it needs 72×84, too tall for the 84×75 bin.
+    // A 1° step would also fit at 41° and 42°.
     #[test]
     fn any_piece_uses_non_quarter_turn_to_fit() {
         let rule = Rect::new(100, 10)
             .with_piece_rotation(PieceRotationRule::Any)
             .with_piece_rotation_enabled(true);
-        let (placed, _) = pack_maxrects_multi_angle(78, 78, 0, &[rule], &[0, 90, 180, 270], None)
-            .expect("free-angle rule fits at 45 degrees");
+        let (placed, _) = pack_maxrects_multi_angle(84, 75, 0, &[rule], &[0, 90, 180, 270], None)
+            .expect("free-angle rule fits at 40 degrees");
 
         assert_eq!(placed.len(), 1);
-        assert_eq!(placed[0].rotation_deg, 45);
-        assert!(placed[0].w <= 78 && placed[0].h <= 78);
+        assert_eq!(placed[0].rotation_deg, 40);
+        assert!(placed[0].w <= 84 && placed[0].h <= 75);
 
         for restricted in [
             PieceRotationRule::Unspecified,
@@ -730,7 +733,7 @@ mod tests {
             let rect = Rect::new(100, 10)
                 .with_piece_rotation(restricted)
                 .with_piece_rotation_enabled(true);
-            assert!(!fits_bin(rect, 78, 78, &[0, 90, 180, 270]), "{restricted:?}");
+            assert!(!fits_bin(rect, 84, 75, &[0, 90, 180, 270]), "{restricted:?}");
         } // for each restricted rule
     } // any_piece_uses_non_quarter_turn_to_fit
 
@@ -746,13 +749,13 @@ mod tests {
                 .with_piece_rotation_enabled(true),
         ];
         let (placed, _, unplaced) =
-            pack_maxrects_multi_angle_lenient(78, 78, 0, &rects, &[0, 90, 180, 270], None);
+            pack_maxrects_multi_angle_lenient(84, 75, 0, &rects, &[0, 90, 180, 270], None);
 
         assert_eq!(placed.len(), 1);
         assert_eq!(placed[0].id, 0);
-        assert_eq!(placed[0].rotation_deg, 45);
+        assert_eq!(placed[0].rotation_deg, 40);
         assert_eq!(unplaced, vec![1]);
-        assert!(validate_placements(78, 78, &placed));
+        assert!(validate_placements(84, 75, &placed));
     } // mixed_piece_rules_keep_allowed_angles_and_unplaced_ids
 
 

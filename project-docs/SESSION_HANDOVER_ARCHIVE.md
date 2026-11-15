@@ -2,6 +2,20 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-14 — Nested: lowest corner without a right angle (Layout.Y3)
+
+- Stack point Rule 2a: a right angle at one or more turn points keeps the old rule.
+- Rule 2b, no right angle: the lowest turn point (largest y' in the grain frame) wins. A level tie uses the 2a edge ranks, then left.
+- Right angle: the two edges meet within 1° of 90°. The first point away from the turn point sets each edge's direction.
+- Same rule in `svg_dom/src/stack_point.rs` (`ranks_lower`, `RIGHT_ANGLE_COSINE`) and `layout_handoff/handoff_stack_point.cpp`.
+- jacket2: only Detail 3 changes. Detail 2 has no right angle but has a fold line (Rule 1).
+- Fixture `jacket2_40-146_handoff.svg` realigned: 25 Detail 3 grainline transforms.
+- Tests: `right_angle_is_within_one_degree`, `without_a_right_angle_the_lowest_corner_wins`, Qt `stackPointTakesLowestCornerWithoutRightAngle`. Trapezoid fixtures are right trapezoids.
+- Checked: `cargo test --workspace` 711 pass; `ctest` debug 8/8; `TestHandoffAnnotationAlignment` 19/19 in a scratch QtTest build. Full Qt suites run in the next MSI.
+- Built in worktree `nested-corner`; merged `--no-ff`; branch and worktree deleted.
+- Docs: SVG-DATA-ATTRIBUTES "Multisize stack point"; `AGENT_CHECKLIST.md` new §50 and OPEN row.
+- Open: Layout.Y3.1 installed-app check with the next MSI (§50).
+
 ### 2026-11-14 — Marker and Nested unavailable after a split (Layout.Y2)
 
 - Multisize "Split the pieces": the run lays out only Base Size and each size (`layout_views::size_kinds`, was `tiled_kinds`), every material.

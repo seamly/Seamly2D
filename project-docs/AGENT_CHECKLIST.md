@@ -56,6 +56,7 @@ MALE_SHIRT
 | Layout.88.2 | 3 | SL > male_shirt > Export menu: DXF-ASTM note reads in full | FAIL --> Note did not appear
 | Layout.800.3 | 36 | SL > male_shirt > Export > SVG: no check boxes; each item exports | ?
 | Layout.X8.2 | 40 | S2D > male_shirt > Piece Properties: "Layout rotation:" label and Layout Mode=Any line | ?
+| Layout.Y8.1 | 40, 55 | SL > male_shirt > Layout Mode Any, Layout rotation Any: pieces turn in 10° steps | ?
 | Layout.X3.2 | 43 | S2D > male_shirt > Piece label `<empty>` line: blank line in Piece mode, Preview and SL | ?
 | Layout.X4.2 | 45 | SL > male_shirt > Paper Tiled: Export > PDF disabled, PDF (Tiled) enabled | ?
 | Layout.X2.2 | 46 | SL > trousers > Paper Roll 16 in, split: part labels read `<piece name> part i of n` | ?
@@ -632,7 +633,7 @@ Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is 
 - [ ] Seamly2D: open male_shirt. Piece mode, open a piece's Piece Properties > Properties.
 - [ ] The label left of the None, 1-Way, 2-Way, 4-Way, Any radio buttons reads "Layout rotation:".
 - [ ] Below the radio buttons, one line reads "Rotation applies when Layout Mode=Any in SeamlyLayout." No text is cut off.
-- [ ] Press Layout. SeamlyLayout: Settings. The Piece Gap tip reads "Any applies each piece's Layout rotation rule; Layout rotation Any samples 1° steps."
+- [ ] Press Layout. SeamlyLayout: Settings. The Piece Gap tip reads "Any applies each piece's Layout rotation rule; Layout rotation Any samples 10° steps."
 
 ## 41. Piece names without the piece number
 
@@ -810,3 +811,12 @@ Detail 3 has corners on its cut line, but no corner is a right angle. Detail 3 i
 - [ ] Fabric Folded on, fold edge on. Submit. Create Layout. Size 220 tab: Back's fold line lies on the left edge.
 - [ ] Fabric Folded off. Submit. Create Layout. Back's fold line is not on the left edge; the left margin shows.
 - [ ] Media Paper, Roll 48 in. Submit. Create Layout. Back's fold line is not on the left content edge.
+
+## 55. [ ] Layout rotation Any turns in 10° steps
+
+(Layout.Y8.1)
+
+- [ ] Seamly2D: open male_shirt. Piece mode, Pocket > Piece Properties: Layout rotation Any. OK.
+- [ ] Press Layout. SeamlyLayout: Settings. The Piece Gap tip reads "Layout rotation Any samples 10° steps."
+- [ ] Layout Mode Any. Submit. Create Layout: the layout finishes.
+- [ ] Export > SVG. Open the file in a text editor. The Pocket piece `rotate(` angle is a multiple of 10.

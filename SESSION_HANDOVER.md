@@ -2,6 +2,16 @@
 
 ## Current status
 
+### 2026-11-15 — Layout rotation Any samples 10° steps (Layout.Y8)
+
+- `pack_types`: `ANY_ROTATION_STEP_DEG` = 10. `PieceRotationRule::Any` gives 0°, 10°, … 350° (36 angles, was 360).
+- `SettingsDialog.qml` Piece Gap tip: "Layout rotation Any samples 10° steps."
+- Handoff unchanged: `data-rotation="1"` still means Any.
+- Tests: `piece_rotation_rules_resolve_by_layout_mode`, `any_piece_uses_non_quarter_turn_to_fit`, `mixed_piece_rules_keep_allowed_angles_and_unplaced_ids` (84×75 bin, 40°).
+- Checked after the merge with Layout.Y7: `cargo test --workspace` 714 pass; `ctest` debug 8/8. Built in worktree `rotation-step`; merged `--no-ff`; branch and worktree deleted.
+- Docs: SVG-DATA-ATTRIBUTES `data-rotation`, SETTINGS_WORKFLOW, LAYOUT_ROTATION_PLAN, `TODO_ROTATION.md`, `AGENT_CHECKLIST.md` §40 tip text, new §55 and row.
+- Open: Layout.Y8.1 installed-app check with the next MSI (§55).
+
 ### 2026-11-15 — Fold edge option in the Fabric section (Layout.Y7)
 
 - `SettingsDialog.qml`: "Place fold lines on the left edge" moved to the Fabric section, below "Fabric Folded". Enabled only when Fabric Folded is checked.
@@ -47,22 +57,9 @@
 - Docs: SVG-DATA-ATTRIBUTES, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, DXF-ASTM compliance, `AGENT_CHECKLIST.md` §48, new §51 and OPEN row.
 - Open: Layout.Y4.1 installed-app check with the next MSI (§51).
 
-### 2026-11-14 — Nested: lowest corner without a right angle (Layout.Y3)
-
-- Stack point Rule 2a: a right angle at one or more turn points keeps the old rule.
-- Rule 2b, no right angle: the lowest turn point (largest y' in the grain frame) wins. A level tie uses the 2a edge ranks, then left.
-- Right angle: the two edges meet within 1° of 90°. The first point away from the turn point sets each edge's direction.
-- Same rule in `svg_dom/src/stack_point.rs` (`ranks_lower`, `RIGHT_ANGLE_COSINE`) and `layout_handoff/handoff_stack_point.cpp`.
-- jacket2: only Detail 3 changes. Detail 2 has no right angle but has a fold line (Rule 1).
-- Fixture `jacket2_40-146_handoff.svg` realigned: 25 Detail 3 grainline transforms.
-- Tests: `right_angle_is_within_one_degree`, `without_a_right_angle_the_lowest_corner_wins`, Qt `stackPointTakesLowestCornerWithoutRightAngle`. Trapezoid fixtures are right trapezoids.
-- Checked: `cargo test --workspace` 711 pass; `ctest` debug 8/8; `TestHandoffAnnotationAlignment` 19/19 in a scratch QtTest build. Full Qt suites run in the next MSI.
-- Built in worktree `nested-corner`; merged `--no-ff`; branch and worktree deleted.
-- Docs: SVG-DATA-ATTRIBUTES "Multisize stack point"; `AGENT_CHECKLIST.md` new §50 and OPEN row.
-- Open: Layout.Y3.1 installed-app check with the next MSI (§50).
-
 ## Decisions to retain
 
+- Piece Layout rotation Any samples 10° steps, not 1°; 1° steps are not efficient (user, 2026-11-15).
 - "Place fold lines on the left edge" applies to folded fabric only; default on. The dialog enables it only when Fabric Folded is checked. A hidden setting must not change the layout (2026-11-15).
 - No layout changes the width of a paper roll or fabric (folded or not), or the contentRect width. Only the length grows; a piece wider than the media is left out or split (user, 2026-11-14). Replaces Layout.71 roll widening.
 - Multisize stack point with no right-angle turn point: the lowest turn point wins; the sizes align along its longest edge. An edge is the straight part only (user, 2026-11-14).

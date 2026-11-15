@@ -1,5 +1,5 @@
 // project: SeamlyLayout
-// author: slspencer, copyright 2026
+// author: slspencer, copyright 2026 Seamly2D Project
 // MIT License: https://opensource.org/licenses/MIT
 
 //! Shared bin-packing data types.
@@ -75,6 +75,11 @@ impl Rect {
     }
 }
 
+// @brief Angle step in degrees for a piece with Layout rotation Any.
+//
+// The packer tests each trial angle at each free space; 10° steps give 36 angles, not 360.
+pub const ANY_ROTATION_STEP_DEG: u16 = 10;
+
 // @brief Source rotation choices carried by a piece, independent of layout mode.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PieceRotationRule {
@@ -86,7 +91,7 @@ pub enum PieceRotationRule {
     TwoWay,
     // Permit quarter turns.
     FourWay,
-    // Permit every integer degree in Any layout mode.
+    // Permit every `ANY_ROTATION_STEP_DEG` step in Any layout mode.
     Any,
     // An explicit unsupported value; layout mode Any restricts it to baseline.
     Invalid,
@@ -102,7 +107,7 @@ impl PieceRotationRule {
             Self::Fixed | Self::Invalid => vec![0],
             Self::TwoWay => vec![0, 180],
             Self::FourWay => vec![0, 90, 180, 270],
-            Self::Any => (0..360).collect(),
+            Self::Any => (0..360).step_by(usize::from(ANY_ROTATION_STEP_DEG)).collect(),
         } // match rule
     } // fn angles_for_any_mode
 
