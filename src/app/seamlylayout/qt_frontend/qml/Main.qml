@@ -983,6 +983,7 @@ ApplicationWindow {
                     id: leftCanvas
                     Layout.fillWidth:  true
                     Layout.fillHeight: true
+                    canvasName:        "input"
 
                     placeholderText: "Import an SVG pattern to begin"
                     showBusy:        false
@@ -1167,6 +1168,7 @@ ApplicationWindow {
                 // Static layout display — shown when NOT in AdjustMode
                 SvgCanvas {
                     id: rightCanvas
+                    canvasName:      "layout"
                     anchors.top:     layoutViewTabScrollBar.visible ? layoutViewTabScrollBar.bottom
                                    : layoutViewTabStrip.visible ? layoutViewTabStrip.bottom
                                    : materialLayoutTabs.visible ? materialLayoutTabs.bottom

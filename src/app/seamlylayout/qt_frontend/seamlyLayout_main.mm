@@ -1,5 +1,5 @@
 // project: SeamlyLayout
-// author: slspencer, copyright 2026
+// author: slspencer, copyright 2026 Seamly2D Project
 // MIT License: https://opensource.org/licenses/MIT
 
 // @file seamlyLayout_main.mm
@@ -30,6 +30,7 @@
 #include <QVariant>
 #include <QQuickWindow>
 #include <QtWebEngineQuick>
+#include <QQuickWebEngineProfile>
 #include <QStringList>
 
 #include <cstdio>
@@ -69,6 +70,9 @@ extern "C" bool seamly_layout_set_log_sink(void (*sink)(const char *text, std::s
 // Seamly2D's Layout Mode sends on standard input (Seamly2D.5).
 #include "src/StartupOptions.h"
 #include "src/HeadlessExport.h"
+
+// CanvasSvgSchemeHandler — serves SvgCanvas SVGs to WebEngine from memory (seamly-canvas:// URLs).
+#include "src/CanvasSvgSchemeHandler.h"
 
 // ---------------------------------------------------------------------------
 // Platform-specific title bar color customization
@@ -196,7 +200,9 @@ int main(int argc, char *argv[])
 
     // Initialise Qt WebEngine only for the GUI path; headless export does not
     // create QML or WebEngine views and must not require their runtime.
+    // WebEngine reads custom URL schemes once, so register them before QApplication.
     if (!hasHeadlessExportOption(argc, argv)) {
+        seamly_layout::CanvasSvgSchemeHandler::registerUrlScheme();
         QtWebEngineQuick::initialize();
     } // if GUI startup
 
@@ -332,6 +338,14 @@ int main(int argc, char *argv[])
     // Owns the QtWidgets PreferencesWindow; QML calls openPreferences() to show it.
     qmlRegisterType<PreferencesController>("SeamlyLayout", 1, 0, "PreferencesController");
     Logger::log(QStringLiteral("main(): registered PreferencesController with QML engine"));
+
+    // SvgCanvas loads its SVG from seamly-canvas:// URLs: a loadHtml() data: URL holds at most 2 MB.
+    // Declared before the QML engine, so it outlives every WebEngineView. The profile does not own it.
+    seamly_layout::CanvasSvgSchemeHandler canvas_svg_handler;
+    QQuickWebEngineProfile::defaultProfile()->installUrlSchemeHandler(
+        QByteArray(seamly_layout::CanvasSvgSchemeHandler::scheme_name), &canvas_svg_handler);
+    qmlRegisterSingletonInstance("SeamlyLayout", 1, 0, "CanvasSvgSchemeHandler", &canvas_svg_handler);
+    Logger::log(QStringLiteral("main(): installed CanvasSvgSchemeHandler for seamly-canvas URLs"));
 
     // QML application engine — loads the SeamlyLayout QML module
     QQmlApplicationEngine engine;
