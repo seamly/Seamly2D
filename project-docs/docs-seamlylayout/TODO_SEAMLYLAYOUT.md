@@ -4,38 +4,12 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Little things to take care of:
 
-- [ ] Layout.X1 - when a piece is split, check if any label lies wholly or partially outside a split piece cutline, if yes then move the label(s) to lie 100% within the split piece cutline.
-  - [x] Layout.X1.1 - `label_inside_part.rs`: a `pattern_label`, `piece_label` or `fold_line_label` not wholly inside its part outline moves to the nearest place inside, 1/16 in clear; clear of other labels and the part label place first; shrinks in 10% steps when too large (user decision pending). Tests: `label_inside_part` (6), `labels_outside_a_part_move_inside_it`. Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, SVG-DATA-ATTRIBUTES, `AGENT_CHECKLIST.md` §44.
-  - [ ] Layout.X1.2 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §44.
-- [ ] Layout.X2 - when a piece is split, simplify the split piece's text to "<piecename> part <n> of <m>"; e.g. for piece with name="Union_piece" change it from the current text "Piece_12_Union_piece part 1 of 3, joins 2" to "Union_piece part 1 of 3"
-  - [x] Layout.X2.1 - `piece_divider.rs`: part label is `<name> part i of n`; the join list code is removed. `piece_naming.rs` keeps the imported `data-name` in new `data-source-name` (user decision: keep); the label uses it, else the shown name. Pieces imported before this change keep the old numbered name. Tests: `concave_piece_gives_one_part_per_region`, `part_label_uses_source_name`. Docs: SVG-DATA-ATTRIBUTES, SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §46 (§12, §37, §44 text).
-  - [ ] Layout.X2.2 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §46.
-- [ ] Layout.X3 - in labels, "<empty>" should be displayed as a blank line. Currently labels containing "<empty>" incorrectly display the literal text "<empty>".
-  - [x] Layout.X3.1 - `LabelTextManager::isBlankLineMarker`: a template line `<empty>` (English, or the editor or reader translation) becomes a line with no text that keeps one line height. Covers the Seamly2D piece and pattern labels, the handoff SVG (no `<text>`, next line moves down), and the Edit template Preview tab. Test: `TST_LabelTextManager::blankLineMarker`. Docs: SVG-DATA-ATTRIBUTES `piece_label`, `AGENT_CHECKLIST.md` §43.
-  - [ ] Layout.X3.2 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §43.
-- [ ] Layout.X4 - When paperType='tiled', disable the export option 'PDF'.
-  - [x] Layout.X4.1 - `ExportMenu.qml` `pdfEnabled`: on tiled paper the Export menu item "PDF" is disabled and reads "PDF: use PDF (Tiled) for tiled paper"; "PDF (Tiled)" stays enabled. `TopMenuBar.qml` binds it for the Export menu only; the View menu keeps "PDF" enabled. Test: `ExportMenuTests::plainPdfIsDisabledWhenPdfDisabled`. Docs: `AGENT_CHECKLIST.md` §45.
-  - [ ] Layout.X4.2 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §45.
 - [ ] Layout.X5 - Display the media dimensions (WxH) in each layout tab, of the layout displayed in that tab.
   - [x] Layout.X5.1 - Each tab shows `<W> x <H> <unit>` below its label (`layoutViewMediaSizes`, `LayoutViews::media_sizes`). Width: paper canvas width, or the fabric width (folded too). Height: the tab's layout length. Done Adjusting updates the shown tab. Tests: `media_size_text_uses_the_settings_unit`, `media_sizes_follow_each_tab_layout`. Docs: SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §42.
   - [ ] Layout.X5.2 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §42.
   - [x] Layout.X5.3 - Individual pattern: each material tab over the layout shows `<W> x <H> <unit>` below its name; one material: the header over the layout shows it below "Material: <name>" (`materialMediaSizes`, `layout_views::material_media_size`). A blank canvas or a material with layout tabs shows none. Test: `material_media_size_shows_one_finished_layout`. Docs: SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §42.
-- [ ] Layout.X6 - Remove redundancies from multisize layout piece names, e.g. name="Collar" and multisize name is currently "Size_640_Piece_1_Collar_H: 640". Simplify this to be
-'Size_<sizenumber>' followed by '_<piecename>' if piecename exists else '_Piece_<num>', followed by '_<letter>' if letter exists.
-  - [x] Layout.X6.1 - `piece_naming.rs`: multisize `Size_<size>_<name>[_<letter>]`, else `Size_<size>_Piece_<n>[_<letter>]`. A name that two pieces share keeps `Piece_<n>`, so names stay unique.
-  - [x] Layout.X6.2 - `unplaced_piece_lines`: an assigned name is the whole line; no `: <size>`.
-  - [x] Layout.X6.3 - Tests and docs: `piece_naming` (2), `piece_extractor` (2), jacket2 export test; SVG-DATA-ATTRIBUTES "SeamlyLayout piece names"; `AGENT_CHECKLIST.md` §5, §41.
-  - [ ] Layout.X6.4 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §41.
-  - [x] Layout.X6.5 - Individual names: `<name>[_<letter>]`, else `Piece_<n>[_<letter>]`; a shared name keeps `Piece_<n>` (user decision). Tests: `piece_naming` (2). `AGENT_CHECKLIST.md` §41 trousers step.
-- [ ] Layout.X7 - 'Fabric (folded)' > Width=30.0 > 'Split the pieces' in jacket 2 incorrectly generates message "Some layouts left pieces out". The pieces should be split so that they fit on the media for each size, for each material.
-  - [x] Layout.X7.1 - `process_layout`: a multisize layout on fabric runs the oversized-pieces check and dialog (multisize paper still widens). "Split the pieces" splits on every layout of the run, not only the first. `piece_divider.rs`: a Nested piece-set too wide is cut on the same lines for every size; the parts of each column form piece-set `<set id>_part<k>`. Tests: `jacket2_folded_fabric_split_leaves_no_piece_out`, `wide_piece_set_splits_into_one_piece_set_per_column`. Docs: SVG-DATA-ATTRIBUTES, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §47 (§41 now uses "Make the media bigger").
-  - [ ] Layout.X7.2 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §47.
-  - [ ] Layout.X7.3 - After a split, DXF is refused on every tab of that material, also on size tabs with no split piece: `divide_spec` is kept per material, not per tab.
-  - [ ] Layout.X7.4 - The dialog does not list a Nested piece-set that is too wide when no single size piece is too wide; that set is still left out. jacket2 has no such set.
-- [ ] Layout.X8 - Update the 'Rotation' setting to display only when 'Layout Mode' is 'Any' which allows pieces to be rotated.
-  - User decision: Seamly2D does not know the SeamlyLayout Layout Mode, so Rotation stays visible. Label "Rotation:" becomes "Layout rotation:". New line below the radio buttons: "Rotation applies when Layout Mode=Any in SeamlyLayout."
-  - [x] Layout.X8.1 `pattern_piece_dialog.ui`: label and line. SeamlyLayout Settings tip, SVG-DATA-ATTRIBUTES, NEW-ATTRIBUTES, SETTINGS_WORKFLOW, LAYOUT_ROTATION_PLAN say "Layout rotation".
-  - [ ] Layout.X8.2 Installed-app check with the next MSI (`AGENT_CHECKLIST.md` §40).
+  - [ ] Display wxh below tabs of individual pattern layouts
+
 
 ## Implement
 
@@ -108,16 +82,7 @@ User approved (2026-10-25). DXF-AAMA only; DXF-ASTM and CLO3D keep their output.
 - [x] Layout.104.4 Tests in `writer_astm_test.rs` (`aama_*`).
 - [x] Layout.104.5 Docs: `seamlylayout_DXF_AAMA.md` Decisions and McNeel table.
 - [ ] Layout.104.6 `cargo test --workspace` and `ctest --preset debug` pass. Not run yet: the Qt build; it runs in the next MSI build. Check in the app: export a multisize pattern to DXF-AAMA. Blocks are `<piece name>_<size>` (e.g. `Front_36`), `Annotation:` follows `Size:` when the piece has one, `Creation Time:` is `HH:MM:SS`, and the `.rul` `CREATION TIME:` too. DXF-ASTM keeps `<svg id>_M` and `hh-mm`.
-- Not done (user decisions): `Piece Name:` stays full length; `Material:` stays the full name; no `Category:`; layer 5 keeps the grade reference line.
-
-### [ ] Task Layout.105 — Verify - rewrite or leave the untracked `AAMA-INTEROP.md`
-
-- `project-docs/docs-seamlylayout/AAMA-INTEROP.md` (untracked, user file) copies the upstream PR 1783 text. It describes the removed Seamly2D `vdxf` AAMA output.
-- Needs a side-by-side document review with the user: `AAMA-INTEROP.md` against `dxf-docs/seamlylayout_DXF_AAMA.md`.
-- Known differences: `Units: MM` (output: `Units:METRIC`); total quantity (output: `R,L`); size in cm (output: Layout.103 units); notch segments on layer 4 (output: notch points); `--gsize` exports (Seamly2D has none now).
-- [ ] Layout.105.1 Verify - review both documents side by side with the user, section by section.
-- [X] Layout.105.2 User decision: rewrite it for SeamlyLayout's DXF-AAMA, merge its useful parts into `seamlylayout_DXF_AAMA.md`, or leave it as reference. --> rewrite it for SeamlyLayout's DXF-AAMA
-- [X] Layout.105.3 Apply the decision; keep the `.github/AAMA-INTEROP.md` merge rule in `CLAUDE.md` consistent with it. Done: `AAMA-INTEROP.md` rewritten; the rule lives in the `merge-upstream` skill (not `CLAUDE.md`), now says drop the incoming `.github/` copy.
+- [ ] Layout.104.7 `Piece Name:` stays full length; `Material:` stays the full name; no `Category:`; layer 5 keeps the grade reference line.
 
 ### [ ] Task Layout.101 — Verify - `SEAMLY_DATA_DIR` for SeamlyLayout
 

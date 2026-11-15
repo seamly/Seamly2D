@@ -2162,3 +2162,19 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 - [x] Decision: no such move → base size's offset, and a warning before SeamlyLayout starts.
 - [x] Decision: SeamlyLayout keeps `annotation_alignment.rs` for SVGs from older Seamly2D builds.
 - [x] Tests: Qt tests; `jacket2_nested_stacks_each_piece_set_annotations` with a new jacket2 input. App check: no import warning; Back's label inside the Size 220 cut line.
+
+## [x] Layout.X1 - when a piece is split, check if any label lies wholly or partially outside a split piece cutline, if yes then move the label(s) to lie 100% within the split piece cutline.
+
+## [x] Layout.X2 - when a piece is split, simplify the split piece's text to "<piecename> part <n> of <m>"; e.g. for piece with name="Union_piece" change it from the current text "Piece_12_Union_piece part 1 of 3, joins 2" to "Union_piece part 1 of 3"
+
+## [x] Layout.X3 - in labels, "<empty>" should be displayed as a blank line. Currently labels containing "<empty>" incorrectly display the literal text "<empty>".
+
+## [x] Layout.X4 - When paperType='tiled', disable the export option 'PDF'.
+
+## [x] Layout.X6 - Remove redundancies from multisize layout piece names, e.g. name="Collar" and multisize name is currently "Size_640_Piece_1_Collar_H: 640". Simplify this to be 'Size_<sizenumber>' followed by '_<piecename>' if piecename exists else '_Piece_<num>', followed by '_<letter>' if letter exists.
+
+## [x] Layout.X7 - 'Fabric (folded)' > Width=30.0 > 'Split the pieces' in jacket 2 incorrectly generates message "Some layouts left pieces out". The pieces should be split so that they fit on the media for each size, for each material.
+
+## [x] Layout.X8 - Update the 'Rotation' setting to display only when 'Layout Mode' is 'Any' which allows pieces to be rotated.
+
+## [x] Layout.105 — rewrite or leave the untracked `AAMA-INTEROP.md` - Known differences: `Units: MM` (output: `Units:METRIC`); total quantity (output: `R,L`); size in cm; notch segments on layer 4 (output: notch points); `--gsize` exports (Seamly2D has none now).

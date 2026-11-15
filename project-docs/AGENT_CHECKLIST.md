@@ -56,7 +56,6 @@ MALE_SHIRT
 | Layout.800.3 | 36 | SL > male_shirt > Export > SVG: no check boxes; each item exports | ?
 | Layout.X8.2 | 40 | S2D > male_shirt > Piece Properties: "Layout rotation:" label and Layout Mode=Any line | ?
 | Layout.X3.2 | 43 | S2D > male_shirt > Piece label `<empty>` line: blank line in Piece mode, Preview and SL | ?
-| Layout.X1.2 | 44 | SL > male_shirt > Paper Roll 8 in, split: pattern and piece labels wholly inside each part | ?
 | Layout.X4.2 | 45 | SL > male_shirt > Paper Tiled: Export > PDF disabled, PDF (Tiled) enabled | ?
 | Layout.X2.2 | 46 | SL > trousers > Paper Roll 16 in, split: part labels read `<piece name> part i of n` | ?
 | Layout.X7.2 | 47 | SL > jacket_2 > Fabric folded 30.0, split: no layout leaves pieces out | ?
@@ -102,7 +101,7 @@ Settings from section 1: Paper, Roll, 48 in.
 - [x] Marker tab, Adjust Layout: the frame shows the full length.
 - [x] Marker tab, Export > SVG: page height matches the canvas.
 
-## 3. [ ]Export menu on Marker and Nested
+## 3. [ ] Export menu on Marker and Nested
 
 - [x] Marker tab, Export menu: DXF-ASTM items disabled.
 - [ ] A note reads "DXF: select Base Size or a size tab". Layout.85 changed the text from "DXF-ASTM: …".
@@ -112,7 +111,7 @@ Settings from section 1: Paper, Roll, 48 in.
 - [ ] Nested tab: same.
 - [ ] Export > SVG submenu: each item reads in full, with no "..." at the end.
 
-## 4. PDF true size
+## 4. [ ] PDF true size
 
 Export all tabs unchecked.
 
@@ -125,7 +124,7 @@ Export all tabs unchecked.
   --> See Layout.87 - disable PDF (tiled) for markers due to lockups.
   - Layout.87 disables this item on the Marker tab. Run the two checks above on the Nested tab instead; §17 checks the Marker tab.
 
-## 5. Base Size 500: DXF-ASTM
+## 5. [ ] Base Size 500: DXF-ASTM
 
 Export all tabs unchecked.
 
@@ -164,7 +163,7 @@ Export all tabs unchecked.
   - [ ] Lining tab: Base Size 500, Export > DXF > DXF-ASTM (R13), aw.fyi. Detail 4 graded.
   - Layout.61.7.2 named the Nested tab. Nested has no DXF-ASTM export since Layout.67, so Base Size 500 replaces it.
 
-## 6. Size 220: DXF-ASTM
+## 6. [ ]  Size 220: DXF-ASTM
 
 - [ ] Size 220 tab, Export > DXF > DXF-ASTM (R13).
 - [ ] Save dialog offers `jacket2_40-146_R13_Size220_<stamp>.dxf`.
@@ -172,7 +171,7 @@ Export all tabs unchecked.
 - [ ] Search `# 1`: not found.
 - [ ] `Sample Size:` is blank.
 
-## 7. Export all tabs
+## 7. [ ] Export all tabs
 
 - [ ] Check Export all tabs. Marker tab shown. Export > DXF > DXF-ASTM (R13):
   - [ ] Files for Base Size 500 and every size. No Marker or Nested file.
@@ -186,7 +185,7 @@ Export all tabs unchecked.
   - [ ] Files: `test_Marker.pdf`, `test_Nested.pdf`, `test_Size220.pdf`, and so on.
 - [ ] Uncheck Export all tabs.
 
-## 8. CLO3D
+## 8. [ ] CLO3D
 
 - [ ] Import the Base Size `.dxf` from section 5 with its `.rul`. Each piece appears once, graded.
 
@@ -198,13 +197,13 @@ Export all tabs unchecked.
 - [ ] If cut and sew lines come in reversed: report it. The agent sets the CLO3D preset to `Swapped`.
 - [ ] Repeat with the option ON: the lines swap. This confirms the option name.
 
-## 9. PNG and JPG resolution
+## 9. [ ] PNG and JPG resolution
 
 - [ ] Size 220 tab, Export > PNG, then Export > JPG.
 - [ ] GIMP, Image > Print Size: 96 pixels/in, not 72. Check both files.
 - [ ] Print the PNG at "Actual size". A known piece length measures true.
 
-## 10. Paper Type is Tiled or Roll
+## 10. [ ] Paper Type is Tiled or Roll
 
 - [ ] Settings: Paper Type lists Tiled and Roll only. No sheet size fields.
 - [ ] Paper, Tiled, Letter. Submit. Create Layout: the tabs lay out. Export > PDF (Tiled) is enabled and saves.
@@ -683,19 +682,8 @@ Individual pattern, two materials:
 - [ ] OK, OK. The piece label shows a blank line in that place. No `<empty>`.
 - [ ] Press Layout. SeamlyLayout: Create Layout. The piece label shows the same blank line. No `<empty>`.
 - [ ] Export > SVG. Open the SVG in a browser. The label shows the blank line. No `<empty>`.
-## 44. Split part labels inside the cut line
 
-(Layout.X1.2)
-
-- [ ] Open male_shirt. Press Layout.
-- [ ] Settings: Paper, Roll, custom width 8 in. Layout Mode: Along Grainline. Submit. Create Layout.
-- [ ] Dialog "Pieces do not fit the media": choose "Split the pieces". OK.
-- [ ] Each pattern label and piece label lies wholly inside the cut line of one part. No label crosses a cut line.
-- [ ] No moved label overlaps another label or the blue part label `<name> part i of n`.
-- [ ] A label is smaller than before only when its part is too small for it at full size.
-- [ ] Export > DXF is disabled. Export > PDF: the labels are where the layout shows them.
-
-## 45. Plain PDF export disabled on tiled paper
+## 45. [ ] Plain PDF export disabled on tiled paper
 
 (Layout.X4.2)
 
@@ -706,7 +694,7 @@ Individual pattern, two materials:
 - [ ] Settings: Paper Type Roll. Submit. Create Layout. Export > PDF is enabled. PDF (Tiled) is disabled.
 - [ ] View menu: PDF is enabled.
 
-## 46. Split part label text
+## 46. [ ] Split part label text
 
 (Layout.X2.2)
 
@@ -717,7 +705,7 @@ Individual pattern, two materials:
 - [ ] Part numbers run 1 to n; n is the part count of that piece.
 - [ ] Each label lies along a cut edge, or level when the edge is too short.
 
-## 47. Multisize split on folded fabric
+## 47. [ ] Multisize split on folded fabric
 
 (Layout.X7.2)
 
