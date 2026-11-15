@@ -2,6 +2,17 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-14 — Split drill holes (Layout.Y4)
+
+- `piece_divider.rs` `drill_for_parts`: a cut line that crosses a drill circle splits it. Each part's `<circle>` becomes a `<path>` of its arcs (cubic curves, 90° or less each) that end at the cut line.
+- The part nearest the centre keeps `<circle r="0" stroke="none" fill="none">`: one DXF-ASTM layer 13 drill point. Decision: DXF has no half drill hole; the point stays where the centre is.
+- Cubic curves, not SVG `A` arcs: `svg_dom` bakes an arc wrongly under a flip.
+- `seamly_svg2ezdxf` `extract_drill_hole`: a split part (`data-split-of`) with no circle writes no point; a zero-radius circle writes the point. Unsplit pieces keep the old checks.
+- Tests: `drill_hole_splits_at_the_cut_line`, `narrow_cell_holds_two_arcs`, `split_drill_hole_keeps_one_drill_point`; two reject cases.
+- Checked: `cargo test --workspace` 712 pass; `ctest` debug 8/8. Built in worktree `split-drill`; merged `--no-ff`; branch and worktree deleted.
+- Docs: SVG-DATA-ATTRIBUTES, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, DXF-ASTM compliance, `AGENT_CHECKLIST.md` §48, new §51 and OPEN row.
+- Open: Layout.Y4.1 installed-app check with the next MSI (§51).
+
 ### 2026-11-14 — Nested: lowest corner without a right angle (Layout.Y3)
 
 - Stack point Rule 2a: a right angle at one or more turn points keeps the old rule.

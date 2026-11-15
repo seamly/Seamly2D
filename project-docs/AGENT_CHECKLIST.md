@@ -48,6 +48,7 @@ JACKET_2
 | Seamly2D.71.15 | 35 | S2D > jacket2 > Layout > SL, Back: seam line and cut line stop at the fold line | ?
 | Layout.804.5 | 39 | SL > jacket_2 > Nested: Back and Detail 2 stack on the lower fold line end; other pieces on one corner | PASS
 | Layout.Y3.1 | 50 | SL > jacket_2 > Nested: Detail 3 sizes stack on the lowest cut line corner | ?
+| Layout.Y9.1 | 56 | SL > jacket_2 > Fabric (folded): on every tab, Back and Detail 2 go first, down the left edge from the top | ?
 
 MALE_SHIRT
 | Seamly2D.71.12 | 34 | S2D > male_shirt > Piece mode, BackPanel and CollarTopInterface-Built-in-SA: seam line and cut line stop at the fold line | ?
@@ -820,3 +821,14 @@ Detail 3 has corners on its cut line, but no corner is a right angle. Detail 3 i
 - [ ] Press Layout. SeamlyLayout: Settings. The Piece Gap tip reads "Layout rotation Any samples 10° steps."
 - [ ] Layout Mode Any. Submit. Create Layout: the layout finishes.
 - [ ] Export > SVG. Open the file in a text editor. The Pocket piece `rotate(` angle is a multiple of 10.
+
+## 56. [ ] Fold line pieces go first on every tab
+
+(Layout.Y9.1)
+
+- [ ] Open jacket2 (`test-seamly-layout/patterns/validation/jacket2_40-146.sm2d`). Press Layout.
+- [ ] Settings: Fabric, width 60.0, Fabric Folded on, "Place fold lines on the left edge" on. Layout Mode Along grainline. Submit. Create Layout.
+- [ ] Base Size tab: Back and Detail 2 lie on the left edge, one above the other, Back or Detail 2 at the top. No other piece is above them on the left edge.
+- [ ] Size 220, 300, 580, 660 and 720 tabs: the same.
+- [ ] Marker tab: every Back and Detail 2 lies on the left edge, above every other piece on that edge.
+- [ ] Nested tab: the Back and Detail 2 piece-sets lie on the left edge at the top.

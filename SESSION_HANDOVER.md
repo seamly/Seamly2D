@@ -2,6 +2,16 @@
 
 ## Current status
 
+### 2026-11-15 — Fold line pieces go first on every tab (Layout.Y9)
+
+- Cause: the order search (hill climbing) moved left-edge pieces after other pieces. Any layout could break; the Base Size tab was right by chance.
+- `maxrects_order_search.rs` `PackJob::left_edge_first`: every packed order puts left-edge pieces first; each group keeps its order. Start orders and hill climbing use it.
+- Fold line pieces stack down the left edge from the top; the media gets longer when it must.
+- Tests: `left_edge_pieces_are_placed_first`, `jacket2_size_tabs_place_fold_line_pieces_first` (26 sizes), `jacket2_marker_and_nested_place_fold_line_pieces_first`. The first two fail without the fix.
+- Checked: `cargo test --workspace` 717 pass; `ctest` debug 8/8. Built in worktree `fold-sizes`; merged `--no-ff`; branch and worktree deleted.
+- Docs: PROCESS LAYOUT WORKFLOW (piece-order search), CREATE_LAYOUT_WORKFLOW, `AGENT_CHECKLIST.md` new §56 and OPEN row.
+- Open: Layout.Y9.1 installed-app check with the next MSI (§56).
+
 ### 2026-11-15 — Layout rotation Any samples 10° steps (Layout.Y8)
 
 - `pack_types`: `ANY_ROTATION_STEP_DEG` = 10. `PieceRotationRule::Any` gives 0°, 10°, … 350° (36 angles, was 360).
@@ -46,19 +56,9 @@
 - Docs: `AGENT_CHECKLIST.md` new §52 and OPEN row; `TEST_APPLICATION_UPDATES.md` tilt line.
 - Open: Layout.Y5.1 installed-app check with the next MSI (§52).
 
-### 2026-11-14 — Split drill holes (Layout.Y4)
-
-- `piece_divider.rs` `drill_for_parts`: a cut line that crosses a drill circle splits it. Each part's `<circle>` becomes a `<path>` of its arcs (cubic curves, 90° or less each) that end at the cut line.
-- The part nearest the centre keeps `<circle r="0" stroke="none" fill="none">`: one DXF-ASTM layer 13 drill point. Decision: DXF has no half drill hole; the point stays where the centre is.
-- Cubic curves, not SVG `A` arcs: `svg_dom` bakes an arc wrongly under a flip.
-- `seamly_svg2ezdxf` `extract_drill_hole`: a split part (`data-split-of`) with no circle writes no point; a zero-radius circle writes the point. Unsplit pieces keep the old checks.
-- Tests: `drill_hole_splits_at_the_cut_line`, `narrow_cell_holds_two_arcs`, `split_drill_hole_keeps_one_drill_point`; two reject cases.
-- Checked: `cargo test --workspace` 712 pass; `ctest` debug 8/8. Built in worktree `split-drill`; merged `--no-ff`; branch and worktree deleted.
-- Docs: SVG-DATA-ATTRIBUTES, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, DXF-ASTM compliance, `AGENT_CHECKLIST.md` §48, new §51 and OPEN row.
-- Open: Layout.Y4.1 installed-app check with the next MSI (§51).
-
 ## Decisions to retain
 
+- Pieces with a fold line on folded fabric go first, down the left edge from the top, on every layout and tab (user, 2026-11-15).
 - Piece Layout rotation Any samples 10° steps, not 1°; 1° steps are not efficient (user, 2026-11-15).
 - "Place fold lines on the left edge" applies to folded fabric only; default on. The dialog enables it only when Fabric Folded is checked. A hidden setting must not change the layout (2026-11-15).
 - No layout changes the width of a paper roll or fabric (folded or not), or the contentRect width. Only the length grows; a piece wider than the media is left out or split (user, 2026-11-14). Replaces Layout.71 roll widening.
