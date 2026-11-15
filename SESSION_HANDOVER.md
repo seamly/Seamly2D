@@ -2,6 +2,17 @@
 
 ## Current status
 
+### 2026-11-15 — Large patterns display in both canvases (Layout.Y10)
+
+- Cause: jacket2 resaved with 16 pieces; real handoff 2,024,522 chars. Fabric all-sizes, Marker and Nested SVGs went into `loadHtml()` `data:` URLs over Chromium's 2 MB limit; the load failed with no error.
+- New `qt_frontend/src/CanvasSvgSchemeHandler`: serves each canvas SVG from memory at `seamly-canvas://<canvas>/<n>.svg`. Scheme registered before `QApplication`; handler on the default profile; QML singleton.
+- `SvgCanvas.qml`: `canvasName` (`input`, `layout`); an `<img>` loads the scheme URL; "Cannot display this SVG." when `naturalWidth` is 0.
+- CMake: `Qt6::WebEngineCore`; new `CanvasSvgSchemeHandlerTests` (10 tests; offscreen, no sandbox, no GPU).
+- `webEngine_displaysSvgOverDataUrlLimit` (3 MiB SVG) fails with the old `data:` URL path.
+- Checked: `ctest` debug 9/9; `cargo test --workspace` 717 pass. Built in worktree `canvas-svg`; merged `--no-ff` with no skip-ci token (CMakeLists changed); branch and worktree deleted.
+- Docs: README "Canvas display", DECISIONS record, CXXQT_BRIDGE, CODEBASE_INDEX, rules (architecture, svg-processing, dependencies), `AGENT_CHECKLIST.md` §57 and OPEN row.
+- Open: Layout.Y10.1 installed-app check with the next MSI (§57). The WebEngine tests run first on Linux and macOS in CI.
+
 ### 2026-11-15 — Fold line pieces go first on every tab (Layout.Y9)
 
 - Cause: the order search (hill climbing) moved left-edge pieces after other pieces. Any layout could break; the Base Size tab was right by chance.
@@ -45,19 +56,9 @@
 - Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` new §53 and OPEN row; §11 and its OPEN row removed.
 - Open: Layout.Y6.1 installed-app check with the next MSI (§53).
 
-### 2026-11-14 — Tilted piece: grainline tilts (Layout.Y5)
-
-- Seamly2D Piece Mode: `PatternPieceTool::updateGrainline` turns the grainline with the piece tilt, about the same center. Labels stay level.
-- `applyTiltToGeometry` keeps the tilt in `m_tilt_degrees` and `m_tilt_center`.
-- Grainline move, resize and rotate remove the tilt before they store the grainline; the pattern keeps a level grainline.
-- Flip is unchanged: the grainline still does not mirror (applyFlipToGeometry rule).
-- Test: `TST_VPiece::PieceTiltTransformTurnsGrainline`, passed in a scratch QtTest build. `pattern_piece_tool.cpp` compiles (cl). Full Qt suites run in the next MSI.
-- Built in worktree `tilt-grain`; merged `--no-ff`; branch and worktree deleted.
-- Docs: `AGENT_CHECKLIST.md` new §52 and OPEN row; `TEST_APPLICATION_UPDATES.md` tilt line.
-- Open: Layout.Y5.1 installed-app check with the next MSI (§52).
-
 ## Decisions to retain
 
+- Canvas SVG goes to WebEngine through `CanvasSvgSchemeHandler` (`seamly-canvas://`, from memory). No `data:` URL: the 2 MB limit is not acceptable (user, 2026-11-15).
 - Pieces with a fold line on folded fabric go first, down the left edge from the top, on every layout and tab (user, 2026-11-15).
 - Piece Layout rotation Any samples 10° steps, not 1°; 1° steps are not efficient (user, 2026-11-15).
 - "Place fold lines on the left edge" applies to folded fabric only; default on. The dialog enables it only when Fabric Folded is checked. A hidden setting must not change the layout (2026-11-15).

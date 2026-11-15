@@ -49,6 +49,7 @@ JACKET_2
 | Layout.804.5 | 39 | SL > jacket_2 > Nested: Back and Detail 2 stack on the lower fold line end; other pieces on one corner | PASS
 | Layout.Y3.1 | 50 | SL > jacket_2 > Nested: Detail 3 sizes stack on the lowest cut line corner | ?
 | Layout.Y9.1 | 56 | SL > jacket_2 > Fabric (folded): on every tab, Back and Detail 2 go first, down the left edge from the top | ?
+| Layout.Y10.1 | 57 | SL > jacket_2 (16 pieces) > Fabric: graded pieces show in the left canvas; Marker and Nested show in the right canvas | ?
 
 MALE_SHIRT
 | Seamly2D.71.12 | 34 | S2D > male_shirt > Piece mode, BackPanel and CollarTopInterface-Built-in-SA: seam line and cut line stop at the fold line | ?
@@ -832,3 +833,14 @@ Detail 3 has corners on its cut line, but no corner is a right angle. Detail 3 i
 - [ ] Size 220, 300, 580, 660 and 720 tabs: the same.
 - [ ] Marker tab: every Back and Detail 2 lies on the left edge, above every other piece on that edge.
 - [ ] Nested tab: the Back and Detail 2 piece-sets lie on the left edge at the top.
+
+## 57. [ ] Large patterns display in both canvases
+
+(Layout.Y10.1)
+
+- [ ] Open jacket2 (`test-seamly-layout/patterns/validation/jacket2_40-146.sm2d`), all 16 pieces. Press Layout.
+- [ ] Left canvas, Fabric: every graded size of every Fabric piece displays.
+- [ ] Lining and Interfacing: the graded pieces display.
+- [ ] Settings: Fabric. Submit. Create Layout. Base Size, size, Marker and Nested tabs: each layout displays.
+- [ ] Pan, wheel zoom and double-click fit work on each canvas.
+- [ ] Log file: no `CanvasSvgSchemeHandler` or `SvgCanvas` warning.

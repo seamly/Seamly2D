@@ -42,7 +42,8 @@ This document provides a high-level index of the main components, crates, and mo
 - **src/** — C++ source files (platform, preferences, logging, etc.)
 - **qml/** — QML UI components
   - `Main.qml` — Main application window
-  - `SvgCanvas.qml` — SVG rendering canvas
+  - `SvgCanvas.qml` — SVG rendering canvas. Gets its SVG from `src/CanvasSvgSchemeHandler` at a
+    `seamly-canvas://` URL, from memory. No `data:` URL: Chromium refuses a URL over 2 MB.
   - `ExportMenu.qml`, `TopMenuBar.qml` — Menus
   - `PreferencesPanel.qml`, `SettingsDialog.qml` — Settings UI
   - `Theme.qml`, `SeamlyButton.qml` — Theming and controls

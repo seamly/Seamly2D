@@ -12,6 +12,47 @@ A pattern layout application — daughter app to Seamly2D. SeamlyLayout is a **Q
 - **Core:** Rust crates under [crates/](crates/), licensed MIT.
 - **Bridge:** [CXX-Qt](https://github.com/KDAB/cxx-qt) 0.7 generates C++ glue from Rust in [crates/cxxqt_bridge/](crates/cxxqt_bridge/).
 - **Dual license:** the Qt frontend (LGPL-3.0) and Rust core (MIT) are de-linkable.
+- **Canvas display:** a custom URL scheme handler serves each canvas SVG to WebEngine from memory. See [Canvas display](#canvas-display).
+
+### Canvas display
+
+- `SvgCanvas.qml` shows SVG text in a `WebEngineView`. Left canvas: `canvasName: "input"`. Right canvas: `canvasName: "layout"`.
+- `CanvasSvgSchemeHandler` (`qt_frontend/src/`) serves the SVG bytes at a `seamly-canvas://` URL.
+- No size limit. No temp file. No disk I/O.
+- Reason and rejected options: [decision record](status-docs/seamlylayout_SEAMLYLAYOUT_DECISIONS.md#canvas-svg-served-by-a-custom-url-scheme-2026-11-15).
+
+Start-up, in `seamlyLayout_main.mm` (GUI mode only):
+
+1. `CanvasSvgSchemeHandler::registerUrlScheme()` runs before `QApplication`. WebEngine reads custom schemes once.
+2. `main()` installs the handler on `QQuickWebEngineProfile::defaultProfile()`.
+   - The default profile is off-the-record. WebEngine keeps its cache in memory only.
+3. `qmlRegisterSingletonInstance()` gives QML the handler as singleton `CanvasSvgSchemeHandler`, URI `SeamlyLayout`.
+
+Each display:
+
+1. `SvgCanvas.loadSvgFullPage()` calls `CanvasSvgSchemeHandler.publishSvg(canvasName, svgContent)`.
+2. `publishSvg()` stores the SVG as UTF-8 for that canvas. It returns a new URL: `seamly-canvas://<canvas>/<n>.svg`.
+   - `<n>` increases on every call, so WebEngine never shows an image cached for an older URL.
+3. The canvas loads a small pan/zoom HTML page: `loadHtml(html, svgUrl)`. The page holds `<img id="svg-img" src="<svgUrl>">`.
+4. WebEngine requests the URL. `requestStarted()` runs on the GUI thread.
+   - It replies with a `QBuffer`. The request job owns the buffer.
+   - The buffer shares the stored `QByteArray`. It does not copy the SVG.
+5. The page load event waits for the `<img>`. Then the canvas reads `naturalWidth` and emits `svgLoaded`.
+   - `naturalWidth` 0: the canvas shows "Cannot display this SVG."
+
+Handler rules:
+
+| Input | Result |
+|---|---|
+| Newest URL of a canvas | SVG bytes, MIME `image/svg+xml` |
+| Older URL of a canvas | `UrlNotFound`, log warning `no SVG for <url>` |
+| Request that is not GET | `RequestDenied` |
+| `publishSvg()` with empty SVG text | Releases the canvas bytes; returns an empty URL; the canvas shows its placeholder |
+| Canvas name not lowercase ASCII letters and digits | Log warning; empty URL; the canvas shows "Cannot display this SVG." |
+
+- The canvas name is the URL host. `Syntax::Host` gives each canvas its own origin.
+- Flag `SecureScheme` only. The page base URL is the SVG URL, so the page and the image have one origin. No CORS flag is necessary.
+- Tests: `src/test/SeamlyLayoutTest/CanvasSvgSchemeHandlerTests.cpp`. One test displays a 3 MiB SVG through WebEngine.
 
 ## Workspace layout
 
