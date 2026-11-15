@@ -24,6 +24,10 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
   - [x] Tests: `placement_enlargement_dimensions_and_notifications`, `jacket2_marker_keeps_narrow_roll_width`. Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §53 (§11 removed).
   - [ ] Layout.Y6.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §53.
 
+  - [ ] Layout.Y7 multisize > Paper=roll > custom > width=16.0: for jacket 2, why wasn't the user prompted to either 'split the pieces' or 'make the media longer'?
+
+
+
 ## Implement
 
 ## VERIFY
