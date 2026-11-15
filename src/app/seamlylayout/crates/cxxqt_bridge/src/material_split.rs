@@ -11,8 +11,14 @@
 // pattern group, plus the pattern groups of that material. Each document then
 // has the shape of a one-material handoff, so the import and layout pipeline
 // treat it as before.
+//
+// The material tabs follow `MATERIAL_ORDER`, not the handoff order: Seamly2D
+// writes the materials in the order of the first piece of each material.
 
 use xmltree::XMLNode;
+
+// Tab order of the Seamly2D materials, as the Seamly2D piece dialog lists them.
+const MATERIAL_ORDER: [&str; 4] = ["Fabric", "Lining", "Interfacing", "Interlining"];
 
 // @brief One material and the document that holds its pieces.
 #[derive(Debug, Clone)]
@@ -22,7 +28,7 @@ pub(crate) struct MaterialDoc {
     pub doc: svg_dom::Document,
 }
 
-// @brief Split `doc` into one document per material, in the order the materials first appear.
+// @brief Split `doc` into one document per material, in `MATERIAL_ORDER`, then other materials in document order.
 // @param doc Imported document.
 // @return One entry per material; a single entry, holding `doc` unchanged, when the
 //         document has fewer than two materials.
@@ -46,7 +52,8 @@ pub(crate) fn split_by_material(doc: svg_dom::Document) -> Vec<MaterialDoc> {
         .collect()
 } // fn split_by_material
 
-// @brief Distinct `data-material` values of the top-level pattern groups, in document order.
+// @brief Distinct `data-material` values of the top-level pattern groups, in `MATERIAL_ORDER`.
+// @return The known materials in `MATERIAL_ORDER`, then every other name in document order.
 fn pattern_materials(doc: &svg_dom::Document) -> Vec<String> {
     let mut materials: Vec<String> = Vec::new();
     for group in doc.root.children.iter().filter_map(|n| n.as_element()).filter(|e| is_pattern(e)) {
@@ -55,8 +62,19 @@ fn pattern_materials(doc: &svg_dom::Document) -> Vec<String> {
             materials.push(name);
         } // if new material
     } // for group
+    // Stable sort: names with the same rank keep their document order.
+    materials.sort_by_key(|name| material_rank(name));
     materials
 } // fn pattern_materials
+
+// @brief Tab position of a material name.
+// @param name `data-material` value; the match ignores ASCII case.
+// @return Index of `name` in `MATERIAL_ORDER`; `MATERIAL_ORDER.len()` for any other name.
+fn material_rank(name: &str) -> usize {
+    MATERIAL_ORDER.iter()
+        .position(|known| known.eq_ignore_ascii_case(name))
+        .unwrap_or(MATERIAL_ORDER.len())
+} // fn material_rank
 
 // @brief True for a `<g data-type="pattern">`.
 fn is_pattern(elem: &xmltree::Element) -> bool {
@@ -98,7 +116,7 @@ mod tests {
         ids
     } // fn piece_ids
 
-    // @brief Each material gets a document with its own pieces, in handoff order.
+    // @brief Each material gets a document with its own pieces.
     #[test]
     fn each_material_gets_its_own_document() {
         let parts = split_by_material(svg_dom::Document::parse(TWO_MATERIALS).expect("valid SVG"));
@@ -130,6 +148,26 @@ mod tests {
         let plain = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="drawing"><path d="M0,0 L1,1"/></g></svg>"#;
         assert_eq!(split_by_material(svg_dom::Document::parse(plain).expect("valid SVG")).len(), 1);
     } // one_material_stays_one_document
+
+    // @brief The materials follow `MATERIAL_ORDER`, whatever the handoff order; other names go last.
+    #[test]
+    fn materials_follow_the_tab_order() {
+        // Handoff order: the order of the first piece of each material.
+        let mut svg = String::from(r#"<svg xmlns="http://www.w3.org/2000/svg">"#);
+        for (n, material) in ["Lining", "Mesh", "interlining", "Fabric", "Felt", "Interfacing"].iter().enumerate() {
+            svg.push_str(&format!(
+                r#"<g id="pattern-{n}" data-type="pattern" data-material="{material}"><g id="piece_{n}" data-type="piece"/></g>"#
+            ));
+        } // for material
+        svg.push_str("</svg>");
+
+        let parts = split_by_material(svg_dom::Document::parse(&svg).expect("valid SVG"));
+        let names: Vec<&str> = parts.iter().map(|p| p.name.as_str()).collect();
+        assert_eq!(names, ["Fabric", "Lining", "Interfacing", "interlining", "Mesh", "Felt"]);
+        // Each document still holds the pieces of its own material.
+        assert_eq!(piece_ids(&parts[0].doc), ["piece_3"]);
+        assert_eq!(piece_ids(&parts[4].doc), ["piece_1"]);
+    } // materials_follow_the_tab_order
 
     // @brief A material's layout holds that material's pieces only.
     #[test]

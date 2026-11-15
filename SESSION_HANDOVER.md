@@ -2,6 +2,16 @@
 
 ## Current status
 
+### 2026-11-14 — Material tab order (Layout.Y1)
+
+- `material_split.rs`: `pattern_materials` sorts by `MATERIAL_ORDER`: Fabric, Lining, Interfacing, Interlining. Other names go after, in handoff order. Match ignores ASCII case.
+- Cause: Seamly2D writes the pattern groups in the order of the first piece of each material, so Lining could come first.
+- Both tab bars (`materialLabels`) and every material index (`material_docs`, `material_layouts`) follow the new order.
+- Test: `materials_follow_the_tab_order`.
+- Checked: `cargo test --workspace` 708 pass; `ctest` debug 8/8. Built in worktree `material-tab-order`; merged `--no-ff`; branch and worktree deleted.
+- Docs: SVG-DATA-ATTRIBUTES Materials.
+- Open: Layout.Y1.1 installed-app check with the next MSI.
+
 ### 2026-11-14 — Split pieces keep their markings (Layout.803)
 
 - `piece_divider.rs`: `stripe` and `plaid` reference lines are open lines that end at the cut lines, like `internal_path`.
@@ -43,18 +53,6 @@
 - Docs: SVG-DATA-ATTRIBUTES, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW; `AGENT_CHECKLIST.md` §45–§47 and OPEN rows; §41 now uses jacket2 and "Make the media bigger".
 - Decision (Sue): keep `data-source-name` for the part label.
 - Open: X2.2, X4.2, X7.2 installed-app checks; X7.3 DXF refused on every tab of a split material; X7.4 dialog misses a too-wide Nested set with no too-wide size piece.
-
-### 2026-11-14 — Split part labels move inside the cut line (Layout.X1)
-
-- New `label_inside_part.rs`: after a split, a `pattern_label`, `piece_label` or `fold_line_label` not wholly inside its part outline moves inside it.
-- Search: grid of whole steps from the old centre, nearest first. Order: full size, 1/16 in clear of other labels and the part label place; full size anywhere inside; shrink about the centre in 10% steps.
-- No place at 10%: the label stays. The move and scale go in through `svg_dom::flatten_dom`.
-- `piece_divider::divide_piece` calls it before `place_part_label`; reserved box: `part_label_placement::along_edge_bounds`.
-- `part_label_placement.rs`: `drawn_bounds`, `along_edge_bounds`, `Bounds::grown`/`overlaps`, `inside`, `x_range_in_band` shared.
-- Checked: `cargo test --workspace` 701 pass; `ctest` debug 8/8. Fixtures richmond (8 in roll) and jacket2 (12 in roll): crossing labels moved inside; 155 calls, 61 ms debug.
-- Decision for Sue: shrink fallback for a label larger than its part (10% steps). Alternative: leave it at full size.
-- Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, SVG-DATA-ATTRIBUTES split parts and `fold_line`, `AGENT_CHECKLIST.md` §44.
-- Open: Layout.X1.2 installed-app check (male_shirt, roll 8 in, split).
 
 ## Decisions to retain
 
