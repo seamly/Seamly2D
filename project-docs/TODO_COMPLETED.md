@@ -2191,4 +2191,6 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 
 ### [X] Layout.803 - Implement - Fix piece objects that should be split when the piece is split.\ (plaid & stripe reference lines, drill holes)
 
-- [x] Layout.Y1 - reorder the material tabs to be 'Fabric', 'Lining', 'Interfacing', 'Interlining' in both left and right canvases. Currently the incorrect order is 'Lining', 'Fabric', 'Interfacging', 'Interlining'.
+### [x] Layout.Y1 - reorder the material tabs to be 'Fabric', 'Lining', 'Interfacing', 'Interlining' in both left and right canvases. Currently the incorrect order is 'Lining', 'Fabric', 'Interfacging', 'Interlining'.
+
+### [x] Layout.Y4 - Split the pieces: When a piece is split, split the drill hole when needed. Currently 'trousers.sm2d > Along grainline > Keep upright > paper > roll > custom > width=16.00in' produces a split piece "Back" where the stripe and plaid reference lines are split correctly but the drill hole is not split -- the drill hole is located on "Back part 2 of 2" where half of the drill hole lies outside the split line.

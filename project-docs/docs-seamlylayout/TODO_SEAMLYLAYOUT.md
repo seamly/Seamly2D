@@ -13,29 +13,14 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
   - [x] Tests: `right_angle_is_within_one_degree`, `without_a_right_angle_the_lowest_corner_wins`, `stackPointTakesLowestCornerWithoutRightAngle`. Docs: SVG-DATA-ATTRIBUTES "Multisize stack point".
   - [ ] Layout.Y3.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §50. The MSI build also runs the full Qt suites.
 
-- [x] Layout.Y4 - Split the pieces: When a piece is split, split the drill hole when needed. Currently 'trousers.sm2d > Along grainline > Keep upright > paper > roll > custom > width=16.00in' produces a split piece "Back" where the stripe and plaid reference lines are split correctly but the drill hole is not split -- the drill hole is located on "Back part 2 of 2" where half of the drill hole lies outside the split line.
-  - [x] `piece_divider.rs` `drill_for_parts`: a cut line that crosses a drill circle splits it. Each part's `<circle>` becomes a `<path>` of its arcs, cubic curves that end at the cut line.
-  - [x] The part nearest the centre keeps `<circle r="0" stroke="none">` at the centre: the one DXF-ASTM layer 13 drill point (DXF has no half drill hole).
-  - [x] `seamly_svg2ezdxf` `extract_drill_hole`: on a split part (`data-split-of`), a drill group without a circle writes no point; a zero-radius circle writes the point with `data-diameter`.
-  - Tests: `drill_hole_splits_at_the_cut_line`, `narrow_cell_holds_two_arcs`, `split_drill_hole_keeps_one_drill_point`; two new reject cases for unsplit pieces.
-  - Docs: SVG-DATA-ATTRIBUTES split parts, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, DXF-ASTM compliance layer 13, `AGENT_CHECKLIST.md` §48, new §51 and OPEN row.
-- [ ] Layout.Y4.1 - Installed-app check with the next MSI (`AGENT_CHECKLIST.md` §51).
-
 - [ ] yy Layout.Y5 - Tilt: Currently male_shirt.sm2d's piece 'BackPanel Mirrored' is tilted but the grainline isn't tilted. Grainlines should tilt; internal paths, stripe reference lines, plaid reference lines, and drill holes tilt correctly. Fix grainlines so that they tilt, also. 
+  - [x] Seamly2D Piece Mode: `PatternPieceTool::updateGrainline` turns the grainline with the piece tilt, about the same center. Labels stay level. Grainline move, resize and rotate store the grainline without the tilt.
+  - [x] Test: `TST_VPiece::PieceTiltTransformTurnsGrainline`. Docs: `AGENT_CHECKLIST.md` §52, `TEST_APPLICATION_UPDATES.md`.
+  - [ ] Layout.Y5.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §52. The MSI build also runs the full Qt suites.
 
-- [ ] yy Layout.Y6 - Paper > roll : PROHIBIT CHANGING THE WIDTH OF THE ROLL PAPER!!! DO NOT MAKE ME TELL YOU THIS AGAIN!!!!! THE ROLL LENGTH CAN CHANGE BUT THE WIDTH CANNOT! I have submitted multiple prompts to fix this problem, and I don't want to keep wasting tokens to fix this one problem. It's simple. When media=paper and papertype=roll then do not ever change the width of the media or content rect. Also applies to media=fabric --> do not ever change the media width or content rect for fabric (folded) or fabric (not folded)> 
+- [ ] yy Layout.Y6 - Paper > roll : PROHIBIT CHANGING THE WIDTH OF THE ROLL PAPER!!! DO NOT MAKE ME TELL YOU THIS AGAIN!!!!! THE ROLL LENGTH CAN CHANGE BUT THE WIDTH CANNOT! I have submitted multiple prompts to fix this problem, and I don't want to keep wasting tokens to fix this one problem. It's simple. When media=paper and papertype=roll then do not ever change the width of the media or content rect. Also applies to media=fabric --> do not ever change the media width or content rect for fabric (folded) or fabric (not folded)>. 
 
 ## Implement
-
-### [ ] Layout.803 - Implement - Fix piece objects that should be split when the piece is split.
-
-- [x] When a piece is split then split the:
-  - [x] reference lines -- `piece_divider.rs`: `stripe` and `plaid` are open lines that end at the cut lines, like `internal_path`. Before, each went whole to the nearest part.
-  - [x] internal paths -- no code change: already open lines that end at the cut lines; a closed internal path becomes one open line per part. New test pins the closed case.
-  - [x] drill holes -- a drill hole inside one column stays whole, on the part nearest its centre. Before, every drill hole went to part 1 (no anchor point). Cut lines move off drill centres. A cut line that crosses the circle splits it: see Layout.Y4.
-  - [x] grainlines -- validated (trousers.sm2d, Union piece is split at the same place as the grainline and the halves of the grainline is shown on each split piece)
-  - Tests: `markings_split_with_the_piece`, `cut_line_misses_drill_centres`. Docs: SVG-DATA-ATTRIBUTES split parts, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §48.
-- [X] Layout.803.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §48.
 
 ## VERIFY
 
