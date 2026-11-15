@@ -2178,3 +2178,7 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 ## [x] Layout.X8 - Update the 'Rotation' setting to display only when 'Layout Mode' is 'Any' which allows pieces to be rotated.
 
 ## [x] Layout.105 — rewrite or leave the untracked `AAMA-INTEROP.md` - Known differences: `Units: MM` (output: `Units:METRIC`); total quantity (output: `R,L`); size in cm; notch segments on layer 4 (output: notch points); `--gsize` exports (Seamly2D has none now).
+
+### [x] Task Layout.106 — Verify - Seamly2D: build the pieces for the SVG sent to SeamlyLayout with `layout_handoff`, not `VLayoutPiece`
+
+### [x] Task Layout.109 - Verify - SeamlyLayout > Layout Settings > Media Type=Fabric

@@ -84,42 +84,10 @@ User approved (2026-10-25). DXF-AAMA only; DXF-ASTM and CLO3D keep their output.
 - [ ] Layout.104.6 `cargo test --workspace` and `ctest --preset debug` pass. Not run yet: the Qt build; it runs in the next MSI build. Check in the app: export a multisize pattern to DXF-AAMA. Blocks are `<piece name>_<size>` (e.g. `Front_36`), `Annotation:` follows `Size:` when the piece has one, `Creation Time:` is `HH:MM:SS`, and the `.rul` `CREATION TIME:` too. DXF-ASTM keeps `<svg id>_M` and `hh-mm`.
 - [ ] Layout.104.7 `Piece Name:` stays full length; `Material:` stays the full name; no `Category:`; layer 5 keeps the grade reference line.
 
-### [ ] Task Layout.101 — Verify - `SEAMLY_DATA_DIR` for SeamlyLayout
+### [x] Task Layout.101 - Verify - `SEAMLY_DATA_DIR` for SeamlyLayout
 
 - Done: `DataDirectory` (`qt_frontend/src/DataDirectory.{h,cpp}`) reads the variable first in `main()`. Settings go to `<dir>/settings/`, logs to `<dir>/logs/seamlylayout/`. A relative path exits 78; an unwritable one exits 73. Seamly2D's `--svg-stdin` launch passes the variable on.
 - [ ] Layout.101.4 In the next MSI build, check in the app: in PowerShell, run `$env:SEAMLY_DATA_DIR="D:/sl_job"; seamlylayout.exe`. Expect `settings\qt6_seamlylayout.ini` and `logs\seamlylayout\log_*.txt` under it, nothing new in `%LOCALAPPDATA%\Seamly\SeamlyLayout`. Run with `SEAMLY_DATA_DIR=rel`, a relative path (exit 78). Run with a path whose parent is a file, so the folder cannot be made (exit 73). Run Seamly2D with the variable set, open Layout Mode: SeamlyLayout uses the same folder. The Qt build also runs in the next MSI build.
-
-### [ ] Task Layout.106 — Verify - Seamly2D: build the pieces for the SVG sent to SeamlyLayout with `layout_handoff`, not `VLayoutPiece`
-
-Before this task, Seamly2D built the pieces for the SVG with the old class `VLayoutPiece`. This task builds them with `layout_handoff` (Gap 2 in Dead.4.4.3, `TODO_REMOVE_DEAD_LAYOUT_CODE.md`). After it, Dead.4.4.3 can check that the old and the new SVG writer give the same SVG, then switch `MainWindow` to the new writer. Dead.4.5 can then delete `VLayoutPiece`.
-
-- Today `MainWindowsNoGUI` holds `VLayoutPiece` in `pieceList` and `SizePieceList::pieces`. `preparePiecesForLayout()` and `prepareSizePieceList()` fill them with `VLayoutPiece::Create()`.
-- Users of these lists: `unevenCornerCuts()`, `needsCornerCuts()`, `unifySizeTurnPoints()`, `arrangePieceItemsFlat()`, `generatePiecesSvgDocument()`, `generateMultisizePiecesSvgDocument()`, `MainWindow::prepareMultisizePieceLists()`, and the `clear()` calls in `mainwindow.cpp`.
-- New value per piece: `layout_handoff::HandoffPlacedPiece` (info, piece, piece label, pattern label, offset). `placed_piece()` in `tst_handoffdocument.cpp` shows the calls.
-- Constraint: `recalculateAtSize()` changes the pattern data. Build the pieces and labels of a size while that size is active, and keep the results, not the `VContainer`.
-- [x] Layout.106.1 User decision: how Dead.4.4.3 compares the two writers.
-  - Option A (recommended): fill the old and the new lists in the same size loop. A developer switch writes both SVGs. The `MainWindow` switch deletes the old lists.
-  - Option B: replace the old lists now. Compare only in a test program that loads a pattern and runs both writers.
-  - Decision: Option A was used during development. When the old and the new writer gave the same SVG, the comparison switch was removed from Seamly2D. To compare the two writers again, build `handoff_capture.exe` with `build_handoff_capture.ps1`, then run `capture_handoff_writers.py` and `compare_handoff_writers.py` (`src/test/Seamly2DTest/`).
-- [x] Layout.106.2 Add the new lists: `QVector<HandoffPlacedPiece>` for an individual pattern, and one in `SizePieceList`. Keep them index-aligned with `pieceIds`.
-  - Done: `MainWindowsNoGUI::handoff_pieces`, `SizePieceList::handoff_pieces`. `mainwindow.cpp` clears `handoff_pieces` with `pieceList`.
-- [x] Layout.106.3 `preparePiecesForLayout()` and `prepareSizePieceList()`: build each piece with `HandoffPieceInfo::create()`, `HandoffPiece::create()`, `HandoffLabel::create_piece_label()` and `create_pattern_label()`.
-  - Call `setForcedCornerCuts()` before `HandoffPiece::create()`, as now.
-  - The pattern label needs `doc`, so `preparePiecesForLayout()` can no longer be static.
-  - Piece set key: the `VPiece` id, as now.
-  - Done: both functions fill the old and the new list in one loop (`createPlacedPiece()`). `offset` holds Mx/My until the SVG function places the piece.
-- [x] Layout.106.4 `unevenCornerCuts()` and `needsCornerCuts()`: read `HandoffPiece::seam_allowance_corners()` and `HandoffPieceInfo::name`. Move the corner compare into a pure function, so a unit test can call it.
-  - Done: `layout_handoff::compare_corner_cuts()` in new `handoff_corner_cuts.h/.cpp`.
-- [x] Layout.106.5 `unifySizeTurnPoints()`: call `HandoffPiece::unify_piece_turn_points()`. Count the differing pieces with `line_node_counts()`, as now.
-  - Done: unifies the old and the new list.
-- [x] Layout.106.6 Size units: pass every size through `sizeInExportUnit()` (Layout.103.8) to `HandoffPieceInfo` and `HandoffDocument::set_multisize()`. Fix the briefs in `handoff_document.h` that say "in pattern units".
-  - Done: also the `@param size` briefs in `handoff_ids.h`.
-- [x] Layout.106.7 Add a function that builds the SVG from the new lists: `HandoffStyle::from_settings()`, `set_units()`, `set_sample_size()` or `set_multisize()`, `piece_extent()` and `arrange_flat()` for the sheet and offsets, `add_piece()`, `to_svg_string()`. Layout Mode does not call it until the Dead.4.4.3 compare passes.
-  - Done: `generateHandoffSvgDocument()` builds the production handoff. Both GUI and CLI use the fitted new writer after all 25 comparison patterns passed.
-- [x] Layout.106.8 Tests: the corner compare (same cuts; different cuts, same corner count; different corner count). Run `TST_HandoffPiece` and `TST_HandoffDocument` again.
-  - Done: new `TST_HandoffCornerCuts` (4 cases pass in a temporary test program). `TST_HandoffPiece` and `TST_HandoffDocument` run in 106.9.
-  - `cl /Zs` of `mainwindowsnogui.cpp`, `mainwindow.cpp` and `handoff_corner_cuts.cpp`: no errors.
-- [ ] Layout.106.9 The MSI build and the Qt test suites passed. Check in the app: in Seamly2D, press Layout for an individual pattern and for a multisize pattern. SeamlyLayout opens with the same pieces as before.
 
 ### [ ] Task Layout.102 — Verify - DXF-ASTM (CLO3D): the DXF-ASTM export with CLO3D settings, and a setting that can swap the cut line and sew line layers
 
@@ -135,13 +103,3 @@ Before this task, Seamly2D built the pieces for the SVG with the old class `VLay
 - [x] Layout.102.4 Integrated MSI build, Qt suites, and Rust workspace tests passed.
 - [ ] Layout.102.5 Check in the app (steps: `AGENT_CHECKLIST.md` section 8): export DXF-ASTM (CLO3D), then import the file in CLO3D with "Swap Cutting Line and Sewing Line" off. If the cut line and sew line come in reversed, set `CLO3D_CUT_SEW_LAYERS = CutSewLayers::Swapped` (one line in `writer.rs`) and run the test again.
 
-
-### [ ] Task Layout.109 - Verify - SeamlyLayout > Layout Settings > Media Type=Fabric
-
-- trousers.sm2d with fabric, folded, displayed message "Some pieces could not be placed". Message suggested "Try a larger sheet size". Remember 1) that fabric layouts should initially be created at 500" long (similar to initial layout size when paperType=roll) then trimmed after layout is created to fit the pieces, 2) leftMargin=0 when folded=True.
-
-- [x] Decision: fabric starts 500 in long, as a paper roll does. Both use `ROLL_DEFAULT_LENGTH_IN`; neither is a setting.
-- [x] Decision: folded fabric has left margin 0 by definition. The fold-lines-on-left-edge option does not change it.
-- [x] Fix the initial layout size for media=fabric. Fabric starts 500 in long (01562ef927) and trims after packing. Folded fabric has left margin 0. The fabric warning no longer advises a larger sheet size.
-- [x] Verify that initial fabric layout is long, similar to paper roll. (MSI, AGENT_CHECKLIST.md section 33)
-- [ ] Verify that all pieces are placed on the fabric layout and that piece foldlines are placed along fold if folded=true.
