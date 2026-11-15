@@ -2202,3 +2202,5 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 ### [x] Layout.Y6 - Paper > roll : PROHIBIT CHANGING THE WIDTH OF THE ROLL PAPER!!! DO NOT MAKE ME TELL YOU THIS AGAIN!!!!! THE ROLL LENGTH CAN CHANGE BUT THE WIDTH CANNOT! I have submitted multiple prompts to fix this problem, and I don't want to keep wasting tokens to fix this one problem. It's simple. When media=paper and papertype=roll then do not ever change the width of the media or content rect. Also applies to media=fabric --> do not ever change the media width or content rect for fabric (folded) or fabric (not folded)>.
 
 ### [x] Layout.Y7 multisize > Paper=roll > custom > width=16.0: for jacket 2, why wasn't the user prompted to either 'split the pieces' or 'make the media longer'? - check one more time, if the dialog doesn't appear then run this as an implementation task.
+
+### [x] Layout.Y3 - multisize - Nested: When a piece has corners but none are 90 degrees then align the sizes along the cutline's longest edge.

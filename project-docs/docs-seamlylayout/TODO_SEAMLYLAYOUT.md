@@ -4,11 +4,6 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Little things to fix
 
-- [ ] zz Layout.Y3 - multisize - Nested: When a piece has corners but none are 90 degrees then align the sizes along the cutline's longest edge.
-  - [x] Stack point Rule 2b: with no right-angle turn point, the lowest turn point wins; the sizes align along its longest edge (straight part only). Same rule in `svg_dom/src/stack_point.rs` and `layout_handoff/handoff_stack_point.cpp`. jacket2: only Detail 3 changes.
-  - [x] Tests: `right_angle_is_within_one_degree`, `without_a_right_angle_the_lowest_corner_wins`, `stackPointTakesLowestCornerWithoutRightAngle`. Docs: SVG-DATA-ATTRIBUTES "Multisize stack point".
-  - [ ] this feature is not fully implemented -- see piece "Middle Front Yoke C" in test-seamly-layout\patterns\validation\layouts_jacket2\jacket2_40-146_Fabric_Marker_202611151148.svg -- the sizes are not aligned together -- there seems to be two separate sets of nested sizes for 'Middle Front Yoke C"; These two sets should have been aligned together such that they share a corner and a line."
-
 - [ ] zz Layout.Y7 - Settings - Improve display and processing of the 'Place fold lines on the left edge (fabric: no left margin)' setting.
   - [x] Layout.Y7.1 - Move the 'Place fold lines...' label and checkbox into the Fabric section, on the line below the 'Fabric Folded' checkbox; It should be displayed with the Fabric section.
     - Result: `SettingsDialog.qml` Fabric grid, below "Fabric Folded". Test: `foldLinesOnLeftEdgeCheck_enabledOnlyForFoldedFabric`.
@@ -27,7 +22,8 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## VERIFY
 
-- Export DXF files & create aw.fyi/dxf
+- Export DXF files & create aw.fyi/dxf reports for
+male_shirt, trousers, and jacket2
 
 ### [ ] Task Layout.93 - Verify - DXF - for each piece, use its 'piece tool' properties and attributes as source of truth instead of labels for names, letter, quantity, material, foldline, etc.; track this data with the layout pieces.
 
