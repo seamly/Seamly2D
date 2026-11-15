@@ -142,15 +142,16 @@ bool contains(const QPolygonF &polygon, const QPointF &point)
 }
 
 /**
- * @brief Builds one piece-set of two trapezoid sizes, each with its wide edge at the top.
+ * @brief Builds one piece-set of two trapezoid sizes, each with its wide edge at the top and right angles on its
+ *        right side.
  * @param small_path  cut line of size 34.
  * @param small_turns turn point indices of size 34; empty leaves out data-turn-points.
  * @param big_path    cut line of size 36, the largest size.
  * @param big_turns   turn point indices of size 36; empty leaves out data-turn-points.
  */
-QString trapezoids(const QString& small_path = QStringLiteral("M 0,0 L 40,0 L 30,30 L 10,30 Z"),
+QString trapezoids(const QString& small_path = QStringLiteral("M 0,0 L 40,0 L 40,30 L 10,30 Z"),
                    const QString& small_turns = QStringLiteral("0 1 2 3 4"),
-                   const QString& big_path = QStringLiteral("M 100,100 L 180,100 L 160,160 L 120,160 Z"),
+                   const QString& big_path = QStringLiteral("M 100,100 L 180,100 L 180,160 L 120,160 Z"),
                    const QString& big_turns = QStringLiteral("0 1 2 3 4"))
 {
     const auto cutline = [](const QString& path, const QString& turns)
@@ -419,16 +420,40 @@ void TestHandoffAnnotationAlignment::jacketCaptureFitsEverySize() const
 
 void TestHandoffAnnotationAlignment::stackPointTakesLongestHorizontalEdge() const
 {
-    // The top edge is the longest horizontal edge; its left end wins the tie between its two corners.
+    // With a right angle, the top edge is the longest horizontal edge. Of its two ends, the left one has the
+    // longer other edge (~63.2, not 60).
     same_points(find_set_stack_points(trapezoids()), {QPointF(0, 0), QPointF(100, 100)});
+}
+
+void TestHandoffAnnotationAlignment::stackPointTakesLowestCornerWithoutRightAngle() const
+{
+    // Isosceles trapezoids: no right angle. The bottom corners are level and tie on their edges; the left one wins.
+    same_points(find_set_stack_points(trapezoids(QStringLiteral("M 0,0 L 40,0 L 30,30 L 10,30 Z"),
+                                                 QStringLiteral("0 1 2 3 4"),
+                                                 QStringLiteral("M 100,100 L 180,100 L 160,160 L 120,160 Z"))),
+                {QPointF(10, 30), QPointF(120, 160)});
+
+    // One size: corner 1 meets at 90.5 degrees, a right angle, so the longest horizontal edge wins at (0,0).
+    // At 92 degrees no corner is a right angle, so the lowest corner (10,80) wins.
+    const QString one_size = QStringLiteral("<svg><g data-type='piece-set'><g data-type='piece'>"
+                                            "<g data-type='cutline' data-turn-points='0 1 2 3'>"
+                                            "<path d='M 0,0 L 100,0 L %1,60 L 10,80 Z'/></g></g></g></svg>");
+    same_points(find_set_stack_points(one_size.arg(QStringLiteral("100.5"))), {QPointF(0, 0)});
+    same_points(find_set_stack_points(one_size.arg(QStringLiteral("102.1"))), {QPointF(10, 80)});
+
+    // Level bottom corners: (80,100) has the longer other edge (~102, not ~100.5), so it wins.
+    same_points(find_set_stack_points(QStringLiteral("<svg><g data-type='piece-set'><g data-type='piece'>"
+                                                     "<g data-type='cutline' data-turn-points='0 1 2 3'>"
+                                                     "<path d='M 0,0 L 60,0 L 80,100 L 10,100 Z'/></g></g></g></svg>")),
+                {QPointF(80, 100)});
 }
 
 void TestHandoffAnnotationAlignment::stackPointMapsClosingIndexToFirstVertex() const
 {
     // Index 4 names the closing vertex, the same place as vertex 0. Without it, corner 1 would win.
-    same_points(find_set_stack_points(trapezoids(QStringLiteral("M 0,0 L 40,0 L 30,30 L 10,30 Z"),
+    same_points(find_set_stack_points(trapezoids(QStringLiteral("M 0,0 L 40,0 L 40,30 L 10,30 Z"),
                                                  QStringLiteral("0 1 2 3 4"),
-                                                 QStringLiteral("M 100,100 L 180,100 L 160,160 L 120,160 L 100,100 Z"),
+                                                 QStringLiteral("M 100,100 L 180,100 L 180,160 L 120,160 L 100,100 Z"),
                                                  QStringLiteral("1 2 3 4"))),
                 {QPointF(0, 0), QPointF(100, 100)});
 }
@@ -436,14 +461,14 @@ void TestHandoffAnnotationAlignment::stackPointMapsClosingIndexToFirstVertex() c
 void TestHandoffAnnotationAlignment::stackPointCentresWithoutTurnPoints() const
 {
     // One size without turn points puts every size on its bounding-box centre.
-    same_points(find_set_stack_points(trapezoids(QStringLiteral("M 0,0 L 40,0 L 30,30 L 10,30 Z"), QString())),
+    same_points(find_set_stack_points(trapezoids(QStringLiteral("M 0,0 L 40,0 L 40,30 L 10,30 Z"), QString())),
                 {QPointF(20, 15), QPointF(140, 130)});
 }
 
 void TestHandoffAnnotationAlignment::stackPointTakesNearestPlaceInOtherSizes() const
 {
     // Size 34 starts at (4,0). Its turn point nearest the top left of its bounding box is vertex 4 at (0,0).
-    same_points(find_set_stack_points(trapezoids(QStringLiteral("M 4,0 L 40,0 L 30,30 L 10,30 L 0,0 Z"),
+    same_points(find_set_stack_points(trapezoids(QStringLiteral("M 4,0 L 40,0 L 40,30 L 10,30 L 0,0 Z"),
                                                  QStringLiteral("0 1 2 3 4 5"))),
                 {QPointF(0, 0), QPointF(100, 100)});
 }
