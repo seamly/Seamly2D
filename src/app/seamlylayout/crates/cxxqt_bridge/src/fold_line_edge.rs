@@ -3,11 +3,11 @@
 // MIT License: https://opensource.org/licenses/MIT
 
 // @file fold_line_edge.rs
-// @brief Puts the fold line of each piece cut on the fold on the fold of folded fabric.
+// @brief Puts the fold line of each piece cut on the fold on the left edge of the media.
 //
-// Folded fabric only: the left edge is the fold, with no margin, so one cut gives
-// the whole piece. Paper and open fabric never plan. Runs on the pre-processed
-// DOM, before `translate_dom`:
+// Every media. Folded fabric: the left edge is the fold, with no margin, so one cut
+// gives the whole piece. Paper and open fabric: the left edge is the left margin.
+// Runs on the pre-processed DOM, before `translate_dom`:
 // pieces are direct `<g>` children of the root, grain up, with transforms baked.
 //
 // Per piece with a vertical fold line, the packer angle that brings the fold

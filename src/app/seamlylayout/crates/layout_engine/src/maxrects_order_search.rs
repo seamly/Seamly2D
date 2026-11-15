@@ -175,7 +175,7 @@ impl PackJob {
 
     // @brief Move the left-edge pieces ahead of the other pieces; each group keeps its order.
     //
-    // Left-edge pieces (pieces with a fold line, on folded fabric) take the left
+    // Left-edge pieces (pieces with a fold line, on any media) take the left
     // edge from the top down before any other piece is placed.  An order with
     // another piece first can score better, so every order the search packs
     // goes through here.

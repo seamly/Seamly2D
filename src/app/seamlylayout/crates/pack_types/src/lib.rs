@@ -22,7 +22,7 @@ pub struct Rect {
     // without a grain direction when the user allows free rotation.
     pub free_rotation: bool,
     // Some(angle): the rectangle touches the left bin edge, at this rotation
-    // only.  Set for a piece whose fold line goes on the fold of the media.
+    // only.  Set for a piece whose fold line goes on the left edge of the media.
     pub left_edge_angle: Option<u16>,
     // Minimum x coordinate required for this rectangle inside the bin.
     pub min_left_gap_px: u32,

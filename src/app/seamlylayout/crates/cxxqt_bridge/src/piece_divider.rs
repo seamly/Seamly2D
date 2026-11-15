@@ -82,10 +82,10 @@ pub struct DivideSpec {
     pub apply_piece_rotation: bool,
     // The user's "Rotate freely" choice for pieces without a grainline.
     pub free_rotation_without_grainline: bool,
-    // Clearance from the fold edge for pieces without a fold line.
+    // Clearance from the fold of folded fabric for pieces without a fold line; 0 on other media.
     pub fold_edge_gap_px: u32,
-    // Pin fold-line pieces to the fold edge while measuring and splitting.
-    // False for paper, open fabric, and Layout Mode Any (`LayoutSettings::places_fold_lines_on_left_edge`).
+    // Pin fold-line pieces to the left edge while measuring and splitting.
+    // False when the option is off, and in Layout Mode Any (`LayoutSettings::places_fold_lines_on_left_edge`).
     pub fold_lines_on_left_edge: bool,
 }
 
