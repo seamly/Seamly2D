@@ -2,6 +2,18 @@
 
 ## Current status
 
+### 2026-11-14 — Paper roll and fabric keep their width (Layout.Y6)
+
+- `layout_utils::do_process_layout`: every non-tiled pack uses `bin_w`, the contentRect width. Removed `pack_bin_w`, `mr_px`, `set_content_width` (`layout_assembler.rs`).
+- A piece wider than a paper roll or fabric stays unplaced; the warning names it. Only the length grows.
+- `lib.rs` `process_layout`: the oversized-piece check runs for every layout. Multisize paper rolls now get the dialog too.
+- `Main.qml`: dialog choice "Make the media longer"; text says the media keeps its width.
+- `enlarged_media_message` compares the length only.
+- Tests: `placement_enlargement_dimensions_and_notifications`, `jacket2_marker_keeps_narrow_roll_width` (replaces `jacket2_marker_widens_narrow_roll`).
+- Checked: `cargo test --workspace` 713 pass; `ctest` debug 8/8. Built in worktree `roll-width`; merged `--no-ff`; branch and worktree deleted.
+- Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` new §53 and OPEN row; §11 and its OPEN row removed.
+- Open: Layout.Y6.1 installed-app check with the next MSI (§53).
+
 ### 2026-11-14 — Tilted piece: grainline tilts (Layout.Y5)
 
 - Seamly2D Piece Mode: `PatternPieceTool::updateGrainline` turns the grainline with the piece tilt, about the same center. Labels stay level.
@@ -50,18 +62,9 @@
 - Docs: SVG-DATA-ATTRIBUTES, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §47, new §49 and OPEN row.
 - Open: Layout.Y2.1 installed-app check with the next MSI (§49). X7.4 (Nested set too wide) no longer applies.
 
-### 2026-11-14 — Material tab order (Layout.Y1)
-
-- `material_split.rs`: `pattern_materials` sorts by `MATERIAL_ORDER`: Fabric, Lining, Interfacing, Interlining. Other names go after, in handoff order. Match ignores ASCII case.
-- Cause: Seamly2D writes the pattern groups in the order of the first piece of each material, so Lining could come first.
-- Both tab bars (`materialLabels`) and every material index (`material_docs`, `material_layouts`) follow the new order.
-- Test: `materials_follow_the_tab_order`.
-- Checked: `cargo test --workspace` 708 pass; `ctest` debug 8/8. Built in worktree `material-tab-order`; merged `--no-ff`; branch and worktree deleted.
-- Docs: SVG-DATA-ATTRIBUTES Materials.
-- Open: Layout.Y1.1 installed-app check with the next MSI.
-
 ## Decisions to retain
 
+- No layout changes the width of a paper roll or fabric (folded or not), or the contentRect width. Only the length grows; a piece wider than the media is left out or split (user, 2026-11-14). Replaces Layout.71 roll widening.
 - Multisize stack point with no right-angle turn point: the lowest turn point wins; the sizes align along its longest edge. An edge is the straight part only (user, 2026-11-14).
 - Layout Mode Any: a piece too wide at its Rotation rule's angles turns 90° if that fits. This replaces the rule for that piece only; the packer cannot place it otherwise (Layout.802 task text, 2026-11-12).
 - Custom page size lives in Tile Size > Custom (`tileWidth`, `tileHeight`). Paper Type has no custom size (user, 2026-11-12).
