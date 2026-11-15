@@ -419,7 +419,7 @@ Dialog {
                     text: "Tip: minimum clearance kept between pieces during auto-layout.\n"
                         + "• Along Grainline tries 0°/180° rotations for tighter nesting; "
                         + "With Nap pins every piece to one direction (use for directional or napped fabrics).\n"
-                        + "• Any applies each piece's Layout rotation rule; Layout rotation Any samples 1° steps.\n"
+                        + "• Any applies each piece's Layout rotation rule; Layout rotation Any samples 10° steps.\n"
                         + "• After layout, open Adjust mode to fine-tune placement by hand.\n"
                         + "• Smaller gap = faster layout run — 0.05–0.10 in (1–3 mm) is typical."
                 } // Text pieceGapGuidance
