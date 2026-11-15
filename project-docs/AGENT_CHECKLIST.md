@@ -60,6 +60,7 @@ MALE_SHIRT
 | Layout.X4.2 | 45 | SL > male_shirt > Paper Tiled: Export > PDF disabled, PDF (Tiled) enabled | ?
 | Layout.X2.2 | 46 | SL > trousers > Paper Roll 16 in, split: part labels read `<piece name> part i of n` | ?
 | Layout.X7.2 | 47 | SL > jacket_2 > Fabric folded 30.0, split: no layout leaves pieces out | ?
+| Layout.X5.2 | 42 | SL > jacket_2, trousers, male_shirt > Media size below each layout tab and material tab | ?
 | Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Fabric | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Lining | ?
@@ -648,13 +649,29 @@ Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is 
 
 (Layout.X5.2)
 
-- [ ] Open trousers (`test-seamly-layout/patterns/validation/trousers.sm2d`). Press Layout.
+Multisize pattern:
+
+- [ ] Open jacket2 (`test-seamly-layout/patterns/validation/jacket2_40-146.sm2d`). Press Layout.
 - [ ] Settings: Paper, Roll, 36 in. Submit. Create Layout. Below each tab label (Marker, Nested, Base Size 500, Size …) one smaller line reads `36.00 x <length> in`.
 - [ ] The lengths differ between tabs. Each length matches the height of the layout on that tab.
 - [ ] Select a size tab. Adjust Layout. Move the lowest piece up. Apply. Done Adjusting. The tab's length is shorter. The other tabs do not change.
 - [ ] Settings: Fabric (folded), width 60.0. Submit. Create Layout. Each tab reads `60.00 x <length> in`.
 - [ ] Settings: unit cm. Submit. Create Layout. Each tab reads `<width> x <length> cm`.
-- [ ] Lining material tab: its layout tabs show the Lining layout lengths.
+- [ ] Lining material tab: its layout tabs show the Lining layout lengths. The material tabs show no size.
+
+Individual pattern, one material:
+
+- [ ] Open trousers (`test-seamly-layout/patterns/validation/trousers.sm2d`). Press Layout.
+- [ ] Settings: Paper, Roll, 36 in. Submit. The header over the blank canvas reads "Material: Fabric" and no size.
+- [ ] Create Layout. Below "Material: Fabric" one smaller line reads `36.00 x <length> in`. The length matches the layout height.
+- [ ] Adjust Layout. Move the lowest piece up. Apply. Done Adjusting. The length is shorter.
+- [ ] Settings: Fabric (folded), width 60.0. Submit: the size line goes away. Create Layout: it reads `60.00 x <length> in`.
+
+Individual pattern, two materials:
+
+- [ ] Open male_shirt. Set one piece's Material to Lining. Press Layout.
+- [ ] Settings: Paper, Roll, 36 in. Submit. Create Layout. Below Fabric and Lining in the tabs over the layout, one smaller line reads `36.00 x <length> in`.
+- [ ] Each length matches the layout of that material. The tabs over the imported pieces show no size.
 
 ## 43. Labels show `<empty>` as a blank line
 

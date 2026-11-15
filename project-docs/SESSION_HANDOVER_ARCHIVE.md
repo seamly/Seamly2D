@@ -2,6 +2,18 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-14 — Layout tabs show the media size (Layout.X5)
+
+- Each layout tab shows `<W> x <H> <unit>` below its label, in a smaller font: "36.00 x 52.25 in".
+- Width: paper canvas width (a roll can widen); fabric: the bolt width, folded too (as "Media enlarged"). Height: the tab's layout length.
+- Rust: `layout_utils::media_size_in_unit` (shared with `enlarged_media_message`), `layout_views::media_size_text`, `LayoutViews::media_sizes`.
+- Bridge: QML property `layoutViewMediaSizes`; `run_layout` keeps the parsed `layout_settings`; `exit_adjust_mode` refreshes the tab properties.
+- `Main.qml`: tab `contentItem` is a Column: label, then media size.
+- Tests: `media_size_text_uses_the_settings_unit`, `media_sizes_follow_each_tab_layout`.
+- Checked: `cargo test --workspace` 693 pass; `ctest` 8/8 pass (build dir `Seamly2D-private-worktrees/x5dbg`: the preset path in a worktree passes MAX_PATH).
+- Docs: SIMPLE_WORKFLOW tab list; `AGENT_CHECKLIST.md` §42; TODO Layout.X5.1.
+- Open: Layout.X5.2 installed-app check with the next MSI (§42).
+
 ### 2026-11-14 — Multisize piece names without the piece number (Layout.X6)
 
 - `piece_naming.rs`: multisize `Size_<size>_<name>[_<letter>]`; no name → `Size_<size>_Piece_<n>[_<letter>]`. Piece-set: same without the size.

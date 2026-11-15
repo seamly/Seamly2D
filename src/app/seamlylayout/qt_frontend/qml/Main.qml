@@ -1008,31 +1008,44 @@ ApplicationWindow {
                     visible:    appController.materialLabels.length > 1 && !appController.isAdjustMode
                     enabled:    !appController.isLayoutInProgress
                     labels:     appController.materialLabels
+                    mediaSizes: appController.materialMediaSizes
                     shownIndex: appController.activeMaterial
                     onMaterialClicked: function(index) { appController.selectMaterial(index) }
                 } // MaterialTabBar materialLayoutTabs
 
-                // Material of the laid-out pieces when the import names one material only.
+                // Material of the laid-out pieces when the import has one material only,
+                // with the media size of its layout below it.  Shown when either is known.
                 Rectangle {
                     id: materialHeader
+                    // Media width x height of the layout; empty without a finished individual layout.
+                    readonly property string mediaSize: appController.materialMediaSizes[appController.activeMaterial] ?? ""
                     anchors.top:   parent.top
                     anchors.left:  parent.left
                     anchors.right: parent.right
                     height:        visible ? materialHeaderText.implicitHeight + 8 : 0
-                    visible:       appController.activeMaterialName !== "" && appController.materialLabels.length < 2
-                                   && !appController.isAdjustMode
+                    visible:       (appController.activeMaterialName !== "" || materialHeader.mediaSize !== "")
+                                   && appController.materialLabels.length < 2 && !appController.isAdjustMode
                     color:         Theme.appBackground
 
-                    Text {
+                    Column {
                         id: materialHeaderText
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.left:           parent.left
                         anchors.leftMargin:     8
-                        text:           "Material: " + appController.activeMaterialName
-                        color:          Theme.textOnDark
-                        font.pixelSize: Theme.fontSizeNormal
-                        font.bold:      true
-                    } // Text materialHeaderText
+                        Text {
+                            visible:        appController.activeMaterialName !== ""
+                            text:           "Material: " + appController.activeMaterialName
+                            color:          Theme.textOnDark
+                            font.pixelSize: Theme.fontSizeNormal
+                            font.bold:      true
+                        } // Text material name
+                        Text {
+                            visible:        materialHeader.mediaSize !== ""
+                            text:           materialHeader.mediaSize
+                            color:          Theme.textOnDark
+                            font.pixelSize: Theme.fontSizeSmall
+                        } // Text media size
+                    } // Column materialHeaderText
                 } // Rectangle materialHeader
 
                 // Non-tiled multisize tabs include Marker and Nested; tiled tabs show only sizes.
@@ -1893,6 +1906,10 @@ ApplicationWindow {
         // @brief Index of the shown material.
         required property int shownIndex
 
+        // @brief Media size under each tab label, indexed like `labels`; an empty entry shows none.
+        //        The tabs over the imported pieces leave it empty.
+        property var mediaSizes: []
+
         // @brief Emitted when the user clicks a tab.  The handler selects the material
         //        or refuses; the current tab then follows `shownIndex` either way.
         signal materialClicked(int index)
@@ -1909,18 +1926,35 @@ ApplicationWindow {
                 id: materialTab
                 required property string modelData
                 required property int index
+                // Media width x height of this material's layout; empty when unknown.
+                readonly property string mediaSize: materialTabBar.mediaSizes[index] ?? ""
                 text:  modelData
                 // 1.5 × the Fusion tab size; TabBar sizes its bar from implicitHeight.
                 implicitWidth:  Math.round(1.5 * (implicitContentWidth  + leftPadding + rightPadding))
                 implicitHeight: Math.round(1.5 * (implicitContentHeight + topPadding + bottomPadding))
                 width: implicitWidth
-                contentItem: Text {
-                    text:  materialTab.text
-                    color: materialTab.checked ? Theme.violetDark : Theme.textOnDark
-                    font.pixelSize: Theme.fontSizeNormal
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment:   Text.AlignVCenter
-                } // Text contentItem
+                // Material name, with the media size below it, centred in the tab.
+                contentItem: Item {
+                    implicitWidth:  materialTabText.implicitWidth
+                    implicitHeight: materialTabText.implicitHeight
+                    Column {
+                        id: materialTabText
+                        anchors.centerIn: parent
+                        Text {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text:  materialTab.text
+                            color: materialTab.checked ? Theme.violetDark : Theme.textOnDark
+                            font.pixelSize: Theme.fontSizeNormal
+                        } // Text label
+                        Text {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            visible: materialTab.mediaSize !== ""
+                            text:    materialTab.mediaSize
+                            color:   materialTab.checked ? Theme.violetDark : Theme.textOnDark
+                            font.pixelSize: Theme.fontSizeSmall
+                        } // Text media size
+                    } // Column materialTabText
+                } // Item contentItem
                 background: Rectangle {
                     color: materialTab.checked ? Theme.canvasBackground
                          : materialTab.hovered ? Theme.violetMedium : Theme.violet

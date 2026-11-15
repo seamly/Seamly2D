@@ -2,6 +2,19 @@
 
 ## Current status
 
+### 2026-11-14 — Media size for individual patterns (Layout.X5.3)
+
+- Individual pattern: the media size shows below each material tab name over the layout; one material: below "Material: <name>".
+- Untagged import (no material name): the header shows only the size.
+- Rust: `layout_views::material_media_size`, `MaterialLayout::media_size`. Empty for a blank canvas or a material with layout tabs.
+- Bridge: QML property `materialMediaSizes`, one entry per material; `refresh_layout_view_properties` fills it from `is_layout_ready` (shown) and `material_layouts` (others).
+- Order fixes so no old size stays: `initialize_layout` and `run_layout` clear the tabs after the layout flag drops; `finish_tab_layouts` refreshes after it rises.
+- `Main.qml`: `MaterialTabBar.mediaSizes` (left bar leaves it empty); `materialHeader` is a Column.
+- Test: `material_media_size_shows_one_finished_layout`.
+- Checked: `cargo test --workspace` 705 pass; `ctest --preset debug` 8/8. App starts with the new QML; UI not driven.
+- Docs: SIMPLE_WORKFLOW; `AGENT_CHECKLIST.md` §42 (multisize part now jacket2; trousers is individual) and OPEN row; TODO Layout.X5.3.
+- Open: Layout.X5.2 installed-app check with the next MSI (§42).
+
 ### 2026-11-14 — Logo commit broke the MSI build
 
 - Cause: commit `3674fcfeab` moved `seamly-layout_512x512.png` and `seamly-layout.icns` to `assets/images/old-imgs/`; `qt_frontend/CMakeLists.txt` still names `assets/images/`.
@@ -43,18 +56,6 @@
 - Checked: test program `TST_LabelTextManager` 12/12 pass (`build/scratch_label_empty/`, in-tree libs). `cargo test` not run: Rust comment only. Qt suites run with the next MSI.
 - Docs: SVG-DATA-ATTRIBUTES `piece_label`; `AGENT_CHECKLIST.md` §43 and OPEN row; TODO Layout.X3.1.
 - Open: Layout.X3.2 installed-app check with the next MSI (§43).
-
-### 2026-11-14 — Layout tabs show the media size (Layout.X5)
-
-- Each layout tab shows `<W> x <H> <unit>` below its label, in a smaller font: "36.00 x 52.25 in".
-- Width: paper canvas width (a roll can widen); fabric: the bolt width, folded too (as "Media enlarged"). Height: the tab's layout length.
-- Rust: `layout_utils::media_size_in_unit` (shared with `enlarged_media_message`), `layout_views::media_size_text`, `LayoutViews::media_sizes`.
-- Bridge: QML property `layoutViewMediaSizes`; `run_layout` keeps the parsed `layout_settings`; `exit_adjust_mode` refreshes the tab properties.
-- `Main.qml`: tab `contentItem` is a Column: label, then media size.
-- Tests: `media_size_text_uses_the_settings_unit`, `media_sizes_follow_each_tab_layout`.
-- Checked: `cargo test --workspace` 693 pass; `ctest` 8/8 pass (build dir `Seamly2D-private-worktrees/x5dbg`: the preset path in a worktree passes MAX_PATH).
-- Docs: SIMPLE_WORKFLOW tab list; `AGENT_CHECKLIST.md` §42; TODO Layout.X5.1.
-- Open: Layout.X5.2 installed-app check with the next MSI (§42).
 
 ## Decisions to retain
 

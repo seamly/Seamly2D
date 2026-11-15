@@ -50,6 +50,27 @@ pub fn media_size_text(settings: &LayoutSettings, doc: &Document) -> String {
     format!("{width:.2} x {height:.2} {}", settings.unit)
 } // fn media_size_text
 
+// @brief Media size under a material tab label: the size of the material's one layout.
+//
+// @param is_laid_out True when the material's layout finished; a blank canvas gets no size.
+// @param views       Tabs of the material; a multisize layout shows its sizes on these tabs instead.
+// @param layout      Layout of the material.
+// @param settings    Settings of the layout run; give the unit.
+// @return "36.00 x 52.25 in"; empty without a finished layout, or for a material with tabs.
+pub fn material_media_size(
+    is_laid_out: bool,
+    views: &LayoutViews,
+    layout: Option<&Document>,
+    settings: &LayoutSettings,
+) -> String {
+    // An individual pattern has no tabs: its one layout is the material's layout.
+    let has_one_layout = is_laid_out && views.is_empty();
+    match layout {
+        Some(doc) if has_one_layout => media_size_text(settings, doc),
+        _ => String::new(), // blank canvas, no canvas, or tabs with their own sizes
+    } // match layout
+} // fn material_media_size
+
 // @brief Advice that ends every "pieces left out" warning.
 // @param is_fabric True for fabric media; false for a paper roll. Tiled paper places every piece.
 fn unplaced_advice(is_fabric: bool) -> &'static str {
@@ -396,6 +417,11 @@ impl MaterialLayout {
         self.divide_spec = None;
         self.is_laid_out = false;
     } // fn reset_to_blank
+
+    // @brief Media size under the material's tab label; see `material_media_size`.
+    pub fn media_size(&self, settings: &LayoutSettings) -> String {
+        material_media_size(self.is_laid_out, &self.views, self.state.layout_dom.as_ref(), settings)
+    } // fn media_size
 } // impl MaterialLayout
 
 // @brief One layout of a layout run: a material's first layout, or one of its tabs.
@@ -660,6 +686,31 @@ mod tests {
         );
         assert!(views.media_sizes(None, &settings)[1].is_empty(), "active tab without a layout");
     } // media_sizes_follow_each_tab_layout
+
+    // @brief A material tab shows the size of its one finished layout; tabs and blank canvases show none.
+    #[test]
+    fn material_media_size_shows_one_finished_layout() {
+        let settings = media_settings("in", "paper");
+        let layout = canvas(3456, 5016);
+        let no_tabs = LayoutViews::default();
+        assert_eq!(material_media_size(true, &no_tabs, Some(&layout), &settings), "36.00 x 52.25 in");
+        assert!(material_media_size(false, &no_tabs, Some(&layout), &settings).is_empty(), "blank canvas");
+        assert!(material_media_size(true, &no_tabs, None, &settings).is_empty(), "no canvas");
+
+        // Multisize: the layout tabs carry the sizes.
+        let mut tabs = LayoutViews::default();
+        tabs.start(ViewKind::Marker);
+        assert!(material_media_size(true, &tabs, Some(&layout), &settings).is_empty(), "material with tabs");
+
+        // A parked material reads its own layout, and none after a new run resets it.
+        let mut parked = MaterialLayout::blank(canvas(3456, 6912));
+        assert!(parked.media_size(&settings).is_empty(), "blank canvas before the run");
+        parked.state = LayoutState { layout_dom: Some(layout), ..LayoutState::default() };
+        parked.is_laid_out = true;
+        assert_eq!(parked.media_size(&settings), "36.00 x 52.25 in");
+        parked.reset_to_blank();
+        assert!(parked.media_size(&settings).is_empty(), "reset for a new run");
+    } // material_media_size_shows_one_finished_layout
 
     // @brief Tiled multisize tabs contain only the Base Size and per-size views.
     #[test]

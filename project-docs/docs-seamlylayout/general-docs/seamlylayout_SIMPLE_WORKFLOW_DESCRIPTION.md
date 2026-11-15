@@ -162,6 +162,9 @@ The application workflow loop consists of:
       NOTE: tiled trim deferred — see docs/layout-docs/tiling-docs/TILING_REDUCTION_WORKFLOW.md
    * On Success:
      * Emit layout_finished signal → right canvas reloads from self.layout_dom
+     * Individual pattern: the media size shows below the material name over the layout, in the settings unit:
+       "36.00 x 52.25 in" (`materialMediaSizes`). Several materials: below each material tab name. One material:
+       below "Material: <name>". Width and height as for the multisize tabs (below). A blank canvas shows no size.
      * Disable 'Create Layout' button
      * Enable 'Adjust Layout' button
      * Enable 'Export' button
