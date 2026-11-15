@@ -1,13 +1,13 @@
 // project: SeamlyLayout
-// author: slspencer, copyright 2026
+// author: slspencer, copyright 2026 Seamly2D Project
 // MIT License: https://opensource.org/licenses/MIT
 
 // @file fold_line_edge.rs
-// @brief Puts the fold line of each piece cut on the fold on the left content edge.
+// @brief Puts the fold line of each piece cut on the fold on the fold of folded fabric.
 //
-// Fabric: the left edge is the fold, with no margin, so one cut gives the whole
-// piece. Paper: the left content edge, inside the margin, where the user lays
-// the fold of the fabric. Runs on the pre-processed DOM, before `translate_dom`:
+// Folded fabric only: the left edge is the fold, with no margin, so one cut gives
+// the whole piece. Paper and open fabric never plan. Runs on the pre-processed
+// DOM, before `translate_dom`:
 // pieces are direct `<g>` children of the root, grain up, with transforms baked.
 //
 // Per piece with a vertical fold line, the packer angle that brings the fold

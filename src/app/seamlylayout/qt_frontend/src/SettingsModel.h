@@ -54,11 +54,11 @@ class SettingsModel : public QObject
     //   free    → the packer may also turn the piece 90° or 270°
     Q_PROPERTY(QString noGrainlineRotation READ noGrainlineRotation WRITE setNoGrainlineRotation NOTIFY noGrainlineRotationChanged)
 
-    // @brief Whether fabric is cut on the fold (doubles usable width).
+    // @brief True when fabric is folded lengthwise; the layout uses half the fabric width.
     Q_PROPERTY(bool    fabricFolded  READ fabricFolded  WRITE setFabricFolded  NOTIFY fabricFoldedChanged)
     // @brief True adds a scale check grid to every layout except Marker: 3 x 3 cm, or 2 x 2 in for inches.
     Q_PROPERTY(bool    scaleGrid     READ scaleGrid     WRITE setScaleGrid     NOTIFY scaleGridChanged)
-    // @brief True puts each piece's fold line on the left content edge; fabric media then has no left margin.
+    // @brief True puts each piece's fold line on the fold of folded fabric. Default on; paper and open fabric ignore it.
     Q_PROPERTY(bool    foldLinesOnLeftEdge READ foldLinesOnLeftEdge WRITE setFoldLinesOnLeftEdge NOTIFY foldLinesOnLeftEdgeChanged)
 
     // @brief Minimum clearance between adjacent placed pieces, in active units.
@@ -378,7 +378,7 @@ private:
     QString m_noGrainlineRotation = QStringLiteral("upright");
     bool    m_fabricFolded  = false;
     bool    m_scaleGrid     = false;
-    bool    m_foldLinesOnLeftEdge = false;
+    bool    m_foldLinesOnLeftEdge = true;
     double  m_pieceGap      = 0.05;  // active-unit clearance between adjacent pieces (default ≈ 5 px @ 96 dpi)
     QString m_unit          = QStringLiteral("in");
     QString m_mediaType     = QStringLiteral("paper");

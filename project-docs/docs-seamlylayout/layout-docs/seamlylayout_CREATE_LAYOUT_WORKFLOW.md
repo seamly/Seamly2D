@@ -14,7 +14,7 @@ See full documentation in [`docs/layout-docs/PROCESS LAYOUT WORKFLOW.md`](../../
 | 4 | flatDom_2 | `translate_dom()` | translatedDom | `output/translatedDom.svg` |
 | 5 | translatedDom | `flatten_dom()` | flatDom_3 | `output/flatDom_3.svg` |
 
-With "Place fold lines on the left edge": before step 4,
+With "Place fold lines on the left edge" on folded fabric: before step 4,
 `fold_line_edge::plan_fold_line_edge` gives each piece with a vertical fold line
 the packer angle (0 or 180) that brings its fold line to the left. When the
 layout mode forbids that angle, the piece is mirrored across its fold line.
@@ -22,10 +22,10 @@ A fold line across or aslant the grain turns its piece until the fold line is
 vertical; the fold edge outranks the layout mode. "Split the pieces"
 turns the pieces the same way before it measures them.
 Layout Mode Any ignores the option (`LayoutSettings::places_fold_lines_on_left_edge`):
-Piece Properties Rotation alone sets each angle, no fold line goes on the edge,
-and fabric keeps its left margin unless it is folded.
-The packer then puts the piece against the left bin edge (`Rect::with_left_edge`).
-Fabric has no left margin then; paper keeps it.
+Piece Properties Rotation alone sets each angle, and no fold line goes on the edge.
+Paper and open fabric ignore the option too.
+The packer then puts the piece against the left bin edge (`Rect::with_left_edge`):
+the fold, which has no left margin.
 
 ## Layout Engine Pipeline
 

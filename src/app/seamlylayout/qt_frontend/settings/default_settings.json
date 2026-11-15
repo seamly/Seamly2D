@@ -2,6 +2,7 @@
     "fabricFolded": false,
     "fabricHeight": 0,
     "fabricWidth": 0,
+    "foldLinesOnLeftEdge": true,
     "layoutMode": "withNap",
     "marginBottom": 0.25,
     "marginLeft": 0.25,

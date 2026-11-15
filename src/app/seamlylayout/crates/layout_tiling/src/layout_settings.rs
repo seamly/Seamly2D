@@ -1,5 +1,5 @@
 // project: SeamlyLayout
-// author: slspencer, copyright 2026
+// author: slspencer, copyright 2026 Seamly2D Project
 // MIT License: https://opensource.org/licenses/MIT
 
 // @file layout_settings.rs
@@ -98,10 +98,10 @@ pub struct LayoutSettings {
     pub fabric_folded: bool,
 
     // True places every piece with a fold line so the fold line lies on the
-    // left edge of the content.  Fabric media: the left edge is the fold, with
-    // no left margin (`margin_left_value`).  Paper keeps its left margin.
-    // Layout Mode Any ignores it: read `places_fold_lines_on_left_edge`.
-    #[serde(default)]
+    // fold of folded fabric, the left edge, which has no left margin.  Default on.
+    // Paper, open fabric, and Layout Mode Any ignore it: read
+    // `places_fold_lines_on_left_edge`.
+    #[serde(default = "default_fold_lines_on_left_edge")]
     pub fold_lines_on_left_edge: bool,
 
     // Fabric width in active units, selvedges included; fabric media only
@@ -174,6 +174,7 @@ fn default_tile_orientation() -> String { "landscape".to_string() } // default t
 fn default_tile_width()    -> f64    { 8.5                      } // custom tile width: Letter, in inches
 fn default_tile_height()   -> f64    { 11.0                     } // custom tile height: Letter, in inches
 fn default_piece_gap()     -> f64    { 0.05                     } // 0.05 in ≈ 5 px @ 96 dpi (historic GAP_PX)
+fn default_fold_lines_on_left_edge() -> bool { true             } // fold lines on the fold of folded fabric
 
 // ---------------------------------------------------------------------------
 // Implementation
@@ -424,17 +425,24 @@ impl LayoutSettings {
         self.layout_mode == "any"
     } // fn applies_piece_rotation_rules
 
-    // @brief True when pieces with a fold line go on the left edge.
+    // @brief True when the media is fabric folded lengthwise: the left edge is the fold.
+    pub fn is_folded_fabric(&self) -> bool {
+        self.media_type == "fabric" && self.fabric_folded
+    } // fn is_folded_fabric
+
+    // @brief True when pieces with a fold line go on the fold of folded fabric.
     //
-    // Layout Mode Any ignores the fold edge rule (user decision): Piece Properties
-    // rotation decides the angle, and no fold line is pinned to the edge.
+    // The Settings dialog enables the option only for folded fabric, so paper and
+    // open fabric ignore a saved value.  Layout Mode Any ignores the fold edge rule
+    // (user decision): Piece Properties rotation decides the angle, and no fold line
+    // is pinned to the edge.
     pub fn places_fold_lines_on_left_edge(&self) -> bool {
-        self.fold_lines_on_left_edge && !self.applies_piece_rotation_rules()
+        self.fold_lines_on_left_edge && self.is_folded_fabric() && !self.applies_piece_rotation_rules()
     } // fn places_fold_lines_on_left_edge
 
-    // @brief Left margin in the active unit: 0 on the fold edge of fabric (folded, or fold lines on the left edge), else `margin_left`.
+    // @brief Left margin in the active unit: 0 on the fold of folded fabric, else `margin_left`.
     fn margin_left_value(&self) -> f64 {
-        if (self.places_fold_lines_on_left_edge() || self.fabric_folded) && self.media_type == "fabric" {
+        if self.is_folded_fabric() {
             0.0
         } else {
             self.margin_left
@@ -711,48 +719,53 @@ mod tests {
         assert_eq!(paper.effective_bin_px(), (3684, 5248));
     } // media_reads_only_its_own_size_fields
 
-    // @brief Fold lines on the left edge of fabric, folded or not: no left margin.
-    // Folded fabric also has no left margin. Paper, and open fabric with the option off, keep it.
+    // @brief Fold lines on the left edge apply to folded fabric only.  Folded fabric has
+    // no left margin, option on or off.  Paper and open fabric keep the margin and ignore the option.
     #[test]
-    fn fold_lines_on_left_edge_drop_the_left_margin_of_fabric_only() {
+    fn fold_lines_on_left_edge_apply_to_folded_fabric_only() {
         let json = |media: &str, folded: bool, on_edge: bool| format!(
             r#"{{"unit": "in", "mediaType": "{media}", "paperType": "tiled", "pageWidth": 40.0, "pageHeight": 48.0,
                 "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
                 "fabricFolded": {folded}, "foldLinesOnLeftEdge": {on_edge}, "layoutMode": "alongGrainline"}}"#);
         let fold = LayoutSettings::from_json(&json("fabric", true, true)).expect("parse ok");
-        assert!(fold.fold_lines_on_left_edge);
+        assert!(fold.places_fold_lines_on_left_edge());
         assert_eq!(fold.margin_px(), (0, 48, 48, 48));
         // (40 / 2 - 0.5) * 96 = 1872
         assert_eq!(fold.effective_bin_px().0, 1872);
-        let open = LayoutSettings::from_json(&json("fabric", false, true)).expect("parse ok");
-        assert_eq!(open.margin_px().0, 0, "unfolded fabric");
         let folded_off = LayoutSettings::from_json(&json("fabric", true, false)).expect("parse ok");
+        assert!(!folded_off.places_fold_lines_on_left_edge());
         assert_eq!(folded_off.margin_px().0, 0, "folded fabric, option off");
 
-        for (media, folded, on_edge) in [("paper", false, true), ("paper", true, true), ("fabric", false, false)] {
+        for (media, folded, on_edge) in [("paper", false, true), ("paper", true, true), ("fabric", false, true), ("fabric", false, false)] {
             let s = LayoutSettings::from_json(&json(media, folded, on_edge)).expect("parse ok");
+            assert!(!s.places_fold_lines_on_left_edge(), "{media} folded={folded} on_edge={on_edge}");
             assert_eq!(s.margin_px().0, 48, "{media} folded={folded} on_edge={on_edge}");
         } // for each case that keeps the margin
-    } // fold_lines_on_left_edge_drop_the_left_margin_of_fabric_only
+    } // fold_lines_on_left_edge_apply_to_folded_fabric_only
 
-    // @brief Layout Mode Any ignores the fold edge rule: no fold line on the edge, and open fabric keeps its left margin.
+    // @brief A settings file without the key places fold lines on the fold: the default is on.
+    #[test]
+    fn fold_lines_on_left_edge_default_on() {
+        let s = LayoutSettings::from_json(r#"{"unit": "in", "mediaType": "fabric", "fabricFolded": true}"#).expect("parse ok");
+        assert!(s.fold_lines_on_left_edge);
+        assert!(s.places_fold_lines_on_left_edge());
+    } // fold_lines_on_left_edge_default_on
+
+    // @brief Layout Mode Any ignores the fold edge rule on folded fabric: no fold line on the edge.
     #[test]
     fn any_mode_ignores_fold_lines_on_left_edge() {
-        let json = |mode: &str, folded: bool| format!(
+        let json = |mode: &str| format!(
             r#"{{"unit": "in", "mediaType": "fabric", "pageWidth": 40.0, "pageHeight": 48.0,
                 "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
-                "fabricFolded": {folded}, "foldLinesOnLeftEdge": true, "layoutMode": "{mode}"}}"#);
+                "fabricFolded": true, "foldLinesOnLeftEdge": true, "layoutMode": "{mode}"}}"#);
         for mode in ["alongGrainline", "withNap"] {
-            let s = LayoutSettings::from_json(&json(mode, false)).expect("parse ok");
+            let s = LayoutSettings::from_json(&json(mode)).expect("parse ok");
             assert!(s.places_fold_lines_on_left_edge(), "{mode}");
-            assert_eq!(s.margin_px().0, 0, "{mode}");
         } // for each mode that keeps the fold edge rule
-        let any = LayoutSettings::from_json(&json("any", false)).expect("parse ok");
+        let any = LayoutSettings::from_json(&json("any")).expect("parse ok");
         assert!(any.fold_lines_on_left_edge, "the saved option stays on");
         assert!(!any.places_fold_lines_on_left_edge());
-        assert_eq!(any.margin_px().0, 48, "open fabric keeps its left margin");
-        let any_folded = LayoutSettings::from_json(&json("any", true)).expect("parse ok");
-        assert_eq!(any_folded.margin_px().0, 0, "folded fabric has no left margin");
+        assert_eq!(any.margin_px().0, 0, "folded fabric has no left margin");
     } // any_mode_ignores_fold_lines_on_left_edge
 
     // @brief Millimetre units are converted correctly.

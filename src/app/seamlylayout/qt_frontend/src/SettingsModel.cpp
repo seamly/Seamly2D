@@ -935,7 +935,7 @@ void SettingsModel::resetToDefaults()
     setNoGrainlineRotation(QStringLiteral("upright"));
     setFabricFolded(false);
     setScaleGrid(false);
-    setFoldLinesOnLeftEdge(false);
+    setFoldLinesOnLeftEdge(true);
     setUnit(QStringLiteral("in"));
     setMediaType(QStringLiteral("paper"));
     setPaperType(QString(TILED_PAPER_TYPE));

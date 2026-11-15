@@ -66,6 +66,7 @@ MALE_SHIRT
 | Layout.Y4.1 | 51 | SL > trousers > Paper Roll 16 in, split: Back drill hole splits at the cut line | ?
 | Layout.Y5.1 | 52 | S2D > male_shirt > Piece mode, BackPanel Mirrored: grainline tilts with the piece | ?
 | Layout.Y6.1 | 53 | SL > trousers, jacket_2 > Paper Roll and Fabric: the media width never changes | ?
+| Layout.Y7.3 | 54 | SL > jacket_2 > Settings: fold edge check box in the Fabric section, enabled by Fabric Folded | ?
 | Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Fabric | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Lining | ?
@@ -359,7 +360,7 @@ Needs the next MSI. Any pattern with a half piece, for example a back cut on the
 
 Needs the next MSI. jacket2 Back has a fold line.
 
-- [ ] Settings: "Place fold lines on the left edge (fabric: no left margin)" is under "Add scale check grid", for paper and fabric.
+- [ ] Settings: "Place fold lines on the left edge (fabric: no left margin)" is in the Fabric section, below "Fabric Folded" (§54).
 - [ ] Media Fabric, Fabric Width 60 in, Fabric Folded. Check the option. Layout Mode Along Grainline. Submit. Create Layout.
 - [ ] Size 220 tab: Back lies with its dashed fold line on the left media edge. No margin left of it.
 - [ ] Marker tab: every size of Back touches the left edge.
@@ -622,7 +623,7 @@ Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is 
 - [ ] Подборт, Комір, Detail 3, Sleeve 1, Sleeve 2: the cut lines of all sizes meet at one corner of the cut line.
 - [ ] Each piece: one grainline stack and one label stack. The sizes' copies lie on top of each other.
 - [ ] Lining, Nested tab: the Detail 4 cut lines meet at one corner. Its grainline and labels each stack as one.
-- [ ] Settings: Layout Mode: Along Grainline. "Place fold lines on the left edge" on. Submit. Create Layout. The Back and Detail 2 stacks lie on the left edge. No warning.
+- [ ] Settings: Layout Mode: Along Grainline. Fabric Folded. "Place fold lines on the left edge" on. Submit. Create Layout. The Back and Detail 2 stacks lie on the left edge. No warning.
 
 ## 40. Piece Properties: Layout rotation
 
@@ -796,3 +797,16 @@ Detail 3 has corners on its cut line, but no corner is a right angle. Detail 3 i
 - [ ] Settings: Fabric (folded), width 30.0. Create Layout. "Make the media longer". Every tab's media size starts with `30.00 x`.
 - [ ] Settings: Fabric (not folded), width 30.0. Same check.
 - [ ] Settings: Paper, Roll, width 48.00 in. Create Layout: no dialog. Every tab starts with `48.00 x`; the length grows past 500 in on Marker.
+
+## 54. [ ] Fold edge option in the Fabric section
+
+(Layout.Y7.3)
+
+- [ ] Open jacket2 (`test-seamly-layout/patterns/validation/jacket2_40-146.sm2d`). Press Layout. Open Settings.
+- [ ] Media Paper: no "Place fold lines on the left edge" check box.
+- [ ] Media Fabric: the Fabric section shows "Fabric Folded", then "Place fold lines on the left edge (fabric: no left margin)" on the next line.
+- [ ] Fabric Folded off: the fold edge check box is grey. A click does not change it.
+- [ ] Fabric Folded on: the fold edge check box is enabled. A new settings file has it checked.
+- [ ] Fabric Folded on, fold edge on. Submit. Create Layout. Size 220 tab: Back's fold line lies on the left edge.
+- [ ] Fabric Folded off. Submit. Create Layout. Back's fold line is not on the left edge; the left margin shows.
+- [ ] Media Paper, Roll 48 in. Submit. Create Layout. Back's fold line is not on the left content edge.
