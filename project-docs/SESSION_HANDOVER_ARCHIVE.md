@@ -2,6 +2,18 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-14 — Paper roll and fabric keep their width (Layout.Y6)
+
+- `layout_utils::do_process_layout`: every non-tiled pack uses `bin_w`, the contentRect width. Removed `pack_bin_w`, `mr_px`, `set_content_width` (`layout_assembler.rs`).
+- A piece wider than a paper roll or fabric stays unplaced; the warning names it. Only the length grows.
+- `lib.rs` `process_layout`: the oversized-piece check runs for every layout. Multisize paper rolls now get the dialog too.
+- `Main.qml`: dialog choice "Make the media longer"; text says the media keeps its width.
+- `enlarged_media_message` compares the length only.
+- Tests: `placement_enlargement_dimensions_and_notifications`, `jacket2_marker_keeps_narrow_roll_width` (replaces `jacket2_marker_widens_narrow_roll`).
+- Checked: `cargo test --workspace` 713 pass; `ctest` debug 8/8. Built in worktree `roll-width`; merged `--no-ff`; branch and worktree deleted.
+- Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` new §53 and OPEN row; §11 and its OPEN row removed.
+- Open: Layout.Y6.1 installed-app check with the next MSI (§53).
+
 ### 2026-11-14 — Tilted piece: grainline tilts (Layout.Y5)
 
 - Seamly2D Piece Mode: `PatternPieceTool::updateGrainline` turns the grainline with the piece tilt, about the same center. Labels stay level.

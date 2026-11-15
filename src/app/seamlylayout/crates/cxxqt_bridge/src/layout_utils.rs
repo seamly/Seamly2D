@@ -381,6 +381,8 @@ pub fn do_process_layout(
         .filter(|warning| seen_rotation_warnings.insert(warning.clone()))
         .collect();
     crate::fold_line_edge::pin_fold_line_pieces(&mut pieces, &fold_plan);
+    // Folded fabric: pieces without a fold line keep one piece gap from the fold.
+    // The left margin of paper and open fabric needs no gap.
     if settings.is_folded_fabric() {
         let fold_edge_gap_px = settings.piece_gap_px();
         for piece in &mut pieces {
@@ -2696,15 +2698,32 @@ mod tests {
         fabric_width: f64,
         split_oversized: bool,
     ) -> ProcessLayoutResult {
-        let input = Document::parse(svg).expect("valid SVG");
-        let settings = serde_json::json!({
+        let settings = fold_settings(media, layout_mode, rotation_step, fold_lines_on_left_edge, fabric_width);
+        process_fold_svg_with_settings(svg, &settings, split_oversized)
+    } // fn process_fold_svg
+
+    // @brief Settings of the fold fixture: fabric is folded; paper is a 20 in roll.  Margins 0.5 in.
+    fn fold_settings(
+        media: &str,
+        layout_mode: &str,
+        rotation_step: f64,
+        fold_lines_on_left_edge: bool,
+        fabric_width: f64,
+    ) -> serde_json::Value {
+        serde_json::json!({
             "unit": "in", "mediaType": media, "paperType": "roll",
             "rollWidth": 20.0, "fabricWidth": fabric_width,
             "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
             "pieceGap": 0.125, "layoutMode": layout_mode, "rotationStep": rotation_step,
             "fabricFolded": media == "fabric", "foldLinesOnLeftEdge": fold_lines_on_left_edge,
             "tileSize": "Letter", "tileOrientation": "Portrait"
-        }).to_string();
+        })
+    } // fn fold_settings
+
+    // @brief Lay out `svg` with the given settings; the media length does not grow.
+    fn process_fold_svg_with_settings(svg: &str, settings: &serde_json::Value, split_oversized: bool) -> ProcessLayoutResult {
+        let input = Document::parse(svg).expect("valid SVG");
+        let settings = settings.to_string();
         let init = do_initialize_layout(&settings, Some(&input)).expect("initialize");
         let mut progress = |_pct: i32, _status: Option<&str>| {};
         do_process_layout(
@@ -2719,7 +2738,7 @@ mod tests {
             },
             &mut progress,
         ).expect("layout")
-    } // fn process_fold_svg
+    } // fn process_fold_svg_with_settings
 
     // @brief Process the fold fixture with one unsupported per-piece rotation value.
     fn process_invalid_rotation(layout_mode: &str) -> ProcessLayoutResult {
@@ -2839,8 +2858,7 @@ mod tests {
 
     // @brief Fold lines on the left edge.  Folded fabric: the fold line lies on the
     // left media edge, the fold, which has no margin.  Along grainline turns the piece
-    // 180 degrees; with nap mirrors it.  Paper ignores the option: the layout is the
-    // same with it on or off.  Off, the fold line stays where the packer puts it.
+    // 180 degrees; with nap mirrors it.  Off, the fold line stays where the packer puts it.
     #[test]
     fn fold_line_lies_on_the_left_edge() {
         for (mode, step) in [("alongGrainline", 0.0), ("withNap", 0.0), ("withNap", 180.0)] {
@@ -2851,16 +2869,34 @@ mod tests {
             assert!(xs.iter().all(|x| x.abs() < 1.0), "{mode} {step}: fold line at x {xs:?}");
         } // for each layout mode
 
-        let paper = process_fold_pieces("paper", "alongGrainline", 0.0, true);
-        let paper_off = process_fold_pieces("paper", "alongGrainline", 0.0, false);
-        assert!(paper.unplaced_labels.is_empty() && paper.fold_line_warnings.is_empty());
-        assert_eq!(paper.output_doc.get_attr_by_id("contentRect", "x"), Some("48"), "paper keeps its left margin");
-        assert_eq!(paper.bbox_json, paper_off.bbox_json, "paper ignores the option");
-
         let off = process_fold_pieces("fabric", "alongGrainline", 0.0, false);
         assert_eq!(off.output_doc.get_attr_by_id("contentRect", "x"), Some("0"), "folded fabric has no left margin");
         assert!(fold_line_xs(&off.output_doc).iter().all(|x| x.abs() > 1.0), "fold line off the edge");
     } // fold_line_lies_on_the_left_edge
+
+    // @brief Paper roll, tiled paper and open fabric: the fold line lies on the left margin,
+    //        the left edge of the content area.  Off, the fold line stays off the left margin.
+    #[test]
+    fn fold_line_lies_on_the_left_margin_of_paper_and_open_fabric() {
+        let media_settings = |media: &str, paper_type: &str, on_edge: bool| {
+            let mut settings = fold_settings(media, "alongGrainline", 0.0, on_edge, 20.0);
+            settings["paperType"] = serde_json::json!(paper_type);
+            settings["fabricFolded"] = serde_json::json!(false);
+            settings
+        };
+        for (media, paper_type) in [("paper", "roll"), ("paper", "tiled"), ("fabric", "roll")] {
+            let result = process_fold_svg_with_settings(FOLD_PIECES_SVG, &media_settings(media, paper_type, true), false);
+            assert!(result.unplaced_labels.is_empty() && result.fold_line_warnings.is_empty(), "{media} {paper_type}");
+            let bbox: serde_json::Value = serde_json::from_str(&result.bbox_json).expect("valid bbox JSON");
+            assert_eq!(bbox["ml_px"].as_f64(), Some(48.0), "{media} {paper_type}: the left margin stays");
+            let xs = fold_line_xs(&result.output_doc);
+            assert!(xs.iter().all(|x| (x - 48.0).abs() < 1.0), "{media} {paper_type}: fold line at x {xs:?}");
+
+            let off = process_fold_svg_with_settings(FOLD_PIECES_SVG, &media_settings(media, paper_type, false), false);
+            let off_xs = fold_line_xs(&off.output_doc);
+            assert!(off_xs.iter().all(|x| x - 48.0 > 1.0), "{media} {paper_type} off: fold line at x {off_xs:?}");
+        } // for each media
+    } // fold_line_lies_on_the_left_margin_of_paper_and_open_fabric
 
     // @brief Layout Mode Any ignores the fold edge rule.  Back keeps its fixed rotation (None),
     // so its fold line stays on its right edge, off the left edge.  No error, no warning.
@@ -2876,7 +2912,8 @@ mod tests {
         } // for each media
     } // any_mode_ignores_the_fold_edge
 
-    // @brief "Split the pieces" follows the layout: Layout Mode Any and open fabric pin no fold line while it measures.
+    // @brief "Split the pieces" follows the layout: Layout Mode Any pins no fold line while it measures.
+    //        Only folded fabric keeps the other pieces a piece gap from the left edge.
     #[test]
     fn any_mode_divide_spec_ignores_the_fold_edge() {
         let spec = |mode: &str, folded: bool| {
@@ -2888,7 +2925,9 @@ mod tests {
         };
         for (mode, on_edge) in [("alongGrainline", true), ("withNap", true), ("any", false)] {
             assert_eq!(spec(mode, true).fold_lines_on_left_edge, on_edge, "{mode}");
-            assert!(!spec(mode, false).fold_lines_on_left_edge, "{mode}: open fabric");
+            assert_eq!(spec(mode, false).fold_lines_on_left_edge, on_edge, "{mode}: open fabric");
+            assert!(spec(mode, true).fold_edge_gap_px > 0, "{mode}: folded fabric");
+            assert_eq!(spec(mode, false).fold_edge_gap_px, 0, "{mode}: open fabric");
         } // for each layout mode
     } // any_mode_divide_spec_ignores_the_fold_edge
 
@@ -2958,11 +2997,15 @@ mod tests {
     // @brief Lay out jacket2 on folded fabric as a multisize tab: `size` for a size tab,
     //        else Nested (`nested`) or Marker.  Multisize tabs extend the media length, as the app does.
     fn process_jacket2_folded(size: Option<&str>, nested: bool) -> ProcessLayoutResult {
+        process_jacket2_tab(&jacket2_folded_settings_json(), size, nested)
+    } // fn process_jacket2_folded
+
+    // @brief Lay out jacket2 with `settings_json` as a multisize tab, as `process_jacket2_folded` does.
+    fn process_jacket2_tab(settings_json: &str, size: Option<&str>, nested: bool) -> ProcessLayoutResult {
         let (input_dom, _) = jacket2_handoff();
-        let settings_json = jacket2_folded_settings_json();
-        let init = do_initialize_layout(&settings_json, Some(&input_dom)).expect("initialize_layout should succeed");
+        let init = do_initialize_layout(settings_json, Some(&input_dom)).expect("initialize_layout should succeed");
         let args = ProcessLayoutArgs {
-            settings_json: &settings_json,
+            settings_json,
             input_dom: &input_dom,
             initial_layout_dom: &init.initial_dom,
             layout_h_px: init.h_px,
@@ -2975,11 +3018,12 @@ mod tests {
             Some(size) => do_process_size_layout(args, size, &mut progress),
             None => do_process_layout(args, &mut progress),
         }; // match size
-        result.expect("folded jacket2 layout should succeed")
-    } // fn process_jacket2_folded
+        result.expect("jacket2 layout should succeed")
+    } // fn process_jacket2_tab
 
     // @brief Assert the `count` jacket2 units with a fold line (Back, Detail 2) lie first on the left
-    //        edge: the top one at the top, each next one a piece gap below the one above it.
+    //        edge of the content area: the top one at the top, each next one a piece gap below the
+    //        one above it.  Every jacket2 test settings file has the same piece gap.
     fn assert_fold_line_pieces_first(result: &ProcessLayoutResult, tab: &str, count: usize) {
         assert!(result.unplaced_labels.is_empty() && result.fold_line_warnings.is_empty(), "{tab}");
         let gap_px = u64::from(LayoutSettings::from_json(&jacket2_folded_settings_json()).expect("settings parse").piece_gap_px());
@@ -3017,5 +3061,23 @@ mod tests {
         assert_fold_line_pieces_first(&process_jacket2_folded(None, false), "Marker", 52);
         assert_fold_line_pieces_first(&process_jacket2_folded(None, true), "Nested", 2);
     } // jacket2_marker_and_nested_place_fold_line_pieces_first
+
+    // @brief Paper roll and open fabric, 60 in: on the base size tab and the Marker tab, Back and
+    //        Detail 2 go first, stacked at the left margin from the top.
+    #[test]
+    fn jacket2_paper_and_open_fabric_place_fold_line_pieces_first() {
+        let mut paper: serde_json::Value = serde_json::from_str(&jacket2_settings_json(60.0, 0.0)).expect("valid settings JSON");
+        paper["mediaType"] = serde_json::json!("paper");
+        paper["rollWidth"] = serde_json::json!(60.0);
+        let mut open_fabric: serde_json::Value = serde_json::from_str(&jacket2_settings_json(60.0, 100.0)).expect("valid settings JSON");
+        open_fabric["fabricFolded"] = serde_json::json!(false);
+        for (media, mut settings) in [("paper roll", paper), ("open fabric", open_fabric)] {
+            settings["foldLinesOnLeftEdge"] = serde_json::json!(true);
+            let settings_json = settings.to_string();
+            let base = process_jacket2_tab(&settings_json, Some(JACKET2_BASE_SIZE), false);
+            assert_fold_line_pieces_first(&base, &format!("{media} base size"), 2);
+            assert_fold_line_pieces_first(&process_jacket2_tab(&settings_json, None, false), &format!("{media} Marker"), 52);
+        } // for each media
+    } // jacket2_paper_and_open_fabric_place_fold_line_pieces_first
 
 } // mod tests

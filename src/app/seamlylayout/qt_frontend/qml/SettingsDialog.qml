@@ -463,6 +463,8 @@ Dialog {
             } // Rectangle mediaSection
 
             GridLayout {
+                id:                mediaGrid
+                objectName:        "mediaGrid"
                 Layout.fillWidth:  true
                 Layout.leftMargin:  12
                 Layout.rightMargin: 12
@@ -509,6 +511,7 @@ Dialog {
                     verticalAlignment: Text.AlignVCenter
                 } // Text mediaTypeLabel
                 RowLayout {
+                    objectName:       "mediaTypeButtons"
                     Layout.fillWidth: true
                     spacing: 16
 
@@ -542,6 +545,28 @@ Dialog {
                         } // contentItem Text
                     } // RadioButton fabric
                 } // RowLayout mediaTypeButtons
+
+                // Fold lines on the left edge, paper or fabric: each piece cut on the fold
+                // goes first, with its fold line on the left edge of the content area.
+                // Folded fabric: that edge is the fold, which has no left margin.
+                // Layout Mode Any ignores the option.
+                CheckBox {
+                    id:                foldLinesOnLeftEdgeCheck
+                    objectName:        "foldLinesOnLeftEdgeCheck"
+                    Layout.columnSpan: 2
+                    text:              "Place fold lines on the left edge"
+                    checked:           root.model ? root.model.foldLinesOnLeftEdge : false
+                    onToggled:         if (root.model) root.model.foldLinesOnLeftEdge = checked
+
+                    contentItem: Text {
+                        text:           foldLinesOnLeftEdgeCheck.text
+                        color:          Theme.textOnDark
+                        font.pixelSize: Theme.fontSizeNormal
+                        leftPadding:    foldLinesOnLeftEdgeCheck.indicator.width + foldLinesOnLeftEdgeCheck.spacing
+                        verticalAlignment: Text.AlignVCenter
+                        wrapMode:       Text.WordWrap
+                    } // contentItem Text
+                } // CheckBox foldLinesOnLeftEdge
 
                 // Paper type — only when mediaType == "paper"
                 Text {
@@ -813,30 +838,6 @@ Dialog {
                         verticalAlignment: Text.AlignVCenter
                     } // contentItem Text
                 } // CheckBox fabricFolded
-
-                // Fold lines on the left edge: each piece cut on the fold lies with its
-                // fold line on the fold, the left edge, which has no left margin.
-                // Enabled only for folded fabric; the layout ignores the option on paper
-                // and open fabric.  Layout Mode Any ignores it.
-                CheckBox {
-                    id:                foldLinesOnLeftEdgeCheck
-                    objectName:        "foldLinesOnLeftEdgeCheck"
-                    Layout.columnSpan: 2
-                    text:              "Place fold lines on the left edge (fabric: no left margin)"
-                    enabled:           root.model ? root.model.fabricFolded : false
-                    checked:           root.model ? root.model.foldLinesOnLeftEdge : false
-                    onToggled:         if (root.model) root.model.foldLinesOnLeftEdge = checked
-
-                    contentItem: Text {
-                        text:           foldLinesOnLeftEdgeCheck.text
-                        color:          Theme.textOnDark
-                        opacity:        foldLinesOnLeftEdgeCheck.enabled ? 1.0 : 0.5
-                        font.pixelSize: Theme.fontSizeNormal
-                        leftPadding:    foldLinesOnLeftEdgeCheck.indicator.width + foldLinesOnLeftEdgeCheck.spacing
-                        verticalAlignment: Text.AlignVCenter
-                        wrapMode:       Text.WordWrap
-                    } // contentItem Text
-                } // CheckBox foldLinesOnLeftEdge
 
                 // Fabric width
                 Text {

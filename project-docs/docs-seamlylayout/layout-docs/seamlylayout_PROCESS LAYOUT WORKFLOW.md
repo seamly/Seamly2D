@@ -54,7 +54,7 @@ Box-based packer: `crates/layout_engine/src/maxrects_order_search.rs` and `up_le
 
 - Start orders: pieces sorted by area, height, width, longer side, perimeter. Each order is packed with both rules.
 - Then late-acceptance hill climbing: swap two pieces, move one piece, or change the rule.
-- Left-edge pieces (fold lines on folded fabric) come first in every order, start orders and hill climbing alike (`PackJob::left_edge_first`).
+- Left-edge pieces (fold lines, on paper or fabric) come first in every order, start orders and hill climbing alike (`PackJob::left_edge_first`).
   They stack down the left edge from the top. The other pieces go after them. Every layout follows this rule: individual, Marker, Nested, Base Size and size tabs.
 - Fixed random seed: the same input always gives the same layout.
 - Layout rank, in order: least unplaced area, least height, least side-gap excess, pieces higher.
@@ -111,7 +111,7 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
 - Oversized pieces: the `oversized_pieces_found` signal, no layout. QML asks the user, then calls `process_layout_oversized(settings, "split" | "extend")` or `cancel_layout()`.
 - "split": `ProcessLayoutArgs::split_oversized`. `piece_divider::divide_oversized_pieces` runs after the piece-set centring and before `translate_dom`.
   - Equal columns for a piece too wide. Each outline region in a column is one part.
-  - On folded fabric with fold lines on the left edge, true fold-line pieces remain pinned to the fold. Layout Mode Any pins none. Other pieces and split parts keep at least `pieceGap` from the fold edge. Oversize checks and split sizing use that same reduced width.
+  - With fold lines on the left edge, true fold-line pieces remain pinned to the left edge, on paper or fabric. Layout Mode Any pins none. On folded fabric, other pieces and split parts keep at least `pieceGap` from the fold edge. Oversize checks and split sizing use that same reduced width.
   - Cutting: `geometry::half_plane_clip` (`cut_closed`, `cut_open`). Each output vertex keeps its source vertex index, so `data-turn-points` stay valid.
   - Internal paths, grainlines and reference lines (`stripe`, `plaid`) end at the cut lines. A `drill` hole inside one column goes whole to the part nearest its circle centre; `cut_positions` keeps cut lines off drill centres.
   - A cut line that crosses a drill circle splits it (`drill_for_parts`): each part gets a `<path>` of its arcs as cubic curves.

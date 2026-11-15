@@ -69,7 +69,7 @@ MALE_SHIRT
 | Layout.Y4.1 | 51 | SL > trousers > Paper Roll 16 in, split: Back drill hole splits at the cut line | ?
 | Layout.Y5.1 | 52 | S2D > male_shirt > Piece mode, BackPanel Mirrored: grainline tilts with the piece | ?
 | Layout.Y6.1 | 53 | SL > trousers, jacket_2 > Paper Roll and Fabric: the media width never changes | ?
-| Layout.Y7.3 | 54 | SL > jacket_2 > Settings: fold edge check box in the Fabric section, enabled by Fabric Folded | ?
+| Layout.Y111.1 | 58 | SL > jacket_2 > Settings: fold edge check box below Media Type; fold line pieces on the left edge of paper and fabric | ?
 | Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Fabric | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Lining | ?
@@ -363,7 +363,7 @@ Needs the next MSI. Any pattern with a half piece, for example a back cut on the
 
 Needs the next MSI. jacket2 Back has a fold line.
 
-- [ ] Settings: "Place fold lines on the left edge (fabric: no left margin)" is in the Fabric section, below "Fabric Folded" (§54).
+- [ ] Settings: "Place fold lines on the left edge" is on the line below Media Type (§58).
 - [ ] Media Fabric, Fabric Width 60 in, Fabric Folded. Check the option. Layout Mode Along Grainline. Submit. Create Layout.
 - [ ] Size 220 tab: Back lies with its dashed fold line on the left media edge. No margin left of it.
 - [ ] Marker tab: every size of Back touches the left edge.
@@ -801,19 +801,6 @@ Detail 3 has corners on its cut line, but no corner is a right angle. Detail 3 i
 - [ ] Settings: Fabric (not folded), width 30.0. Same check.
 - [ ] Settings: Paper, Roll, width 48.00 in. Create Layout: no dialog. Every tab starts with `48.00 x`; the length grows past 500 in on Marker.
 
-## 54. [ ] Fold edge option in the Fabric section
-
-(Layout.Y7.3)
-
-- [ ] Open jacket2 (`test-seamly-layout/patterns/validation/jacket2_40-146.sm2d`). Press Layout. Open Settings.
-- [ ] Media Paper: no "Place fold lines on the left edge" check box.
-- [ ] Media Fabric: the Fabric section shows "Fabric Folded", then "Place fold lines on the left edge (fabric: no left margin)" on the next line.
-- [ ] Fabric Folded off: the fold edge check box is grey. A click does not change it.
-- [ ] Fabric Folded on: the fold edge check box is enabled. A new settings file has it checked.
-- [ ] Fabric Folded on, fold edge on. Submit. Create Layout. Size 220 tab: Back's fold line lies on the left edge.
-- [ ] Fabric Folded off. Submit. Create Layout. Back's fold line is not on the left edge; the left margin shows.
-- [ ] Media Paper, Roll 48 in. Submit. Create Layout. Back's fold line is not on the left content edge.
-
 ## 55. [ ] Layout rotation Any turns in 10° steps
 
 (Layout.Y8.1)
@@ -844,3 +831,17 @@ Detail 3 has corners on its cut line, but no corner is a right angle. Detail 3 i
 - [ ] Settings: Fabric. Submit. Create Layout. Base Size, size, Marker and Nested tabs: each layout displays.
 - [ ] Pan, wheel zoom and double-click fit work on each canvas.
 - [ ] Log file: no `CanvasSvgSchemeHandler` or `SvgCanvas` warning.
+
+## 58. [ ] Fold lines on the left edge of paper and fabric
+
+(Layout.Y111.1)
+
+- [ ] Open jacket2 (`test-seamly-layout/patterns/validation/jacket2_40-146.sm2d`). Press Layout. Open Settings.
+- [ ] Media Paper: "Place fold lines on the left edge" is on the line below Media Type, enabled. A new settings file has it checked.
+- [ ] Media Fabric: the same line, enabled, Fabric Folded on or off. The Fabric section has no fold edge check box.
+- [ ] Paper, Roll 60 in, fold edge on. Submit. Create Layout. Base Size tab: Back and Detail 2 lie first, at the top of the left margin, one above the other.
+- [ ] Marker tab: every Back and Detail 2 lies on the left margin, above every other piece on that edge. The roll gets longer when it must.
+- [ ] Paper, Tiled, Letter: Back's fold line lies on the left margin of the left tile column.
+- [ ] Fabric, width 60.0, Fabric Folded off, fold edge on: Back and Detail 2 lie first on the left margin.
+- [ ] Fabric Folded on: Back's fold line lies on the fold; no left margin.
+- [ ] Fold edge off, any media: Back's fold line is not on the left edge.

@@ -6,6 +6,13 @@
 - Unit -- 'cm', 'mm', or 'in' radio buttons; Default is 'in'.
 # Media Settings
 - media -- 'paper' or 'fabric' radio buttons; default is 'paper'.
+- foldLinesOnLeftEdge -- checkbox "Place fold lines on the left edge", on the line below media; default on.
+    > Enabled for paper and fabric (`LayoutSettings::places_fold_lines_on_left_edge`).
+    > Each piece with a fold line goes first, with its fold line on the left edge of the content area. The media gets longer when it must.
+    > Folded fabric: the left edge is the fold, with no margin. Paper and open fabric: the left edge is the left margin.
+    > A fold line across or aslant the grain turns its piece; the fold edge outranks the layout mode.
+    > layoutMode='any' ignores this option: no fold line goes on the edge, and no conflict is reported.
+    > A Nested piece-set: its sizes stack on the lower end of their fold line, so the stack goes on the edge when the sizes share one fold line; else a warning.
 - if media = 'paper':
     > paperType - 'tiled', 'roll' dropdown; default is 'tiled'. A saved 'sheet' or 'custom' loads as 'tiled'.
     > if paperType='roll':
@@ -45,12 +52,6 @@
     > The page size (pageWidth, pageHeight) does not apply to fabric.
     > selvedgeWidth -- default is 0.
     > fabricFold -- checkbox.
-    > foldLinesOnLeftEdge -- checkbox "Place fold lines on the left edge (fabric: no left margin)", on the line below fabricFold; default on.
-      >> Enabled only when fabricFold is True. Paper and open fabric ignore a saved value (`LayoutSettings::places_fold_lines_on_left_edge`).
-      >> Each piece with a fold line lies with its fold line on the fold: the left edge, with no margin.
-      >> A fold line across or aslant the grain turns its piece; the fold edge outranks the layout mode.
-      >> layoutMode='any' ignores this option: no fold line goes on the edge, and no conflict is reported.
-      >> A Nested piece-set: its sizes stack on the lower end of their fold line, so the stack goes on the edge when the sizes share one fold line; else a warning.
     > Margins - marginLeft, marginRight, marginTop, marginBottom
       >> if fabricFold is True then marginLeft=0 else marginLeft=SelvedgeWidth.
       >> marginRight=selvedgeWidth.
