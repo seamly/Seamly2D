@@ -26,7 +26,9 @@
 //     (`fold_line_arrow`, `fold_line_label`) go whole into the fold line group of the
 //     nearest part;
 //   - `drill` holes: whole, on the part nearest the circle centre. No cut line
-//     passes through a drill centre;
+//     passes through a drill centre. A cut line that crosses the circle splits it:
+//     each part draws its arcs, which end at the cut lines. The part that holds the
+//     centre also keeps a zero-radius circle there, the drill point for DXF;
 //   - notches, labels and other groups: whole, on the nearest part. A pattern, piece
 //     or fold line label not wholly inside the part outline moves inside it
 //     (`label_inside_part.rs`);
@@ -42,6 +44,7 @@
 // cut line are turn points.
 
 use std::collections::{HashMap, HashSet};
+use std::f64::consts::{FRAC_PI_2, TAU};
 
 use geometry::fold_line_join::{distance_to_segment, line_closes_on_fold};
 use geometry::half_plane_clip::{cut_closed, cut_open, CutLine, CutVertex};
@@ -584,24 +587,50 @@ fn all_points(el: &Element) -> Vec<(f64, f64)> {
         .flat_map(|s| s.points)
         .collect();
     // Drill holes are circles: their centres place them on a part and keep cut lines off them.
-    circle_centres(el, &mut points);
+    let mut found = Vec::new();
+    circles(el, &mut found);
+    points.extend(found.iter().map(|circle| circle.centre));
     points
 } // fn all_points
 
-// @brief Append the centre of every `<circle>` below `el` with numeric `cx` and `cy`, in document order.
-fn circle_centres(el: &Element, out: &mut Vec<(f64, f64)>) {
+// @brief A `<circle>`: centre and radius.
+#[derive(Debug, Clone, Copy)]
+struct Circle {
+    centre: (f64, f64),
+    // 0 when `r` is missing or does not parse.
+    r: f64,
+}
+
+// @brief Append every `<circle>` below `el` with numeric `cx` and `cy`, in document order.
+fn circles(el: &Element, out: &mut Vec<Circle>) {
     for child in el.children.iter().filter_map(XMLNode::as_element) {
         if child.name == "circle" {
             let number = |name: &str| attr(child, name).trim().parse::<f64>().ok();
             if let (Some(x), Some(y)) = (number("cx"), number("cy")) {
-                out.push((x, y));
+                out.push(Circle { centre: (x, y), r: number("r").unwrap_or(0.0) });
             } // if the centre parses
         } else {
             // A container: search its children.
-            circle_centres(child, out);
+            circles(child, out);
         } // if circle
     } // for each child element
-} // fn circle_centres
+} // fn circles
+
+// @brief Replace each `<circle>` below `el` with `nodes`, in its place.
+fn replace_circles(el: &mut Element, nodes: &[XMLNode]) {
+    for node in std::mem::take(&mut el.children) {
+        match node {
+            XMLNode::Element(child) if child.name == "circle" => {
+                el.children.extend(nodes.iter().cloned());
+            } // circle
+            XMLNode::Element(mut child) => {
+                replace_circles(&mut child, nodes);
+                el.children.push(XMLNode::Element(child));
+            } // container
+            other => el.children.push(other),
+        } // match node
+    } // for each child node
+} // fn replace_circles
 
 // @brief A point that tells which part an element belongs to: the centre of its
 // path points and circle centres, else the anchor of its first `<text>`.
@@ -882,6 +911,116 @@ fn notches_for_parts(group: &Element, parts: &[Part]) -> Vec<Option<Element>> {
     out
 } // fn notches_for_parts
 
+// @brief The drill group of each part when a cut line crosses the drill circle.
+//
+// Each part gets a copy of the group. Its `<circle>` becomes a `<path>` of the
+// circle's arcs inside the part; each arc ends at a cut line. The part that holds
+// the centre also gets a `<circle r="0" stroke="none">` at the centre. It draws
+// nothing; DXF-ASTM writes it as the layer 13 drill point.
+// @return None when the group does not hold exactly one circle, or no cut line crosses it.
+fn drill_for_parts(group: &Element, cells: &[Cell], parts: &[Part]) -> Option<Vec<Option<Element>>> {
+    let mut found = Vec::new();
+    circles(group, &mut found);
+    let [circle] = found.as_slice() else {
+        return None; // no circle, or several: the group goes whole to one part
+    };
+    let ((cx, cy), r) = (circle.centre, circle.r);
+    let crosses = |x: f64| (x - cx).abs() < r;
+    if !cells.iter().flat_map(|cell| [cell.x_lo, cell.x_hi]).flatten().any(crosses) {
+        return None; // the circle lies inside one cell
+    } // if no cut line crosses the circle
+
+    // Each arc goes to the part nearest its middle, among the parts of its cell.
+    let mut arcs_of: Vec<Vec<String>> = vec![Vec::new(); parts.len()];
+    for (c, cell) in cells.iter().enumerate() {
+        for (from, to) in arcs_in_cell(*circle, cell) {
+            let middle = (from + to) / 2.0;
+            let anchor = (cx + r * middle.cos(), cy + r * middle.sin());
+            arcs_of[nearest_part(parts, Some(c), anchor)].push(arc_d(*circle, from, to));
+        } // for each arc in the cell
+    } // for each cell
+
+    // The drill point stays with the part nearest the centre, in the centre's cell.
+    let centre_cell = cells.iter().position(|cell| cell.x_lo.map_or(true, |x| x <= cx) && cell.x_hi.map_or(true, |x| cx < x));
+    let centre_part = nearest_part(parts, centre_cell, (cx, cy));
+    let point = new_element("circle", &[
+        ("cx", fmt_coord(cx)),
+        ("cy", fmt_coord(cy)),
+        ("r", "0".to_string()),
+        // A renderer that draws a zero-length line with square caps would show a dot.
+        ("stroke", "none".to_string()),
+        ("fill", "none".to_string()),
+    ]);
+
+    let groups = arcs_of
+        .iter()
+        .enumerate()
+        .map(|(i, arcs)| {
+            let mut nodes: Vec<XMLNode> = Vec::new();
+            if !arcs.is_empty() {
+                nodes.push(XMLNode::Element(new_element("path", &[("d", arcs.join(" "))])));
+            } // if the part holds arcs
+            if i == centre_part {
+                nodes.push(XMLNode::Element(point.clone()));
+            } // if the part holds the centre
+            if nodes.is_empty() {
+                return None; // the circle misses this part
+            } // if nothing for this part
+            let mut el = group.clone();
+            replace_circles(&mut el, &nodes);
+            Some(el)
+        })
+        .collect();
+    Some(groups)
+} // fn drill_for_parts
+
+// @brief Angle ranges (from, to), from < to, of the arcs of `circle` inside `cell`.
+//
+// Angles are in radians from +x, turning toward +y. A point at angle t, with t in
+// -π..π, lies right of the low cut line while |t| <= low, and left of the high cut
+// line while |t| >= high.
+// @return Empty when the circle misses the cell; (0, 2π) when it lies wholly inside.
+fn arcs_in_cell(circle: Circle, cell: &Cell) -> Vec<(f64, f64)> {
+    let (cx, r) = (circle.centre.0, circle.r);
+    if cell.x_lo.is_some_and(|x| x >= cx + r) || cell.x_hi.is_some_and(|x| x <= cx - r) {
+        return Vec::new(); // the circle lies beside the cell
+    } // if the circle misses the cell
+    let angle = |x: f64| ((x - cx) / r).clamp(-1.0, 1.0).acos();
+    // A cut line that misses the circle leaves the circle whole on that side.
+    let low = cell.x_lo.filter(|&x| x > cx - r).map(angle);
+    let high = cell.x_hi.filter(|&x| x < cx + r).map(angle);
+    match (low, high) {
+        (None, None) => vec![(0.0, TAU)], // wholly inside
+        (Some(low), None) => vec![(-low, low)], // right of the low cut line: one arc through angle 0
+        (None, Some(high)) => vec![(high, TAU - high)], // left of the high cut line: one arc through angle π
+        (Some(low), Some(high)) => vec![(high, low), (-low, -high)], // between both: a lower and an upper arc
+    } // match the cut lines that cross the circle
+} // fn arcs_in_cell
+
+// @brief `d` of the arc of `circle` from angle `from` to angle `to`, as cubic Bézier curves.
+//
+// Each curve spans 90° or less: its distance from the circle is under 0.03% of the radius.
+// Cubic curves stay exact under each layout transform; an SVG arc command does not under a flip.
+fn arc_d(circle: Circle, from: f64, to: f64) -> String {
+    let ((cx, cy), r) = (circle.centre, circle.r);
+    let curves = ((to - from) / FRAC_PI_2).ceil().max(1.0) as usize;
+    let step = (to - from) / curves as f64;
+    // Distance of each control point from its end point, along the tangent.
+    let handle = 4.0 / 3.0 * (step / 4.0).tan() * r;
+    let at = |t: f64| (cx + r * t.cos(), cy + r * t.sin());
+    let xy = |(x, y): (f64, f64)| format!("{},{}", fmt_coord(x), fmt_coord(y));
+    let mut d = format!("M{}", xy(at(from)));
+    for k in 0..curves {
+        let (t0, t1) = (from + step * k as f64, from + step * (k + 1) as f64);
+        let (p0, p3) = (at(t0), at(t1));
+        // The tangent at angle t points along (-sin t, cos t).
+        let p1 = (p0.0 - handle * t0.sin(), p0.1 + handle * t0.cos());
+        let p2 = (p3.0 + handle * t1.sin(), p3.1 - handle * t1.cos());
+        d.push_str(&format!(" C{} {} {}", xy(p1), xy(p2), xy(p3)));
+    } // for each curve
+    d
+} // fn arc_d
+
 // @brief `d` text of one unclipped subpath, with a trailing space.
 fn subpath_d(subpath: &Subpath) -> String {
     let mut d = String::new();
@@ -1087,6 +1226,16 @@ fn divide_piece(piece: &Element, columns: usize, uu_per_px: f64) -> Option<Vec<E
                 continue;
             } // if clipped
         } // if fold line
+        if data_type == "drill" {
+            if let Some(groups) = drill_for_parts(child, &cells, &parts) {
+                for (i, group) in groups.into_iter().enumerate() {
+                    if let Some(group) = group {
+                        part_children[i].push(group);
+                    } // if the part holds some of the drill hole
+                } // for each part
+                continue;
+            } // if a cut line crosses the drill hole
+        } // if drill hole
         if let Some(split) = closed.and_then(|closed| split_component(child, closed, &cells, &parts)) {
             for (i, list) in part_children.iter_mut().enumerate() {
                 if let Some(el) = component_for_part(child, &split, i) {
@@ -1098,7 +1247,7 @@ fn divide_piece(piece: &Element, columns: usize, uu_per_px: f64) -> Option<Vec<E
             }
             continue;
         } // if clipped
-        // Labels, drill holes and anything else: whole, to the nearest part.
+        // Labels, drill holes inside one cell, and anything else: whole, to the nearest part.
         let part = element_anchor(child).map_or(0, |p| nearest_part(&parts, None, p));
         part_children[part].push((*child).clone());
         if data_type == "grainline" {
@@ -1416,9 +1565,9 @@ mod tests {
     fn drill_holes(part: &Element) -> Vec<(String, f64)> {
         let mut out = Vec::new();
         for drill in part.children.iter().filter_map(|n| n.as_element()).filter(|e| attr(e, "data-type") == "drill") {
-            let mut centres = Vec::new();
-            circle_centres(drill, &mut centres);
-            out.extend(centres.into_iter().map(|(x, _)| (attr(drill, "id").to_string(), x)));
+            let mut found = Vec::new();
+            circles(drill, &mut found);
+            out.extend(found.into_iter().map(|circle| (attr(drill, "id").to_string(), circle.centre.0)));
         } // for each drill group
         out
     } // fn drill_holes
@@ -1459,6 +1608,89 @@ mod tests {
         assert_eq!(drill_holes(parts[0]), vec![("drill_Back_part1".to_string(), 100.0)]);
         assert_eq!(drill_holes(parts[1]), vec![("drill_Back-2_part2".to_string(), 300.0)]);
     } // markings_split_with_the_piece
+
+    // @brief One tagged piece, 400 × 100, with one drill hole, radius 20, that the cut line at x 200 crosses.
+    const CROSSED_DRILL_SVG: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="2000">
+  <g id="piece_Back" data-type="piece" data-type-number="1" data-name="Back">
+    <g id="cutline_Back" data-type="cutline" data-type-number="1" data-parent="Back"><path d="M0,0 L400,0 L400,100 L0,100 L0,0 Z"/></g>
+    <g id="drill_Back" data-type="drill" data-type-number="1" data-parent="Back" data-diameter="40"><g stroke="black" stroke-dasharray="5 2"><circle cx="190" cy="50" r="20"/></g></g>
+  </g>
+</svg>"#;
+
+    // @brief The points of a path of cubic curves: start, then control points and end of each curve.
+    fn curve_points(d: &str) -> Vec<(f64, f64)> {
+        let path = Path::parse_path_attribute(d).expect("arc path parses");
+        let mut out = Vec::new();
+        for segment in &path.segments {
+            match segment {
+                PathSegment::MoveTo(p) => out.push((f64::from(p.x), f64::from(p.y))),
+                PathSegment::CubicTo { ctrl1, ctrl2, to } => {
+                    out.extend([ctrl1, ctrl2, to].map(|p| (f64::from(p.x), f64::from(p.y))));
+                } // curve
+                other => panic!("arc path holds {other:?}"),
+            } // match segment
+        } // for each segment
+        out
+    } // fn curve_points
+
+    // @brief A cut line that crosses a drill circle splits it: each part draws its arc,
+    // from the cut line round to the cut line; only the part with the centre keeps the drill point.
+    #[test]
+    fn drill_hole_splits_at_the_cut_line() {
+        let mut doc = Document::parse(CROSSED_DRILL_SVG).expect("fixture parses");
+        let divided = divide_oversized_pieces(&mut doc, &spec(250));
+        assert_eq!(divided, vec![DividedPiece { label: "Back".to_string(), parts: 2 }]);
+        let parts = part_groups(&doc);
+        assert_eq!(parts.len(), 2);
+
+        // The cut line at x 200 meets the circle at y = 50 ± 20 sin 60°.
+        let (top, bottom) = (50.0 - 20.0 * 60f64.to_radians().sin(), 50.0 + 20.0 * 60f64.to_radians().sin());
+        // (part, arc start y, arc end y, curves): part 1 holds 240° of the circle, part 2 holds 120°.
+        for (part, start_y, end_y, curves) in [(parts[0], bottom, top, 3), (parts[1], top, bottom, 2)] {
+            let drill = component(part, "drill").expect("drill hole on each part");
+            // The arc path takes the circle's place in the styled group.
+            let styled = drill.get_child("g").expect("styled drill group");
+            assert_eq!(attr(styled, "stroke-dasharray"), "5 2");
+            let d = ds(styled);
+            assert_eq!(d.matches('C').count(), curves, "{d}");
+            let points = curve_points(&d);
+            let (first, last) = (points[0], points[points.len() - 1]);
+            assert!((first.0 - 200.0).abs() < 1e-3 && (first.1 - start_y).abs() < 1e-3, "arc start {first:?}");
+            assert!((last.0 - 200.0).abs() < 1e-3 && (last.1 - end_y).abs() < 1e-3, "arc end {last:?}");
+            // Each curve end lies on the circle.
+            for end in points.iter().skip(3).step_by(3) {
+                let radius = ((end.0 - 190.0).powi(2) + (end.1 - 50.0).powi(2)).sqrt();
+                assert!((radius - 20.0).abs() < 1e-3, "curve end {end:?} is {radius} from the centre");
+            } // for each curve end
+            // Every point, control points too, stays on the part's side of the cut line.
+            let inside = |p: &(f64, f64)| if std::ptr::eq(part, parts[0]) { p.0 <= 200.0 + 1e-3 } else { p.0 >= 200.0 - 1e-3 };
+            assert!(points.iter().all(inside), "{d}");
+        } // for each part
+
+        // Part 1 holds the centre: its zero-radius circle is the drill point; part 2 has no circle.
+        let point = component(parts[0], "drill").and_then(|g| g.get_child("g")).and_then(|g| g.get_child("circle")).expect("drill point");
+        assert_eq!((attr(point, "cx"), attr(point, "cy"), attr(point, "r"), attr(point, "stroke")), ("190", "50", "0", "none"));
+        assert!(drill_holes(parts[1]).is_empty());
+        assert_eq!(attr(component(parts[1], "drill").expect("drill"), "data-diameter"), "40");
+    } // drill_hole_splits_at_the_cut_line
+
+    // @brief A middle cell narrower than the circle holds a lower and an upper arc; each end lies on a cut line.
+    #[test]
+    fn narrow_cell_holds_two_arcs() {
+        let circle = Circle { centre: (0.0, 0.0), r: 10.0 };
+        let arcs = arcs_in_cell(circle, &Cell { x_lo: Some(-5.0), x_hi: Some(5.0) });
+        assert_eq!(arcs.len(), 2);
+        for (from, to) in arcs {
+            assert!(from < to);
+            for t in [from, to] {
+                let x = 10.0 * t.cos();
+                assert!((x.abs() - 5.0).abs() < 1e-9, "arc end x {x}");
+            } // for each arc end
+        } // for each arc
+        // A cell beside the circle holds none; a cell around it holds the whole circle.
+        assert!(arcs_in_cell(circle, &Cell { x_lo: Some(10.0), x_hi: None }).is_empty());
+        assert_eq!(arcs_in_cell(circle, &Cell { x_lo: Some(-20.0), x_hi: Some(20.0) }), vec![(0.0, TAU)]);
+    } // narrow_cell_holds_two_arcs
 
     // @brief A cut line that would pass through a drill centre moves off it.
     #[test]

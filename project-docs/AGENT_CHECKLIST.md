@@ -61,7 +61,8 @@ MALE_SHIRT
 | Layout.X7.2 | 47 | SL > jacket_2 > Fabric folded 30.0, split: no layout leaves pieces out | ?
 | Layout.Y2.1 | 49 | SL > jacket_2 > Fabric folded 30.0, split: Marker and Nested tabs show a message, no media | ?
 | Layout.X5.2 | 42 | SL > jacket_2, trousers, male_shirt > Media size below each layout tab and material tab | ?
-| Layout.803.1 | 48 | SL > male_shirt, trousers > Paper Roll 8 in, split: drill holes whole; stripe, plaid, internal paths end at the cut line | ?
+| Layout.803.1 | 48 | SL > male_shirt, trousers > Paper Roll 8 in, split: drill holes, stripe, plaid, internal paths end at the cut line | ?
+| Layout.Y4.1 | 50 | SL > trousers > Paper Roll 16 in, split: Back drill hole splits at the cut line | ?
 | Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Fabric | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Lining | ?
@@ -724,10 +725,10 @@ Individual pattern, two materials:
 - [ ] Open male_shirt. Press Layout.
 - [ ] Settings: Paper, Roll, custom width 8 in. Layout Mode: Along Grainline. Submit. Create Layout.
 - [ ] Dialog "Pieces do not fit the media": choose "Split the pieces". OK.
-- [ ] FrontPanel: each drill hole is whole, on the part where it lies. The stripe line ends at the cut line on each part it crosses.
+- [ ] FrontPanel: a drill hole away from the cut line is whole, on the part where it lies. The stripe line ends at the cut line on each part it crosses.
 - [ ] BackPanel: each internal path ends at the cut line on each part it crosses. No internal path runs along a cut edge.
 - [ ] Open trousers (`test-seamly-layout/patterns/validation/trousers.sm2d`). Same settings. Split.
-- [ ] Back: the drill hole is whole, on one part. Stripe and plaid lines end at the cut line on each part. The plaid line stays dashed.
+- [ ] Back: stripe and plaid lines end at the cut line on each part. The plaid line stays dashed. Drill hole: see section 50.
 - [ ] Front Pleats: stripe and plaid lines end at the cut line on each part.
 
 ## 49. [ ] Marker and Nested unavailable after a split
@@ -745,3 +746,15 @@ Individual pattern, two materials:
 - [ ] Every material tab: same Marker and Nested message.
 - [ ] Export > Export all tabs, SVG: no Marker or Nested file.
 - [ ] Settings: Paper, Roll. Create Layout. No dialog appears; Marker and Nested lay out as before.
+
+## 50. [ ] Split drill holes
+
+(Layout.Y4.1)
+
+- [ ] Open trousers (`test-seamly-layout/patterns/validation/trousers.sm2d`). Press Layout.
+- [ ] Settings: Layout Mode Along Grainline. No Grainline: Keep upright. Paper, Roll, custom width 16.00 in. Submit. Create Layout.
+- [ ] Dialog "Pieces do not fit the media": choose "Split the pieces". OK.
+- [ ] Back part 1 of 2 and Back part 2 of 2: each shows its side of the drill hole circle. Each arc ends at the cut line.
+- [ ] No part of the drill hole lies outside its part. The two arcs meet at the cut line when the parts are side by side.
+- [ ] Stripe and plaid lines still end at the cut line on each part.
+- [ ] Export > DXF-ASTM. Open the file in a DXF viewer: Back has one drill point, on the part that holds the drill centre.

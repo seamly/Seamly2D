@@ -2,6 +2,17 @@
 
 ## Current status
 
+### 2026-11-14 — Split drill holes (Layout.Y4)
+
+- `piece_divider.rs` `drill_for_parts`: a cut line that crosses a drill circle splits it. Each part's `<circle>` becomes a `<path>` of its arcs (cubic curves, 90° or less each) that end at the cut line.
+- The part nearest the centre keeps `<circle r="0" stroke="none" fill="none">`: one DXF-ASTM layer 13 drill point. Decision: DXF has no half drill hole; the point stays where the centre is.
+- Cubic curves, not SVG `A` arcs: `svg_dom` bakes an arc wrongly under a flip.
+- `seamly_svg2ezdxf` `extract_drill_hole`: a split part (`data-split-of`) with no circle writes no point; a zero-radius circle writes the point. Unsplit pieces keep the old checks.
+- Tests: `drill_hole_splits_at_the_cut_line`, `narrow_cell_holds_two_arcs`, `split_drill_hole_keeps_one_drill_point`; two reject cases.
+- Checked: `cargo test --workspace` 712 pass; `ctest` debug 8/8. Built in worktree `split-drill`; merged `--no-ff`; branch and worktree deleted.
+- Docs: SVG-DATA-ATTRIBUTES, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, DXF-ASTM compliance, `AGENT_CHECKLIST.md` §48, new §50 and OPEN row.
+- Open: Layout.Y4.1 installed-app check with the next MSI (§50).
+
 ### 2026-11-14 — Marker and Nested unavailable after a split (Layout.Y2)
 
 - Multisize "Split the pieces": the run lays out only Base Size and each size (`layout_views::size_kinds`, was `tiled_kinds`), every material.
@@ -46,14 +57,6 @@
 - Checked: `cargo test --workspace` 705 pass; `ctest --preset debug` 8/8. App starts with the new QML; UI not driven.
 - Docs: SIMPLE_WORKFLOW; `AGENT_CHECKLIST.md` §42 (multisize part now jacket2; trousers is individual) and OPEN row; TODO Layout.X5.3.
 - Open: Layout.X5.2 installed-app check with the next MSI (§42).
-
-### 2026-11-14 — Logo commit broke the MSI build
-
-- Cause: commit `3674fcfeab` moved `seamly-layout_512x512.png` and `seamly-layout.icns` to `assets/images/old-imgs/`; `qt_frontend/CMakeLists.txt` still names `assets/images/`.
-- `CMakeLists.txt` `SEAMLY_ICON_PNG` now names `seamly-layout-512x512.png` (Sue made the PNG set). `seamly-layout.icns` rendered from the new `seamly-layout.svg` (Inkscape 1.4.4, Pillow).
-- `svg_dom` test `deep_id_lookup_in_nested_groups` uses inline SVG; the old test read id `Circle` from the logo.
-- Checked: `cargo test --workspace` 704 pass; `ctest --preset debug` 8/8.
-- Open (Sue): rerun `local_build_msi.ps1`; keep or delete `assets/images/old-imgs/`.
 
 ## Decisions to retain
 

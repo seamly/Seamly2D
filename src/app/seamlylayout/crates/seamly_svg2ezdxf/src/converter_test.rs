@@ -217,11 +217,44 @@ mod tests {
         assert!((first.diameter - 4.0 * crate::utils::MM_PER_PX).abs() < 1e-6);
     } // keeps_graded_drill_centers_per_size
 
+    // @brief A split drill hole writes one drill point: on the part that holds the zero-radius centre circle.
+    #[test]
+    fn split_drill_hole_keeps_one_drill_point() {
+        let svg = r#"<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <g id="piece_Back_part1" data-type="piece" data-split-of="piece_Back" data-split-part="1" data-split-count="2">
+    <g data-type="cutline"><path d="M0,0 L30,0 L30,100 L0,100 Z"/></g>
+    <g data-type="drill" data-diameter="40"><g stroke="black">
+      <path d="M30,67.3205 C20,80 0,70 10,50 C0,30 20,20 30,32.6795"/>
+      <circle cx="20" cy="50" r="0" stroke="none" fill="none"/>
+    </g></g>
+  </g>
+  <g id="piece_Back_part2" data-type="piece" data-split-of="piece_Back" data-split-part="2" data-split-count="2">
+    <g data-type="cutline"><path d="M30,0 L60,0 L60,100 L30,100 Z"/></g>
+    <g data-type="drill" data-diameter="40"><g stroke="black"><path d="M30,32.6795 C40,40 40,60 30,67.3205"/></g></g>
+  </g>
+</svg>"#;
+        let doc = Document::parse(svg).expect("fixture parses");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        assert_eq!(drawing.blocks.len(), 2);
+        let holes = &drawing.blocks[0].drill_holes;
+        assert_eq!(holes.len(), 1, "the part with the centre writes the drill point");
+        assert!((holes[0].center.x - 20.0 * crate::utils::MM_PER_PX).abs() < 1e-6);
+        assert!((holes[0].center.y - 50.0 * crate::utils::MM_PER_PX).abs() < 1e-6);
+        assert!((holes[0].diameter - 40.0 * crate::utils::MM_PER_PX).abs() < 1e-6);
+        assert!(drawing.blocks[1].drill_holes.is_empty(), "the other part writes no drill point");
+        for block in &drawing.blocks {
+            assert!(block.entities.iter().all(|entity| entity.layer() != "13"), "arcs are not generic entities");
+        } // for each block
+    } // split_drill_hole_keeps_one_drill_point
+
     // @brief Reject invalid drill dimensions and unsupported reference-path geometry.
     #[test]
     fn rejects_malformed_drill_and_reference_components() {
         for component in [
             r#"<g data-type="drill" data-diameter="0"><circle cx="1" cy="1" r="0"/></g>"#,
+            // A zero-radius drill circle is a drill point only in a part of a split piece.
+            r#"<g data-type="drill" data-diameter="2"><circle cx="1" cy="1" r="0"/></g>"#,
+            r#"<g data-type="drill" data-diameter="2"><path d="M0,1 C0,0 2,0 2,1"/></g>"#,
             r#"<g data-type="stripe"><path d="M0,0 L1,1 L2,2"/></g>"#,
         ] {
             let svg = format!(
@@ -229,7 +262,8 @@ mod tests {
             );
             let doc = Document::parse(&svg).expect("fixture parses");
             let error = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).err().expect("invalid component rejected");
-            assert!(error.to_string().contains("drill hole") || error.to_string().contains("reference path"));
+            let message = error.to_string();
+            assert!(message.contains("drill hole") || message.contains("drill circle") || message.contains("reference path"), "{message}");
         } // for each malformed component
     } // rejects_malformed_drill_and_reference_components
 

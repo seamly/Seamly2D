@@ -803,7 +803,10 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
                 } // if first fold line
             } // FoldLine
             PieceComponent::Label => collect_annotations(element, options, svg_height, &mut block.annotations),
-            PieceComponent::DrillHole => block.drill_holes.push(extract_drill_hole(element, options, svg_height)?),
+            PieceComponent::DrillHole => {
+                let split_part = piece.attributes.contains_key("data-split-of");
+                block.drill_holes.extend(extract_drill_hole(element, split_part, options, svg_height)?);
+            } // DrillHole
         } // match component
     } // for each component
 
@@ -895,13 +898,20 @@ fn component_descendants<'a>(element: &'a Element, name: &str, out: &mut Vec<&'a
 } // fn component_descendants
 
 // @brief Parse a drill circle into its ASTM center and positive diameter.
-fn extract_drill_hole(element: &Element, options: &SvgToEzdxfOptions, svg_height: f64) -> Result<DrillHole> {
+// @param split_part True when the piece is a part of a split piece (`data-split-of`). A cut
+//        line that crosses a drill circle splits it into arcs (`<path>`). The part that holds
+//        the centre keeps a zero-radius circle there; the other parts hold no circle.
+// @return The drill point; None for a split drill hole whose centre is on another part.
+fn extract_drill_hole(element: &Element, split_part: bool, options: &SvgToEzdxfOptions, svg_height: f64) -> Result<Option<DrillHole>> {
     let diameter_px = required_component_number(element, "data-diameter", "drill hole")?;
     if diameter_px <= 0.0 {
         return Err(crate::error::SvgToEzdxfError::Geometry("drill hole diameter must be positive".to_string()));
     } // if non-positive diameter
     let mut circles = Vec::new();
     component_descendants(element, "circle", &mut circles);
+    if split_part && circles.is_empty() {
+        return Ok(None); // arcs of a split drill hole: another part holds the drill point
+    } // if a split drill hole without its centre
     if circles.len() != 1 {
         return Err(crate::error::SvgToEzdxfError::Geometry(format!(
             "drill hole must contain exactly one circle, found {}",
@@ -912,18 +922,20 @@ fn extract_drill_hole(element: &Element, options: &SvgToEzdxfOptions, svg_height
     let cx = required_component_number(circle, "cx", "drill circle")?;
     let cy = required_component_number(circle, "cy", "drill circle")?;
     let radius = required_component_number(circle, "r", "drill circle")?;
-    if radius <= 0.0 {
+    // The drill point of a split drill hole has radius 0; `data-diameter` gives the diameter.
+    let split_point = split_part && radius == 0.0;
+    if radius <= 0.0 && !split_point {
         return Err(crate::error::SvgToEzdxfError::Geometry("drill circle radius must be positive".to_string()));
     } // if non-positive radius
-    if (radius * 2.0 - diameter_px).abs() > diameter_px.max(1.0) * 1.0e-5 {
+    if !split_point && (radius * 2.0 - diameter_px).abs() > diameter_px.max(1.0) * 1.0e-5 {
         return Err(crate::error::SvgToEzdxfError::Geometry(format!(
             "drill circle radius {radius} does not match data-diameter {diameter_px}"
         )));
     } // if inconsistent diameter
-    Ok(DrillHole {
+    Ok(Some(DrillHole {
         center: to_dxf(Point::new(cx, cy), options, svg_height),
         diameter: diameter_px * options.unit_scale,
-    })
+    }))
 } // fn extract_drill_hole
 
 // @brief Parse a stripe or plaid's one straight, two-point reference path.
