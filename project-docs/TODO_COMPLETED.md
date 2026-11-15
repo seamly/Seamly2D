@@ -2194,3 +2194,11 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 ### [x] Layout.Y1 - reorder the material tabs to be 'Fabric', 'Lining', 'Interfacing', 'Interlining' in both left and right canvases. Currently the incorrect order is 'Lining', 'Fabric', 'Interfacging', 'Interlining'.
 
 ### [x] Layout.Y4 - Split the pieces: When a piece is split, split the drill hole when needed. Currently 'trousers.sm2d > Along grainline > Keep upright > paper > roll > custom > width=16.00in' produces a split piece "Back" where the stripe and plaid reference lines are split correctly but the drill hole is not split -- the drill hole is located on "Back part 2 of 2" where half of the drill hole lies outside the split line.
+
+### [x] Layout.Y2 - multisize - Split the pieces: The Marker tab and Nested tab should display a messaage that Marker and Nested layouts are unavailable when pieces are split, and should not display the media, as their layouts are disabled when pieces are split.
+
+### [x] Layout.Y5 - Tilt: Currently male_shirt.sm2d's piece 'BackPanel Mirrored' is tilted but the grainline isn't tilted. Grainlines should tilt; internal paths, stripe reference lines, plaid reference lines, and drill holes tilt correctly. Fix grainlines so that they tilt, also.
+
+### [x] Layout.Y6 - Paper > roll : PROHIBIT CHANGING THE WIDTH OF THE ROLL PAPER!!! DO NOT MAKE ME TELL YOU THIS AGAIN!!!!! THE ROLL LENGTH CAN CHANGE BUT THE WIDTH CANNOT! I have submitted multiple prompts to fix this problem, and I don't want to keep wasting tokens to fix this one problem. It's simple. When media=paper and papertype=roll then do not ever change the width of the media or content rect. Also applies to media=fabric --> do not ever change the media width or content rect for fabric (folded) or fabric (not folded)>.
+
+### [x] Layout.Y7 multisize > Paper=roll > custom > width=16.0: for jacket 2, why wasn't the user prompted to either 'split the pieces' or 'make the media longer'? - check one more time, if the dialog doesn't appear then run this as an implementation task.

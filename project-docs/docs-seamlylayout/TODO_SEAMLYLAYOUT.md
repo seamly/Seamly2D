@@ -4,29 +4,24 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Little things to fix
 
-- [ ] yy Layout.Y2 - multisize - Split the pieces: The Marker tab and Nested tab should display a messaage that Marker and Nested layouts are unavailable when pieces are split, and should not display the media, as their layouts are disabled when pieces are split.
-  - [x] A split run lays out only Base Size and each size (`layout_views::size_kinds`). Marker and Nested tabs stay first with no layout and no media size; the canvas shows `SPLIT_UNAVAILABLE_TEXT` (QML `layoutViewUnavailableText`). Adjust, Export, View off there; Export all tabs skips them. Nested piece-set split code removed. Tests: `split_run_makes_marker_and_nested_unavailable`, `unsplit_run_keeps_marker_and_nested`. Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, SVG-DATA-ATTRIBUTES, `AGENT_CHECKLIST.md` §49.
-  - [ ] Layout.Y2.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §49.
-
-- [ ] yy Layout.Y3 - multisize - Nested: When a piece has corners but none are 90 degrees then align the sizes along the cutline's longest edge.
+- [ ] zz Layout.Y3 - multisize - Nested: When a piece has corners but none are 90 degrees then align the sizes along the cutline's longest edge.
   - [x] Stack point Rule 2b: with no right-angle turn point, the lowest turn point wins; the sizes align along its longest edge (straight part only). Same rule in `svg_dom/src/stack_point.rs` and `layout_handoff/handoff_stack_point.cpp`. jacket2: only Detail 3 changes.
   - [x] Tests: `right_angle_is_within_one_degree`, `without_a_right_angle_the_lowest_corner_wins`, `stackPointTakesLowestCornerWithoutRightAngle`. Docs: SVG-DATA-ATTRIBUTES "Multisize stack point".
-  - [ ] Layout.Y3.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §50. The MSI build also runs the full Qt suites.
+  - [ ] this feature is not fully implemented -- see piece "Middle Front Yoke C" in test-seamly-layout\patterns\validation\layouts_jacket2\jacket2_40-146_Fabric_Marker_202611151148.svg -- the sizes are not aligned together -- there seems to be two separate sets of nested sizes for 'Middle Front Yoke C"; These two sets should have been aligned together such that they share a corner and a line."
 
-- [ ] yy Layout.Y5 - Tilt: Currently male_shirt.sm2d's piece 'BackPanel Mirrored' is tilted but the grainline isn't tilted. Grainlines should tilt; internal paths, stripe reference lines, plaid reference lines, and drill holes tilt correctly. Fix grainlines so that they tilt, also. 
-  - [x] Seamly2D Piece Mode: `PatternPieceTool::updateGrainline` turns the grainline with the piece tilt, about the same center. Labels stay level. Grainline move, resize and rotate store the grainline without the tilt.
-  - [x] Test: `TST_VPiece::PieceTiltTransformTurnsGrainline`. Docs: `AGENT_CHECKLIST.md` §52, `TEST_APPLICATION_UPDATES.md`.
-  - [ ] Layout.Y5.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §52. The MSI build also runs the full Qt suites.
+- [ ] zz Layout.Y7 - Settings - Improve display and processing of the 'Place fold lines on the left edge (fabric: no left margin)' setting.
+  - [x] Layout.Y7.1 - Move the 'Place fold lines...' label and checkbox into the Fabric section, on the line below the 'Fabric Folded' checkbox; It should be displayed with the Fabric section.
+    - Result: `SettingsDialog.qml` Fabric grid, below "Fabric Folded". Test: `foldLinesOnLeftEdgeCheck_enabledOnlyForFoldedFabric`.
+  - [x] Layout.Y7.2 - Enable the 'Place fold lines...' checkbox when the 'Fabric Folded' checkbox is selected, it's default setting is checked.
+    - Result: enabled only when Fabric Folded is checked; default on (`LayoutSettings`, `SettingsModel`, `default_settings.json`). Paper and open fabric ignore a saved value (`LayoutSettings::is_folded_fabric`).
+  - [ ] Layout.Y7.3 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §54.
 
-- [ ] yy Layout.Y6 - Paper > roll : PROHIBIT CHANGING THE WIDTH OF THE ROLL PAPER!!! DO NOT MAKE ME TELL YOU THIS AGAIN!!!!! THE ROLL LENGTH CAN CHANGE BUT THE WIDTH CANNOT! I have submitted multiple prompts to fix this problem, and I don't want to keep wasting tokens to fix this one problem. It's simple. When media=paper and papertype=roll then do not ever change the width of the media or content rect. Also applies to media=fabric --> do not ever change the media width or content rect for fabric (folded) or fabric (not folded)>. 
-  - [x] `layout_utils::do_process_layout`: every non-tiled pack uses the contentRect width of the blank canvas. Removed `set_content_width` and the roll widening path. A piece wider than the media stays unplaced.
-  - [x] `process_layout`: the oversized-piece check runs for every layout, multisize paper rolls too. Dialog choice "Make the media longer".
-  - [x] Tests: `placement_enlargement_dimensions_and_notifications`, `jacket2_marker_keeps_narrow_roll_width`. Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §53 (§11 removed).
-  - [ ] Layout.Y6.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §53.
-
-  - [ ] Layout.Y7 multisize > Paper=roll > custom > width=16.0: for jacket 2, why wasn't the user prompted to either 'split the pieces' or 'make the media longer'?
-
-
+- [ ] zz Layout.Y8 - Rotation - Improve efficiency of rotation degree steps - the Layout Settings user instructions state that a piece's  Layout rotation setting 'Any' samples 1 degree steps. This is not efficient -- change the rotation step from 1 degree to 10 degrees.
+  - [x] Change the layout algorithm so that if layout settings 'Layout Mode'='Any' and piece property setting 'Layout rotation'='Any' then the piece can be rotated in 10 degree steps to find optimal placement.
+    - Result: `pack_types::ANY_ROTATION_STEP_DEG` = 10; `PieceRotationRule::Any` tries 0°, 10°, … 350° (36 angles, was 360). Handoff `data-rotation="1"` unchanged. Tests: `piece_rotation_rules_resolve_by_layout_mode`, `any_piece_uses_non_quarter_turn_to_fit`, `mixed_piece_rules_keep_allowed_angles_and_unplaced_ids`.
+  - [x] Change the text in Layout Settings to state that 'Layout rotation Any samples 10 degree steps.'
+    - Result: `SettingsDialog.qml` Piece Gap tip reads "Layout rotation Any samples 10° steps." Docs: SVG-DATA-ATTRIBUTES `data-rotation`, `TODO_ROTATION.md`, `AGENT_CHECKLIST.md` §40.
+  - [ ] Layout.Y8.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §55.
 
 ## Implement
 
