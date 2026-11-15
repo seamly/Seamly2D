@@ -1,5 +1,5 @@
 // project: SeamlyLayout
-// author: slspencer, copyright 2026
+// author: slspencer, copyright 2026 Seamly2D Project
 // MIT License: https://opensource.org/licenses/MIT
 
 //! MaxRects placement and piece-order search.
@@ -172,6 +172,16 @@ impl PackJob {
     pub fn fits_empty_bin(&self, id: usize) -> bool {
         !self.orientations[id].is_empty()
     } // fn fits_empty_bin
+
+    // @brief Move the left-edge pieces ahead of the other pieces; each group keeps its order.
+    //
+    // Left-edge pieces (pieces with a fold line, on folded fabric) take the left
+    // edge from the top down before any other piece is placed.  An order with
+    // another piece first can score better, so every order the search packs
+    // goes through here.
+    fn left_edge_first(&self, order: &mut [usize]) {
+        order.sort_by_key(|&id| !self.left_edge[id]); // stable: false (left edge) sorts first
+    } // fn left_edge_first
 
     // @brief Place the pieces in `order` with MaxRects and the given rule, then compact them.
     //
@@ -401,7 +411,7 @@ impl SplitMix64 {
 // order of the single-pass packer.  Left-edge pieces come first in every
 // order, so they take the left edge before other pieces fill it.  Duplicate
 // orders are dropped.
-fn seed_orders(rects: &[Rect], ids: &[usize]) -> Vec<Vec<usize>> {
+fn seed_orders(job: &PackJob, rects: &[Rect], ids: &[usize]) -> Vec<Vec<usize>> {
     let keys: [fn(&Rect) -> (u64, u64); 5] = [
         // area, then longer side
         |r| (r.w as u64 * r.h as u64, r.w.max(r.h) as u64),
@@ -418,7 +428,7 @@ fn seed_orders(rects: &[Rect], ids: &[usize]) -> Vec<Vec<usize>> {
     for key in keys {
         let mut order = ids.to_vec();
         order.sort_by(|&a, &b| key(&rects[b]).cmp(&key(&rects[a])).then(a.cmp(&b)));
-        order.sort_by_key(|&id| rects[id].left_edge_angle.is_none()); // stable: left-edge pieces first
+        job.left_edge_first(&mut order);
         if !orders.contains(&order) {
             orders.push(order);
         } // if new order
@@ -430,8 +440,9 @@ fn seed_orders(rects: &[Rect], ids: &[usize]) -> Vec<Vec<usize>> {
 //
 // 1. Pack every start order with both rules; keep the best.
 // 2. Late-acceptance hill climbing: swap two pieces, move one piece, or change
-//    the rule.  Keep a change that is no worse than the current layout or the
-//    layout of `LAHC_HISTORY` steps ago.
+//    the rule.  Left-edge pieces stay ahead of the other pieces.  Keep a change
+//    that is no worse than the current layout or the layout of `LAHC_HISTORY`
+//    steps ago.
 // 3. Stop at the evaluation limit, or when the height equals the tallest piece
 //    and every piece is placed.
 //
@@ -451,7 +462,7 @@ pub(crate) fn search_layout(
         .iter()
         .map(|&id| job.orientations[id].len() as u64)
         .sum();
-    let seeds = seed_orders(rects, &ids);
+    let seeds = seed_orders(job, rects, &ids);
     let rules = [PlacementRule::TopLeft, PlacementRule::WeightedTopLeft];
     let evals = match depth {
         // Start orders only: no hill climbing
@@ -536,6 +547,7 @@ pub(crate) fn search_layout(
             // 10 %: change the placement rule
             _ => rule = rule.other(),
         } // match move
+        job.left_edge_first(&mut order);
 
         let cand = job.evaluate(order, rule);
         let slot = step % LAHC_HISTORY;
@@ -602,6 +614,17 @@ mod tests {
         let placed = job.place_in_order(&[0], PlacementRule::TopLeft, false).placements;
         assert_eq!(placed[0].x, 5);
     } // minimum_left_gap_survives_placement_and_compaction
+
+    // @brief Left-edge pieces are placed before the other pieces, at the left edge from the top down.
+    //        Here the order with the other piece first has the lower moment, so the search would pick it.
+    #[test]
+    fn left_edge_pieces_are_placed_first() {
+        let rects = [Rect::new(100, 90), Rect::new(50, 10).with_left_edge(0), Rect::new(40, 10).with_left_edge(0)];
+        let job = PackJob::new(100, 200, 0, &rects, |r| r.left_edge_angle.map_or(vec![0], |a| vec![a]), |w, h, _| (w, h));
+        let placed = search_layout(&job, &rects, SearchDepth::Full, None).placements;
+        let at: Vec<(usize, u32, u32)> = placed.iter().map(|p| (p.id, p.x, p.y)).collect();
+        assert_eq!(at, vec![(1, 0, 0), (2, 0, 10), (0, 0, 20)]);
+    } // left_edge_pieces_are_placed_first
 
     // @brief The same input always gives the same layout.
     #[test]
