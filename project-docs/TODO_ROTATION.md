@@ -13,7 +13,7 @@ Move fully completed tasks to [TODO_COMPLETED.md](TODO_COMPLETED.md).
 - Apply each piece's **Piece Properties > Rotation** only when SeamlyLayout's `layoutMode` is `any`.
 - Preserve `alongGrainline` and `withNap`, including nap direction and the existing No Grainline exception.
 - The checklist calls the first mode “With Grainline”; the current UI calls it “Along Grainline”.
-- Distinguish layout **Any** from piece Rotation **Any**. The first enables the policy; the second supplies a 1-degree step.
+- Distinguish layout **Any** from piece Rotation **Any**. The first enables the policy; the second supplies a 10-degree step.
 - Do not add a rotation-enabled checkbox. `rotationEnabled` exists only in legacy settings migration.
 - Do not change Piece Mode display, draft geometry, pattern schemas, Flip, Tilt, or DXF rule serialization.
 - Preserve grain-up preprocessing. Trial angles are additional SVG rotations from that baseline, not absolute draft angles.
@@ -177,7 +177,7 @@ The  'Rotation > Any' layout settings option means that the fold edge rule is ig
 **Dependencies:** Rotation.5.
 
 - [ ] Rotation.6.1 Update the rotation document, settings workflow, and SVG contract consumer notes.
-  Explain Any-only precedence, omission behavior, normalized baseline, and 1-degree sampling.
+  Explain Any-only precedence, omission behavior, normalized baseline, and 10-degree sampling.
   Do not rewrite attribute numbers or reuse `rotationStep` for this policy.
 - [ ] Rotation.6.2 Update relevant comments/tooltips in `SettingsDialog.qml`, `SettingsModel`, and Rust settings/packing code.
   Keep current mode labels, defaults, and legacy migration.
