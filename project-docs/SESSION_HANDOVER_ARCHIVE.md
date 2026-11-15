@@ -2,6 +2,16 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-14 — Split pieces keep their markings (Layout.803)
+
+- `piece_divider.rs`: `stripe` and `plaid` reference lines are open lines that end at the cut lines, like `internal_path`.
+- Drill holes: `all_points` adds circle centres. A `drill` group goes whole to the part nearest its centre (before: always part 1). `cut_positions` keeps cut lines off drill centres.
+- Internal paths: no code change; already split. A closed one becomes one open line per part.
+- Tests: `markings_split_with_the_piece`, `cut_line_misses_drill_centres`.
+- Built and tested in worktree `split-markings`; merged `--no-ff`; branch and worktree deleted.
+- Docs: SVG-DATA-ATTRIBUTES split parts, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §48 and OPEN row.
+- Open: Layout.803.1 installed-app check with the next MSI (§48).
+
 ### 2026-11-14 — Media size for individual patterns (Layout.X5.3)
 
 - Individual pattern: the media size shows below each material tab name over the layout; one material: below "Material: <name>".

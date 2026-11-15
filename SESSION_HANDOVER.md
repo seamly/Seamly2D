@@ -2,6 +2,17 @@
 
 ## Current status
 
+### 2026-11-14 — Tilted piece: grainline tilts (Layout.Y5)
+
+- Seamly2D Piece Mode: `PatternPieceTool::updateGrainline` turns the grainline with the piece tilt, about the same center. Labels stay level.
+- `applyTiltToGeometry` keeps the tilt in `m_tilt_degrees` and `m_tilt_center`.
+- Grainline move, resize and rotate remove the tilt before they store the grainline; the pattern keeps a level grainline.
+- Flip is unchanged: the grainline still does not mirror (applyFlipToGeometry rule).
+- Test: `TST_VPiece::PieceTiltTransformTurnsGrainline`, passed in a scratch QtTest build. `pattern_piece_tool.cpp` compiles (cl). Full Qt suites run in the next MSI.
+- Built in worktree `tilt-grain`; merged `--no-ff`; branch and worktree deleted.
+- Docs: `AGENT_CHECKLIST.md` new §52 and OPEN row; `TEST_APPLICATION_UPDATES.md` tilt line.
+- Open: Layout.Y5.1 installed-app check with the next MSI (§52).
+
 ### 2026-11-14 — Split drill holes (Layout.Y4)
 
 - `piece_divider.rs` `drill_for_parts`: a cut line that crosses a drill circle splits it. Each part's `<circle>` becomes a `<path>` of its arcs (cubic curves, 90° or less each) that end at the cut line.
@@ -48,16 +59,6 @@
 - Checked: `cargo test --workspace` 708 pass; `ctest` debug 8/8. Built in worktree `material-tab-order`; merged `--no-ff`; branch and worktree deleted.
 - Docs: SVG-DATA-ATTRIBUTES Materials.
 - Open: Layout.Y1.1 installed-app check with the next MSI.
-
-### 2026-11-14 — Split pieces keep their markings (Layout.803)
-
-- `piece_divider.rs`: `stripe` and `plaid` reference lines are open lines that end at the cut lines, like `internal_path`.
-- Drill holes: `all_points` adds circle centres. A `drill` group goes whole to the part nearest its centre (before: always part 1). `cut_positions` keeps cut lines off drill centres.
-- Internal paths: no code change; already split. A closed one becomes one open line per part.
-- Tests: `markings_split_with_the_piece`, `cut_line_misses_drill_centres`.
-- Built and tested in worktree `split-markings`; merged `--no-ff`; branch and worktree deleted.
-- Docs: SVG-DATA-ATTRIBUTES split parts, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §48 and OPEN row.
-- Open: Layout.803.1 installed-app check with the next MSI (§48).
 
 ## Decisions to retain
 

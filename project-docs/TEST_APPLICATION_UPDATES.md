@@ -131,7 +131,7 @@ Use an asymmetric male_shirt piece, such as FrontPanel.
 - [x] Create a plan to enable Piece Properties Rotation in Layout Mode "Any".
   - Implementation is tracked in [TODO_ROTATION.md](TODO_ROTATION.md); installed-app verification of Layout Mode "Any" free rotation remains pending.
 - [x] Tilt None disables degrees; enabled degrees remain within 0–90.
-  - [x] Tilt with degress > 0 should visually rotate the pattern piece but not the grainline.
+  - [ ] Tilt with degrees > 0 visually rotates the pattern piece and its grainline. The labels stay level (`AGENT_CHECKLIST.md` §52).
   - [x] Tilt rotates the piece and rotates all of the points. Piece Mode now applies the same display transform to path-node markers.
   - [x] Tilt should rotate internal paths. Fix this on a worktree as a feature branch then merge into run-seamlyLayout.
 

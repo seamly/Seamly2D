@@ -689,37 +689,34 @@ void PatternPieceTool::updatePatternLabel()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/// @brief updateGrainline updates the grain line item
+/// @brief updateGrainline draws the grainline item; a tilted piece turns its grainline with it.
 //---------------------------------------------------------------------------------------------------------------------
 void PatternPieceTool::updateGrainline()
 {
     const VPiece piece = VAbstractTool::data.GetPiece(m_id);
-    const VGrainlineData &data = piece.GetGrainlineGeometry();
+    const VGrainlineData& data = piece.GetGrainlineGeometry();
+    bool shown = false;
 
-
-    if (data.IsVisible() & qApp->Settings()->showGrainlines())
+    if (data.IsVisible() && qApp->Settings()->showGrainlines())
     {
         QPointF pos;
         qreal rotation = 0;
         qreal length = 0;
-        qreal arrowLength = 0;
+        qreal arrow_length = 0;
 
-        const VGrainlineItem::MoveTypes type = findGrainlineGeometry(data, length, rotation, arrowLength, pos);
-        if (type & VGrainlineItem::Error)
+        const VGrainlineItem::MoveTypes type = findGrainlineGeometry(data, length, rotation, arrow_length, pos);
+        if (!(type & VGrainlineItem::Error))
         {
-            m_grainLine->hide();
-            return;
+            // The pattern stores a level grainline. Turn it about the piece tilt center; the labels stay level.
+            const Unit unit = *VDataTool::data.GetPatternUnit();
+            const QTransform tilt = pieceTiltTransform(m_tilt_degrees, m_tilt_center);
+            m_grainLine->setMoveType(type);
+            m_grainLine->updateGeometry(tilt.map(pos), rotation + m_tilt_degrees, ToPixel(length, unit),
+                                        data.getArrowType(), ToPixel(arrow_length, unit));
+            shown = true;
         }
-
-        m_grainLine->setMoveType(type);
-        m_grainLine->updateGeometry(pos, rotation, ToPixel(length, *VDataTool::data.GetPatternUnit()),
-                                    data.getArrowType(), ToPixel(arrowLength, *VDataTool::data.GetPatternUnit()));
-        m_grainLine->show();
     }
-    else
-    {
-        m_grainLine->hide();
-    }
+    m_grainLine->setVisible(shown);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -829,11 +826,14 @@ void PatternPieceTool::SaveRotationPattern(qreal dRot)
 
 
 //---------------------------------------------------------------------------------------------------------------------
+/// @brief SaveMoveGrainline saves the grainline position after the user moves it.
+/// @param ptPos grainline start point on the canvas, turned with the piece tilt.
 void PatternPieceTool::SaveMoveGrainline(const QPointF &ptPos)
 {
     VPiece oldPiece = VAbstractTool::data.GetPiece(m_id);
     VPiece newPiece = oldPiece;
-    newPiece.GetGrainlineGeometry().SetPos(ptPos);
+    // The pattern stores the grainline without the piece tilt.
+    newPiece.GetGrainlineGeometry().SetPos(pieceTiltTransform(-m_tilt_degrees, m_tilt_center).map(ptPos));
 
     SavePieceOptions *moveCommand = new SavePieceOptions(oldPiece, newPiece, doc, m_id);
     moveCommand->setText(tr("move grainline"));
@@ -841,13 +841,16 @@ void PatternPieceTool::SaveMoveGrainline(const QPointF &ptPos)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/// @brief SaveResizeGrainline saves the grainline length after the user resizes it.
+/// @param dLength new grainline length in scene pixels.
 void PatternPieceTool::SaveResizeGrainline(qreal dLength)
 {
     VPiece oldPiece = VAbstractTool::data.GetPiece(m_id);
     VPiece newPiece = oldPiece;
 
     dLength = FromPixel(dLength, *VDataTool::data.GetPatternUnit());
-    newPiece.GetGrainlineGeometry().SetPos(m_grainLine->pos());
+    // The pattern stores the grainline without the piece tilt.
+    newPiece.GetGrainlineGeometry().SetPos(pieceTiltTransform(-m_tilt_degrees, m_tilt_center).map(m_grainLine->pos()));
     newPiece.GetGrainlineGeometry().setLength(QString().setNum(dLength));
     SavePieceOptions *resizeCommand = new SavePieceOptions(oldPiece, newPiece, doc, m_id);
     resizeCommand->setText(tr("resize grainline"));
@@ -855,15 +858,20 @@ void PatternPieceTool::SaveResizeGrainline(qreal dLength)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/// @brief SaveRotateGrainline saves the grainline angle and position after the user turns it.
+/// @param dRot grainline angle on the canvas in radians, counterclockwise, turned with the piece tilt.
+/// @param ptPos grainline start point on the canvas, turned with the piece tilt.
 void PatternPieceTool::SaveRotateGrainline(qreal dRot, const QPointF &ptPos)
 {
     VPiece oldPiece = VAbstractTool::data.GetPiece(m_id);
     VPiece newPiece = oldPiece;
 
     // A grainline turned past horizontal flips end for end, so it keeps pointing up around the same midpoint.
+    // The pattern stores the midpoint and the angle without the piece tilt.
     const qreal length = m_grainLine->length();
-    const QPointF midpoint = ptPos + QPointF(length / 2.0 * qCos(dRot), -length / 2.0 * qSin(dRot));
-    const qreal angle = VGrainlineData::upwardAngle(qRadiansToDegrees(dRot));
+    const QPointF canvas_midpoint = ptPos + QPointF(length / 2.0 * qCos(dRot), -length / 2.0 * qSin(dRot));
+    const QPointF midpoint = pieceTiltTransform(-m_tilt_degrees, m_tilt_center).map(canvas_midpoint);
+    const qreal angle = VGrainlineData::upwardAngle(qRadiansToDegrees(dRot) - m_tilt_degrees);
 
     newPiece.GetGrainlineGeometry().setRotation(QString().setNum(angle));
     newPiece.GetGrainlineGeometry().SetPos(VGrainlineData::centeredStart(midpoint, angle, length));
@@ -1905,39 +1913,40 @@ void PatternPieceTool::applyFlipToGeometry(PieceFlip flip)
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief applyTiltToGeometry rotates the displayed piece geometry without rotating its labels or grainline.
+ * @brief applyTiltToGeometry rotates the displayed piece geometry; the labels stay level.
  * @param signed_degrees counterclockwise degrees when positive; clockwise degrees when negative.
+ *
+ * Keeps the tilt in m_tilt_degrees and m_tilt_center. updateGrainline turns the grainline with them, and the
+ * grainline save functions remove the tilt again before they store the grainline.
  */
 void PatternPieceTool::applyTiltToGeometry(int signed_degrees)
 {
-    if (signed_degrees == 0)
-    {
-        return;
-    }
-
+    // The outline is the seam line plus the cut line. A piece with no outline is not tilted.
     const QRectF outline = this->path().united(m_cutLine->path()).boundingRect();
-    if (outline.isNull())
-    {
-        return;
-    }
-    const QTransform tilt = pieceTiltTransform(signed_degrees, outline.center());
+    m_tilt_degrees = outline.isNull() ? 0 : signed_degrees;
+    m_tilt_center = outline.center();
 
-    this->setPath(tilt.map(this->path()));
-    m_cutLine->setPath(tilt.map(m_cutLine->path()));
-    m_allowanceFill->setPath(tilt.map(m_allowanceFill->path()));
-    m_notches->setPath(tilt.map(m_notches->path()));
-    m_markings->setPath(tilt.map(m_markings->path()));
-    m_plaid_markings->setPath(tilt.map(m_plaid_markings->path()));
-    m_drill_holes_outline->setPath(tilt.map(m_drill_holes_outline->path()));
-    m_drill_holes->setPath(tilt.map(m_drill_holes->path()));
-    m_anchor_points_outline->setPath(tilt.map(m_anchor_points_outline->path()));
-    m_anchor_points->setPath(tilt.map(m_anchor_points->path()));
-    m_foldLine->setPath(tilt.map(m_foldLine->path()));
-    m_fold_line_arrow->setPath(tilt.map(m_fold_line_arrow->path()));
-    m_fold_line_arrow_heads->setPath(tilt.map(m_fold_line_arrow_heads->path()));
-    m_cutPath = tilt.map(m_cutPath);
-    m_mainPath = tilt.map(m_mainPath);
-    m_pieceRect = tilt.mapRect(m_pieceRect);
+    if (m_tilt_degrees != 0)
+    {
+        const QTransform tilt = pieceTiltTransform(m_tilt_degrees, m_tilt_center);
+
+        this->setPath(tilt.map(this->path()));
+        m_cutLine->setPath(tilt.map(m_cutLine->path()));
+        m_allowanceFill->setPath(tilt.map(m_allowanceFill->path()));
+        m_notches->setPath(tilt.map(m_notches->path()));
+        m_markings->setPath(tilt.map(m_markings->path()));
+        m_plaid_markings->setPath(tilt.map(m_plaid_markings->path()));
+        m_drill_holes_outline->setPath(tilt.map(m_drill_holes_outline->path()));
+        m_drill_holes->setPath(tilt.map(m_drill_holes->path()));
+        m_anchor_points_outline->setPath(tilt.map(m_anchor_points_outline->path()));
+        m_anchor_points->setPath(tilt.map(m_anchor_points->path()));
+        m_foldLine->setPath(tilt.map(m_foldLine->path()));
+        m_fold_line_arrow->setPath(tilt.map(m_fold_line_arrow->path()));
+        m_fold_line_arrow_heads->setPath(tilt.map(m_fold_line_arrow_heads->path()));
+        m_cutPath = tilt.map(m_cutPath);
+        m_mainPath = tilt.map(m_mainPath);
+        m_pieceRect = tilt.mapRect(m_pieceRect);
+    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
