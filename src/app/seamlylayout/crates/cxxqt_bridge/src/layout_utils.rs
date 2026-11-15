@@ -164,8 +164,8 @@ pub struct ProcessLayoutArgs<'a> {
     /// Fabric pieces that cannot fit the configured width remain unplaced.
     /// Tiled paper ignores it: its pages cover a larger layout.
     pub extend_media: bool,
-    /// `true` splits each piece or Nested piece-set wider than the media into
-    /// parts that fit (the user's choice).  Tiled paper ignores it.
+    /// `true` splits each piece wider than the media into parts that fit
+    /// (the user's choice).  Tiled paper ignores it.
     pub split_oversized: bool,
 }
 
@@ -2010,7 +2010,8 @@ mod tests {
 
     // @brief Folded fabric, 30 in wide, "Split the pieces": the dialog lists size pieces wider
     // than the 15 in half width, and no layout of either material leaves a piece out.
-    // Marker, Nested and every size tab split as the app runs them, on extended media.
+    // Every size tab splits as the app runs it, on extended media; a split run lays out
+    // no Marker or Nested layout.
     #[test]
     fn jacket2_folded_fabric_split_leaves_no_piece_out() {
         let settings_json = serde_json::json!({
@@ -2038,29 +2039,29 @@ mod tests {
             assert!(!oversized.is_empty(), "{}: the dialog lists the pieces too wide", part.name);
             assert!(oversized.iter().all(|piece| piece.label.starts_with("Size_")), "{}: {oversized:?}", part.name);
 
-            let lay_out = |nested: bool, size: Option<&str>| {
+            let lay_out = |size: &str| {
                 let args = ProcessLayoutArgs {
                     settings_json: &settings_json,
                     input_dom: &part.doc,
                     initial_layout_dom: &init.initial_dom,
                     layout_h_px: init.h_px,
-                    nested_multisize: nested,
+                    nested_multisize: false,
                     extend_media: true,
                     split_oversized: true,
                 };
                 let mut progress = |_pct: i32, _status: Option<&str>| {};
-                match size {
-                    Some(size) => do_process_size_layout(args, size, &mut progress),
-                    None => do_process_layout(args, &mut progress),
-                }
-                .expect("layout should succeed")
+                do_process_size_layout(args, size, &mut progress).expect("layout should succeed")
             }; // lay_out
-            let mut layouts = vec![("Marker".to_string(), lay_out(false, None)), ("Nested".to_string(), lay_out(true, None))];
-            layouts.extend(sizes.iter().map(|size| (format!("Size {size}"), lay_out(false, Some(size)))));
+            let layouts: Vec<(String, ProcessLayoutResult)> =
+                sizes.iter().map(|size| (format!("Size {size}"), lay_out(size))).collect();
             for (view, result) in &layouts {
                 assert!(result.unplaced_labels.is_empty(), "{} {view} left out {:?}", part.name, result.unplaced_labels);
             } // for each layout
-            assert!(layouts[1].1.divide_spec.is_some(), "{}: Nested splits a piece-set", part.name);
+            assert!(
+                layouts.iter().any(|(_, result)| result.divide_spec.is_some()),
+                "{}: a size tab splits a piece",
+                part.name
+            );
         } // for each material
     } // jacket2_folded_fabric_split_leaves_no_piece_out
 

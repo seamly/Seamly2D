@@ -352,7 +352,6 @@ When a piece of an individual pattern, or of a multisize pattern on fabric, is w
 
 - Each part is a `data-type="piece"` group with the piece's attributes, plus `data-split-of`, `data-split-part`, `data-split-count`.
 - Part `id`: `<piece id>_part<i>`. Every id inside the part gets `_part<i>`.
-- A split Nested piece-set: one `data-type="piece-set"` group per part of its largest size, `id` `<set id>_part<k>`, other set attributes kept. It holds the size parts of that column.
 - Part `data-name`: `<name> (<i>/<n>)`, e.g. `Front (1/2)`. DXF-ASTM `Piece Name:` uses it.
 - `cutline` and `cut_path`: closed, with new edges on the cut lines. No seam allowance on a cut edge.
 - An outer line (`cutline`, or `seamline` without a `cutline`) with no `Z` and both ends on the fold line makes parts as if it had its fold line edge. A part on the fold line gets no edge on the fold line either; its stretch of fold line completes the outer edge.

@@ -116,9 +116,10 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
     A label not wholly inside the part outline moves to the nearest place inside it, 1/16 in clear (`label_inside_part.rs`).
     It keeps clear of other labels and of the part label place along the cut edge when it can.
     A label too large for the part shrinks in 10% steps. A label with no place at 10% stays where it is.
-  - Multisize: every queued layout gets `split_oversized` (Marker, Nested, Base Size, each size, every material).
-  - Nested: `divide_piece_set` cuts every size of a piece-set on the same lines, from the outline bounds of all sizes.
-    Each part of the largest size starts a piece-set `<set id>_part<k>`. A part of another size joins the set in its column with the nearest outline centre.
+  - Multisize: a split run lays out only Base Size and each size (`layout_views::size_kinds`), every material, each with `split_oversized`.
+    `LayoutViews::start(kind, true)` puts Marker and Nested tabs first, with no layout.
+    On those tabs `layout_view_unavailable_text` holds `SPLIT_UNAVAILABLE_TEXT`; the canvas shows it, and the tab has no media size.
+    QML disables Adjust Layout, Export and View there. Export all tabs skips them (`LayoutViews::in_all_tabs_export`).
   - `ProcessLayoutResult::divide_spec` is set only when at least one piece was divided. `is_split_layout_active` follows it.
   - Paper rolls keep the selected roll width and margins when splitting, even if a caller requests enlargement. Only the length follows the content.
   - Roll and fabric retry the remaining pieces on successive media lengths (`packing::pack_polygons_on_sheets`). Fabric keeps its fixed width.

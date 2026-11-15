@@ -2,6 +2,18 @@
 
 ## Current status
 
+### 2026-11-14 — Marker and Nested unavailable after a split (Layout.Y2)
+
+- Multisize "Split the pieces": the run lays out only Base Size and each size (`layout_views::size_kinds`, was `tiled_kinds`), every material.
+- `LayoutViews::start(kind, split)`: a split run puts Marker and Nested views first, with no layout; Base Size shows first.
+- New QML property `layoutViewUnavailableText` (`SPLIT_UNAVAILABLE_TEXT` on those tabs): canvas shows it; no media size; Adjust, Export, View and fit-to-view off.
+- Export all tabs skips them: `LayoutViews::in_all_tabs_export`.
+- Removed the Nested piece-set split (`divide_unit`, `divide_piece_set`, `outline_bounds`, `PiecePart`, its test): no split run lays out Nested now.
+- Tests: `split_run_makes_marker_and_nested_unavailable`, `unsplit_run_keeps_marker_and_nested`; jacket2 split test lays out size tabs only.
+- Checked: `cargo test --workspace` 709 pass; `ctest` debug 8/8. Built in worktree `split-tabs`; merged `--no-ff`; branch and worktree deleted.
+- Docs: SVG-DATA-ATTRIBUTES, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §47, new §49 and OPEN row.
+- Open: Layout.Y2.1 installed-app check with the next MSI (§49). X7.4 (Nested set too wide) no longer applies.
+
 ### 2026-11-14 — Material tab order (Layout.Y1)
 
 - `material_split.rs`: `pattern_materials` sorts by `MATERIAL_ORDER`: Fabric, Lining, Interfacing, Interlining. Other names go after, in handoff order. Match ignores ASCII case.
@@ -42,17 +54,6 @@
 - `svg_dom` test `deep_id_lookup_in_nested_groups` uses inline SVG; the old test read id `Circle` from the logo.
 - Checked: `cargo test --workspace` 704 pass; `ctest --preset debug` 8/8.
 - Open (Sue): rerun `local_build_msi.ps1`; keep or delete `assets/images/old-imgs/`.
-
-### 2026-11-14 — Split part label, tiled PDF, multisize split on fabric (Layout.X2, X4, X7)
-
-- Three task branches built and tested in parallel worktrees; merged `--no-ff` into `run-seamlyLayout`; branches and worktrees deleted.
-- X2: part label `<name> part i of n`; join list code removed. New `data-source-name` keeps the imported `data-name`; the label uses it, else the shown name.
-- X4: `ExportMenu.qml` `pdfEnabled`: Export > PDF disabled on tiled paper; PDF (Tiled) enabled; View menu PDF unchanged.
-- X7: multisize fabric runs the oversized-pieces dialog; "Split the pieces" splits on every layout of the run; a Nested piece-set too wide is cut on the same lines per size into piece-sets `<set id>_part<k>`.
-- Checked per branch and on the merged tree: `cargo test --workspace` 704 pass, 0 failed; `ctest` debug 8/8.
-- Docs: SVG-DATA-ATTRIBUTES, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW; `AGENT_CHECKLIST.md` §45–§47 and OPEN rows; §41 now uses jacket2 and "Make the media bigger".
-- Decision (Sue): keep `data-source-name` for the part label.
-- Open: X2.2, X4.2, X7.2 installed-app checks; X7.3 DXF refused on every tab of a split material; X7.4 dialog misses a too-wide Nested set with no too-wide size piece.
 
 ## Decisions to retain
 

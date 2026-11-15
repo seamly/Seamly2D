@@ -185,8 +185,7 @@ The application workflow loop consists of:
          Internal paths, grainlines and stripe and plaid reference lines split at the cut line. Each drill hole stays whole on its part.
          See `SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout split parts".
          A paper roll keeps the selected roll width and margins; only its length follows the content.
-         Multisize: every tab of every material splits. Nested cuts every size of a piece-set on the same lines;
-         the parts in each column make a new piece-set.
+         Multisize: Base Size and every size tab of every material split. Marker and Nested get no layout.
        * "Make the media bigger" (DXF): fabric keeps its configured width and grows longer. Other media can grow wider and longer.
          A completion popup reports the resulting dimensions. Pieces that cannot fit fabric width remain explicitly reported.
        * Split placement on roll and fabric retries remaining pieces on fresh media lengths until all fit or a fresh length makes no progress.
@@ -195,6 +194,9 @@ The application workflow loop consists of:
      * For non-tiled paper, "Marker" packs every size of every piece as its own piece. It runs first.
      * For non-tiled paper, "Nested" packs each piece once as a group of its sizes, centred on the largest size.
      * For tiled paper, Marker and Nested are not generated. The first tab is the Base Size when available, then one tab covers each size.
+     * After "Split the pieces", Marker and Nested are not generated either. Their tabs stay first, with no media size.
+       Each shows "Marker and Nested layouts are unavailable when pieces are split." Adjust Layout, Export and View are disabled there.
+       The Base Size tab (or the first size tab) shows first.
      * "Base Size 36": the base size (`data-base-size`) alone. Left out when the base size is not in `data-sizes`.
      * "Size 34", "Size 36", …: each size alone, one unit per piece. The base size tab repeats the Base Size layout.
      * Each tab shows its media size below its label, in the settings unit: "36.00 x 52.25 in" (`layoutViewMediaSizes`).
@@ -222,6 +224,7 @@ The application workflow loop consists of:
      * Export > "Export all tabs" (checkable, shown only when tabs exist): every format then writes one file per tab.
        * DXF-ASTM writes the Base Size and size tabs. Other formats write every tab but Base Size, which repeats its size tab.
        * PDF (Tiled) also skips Marker.
+       * Every format skips the Marker and Nested tabs of a split run.
        * File name: the save-dialog name with the tab before the timestamp: `shirt_Marker_202610112043.pdf`, `shirt_R13_BaseSize36_202610112043.dxf`, `shirt_Size36_202610112043.pdf`.
        * A name without a timestamp gets the tab before the extension: `shirt_Size36.pdf`.
      * A single export from a tab: the default name carries that tab before the timestamp: `shirt_R13_Size36_202610112043.dxf`.

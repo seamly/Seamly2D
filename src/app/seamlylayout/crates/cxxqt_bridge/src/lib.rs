@@ -622,6 +622,9 @@ pub mod qobject {
         #[qproperty(QStringList, layout_view_media_sizes)]
         // Index of the selected tab in `layout_view_labels`.
         #[qproperty(i32, active_layout_view)]
+        // Canvas text of the selected tab when it has no layout: the Marker and Nested tabs of a
+        // run that splits pieces.  Empty for a tab with a layout.
+        #[qproperty(QString, layout_view_unavailable_text)]
         // True while tabs are still queued for `process_next_tab_layout`.
         #[qproperty(bool, is_tab_layout_pending)]
         // True when DXF-ASTM can export the shown layout: an individual layout,
@@ -1092,6 +1095,9 @@ pub struct AppControllerRust {
     // Selected tab, mirrored from `layout_views`.
     active_layout_view: i32,
 
+    // Canvas text of the selected tab, mirrored from `layout_views`.
+    layout_view_unavailable_text: cxx_qt_lib::QString,
+
     // True while `tab_queue` holds tabs.
     is_tab_layout_pending: bool,
 
@@ -1182,6 +1188,7 @@ impl Default for AppControllerRust {
             layout_view_labels:        cxx_qt_lib::QStringList::default(), // no tabs until a multisize layout
             layout_view_media_sizes:   cxx_qt_lib::QStringList::default(), // no tabs until a multisize layout
             active_layout_view:        0,                              // first tab
+            layout_view_unavailable_text: cxx_qt_lib::QString::default(), // every tab has a layout
             is_tab_layout_pending:     false,                          // no tab run queued
             dxf_export_allowed:        true,                           // no tabs: an individual layout exports DXF-ASTM
             pdf_tiled_export_allowed:  true,                           // no tabs: an individual layout exports PDF (Tiled)
@@ -1780,20 +1787,23 @@ impl qobject::AppController {
         let is_fabric_layout = settings.as_ref().is_some_and(|settings| settings.media_type == "fabric");
         let is_tiled_multisize = *self.is_multisize()
             && settings.as_ref().is_some_and(LayoutSettings::is_tiled_paper);
+        // Split parts of all sizes do not pack as Marker or Nested, so a split run skips them.
+        let split_multisize = *self.is_multisize() && oversize == OversizeChoice::Split;
+        let sizes_only = is_tiled_multisize || split_multisize;
         let sizes: Vec<String> = if *self.is_multisize() {
             self.multisize_sizes().to_string()
                 .split(',').map(str::trim).filter(|size| !size.is_empty()).map(String::from).collect()
         } else {
             Vec::new()
         }; // sizes
-        let first_kind = if is_tiled_multisize {
+        let first_kind = if sizes_only {
             let base_size = crate::piece_extractor::read_measurements_info(&input_dom_clone).base_size;
-            layout_views::tiled_kinds(&sizes, &base_size).into_iter().next()
+            layout_views::size_kinds(&sizes, &base_size).into_iter().next()
         } else {
             None
-        }; // tiled first view
+        }; // size first view
 
-        // A tiled multisize layout starts with its Base Size (or first size),
+        // A tiled or split multisize layout starts with its Base Size (or first size),
         // then makes only per-size views. Other multisize layouts start with Marker.
         let args_extend_media = *self.is_multisize() || oversize == OversizeChoice::Extend;
         let args = ProcessLayoutArgs {
@@ -1846,18 +1856,18 @@ impl qobject::AppController {
                     rust.translate_dom     = Some(result.translate_dom);
                 } // rust borrow dropped
 
-                // Multisize layouts queue their remaining views; tiled paper omits
-                // Marker and Nested. Several materials also queue each other material.
+                // Multisize layouts queue their remaining views; tiled paper and a split
+                // omit Marker and Nested. Several materials also queue each other material.
                 let shown = usize::try_from(*self.active_material()).unwrap_or(0);
                 let (jobs, names, first_kind, shown) = {
                     let rust = self.rust();
-                    // Tiled paper starts each material on Base Size or its first size.
+                    // Tiled paper and a split start each material on Base Size or its first size.
                     let tabs_of = |doc: &svg_dom::Document| -> (Option<ViewKind>, Vec<ViewKind>) {
                         if sizes.is_empty() {
                             (None, Vec::new()) // individual pattern: one layout per material
-                        } else if is_tiled_multisize {
+                        } else if sizes_only {
                             let base_size = crate::piece_extractor::read_measurements_info(doc).base_size;
-                            let mut kinds = layout_views::tiled_kinds(&sizes, &base_size).into_iter();
+                            let mut kinds = layout_views::size_kinds(&sizes, &base_size).into_iter();
                             (kinds.next(), kinds.collect())
                         } else {
                             (
@@ -1921,9 +1931,9 @@ impl qobject::AppController {
                     {
                         let mut rust = self.as_mut().rust_mut();
                         if let Some(kind) = first_kind.clone() {
-                            rust.layout_views.start(kind);
-                        } else if multisize && !is_tiled_multisize {
-                            rust.layout_views.start(ViewKind::Marker);
+                            rust.layout_views.start(kind, split_multisize);
+                        } else if multisize {
+                            rust.layout_views.start(ViewKind::Marker, false);
                         } // if multisize
                         rust.tab_queue = Some(queue);
                     } // rust borrow dropped
@@ -2001,6 +2011,7 @@ impl qobject::AppController {
     fn process_next_tab_layout(mut self: std::pin::Pin<&mut Self>) {
         let shown = usize::try_from(*self.active_material()).unwrap_or(0);
         let multisize = *self.is_multisize();
+        let split_multisize = multisize && self.rust().tab_queue.as_ref().is_some_and(|queue| queue.split_oversized);
 
         // Gather inputs; a cleared queue (new import or settings) makes this a no-op.
         let inputs = {
@@ -2090,7 +2101,7 @@ impl qobject::AppController {
                             Some(kind) if layout.views.is_empty() => {
                                 layout.divide_spec = result.divide_spec.clone();
                                 layout.state = LayoutState::from_result(result);
-                                layout.views.start(kind);
+                                layout.views.start(kind, split_multisize);
                                 layout.is_laid_out = true;
                             } // first view of another material
                             Some(kind) => layout.views.push(kind, LayoutState::from_result(result)),
@@ -2098,7 +2109,7 @@ impl qobject::AppController {
                                 layout.divide_spec = result.divide_spec.clone();
                                 layout.state = LayoutState::from_result(result);
                                 if multisize {
-                                    layout.views.start(ViewKind::Marker);
+                                    layout.views.start(ViewKind::Marker, false);
                                 } // if multisize
                                 layout.is_laid_out = true;
                             } // first layout
@@ -2113,7 +2124,10 @@ impl qobject::AppController {
                     if job.material != shown && multisize {
                         let layout = rust.material_layout_mut(job.material);
                         if layout.views.is_empty() {
-                            layout.views.start(job.kind.unwrap_or(ViewKind::Marker));
+                            match job.kind {
+                                Some(kind) => layout.views.start(kind, split_multisize),
+                                None => layout.views.start(ViewKind::Marker, false),
+                            } // match first view
                         } // if first view failed
                     } // if another material's first view failed
                 } // Err
@@ -2191,9 +2205,7 @@ impl qobject::AppController {
     fn export_tab_included(&self, index: i32, format: &cxx_qt_lib::QString) -> bool {
         let format = format.to_string();
         usize::try_from(index)
-            .ok()
-            .and_then(|i| self.rust().layout_views.kind(i))
-            .is_some_and(|kind| kind.in_all_tabs_export(&format))
+            .is_ok_and(|i| self.rust().layout_views.in_all_tabs_export(i, &format))
     } // fn export_tab_included
 
     // Swap the controller's layout fields with tab `index`.
@@ -2243,7 +2255,7 @@ impl qobject::AppController {
     fn refresh_layout_view_properties(mut self: std::pin::Pin<&mut Self>) {
         let shown = usize::try_from(*self.active_material()).unwrap_or(0);
         let is_shown_laid_out = *self.is_layout_ready();
-        let (labels, media_sizes, material_sizes, active, dxf_allowed, tiled_allowed) = {
+        let (labels, media_sizes, material_sizes, active, unavailable_text, dxf_allowed, tiled_allowed) = {
             let rust = self.rust();
             let views = &rust.layout_views;
             // The active tab's layout is the controller's layout_dom.
@@ -2269,6 +2281,7 @@ impl qobject::AppController {
                 string_list(&media_sizes),
                 string_list(&material_sizes),
                 views.active() as i32,
+                cxx_qt_lib::QString::from(views.active_unavailable_text()),
                 dxf_allowed,
                 tiled_allowed,
             )
@@ -2278,6 +2291,7 @@ impl qobject::AppController {
         self.as_mut().set_layout_view_media_sizes(media_sizes);
         self.as_mut().set_layout_view_labels(labels);
         self.as_mut().set_active_layout_view(active);
+        self.as_mut().set_layout_view_unavailable_text(unavailable_text);
         self.as_mut().set_dxf_export_allowed(dxf_allowed);
         self.as_mut().set_pdf_tiled_export_allowed(tiled_allowed);
         let split_layout_active = self.rust().divide_spec.is_some();
