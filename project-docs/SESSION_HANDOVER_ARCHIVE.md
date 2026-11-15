@@ -2,6 +2,19 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-14 — Media size for individual patterns (Layout.X5.3)
+
+- Individual pattern: the media size shows below each material tab name over the layout; one material: below "Material: <name>".
+- Untagged import (no material name): the header shows only the size.
+- Rust: `layout_views::material_media_size`, `MaterialLayout::media_size`. Empty for a blank canvas or a material with layout tabs.
+- Bridge: QML property `materialMediaSizes`, one entry per material; `refresh_layout_view_properties` fills it from `is_layout_ready` (shown) and `material_layouts` (others).
+- Order fixes so no old size stays: `initialize_layout` and `run_layout` clear the tabs after the layout flag drops; `finish_tab_layouts` refreshes after it rises.
+- `Main.qml`: `MaterialTabBar.mediaSizes` (left bar leaves it empty); `materialHeader` is a Column.
+- Test: `material_media_size_shows_one_finished_layout`.
+- Checked: `cargo test --workspace` 705 pass; `ctest --preset debug` 8/8. App starts with the new QML; UI not driven.
+- Docs: SIMPLE_WORKFLOW; `AGENT_CHECKLIST.md` §42 (multisize part now jacket2; trousers is individual) and OPEN row; TODO Layout.X5.3.
+- Open: Layout.X5.2 installed-app check with the next MSI (§42).
+
 ### 2026-11-14 — Logo commit broke the MSI build
 
 - Cause: commit `3674fcfeab` moved `seamly-layout_512x512.png` and `seamly-layout.icns` to `assets/images/old-imgs/`; `qt_frontend/CMakeLists.txt` still names `assets/images/`.

@@ -360,7 +360,10 @@ When a piece of an individual pattern, or of a multisize pattern on fabric, is w
 - An outer line (`cutline`, or `seamline` without a `cutline`) with no `Z` and both ends on the fold line makes parts as if it had its fold line edge. A part on the fold line gets no edge on the fold line either; its stretch of fold line completes the outer edge.
 - `seamline` (beside a cutline), `internal_path`, `grainline`, `stripe`, `plaid`: open lines that end at the cut lines. A closed `internal_path` becomes one open line per part.
 - `data-turn-points`: kept vertices keep their flag; new vertices on a cut line are turn points.
-- `drill`: whole, on the part nearest its circle centre. No cut line passes through a drill centre.
+- `drill`: whole, on the part nearest its circle centre, when no cut line crosses its circle. No cut line passes through a drill centre.
+  A cut line that crosses the circle splits it. Each part's `<circle>` becomes a `<path>` of its arcs: cubic curves that end at the cut line.
+  The part nearest the centre also keeps `<circle r="0" stroke="none" fill="none">` at the centre. It draws nothing.
+  DXF-ASTM writes that circle as the one layer 13 drill point. A split part's `drill` group without a circle writes no point.
 - Notches, `piece_label`, `pattern_label`: whole, on the part that holds them.
   A `piece_label`, `pattern_label` or `fold_line_label` not wholly inside the part's outer line moves to the nearest place inside it, 1/16 in clear.
   It keeps clear of other labels and of the new part label when it can. A label too large for the part shrinks about its centre in 10% steps.

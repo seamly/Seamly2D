@@ -56,7 +56,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | 9 | Stripe reference lines | LINE |
 | 10 | Plaid reference lines | LINE |
 | 11 | Internal cutouts (`cut_path`) | POLYLINE |
-| 13 | Drill-hole centers; group 30 carries the positive diameter in file units | POINT |
+| 13 | Drill-hole centers; group 30 carries the positive diameter in file units. A split drill hole has one point, on the part with its centre | POINT |
 | 14 | Sew lines (`seamline`) | POLYLINE |
 | 15 | Piece and pattern label text | TEXT |
 | 84 / 85 / 86 / 87 | Validation curves for 1 / 8 / 11 / 14 | POLYLINE |

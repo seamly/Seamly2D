@@ -2,6 +2,17 @@
 
 ## Current status
 
+### 2026-11-14 — Split drill holes (Layout.Y4)
+
+- `piece_divider.rs` `drill_for_parts`: a cut line that crosses a drill circle splits it. Each part's `<circle>` becomes a `<path>` of its arcs (cubic curves, 90° or less each) that end at the cut line.
+- The part nearest the centre keeps `<circle r="0" stroke="none" fill="none">`: one DXF-ASTM layer 13 drill point. Decision: DXF has no half drill hole; the point stays where the centre is.
+- Cubic curves, not SVG `A` arcs: `svg_dom` bakes an arc wrongly under a flip.
+- `seamly_svg2ezdxf` `extract_drill_hole`: a split part (`data-split-of`) with no circle writes no point; a zero-radius circle writes the point. Unsplit pieces keep the old checks.
+- Tests: `drill_hole_splits_at_the_cut_line`, `narrow_cell_holds_two_arcs`, `split_drill_hole_keeps_one_drill_point`; two reject cases.
+- Checked: `cargo test --workspace` 712 pass; `ctest` debug 8/8. Built in worktree `split-drill`; merged `--no-ff`; branch and worktree deleted.
+- Docs: SVG-DATA-ATTRIBUTES, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, DXF-ASTM compliance, `AGENT_CHECKLIST.md` §48, new §51 and OPEN row.
+- Open: Layout.Y4.1 installed-app check with the next MSI (§51).
+
 ### 2026-11-14 — Nested: lowest corner without a right angle (Layout.Y3)
 
 - Stack point Rule 2a: a right angle at one or more turn points keeps the old rule.
@@ -47,19 +58,6 @@
 - Built and tested in worktree `split-markings`; merged `--no-ff`; branch and worktree deleted.
 - Docs: SVG-DATA-ATTRIBUTES split parts, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §48 and OPEN row.
 - Open: Layout.803.1 installed-app check with the next MSI (§48).
-
-### 2026-11-14 — Media size for individual patterns (Layout.X5.3)
-
-- Individual pattern: the media size shows below each material tab name over the layout; one material: below "Material: <name>".
-- Untagged import (no material name): the header shows only the size.
-- Rust: `layout_views::material_media_size`, `MaterialLayout::media_size`. Empty for a blank canvas or a material with layout tabs.
-- Bridge: QML property `materialMediaSizes`, one entry per material; `refresh_layout_view_properties` fills it from `is_layout_ready` (shown) and `material_layouts` (others).
-- Order fixes so no old size stays: `initialize_layout` and `run_layout` clear the tabs after the layout flag drops; `finish_tab_layouts` refreshes after it rises.
-- `Main.qml`: `MaterialTabBar.mediaSizes` (left bar leaves it empty); `materialHeader` is a Column.
-- Test: `material_media_size_shows_one_finished_layout`.
-- Checked: `cargo test --workspace` 705 pass; `ctest --preset debug` 8/8. App starts with the new QML; UI not driven.
-- Docs: SIMPLE_WORKFLOW; `AGENT_CHECKLIST.md` §42 (multisize part now jacket2; trousers is individual) and OPEN row; TODO Layout.X5.3.
-- Open: Layout.X5.2 installed-app check with the next MSI (§42).
 
 ## Decisions to retain
 
