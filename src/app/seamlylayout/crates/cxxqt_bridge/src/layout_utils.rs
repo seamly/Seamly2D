@@ -2946,4 +2946,76 @@ mod tests {
         assert_eq!(backs, 2, "the turned piece splits into two parts");
     } // fold_line_across_the_grain_lies_on_the_left_edge
 
+    // @brief jacket2 settings on 60 in fabric folded to 30 in, with fold lines on the left edge.
+    fn jacket2_folded_settings_json() -> String {
+        let mut settings: serde_json::Value = serde_json::from_str(&jacket2_settings_json(60.0, 100.0))
+            .expect("valid settings JSON");
+        settings["fabricFolded"] = serde_json::json!(true);
+        settings["foldLinesOnLeftEdge"] = serde_json::json!(true);
+        settings.to_string()
+    } // fn jacket2_folded_settings_json
+
+    // @brief Lay out jacket2 on folded fabric as a multisize tab: `size` for a size tab,
+    //        else Nested (`nested`) or Marker.  Multisize tabs extend the media length, as the app does.
+    fn process_jacket2_folded(size: Option<&str>, nested: bool) -> ProcessLayoutResult {
+        let (input_dom, _) = jacket2_handoff();
+        let settings_json = jacket2_folded_settings_json();
+        let init = do_initialize_layout(&settings_json, Some(&input_dom)).expect("initialize_layout should succeed");
+        let args = ProcessLayoutArgs {
+            settings_json: &settings_json,
+            input_dom: &input_dom,
+            initial_layout_dom: &init.initial_dom,
+            layout_h_px: init.h_px,
+            nested_multisize: nested,
+            extend_media: true,
+            split_oversized: false,
+        };
+        let mut progress = |_pct: i32, _status: Option<&str>| {};
+        let result = match size {
+            Some(size) => do_process_size_layout(args, size, &mut progress),
+            None => do_process_layout(args, &mut progress),
+        }; // match size
+        result.expect("folded jacket2 layout should succeed")
+    } // fn process_jacket2_folded
+
+    // @brief Assert the `count` jacket2 units with a fold line (Back, Detail 2) lie first on the left
+    //        edge: the top one at the top, each next one a piece gap below the one above it.
+    fn assert_fold_line_pieces_first(result: &ProcessLayoutResult, tab: &str, count: usize) {
+        assert!(result.unplaced_labels.is_empty() && result.fold_line_warnings.is_empty(), "{tab}");
+        let gap_px = u64::from(LayoutSettings::from_json(&jacket2_folded_settings_json()).expect("settings parse").piece_gap_px());
+        let bbox: serde_json::Value = serde_json::from_str(&result.bbox_json).expect("valid JSON");
+        let (ml, mt) = (bbox["ml_px"].as_u64().expect("ml_px"), bbox["mt_px"].as_u64().expect("mt_px"));
+        let value = |piece: &serde_json::Value, key: &str| piece[key].as_u64().expect("number");
+        // Size pieces are `piece_Back_s220`; Nested piece-sets are `piece-set_Back`.
+        let mut fold_pieces: Vec<&serde_json::Value> = bbox["pieces"].as_array().expect("pieces array").iter()
+            .filter(|piece| piece["id"].as_str().is_some_and(|id| id.contains("_Back") || id.contains("_Detail_2")))
+            .collect();
+        assert_eq!(fold_pieces.len(), count, "{tab}");
+        fold_pieces.sort_by_key(|piece| value(piece, "y"));
+
+        let mut next_y = mt;
+        for piece in fold_pieces {
+            assert_eq!((value(piece, "x"), value(piece, "y")), (ml, next_y), "{tab}: {}", piece["label"]);
+            next_y = value(piece, "y") + value(piece, "h") + gap_px;
+        } // for each fold line piece
+    } // fn assert_fold_line_pieces_first
+
+    // @brief Folded fabric: on the Base Size tab and every size tab, Back and Detail 2 go first,
+    //        stacked at the left edge from the top; the other pieces go after them.
+    #[test]
+    fn jacket2_size_tabs_place_fold_line_pieces_first() {
+        let (_, sizes) = jacket2_handoff();
+        for size in &sizes {
+            assert_fold_line_pieces_first(&process_jacket2_folded(Some(size), false), &format!("size {size}"), 2);
+        } // for each size
+    } // jacket2_size_tabs_place_fold_line_pieces_first
+
+    // @brief Folded fabric: Marker puts every size of Back and Detail 2 first on the left edge;
+    //        Nested puts their two piece-sets first.
+    #[test]
+    fn jacket2_marker_and_nested_place_fold_line_pieces_first() {
+        assert_fold_line_pieces_first(&process_jacket2_folded(None, false), "Marker", 52);
+        assert_fold_line_pieces_first(&process_jacket2_folded(None, true), "Nested", 2);
+    } // jacket2_marker_and_nested_place_fold_line_pieces_first
+
 } // mod tests

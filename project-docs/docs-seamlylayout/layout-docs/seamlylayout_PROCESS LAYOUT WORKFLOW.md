@@ -54,6 +54,8 @@ Box-based packer: `crates/layout_engine/src/maxrects_order_search.rs` and `up_le
 
 - Start orders: pieces sorted by area, height, width, longer side, perimeter. Each order is packed with both rules.
 - Then late-acceptance hill climbing: swap two pieces, move one piece, or change the rule.
+- Left-edge pieces (fold lines on folded fabric) come first in every order, start orders and hill climbing alike (`PackJob::left_edge_first`).
+  They stack down the left edge from the top. The other pieces go after them. Every layout follows this rule: individual, Marker, Nested, Base Size and size tabs.
 - Fixed random seed: the same input always gives the same layout.
 - Layout rank, in order: least unplaced area, least height, least side-gap excess, pieces higher.
 - Side-gap excess: whitespace beyond the gap left of each piece. It ends at the nearest side-by-side piece or at the bin edge.

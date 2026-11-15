@@ -25,7 +25,9 @@ Layout Mode Any ignores the option (`LayoutSettings::places_fold_lines_on_left_e
 Piece Properties Rotation alone sets each angle, and no fold line goes on the edge.
 Paper and open fabric ignore the option too.
 The packer then puts the piece against the left bin edge (`Rect::with_left_edge`):
-the fold, which has no left margin.
+the fold, which has no left margin. The packer places every fold line piece
+before the other pieces, from the top of the left edge down; the media gets
+longer when it must.
 
 ## Layout Engine Pipeline
 
