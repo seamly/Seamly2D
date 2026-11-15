@@ -2,6 +2,16 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-14 — Material tab order (Layout.Y1)
+
+- `material_split.rs`: `pattern_materials` sorts by `MATERIAL_ORDER`: Fabric, Lining, Interfacing, Interlining. Other names go after, in handoff order. Match ignores ASCII case.
+- Cause: Seamly2D writes the pattern groups in the order of the first piece of each material, so Lining could come first.
+- Both tab bars (`materialLabels`) and every material index (`material_docs`, `material_layouts`) follow the new order.
+- Test: `materials_follow_the_tab_order`.
+- Checked: `cargo test --workspace` 708 pass; `ctest` debug 8/8. Built in worktree `material-tab-order`; merged `--no-ff`; branch and worktree deleted.
+- Docs: SVG-DATA-ATTRIBUTES Materials.
+- Open: Layout.Y1.1 installed-app check with the next MSI.
+
 ### 2026-11-14 — Split pieces keep their markings (Layout.803)
 
 - `piece_divider.rs`: `stripe` and `plaid` reference lines are open lines that end at the cut lines, like `internal_path`.

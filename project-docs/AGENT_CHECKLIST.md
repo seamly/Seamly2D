@@ -65,12 +65,12 @@ MALE_SHIRT
 | Layout.803.1 | 48 | SL > male_shirt, trousers > Paper Roll 8 in, split: drill holes, stripe, plaid, internal paths end at the cut line | ?
 | Layout.Y4.1 | 51 | SL > trousers > Paper Roll 16 in, split: Back drill hole splits at the cut line | ?
 | Layout.Y5.1 | 52 | S2D > male_shirt > Piece mode, BackPanel Mirrored: grainline tilts with the piece | ?
+| Layout.Y6.1 | 53 | SL > trousers, jacket_2 > Paper Roll and Fabric: the media width never changes | ?
 | Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Fabric | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Lining | ?
 
 TROUSERS
-| Layout.71.6 | 11 | SL > trousers > Media grows in width | ?
 | Layout.72.8 | 12 | SL > trousers > Settings > Paper Roll 16 in: Oversized pieces - split or enlarge | ?
 | Layout.801.4 | 37 | SL > trousers > Paper Roll 16 in, split: waistband part labels level, 0.25 in, inside each part | ?
 | Layout.802.5 | 38 | SL > trousers > Paper Roll 16 in, Layout Mode Any: waistband turns 90°, not listed as too wide | ?
@@ -221,11 +221,7 @@ Export all tabs unchecked.
 
 ## 11. Media grows in width
 
-- [ ] Settings: Paper, Roll, width 10 in. Submit. Create Layout.
-- [ ] Every tab is wider than 10 in. No warning.
-- [ ] Adjust Layout on each tab: the frame matches the canvas.
-- [ ] Export > SVG: page size matches the canvas.
-- [ ] Close SeamlyLayout and Seamly2D. Do not save the pattern.
+Removed: no media widens. See §53.
 
 ## 12. trousers: oversized pieces
 
@@ -234,7 +230,7 @@ Pattern: `C:\Users\susan\seamly2d\patterns\trousers.sm2d` (individual).
 - [ ] Start Seamly2D from the Start menu. Open the pattern. Press Layout.
 - [ ] Settings: Paper, Roll, custom width 16 in. Submit. Create Layout.
 - [ ] Dialog "Pieces do not fit the media" lists `Back: width 16.61 in, media 15.50 in`.
-- [ ] Dialog text is light on the violet background: heading, piece list, "Split the pieces", "Make the media bigger", both descriptions. No black text.
+- [ ] Dialog text is light on the violet background: heading, piece list, "Split the pieces", "Make the media longer", both descriptions. No black text.
 - [ ] Cancel: only Layout Settings, Preferences and Exit are enabled.
 - [ ] Submit the settings: Create Layout is enabled.
 - [ ] Create Layout. Choose "Split the pieces". OK.
@@ -243,7 +239,7 @@ Pattern: `C:\Users\susan\seamly2d\patterns\trousers.sm2d` (individual).
   - [ ] Each cut edge has 2 green match notches.
   - [ ] Export > PDF: save dialog offers `trousers_<stamp>.pdf`, with no tab. The split parts appear.
   - [ ] Export > DXF > DXF-ASTM (R13): blocks named `Back (1/2)` and `Back (2/2)`.
-- [ ] Create Layout. Choose "Make the media bigger". OK: the roll grows wider than 16 in; Back stays whole.
+- [ ] Create Layout. Choose "Make the media longer". OK: the roll stays 16 in wide; Back is left out and the warning names it.
 - [ ] Close both apps.
 
 ## 13. male_shirt: built-in seam line
@@ -643,7 +639,7 @@ Pattern: jacket2. Back and Detail 2 have a fold line in every size. Detail 4 is 
 
 - [ ] Open jacket2 (`test-seamly-layout/patterns/validation/jacket2_40-146.sm2d`). Press Layout.
 - [ ] Settings: Fabric (folded), width 30.0. Submit. Create Layout. "Pieces do not fit the media": the list names pieces `Size_<size>_<name>_<letter>`, for example `Size_640_Комір_H`. No `Piece_<n>`.
-- [ ] Choose "Make the media bigger". OK. If "Some layouts left pieces out" appears, each line is `Size_<size>_<name>_<letter>` alone. No `: <size>` after the name.
+- [ ] Choose "Make the media longer". OK. If "Some layouts left pieces out" appears, each line is `Size_<size>_<name>_<letter>` alone. No `: <size>` after the name.
 - [ ] Base Size 500 tab > Export > DXF-ASTM (R13). "Missing Piece Data" lists `Size_500_Подборт_G`.
 - [ ] Open `test-seamly-layout/patterns/validation/trousers.sm2d` (individual). Press Layout.
 - [ ] Settings: Paper, Roll, custom width 16 in. Layout Mode: Along Grainline. Submit. Create Layout. "Pieces do not fit the media" lists `Back`, not `Piece_<n>_Back`.
@@ -784,3 +780,19 @@ Detail 3 has corners on its cut line, but no corner is a right angle. Detail 3 i
 - [ ] Drag the grainline. Save, close, and reopen: the grainline is where you left it, tilted with the piece.
 - [ ] Turn the grainline with its rotate handle: it keeps the new angle. Undo puts it back.
 - [ ] A piece with Tilt None: the grainline does not change.
+
+## 53. [ ] The media width never changes
+
+(Layout.Y6.1)
+
+- [ ] Open trousers (`test-seamly-layout/patterns/validation/trousers.sm2d`). Press Layout.
+- [ ] Settings: Paper, Roll, custom width 16.00 in. Layout Mode Along Grainline. Submit. Create Layout.
+- [ ] Dialog "Pieces do not fit the media": the second choice reads "Make the media longer". Its text: the media keeps its width and grows longer.
+- [ ] Choose "Make the media longer". OK. The media size below the material name starts with `16.00 x`.
+- [ ] The warning names Back as left out. Adjust Layout: the frame matches the canvas.
+- [ ] Open jacket2 (`test-seamly-layout/patterns/validation/jacket2_40-146.sm2d`). Press Layout.
+- [ ] Settings: Paper, Roll, width 10.00 in. Submit. Create Layout. Dialog "Pieces do not fit the media" opens (new for multisize paper).
+- [ ] Choose "Make the media longer". OK. Every tab's media size starts with `10.00 x`. The warning lists the left-out pieces.
+- [ ] Settings: Fabric (folded), width 30.0. Create Layout. "Make the media longer". Every tab's media size starts with `30.00 x`.
+- [ ] Settings: Fabric (not folded), width 30.0. Same check.
+- [ ] Settings: Paper, Roll, width 48.00 in. Create Layout: no dialog. Every tab starts with `48.00 x`; the length grows past 500 in on Marker.

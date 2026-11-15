@@ -59,11 +59,12 @@ mod label_inside_part;
 // @brief What a layout does with a piece wider or longer than the media.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum OversizeChoice {
-    // Lay out as usual: no piece is too big, or the layout is multisize on paper.
+    // Lay out as usual: no piece is too big, or the media is tiled paper.
     AsIs,
     // Split each such piece into parts that fit (the user's choice).
     Split,
-    // Make the media wider and longer, as a multisize tab does (the user's choice).
+    // Make the media longer, as a multisize tab does (the user's choice).
+    // The width stays: a piece wider than the media stays unplaced.
     Extend,
 } // enum OversizeChoice
 
@@ -666,9 +667,9 @@ pub mod qobject {
         #[qsignal]
         fn layout_warning(self: Pin<&mut AppController>, message: QString);
 
-        // Emitted instead of a layout when an individual pattern has a piece wider
-        // or longer than the media.  `message` lists the pieces, one per line.
-        // QML asks the user to split the pieces or make the media bigger, then calls
+        // Emitted instead of a layout when a paper roll or fabric layout has a piece
+        // wider than the media.  `message` lists the pieces, one per line.
+        // QML asks the user to split the pieces or make the media longer, then calls
         // process_layout_oversized, or cancel_layout.
         #[qsignal]
         fn oversized_pieces_found(self: Pin<&mut AppController>, message: QString);
@@ -1664,52 +1665,47 @@ impl qobject::AppController {
     } // fn initialize_layout
 
     // Run the layout pipeline: parse settings, extract pieces, pack, assemble output SVG.
-    // An individual pattern, or a multisize pattern on fabric, with a piece wider or
-    // longer than the media gets no layout yet: `oversized_pieces_found` asks the user
-    // to split the pieces or make the media bigger. Multisize paper widens to fit.
+    // A layout on a paper roll or fabric with a piece wider than the media gets no
+    // layout yet: `oversized_pieces_found` asks the user to split the pieces or make
+    // the media longer.  No media widens to fit; tiled paper finds no oversized piece.
     // Called by 'Create Layout' button handler in QML: onCreateLayout: appController.processLayout(settingsJson)
     fn process_layout(
         mut self: std::pin::Pin<&mut Self>,
         settings_json: &cxx_qt_lib::QString,
     ) -> bool {
-        // Fabric keeps its width, so a multisize layout on fabric asks too.
-        let fabric = LayoutSettings::from_json(&settings_json.to_string())
-            .is_ok_and(|settings| settings.media_type == "fabric");
-        if !*self.is_multisize() || fabric {
-            // Every material is laid out, so the dialog names the oversized pieces of each.
-            let found = {
-                let rust = self.rust();
-                let json = settings_json.to_string();
-                let shown = usize::try_from(*self.active_material()).unwrap_or(0);
-                let mut found = match (&rust.input_dom, &rust.initial_layout_dom) {
-                    (Some(input), Some(initial)) => {
-                        layout_utils::do_find_oversized_pieces(&json, input, initial).unwrap_or_default()
-                    } // inputs present
-                    _ => Vec::new(), // run_layout reports the missing input
-                }; // found
-                for (material, part) in rust.material_docs.iter().enumerate().filter(|(m, _)| *m != shown) {
-                    let initial = rust.material_layouts.get(material).and_then(|l| l.initial_layout_dom.as_ref());
-                    if let Some(initial) = initial {
-                        found.extend(layout_utils::do_find_oversized_pieces(&json, &part.doc, initial).unwrap_or_default());
-                    } // if the material has a canvas
-                } // for each other material
-                found
-            }; // rust borrow dropped
-            if !found.is_empty() {
-                // The settings parsed in do_find_oversized_pieces, so the unit is there.
-                let unit = LayoutSettings::from_json(&settings_json.to_string())
-                    .map(|settings| settings.unit)
-                    .unwrap_or_default();
-                let message = piece_divider::oversized_pieces_message(&found, &unit);
-                self.as_mut().oversized_pieces_found(cxx_qt_lib::QString::from(message.as_str()));
-                return false;
-            } // if oversized pieces
-        } // if individual or fabric
+        // Every material is laid out, so the dialog names the oversized pieces of each.
+        let found = {
+            let rust = self.rust();
+            let json = settings_json.to_string();
+            let shown = usize::try_from(*self.active_material()).unwrap_or(0);
+            let mut found = match (&rust.input_dom, &rust.initial_layout_dom) {
+                (Some(input), Some(initial)) => {
+                    layout_utils::do_find_oversized_pieces(&json, input, initial).unwrap_or_default()
+                } // inputs present
+                _ => Vec::new(), // run_layout reports the missing input
+            }; // found
+            for (material, part) in rust.material_docs.iter().enumerate().filter(|(m, _)| *m != shown) {
+                let initial = rust.material_layouts.get(material).and_then(|l| l.initial_layout_dom.as_ref());
+                if let Some(initial) = initial {
+                    found.extend(layout_utils::do_find_oversized_pieces(&json, &part.doc, initial).unwrap_or_default());
+                } // if the material has a canvas
+            } // for each other material
+            found
+        }; // rust borrow dropped
+        if !found.is_empty() {
+            // The settings parsed in do_find_oversized_pieces, so the unit is there.
+            let unit = LayoutSettings::from_json(&settings_json.to_string())
+                .map(|settings| settings.unit)
+                .unwrap_or_default();
+            let message = piece_divider::oversized_pieces_message(&found, &unit);
+            self.as_mut().oversized_pieces_found(cxx_qt_lib::QString::from(message.as_str()));
+            return false;
+        } // if oversized pieces
         self.run_layout(settings_json, OversizeChoice::AsIs)
     } // fn process_layout
 
     // Lay out after the oversized-pieces dialog's OK: "split" splits each such
-    // piece into parts; any other value makes the media bigger.
+    // piece into parts; any other value makes the media longer.
     fn process_layout_oversized(
         self: std::pin::Pin<&mut Self>,
         settings_json: &cxx_qt_lib::QString,

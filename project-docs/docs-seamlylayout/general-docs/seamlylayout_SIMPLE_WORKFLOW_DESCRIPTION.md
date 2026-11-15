@@ -168,9 +168,9 @@ The application workflow loop consists of:
      * Disable 'Create Layout' button
      * Enable 'Adjust Layout' button
      * Enable 'Export' button
-   * Oversized pieces (individual pattern, or multisize on fabric; not tiled paper):
+   * Oversized pieces (paper roll or fabric, individual or multisize; not tiled paper):
      * Before the layout, `do_find_oversized_pieces` lists each piece wider than the media at every trial angle.
-       Multisize: each size of each piece is listed alone: "Size_640_Комір_H". Multisize paper widens instead (below).
+       Multisize: each size of each piece is listed alone: "Size_640_Комір_H".
        Paper roll and fabric have no length limit.
        Layout Mode Any: a piece that fits turned 90° is not listed, whatever its Rotation rule. The layout turns it.
      * None: the layout runs as before. A piece that fits but runs out of room is left out, and a warning names it.
@@ -187,8 +187,8 @@ The application workflow loop consists of:
          See `SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout split parts".
          A paper roll keeps the selected roll width and margins; only its length follows the content.
          Multisize: Base Size and every size tab of every material split. Marker and Nested get no layout.
-       * "Make the media bigger" (DXF): fabric keeps its configured width and grows longer. Other media can grow wider and longer.
-         A completion popup reports the resulting dimensions. Pieces that cannot fit fabric width remain explicitly reported.
+       * "Make the media longer" (DXF): the paper roll or fabric keeps its configured width and grows longer.
+         A completion popup reports the resulting dimensions. A piece wider than the media is left out, and the warning names it.
        * Split placement on roll and fabric retries remaining pieces on fresh media lengths until all fit or a fresh length makes no progress.
      * OK lays out with the choice. Cancel: no layout; only 'Layout Settings' (plus Preferences and Exit) stays active until new settings are submitted.
    * Multisize import (`data-measurements='multisize'`) — one tab per layout, every tab from the imported SVG:
@@ -206,10 +206,9 @@ The application workflow loop consists of:
      * One tab per UI tick (`processNextTabLayout`); the progress popup names the tab: "Laying out Size 36 (5 of 6)…".
      * 'Adjust Layout' and 'Export' stay disabled until the last tab finishes.
      * Every tab extends its roll or fabric until every piece is placed (`ProcessLayoutArgs::extend_media`).
-       * Wider: a piece wider than the paper roll widens it to the right. Both side margins are kept.
        * Longer: the media grows downwards. The canvas ends at the lowest piece.
-       * No piece is left out of paper. Tiled paper does not extend.
-       * Fabric does not widen: see "Oversized pieces" above.
+       * The width never changes: a paper roll, folded fabric and fabric keep the media width and the contentRect width.
+         A piece wider than the media: see "Oversized pieces" above. Tiled paper does not extend.
      * One warning after the last tab lists every layout that left pieces out or failed.
        * One bullet per piece, named as DXF-ASTM names it, then its sizes: "Detail (3): 220, 240".
        * The warning scrolls; its OK button stays visible.

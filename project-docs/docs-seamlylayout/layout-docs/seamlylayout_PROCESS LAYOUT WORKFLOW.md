@@ -100,10 +100,10 @@ trimmed_h = max(placed.y + placed.h for all placements) + margin_bottom_px
 
 Updates `<svg height>` and background `<rect height>`. Applied only when `trimmed_h < bin_h`.
 
-## Oversized Pieces (individual pattern, multisize fabric)
+## Oversized Pieces (paper roll and fabric)
 
 - `process_layout` first runs `layout_utils::do_find_oversized_pieces`: pre-processing up to grain-up pieces, then `piece_divider::find_oversized_pieces`.
-- It runs for an individual pattern, and for a multisize pattern on fabric: fabric does not widen. Multisize lists each size piece alone, as Marker packs it.
+- It runs for every layout: no media widens. Tiled paper finds no oversized piece. Multisize lists each size piece alone, as Marker packs it.
 - A piece is oversized when no trial angle fits the content width. Paper roll and fabric limit only the width.
 - Layout Mode Any: a piece too wide at its `data-rotation` angles gets quarter turns if a 90° turn fits (`piece_extractor::turn_wide_pieces_to_fit`). It is not oversized. The packer gets the same angles. Warnings report each offending piece width and the media width inside the margins. Tiled paper is never checked.
 - Oversized pieces: the `oversized_pieces_found` signal, no layout. QML asks the user, then calls `process_layout_oversized(settings, "split" | "extend")` or `cancel_layout()`.
@@ -135,19 +135,19 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
 
 ## Extended Media (multisize tabs)
 
-Every multisize tab sets `ProcessLayoutArgs::extend_media`. An individual pattern sets it only when the user chose "Make the media bigger".
+Every multisize tab sets `ProcessLayoutArgs::extend_media`. An individual pattern sets it only when the user chose "Make the media longer".
 
-- Paper width: `packing::required_bin_width` finds the widest required bin. A wider value widens paper rolls.
-- Fabric keeps its configured width, including the folded half-width and selvedge margins. Only its height can enlarge.
+- Constraint: no layout changes the media width or the contentRect width. This applies to a paper roll, folded fabric and fabric.
+  Every non-tiled packing branch packs into the contentRect width of the blank canvas.
+- Fabric keeps its configured width, including the folded half-width and selvedge margins. Only the length can grow.
 - `packing::pack_polygons_extending` packs into a bin as tall as all pieces that fit its width, stacked.
-- Pieces that cannot fit the fixed fabric width remain unplaced and appear in the warning popup, unless the user chose "split".
-- `set_content_width` widens the canvas to the right. contentRect keeps its x; both side margins are kept.
+- Pieces wider than the media remain unplaced and appear in the warning popup, unless the user chose "split".
 - `trim_bottom` sets the canvas height. Roll and fabric end at the lowest piece.
 - Canvas, Adjust Mode and exports read the size from `layout_dom`.
 - Tiled paper does not extend: its candidate-width search sets the width.
-- User-requested enlargement shows the resulting width and height in the active unit. Folded fabric reports its full configured width.
+- User-requested enlargement shows the media width and the new length in the active unit, only when the media grew longer. Folded fabric reports its full configured width.
 - Multiple materials collect their enlargement dimensions and unplaced warnings in one completion popup.
-- Example: jacket2 Marker, 208 pieces, 48 in paper roll: the roll grows from 500 in to about 798 in. On a 10 in roll it also widens.
+- Example: jacket2 Marker, 208 pieces, 48 in paper roll: the roll grows from 500 in to about 798 in. On a 10 in roll it stays 10 in wide; pieces wider than 9.25 in are left out.
 
 ## Export Preparation
 

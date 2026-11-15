@@ -19,6 +19,10 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
   - [ ] Layout.Y5.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §52. The MSI build also runs the full Qt suites.
 
 - [ ] yy Layout.Y6 - Paper > roll : PROHIBIT CHANGING THE WIDTH OF THE ROLL PAPER!!! DO NOT MAKE ME TELL YOU THIS AGAIN!!!!! THE ROLL LENGTH CAN CHANGE BUT THE WIDTH CANNOT! I have submitted multiple prompts to fix this problem, and I don't want to keep wasting tokens to fix this one problem. It's simple. When media=paper and papertype=roll then do not ever change the width of the media or content rect. Also applies to media=fabric --> do not ever change the media width or content rect for fabric (folded) or fabric (not folded)>. 
+  - [x] `layout_utils::do_process_layout`: every non-tiled pack uses the contentRect width of the blank canvas. Removed `set_content_width` and the roll widening path. A piece wider than the media stays unplaced.
+  - [x] `process_layout`: the oversized-piece check runs for every layout, multisize paper rolls too. Dialog choice "Make the media longer".
+  - [x] Tests: `placement_enlargement_dimensions_and_notifications`, `jacket2_marker_keeps_narrow_roll_width`. Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §53 (§11 removed).
+  - [ ] Layout.Y6.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §53.
 
 ## Implement
 

@@ -1719,8 +1719,8 @@ ApplicationWindow {
     } // Dialog warningDialog
 
     // -----------------------------------------------------------------------
-    // Oversized pieces dialog — an individual pattern has a piece wider than
-    // the media.  OK lays out with the chosen remedy; Cancel leaves only
+    // Oversized pieces dialog — a paper roll or fabric layout has a piece wider
+    // than the media.  OK lays out with the chosen remedy; Cancel leaves only
     // 'Layout Settings' active.  Only the buttons close it.
     // -----------------------------------------------------------------------
     Dialog {
@@ -1810,7 +1810,7 @@ ApplicationWindow {
 
             RadioButton {
                 id:      extendMediaRadio
-                text:    "Make the media bigger"
+                text:    "Make the media longer"
                 ButtonGroup.group: oversizeChoiceGroup
 
                 contentItem: Text {
@@ -1823,8 +1823,8 @@ ApplicationWindow {
             } // RadioButton extendMediaRadio
 
             Text {
-                text:           "For DXF files: pieces stay whole. Fabric keeps its width and grows longer. " +
-                                "Other media can grow wider and longer."
+                text:           "For DXF files: pieces stay whole. The media keeps its width and grows longer. " +
+                                "A piece wider than the media is left out."
                 color:          Theme.textOnDark
                 font.pixelSize: Theme.fontSizeSmall
                 wrapMode:       Text.WordWrap
