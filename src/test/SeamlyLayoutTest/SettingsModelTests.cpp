@@ -9,7 +9,7 @@
 //   • Default field values after construction
 //   • Paper Type choices: tiled and roll; a saved "sheet" loads as tiled
 //   • Roll Width choices, including the custom roll width and its dialog field
-//   • Fold edge checkbox: Fabric section placement, default on, folded fabric enables it
+//   • Fold edge checkbox: below Media Type, default on, every media enables it
 //   • Legacy layoutMode schema migration (pre-2026-05 → current)
 //   • Save/load round-trip preserving all fields
 //   • Unit conversion helpers
@@ -91,7 +91,7 @@ private slots:
     void noGrainlineRotation_roundtripAndJson();
     void scaleGrid_defaultsOffAndRoundtrips();
     void foldLinesOnLeftEdge_defaultsOnAndRoundtrips();
-    void foldLinesOnLeftEdgeCheck_enabledOnlyForFoldedFabric();
+    void foldLinesOnLeftEdgeCheck_belowMediaTypeForEveryMedia();
     void noGrainlineRotation_unknownValueIsUpright();
 
     // Retired keys
@@ -844,13 +844,13 @@ void SettingsModelTests::foldLinesOnLeftEdge_defaultsOnAndRoundtrips()
     QCOMPARE(reader.foldLinesOnLeftEdge(), true);
 }
 
-// @brief The fold edge checkbox sits in the Fabric section with Fabric Folded,
-//        and only folded fabric enables it.
-void SettingsModelTests::foldLinesOnLeftEdgeCheck_enabledOnlyForFoldedFabric()
+// @brief The fold edge checkbox is on the line below Media Type, in the Media grid,
+//        and every media enables it.
+void SettingsModelTests::foldLinesOnLeftEdgeCheck_belowMediaTypeForEveryMedia()
 {
     register_theme_singleton();
     SettingsModel model;
-    model.setMediaType(QStringLiteral("fabric"));
+    model.setMediaType(QStringLiteral("paper"));
     QQmlEngine engine;
     QQmlComponent component(&engine, QUrl(QStringLiteral("qrc:/qml/SettingsDialog.qml")));
     QVERIFY2(component.isReady(), qPrintable(component.errorString()));
@@ -859,25 +859,28 @@ void SettingsModelTests::foldLinesOnLeftEdgeCheck_enabledOnlyForFoldedFabric()
     }));
     QVERIFY2(dialog, qPrintable(component.errorString()));
     QObject* fold_check = dialog->findChild<QObject*>(QStringLiteral("foldLinesOnLeftEdgeCheck"));
+    QObject* media_grid = dialog->findChild<QObject*>(QStringLiteral("mediaGrid"));
+    QObject* media_type_buttons = dialog->findChild<QObject*>(QStringLiteral("mediaTypeButtons"));
     QObject* folded_check = dialog->findChild<QObject*>(QStringLiteral("fabricFoldedCheck"));
     QVERIFY(fold_check);
+    QVERIFY(media_grid);
+    QVERIFY(media_type_buttons);
     QVERIFY(folded_check);
 
-    // Same grid as Fabric Folded: the Fabric section shows and hides both.
-    QObject* fold_grid = fold_check->property("parent").value<QObject*>();
-    QVERIFY(fold_grid);
-    QCOMPARE(fold_grid, folded_check->property("parent").value<QObject*>());
+    // The Media grid holds it, the item after the Media Type buttons; not the Fabric section.
+    QCOMPARE(fold_check->property("parent").value<QObject*>(), media_grid);
+    QVERIFY(folded_check->property("parent").value<QObject*>() != media_grid);
+    const QObjectList grid_items = media_grid->children();
+    QCOMPARE(grid_items.indexOf(fold_check), grid_items.indexOf(media_type_buttons) + 1);
 
-    // Open fabric: disabled, but checked by default.
-    QCOMPARE(fold_check->property("enabled").toBool(), false);
+    // Paper, open fabric and folded fabric: enabled, and checked by default.
+    QCOMPARE(fold_check->property("enabled").toBool(), true);
     QCOMPARE(fold_check->property("checked").toBool(), true);
-
-    // Folded fabric enables it; unfolded fabric disables it again.
+    model.setMediaType(QStringLiteral("fabric"));
+    QCOMPARE(fold_check->property("enabled").toBool(), true);
     model.setFabricFolded(true);
     QCOMPARE(fold_check->property("enabled").toBool(), true);
-    model.setFabricFolded(false);
-    QCOMPARE(fold_check->property("enabled").toBool(), false);
-} // foldLinesOnLeftEdgeCheck_enabledOnlyForFoldedFabric()
+} // foldLinesOnLeftEdgeCheck_belowMediaTypeForEveryMedia()
 
 // @brief An unknown value is coerced to "upright".
 void SettingsModelTests::noGrainlineRotation_unknownValueIsUpright()
