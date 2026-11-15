@@ -45,6 +45,12 @@
     > The page size (pageWidth, pageHeight) does not apply to fabric.
     > selvedgeWidth -- default is 0.
     > fabricFold -- checkbox.
+    > foldLinesOnLeftEdge -- checkbox "Place fold lines on the left edge (fabric: no left margin)", on the line below fabricFold; default on.
+      >> Enabled only when fabricFold is True. Paper and open fabric ignore a saved value (`LayoutSettings::places_fold_lines_on_left_edge`).
+      >> Each piece with a fold line lies with its fold line on the fold: the left edge, with no margin.
+      >> A fold line across or aslant the grain turns its piece; the fold edge outranks the layout mode.
+      >> layoutMode='any' ignores this option: no fold line goes on the edge, and no conflict is reported.
+      >> A Nested piece-set: its sizes stack on the lower end of their fold line, so the stack goes on the edge when the sizes share one fold line; else a warning.
     > Margins - marginLeft, marginRight, marginTop, marginBottom
       >> if fabricFold is True then marginLeft=0 else marginLeft=SelvedgeWidth.
       >> marginRight=selvedgeWidth.
@@ -69,15 +75,6 @@
      Applies only to pieces with no drawn grainline and no data-grainline-angle.
      'Keep upright' keeps the drafted orientation and the layoutMode trial set.
      'Rotate freely' also lets the packer try 90° and 270° for those pieces.
-- foldLinesOnLeftEdge -- checkbox "Place fold lines on the left edge (fabric: no left margin)"; default off.
-  Every media.
-  >> Each piece with a fold line lies with its fold line on the left content edge.
-  >> A fold line across or aslant the grain turns its piece; the fold edge outranks the layout mode.
-  >> layoutMode='any' ignores this option: no fold line goes on the edge, and no conflict is reported.
-     Fabric keeps marginLeft unless fabricFolded.
-  >> media='fabric': marginLeft=0; the left edge is the fold.
-  >> media='paper': marginLeft is kept; the fold line lies on the left content edge.
-  >> A Nested piece-set: its sizes stack on the lower end of their fold line, so the stack goes on the edge when the sizes share one fold line; else a warning.
 # Save/Load Settings
 - settingSavepath -- opens a file-save dialog in the /settings directorywhen the user clicks the 'Save Settings' button, saves parameters to a file, can be a relative filepath, extension must be '.settings'.
 - settingOpenpath -- opens a file-open dialog in the /settings directory when the user clicks the 'Load Settigs' button, loads parameters from a file, can be a relative filepath, extension must be '.settings'.

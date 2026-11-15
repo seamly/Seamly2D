@@ -2,6 +2,17 @@
 
 ## Current status
 
+### 2026-11-15 — Fold edge option in the Fabric section (Layout.Y7)
+
+- `SettingsDialog.qml`: "Place fold lines on the left edge" moved to the Fabric section, below "Fabric Folded". Enabled only when Fabric Folded is checked.
+- Default on: `LayoutSettings` serde default, `SettingsModel` member and `resetToDefaults`, `default_settings.json`.
+- `LayoutSettings::is_folded_fabric`: `places_fold_lines_on_left_edge` and the zero left margin need folded fabric. Paper and open fabric ignore a saved value.
+- `layout_utils.rs` uses `is_folded_fabric` at both fold checks.
+- Tests: `fold_lines_on_left_edge_apply_to_folded_fabric_only`, `fold_lines_on_left_edge_default_on`; paper and across-grain cases in `layout_utils`; Qt `foldLinesOnLeftEdge_defaultsOnAndRoundtrips`, `foldLinesOnLeftEdgeCheck_enabledOnlyForFoldedFabric`.
+- Checked: `cargo test --workspace` 714 pass; `ctest` debug 8/8. Built in worktree `fold-edge`; merged `--no-ff`; branch and worktree deleted.
+- Docs: SETTINGS_WORKFLOW, CREATE_LAYOUT_WORKFLOW, SVG-DATA-ATTRIBUTES, `AGENT_CHECKLIST.md` §21, §39, new §54 and OPEN row.
+- Open: Layout.Y7.3 installed-app check with the next MSI (§54).
+
 ### 2026-11-14 — Paper roll and fabric keep their width (Layout.Y6)
 
 - `layout_utils::do_process_layout`: every non-tiled pack uses `bin_w`, the contentRect width. Removed `pack_bin_w`, `mr_px`, `set_content_width` (`layout_assembler.rs`).
@@ -50,20 +61,9 @@
 - Docs: SVG-DATA-ATTRIBUTES "Multisize stack point"; `AGENT_CHECKLIST.md` new §50 and OPEN row.
 - Open: Layout.Y3.1 installed-app check with the next MSI (§50).
 
-### 2026-11-14 — Marker and Nested unavailable after a split (Layout.Y2)
-
-- Multisize "Split the pieces": the run lays out only Base Size and each size (`layout_views::size_kinds`, was `tiled_kinds`), every material.
-- `LayoutViews::start(kind, split)`: a split run puts Marker and Nested views first, with no layout; Base Size shows first.
-- New QML property `layoutViewUnavailableText` (`SPLIT_UNAVAILABLE_TEXT` on those tabs): canvas shows it; no media size; Adjust, Export, View and fit-to-view off.
-- Export all tabs skips them: `LayoutViews::in_all_tabs_export`.
-- Removed the Nested piece-set split (`divide_unit`, `divide_piece_set`, `outline_bounds`, `PiecePart`, its test): no split run lays out Nested now.
-- Tests: `split_run_makes_marker_and_nested_unavailable`, `unsplit_run_keeps_marker_and_nested`; jacket2 split test lays out size tabs only.
-- Checked: `cargo test --workspace` 709 pass; `ctest` debug 8/8. Built in worktree `split-tabs`; merged `--no-ff`; branch and worktree deleted.
-- Docs: SVG-DATA-ATTRIBUTES, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §47, new §49 and OPEN row.
-- Open: Layout.Y2.1 installed-app check with the next MSI (§49). X7.4 (Nested set too wide) no longer applies.
-
 ## Decisions to retain
 
+- "Place fold lines on the left edge" applies to folded fabric only; default on. The dialog enables it only when Fabric Folded is checked. A hidden setting must not change the layout (2026-11-15).
 - No layout changes the width of a paper roll or fabric (folded or not), or the contentRect width. Only the length grows; a piece wider than the media is left out or split (user, 2026-11-14). Replaces Layout.71 roll widening.
 - Multisize stack point with no right-angle turn point: the lowest turn point wins; the sizes align along its longest edge. An edge is the straight part only (user, 2026-11-14).
 - Layout Mode Any: a piece too wide at its Rotation rule's angles turns 90° if that fits. This replaces the rule for that piece only; the packer cannot place it otherwise (Layout.802 task text, 2026-11-12).
