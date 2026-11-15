@@ -64,6 +64,7 @@ MALE_SHIRT
 | Layout.X5.2 | 42 | SL > jacket_2, trousers, male_shirt > Media size below each layout tab and material tab | ?
 | Layout.803.1 | 48 | SL > male_shirt, trousers > Paper Roll 8 in, split: drill holes, stripe, plaid, internal paths end at the cut line | ?
 | Layout.Y4.1 | 51 | SL > trousers > Paper Roll 16 in, split: Back drill hole splits at the cut line | ?
+| Layout.Y5.1 | 52 | S2D > male_shirt > Piece mode, BackPanel Mirrored: grainline tilts with the piece | ?
 | Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Fabric | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Lining | ?
@@ -771,3 +772,15 @@ Detail 3 has corners on its cut line, but no corner is a right angle. Detail 3 i
 - [ ] No part of the drill hole lies outside its part. The two arcs meet at the cut line when the parts are side by side.
 - [ ] Stripe and plaid lines still end at the cut line on each part.
 - [ ] Export > DXF-ASTM. Open the file in a DXF viewer: Back has one drill point, on the part that holds the drill centre.
+
+## 52. [ ] Tilted piece: grainline tilts
+
+(Layout.Y5.1)
+
+- [ ] Open male_shirt (`test-seamly-layout/patterns/validation/male_shirt.sm2d`). Piece mode.
+- [ ] BackPanel Mirrored (Tilt CCW 45°): the grainline turns 45° counterclockwise with the piece and stays in its place on the piece.
+- [ ] The labels stay level.
+- [ ] Piece Properties: Tilt CW, 15°. OK. The piece and its grainline turn 15° clockwise. Set Tilt back to CCW, 45°.
+- [ ] Drag the grainline. Save, close, and reopen: the grainline is where you left it, tilted with the piece.
+- [ ] Turn the grainline with its rotate handle: it keeps the new angle. Undo puts it back.
+- [ ] A piece with Tilt None: the grainline does not change.
