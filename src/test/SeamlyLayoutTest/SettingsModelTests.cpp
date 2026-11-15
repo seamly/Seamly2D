@@ -9,6 +9,7 @@
 //   • Default field values after construction
 //   • Paper Type choices: tiled and roll; a saved "sheet" loads as tiled
 //   • Roll Width choices, including the custom roll width and its dialog field
+//   • Fold edge checkbox: Fabric section placement, default on, folded fabric enables it
 //   • Legacy layoutMode schema migration (pre-2026-05 → current)
 //   • Save/load round-trip preserving all fields
 //   • Unit conversion helpers
@@ -89,7 +90,8 @@ private slots:
     void noGrainlineRotation_defaultsToUpright();
     void noGrainlineRotation_roundtripAndJson();
     void scaleGrid_defaultsOffAndRoundtrips();
-    void foldLinesOnLeftEdge_defaultsOffAndRoundtrips();
+    void foldLinesOnLeftEdge_defaultsOnAndRoundtrips();
+    void foldLinesOnLeftEdgeCheck_enabledOnlyForFoldedFabric();
     void noGrainlineRotation_unknownValueIsUpright();
 
     // Retired keys
@@ -822,25 +824,60 @@ void SettingsModelTests::scaleGrid_defaultsOffAndRoundtrips()
     QCOMPARE(reader.scaleGrid(), false);
 }
 
-// @brief Fold lines on the left edge are off by default; the file and the Rust settings JSON carry the choice.
-void SettingsModelTests::foldLinesOnLeftEdge_defaultsOffAndRoundtrips()
+// @brief Fold lines on the left edge are on by default; the file and the Rust settings JSON carry the choice.
+void SettingsModelTests::foldLinesOnLeftEdge_defaultsOnAndRoundtrips()
 {
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
     const QString path = dir.filePath(QStringLiteral("settings.json"));
 
     SettingsModel writer;
-    QCOMPARE(writer.foldLinesOnLeftEdge(), false);
-    writer.setFoldLinesOnLeftEdge(true);
+    QCOMPARE(writer.foldLinesOnLeftEdge(), true);
+    writer.setFoldLinesOnLeftEdge(false);
     QVERIFY(writer.save(path));
-    QVERIFY(writer.toJson().contains(QStringLiteral("\"foldLinesOnLeftEdge\":true")));
+    QVERIFY(writer.toJson().contains(QStringLiteral("\"foldLinesOnLeftEdge\":false")));
 
     SettingsModel reader;
     QVERIFY(reader.load(path));
-    QCOMPARE(reader.foldLinesOnLeftEdge(), true);
-    reader.resetToDefaults();
     QCOMPARE(reader.foldLinesOnLeftEdge(), false);
+    reader.resetToDefaults();
+    QCOMPARE(reader.foldLinesOnLeftEdge(), true);
 }
+
+// @brief The fold edge checkbox sits in the Fabric section with Fabric Folded,
+//        and only folded fabric enables it.
+void SettingsModelTests::foldLinesOnLeftEdgeCheck_enabledOnlyForFoldedFabric()
+{
+    register_theme_singleton();
+    SettingsModel model;
+    model.setMediaType(QStringLiteral("fabric"));
+    QQmlEngine engine;
+    QQmlComponent component(&engine, QUrl(QStringLiteral("qrc:/qml/SettingsDialog.qml")));
+    QVERIFY2(component.isReady(), qPrintable(component.errorString()));
+    QScopedPointer<QObject> dialog(component.createWithInitialProperties({
+        {QStringLiteral("model"), QVariant::fromValue(&model)}
+    }));
+    QVERIFY2(dialog, qPrintable(component.errorString()));
+    QObject* fold_check = dialog->findChild<QObject*>(QStringLiteral("foldLinesOnLeftEdgeCheck"));
+    QObject* folded_check = dialog->findChild<QObject*>(QStringLiteral("fabricFoldedCheck"));
+    QVERIFY(fold_check);
+    QVERIFY(folded_check);
+
+    // Same grid as Fabric Folded: the Fabric section shows and hides both.
+    QObject* fold_grid = fold_check->property("parent").value<QObject*>();
+    QVERIFY(fold_grid);
+    QCOMPARE(fold_grid, folded_check->property("parent").value<QObject*>());
+
+    // Open fabric: disabled, but checked by default.
+    QCOMPARE(fold_check->property("enabled").toBool(), false);
+    QCOMPARE(fold_check->property("checked").toBool(), true);
+
+    // Folded fabric enables it; unfolded fabric disables it again.
+    model.setFabricFolded(true);
+    QCOMPARE(fold_check->property("enabled").toBool(), true);
+    model.setFabricFolded(false);
+    QCOMPARE(fold_check->property("enabled").toBool(), false);
+} // foldLinesOnLeftEdgeCheck_enabledOnlyForFoldedFabric()
 
 // @brief An unknown value is coerced to "upright".
 void SettingsModelTests::noGrainlineRotation_unknownValueIsUpright()
