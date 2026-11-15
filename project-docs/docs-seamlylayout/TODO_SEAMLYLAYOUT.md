@@ -4,10 +4,6 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Little things to fix
 
-- [ ] yy Layout.Y1 - reorder the material tabs to be 'Fabric', 'Lining', 'Interfacing', 'Interlining' in both left and right canvases. Currently the incorrect order is 'Lining', 'Fabric', 'Interfacging', 'Interlining'.
-  - [x] `material_split::pattern_materials` sorts by `MATERIAL_ORDER`; other materials follow in handoff order. Both tab bars read the same list. Test: `materials_follow_the_tab_order`. Docs: SVG-DATA-ATTRIBUTES Materials.
-  - [ ] Layout.Y1.1 - Installed-app check with the next MSI: open a pattern whose first piece is Lining; both tab bars show Fabric, Lining, Interfacing, Interlining.
-
 - [ ] yy Layout.Y2 - multisize - Split the pieces: The Marker tab and Nested tab should display a messaage that Marker and Nested layouts are unavailable when pieces are split, and should not display the media, as their layouts are disabled when pieces are split.
   - [x] A split run lays out only Base Size and each size (`layout_views::size_kinds`). Marker and Nested tabs stay first with no layout and no media size; the canvas shows `SPLIT_UNAVAILABLE_TEXT` (QML `layoutViewUnavailableText`). Adjust, Export, View off there; Export all tabs skips them. Nested piece-set split code removed. Tests: `split_run_makes_marker_and_nested_unavailable`, `unsplit_run_keeps_marker_and_nested`. Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, SVG-DATA-ATTRIBUTES, `AGENT_CHECKLIST.md` §49.
   - [ ] Layout.Y2.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §49.
@@ -25,6 +21,10 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
   - Docs: SVG-DATA-ATTRIBUTES split parts, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, DXF-ASTM compliance layer 13, `AGENT_CHECKLIST.md` §48, new §51 and OPEN row.
 - [ ] Layout.Y4.1 - Installed-app check with the next MSI (`AGENT_CHECKLIST.md` §51).
 
+- [ ] yy Layout.Y5 - Tilt: Currently male_shirt.sm2d's piece 'BackPanel Mirrored' is tilted but the grainline isn't tilted. Grainlines should tilt; internal paths, stripe reference lines, plaid reference lines, and drill holes tilt correctly. Fix grainlines so that they tilt, also. 
+
+- [ ] yy Layout.Y6 - Paper > roll : PROHIBIT CHANGING THE WIDTH OF THE ROLL PAPER!!! DO NOT MAKE ME TELL YOU THIS AGAIN!!!!! THE ROLL LENGTH CAN CHANGE BUT THE WIDTH CANNOT! I have submitted multiple prompts to fix this problem, and I don't want to keep wasting tokens to fix this one problem. It's simple. When media=paper and papertype=roll then do not ever change the width of the media or content rect. Also applies to media=fabric --> do not ever change the media width or content rect for fabric (folded) or fabric (not folded)> 
+
 ## Implement
 
 ### [ ] Layout.803 - Implement - Fix piece objects that should be split when the piece is split.
@@ -35,7 +35,7 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
   - [x] drill holes -- a drill hole inside one column stays whole, on the part nearest its centre. Before, every drill hole went to part 1 (no anchor point). Cut lines move off drill centres. A cut line that crosses the circle splits it: see Layout.Y4.
   - [x] grainlines -- validated (trousers.sm2d, Union piece is split at the same place as the grainline and the halves of the grainline is shown on each split piece)
   - Tests: `markings_split_with_the_piece`, `cut_line_misses_drill_centres`. Docs: SVG-DATA-ATTRIBUTES split parts, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §48.
-- [ ] Layout.803.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §48.
+- [X] Layout.803.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §48.
 
 ## VERIFY
 

@@ -2188,3 +2188,7 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 ### [x] Task Layout.101 - Verify - `SEAMLY_DATA_DIR` for SeamlyLayout
 
 ### [x] Layout.X5 - Display the media dimensions (WxH) in each layout tab, of the layout displayed in that tab.
+
+### [X] Layout.803 - Implement - Fix piece objects that should be split when the piece is split.\ (plaid & stripe reference lines, drill holes)
+
+- [x] Layout.Y1 - reorder the material tabs to be 'Fabric', 'Lining', 'Interfacing', 'Interlining' in both left and right canvases. Currently the incorrect order is 'Lining', 'Fabric', 'Interfacging', 'Interlining'.
