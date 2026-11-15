@@ -18,6 +18,13 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
     - Result: `SettingsDialog.qml` Piece Gap tip reads "Layout rotation Any samples 10° steps." Docs: SVG-DATA-ATTRIBUTES `data-rotation`, `TODO_ROTATION.md`, `AGENT_CHECKLIST.md` §40.
   - [ ] Layout.Y8.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §55.
 
+- [ ] qq Layout.Y111 - foldlines - Improve the foldline processing so that foldlines can be placed along the left edge for paper and for fabric. To do this, move the 'Place the foldlines along the left edge' checkbox on the line below the 'Media type' label and radio buttons, above the 'Fabric' section. Enable the 'Place the foldlines...' checkbox for either media. When this checkbox is selected then place the pieces along the media's left edge, extending the media's total length as needed, then place the remaining pieces.
+  - [x] Move the checkbox to the line below Media Type; enable it for paper and fabric.
+    - Result: `SettingsDialog.qml` Media grid, below the Media Type buttons; text "Place fold lines on the left edge"; default on. Test: `foldLinesOnLeftEdgeCheck_belowMediaTypeForEveryMedia`.
+  - [x] Place fold line pieces first on the left edge of paper and fabric; the media gets longer when it must.
+    - Result: `LayoutSettings::places_fold_lines_on_left_edge` has no folded fabric check. Paper and open fabric: the left margin stays. Folded fabric: the fold, no margin. Tests: `fold_lines_on_left_edge_apply_to_every_media`, `fold_line_lies_on_the_left_margin_of_paper_and_open_fabric`, `jacket2_paper_and_open_fabric_place_fold_line_pieces_first`.
+  - [ ] Layout.Y111.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §58.
+
 - [ ] Layout.Y10 - Large patterns: display SVGs over the 2 MB `data:` URL limit in both canvases. jacket2 (16 pieces): Fabric graded pieces, Marker and Nested layouts did not display.
   - [x] Serve canvas SVGs from memory through a custom URL scheme.
     - Result: `CanvasSvgSchemeHandler` serves `seamly-canvas://<canvas>/<n>.svg`; `SvgCanvas.qml` loads it in an `<img>`; no `data:` URL. Test: `webEngine_displaysSvgOverDataUrlLimit` (3 MiB SVG). Docs: README "Canvas display", DECISIONS record.
