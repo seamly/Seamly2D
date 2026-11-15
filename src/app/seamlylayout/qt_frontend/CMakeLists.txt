@@ -62,6 +62,7 @@ find_package(Qt6 6.11.3 REQUIRED COMPONENTS
     Test
     Widgets
     PrintSupport
+    WebEngineCore
     WebEngineQuick
     Xml
 )
@@ -89,7 +90,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     foreach(_qt_target IN ITEMS
             Qt6::Core Qt6::Gui Qt6::Quick Qt6::QuickControls2
             Qt6::QuickDialogs2 Qt6::Svg Qt6::SvgWidgets Qt6::Widgets
-            Qt6::PrintSupport Qt6::WebEngineQuick Qt6::Test
+            Qt6::PrintSupport Qt6::WebEngineCore Qt6::WebEngineQuick Qt6::Test
             Qt6::Qml Qt6::QmlModels Qt6::Network Qt6::Xml)
         if(TARGET ${_qt_target}) # guard: target may not exist if module not found
             set_property(TARGET ${_qt_target}
@@ -130,6 +131,7 @@ FetchContent_MakeAvailable(CxxQt)
 qt_add_executable(SeamlyLayout
     WIN32
     seamlyLayout_main.mm
+    src/CanvasSvgSchemeHandler.cpp
     src/DataDirectory.cpp
     src/Logger.cpp
     src/Platform.cpp
@@ -313,6 +315,7 @@ target_link_libraries(SeamlyLayout PRIVATE
     Qt6::SvgWidgets
     Qt6::Widgets
     Qt6::PrintSupport
+    Qt6::WebEngineCore
     Qt6::WebEngineQuick
     Qt6::Xml
     cxxqt_bridge  # Phase 2f: CXX-Qt generated AppController QObject
@@ -560,6 +563,31 @@ target_link_libraries(StartupOptionsTests PRIVATE
 
 add_test(NAME StartupOptionsTests COMMAND StartupOptionsTests)
 
+# CanvasSvgSchemeHandler serves the SvgCanvas SVGs from memory. Two test cases load
+# an SVG in a WebEngine page, so this suite starts QtWebEngineProcess.
+add_executable(CanvasSvgSchemeHandlerTests
+    ${SEAMLYLAYOUT_TEST_DIR}/CanvasSvgSchemeHandlerTests.cpp
+    src/CanvasSvgSchemeHandler.cpp
+)
+
+target_include_directories(CanvasSvgSchemeHandlerTests PRIVATE
+    src/
+)
+
+target_link_libraries(CanvasSvgSchemeHandlerTests PRIVATE
+    Qt6::Core
+    Qt6::Gui
+    Qt6::WebEngineCore
+    Qt6::Test
+)
+
+add_test(NAME CanvasSvgSchemeHandlerTests COMMAND CanvasSvgSchemeHandlerTests)
+
+# offscreen: CI has no display. The Chromium sandbox needs unprivileged user
+# namespaces, which Ubuntu runners block. The tests need no GPU.
+set_tests_properties(CanvasSvgSchemeHandlerTests PROPERTIES ENVIRONMENT
+    "QT_QPA_PLATFORM=offscreen;QTWEBENGINE_DISABLE_SANDBOX=1;QTWEBENGINE_CHROMIUM_FLAGS=--disable-gpu")
+
 # On Windows the test executables are launched by ctest straight out of the
 # build directory, with no windeployqt output beside them. Qt's DLLs and the
 # platform plugin are then only reachable through PATH, so a bare
@@ -582,6 +610,7 @@ if(WIN32)
         StartupOptionsTests
         LoggerTests
         DataDirectoryTests
+        CanvasSvgSchemeHandlerTests
         PROPERTIES ENVIRONMENT_MODIFICATION
         "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>"
     )

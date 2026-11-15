@@ -122,6 +122,10 @@ qmlRegisterType<AppController>("SeamlyLayout", 1, 0, "AppController");
 This registration happens at runtime before `engine.loadFromModule()`, so QML resolves
 `AppController` correctly via the "SeamlyLayout" URI.
 
+The "SeamlyLayout" URI also holds `CanvasSvgSchemeHandler`, a C++ class outside the bridge.
+`main()` registers one instance with `qmlRegisterSingletonInstance()`. See
+[README, Canvas display](../README._SEAMLYLAYOUT.md#canvas-display).
+
 ---
 
 ## Crate Edition Note

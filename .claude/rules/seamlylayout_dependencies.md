@@ -51,7 +51,7 @@ It replaces `ui_desktop` and calls Rust core crates via the `cxxqt_bridge` CXX-Q
 | Qt | 6.11.3 | UI framework (LGPLv3); installed at `C:/Qt/6.11.3/msvc2022_64/` |
 | CMake | ≥ 3.28 | Qt build system |
 | Ninja | any | Build backend (via cmake preset) |
-| Qt Modules | Core, Gui, Quick, QuickControls2, QuickDialogs2, Svg, PrintSupport, WebEngineQuick | Required (all LGPLv3 — no GPL modules) |
+| Qt Modules | Core, Gui, Quick, QuickControls2, QuickDialogs2, Svg, PrintSupport, WebEngineCore, WebEngineQuick | Required (all LGPLv3 — no GPL modules) |
 | cxx-qt | 0.7.3 | Rust→C++ QObject bridge (no manual extern "C" or cbindgen needed) |
 | cxx-qt-lib | 0.7.3 | Qt type bindings for Rust (QString, etc.) |
 | cxx-qt-build | 0.7.3 | build.rs helper for CXX-Qt code generation |

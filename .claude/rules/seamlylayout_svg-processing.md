@@ -9,7 +9,7 @@ paths:
 ## Required Tools
 
 - Use `xmltree` for processing DOM documents and SVG elements (all Rust crates)
-- **Qt frontend:** Use `QSvgRenderer` / QML `Image { source: "file://..." }` for displaying SVGs
+- **Qt frontend:** `SvgCanvas.qml` displays SVGs in a `WebEngineView`. `CanvasSvgSchemeHandler` serves the SVG text from memory. No `data:` URL, no temp file.
 
 ## Reusable Functions
 

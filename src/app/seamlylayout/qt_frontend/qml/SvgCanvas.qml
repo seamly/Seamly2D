@@ -1,6 +1,6 @@
 // project: SeamlyLayout
-// author: slspencer, copyright 2026
-// LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
+// author: slspencer, copyright 2026 Seamly2D Project
+// MIT License: https://opensource.org/licenses/MIT
 //
 // @file SvgCanvas.qml
 // @brief Reusable interactive SVG canvas with pan, zoom, and fit-to-view.
@@ -9,9 +9,13 @@
 // Double-click resets to fit-to-view. Scroll wheel zooms toward the cursor.
 // Mouse drag pans the image.
 //
+// CanvasSvgSchemeHandler serves the SVG from memory at a seamly-canvas:// URL.
+// The SVG is not put in a data: URL: Chromium refuses a URL over 2 MB.
+//
 // Usage:
 //   SvgCanvas {
 //       id: leftCanvas
+//       canvasName:      "input"
 //       placeholderText: "Import an SVG pattern to begin"
 //       showBusy:        false
 //   }
@@ -19,12 +23,13 @@
 //   onImportFinished: leftCanvas.reloadSvg(appController.getImportDomString())
 //
 // Properties:
+//   canvasName      — URL host of this canvas's SVG: lowercase letters and digits, one name per canvas
 //   svgContent      — SVG XML string; updated via reloadSvg(content); empty shows placeholder
 //   placeholderText — message shown when svgContent is empty (default: "")
 //   showBusy        — show spinning BusyIndicator overlay (default: false)
 //
 // Functions:
-//   reloadSvg(content) — embed SVG content inline and reload the canvas
+//   reloadSvg(content) — publish the SVG content and reload the canvas
 
 import QtQuick 6.11
 import QtQuick.Controls 6.11
@@ -33,6 +38,10 @@ import SeamlyLayout
 
 Item {
     id: root
+
+    // @brief URL host of this canvas's SVG: lowercase letters and digits.
+    // Each canvas needs its own name, because a new SVG replaces the earlier SVG of the same name.
+    property string canvasName: ""
 
     // @brief SVG XML string to display.  Empty = show placeholder.
     // Updated via reloadSvg(content) called from Main.qml signal handlers.
@@ -43,6 +52,9 @@ Item {
 
     // @brief When true a BusyIndicator is shown over the canvas.
     property bool showBusy: false
+
+    // @brief Message shown when the SVG did not display. Empty when it displayed.
+    property string displayError: ""
 
     // @brief Emitted when the WebEngineView finishes loading an SVG page.
     signal svgLoaded()
@@ -67,22 +79,41 @@ Item {
         // @brief Notify when the page finishes loading (new SVG is rendered).
         onLoadingChanged: function(loadingInfo) {
             if (loadingInfo.status === WebEngineLoadingInfo.LoadSucceededStatus) {
+                // The page load event waits for the <img>. A naturalWidth of 0 means that the SVG
+                // did not arrive or did not decode. The blank page has no <img> and gives -1.
+                svgView.runJavaScript(
+                    '(function() { var img = document.getElementById("svg-img");' +
+                    ' return img ? img.naturalWidth : -1; })();',
+                    function(imageWidth) {
+                        if (imageWidth === 0) {
+                            console.warn("SvgCanvas " + root.canvasName + ": the SVG did not display")
+                            root.displayError = qsTr("Cannot display this SVG.")
+                        } // if image did not display
+                    })
                 root.svgLoaded()
-            } // if load succeeded
+            } else if (loadingInfo.status === WebEngineLoadingInfo.LoadFailedStatus) {
+                // Log only: a newer reloadSvg() also stops the page that it replaces.
+                console.warn("SvgCanvas " + root.canvasName + ": page load failed: " + loadingInfo.errorString)
+            } // if load succeeded / failed
         } // onLoadingChanged
 
-        // @brief Embed SVG content as a data URI inside an HTML pan/zoom wrapper and load it.
-        // svgContent is the raw SVG XML string; encodeURIComponent encodes it for the data URI.
-        // No disk I/O — SVG is served directly from memory.
+        // @brief Publish the SVG to CanvasSvgSchemeHandler, then load an HTML pan/zoom page that shows it.
+        // svgContent is the raw SVG XML string. No disk I/O — the handler serves the SVG from memory.
+        // Only the small HTML page goes through loadHtml(), so the 2 MB data: URL limit does not apply.
+        // The page's base URL is the SVG URL, so the page and its <img> have the same origin.
         function loadSvgFullPage(svgContent) {
-            if (!svgContent) {
+            // publishSvg() replaces this canvas's earlier SVG. Empty content releases it.
+            var svgUrl = CanvasSvgSchemeHandler.publishSvg(root.canvasName, svgContent).toString();
+            if (svgUrl === "") {
+                if (svgContent) {
+                    // canvasName is not valid; the handler logged the name.
+                    root.displayError = qsTr("Cannot display this SVG.");
+                } // if content without a URL
                 loadHtml("<html><body></body></html>", "about:blank");
                 return;
-            } // if no content
+            } // if no URL
 
             var bgColor  = Theme.canvasBackground.toString();
-            var encoded  = encodeURIComponent(svgContent);
-            var src      = "data:image/svg+xml;charset=utf-8," + encoded;
 
             var html =
                 '<!DOCTYPE html>' +
@@ -97,7 +128,7 @@ Item {
                 '           user-select: none; pointer-events: none; }' + /* Prevent image selection/drag ghost on double-click */
                 '</style></head><body>' +
                 '<div id="container">' +
-                '  <img id="svg-img" src="' + src + '">' +
+                '  <img id="svg-img" src="' + svgUrl + '">' +
                 '</div>' +
                 '<script>' +
                 '(function() {' +
@@ -174,7 +205,7 @@ Item {
                 '<\/script>' +
                 '</body></html>';
 
-            loadHtml(html, "about:blank");
+            loadHtml(html, svgUrl);
         } // loadSvgFullPage
     } // WebEngineView svgView
 
@@ -182,6 +213,7 @@ Item {
     // Called from Main.qml whenever the input SVG or layout SVG is successfully
     // created in memory (self.input_dom or self.layout_dom).
     function reloadSvg(content) {
+        root.displayError = ""
         root.svgContent = content
         svgView.loadSvgFullPage(content)
     } // reloadSvg
@@ -210,4 +242,15 @@ Item {
         font.pixelSize:   Theme.fontSizeNormal
         visible:          root.svgContent === "" && !root.showBusy
     } // Text placeholder
+
+    // -----------------------------------------------------------------------
+    // Display error — shown when the SVG did not display
+    // -----------------------------------------------------------------------
+    Text {
+        anchors.centerIn: parent
+        text:             root.displayError
+        color:            Theme.textOnCanvas
+        font.pixelSize:   Theme.fontSizeNormal
+        visible:          root.displayError !== ""
+    } // Text displayError
 } // Item root

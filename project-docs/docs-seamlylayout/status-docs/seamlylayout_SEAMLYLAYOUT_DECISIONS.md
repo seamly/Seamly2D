@@ -3,7 +3,7 @@
 Author: slspencer
 Copyright: 2026
 
-Last updated: 2026-06-29
+Last updated: 2026-11-15
 
 This file contains architecture/design decisions and open decision records.
 Active implementation tasks are tracked in `docs/status-docs/TODO_SEAMLYLAYOUT_2.md`.
@@ -188,10 +188,35 @@ other: `cargo test` and the C++ test executables build alone. `LoggerTests`
 calls `seamly_logger_write_utf8()` directly in place of Rust; there is no
 cross-language test (user decision).
 
+## Canvas SVG served by a custom URL scheme (2026-11-15)
+
+`CanvasSvgSchemeHandler` serves the SVG of each canvas to WebEngine from memory,
+at a `seamly-canvas://<canvas>/<n>.svg` URL. The canvas page loads it in an `<img>`.
+How it works: [README, Canvas display](../README._SEAMLYLAYOUT.md#canvas-display).
+
+**Why:**
+
+- `loadHtml()` sends the page as a `data:` URL.
+- Chromium refuses a URL over 2 MB (2,097,152 characters). The load fails with no error message.
+- The old canvas page put the SVG in that URL, percent-encoded two times. An SVG over about 1 MB did not display.
+- Example: the jacket2 sample with 16 pieces gave a 2,024,522-character handoff.
+  Its Fabric all-sizes canvas and its Fabric Marker and Nested layouts stayed blank.
+- User decision: the 2 MB limit is not acceptable.
+
+Rejected:
+
+- Temp SVG file and a `file://` URL: disk I/O on every display.
+  It also breaks the in-memory display flow in the snapshot below.
+- SVG text inserted into the page DOM with `runJavaScript()`: the canvases only display the SVG.
+  They need no access to SVG elements.
+- Qt WebChannel with incremental updates: Rust makes a full new SVG for every change.
+  There are no small updates to send.
+
 ## Accepted Architectural Decisions (snapshot)
 
 - CXX-Qt bridge is the Rust↔Qt integration boundary.
 - SVG canvas display uses in-memory DOM string flow rather than temp-file display paths.
+- `CanvasSvgSchemeHandler` serves canvas SVG text to WebEngine from memory. Canvases never put SVG in a `data:` URL.
 - `Superseded` is the canonical spelling for retired workflow notes.
 
 ## Change Log
@@ -204,3 +229,4 @@ cross-language test (user decision).
 - 2026-09-24: Decision-003 — font subsetting moved from `subsetter` to `allsorts`.
 - 2026-09-24: Decision-003 — license notices committed and shipped in all installers.
 - 2026-09-27: Added "One writer for the SeamlyLayout debug log".
+- 2026-11-15: Added "Canvas SVG served by a custom URL scheme".
