@@ -18,6 +18,11 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
     - Result: `SettingsDialog.qml` Piece Gap tip reads "Layout rotation Any samples 10° steps." Docs: SVG-DATA-ATTRIBUTES `data-rotation`, `TODO_ROTATION.md`, `AGENT_CHECKLIST.md` §40.
   - [ ] Layout.Y8.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §55.
 
+- [ ] Layout.Y10 - Large patterns: display SVGs over the 2 MB `data:` URL limit in both canvases. jacket2 (16 pieces): Fabric graded pieces, Marker and Nested layouts did not display.
+  - [x] Serve canvas SVGs from memory through a custom URL scheme.
+    - Result: `CanvasSvgSchemeHandler` serves `seamly-canvas://<canvas>/<n>.svg`; `SvgCanvas.qml` loads it in an `<img>`; no `data:` URL. Test: `webEngine_displaysSvgOverDataUrlLimit` (3 MiB SVG). Docs: README "Canvas display", DECISIONS record.
+  - [ ] Layout.Y10.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §57.
+
 ## Implement
 
 ## VERIFY
