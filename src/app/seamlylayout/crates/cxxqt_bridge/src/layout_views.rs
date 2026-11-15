@@ -11,6 +11,9 @@
 // old view and hands back the new view's layout, so the rest of the app always
 // works on the selected tab without knowing that tabs exist.
 //
+// A run that splits pieces lays out no Marker or Nested layout.  Those tabs stay
+// in the tab bar without a layout and show `SPLIT_UNAVAILABLE_TEXT`.
+//
 // Every tab takes its pieces from the imported SVG: each size of each piece is
 // already drafted there, so no tab builds a size from grade rules.
 //
@@ -30,6 +33,9 @@ pub const MARKER_LABEL: &str = "Marker";
 
 // @brief Label of the tab where each piece packs once, as a group of its sizes.
 pub const NESTED_LABEL: &str = "Nested";
+
+// @brief Canvas text of the Marker and Nested tabs of a run that splits pieces.
+pub const SPLIT_UNAVAILABLE_TEXT: &str = "Marker and Nested layouts are unavailable when pieces are split.";
 
 // @brief Label of the tab for one size.
 pub fn size_label(size: &str) -> String {
@@ -224,15 +230,17 @@ pub fn queued_kinds(sizes: &[String], base_size: &str) -> Vec<ViewKind> {
     kinds
 } // fn queued_kinds
 
-// @brief Size-only views for tiled multisize layouts, with Base Size first when available.
-pub fn tiled_kinds(sizes: &[String], base_size: &str) -> Vec<ViewKind> {
+// @brief Size-only views, with Base Size first when available.
+//
+// Tiled paper and a run that splits pieces lay out only these views.
+pub fn size_kinds(sizes: &[String], base_size: &str) -> Vec<ViewKind> {
     let mut kinds = Vec::new();
     if sizes.iter().any(|size| size == base_size) {
         kinds.push(ViewKind::BaseSize(base_size.to_string()));
     } // if base size is known
     kinds.extend(sizes.iter().map(|size| ViewKind::Size(size.clone())));
     kinds
-} // fn tiled_kinds
+} // fn size_kinds
 
 // @brief The per-layout controller fields that change when the tab changes.
 //
@@ -281,6 +289,8 @@ struct LayoutView {
     label: String,
     // What this view lays out.
     kind: ViewKind,
+    // True for the Marker and Nested tabs of a run that splits pieces: no layout, only a message.
+    unavailable: bool,
     // Empty while this view is active: the controller holds its layout then.
     state: LayoutState,
 }
@@ -307,14 +317,29 @@ impl LayoutViews {
     } // fn is_empty
 
     // @brief Start a multisize layout: one active view, whose layout the controller holds.
-    pub fn start(&mut self, kind: ViewKind) {
+    //
+    // @param kind  The active view.
+    // @param split True when the run splits pieces: unavailable Marker and Nested views come
+    //              first, so the tab order stays Marker, Nested, Base Size, sizes.
+    pub fn start(&mut self, kind: ViewKind, split: bool) {
         self.clear();
-        self.views.push(LayoutView { label: kind.label(), kind, state: LayoutState::default() });
+        if split {
+            for unavailable in [ViewKind::Marker, ViewKind::Nested] {
+                self.views.push(LayoutView {
+                    label: unavailable.label(),
+                    kind: unavailable,
+                    unavailable: true,
+                    state: LayoutState::default(),
+                });
+            } // for Marker and Nested
+            self.active = self.views.len();
+        } // if split
+        self.views.push(LayoutView { label: kind.label(), kind, unavailable: false, state: LayoutState::default() });
     } // fn start
 
     // @brief Add a finished layout as an inactive view.
     pub fn push(&mut self, kind: ViewKind, state: LayoutState) {
-        self.views.push(LayoutView { label: kind.label(), kind, state });
+        self.views.push(LayoutView { label: kind.label(), kind, unavailable: false, state });
     } // fn push
 
     // @brief Tab labels in display order.
@@ -326,14 +351,36 @@ impl LayoutViews {
     //
     // @param active_doc Layout of the active view, which the controller holds.
     // @param settings   Settings of the layout run.
-    // @return One entry per tab; an empty entry for a tab without a layout.
+    // @return One entry per tab; an empty entry for a tab without a layout or an unavailable tab.
     pub fn media_sizes(&self, active_doc: Option<&Document>, settings: &LayoutSettings) -> Vec<String> {
         self.views.iter().enumerate().map(|(index, view)| {
             // The active view's state is empty: the controller holds its layout.
-            let doc = if index == self.active { active_doc } else { view.state.layout_dom.as_ref() };
+            let doc = if view.unavailable {
+                None
+            } else if index == self.active {
+                active_doc
+            } else {
+                view.state.layout_dom.as_ref()
+            }; // doc
             doc.map(|doc| media_size_text(settings, doc)).unwrap_or_default()
         }).collect()
     } // fn media_sizes
+
+    // @brief Canvas text of the active view: `SPLIT_UNAVAILABLE_TEXT` when it is unavailable, else empty.
+    pub fn active_unavailable_text(&self) -> &'static str {
+        match self.views.get(self.active) {
+            Some(view) if view.unavailable => SPLIT_UNAVAILABLE_TEXT,
+            _ => "", // a laid-out view, or no views
+        } // match active view
+    } // fn active_unavailable_text
+
+    // @brief True when Export all tabs writes view `index` in `format`.
+    //
+    // @param format Export format name from QML: "dxf", "pdf-tiled", "svg", ...
+    // @return False for an unavailable view or an index out of range.
+    pub fn in_all_tabs_export(&self, index: usize, format: &str) -> bool {
+        self.views.get(index).is_some_and(|view| !view.unavailable && view.kind.in_all_tabs_export(format))
+    } // fn in_all_tabs_export
 
     // @brief Label of view `index`; `None` when out of range.
     pub fn label(&self, index: usize) -> Option<&str> {
@@ -669,7 +716,7 @@ mod tests {
         let settings = media_settings("in", "paper");
         let state = |height: u32| LayoutState { layout_dom: Some(canvas(960, height)), ..LayoutState::default() };
         let mut views = LayoutViews::default();
-        views.start(ViewKind::Marker);
+        views.start(ViewKind::Marker, false);
         views.push(ViewKind::Nested, state(1920));
         views.push(ViewKind::Size("34".into()), LayoutState::default()); // no layout
 
@@ -699,7 +746,7 @@ mod tests {
 
         // Multisize: the layout tabs carry the sizes.
         let mut tabs = LayoutViews::default();
-        tabs.start(ViewKind::Marker);
+        tabs.start(ViewKind::Marker, false);
         assert!(material_media_size(true, &tabs, Some(&layout), &settings).is_empty(), "material with tabs");
 
         // A parked material reads its own layout, and none after a new run resets it.
@@ -712,10 +759,10 @@ mod tests {
         assert!(parked.media_size(&settings).is_empty(), "reset for a new run");
     } // material_media_size_shows_one_finished_layout
 
-    // @brief Tiled multisize tabs contain only the Base Size and per-size views.
+    // @brief Size kinds contain only the Base Size and per-size views.
     #[test]
-    fn tiled_kinds_omit_marker_and_nested() {
-        let kinds = tiled_kinds(&sizes(&["34", "36"]), "36");
+    fn size_kinds_omit_marker_and_nested() {
+        let kinds = size_kinds(&sizes(&["34", "36"]), "36");
         assert_eq!(
             kinds,
             vec![
@@ -727,10 +774,10 @@ mod tests {
         assert!(!kinds.iter().any(|kind| matches!(kind, ViewKind::Marker | ViewKind::Nested)));
 
         assert_eq!(
-            tiled_kinds(&sizes(&["34", "36"]), "99"),
+            size_kinds(&sizes(&["34", "36"]), "99"),
             vec![ViewKind::Size("34".into()), ViewKind::Size("36".into())]
         );
-    } // tiled_kinds_omit_marker_and_nested
+    } // size_kinds_omit_marker_and_nested
 
     // @brief DXF-ASTM exports one size; Export all tabs skips the repeated Base Size layout in other formats.
     //        PDF (Tiled) skips Marker.
@@ -951,7 +998,7 @@ mod tests {
         assert!(layout.state.layout_dom.is_some() && !layout.is_laid_out);
 
         layout.state = state("laid out");
-        layout.views.start(ViewKind::Marker);
+        layout.views.start(ViewKind::Marker, false);
         layout.is_laid_out = true;
         layout.reset_to_blank();
         assert_eq!((layout.state.layout_h_px, layout.state.piece_bboxes_json.as_str()), (240, ""));
@@ -974,7 +1021,7 @@ mod tests {
         assert!(views.labels().is_empty());
         assert_eq!(views.active_kind(), None);
         assert_eq!(views.active_label(), None);
-        views.start(ViewKind::Marker);
+        views.start(ViewKind::Marker, false);
         views.push(ViewKind::Nested, state("nested"));
         views.push(ViewKind::BaseSize("36".into()), state("base"));
         views.push(ViewKind::Size("34".into()), state("s34"));
@@ -993,7 +1040,7 @@ mod tests {
     #[test]
     fn select_round_trip_keeps_each_layout() {
         let mut views = LayoutViews::default();
-        views.start(ViewKind::Marker);
+        views.start(ViewKind::Marker, false);
         views.push(ViewKind::Size("34".into()), state("s34"));
 
         // The controller holds the Marker layout; switching gives it size 34.
@@ -1013,7 +1060,7 @@ mod tests {
     #[test]
     fn select_out_of_range_fails() {
         let mut views = LayoutViews::default();
-        views.start(ViewKind::Marker);
+        views.start(ViewKind::Marker, false);
         let back = views.select(3, state("marker")).err().expect("index 3 must fail");
         assert_eq!(back.piece_bboxes_json, "marker");
         assert_eq!(views.active(), 0);
@@ -1022,6 +1069,53 @@ mod tests {
         let same = views.select(0, state("marker")).unwrap_or_else(|_| panic!("select 0"));
         assert_eq!(same.piece_bboxes_json, "marker");
     } // select_out_of_range_fails
+
+    // @brief A run that splits pieces shows Marker and Nested without a layout, media size or export.
+    #[test]
+    fn split_run_makes_marker_and_nested_unavailable() {
+        let settings = media_settings("in", "paper");
+        let mut views = LayoutViews::default();
+        views.start(ViewKind::BaseSize("36".into()), true);
+        views.push(ViewKind::Size("34".into()), LayoutState { layout_dom: Some(canvas(960, 1920)), ..LayoutState::default() });
+        assert_eq!(views.labels(), vec!["Marker", "Nested", "Base Size 36", "Size 34"]);
+        assert_eq!(views.active(), 2, "the run shows Base Size first");
+        assert_eq!(views.active_unavailable_text(), "");
+
+        // Marker and Nested get no media size, even while one of them is active.
+        let base = canvas(960, 2880);
+        assert_eq!(views.media_sizes(Some(&base), &settings), vec!["", "", "10.00 x 30.00 in", "10.00 x 20.00 in"]);
+        let Ok(marker) = views.select(0, LayoutState { layout_dom: Some(base), ..LayoutState::default() }) else {
+            panic!("select Marker");
+        }; // let select
+        assert!(marker.layout_dom.is_none(), "Marker has no layout");
+        assert_eq!(views.active_unavailable_text(), SPLIT_UNAVAILABLE_TEXT);
+        assert_eq!(views.media_sizes(Some(&canvas(960, 960)), &settings)[0], "");
+
+        // Back to Base Size: its layout comes back to the controller.
+        let base = views.select(2, marker).unwrap_or_else(|_| panic!("select Base Size"));
+        assert_eq!(base.layout_dom.as_ref().map(canvas_height_px), Some(2880));
+        assert_eq!(views.active_unavailable_text(), "");
+
+        // Export all tabs skips Marker and Nested in every format.
+        for format in ["dxf", "pdf-tiled", "svg", "pdf"] {
+            assert!(!views.in_all_tabs_export(0, format), "Marker {format}");
+            assert!(!views.in_all_tabs_export(1, format), "Nested {format}");
+            assert!(views.in_all_tabs_export(3, format), "Size 34 {format}");
+        } // for each format
+        assert!(!views.in_all_tabs_export(4, "svg"), "index out of range");
+    } // split_run_makes_marker_and_nested_unavailable
+
+    // @brief A run without a split lays out Marker and Nested as usual.
+    #[test]
+    fn unsplit_run_keeps_marker_and_nested() {
+        let mut views = LayoutViews::default();
+        views.start(ViewKind::Marker, false);
+        views.push(ViewKind::Nested, state("nested"));
+        assert_eq!(views.active(), 0);
+        assert_eq!(views.active_unavailable_text(), "");
+        assert!(views.in_all_tabs_export(0, "svg"), "Marker exports to SVG");
+        assert!(views.in_all_tabs_export(1, "pdf-tiled"), "Nested exports to PDF (Tiled)");
+    } // unsplit_run_keeps_marker_and_nested
 
     // @brief Left-out pieces read one bullet per piece, under their tab after a tab run.
     #[test]

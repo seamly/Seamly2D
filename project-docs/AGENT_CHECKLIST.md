@@ -59,6 +59,7 @@ MALE_SHIRT
 | Layout.X4.2 | 45 | SL > male_shirt > Paper Tiled: Export > PDF disabled, PDF (Tiled) enabled | ?
 | Layout.X2.2 | 46 | SL > trousers > Paper Roll 16 in, split: part labels read `<piece name> part i of n` | ?
 | Layout.X7.2 | 47 | SL > jacket_2 > Fabric folded 30.0, split: no layout leaves pieces out | ?
+| Layout.Y2.1 | 49 | SL > jacket_2 > Fabric folded 30.0, split: Marker and Nested tabs show a message, no media | ?
 | Layout.X5.2 | 42 | SL > jacket_2, trousers, male_shirt > Media size below each layout tab and material tab | ?
 | Layout.803.1 | 48 | SL > male_shirt, trousers > Paper Roll 8 in, split: drill holes whole; stripe, plaid, internal paths end at the cut line | ?
 | Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
@@ -714,8 +715,7 @@ Individual pattern, two materials:
 - [ ] Settings: Fabric (folded), width 30.0. Submit. Create Layout.
 - [ ] Dialog "Pieces do not fit the media" lists pieces by `Size_<size>_<name>_<letter>`, e.g. `Size_640_Комір_H`.
 - [ ] Choose "Split the pieces". OK. "Some layouts left pieces out" does not appear.
-- [ ] Nested tab: the collar stack and the Back stack are cut into parts on the same lines for every size.
-- [ ] Every material tab (Marker, Nested, every size) leaves no piece out.
+- [ ] Every Base Size and size tab of every material leaves no piece out.
 
 ## 48. [ ] Split pieces keep their markings
 
@@ -729,3 +729,19 @@ Individual pattern, two materials:
 - [ ] Open trousers (`test-seamly-layout/patterns/validation/trousers.sm2d`). Same settings. Split.
 - [ ] Back: the drill hole is whole, on one part. Stripe and plaid lines end at the cut line on each part. The plaid line stays dashed.
 - [ ] Front Pleats: stripe and plaid lines end at the cut line on each part.
+
+## 49. [ ] Marker and Nested unavailable after a split
+
+(Layout.Y2.1)
+
+- [ ] Open jacket2 (`test-seamly-layout/patterns/validation/jacket2_40-146.sm2d`). Press Layout.
+- [ ] Settings: Fabric (folded), width 30.0. Submit. Create Layout.
+- [ ] Dialog "Pieces do not fit the media": choose "Split the pieces". OK.
+- [ ] Tab order: Marker, Nested, Base Size, then each size. Base Size shows first.
+- [ ] Marker and Nested tabs: no media size below the label.
+- [ ] Select Marker: the canvas shows "Marker and Nested layouts are unavailable when pieces are split." No media, no fit-to-view button.
+- [ ] On Marker: Adjust Layout, Export and View are disabled. Same on Nested.
+- [ ] Select a size tab: its layout shows; Adjust Layout, Export and View are enabled.
+- [ ] Every material tab: same Marker and Nested message.
+- [ ] Export > Export all tabs, SVG: no Marker or Nested file.
+- [ ] Settings: Paper, Roll. Create Layout. No dialog appears; Marker and Nested lay out as before.

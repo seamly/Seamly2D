@@ -1,5 +1,5 @@
 // project: SeamlyLayout
-// author: slspencer, copyright 2026
+// author: slspencer, copyright 2026 Seamly2D Project
 // MIT License: https://opensource.org/licenses/MIT
 // Main.qml — Root ApplicationWindow for SeamlyLayout Qt 6.11 frontend.
 //
@@ -554,7 +554,8 @@ ApplicationWindow {
         id: topMenuBar
 
         svgImported:          appController.isSvgImported
-        layoutReady:          appController.isLayoutReady
+        // A tab without a layout (Marker or Nested after a split) has nothing to adjust, export or view.
+        layoutReady:          appController.isLayoutReady && appController.layoutViewUnavailableText === ""
         createLayoutEnabled:  appController.isCreateLayoutEnabled
         adjustMode:           appController.isAdjustMode
         settingsOnly:         appController.isSettingsRequired
@@ -1048,7 +1049,8 @@ ApplicationWindow {
                     } // Column materialHeaderText
                 } // Rectangle materialHeader
 
-                // Non-tiled multisize tabs include Marker and Nested; tiled tabs show only sizes.
+                // Multisize tabs: Marker, Nested, Base Size, sizes.  Tiled paper shows only sizes;
+                // after a split, Marker and Nested show only a message.
                 // Hidden when there is only one layout.  The strip is as wide as
                 // the canvas; a scroll bar below it reaches tabs past the right edge.
                 Flickable {
@@ -1176,7 +1178,9 @@ ApplicationWindow {
                     anchors.margins: 0
 
                     visible:         !appController.isAdjustMode
-                    placeholderText: "Apply settings to generate layout"
+                    placeholderText: appController.layoutViewUnavailableText !== ""
+                                     ? appController.layoutViewUnavailableText
+                                     : "Apply settings to generate layout"
                     showBusy:        appController.isLayoutInProgress
                 } // SvgCanvas rightCanvas
 
@@ -1185,6 +1189,7 @@ ApplicationWindow {
                 Rectangle {
                     id: fitToViewButton
                     visible: appController.isLayoutReady && !appController.isAdjustMode
+                             && appController.layoutViewUnavailableText === ""
                     z: 10
                     width:  32
                     height: 32
