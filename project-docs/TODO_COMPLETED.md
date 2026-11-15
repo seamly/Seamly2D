@@ -2182,3 +2182,9 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 ### [x] Task Layout.106 — Verify - Seamly2D: build the pieces for the SVG sent to SeamlyLayout with `layout_handoff`, not `VLayoutPiece`
 
 ### [x] Task Layout.109 - Verify - SeamlyLayout > Layout Settings > Media Type=Fabric
+
+### [x] Task Layout.103 — Verify - DXF units: `METRIC` (in mm) or `ENGLISH` (in inches), these are the options for DXF units.
+
+### [x] Task Layout.101 - Verify - `SEAMLY_DATA_DIR` for SeamlyLayout
+
+### [x] Layout.X5 - Display the media dimensions (WxH) in each layout tab, of the layout displayed in that tab.

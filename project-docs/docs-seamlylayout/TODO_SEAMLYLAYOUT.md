@@ -2,14 +2,28 @@
 
 Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to `project-docs/TODO_COMPLETED.md`. Task IDs start with `Layout.`
 
-## Little things to take care of:
+## Little things to fix
 
-- [ ] Layout.X5 - Display the media dimensions (WxH) in each layout tab, of the layout displayed in that tab.
-  - [x] Layout.X5.1 - Each tab shows `<W> x <H> <unit>` below its label (`layoutViewMediaSizes`, `LayoutViews::media_sizes`). Width: paper canvas width, or the fabric width (folded too). Height: the tab's layout length. Done Adjusting updates the shown tab. Tests: `media_size_text_uses_the_settings_unit`, `media_sizes_follow_each_tab_layout`. Docs: SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §42.
-  - [ ] Layout.X5.2 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §42.
-  - [x] Layout.X5.3 - Individual pattern: each material tab over the layout shows `<W> x <H> <unit>` below its name; one material: the header over the layout shows it below "Material: <name>" (`materialMediaSizes`, `layout_views::material_media_size`). A blank canvas or a material with layout tabs shows none. Test: `material_media_size_shows_one_finished_layout`. Docs: SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §42.
-  - [ ] Display wxh below tabs of individual pattern layouts
+- [ ] yy Layout.Y1 - reorder the material tabs to be 'Fabric', 'Lining', 'Interfacing', 'Interlining' in both left and right canvases. Currently the incorrect order is 'Lining', 'Fabric', 'Interfacging', 'Interlining'.
+  - [x] `material_split::pattern_materials` sorts by `MATERIAL_ORDER`; other materials follow in handoff order. Both tab bars read the same list. Test: `materials_follow_the_tab_order`. Docs: SVG-DATA-ATTRIBUTES Materials.
+  - [ ] Layout.Y1.1 - Installed-app check with the next MSI: open a pattern whose first piece is Lining; both tab bars show Fabric, Lining, Interfacing, Interlining.
 
+- [ ] yy Layout.Y2 - multisize - Split the pieces: The Marker tab and Nested tab should display a messaage that Marker and Nested layouts are unavailable when pieces are split, and should not display the media, as their layouts are disabled when pieces are split.
+  - [x] A split run lays out only Base Size and each size (`layout_views::size_kinds`). Marker and Nested tabs stay first with no layout and no media size; the canvas shows `SPLIT_UNAVAILABLE_TEXT` (QML `layoutViewUnavailableText`). Adjust, Export, View off there; Export all tabs skips them. Nested piece-set split code removed. Tests: `split_run_makes_marker_and_nested_unavailable`, `unsplit_run_keeps_marker_and_nested`. Docs: PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, SVG-DATA-ATTRIBUTES, `AGENT_CHECKLIST.md` §49.
+  - [ ] Layout.Y2.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §49.
+
+- [ ] yy Layout.Y3 - multisize - Nested: When a piece has corners but none are 90 degrees then align the sizes along the cutline's longest edge.
+  - [x] Stack point Rule 2b: with no right-angle turn point, the lowest turn point wins; the sizes align along its longest edge (straight part only). Same rule in `svg_dom/src/stack_point.rs` and `layout_handoff/handoff_stack_point.cpp`. jacket2: only Detail 3 changes.
+  - [x] Tests: `right_angle_is_within_one_degree`, `without_a_right_angle_the_lowest_corner_wins`, `stackPointTakesLowestCornerWithoutRightAngle`. Docs: SVG-DATA-ATTRIBUTES "Multisize stack point".
+  - [ ] Layout.Y3.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §50. The MSI build also runs the full Qt suites.
+
+- [x] Layout.Y4 - Split the pieces: When a piece is split, split the drill hole when needed. Currently 'trousers.sm2d > Along grainline > Keep upright > paper > roll > custom > width=16.00in' produces a split piece "Back" where the stripe and plaid reference lines are split correctly but the drill hole is not split -- the drill hole is located on "Back part 2 of 2" where half of the drill hole lies outside the split line.
+  - [x] `piece_divider.rs` `drill_for_parts`: a cut line that crosses a drill circle splits it. Each part's `<circle>` becomes a `<path>` of its arcs, cubic curves that end at the cut line.
+  - [x] The part nearest the centre keeps `<circle r="0" stroke="none">` at the centre: the one DXF-ASTM layer 13 drill point (DXF has no half drill hole).
+  - [x] `seamly_svg2ezdxf` `extract_drill_hole`: on a split part (`data-split-of`), a drill group without a circle writes no point; a zero-radius circle writes the point with `data-diameter`.
+  - Tests: `drill_hole_splits_at_the_cut_line`, `narrow_cell_holds_two_arcs`, `split_drill_hole_keeps_one_drill_point`; two new reject cases for unsplit pieces.
+  - Docs: SVG-DATA-ATTRIBUTES split parts, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, DXF-ASTM compliance layer 13, `AGENT_CHECKLIST.md` §48, new §51 and OPEN row.
+- [ ] Layout.Y4.1 - Installed-app check with the next MSI (`AGENT_CHECKLIST.md` §51).
 
 ## Implement
 
@@ -18,12 +32,14 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 - [x] When a piece is split then split the:
   - [x] reference lines -- `piece_divider.rs`: `stripe` and `plaid` are open lines that end at the cut lines, like `internal_path`. Before, each went whole to the nearest part.
   - [x] internal paths -- no code change: already open lines that end at the cut lines; a closed internal path becomes one open line per part. New test pins the closed case.
-  - [x] drill holes -- a drill hole is a circle: it stays whole, on the part nearest its centre. Before, every drill hole went to part 1 (no anchor point). Cut lines move off drill centres.
+  - [x] drill holes -- a drill hole inside one column stays whole, on the part nearest its centre. Before, every drill hole went to part 1 (no anchor point). Cut lines move off drill centres. A cut line that crosses the circle splits it: see Layout.Y4.
   - [x] grainlines -- validated (trousers.sm2d, Union piece is split at the same place as the grainline and the halves of the grainline is shown on each split piece)
   - Tests: `markings_split_with_the_piece`, `cut_line_misses_drill_centres`. Docs: SVG-DATA-ATTRIBUTES split parts, PROCESS LAYOUT WORKFLOW, SIMPLE_WORKFLOW, `AGENT_CHECKLIST.md` §48.
 - [ ] Layout.803.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §48.
 
 ## VERIFY
+
+- Export DXF files & create aw.fyi/dxf
 
 ### [ ] Task Layout.93 - Verify - DXF - for each piece, use its 'piece tool' properties and attributes as source of truth instead of labels for names, letter, quantity, material, foldline, etc.; track this data with the layout pieces.
 
@@ -51,29 +67,6 @@ This information should be tracked in the layout data even if it's not shown in 
   - Docs: `SVG-DATA-ATTRIBUTES.md` (piece attributes), `NEW-ATTRIBUTES.csv`, `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
 - [ ] Layout.93.7 In the next MSI build: export jacket2 as DXF-ASTM (R13) and check the file in aw.fyi. The piece text (Material, Rotation, Flip, Tilt, Fold) comes from Piece Properties, also when a label is hidden. Steps: `AGENT_CHECKLIST.md` section 23.
 
-### [ ] Task Layout.103 — Verify - DXF units: `METRIC` (in mm) or `ENGLISH` (in inches), these are the options for DXF units.
-
-User approved (2026-10-25). The measurement file's unit decides the file units. If a measurement file (.smms or .smis) isn't referenced in the .sm2d file then use the pattern units; if this unit is 'cm' then convert to 'mm; if this unit is different than the pattern unit, convert pattern units to measurement units.
-
-| Pattern unit | `Units:` | Size values | Lengths |
-|---|---|---|---|
-| mm | `METRIC` | Unchanged | mm, 2 decimals (as now) |
-| cm | `METRIC` | Multiplied by 10 (50 → 500) | mm, 2 decimals (as now) |
-| inch | `ENGLISH` | Unchanged | inches, 4 decimals |
-
-- `.smms` files cannot be in inches (SeamlyMe offers inches for `.smis` only), so `ENGLISH` is only an option for individual .smis measurement files.
-- Size values: `Size:` / `Size Name:`, `Sample Size:`, `.rul` size list and sample size, the "Size N" label text in the DXF.
-- The screen, tabs, file names and legend keep pattern units.
-- A handoff without `data-units` writes `METRIC` with no conversion.
-- [x] Layout.103.1 Seamly2D: `SvgGenerator` writes `data-units` (`mm`, `cm`, `inch`, the pattern unit) on the pattern group; caller `MainWindowsNoGUI`. Qt test in `tst_svgcomponenttags.cpp`.
-- [x] Layout.103.2 `SVG-DATA-ATTRIBUTES.md`: add `data-units`; size rows name the DXF conversion.
-- [x] Layout.103.3 `seamly_svg2ezdxf`: read `data-units` into `Drawing`; convert cm size values to mm.
-- [x] Layout.103.4 `ezdxf2dxfastm`: `ENGLISH` writes every length in inches with 4 decimals: coordinates, text heights, notch depth and width, `Curve Tolerance:`, `.rul` grade steps. `Units:ENGLISH`.
-- [x] Layout.103.5 Rust tests: mm, cm and inch handoffs; `.rul`; R11 and R13.
-- [x] Layout.103.6 Docs: `seamlylayout_DXF_AAMA.md` (Decisions, McNeel table `Size:` row), `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
-- [x] Layout.103.8 Seamly2D picks the file unit: the referenced measurement file unit, else the pattern unit (`MainWindowsNoGUI::exportUnit`, `MainWindow::measurementFileUnit`). `data-units` carries it; size values (`data-size`, `data-sizes`, `data-base-size`, `data-height`, `data-sample-size`) convert from pattern units to it. Decision: conversion on the Seamly2D side; the `--svg-stdin` contract and the Rust DXF writers stay unchanged (lengths are px). Still to check in the app: mm/cm pattern with an inch `.smis` writes `Units:ENGLISH`; inch pattern with a `.smms` in cm writes `Units:METRIC` with sizes in mm.
-- [ ] Layout.103.7 `cargo test --workspace` and `ctest --preset debug` pass. Not run yet: the Qt test `PatternCarriesUnits` (`tst_svgcomponenttags.cpp`) and the Qt build. Both run in the next MSI build. Check in the app: in an inch pattern (`.smis` in inches), export DXF-AAMA and DXF-ASTM. The DXF has `Units:ENGLISH` and inch coordinates with 4 decimals. In a cm pattern with a `.smms` file, size 50 writes `Size:500` and `Units:METRIC`.
-
 ### [ ] Task Layout.104 — Verify - DXF-AAMA piece text from the McNeel guide
 
 User approved (2026-10-25). DXF-AAMA only; DXF-ASTM and CLO3D keep their output. Guide: `dxf-docs/seamlylayout_DXF_AAMA.md`, "McNeel guide".
@@ -85,11 +78,6 @@ User approved (2026-10-25). DXF-AAMA only; DXF-ASTM and CLO3D keep their output.
 - [x] Layout.104.5 Docs: `seamlylayout_DXF_AAMA.md` Decisions and McNeel table.
 - [ ] Layout.104.6 `cargo test --workspace` and `ctest --preset debug` pass. Not run yet: the Qt build; it runs in the next MSI build. Check in the app: export a multisize pattern to DXF-AAMA. Blocks are `<piece name>_<size>` (e.g. `Front_36`), `Annotation:` follows `Size:` when the piece has one, `Creation Time:` is `HH:MM:SS`, and the `.rul` `CREATION TIME:` too. DXF-ASTM keeps `<svg id>_M` and `hh-mm`.
 - [ ] Layout.104.7 `Piece Name:` stays full length; `Material:` stays the full name; no `Category:`; layer 5 keeps the grade reference line.
-
-### [x] Task Layout.101 - Verify - `SEAMLY_DATA_DIR` for SeamlyLayout
-
-- Done: `DataDirectory` (`qt_frontend/src/DataDirectory.{h,cpp}`) reads the variable first in `main()`. Settings go to `<dir>/settings/`, logs to `<dir>/logs/seamlylayout/`. A relative path exits 78; an unwritable one exits 73. Seamly2D's `--svg-stdin` launch passes the variable on.
-- [ ] Layout.101.4 In the next MSI build, check in the app: in PowerShell, run `$env:SEAMLY_DATA_DIR="D:/sl_job"; seamlylayout.exe`. Expect `settings\qt6_seamlylayout.ini` and `logs\seamlylayout\log_*.txt` under it, nothing new in `%LOCALAPPDATA%\Seamly\SeamlyLayout`. Run with `SEAMLY_DATA_DIR=rel`, a relative path (exit 78). Run with a path whose parent is a file, so the folder cannot be made (exit 73). Run Seamly2D with the variable set, open Layout Mode: SeamlyLayout uses the same folder. The Qt build also runs in the next MSI build.
 
 ### [ ] Task Layout.102 — Verify - DXF-ASTM (CLO3D): the DXF-ASTM export with CLO3D settings, and a setting that can swap the cut line and sew line layers
 
@@ -104,4 +92,3 @@ User approved (2026-10-25). DXF-AAMA only; DXF-ASTM and CLO3D keep their output.
 - [x] Layout.102.3 Tests (`writer_astm_test.rs`): the standard export and the preset write layers 1/84/14/87 byte for byte alike; a `Swapped` mapping writes cut on 14/87 and sew on 1/84, group 250 follows the role. `cargo test --workspace` passed.
 - [x] Layout.102.4 Integrated MSI build, Qt suites, and Rust workspace tests passed.
 - [ ] Layout.102.5 Check in the app (steps: `AGENT_CHECKLIST.md` section 8): export DXF-ASTM (CLO3D), then import the file in CLO3D with "Swap Cutting Line and Sewing Line" off. If the cut line and sew line come in reversed, set `CLO3D_CUT_SEW_LAYERS = CutSewLayers::Swapped` (one line in `writer.rs`) and run the test again.
-
