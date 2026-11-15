@@ -196,6 +196,8 @@ private:
     QGraphicsPathItem*       m_fold_line_arrow_heads; ///< Filled arrow heads of m_fold_line_arrow.
     QGraphicsSimpleTextItem* m_fold_line_label;       ///< "Foldline" text between the fold line and its arrow line.
     QSet<quint32>            m_reported_missing_points; ///< Missing marking points already shown to the user.
+    int                      m_tilt_degrees = 0;  ///< Drawn tilt; positive counterclockwise, 0 when the piece is level.
+    QPointF                  m_tilt_center;       ///< Point that the drawn piece and its grainline turn about.
 
                            PatternPieceTool(VAbstractPattern *doc, VContainer *data, const quint32 &id,
                                               const Source &typeCreation, VMainGraphicsScene *scene,

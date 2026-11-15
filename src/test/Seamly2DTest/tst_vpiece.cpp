@@ -2473,6 +2473,37 @@ void TST_VPiece::PieceTiltTransformRotatesAboutCenter() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief PieceTiltTransformTurnsGrainline checks the Piece Mode grainline of a tilted piece.
+ *
+ * The drawn grainline starts at the tilted start point, at the stored angle plus the tilt, so its end is the tilted
+ * stored end. The opposite tilt turns the drawn midpoint back to the stored midpoint.
+ */
+void TST_VPiece::PieceTiltTransformTurnsGrainline() const
+{
+    const QPointF center(10, 20);
+    const QPointF start(12, 30);
+    const qreal angle = 80;
+    const qreal length = 40;
+    QLineF stored(start, start + QPointF(length, 0));
+    stored.setAngle(angle);
+
+    for (const int tilt_degrees : {15, -15})
+    {
+        const QTransform tilt = pieceTiltTransform(tilt_degrees, center);
+
+        // VGrainlineItem puts the end at start + length * (cos, -sin) of its angle.
+        const QPointF drawn_start = tilt.map(start);
+        const qreal drawn_radians = qDegreesToRadians(angle + tilt_degrees);
+        const QPointF drawn_end = drawn_start + QPointF(length * qCos(drawn_radians), -length * qSin(drawn_radians));
+        QVERIFY(QLineF(drawn_end, tilt.map(stored.p2())).length() < 1e-9);
+
+        const QPointF midpoint = pieceTiltTransform(-tilt_degrees, center).map((drawn_start + drawn_end) / 2);
+        QVERIFY(QLineF(VGrainlineData::centeredStart(midpoint, angle, length), start).length() < 1e-9);
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief PieceFlipTransformMirrorsAboutCenter checks the mirror each flip choice draws on the canvas.
  */
 void TST_VPiece::PieceFlipTransformMirrorsAboutCenter() const
