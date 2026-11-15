@@ -22,10 +22,13 @@
 //     edges on the cut lines. With a fold line, Seamly2D sends the outline
 //     without its edge on the fold line. The divider adds that edge back, so the
 //     outline makes parts; each part's outline again has no edge on the fold line;
-//   - `seamline` beside a cutline, `internal_path`, `grainline`, `fold_line`: open
-//     lines that end at the cut lines; a part the fold line misses has none. The
-//     fold line arrow line and label (`fold_line_arrow`, `fold_line_label`) go
-//     whole into the fold line group of the nearest part;
+//   - `seamline` beside a cutline, `internal_path`, `grainline`, `fold_line`, and the
+//     reference lines `stripe` and `plaid`: open lines that end at the cut lines; a
+//     part the fold line misses has none. The fold line arrow line and label
+//     (`fold_line_arrow`, `fold_line_label`) go whole into the fold line group of the
+//     nearest part;
+//   - `drill` holes: whole, on the part nearest the circle centre. No cut line
+//     passes through a drill centre;
 //   - notches, labels and other groups: whole, on the nearest part. A pattern, piece
 //     or fold line label not wholly inside the part outline moves inside it
 //     (`label_inside_part.rs`);
@@ -677,19 +680,38 @@ fn rewrite_paths(el: &mut Element, counter: &mut usize, f: &mut dyn FnMut(usize)
     });
 } // fn rewrite_paths
 
-// @brief Every vertex of every straight path below `el`.
+// @brief Every vertex of every straight path below `el`, then the centre of every `<circle>`.
 fn all_points(el: &Element) -> Vec<(f64, f64)> {
     let mut ds = Vec::new();
     path_ds(el, &mut ds);
-    ds.iter()
+    let mut points: Vec<(f64, f64)> = ds
+        .iter()
         .filter_map(|d| straight_subpaths(d))
         .flatten()
         .flat_map(|s| s.points)
-        .collect()
+        .collect();
+    // Drill holes are circles: their centres place them on a part and keep cut lines off them.
+    circle_centres(el, &mut points);
+    points
 } // fn all_points
 
+// @brief Append the centre of every `<circle>` below `el` with numeric `cx` and `cy`, in document order.
+fn circle_centres(el: &Element, out: &mut Vec<(f64, f64)>) {
+    for child in el.children.iter().filter_map(XMLNode::as_element) {
+        if child.name == "circle" {
+            let number = |name: &str| attr(child, name).trim().parse::<f64>().ok();
+            if let (Some(x), Some(y)) = (number("cx"), number("cy")) {
+                out.push((x, y));
+            } // if the centre parses
+        } else {
+            // A container: search its children.
+            circle_centres(child, out);
+        } // if circle
+    } // for each child element
+} // fn circle_centres
+
 // @brief A point that tells which part an element belongs to: the centre of its
-// path points, else the anchor of its first `<text>`.
+// path points and circle centres, else the anchor of its first `<text>`.
 fn element_anchor(el: &Element) -> Option<(f64, f64)> {
     let points = all_points(el);
     if !points.is_empty() {
@@ -1143,7 +1165,7 @@ fn divide_piece(piece: &Element, xs: &[f64], uu_per_px: f64) -> Option<Vec<Piece
         let closed = match data_type {
             _ if index == outline_index => None, // handled above
             "cutline" | "cut_path" => Some(true),
-            "seamline" | "internal_path" | "grainline" | "fold_line" => Some(false),
+            "seamline" | "internal_path" | "grainline" | "fold_line" | "stripe" | "plaid" => Some(false),
             _ => None,
         }; // closed
         if index == outline_index {
@@ -1183,7 +1205,7 @@ fn divide_piece(piece: &Element, xs: &[f64], uu_per_px: f64) -> Option<Vec<Piece
             }
             continue;
         } // if clipped
-        // Labels and anything else: whole, to the nearest part.
+        // Labels, drill holes and anything else: whole, to the nearest part.
         let part = element_anchor(child).map_or(0, |p| nearest_part(&parts, None, p));
         part_children[part].push((*child).clone());
         if data_type == "grainline" {
@@ -1484,6 +1506,76 @@ mod tests {
         ids.dedup();
         assert_eq!(ids.len(), count, "duplicate ids");
     } // wide_piece_splits_into_two_parts
+
+    // @brief One tagged piece, 400 × 100, with a closed internal path, two drill holes and two reference lines.
+    const MARKED_PIECE_SVG: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="2000">
+  <g id="piece_Back" data-type="piece" data-type-number="1" data-name="Back">
+    <g id="cutline_Back" data-type="cutline" data-type-number="1" data-parent="Back"><path d="M0,0 L400,0 L400,100 L0,100 L0,0 Z"/></g>
+    <g id="internal_path_1_Back" data-type="internal_path" data-type-number="1" data-parent="Back" data-turn-points="0 1 2 3 4"><path d="M150,40 L250,40 L250,60 L150,60 L150,40 Z"/></g>
+    <g id="drill_Back" data-type="drill" data-type-number="1" data-parent="Back" data-diameter="6"><g stroke="black"><circle cx="100" cy="50" r="3"/></g></g>
+    <g id="drill_Back-2" data-type="drill" data-type-number="2" data-parent="Back" data-diameter="6"><g stroke="black"><circle cx="300" cy="50" r="3"/></g></g>
+    <g id="stripe_Back" data-type="stripe" data-type-number="1" data-parent="Back"><g stroke="black"><path d="M20,30 L380,30"/></g></g>
+    <g id="plaid_Back" data-type="plaid" data-type-number="1" data-parent="Back"><g stroke="black" stroke-dasharray="2 1 0.5 1 "><path d="M20,70 L380,70"/></g></g>
+  </g>
+</svg>"#;
+
+    // @brief The (id, circle centre x) of every drill hole in a part.
+    fn drill_holes(part: &Element) -> Vec<(String, f64)> {
+        let mut out = Vec::new();
+        for drill in part.children.iter().filter_map(|n| n.as_element()).filter(|e| attr(e, "data-type") == "drill") {
+            let mut centres = Vec::new();
+            circle_centres(drill, &mut centres);
+            out.extend(centres.into_iter().map(|(x, _)| (attr(drill, "id").to_string(), x)));
+        } // for each drill group
+        out
+    } // fn drill_holes
+
+    // @brief Reference lines and a closed internal path end at the cut line on each part;
+    // each drill hole stays whole on the part that holds its centre.
+    #[test]
+    fn markings_split_with_the_piece() {
+        let mut doc = Document::parse(MARKED_PIECE_SVG).expect("fixture parses");
+        let divided = divide_oversized_pieces(&mut doc, &spec(250));
+        assert_eq!(divided, vec![DividedPiece { label: "Back".to_string(), parts: 2 }]);
+        let parts = part_groups(&doc);
+        assert_eq!(parts.len(), 2);
+
+        // Reference lines: each part holds its stretch, from the line end to the cut line at x 200.
+        let line = |part: &Element, data_type: &str| ds(component(part, data_type).expect(data_type));
+        assert_eq!(line(parts[0], "stripe"), "M20,30 L200,30");
+        assert_eq!(line(parts[1], "stripe"), "M200,30 L380,30");
+        assert_eq!(line(parts[0], "plaid"), "M20,70 L200,70");
+        assert_eq!(line(parts[1], "plaid"), "M200,70 L380,70");
+        for part in &parts {
+            // The plaid line style stays on its styled group.
+            let styled = component(part, "plaid").and_then(|p| p.get_child("g")).expect("styled plaid group");
+            assert_eq!(attr(styled, "stroke-dasharray"), "2 1 0.5 1 ");
+        } // for each part
+
+        // Closed internal path: one open run per part, from the cut line round to the cut line.
+        for part in &parts {
+            let internal = component(part, "internal_path").expect("internal path");
+            let d = ds(internal);
+            assert!(!d.contains('Z'), "{d}");
+            assert_eq!(d.matches('M').count() + d.matches('L').count(), 4, "{d}");
+            assert_eq!(d.matches("200,").count(), 2, "both ends on the cut line: {d}");
+            assert_eq!(attr(internal, "data-turn-points"), "0 1 2 3");
+        } // for each part
+
+        // Drill holes: whole, on the part that holds the centre.
+        assert_eq!(drill_holes(parts[0]), vec![("drill_Back_part1".to_string(), 100.0)]);
+        assert_eq!(drill_holes(parts[1]), vec![("drill_Back-2_part2".to_string(), 300.0)]);
+    } // markings_split_with_the_piece
+
+    // @brief A cut line that would pass through a drill centre moves off it.
+    #[test]
+    fn cut_line_misses_drill_centres() {
+        let drill = Element::parse(r#"<g data-type="drill"><g><circle cx="200" cy="50" r="3"/></g></g>"#.as_bytes())
+            .expect("fixture parses");
+        let xs = cut_positions(0.0, 400.0, 2, &all_points(&drill));
+        assert_eq!(xs.len(), 1);
+        assert!((xs[0] - 200.0).abs() >= 1e-3, "cut at the drill centre: {xs:?}");
+    } // cut_line_misses_drill_centres
 
     // @brief The `<text>` of each part's new label, in part order.
     fn part_label_texts(doc: &Document) -> Vec<&Element> {

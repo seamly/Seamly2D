@@ -61,6 +61,7 @@ MALE_SHIRT
 | Layout.X2.2 | 46 | SL > trousers > Paper Roll 16 in, split: part labels read `<piece name> part i of n` | ?
 | Layout.X7.2 | 47 | SL > jacket_2 > Fabric folded 30.0, split: no layout leaves pieces out | ?
 | Layout.X5.2 | 42 | SL > jacket_2, trousers, male_shirt > Media size below each layout tab and material tab | ?
+| Layout.803.1 | 48 | SL > male_shirt, trousers > Paper Roll 8 in, split: drill holes whole; stripe, plaid, internal paths end at the cut line | ?
 | Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Fabric | ?
 | Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Lining | ?
@@ -727,3 +728,16 @@ Individual pattern, two materials:
 - [ ] Choose "Split the pieces". OK. "Some layouts left pieces out" does not appear.
 - [ ] Nested tab: the collar stack and the Back stack are cut into parts on the same lines for every size.
 - [ ] Every material tab (Marker, Nested, every size) leaves no piece out.
+
+## 48. [ ] Split pieces keep their markings
+
+(Layout.803.1)
+
+- [ ] Open male_shirt. Press Layout.
+- [ ] Settings: Paper, Roll, custom width 8 in. Layout Mode: Along Grainline. Submit. Create Layout.
+- [ ] Dialog "Pieces do not fit the media": choose "Split the pieces". OK.
+- [ ] FrontPanel: each drill hole is whole, on the part where it lies. The stripe line ends at the cut line on each part it crosses.
+- [ ] BackPanel: each internal path ends at the cut line on each part it crosses. No internal path runs along a cut edge.
+- [ ] Open trousers (`test-seamly-layout/patterns/validation/trousers.sm2d`). Same settings. Split.
+- [ ] Back: the drill hole is whole, on one part. Stripe and plaid lines end at the cut line on each part. The plaid line stays dashed.
+- [ ] Front Pleats: stripe and plaid lines end at the cut line on each part.

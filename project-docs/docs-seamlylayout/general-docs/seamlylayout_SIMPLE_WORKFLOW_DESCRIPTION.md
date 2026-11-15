@@ -182,6 +182,7 @@ The application workflow loop consists of:
          A label wider than its cut edge lies level across the part, near the cut edge, clear of other lines and text.
          With no clear place, it shrinks to the edge length.
          A pattern or piece label that crosses a cut line moves wholly inside its part. It shrinks only when the part is too small.
+         Internal paths, grainlines and stripe and plaid reference lines split at the cut line. Each drill hole stays whole on its part.
          See `SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout split parts".
          A paper roll keeps the selected roll width and margins; only its length follows the content.
          Multisize: every tab of every material splits. Nested cuts every size of a piece-set on the same lines;
