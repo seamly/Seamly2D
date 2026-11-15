@@ -34,10 +34,10 @@ All pieces are preprocessed so the grainline points upward.
 - `any`
   - Default trial set: `{0°, 90°, 180°, 270°}` for legacy handoffs without a Piece Properties > Layout rotation rule.
   - When present, each piece's `data-rotation` rule restricts its own angles:
-    `0`/`360` → `{0°}`, `180` → `{0°, 180°}`, `90` → quarter turns, and `1` → every integer angle from 0° through 359°.
+    `0`/`360` → `{0°}`, `180` → `{0°, 180°}`, `90` → quarter turns, and `1` → 10° steps from 0° through 350°.
   - `data-rotation="0"` means no rotation; omission preserves the legacy quarter-turn fallback.
   - A piece wider than the media at its rule's angles gets quarter turns if a 90° turn fits (`piece_extractor::turn_wide_pieces_to_fit`). Tiled paper: no change.
-  - The grainline is ignored after the existing grain-up preprocessing. Any uses integer-degree sampling, not continuous optimization.
+  - The grainline is ignored after the existing grain-up preprocessing. Any samples 10° steps (`pack_types::ANY_ROTATION_STEP_DEG`), not continuous optimization.
   - Routed to `layout_engine::pack_maxrects_multi_angle`; the selected angle is applied to the full piece group.
 
 ## Settings model

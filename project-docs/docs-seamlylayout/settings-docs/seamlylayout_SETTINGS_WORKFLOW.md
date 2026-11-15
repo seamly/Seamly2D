@@ -62,7 +62,7 @@
   - alongGrainline: trial set {0°, 180°} — head-up or head-down.
   - withNap:        trial set is a singleton — every piece points the same direction.
   - any:            per-piece Piece Properties > Layout rotation applies; missing legacy rules use {0°, 90°, 180°, 270°}.
-                    `Any` samples integer angles from 0° to 359°. `rotationStep` remains unused.
+                    `Any` samples 10° steps from 0° to 350°. `rotationStep` remains unused.
 - if layoutMode='withNap':
   >> Nap Direction -- 'Pieces point Up' (rotationStep=0) | 'Pieces point Down' (rotationStep=180);
      default is 'Pieces point Up'.
