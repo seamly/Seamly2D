@@ -27,7 +27,7 @@ use crate::piece_extractor::{
     extract_piece_rects_and_polygons, hoist_layout_units, keep_size, set_free_rotation_without_grainline,
     set_piece_rotation_for_layout_mode, turn_wide_pieces_to_fit,
 };
-use crate::layout_assembler::{create_layout, create_initial_layout_dom, set_content_width, trim_bottom};
+use crate::layout_assembler::{create_layout, create_initial_layout_dom, trim_bottom};
 use crate::piece_divider::{self, DivideSpec, OversizedPiece};
 use crate::save_debug_dom;
 use crate::log_to_file;
@@ -160,8 +160,8 @@ pub struct ProcessLayoutArgs<'a> {
     /// Multisize only: `true` packs each piece-set (one piece in every size) as one
     /// unit (Nested tab); `false` packs every size of every piece alone (Marker tab).
     pub nested_multisize: bool,
-    /// `true` extends media in height, and in width unless it is fabric.
-    /// Fabric pieces that cannot fit the configured width remain unplaced.
+    /// `true` extends the media length only.  The media width and the contentRect
+    /// width never change: a piece wider than them stays unplaced.
     /// Tiled paper ignores it: its pages cover a larger layout.
     pub extend_media: bool,
     /// `true` splits each piece wider than the media into parts that fit
@@ -198,7 +198,6 @@ pub fn do_process_layout(
     let settings = LayoutSettings::from_json(args.settings_json)
         .map_err(|e| format!("[ERROR] layout_utils::do_process_layout(): 1 Failed to parse layout settings: {e}"))?;
 
-    let is_paper_roll = settings.media_type == "paper" && settings.paper_type == "roll";
     let extend_media = args.extend_media;
 
     // Build the per-piece rotation trial set from layoutMode + rotationStep.
@@ -227,12 +226,6 @@ pub fn do_process_layout(
         .and_then(|s| s.parse::<u32>().ok())
         .unwrap_or(0);
     let mb_px: u32 = (layout_h_px - mt_px) - bin_h;
-    // margin right: kept when extended media widens the canvas
-    let mr_px: u32 = args.initial_layout_dom.root.attributes
-        .get("width")
-        .and_then(|s| s.parse::<u32>().ok())
-        .unwrap_or(0)
-        .saturating_sub(ml_px + bin_w);
 
     // --- 2 clone input_dom for piece pre-processing ---
     let mut input_dom_clone = args.input_dom.clone();
@@ -428,20 +421,11 @@ pub fn do_process_layout(
 
     // Tiled paper uses a candidate-width search: several bin widths (in multiples
     // of the trimmed tile width) are packed and the best result by tile-count
-    // (then unused area) wins. Non-tiled paths pack a fixed bin, extend media,
-    // or retry split fabric parts. `is_tiled` is set in step 3.
-
-    // Fabric width is a physical constraint, including when folded.
-    // Tiled paper never extends: its candidate-width search sets the width.
-    let widen_media = extend_media
-        && !is_tiled
-        && settings.media_type != "fabric"
-        && !(is_paper_roll && args.split_oversized);
-    let pack_bin_w = if widen_media {
-        bin_w.max(packing::required_bin_width(&rects, &trial_angles_deg))
-    } else {
-        bin_w
-    }; // pack_bin_w
+    // (then unused area) wins. Non-tiled paths pack a fixed bin, extend the media
+    // length, or retry split parts. `is_tiled` is set in step 3.
+    //
+    // Constraint: a paper roll and fabric (folded or not) keep the configured
+    // width.  Every non-tiled branch packs into `bin_w`, the contentRect width.
 
     // Size-to-color legend of a Nested multisize layout, sized for the content
     // width the packing branch picks; it goes one piece gap below the lowest piece.
@@ -609,11 +593,11 @@ pub fn do_process_layout(
         // Lenient pack: place every piece that fits, skip the rest, and collect
         // the unplaced ids.  This replaces the previous hard-error behavior — a
         // piece too large or one that runs out of room is collected below.
-        // Extended fabric keeps its width and reports pieces too wide to fit.
+        // Extended media keeps its width and reports pieces too wide to fit.
         // `packed_bin_h` includes any extra height or successive media lengths.
         let (placements, _created_rects, unplaced_ids, packed_bin_h) = if extend_media {
             packing::pack_polygons_extending(
-                pack_bin_w,
+                bin_w,
                 bin_h,
                 gap_px,
                 &polygons,
@@ -647,15 +631,15 @@ pub fn do_process_layout(
         log_to_file(&format!(
             "[process_layout] non-tiled pack returned in {} ms with {} placements, {} unplaced: {:?}; bin {}x{} -> {}x{}",
             t_pack.elapsed().as_millis(), placements.len(), unplaced_labels.len(), unplaced_labels,
-            bin_w, bin_h, pack_bin_w, packed_bin_h,
+            bin_w, bin_h, bin_w, packed_bin_h,
         ));
 
         progress_fn(60, None); // packing complete
 
-        legend = crate::size_colors::SizeLegend::new(size_colors.clone(), pack_bin_w);
+        legend = crate::size_colors::SizeLegend::new(size_colors.clone(), bin_w);
 
-        // Non-tiled: keep the initial canvas and margins.  Step 7 sets the
-        // canvas size when the media was extended.
+        // Non-tiled: keep the initial canvas, width and margins.  Step 7 sets the
+        // canvas length when the media was extended.
         (placements, args.initial_layout_dom.clone(), packed_bin_h, ml_px, mt_px, mb_px, layout_h_px, unplaced_labels)
     }; // let (placements, ...) = if is_tiled
 
@@ -708,20 +692,11 @@ pub fn do_process_layout(
 
     // compute the blank space below the lowest piece (or the legend)
     let blank_bottom = work_bin_h.saturating_sub(content_bottom);
-    // Extended media: wider than the media for the widest piece, or longer
-    // because the packer grew the bin or the legend needs room.  Tiled paper never extends.
-    let widened = pack_bin_w > bin_w;
-    let extended = !is_tiled && (widened || work_bin_h > bin_h || content_bottom > work_bin_h);
+    // Extended media: longer because the packer grew the bin or the legend needs
+    // room.  The width stays.  Tiled paper never extends.
+    let extended = !is_tiled && (work_bin_h > bin_h || content_bottom > work_bin_h);
 
-    // 7a. Widen the canvas to the right; both side margins are kept.
-    if widened {
-        set_content_width(&mut output_doc, pack_bin_w, work_ml_px, mr_px);
-        log_to_file(&format!(
-            "[process_layout] media widened: content width {bin_w} px -> {pack_bin_w} px"
-        ));
-    } // if widened
-
-    // 7b. Content height the canvas ends at.  Roll and fabric end at the lowest
+    // 7a. Content height the canvas ends at.  Roll and fabric end at the lowest
     // piece when the blank space below it is large.  Extended media always ends
     // at the lowest piece.  Tiled paper keeps its own size.
     let fitted_content_h = if extended || (settings.is_roll_form() && blank_bottom > MIN_THRESHOLD_PX) {
@@ -740,7 +715,7 @@ pub fn do_process_layout(
     } // if fitted_content_h
 
     if blank_bottom > MIN_THRESHOLD_PX {
-        // 7c trim tiled layout
+        // 7b trim tiled layout
         // Only runs when media is paper and paper_type is tiled — matches the
         // <g id="tiledRects"> structure produced by create_initial_tiled_layout_dom.
         // Reuses the is_tiled flag from the packing branch above.
@@ -868,15 +843,19 @@ pub fn do_process_layout(
     })
 } // fn do_process_layout
 
-/// @brief Report enlarged canvas dimensions in the active unit, using full fabric width.
+/// @brief Report the media size in the active unit when the media grew longer.
+///
+/// @param settings Settings of the layout run: unit, media type, fabric width.
+/// @param initial  Blank canvas before the layout.
+/// @param output   Layout canvas.
+/// @return The message, or `None` when the canvas is not longer than the blank
+///         canvas.  The width never grows, so only the length is compared.
 fn enlarged_media_message(
     settings: &LayoutSettings,
     initial: &Document,
     output: &Document,
 ) -> Option<String> {
-    let grew = canvas_dimension_px(output, "width") > canvas_dimension_px(initial, "width")
-        || canvas_dimension_px(output, "height") > canvas_dimension_px(initial, "height");
-    if !grew {
+    if canvas_dimension_px(output, "height") <= canvas_dimension_px(initial, "height") {
         return None;
     } // if no enlargement
     let (width, height) = media_size_in_unit(settings, output);
@@ -891,7 +870,7 @@ fn enlarged_media_message(
 /// @param settings Settings of the layout run: unit, media type, fabric width.
 /// @param doc      Layout canvas. Its root `width` and `height` are in px; a missing value reads as 0.
 /// @return `(width, height)`. Fabric gives the nominal bolt width: a folded
-///         canvas holds half of it, and a fabric layout never widens.
+///         canvas holds half of it.  No layout changes the media width.
 pub fn media_size_in_unit(settings: &LayoutSettings, doc: &Document) -> (f64, f64) {
     let units_per_inch = match settings.unit.as_str() {
         "mm" => 25.4,
@@ -903,7 +882,7 @@ pub fn media_size_in_unit(settings: &LayoutSettings, doc: &Document) -> (f64, f6
         // The nominal bolt width, not the rounded folded pixel width.
         if settings.fabric_width > 0.0 { settings.fabric_width } else { settings.page_width }
     } else {
-        // Paper: the canvas width, which a paper roll can widen.
+        // Paper: the canvas width.
         px_to_unit(canvas_dimension_px(doc, "width"))
     }; // if fabric
     (width, px_to_unit(canvas_dimension_px(doc, "height")))
@@ -930,7 +909,7 @@ pub fn layout_divide_spec(settings: &LayoutSettings, bin_w: u32) -> DivideSpec {
     }
 } // fn layout_divide_spec
 
-/// @brief Pieces of an individual pattern wider than the media at each of their trial angles.
+/// @brief Pieces wider than the media at each of their trial angles.
 ///
 /// Runs the pre-processing up to grain-up pieces, as `do_process_layout` does.
 /// Tiled paper reports none: its pages already cover a large piece.
@@ -1618,7 +1597,8 @@ mod tests {
         } // for folded and unfolded
     } // placement_fabric_enlargement_keeps_width
 
-    // @brief A paper roll widens; enlargement notices use active units and ignore unchanged media.
+    // @brief A paper roll keeps its width when the media extends: a piece wider than
+    // the roll stays unplaced.  Enlargement notices use active units and compare the length only.
     #[test]
     fn placement_enlargement_dimensions_and_notifications() {
         let settings = serde_json::json!({
@@ -1628,19 +1608,24 @@ mod tests {
             "layoutMode": "alongGrainline", "scaleGrid": false
         });
         let result = process_placement_fixture(settings, false, true).expect("paper enlargement");
-        assert_eq!(result.output_doc.root.attributes["width"], "500");
-        assert!(result.unplaced_labels.is_empty());
-        assert_eq!(placed_count(&result), 2);
-        assert!(result.media_enlargement.as_ref().unwrap().starts_with("Media enlarged: width 5.21 in, height "));
+        // 1 in roll = 96 px: the 500 px Wide piece does not fit and the roll does not widen.
+        assert_eq!(result.output_doc.root.attributes["width"], "96");
+        assert_eq!(result.output_doc.get_attr_by_id("backgroundRect", "width").as_deref(), Some("96"));
+        assert_eq!(result.output_doc.get_attr_by_id("contentRect", "width").as_deref(), Some("96"));
+        assert_eq!(result.unplaced_labels, vec!["Wide"]);
+        assert_eq!(placed_count(&result), 1);
+        assert!(result.media_enlargement.is_none(), "the 500 in roll holds Long without growing");
         let initial = Document::parse(r#"<svg width="96" height="96"/>"#).expect("initial");
-        let output = Document::parse(r#"<svg width="192" height="288"/>"#).expect("output");
+        let longer = Document::parse(r#"<svg width="96" height="288"/>"#).expect("longer");
+        let wider = Document::parse(r#"<svg width="192" height="96"/>"#).expect("wider");
         for (unit, expected) in [
-            ("mm", "Media enlarged: width 50.80 mm, height 76.20 mm."),
-            ("cm", "Media enlarged: width 5.08 cm, height 7.62 cm."),
+            ("mm", "Media enlarged: width 25.40 mm, height 76.20 mm."),
+            ("cm", "Media enlarged: width 2.54 cm, height 7.62 cm."),
         ] {
             let settings = LayoutSettings::from_json(&serde_json::json!({"unit": unit}).to_string()).unwrap();
-            assert_eq!(enlarged_media_message(&settings, &initial, &output).as_deref(), Some(expected));
+            assert_eq!(enlarged_media_message(&settings, &initial, &longer).as_deref(), Some(expected));
             assert!(enlarged_media_message(&settings, &initial, &initial).is_none());
+            assert!(enlarged_media_message(&settings, &initial, &wider).is_none(), "width is not compared");
         } // for active unit
     } // placement_enlargement_dimensions_and_notifications
 
@@ -2479,11 +2464,11 @@ mod tests {
         assert!(content_h > 500 * 96, "the roll grows past 500 in, content height {content_h} px");
     } // jacket2_marker_extends_paper_roll
 
-    // @brief Marker on a 10 in paper roll: the pieces are wider than the roll.
-    // The roll widens to the right for the widest piece, keeps both side margins,
-    // then grows in length until every piece is placed.
+    // @brief Marker on a 10 in paper roll: some pieces are wider than the roll.
+    // The roll and its contentRect keep their width; the wide pieces stay unplaced
+    // and the roll grows in length only.
     #[test]
-    fn jacket2_marker_widens_narrow_roll() {
+    fn jacket2_marker_keeps_narrow_roll_width() {
         let settings_json = serde_json::json!({
             "unit": "in",
             "mediaType": "paper",
@@ -2497,19 +2482,20 @@ mod tests {
             "layoutMode": "alongGrainline"
         }).to_string();
         let marker = process_jacket2_extended(&settings_json);
-        assert!(marker.unplaced_labels.is_empty(), "unplaced: {:?}", marker.unplaced_labels);
-        assert_eq!(placed_count(&marker), 208, "Marker: pieces x sizes");
+        assert!(!marker.unplaced_labels.is_empty(), "pieces wider than 9.25 in stay unplaced");
+        assert!(placed_count(&marker) < 208, "Marker: the wide pieces are left out");
         assert_canvas_holds_pieces(&marker);
 
         let doc = &marker.output_doc;
         let attr = |id: &str, name: &str| -> u32 {
             doc.get_attr_by_id(id, name).and_then(|v| v.parse().ok()).expect("frame attribute")
         };
-        let (content_x, content_w) = (attr("contentRect", "x"), attr("contentRect", "width"));
-        assert_eq!(content_x, 48, "contentRect keeps its x: the roll grows to the right");
-        assert!(content_w > 888, "the roll widens past its 9.25 in (888 px) content width, got {content_w} px");
-        assert_eq!(attr("backgroundRect", "width"), 48 + content_w + 24, "both side margins kept");
-    } // jacket2_marker_widens_narrow_roll
+        // 10 in = 960 px; 0.5 in and 0.25 in margins leave 9.25 in (888 px).
+        assert_eq!(attr("contentRect", "x"), 48, "contentRect keeps its x");
+        assert_eq!(attr("contentRect", "width"), 888, "contentRect keeps the 9.25 in width");
+        assert_eq!(attr("backgroundRect", "width"), 960, "the roll keeps its 10 in width");
+        assert_eq!(doc.root.attributes["width"], "960");
+    } // jacket2_marker_keeps_narrow_roll_width
 
     // @brief The DXF-ASTM warning dialog lists each piece once, by the name the user wrote.
     // Only Подборт hides its grainline in the fixture, so it is the only piece listed.
