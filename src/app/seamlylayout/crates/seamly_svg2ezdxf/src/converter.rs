@@ -367,10 +367,10 @@ fn convert_elements_to_modelspace(
         ));
     } // if marks need piece blocks
 
-    println!("[CONVERTER] convert_elements_to_modelspace: Starting conversion");
-    println!("  └─ Root element: '{}'", root.name);
-    println!("  └─ Children count: {}", root.children.len());
-    println!(
+    log::debug!("[CONVERTER] convert_elements_to_modelspace: Starting conversion");
+    log::debug!("  └─ Root element: '{}'", root.name);
+    log::debug!("  └─ Children count: {}", root.children.len());
+    log::debug!(
         "  └─ Modelspace entities before: {}",
         drawing.modelspace_entities.len()
     );
@@ -378,11 +378,11 @@ fn convert_elements_to_modelspace(
     // Recursively convert all elements.
     convert_element_tree(root, drawing, options, svg_height, None)?;
 
-    println!(
+    log::debug!(
         "  └─ Modelspace entities after: {}",
         drawing.modelspace_entities.len()
     );
-    println!("[CONVERTER] convert_elements_to_modelspace: Complete");
+    log::debug!("[CONVERTER] convert_elements_to_modelspace: Complete");
 
     Ok(())
 }
@@ -1132,44 +1132,44 @@ fn convert_path(
     options: &SvgToEzdxfOptions,
     svg_height: f64,
 ) -> Result<Option<Polyline>> {
-    eprintln!("      [convert_path] Starting PATH conversion");
+    log::debug!("      [convert_path] Starting PATH conversion");
 
-    eprintln!("      [convert_path] Step 1: Extracting path data");
+    log::debug!("      [convert_path] Step 1: Extracting path data");
     // Get path data from 'd' attribute.
     let path_data = element.attributes.get("d").ok_or_else(|| {
-        eprintln!("      [convert_path] ❌ FAILED: No 'd' attribute found");
+        log::debug!("      [convert_path] ❌ FAILED: No 'd' attribute found");
         crate::error::SvgToEzdxfError::Svg("Path element missing 'd' attribute".to_string())
     })?;
-    eprintln!("        • Path data: '{}'", path_data);
+    log::debug!("        • Path data: '{}'", path_data);
 
     if path_data.trim().is_empty() {
-        eprintln!("      [convert_path] ❌ FAILED: Empty path data");
+        log::debug!("      [convert_path] ❌ FAILED: Empty path data");
         return Ok(None);
     }
 
-    eprintln!("      [convert_path] Step 2: Parsing SVG path");
+    log::debug!("      [convert_path] Step 2: Parsing SVG path");
     // Parse SVG path using geometry crate.
     let svg_path = Path::parse_path_attribute(path_data).map_err(|e| {
-        eprintln!(
+        log::debug!(
             "      [convert_path] ❌ FAILED: Path parsing error: {:?}",
             e
         );
         crate::error::SvgToEzdxfError::Geometry(format!("Failed to parse path data: {:?}", e))
     })?;
-    eprintln!(
+    log::debug!(
         "        • Path parsed successfully, {} segments",
         svg_path.segments.len()
     );
 
-    eprintln!("      [convert_path] Step 3: Flattening path to polyline");
+    log::debug!("      [convert_path] Step 3: Flattening path to polyline");
     // Flatten path to points using tolerance.
     let tolerance = options.flatten_tolerance as f32;
-    eprintln!("        • Flatten tolerance: {}", tolerance);
+    log::debug!("        • Flatten tolerance: {}", tolerance);
     let flattened_points = svg_path.flatten(tolerance);
-    eprintln!("        • Flattened to {} points", flattened_points.len());
+    log::debug!("        • Flattened to {} points", flattened_points.len());
 
     if flattened_points.is_empty() {
-        eprintln!("      [convert_path] ❌ FAILED: Path flattened to empty point list");
+        log::debug!("      [convert_path] ❌ FAILED: Path flattened to empty point list");
         return Ok(None);
     }
 
@@ -1181,9 +1181,9 @@ fn convert_path(
         || (flattened_points.len() > 1
             && flattened_points.first().map(|p| (p.x, p.y))
                 == flattened_points.last().map(|p| (p.x, p.y)));
-    eprintln!("        • Path closed: {}", is_closed);
+    log::debug!("        • Path closed: {}", is_closed);
 
-    eprintln!(
+    log::debug!(
         "      [convert_path] Step 4: Converting points and applying coordinate transformation"
     );
     // Convert geometry::Point (f32) to entities::Point (f64) and apply Y-axis inversion.
@@ -1194,34 +1194,34 @@ fn convert_path(
             to_dxf(Point::new(p.x as f64, p.y as f64), options, svg_height)
         })
         .collect();
-    eprintln!("        • Converted {} vertices", vertices.len());
+    log::debug!("        • Converted {} vertices", vertices.len());
 
     // Remove duplicate consecutive points (can occur from flattening).
     vertices.dedup();
     if vertices.len() < 2 {
-        eprintln!(
+        log::debug!(
             "      [convert_path] ❌ FAILED: Path has less than 2 unique vertices after deduplication"
         );
         return Ok(None);
     }
-    eprintln!("        • After deduplication: {} vertices", vertices.len());
+    log::debug!("        • After deduplication: {} vertices", vertices.len());
 
-    eprintln!("      [convert_path] Step 5: Determining layer");
+    log::debug!("      [convert_path] Step 5: Determining layer");
     // Get layer name.
     let layer = map_svg_to_astm_layer(element).to_string();
-    eprintln!("        • Layer: '{}'", layer);
+    log::debug!("        • Layer: '{}'", layer);
 
-    eprintln!("      [convert_path] Step 6: Creating POLYLINE entity");
+    log::debug!("      [convert_path] Step 6: Creating POLYLINE entity");
     let polyline_entity = Polyline {
         layer: layer.clone(),
         vertices,
         closed: is_closed,
     };
-    eprintln!("        • POLYLINE entity created:");
-    eprintln!("          - Layer: '{}'", polyline_entity.layer);
-    eprintln!("          - Vertices: {}", polyline_entity.vertices.len());
-    eprintln!("          - Closed: {}", polyline_entity.closed);
-    eprintln!("      [convert_path] ✅ PATH conversion successful");
+    log::debug!("        • POLYLINE entity created:");
+    log::debug!("          - Layer: '{}'", polyline_entity.layer);
+    log::debug!("          - Vertices: {}", polyline_entity.vertices.len());
+    log::debug!("          - Closed: {}", polyline_entity.closed);
+    log::debug!("      [convert_path] ✅ PATH conversion successful");
 
     Ok(Some(polyline_entity))
 }
@@ -1273,52 +1273,52 @@ fn convert_polyline(
     svg_height: f64,
     parent_layer: Option<&str>,
 ) -> Result<Option<Polyline>> {
-    eprintln!("      [convert_polyline] Starting POLYLINE conversion");
+    log::debug!("      [convert_polyline] Starting POLYLINE conversion");
 
     // Get points attribute.
     let points_str = element.attributes.get("points").ok_or_else(|| {
-        eprintln!("      [convert_polyline] ❌ FAILED: No 'points' attribute found");
+        log::debug!("      [convert_polyline] ❌ FAILED: No 'points' attribute found");
         crate::error::SvgToEzdxfError::Svg(
             "Polyline element missing 'points' attribute".to_string(),
         )
     })?;
 
     if points_str.trim().is_empty() {
-        eprintln!("      [convert_polyline] ❌ FAILED: Empty points attribute");
+        log::debug!("      [convert_polyline] ❌ FAILED: Empty points attribute");
         return Ok(None);
     }
 
-    eprintln!("      [convert_polyline] Step 1: Parsing points attribute");
+    log::debug!("      [convert_polyline] Step 1: Parsing points attribute");
     let mut vertices = parse_points_attribute(points_str);
-    eprintln!("        • Parsed {} points", vertices.len());
+    log::debug!("        • Parsed {} points", vertices.len());
 
     if vertices.len() < 2 {
-        eprintln!("      [convert_polyline] ❌ FAILED: Polyline needs at least 2 points");
+        log::debug!("      [convert_polyline] ❌ FAILED: Polyline needs at least 2 points");
         return Ok(None);
     }
 
-    eprintln!("      [convert_polyline] Step 2: Applying coordinate transformation");
+    log::debug!("      [convert_polyline] Step 2: Applying coordinate transformation");
     // Apply Y-axis inversion if needed.
     vertices = vertices.iter().map(|p| to_dxf(*p, options, svg_height)).collect();
 
-    eprintln!("      [convert_polyline] Step 3: Determining layer");
+    log::debug!("      [convert_polyline] Step 3: Determining layer");
     let layer = parent_layer
         .map(|s| s.to_string())
         .unwrap_or_else(|| map_svg_to_astm_layer(element).to_string());
-    eprintln!("        • Layer: '{}'", layer);
+    log::debug!("        • Layer: '{}'", layer);
 
-    eprintln!("      [convert_polyline] Step 4: Creating POLYLINE entity");
+    log::debug!("      [convert_polyline] Step 4: Creating POLYLINE entity");
     // Polyline is never closed (use <polygon> for closed shapes).
     let polyline_entity = Polyline {
         layer,
         vertices,
         closed: false,
     };
-    eprintln!(
+    log::debug!(
         "        • POLYLINE entity created: {} vertices, closed: false",
         polyline_entity.vertices.len()
     );
-    eprintln!("      [convert_polyline] ✅ POLYLINE conversion successful");
+    log::debug!("      [convert_polyline] ✅ POLYLINE conversion successful");
 
     Ok(Some(polyline_entity))
 }
@@ -1335,29 +1335,29 @@ fn convert_polygon(
     svg_height: f64,
     parent_layer: Option<&str>,
 ) -> Result<Option<Polyline>> {
-    eprintln!("      [convert_polygon] Starting POLYGON conversion");
+    log::debug!("      [convert_polygon] Starting POLYGON conversion");
 
     // Get points attribute.
     let points_str = element.attributes.get("points").ok_or_else(|| {
-        eprintln!("      [convert_polygon] ❌ FAILED: No 'points' attribute found");
+        log::debug!("      [convert_polygon] ❌ FAILED: No 'points' attribute found");
         crate::error::SvgToEzdxfError::Svg("Polygon element missing 'points' attribute".to_string())
     })?;
 
     if points_str.trim().is_empty() {
-        eprintln!("      [convert_polygon] ❌ FAILED: Empty points attribute");
+        log::debug!("      [convert_polygon] ❌ FAILED: Empty points attribute");
         return Ok(None);
     }
 
-    eprintln!("      [convert_polygon] Step 1: Parsing points attribute");
+    log::debug!("      [convert_polygon] Step 1: Parsing points attribute");
     let mut vertices = parse_points_attribute(points_str);
-    eprintln!("        • Parsed {} points", vertices.len());
+    log::debug!("        • Parsed {} points", vertices.len());
 
     if vertices.len() < 3 {
-        eprintln!("      [convert_polygon] ❌ FAILED: Polygon needs at least 3 points");
+        log::debug!("      [convert_polygon] ❌ FAILED: Polygon needs at least 3 points");
         return Ok(None);
     }
 
-    eprintln!("      [convert_polygon] Step 2: Applying coordinate transformation");
+    log::debug!("      [convert_polygon] Step 2: Applying coordinate transformation");
     // Apply Y-axis inversion if needed.
     vertices = vertices.iter().map(|p| to_dxf(*p, options, svg_height)).collect();
 
@@ -1366,23 +1366,23 @@ fn convert_polygon(
         vertices.push(vertices[0]);
     }
 
-    eprintln!("      [convert_polygon] Step 3: Determining layer");
+    log::debug!("      [convert_polygon] Step 3: Determining layer");
     let layer = parent_layer
         .map(|s| s.to_string())
         .unwrap_or_else(|| map_svg_to_astm_layer(element).to_string());
-    eprintln!("        • Layer: '{}'", layer);
+    log::debug!("        • Layer: '{}'", layer);
 
-    eprintln!("      [convert_polygon] Step 4: Creating POLYLINE entity (closed)");
+    log::debug!("      [convert_polygon] Step 4: Creating POLYLINE entity (closed)");
     let polyline_entity = Polyline {
         layer,
         vertices,
         closed: true,
     };
-    eprintln!(
+    log::debug!(
         "        • POLYLINE entity created: {} vertices, closed: true",
         polyline_entity.vertices.len()
     );
-    eprintln!("      [convert_polygon] ✅ POLYGON conversion successful");
+    log::debug!("      [convert_polygon] ✅ POLYGON conversion successful");
 
     Ok(Some(polyline_entity))
 }
@@ -1399,7 +1399,7 @@ fn convert_rect(
     svg_height: f64,
     parent_layer: Option<&str>,
 ) -> Result<Option<Polyline>> {
-    eprintln!("      [convert_rect] Starting RECT conversion");
+    log::debug!("      [convert_rect] Starting RECT conversion");
 
     // Parse rect attributes.
     let x = parse_float_attr(element.attributes.get("x"), 0.0);
@@ -1407,17 +1407,17 @@ fn convert_rect(
     let width = parse_float_attr(element.attributes.get("width"), 0.0);
     let height = parse_float_attr(element.attributes.get("height"), 0.0);
 
-    eprintln!(
+    log::debug!(
         "        • Rect attributes: x={}, y={}, width={}, height={}",
         x, y, width, height
     );
 
     if width <= 0.0 || height <= 0.0 {
-        eprintln!("      [convert_rect] ❌ FAILED: Invalid width or height");
+        log::debug!("      [convert_rect] ❌ FAILED: Invalid width or height");
         return Ok(None);
     }
 
-    eprintln!("      [convert_rect] Step 1: Creating 4 vertices");
+    log::debug!("      [convert_rect] Step 1: Creating 4 vertices");
     // Create 4 vertices: top-left, top-right, bottom-right, bottom-left.
     let mut vertices = vec![
         Point::new(x, y),                  // top-left
@@ -1426,30 +1426,30 @@ fn convert_rect(
         Point::new(x, y + height),         // bottom-left
     ];
 
-    eprintln!("      [convert_rect] Step 2: Applying coordinate transformation");
+    log::debug!("      [convert_rect] Step 2: Applying coordinate transformation");
     // Apply Y-axis inversion if needed.
     vertices = vertices.iter().map(|p| to_dxf(*p, options, svg_height)).collect();
 
     // Close the rectangle (add first point at end).
     vertices.push(vertices[0]);
 
-    eprintln!("      [convert_rect] Step 3: Determining layer");
+    log::debug!("      [convert_rect] Step 3: Determining layer");
     let layer = parent_layer
         .map(|s| s.to_string())
         .unwrap_or_else(|| map_svg_to_astm_layer(element).to_string());
-    eprintln!("        • Layer: '{}'", layer);
+    log::debug!("        • Layer: '{}'", layer);
 
-    eprintln!("      [convert_rect] Step 4: Creating POLYLINE entity (closed)");
+    log::debug!("      [convert_rect] Step 4: Creating POLYLINE entity (closed)");
     let polyline_entity = Polyline {
         layer,
         vertices,
         closed: true,
     };
-    eprintln!(
+    log::debug!(
         "        • POLYLINE entity created: {} vertices, closed: true",
         polyline_entity.vertices.len()
     );
-    eprintln!("      [convert_rect] ✅ RECT conversion successful");
+    log::debug!("      [convert_rect] ✅ RECT conversion successful");
 
     Ok(Some(polyline_entity))
 }
@@ -1467,7 +1467,7 @@ fn convert_ellipse(
     svg_height: f64,
     parent_layer: Option<&str>,
 ) -> Result<Option<Box<dyn Entity>>> {
-    eprintln!("      [convert_ellipse] Starting ELLIPSE conversion");
+    log::debug!("      [convert_ellipse] Starting ELLIPSE conversion");
 
     // Parse ellipse attributes.
     let cx = parse_float_attr(element.attributes.get("cx"), 0.0);
@@ -1475,13 +1475,13 @@ fn convert_ellipse(
     let rx = parse_float_attr(element.attributes.get("rx"), 0.0);
     let ry = parse_float_attr(element.attributes.get("ry"), 0.0);
 
-    eprintln!(
+    log::debug!(
         "        • Ellipse attributes: cx={}, cy={}, rx={}, ry={}",
         cx, cy, rx, ry
     );
 
     if rx <= 0.0 || ry <= 0.0 {
-        eprintln!("      [convert_ellipse] ❌ FAILED: Invalid rx or ry");
+        log::debug!("      [convert_ellipse] ❌ FAILED: Invalid rx or ry");
         return Ok(None);
     }
 
@@ -1492,7 +1492,7 @@ fn convert_ellipse(
 
     // If rx == ry, convert to CIRCLE.
     if (rx - ry).abs() < 1e-6 {
-        eprintln!("      [convert_ellipse] Step 1: Converting to CIRCLE (rx == ry)");
+        log::debug!("      [convert_ellipse] Step 1: Converting to CIRCLE (rx == ry)");
         let center = to_dxf(Point::new(cx, cy), options, svg_height);
 
         let circle_entity = Circle {
@@ -1500,16 +1500,16 @@ fn convert_ellipse(
             center,
             radius: rx * options.unit_scale,
         };
-        eprintln!(
+        log::debug!(
             "        • CIRCLE entity created: center=({}, {}), radius={}",
             center.x, center.y, rx
         );
-        eprintln!("      [convert_ellipse] ✅ ELLIPSE conversion successful (as CIRCLE)");
+        log::debug!("      [convert_ellipse] ✅ ELLIPSE conversion successful (as CIRCLE)");
 
         Ok(Some(Box::new(circle_entity)))
     } else {
         // Otherwise, approximate as POLYLINE with multiple points.
-        eprintln!("      [convert_ellipse] Step 1: Converting to POLYLINE (rx != ry)");
+        log::debug!("      [convert_ellipse] Step 1: Converting to POLYLINE (rx != ry)");
 
         // Generate points around ellipse (approximate with 32 points for smooth curve).
         const NUM_POINTS: usize = 32;
@@ -1522,29 +1522,29 @@ fn convert_ellipse(
             vertices.push(Point::new(x, y));
         }
 
-        eprintln!(
+        log::debug!(
             "        • Generated {} points for ellipse approximation",
             vertices.len()
         );
 
-        eprintln!("      [convert_ellipse] Step 2: Applying coordinate transformation");
+        log::debug!("      [convert_ellipse] Step 2: Applying coordinate transformation");
         // Apply Y-axis inversion if needed.
         vertices = vertices.iter().map(|p| to_dxf(*p, options, svg_height)).collect();
 
         // Close the ellipse.
         vertices.push(vertices[0]);
 
-        eprintln!("      [convert_ellipse] Step 3: Creating POLYLINE entity (closed)");
+        log::debug!("      [convert_ellipse] Step 3: Creating POLYLINE entity (closed)");
         let polyline_entity = Polyline {
             layer,
             vertices,
             closed: true,
         };
-        eprintln!(
+        log::debug!(
             "        • POLYLINE entity created: {} vertices, closed: true",
             polyline_entity.vertices.len()
         );
-        eprintln!("      [convert_ellipse] ✅ ELLIPSE conversion successful (as POLYLINE)");
+        log::debug!("      [convert_ellipse] ✅ ELLIPSE conversion successful (as POLYLINE)");
 
         Ok(Some(Box::new(polyline_entity)))
     }
