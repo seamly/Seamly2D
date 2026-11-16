@@ -58,6 +58,12 @@ const TILE_SIZES_DATA: &[(&str, f64, f64, f64, f64)] = &[
     ("B6", 4.92, 6.93, 125.0, 176.0),
 ]; // TILE_SIZES_DATA
 
+// @brief True when `name` is a tile size of the catalog or `CUSTOM_TILE_SIZE`.
+// @param name Tile size name as written in the settings JSON, e.g. "Letter".
+pub fn is_tile_size_name(name: &str) -> bool {
+    name == CUSTOM_TILE_SIZE || TILE_SIZES_DATA.iter().any(|&(entry, ..)| entry == name)
+} // fn is_tile_size_name
+
 // ---------------------------------------------------------------------------
 // measurement_to_px
 // ---------------------------------------------------------------------------
