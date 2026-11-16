@@ -2,6 +2,16 @@
 
 ## Current status
 
+### 2026-11-15 — Piece mode Details > Export Pieces (Seamly2D.73)
+
+- `export_pieces_action` (E, P) below Copy Piece; `export_pieces_tool_button` below `copy_piece_tool_button`; toolbox +48 px. Piece mode only.
+- `MainWindow::createPiecesSvg()`: one function for Layout mode and Export Pieces; Layout mode messages verbatim. Opening-pattern guard removed.
+- `exportPiecesToSvgFile()`: `handleArrowTool(true)`; save dialog in `getLayoutPath()`; adds `.svg` when no suffix; write error message box.
+- New `layout_handoff/handoff_svg_file.*`: `pieces_svg_file_name()`, `write_svg_file()` (QSaveFile, UTF-8). New `TST_HandoffSvgFile`.
+- Checked: scratch harness `TST_HandoffSvgFile` 7/7 pass; `mainwindow.cpp` compiles (no new warnings). `nmake check` not run.
+- Built in worktree `export-pieces`; merged `--no-ff` with no skip-ci token (`.pro`, `.pri` changed); branch and worktree deleted.
+- Open: Seamly2D.73.5 user check and the Qt suites with the next `local_build_msi.ps1`.
+
 ### 2026-11-15 — Preferences > Paths: SeamlyLayout row removed (Seamly2D.200)
 
 - `preferencespathpage.cpp`: row 10 "SeamlyLayout Application" removed from `initializeTable()`, `Apply()`, `defaultPath()`, `editPath()`. Table has 10 rows.
@@ -47,16 +57,6 @@
 - Checked: `ctest` debug 9/9; `cargo test --workspace` 717 pass. Built in worktree `canvas-svg`; merged `--no-ff` with no skip-ci token (CMakeLists changed); branch and worktree deleted.
 - Docs: README "Canvas display", DECISIONS record, CXXQT_BRIDGE, CODEBASE_INDEX, rules (architecture, svg-processing, dependencies), `AGENT_CHECKLIST.md` §57 and OPEN row.
 - Open: Layout.Y10.1 installed-app check with the next MSI (§57). The WebEngine tests run first on Linux and macOS in CI.
-
-### 2026-11-15 — Fold line pieces go first on every tab (Layout.Y9)
-
-- Cause: the order search (hill climbing) moved left-edge pieces after other pieces. Any layout could break; the Base Size tab was right by chance.
-- `maxrects_order_search.rs` `PackJob::left_edge_first`: every packed order puts left-edge pieces first; each group keeps its order. Start orders and hill climbing use it.
-- Fold line pieces stack down the left edge from the top; the media gets longer when it must.
-- Tests: `left_edge_pieces_are_placed_first`, `jacket2_size_tabs_place_fold_line_pieces_first` (26 sizes), `jacket2_marker_and_nested_place_fold_line_pieces_first`. The first two fail without the fix.
-- Checked: `cargo test --workspace` 717 pass; `ctest` debug 8/8. Built in worktree `fold-sizes`; merged `--no-ff`; branch and worktree deleted.
-- Docs: PROCESS LAYOUT WORKFLOW (piece-order search), CREATE_LAYOUT_WORKFLOW, `AGENT_CHECKLIST.md` new §56 and OPEN row.
-- Open: Layout.Y9.1 installed-app check with the next MSI (§56).
 
 ## Decisions to retain
 
