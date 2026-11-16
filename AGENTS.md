@@ -1,19 +1,13 @@
 # AGENTS.md
 
-## Active CLI worktree — user instruction, 2026-11-16
+## CLI handoff — user instruction, 2026-11-16
 
-Until the user ends the isolated CLI work:
-
-- Make all CLI implementation, test, and documentation changes in `C:\Users\susan\Projects\seamly2d-cli-1`.
-- Use `run-seamlyLayout` in that worktree.
-- Verify `git rev-parse --show-toplevel` and `git branch --show-current` before every change.
-- Do not edit files in `C:\Users\susan\Projects\Seamly2D-private` during CLI work.
-- The main checkout remains detached at `cd044d9b09`; the CLI checkout holds `run-seamlyLayout`.
+- Continue project work in the main Seamly2D-private worktree on run-seamlyLayout.
+- The CLI worktree remains detached at 7f4a5c4173 as a reference.
 - Both folders share Git history. Do not duplicate commits or merge folders.
-- At the final handoff, release the branch from the CLI checkout and check it out in the main folder.
-- Do not move the branch checkout back or push without the user's request.
-
-These instructions override the generic working-directory and branch workflow below for ongoing CLI work.
+- Do not return work to the CLI worktree without the user's request.
+- Preserve the three uncommitted documentation edits restored during the handoff.
+- Do not push without the user's request.
 
 ## Communication Style
 

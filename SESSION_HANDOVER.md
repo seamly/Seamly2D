@@ -1,5 +1,19 @@
 # Session handover
 
+## 2026-11-16 — Returned to the main worktree
+
+- The user ended the isolated CLI work and requested a return to Seamly2D-private.
+- The main worktree now checks out run-seamlyLayout with all CLI commits through 7f4a5c4173.
+- The CLI worktree remains detached at 7f4a5c4173 as a reference.
+- Both worktrees share one repository. The handoff required no merge or duplicate commits.
+- Restored three pre-existing documentation edits without conflicts.
+- Verified the two TODO files byte for byte against the backup.
+- Verified TODO_COMPLETED.md contains the original edits and the new CLI completion records.
+- Kept the safety stash and an external backup of the three files.
+- Continue project work in the main worktree. No push was requested.
+- The source files did not change during the handoff. The recorded CLI test results still apply.
+
+
 ## 2026-11-16 — S2D.78 multisize base size
 
 - Implemented --basesize in the CLI worktree on run-seamlyLayout.
