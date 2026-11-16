@@ -19,7 +19,7 @@
 | SeamlyLayout Rust | `cargo test --workspace` | 734 pass, 0 fail |
 | CLI tester Rust | `cargo test` in `src\test\CliTestApp` | 15 pass, 0 fail |
 | CLI regression suite | `src\test\CliTest\test_cli_layout_export.ps1` | 130 cases: 130 pass, 0 fail, 0 skip (full run with `-RichmondRoot`) |
-| Independent import check | `test_cli_import_check.py cli_test_report.json` (ezdxf 1.4.4, pypdf 6.19.0) | 30 DXF/PDF files of the full run: 0 fail; ezdxf auditor clean |
+| Independent import check | `test_cli_import_check.py cli_test_report.json --inkscape <inkscape.com>` (ezdxf 1.4.4, pypdf 6.19.0, Inkscape 1.4.4) | 59 DXF, PDF, SVG and HP-GL files of the full run: 0 fail. ezdxf auditor clean; pypdf reads every page; Inkscape imports every file with paths (HP-GL: 1359 paths) |
 | Richmond pattern end to end | suite `-RichmondRoot` with the pattern and measurements from git history | 6 `richmond-pattern-*` cases pass (12 pieces, 36 in, AC1012, tiled Letter) |
 | Python headless runner | `test_headless_export.py ... --seamly2d ... --pattern male_shirt.sm2d` | all checks pass (47) |
 | Python pattern input runner | `test_pattern_input_status.py` | all checks pass |
@@ -104,6 +104,7 @@ See `CLI_1_PLAN.md` D1–D16. Each has a case above or a unit test.
 - CI (`ci.yml`): needs a push; the task forbids push. `act` (local Actions runner) is not installed and needs Docker.
 - MSI package: built and its tests passed; not installed on this machine. The install-folder lookup ran from a copy of the install layout.
 - Richmond: the `.sm2d` and its measurements are not in the fixture folder; git history has them (`d3197ee973^:test-seamly-layout-input/`). Extracted to a scratch folder and tested end to end; not added back to the repository (personal measurements).
-- CAD and cutter import (CLI.2.2): ezdxf and pypdf open every file clean. An import into the target CAD and cutter software needs a person with that software.
+- CAD and cutter import (CLI.2.2): ezdxf, pypdf and Inkscape 1.4.4 open every DXF, PDF, SVG and HP-GL file. No CAD or cutter program is installed (checked Program Files for AutoCAD, LibreCAD, QCAD, FreeCAD, CLO, Optitex, Gerber, Lectra). PS and EPS import into Inkscape needs Ghostscript, which is not installed.
+- Inkscape 1.4.4 for Windows ships its HP-GL reader without pyparsing; the check adds a copy of pyparsing for that reader only.
 - `foldLinesOnLeftEdge` and `selvedgeWidth`: accepted and validated; their placement effects are covered by SeamlyLayout Rust tests, not by file checks here.
 - Tester window clicks were not automated; Run calls the same function as `--batch`.

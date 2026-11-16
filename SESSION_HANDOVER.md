@@ -11,7 +11,7 @@
 - Decisions (CLI.3.1, CLI.3.7) are recorded in `TODO_COMPLETED.md`; Sue may rename flags.
 - Tests: CLI suite 130/130 (with `-RichmondRoot`); import check 30 files/0 fail; `cargo test --workspace` 734/0; `TST_VCommandLine` 29; `ctest` 9/9; Python headless runner pass.
 - Richmond pattern and `2025-06-08-Sue.smis`: `git show d3197ee973^:test-seamly-layout-input/<file>`; not re-added (personal measurements).
-- Open: CLI.2.2 import into CAD/cutter software (needs a person); Linux/macOS (no WSL, no Docker, no Mac); CI (no push).
+- Import check with Inkscape 1.4.4, ezdxf, pypdf: 59 files, 0 fail. Open: a CAD program and a cutter (none installed); Linux/macOS (no WSL, no Docker, no Mac); CI (no push).
 - Next: Sue reviews and merges `feature/cli-1` (not pushed).
 
 ### 2026-11-16 — CLI.1 audit and repair (feature/cli-1)

@@ -233,7 +233,7 @@ seamlylayout --info --settings roll.json pieces.svg
   It runs Seamly2D and SeamlyLayout for every option group and checks exit codes, messages and
   file structure (SVG size and pieces, PDF page size and count, DXF version, PNG pixels).
   The JSON report goes to `build\cli-tests\<stamp>\cli_test_report.json`.
-- Independent import: `python src\test\CliTest\test_cli_import_check.py <cli_test_report.json>` opens each DXF with ezdxf and each PDF with pypdf (`pip install ezdxf pypdf`).
+- Independent import: `python src\test\CliTest\test_cli_import_check.py <cli_test_report.json> [--inkscape <inkscape.com>]` opens each DXF with ezdxf and each PDF with pypdf (`pip install ezdxf pypdf pyparsing`), and with `--inkscape` imports each DXF, PDF, SVG and HP-GL file into Inkscape.
 - Richmond pattern: add `-RichmondRoot <folder>` with `richmond-shirt_v1_v061-test.sm2d` and `2025-06-08-Sue.smis` (from git history).
 - Interactive: `src\test\CliTestApp` (Rust, Iced). See its `README.md`.
 - Older runners: `src\test\SeamlyLayoutTest\test_headless_export.py`,
