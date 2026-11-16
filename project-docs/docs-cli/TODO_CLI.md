@@ -22,15 +22,22 @@ These tasks are not numbered in the order they should be implemented -- analyze 
 - [x] CLI.1.4 Wait for SeamlyLayout and propagate stderr/status. Incomplete layouts fail before writing partial output.
 - [ ] CLI.1.5 Tests: seamly2d CLI option parsing (extend `tst_vcommandline`), seamlyLayout headless-export tests (Rust/Qt side), and an end-to-end check with the richmond test pattern
 - [x] CLI.1.6 Document workflow examples, options, statuses, and `--help` behavior.
-- [ ] CLI.1.7 Inventory all options and build a test matrix: expected behavior, required companions (e.g. `--basename` enabling export mode), valid values
-- [ ] CLI.1.8 Exercise each option against the richmond test pattern (all export formats, gradation size/height, page options, `--text2paths`, measurement overrides, etc.) and record which are broken, ignored, or misdocumented
-- [ ] CLI.1.9 Fix the broken/ignored options; make error messages reach the console reliably (the GUI-subsystem exe detaches from the console — evaluate `AttachConsole`/subsystem handling on Windows so `--help` and errors print without redirection)
+- [ ] CLI.1.7 Inventory all options and build a test matrix: expected behavior, required companions (e.g. `--basename` enabling export mode), valid values. The matrix should organize the options from the Layout Settings dialog in order, starting with the top option 'Layout Mode' and ending with the last option 'Margins'.
+ series of .ps1 files to exercise these options, using test-seamly-layout\patterns\jacket2_40-146.sm2d to exercise multisize options and test-seamly-layout\patterns\male_shirt.sm2d and test-seamly-layout\patterns\trousers.sm2d to exercise individual size options. Create PDF, PDF (tiled), DXF (R13), and SVG exports. Include settings for Paper > Tiled, Paper > Roll, Fabric (folded) with Grainline 'With Nap'. 
+- [ ] CLI.1.9 Create an interactive menu-driven app in Rust/Ice (Qt not required) that will allow us to test the CLI thoroughly. The app generates a command line string then executes it to create the output file(s), based on user input.
+  - [ ] The first dialog allows selection of pattern file, measurement file, layout settings, and output file basename (using a file picker with the pattern's basename and application preferences' layout directory as default). If there are pieces wider than the media then generate the layout with 'Split the pieces' selected by default without asking the user.
+  - [ ] For multisize pattern files a second dialog appears to allow selection of Layout using a 'Layout' dropddown that lists all Layouts possible based on layout settings (e.g. the list includes Marker, Nested, Baseline, and all sizes. But if pieces are split then 'Marker' and 'Nested' are disabled). 
+  - [ ] A final dialog appears to allow export format selection using a 'Export format' dropdown that lists all formats possible based on the settings and layout selected (e.g. if paper type='PDF (tiled)' then export 'PDF (Tiled)' is enabled, if pieces are split then DXF options are disabled, etc.)
+  - [ ] For the layout selected, build a command line string for each material using the input data, where the material's layout file is '<basename>_<material>_<YYMMDDHHMM>.<ext>' 
+  - [ ] Execute the command line string(s) to generate the layout file(s) and archive these files to a .zip file '<basename>_<YYMMDDHHMM>.zip'.
+- [ ] CLI.1.8 Exercise each option against the jacket 2 test pattern (all export formats, gradation size/height, page options, `--text2paths`, measurement overrides, etc.) and record which are broken, ignored, or misdocumented
+- [ ] CLI.1.10 Fix the broken/ignored options; make error messages reach the console reliably (the GUI-subsystem exe detaches from the console — evaluate `AttachConsole`/subsystem handling on Windows so `--help` and errors print without redirection)
   - Seamly2D and SeamlyMe log cleanup now uses absolute log paths without changing the launch directory.
   - Added relative pattern, measurement, override, and missing-file regression checks. Build and runtime verification remain pending at the user's request.
   - `VCommandLine::showHelp()` prints help to the console when stdout or stderr has a handle. With no console it shows a help dialog (from upstream). Not built yet.
-- [ ] CLI.1.10 Consider case-insensitive or consistently lowercase option aliases (keeping the existing names working for compatibility)
-- [ ] CLI.1.11 Unit tests: extend `tst_vcommandline` to cover every option and the failure modes found
-- [ ] CLI.1.12 Update `--help` text and repo docs with the verified behavior
+- [ ] CLI.1.11 Consider case-insensitive or consistently lowercase option aliases (keeping the existing names working for compatibility)
+- [ ] CLI.1.12 Unit tests: extend `tst_vcommandline` to cover every option and the failure modes found
+- [ ] CLI.1.13 Update `--help` text and repo docs with the verified behavior
 
 ## Task CLI.2 - run seamly2d/seamlyme/seamlylayout from the command line with an input .sm2d file and an input measurement file to create exports for each of seamlyLayout's export options; validate outputs to validate the CLI parameters
 

@@ -2213,4 +2213,6 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 
 ### [ ] Layout.Y111 - foldlines - Improve the foldline processing so that foldlines can be placed along the left edge for paper and for fabric. To do this, move the 'Place the foldlines along the left edge' checkbox on the line below the 'Media type' label and radio buttons, above the 'Fabric' section. Enable the 'Place the foldlines...' checkbox for either media. When this checkbox is selected then place the pieces along the media's left edge, extending the media's total length as needed, then place the remaining pieces.
 
-### [ ] Layout.Y10 - Large patterns: display SVGs over the 2 MB `data:` URL limit in both canvases. jacket2 (16 pieces): Fabric graded pieces, Marker and Nested layouts did not display.
+### [x] Layout.Y10 - Large patterns: display SVGs over the 2 MB `data:` URL limit in both canvases. jacket2 (16 pieces): Fabric graded pieces, Marker and Nested layouts did not display.
+
+### [x] Task Seamly2D.71 - Implement - Piece Mode - Foldline processing, graphic and text
