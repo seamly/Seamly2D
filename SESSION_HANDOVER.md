@@ -2,6 +2,18 @@
 
 ## Current status
 
+### 2026-11-15 — CLI.1 audit and repair (feature/cli-1)
+
+- Branch `feature/cli-1`, worktree `C:\Users\susan\Projects\seamly2d-cli-1`. Plan: `CLI_1_PLAN.md` (D1–D12, tasks 1–12). Results: `CLI_1_TEST_RESULTS.md`.
+- Done, built, unit-tested: plan tasks 2–8. New Seamly2D options `--layout-material`, `--layout-view`, `--layout-oversize`, `--layout-info`; SeamlyLayout `--material`, `--view`, `--oversize`, `--info`.
+- Rust: `layout_tiling::validate_settings_json` (strict settings check); `cxxqt_bridge/src/export_rules.rs` (format rules, `--info` JSON); bridge invokables `settingsJsonProblems`, `exportFormatProblem`, `layoutInfoJson`, `incompleteLayoutReport`.
+- Headless: drains the tab queue, selects material and view, enforces Export menu format rules, removes old/partial output.
+- Seamly2D: errors print after the console attaches; multisize CLI hands off every size unless `--gsize`/`--gheight`; layout modes keep stdout for the result (INFO lines go to the log only).
+- Checked: `Seamly2DTests` 0 failed (`TST_VCommandLine` 24 pass); `ctest --preset release` 9/9; `cargo test --workspace` see results file.
+- Build: in-source qmake + jom (`-config release CONFIG+=deferDeploy`), SeamlyLayout `cmake --preset release`. Scripts in the session scratchpad; `local_build_msi.ps1` not run.
+- Fixtures: read-only from `C:\Users\susan\Projects\Seamly2D-private\test-seamly-layout`. No Richmond `.sm2d`; only `cxxqt_bridge/test_data/richmond-shirt-handoff_pieces.svg`.
+- Next: commit; PowerShell suite `src/test/CliTest/`; Iced app `src/test/CliTestApp/`; option matrix; docs.
+
 ### 2026-11-15 — Piece mode Details > Export Pieces (Seamly2D.73)
 
 - `export_pieces_action` (E, P) below Copy Piece; `export_pieces_tool_button` below `copy_piece_tool_button`; toolbox +48 px. Piece mode only.
@@ -46,17 +58,6 @@
 - Checked: `cargo test --workspace` 719 pass; `ctest` debug 9/9. Built in worktree `fold-media`; merged `--no-ff`; branch and worktree deleted.
 - Docs: SETTINGS_WORKFLOW, CREATE_LAYOUT_WORKFLOW, PROCESS LAYOUT WORKFLOW, SVG-DATA-ATTRIBUTES, `AGENT_CHECKLIST.md` §21, new §58 and OPEN row; §54 and its row removed.
 - Open: Layout.Y111.1 installed-app check with the next MSI (§58).
-
-### 2026-11-15 — Large patterns display in both canvases (Layout.Y10)
-
-- Cause: jacket2 resaved with 16 pieces; real handoff 2,024,522 chars. Fabric all-sizes, Marker and Nested SVGs went into `loadHtml()` `data:` URLs over Chromium's 2 MB limit; the load failed with no error.
-- New `qt_frontend/src/CanvasSvgSchemeHandler`: serves each canvas SVG from memory at `seamly-canvas://<canvas>/<n>.svg`. Scheme registered before `QApplication`; handler on the default profile; QML singleton.
-- `SvgCanvas.qml`: `canvasName` (`input`, `layout`); an `<img>` loads the scheme URL; "Cannot display this SVG." when `naturalWidth` is 0.
-- CMake: `Qt6::WebEngineCore`; new `CanvasSvgSchemeHandlerTests` (10 tests; offscreen, no sandbox, no GPU).
-- `webEngine_displaysSvgOverDataUrlLimit` (3 MiB SVG) fails with the old `data:` URL path.
-- Checked: `ctest` debug 9/9; `cargo test --workspace` 717 pass. Built in worktree `canvas-svg`; merged `--no-ff` with no skip-ci token (CMakeLists changed); branch and worktree deleted.
-- Docs: README "Canvas display", DECISIONS record, CXXQT_BRIDGE, CODEBASE_INDEX, rules (architecture, svg-processing, dependencies), `AGENT_CHECKLIST.md` §57 and OPEN row.
-- Open: Layout.Y10.1 installed-app check with the next MSI (§57). The WebEngine tests run first on Linux and macOS in CI.
 
 ## Decisions to retain
 
