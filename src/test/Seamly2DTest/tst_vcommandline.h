@@ -71,6 +71,7 @@ private slots:
     void LayoutExportOptionsAppearInHelp();
     void HelpDescribesLimitsAndRemovedBasename();
     void HelpDialogClosesWithoutExiting();
+    void HelpDialogFiltersAndResizesColumns();
     void LayoutExportUsesDefaultSvgFormat();
     void LayoutExportRequiresOutput();
     void LayoutExportRequiresOneInput();

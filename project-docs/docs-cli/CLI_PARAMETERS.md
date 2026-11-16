@@ -8,9 +8,9 @@ Usage: `seamly2d [options] filename`
 
 ## Help menu
 
-Select **Help > Command line options** to open the scrollable, read-only option list.
-The window uses the current parser descriptions and includes limits, removed options, and exit codes.
-Resize the window or use its scroll bars to read the full list.
+Select **Help > Command line options** to open the read-only option tables.
+The window uses the application font and colors. Tabs separate options, limits, exit codes, and removed options.
+Drag column boundaries to adjust their widths. Use the filter to find matching options and descriptions.
 Select **Close** to return to the pattern without changing the command line mode.
 The same information appears with `--help`.
 

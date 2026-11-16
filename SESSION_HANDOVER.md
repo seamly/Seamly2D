@@ -1,5 +1,14 @@
 # Session handover
 
+## 2026-11-16 — Command line help tables
+
+- Replaced the console-style help window with native Qt tables that use the parent window's font and palette.
+- Added adjustable columns, filtering, sorting, and tabs for options, limits, exit codes, and removed options.
+- Windows Qt 6.11.3 build passed. All 40 Qt suites passed: 32629 checks, zero failures.
+- Tests cover font and palette inheritance, registered descriptions, filtering, column resizing, and closing without exiting.
+- The user stopped computer control before the visual check. Visual verification remains pending.
+- Merged `task-command-line-help-table` locally into `run-seamlyLayout` at the user's request. No push.
+
 ## 2026-11-16 — CLI feature merged locally
 
 - Merged `feature/cli-1` through `fa4e0e47ad` into `run-seamlyLayout` at the user's request.

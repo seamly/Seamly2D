@@ -1,5 +1,12 @@
 # COMPLETED — Tagged SVG Handoff to SeamlyLayout
 
+## Command line help tables — 2026-11-16
+
+- [x] Match the Variables dialog with native tables, application font, and application colors.
+- [x] Add adjustable columns, filtering, sorting, and separate reference tabs.
+- [x] Verify the Windows build and all 40 Qt suites with zero failures.
+- Visual verification remains pending after the user stopped computer control.
+
 ## CLI help menu — 2026-11-16
 
 - [x] Add **Help > Command line options** from the `feature/cli-1` parser.
