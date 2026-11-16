@@ -98,6 +98,12 @@ See `CLI_1_PLAN.md` D1–D16. Each has a case above or a unit test.
 - Done on the same branch: `--layout-<name>` flags, `--layout-no-packing`, `--text2paths`. Decisions in `TODO_COMPLETED.md` (CLI.3.1, CLI.3.7).
 - The MSI build ran before the flags; the flags changed no `.pro`, `.pri`, CMake or packaging file.
 
+## Scope of the open items
+
+- §13 lists no CAD import and no Linux or macOS run. §9 asks to "identify any platform-specific verification gaps": they are listed below.
+- CAD and cutter import is CLI.2.2, a step of task CLI.2, not of CLI.1.
+- Not done on purpose: installing WSL, Docker or CAD programs, or running downloaded CAD binaries. Each changes the machine outside the worktree and needs Sue's approval.
+
 ## Gaps
 
 - Linux and macOS: no host. Tried: `wsl.exe -l` (WSL not installed), `docker` (not installed), no macOS machine. Installing WSL needs an elevated prompt and a restart; this session is not elevated (`net session` fails), and a system install needs Sue. Console attach is Windows-only code.
