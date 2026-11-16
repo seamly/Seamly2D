@@ -18,8 +18,8 @@
 | SeamlyLayout Qt tests | `ctest --preset release` | 9/9 pass |
 | SeamlyLayout Rust | `cargo test --workspace` | 734 pass, 0 fail |
 | CLI tester Rust | `cargo test` in `src\test\CliTestApp` | 15 pass, 0 fail |
-| CLI regression suite | `src\test\CliTest\test_cli_layout_export.ps1` | 124 cases: 124 pass, 0 fail, 0 skip (full run, after the direct flags) |
-| Independent import check | `test_cli_import_check.py cli_test_report.json` (ezdxf 1.4.4, pypdf 6.19.0) | 27 DXF/PDF files of the full run + 5 Richmond files: 0 fail; ezdxf auditor clean |
+| CLI regression suite | `src\test\CliTest\test_cli_layout_export.ps1` | 130 cases: 130 pass, 0 fail, 0 skip (full run with `-RichmondRoot`) |
+| Independent import check | `test_cli_import_check.py cli_test_report.json` (ezdxf 1.4.4, pypdf 6.19.0) | 30 DXF/PDF files of the full run: 0 fail; ezdxf auditor clean |
 | Richmond pattern end to end | suite `-RichmondRoot` with the pattern and measurements from git history | 6 `richmond-pattern-*` cases pass (12 pieces, 36 in, AC1012, tiled Letter) |
 | Python headless runner | `test_headless_export.py ... --seamly2d ... --pattern male_shirt.sm2d` | all checks pass (47) |
 | Python pattern input runner | `test_pattern_input_status.py` | all checks pass |
