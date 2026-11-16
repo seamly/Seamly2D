@@ -249,7 +249,8 @@ private slots:
     void showDraftMode(bool checked);
     void showPieceMode(bool checked);
     void showLayoutMode(bool checked);
-    bool exportPiecesToSeamlyLayout();
+    bool exportPiecesToSeamlyLayout(const QString& pieces_svg);
+    void exportPiecesToSvgFile();
 
     void New();
     bool SaveAs();
@@ -455,6 +456,7 @@ private:
     bool               recalculateAtSize(int size, int height);
     QHash<quint32, VPiece> currentLayoutPieces() const;
     bool               prepareMultisizePieceLists();
+    QString            createPiecesSvg();
     bool               measurementFileUnit(Unit &unit) const override;
     void               checkRequiredMeasurements(const MeasurementDoc *m);
     bool               isSeamlyLayoutRunning() const;
