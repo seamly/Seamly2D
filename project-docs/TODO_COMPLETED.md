@@ -2216,3 +2216,20 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 ### [x] Layout.Y10 - Large patterns: display SVGs over the 2 MB `data:` URL limit in both canvases. jacket2 (16 pieces): Fabric graded pieces, Marker and Nested layouts did not display.
 
 ### [x] Task Seamly2D.71 - Implement - Piece Mode - Foldline processing, graphic and text
+## [x] Task CLI.1 - Audit & fix the CLI parameters so that each option works
+
+Branch `feature/cli-1`. Plan `CLI_1_PLAN.md`, matrix `CLI_1_OPTION_MATRIX.md`, results `CLI_1_TEST_RESULTS.md`.
+
+- [x] CLI.1.1 `--layout-export`; `paths/seamlyLayoutApp`; handoff through stdin, no intermediate file.
+- [x] CLI.1.2 Headless SeamlyLayout: file or stdin, layout of every material and view, export, status.
+- [x] CLI.1.3 Forward format, SVG text mode, output, settings, export options, material, view, oversize, info.
+- [x] CLI.1.4 Wait for SeamlyLayout; forward stdout and stderr; refuse unplaced pieces; keep or remove output files safely.
+- [x] CLI.1.5 Tests: `TST_VCommandLine`, `StartupOptionsTests`, Rust `settings_validation` and `export_rules`, PowerShell suite; Richmond handoff end to end through SeamlyLayout (the Richmond `.sm2d` is not in the fixtures: CLI.2.1).
+- [x] CLI.1.6 Workflow examples, options, statuses and `--help` in `CLI_PARAMETERS.md`.
+- [x] CLI.1.7 Option matrix in Layout Settings dialog order: `CLI_1_OPTION_MATRIX.md`.
+- [x] CLI.1.8 Every option exercised on jacket2, male_shirt and trousers; defects D1-D16 in `CLI_1_PLAN.md`.
+- [x] CLI.1.9 Rust/Iced tester `src/test/CliTestApp` (inputs, layout, format, per-material commands, ZIP; `--batch`).
+- [x] CLI.1.10 Broken and ignored options fixed or removed; console attach before every CLI message.
+- [x] CLI.1.11 Option names are lowercase kebab-case already; no aliases needed (decision in `CLI_1_PLAN.md`).
+- [x] CLI.1.12 `TST_VCommandLine` covers every option and the failure modes.
+- [x] CLI.1.13 `--help` text and `CLI_PARAMETERS.md` describe the verified behavior.

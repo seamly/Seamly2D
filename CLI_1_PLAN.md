@@ -1,44 +1,51 @@
 # CLI.1 Implementation Plan
 
-Branch `feature/cli-1`. Dependency order. A box is checked only after a test run proves it.
+Branch `feature/cli-1`. Dependency order. A box is checked only after a test run proved it.
+Results: `CLI_1_TEST_RESULTS.md`. Options: `CLI_1_OPTION_MATRIX.md`.
 
-## Audit findings (2026-11-15, from code)
+## Audit findings (2026-11-15, from code and first runs)
 
-| # | Defect | Location |
-|---|---|---|
-| D1 | Parse error text (`Unknown option`) prints before the console attaches; Windows terminal shows help only | `command_line.cpp` `getCommandLine()` |
-| D2 | Console attach misses `--opt=value` forms and `--no-scaling` with CLI modes | `attachParentConsoleForCommandLine()` |
-| D3 | Multisize `--layout-export` hands off one size; GUI hands off every size (Marker, Nested, Base, Size tabs) | `exportLayoutFromCommandLine()` |
-| D4 | Headless never drains the multisize/material tab queue; other tabs and materials are not laid out or checked | `HeadlessExport.cpp` |
-| D5 | Headless always exports material 0; no material selection; a multi-material pattern exports one material silently | `HeadlessExport.cpp` |
-| D6 | No multisize view selection (Marker, Nested, Base Size, Size N) | CLI and headless |
-| D7 | Oversized pieces always fail; no split / make-longer choice | `HeadlessExport.cpp` |
-| D8 | Settings JSON: unknown keys and invalid values pass silently (coerced to defaults) | `SettingsModel::load()`, `LayoutSettings::from_json()` |
-| D9 | Format rules of the Export menu not enforced headless: `pdf` on tiled paper, `pdf-tiled` off tiled paper, split + DXF/pdf-tiled/paid, Marker/Nested + DXF | `HeadlessExport.cpp` |
-| D10 | Stale output file from an earlier run passes the "file exists" check after a failed export | `HeadlessExport.cpp` |
-| D11 | SeamlyLayout crash leaves a partial output file; Seamly2D does not remove it | `exportLayoutFromCommandLine()` |
-| D12 | No query mode: a caller cannot list materials, views or oversized pieces without a layout run | new |
+| # | Defect | Location | State |
+|---|---|---|---|
+| D1 | Parse error text printed before the console attached; the Windows console showed help only | `command_line.cpp` | fixed |
+| D2 | Console attach missed `--opt=value` forms | `command_line.cpp` | fixed |
+| D3 | Multisize `--layout-export` handed off one size; Layout mode hands off every size | `exportLayoutFromCommandLine()` | fixed |
+| D4 | Headless never ran the queued views and materials; their unplaced pieces went unchecked | `HeadlessExport.cpp` | fixed |
+| D5 | Headless always exported material 0, silently | `HeadlessExport.cpp` | fixed: `--material`, exit 64 when several and none named |
+| D6 | No multisize view selection | CLI, headless | fixed: `--layout-view` |
+| D7 | Oversized pieces always failed; no split or longer-media choice | `HeadlessExport.cpp` | fixed: `--layout-oversize` |
+| D8 | Settings JSON: unknown keys and invalid values were coerced silently | `SettingsModel::load()` | fixed: `validate_settings_json` |
+| D9 | Export menu format rules not enforced headless | `HeadlessExport.cpp` | fixed: `export_rules.rs` |
+| D10 | An old output file passed the "file exists" check after a failed export | `HeadlessExport.cpp` | fixed |
+| D11 | A SeamlyLayout crash left a partial output file | `exportLayoutFromCommandLine()` | fixed |
+| D12 | No query of materials, views, oversized pieces, formats | new | fixed: `--layout-info` |
+| D13 | Relative `--mfile` resolved against the pattern folder | `measurementPathOption()` | fixed |
+| D14 | `--layout-scale` accepted but ignored: PNG export is fixed at 96 px/in | CLI, headless, bridge | removed |
+| D15 | INFO log lines, DXF converter debug lines and doubled CR on stdout/stderr | log handler, `converter.rs`, forwarding | fixed |
+| D16 | Python headless runner: stale expectations (unplaced on tiled paper, tile marker path) | `test_headless_export.py` | updated |
 
 ## Tasks
 
-1. [ ] Build all three apps in the worktree; run `cargo test`, `ctest`, `tst_vcommandline` as baseline.
-2. [ ] D1, D2: attach console before any CLI message; match `--opt=value`.
-3. [ ] D8: `LayoutSettings::validate_json()` (Rust, strict keys, enums, numbers); headless calls it before layout.
-4. [ ] D4, D5, D6, D7, D9, D10: headless options `--material`, `--view`, `--oversize`; drain tab queue; format rules; stale/partial output removal.
-5. [ ] D12: headless `--info` prints JSON: materials, views, split views, oversized pieces, label text state, media.
-6. [ ] D3: CLI multisize handoff carries every size when `--gsize`/`--gheight` are absent; no progress dialog in CLI mode.
-7. [ ] Seamly2D options `--layout-material`, `--layout-view`, `--layout-oversize`, `--layout-info`; validation; forwarding. D11.
-8. [ ] Unit tests: `tst_vcommandline`, `StartupOptionsTests`, Rust tests. `cargo test --workspace`, `ctest`.
-9. [ ] PowerShell CLI regression suite (`src/test/CliTest/`), JSON report; run on jacket2, male_shirt, trousers.
-10. [ ] Rust/Iced test application (`src/test/CliTestApp/`).
-11. [ ] Regression run of the full matrix; record in `CLI_1_TEST_RESULTS.md`.
-12. [ ] Docs: `--help`, `CLI_PARAMETERS.md`, `CLI_1_OPTION_MATRIX.md`, `TODO_CLI.md`.
+1. [x] Build the three apps in the worktree; run `cargo test`, `ctest`, `Seamly2DTests`.
+2. [x] D1, D2: console attach before any CLI message.
+3. [x] D8: `validate_settings_json` (Rust); headless checks an explicit settings file first.
+4. [x] D4, D5, D6, D7, D9, D10: headless `--material`, `--view`, `--oversize`; queue drain; format rules; output handling.
+5. [x] D12: headless `--info` JSON.
+6. [x] D3: every size in the CLI handoff unless `--gsize`/`--gheight`; no progress dialog in CLI modes.
+7. [x] Seamly2D `--layout-material`, `--layout-view`, `--layout-oversize`, `--layout-info`; D11, D13, D14, D15.
+8. [x] Unit tests: `TST_VCommandLine` (24), `StartupOptionsTests`, `rust:settings_validation`, `rust:export_rules`.
+9. [x] PowerShell suite `src/test/CliTest/` with JSON report.
+10. [x] Rust/Iced tester `src/test/CliTestApp/` (GUI and `--batch`).
+11. [x] Full regression run; results in `CLI_1_TEST_RESULTS.md`.
+12. [x] Docs: `--help`, `project-docs/docs-cli/CLI_PARAMETERS.md`, option matrix, `TODO_CLI.md`.
 
 ## Decisions
 
-- Layout Settings dialog controls map to `--layout-settings` JSON keys. No direct flags: CLI.3 owns them (flag names and precedence need Sue).
-- Removed legacy options stay removed, `--text2paths` included. They fail with exit 64 and "Unknown option". `--svg-text-mode hersheyStrokes` gives stroke paths for SVG. CLI.3.5 owns text as paths for PDF/PS/EPS.
-- Option names are already lowercase kebab-case. No aliases added. Single-letter options stay case-sensitive.
-- Multisize without `--gsize`/`--gheight`: every size at the base height, as Layout mode. With either: one size, one height, no tabs.
-- A multi-material pattern needs `--layout-material` when the export is one file; without it the export fails (exit 64) and lists the materials.
-- Windows: keep the GUI subsystem plus `AttachConsole`. A console subsystem flashes a console on GUI start. Callers that need the exit code wait for the process (PowerShell `Start-Process -Wait`, redirection, or `start /wait`).
+- Layout Settings controls map to `--layout-settings` JSON keys. Direct flags stay in CLI.3 (flag names and precedence need Sue).
+- Removed legacy options stay removed, `--text2paths` included: exit 64 "Unknown option". `--svg-text-mode hersheyStrokes` gives stroke paths for SVG; CLI.3.5 owns PDF/PS/EPS.
+- Option names are lowercase kebab-case already; no aliases added.
+- Multisize without `--gsize`/`--gheight`: every size at the base height, as Layout mode. With either: one size and height, no views.
+- Several materials need `--layout-material`; the tester runs one command per material.
+- A run that fails before the export keeps an existing output file (the Python runner's earlier contract); SeamlyLayout removes it only just before it writes.
+- Windows: GUI subsystem plus `AttachConsole`. A console subsystem would flash a console on GUI start. Callers that need the exit code wait (`start /wait`, `Start-Process -Wait`, a pipe).
+- `--layout-scale` removed rather than implemented: the PNG export is fixed at 96 px/in by design.

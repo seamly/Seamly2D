@@ -2,17 +2,15 @@
 
 ## Current status
 
-### 2026-11-15 — CLI.1 audit and repair (feature/cli-1)
+### 2026-11-16 — CLI.1 audit and repair (feature/cli-1)
 
-- Branch `feature/cli-1`, worktree `C:\Users\susan\Projects\seamly2d-cli-1`. Plan: `CLI_1_PLAN.md` (D1–D12, tasks 1–12). Results: `CLI_1_TEST_RESULTS.md`.
-- Done, built, unit-tested: plan tasks 2–8. New Seamly2D options `--layout-material`, `--layout-view`, `--layout-oversize`, `--layout-info`; SeamlyLayout `--material`, `--view`, `--oversize`, `--info`.
-- Rust: `layout_tiling::validate_settings_json` (strict settings check); `cxxqt_bridge/src/export_rules.rs` (format rules, `--info` JSON); bridge invokables `settingsJsonProblems`, `exportFormatProblem`, `layoutInfoJson`, `incompleteLayoutReport`.
-- Headless: drains the tab queue, selects material and view, enforces Export menu format rules, removes old/partial output.
-- Seamly2D: errors print after the console attaches; multisize CLI hands off every size unless `--gsize`/`--gheight`; layout modes keep stdout for the result (INFO lines go to the log only).
-- Checked: `Seamly2DTests` 0 failed (`TST_VCommandLine` 24 pass); `ctest --preset release` 9/9; `cargo test --workspace` see results file.
-- Build: in-source qmake + jom (`-config release CONFIG+=deferDeploy`), SeamlyLayout `cmake --preset release`. Scripts in the session scratchpad; `local_build_msi.ps1` not run.
-- Fixtures: read-only from `C:\Users\susan\Projects\Seamly2D-private\test-seamly-layout`. No Richmond `.sm2d`; only `cxxqt_bridge/test_data/richmond-shirt-handoff_pieces.svg`.
-- Next: commit; PowerShell suite `src/test/CliTest/`; Iced app `src/test/CliTestApp/`; option matrix; docs.
+- Done; CLI.1 moved to `TODO_COMPLETED.md`. Branch `feature/cli-1`, not merged, not pushed. Plan `CLI_1_PLAN.md` (D1–D16); matrix `CLI_1_OPTION_MATRIX.md`; results `CLI_1_TEST_RESULTS.md`.
+- New options: Seamly2D `--layout-material`, `--layout-view`, `--layout-oversize`, `--layout-info`; SeamlyLayout `--material`, `--view`, `--oversize`, `--info`. Removed `--layout-scale`/`--scale` (PNG fixed at 96 px/in; value was ignored).
+- Fixed: console attach before errors; relative `--mfile`; multisize CLI hands off every size; headless lays out every queued view and material; strict settings JSON; Export menu format rules; stale/partial output; stdout noise.
+- Tests: `src/test/CliTest/test_cli_layout_export.ps1` 99/99; `Seamly2DTests` 32 621/0; `ctest` 9/9; `cargo test --workspace` 729/0; tester `cargo test` 15/0; Python runners pass.
+- Tester: `src/test/CliTestApp` (Rust/Iced, `--batch`). Built in `target\release`.
+- Build: in-source qmake + jom and `cmake --preset release` in the worktree; `local_build_msi.ps1` not run.
+- Open for Sue: merge decision; CLI.3 direct layout flags and `--text2paths` for PDF/PS/EPS; CLI.2.1 Richmond fixtures; MSI and Linux/macOS runs. `CLI_1_SESSION_HANDOVER.md` (untracked) is stale.
 
 ### 2026-11-15 — Piece mode Details > Export Pieces (Seamly2D.73)
 
