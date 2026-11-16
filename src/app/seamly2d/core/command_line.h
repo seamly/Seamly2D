@@ -88,12 +88,10 @@ public:
     QString                layoutSettingsOption() const;
     QString                layoutExportOptionsOption() const;
     QString                svgTextModeOption() const;
-    QString                layoutScaleOption() const;
     QString                layoutMaterialOption() const;
     QString                layoutViewOption() const;
     QString                layoutOversizeOption() const;
     bool                   isSvgTextModeSet() const;
-    bool                   isLayoutScaleSet() const;
     bool                   reservesStandardOutput() const;
 
 protected:

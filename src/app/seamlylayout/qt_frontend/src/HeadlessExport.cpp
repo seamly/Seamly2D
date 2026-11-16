@@ -8,13 +8,14 @@
 // Workflow of run():
 //   1. Load preferences and settings; an explicit --settings file gets a strict check.
 //   2. Import the SVG and build each material's blank canvas.
-//   3. --info: print the JSON report and stop.
+//   3. --info: return the JSON report and stop.
 //   4. Lay out every material and view, as the Create Layout button does; oversized
 //      pieces stop the run unless --oversize chooses split or extend.
 //   5. Refuse a layout with unplaced pieces or a failed view.
 //   6. Show the --material and --view layout, then check the format against the
 //      Export menu rules (export_rules.rs).
 //   7. Remove an old file at the output path, export, and remove a partial file on failure.
+//      A run that stops before step 7 leaves an existing output file unchanged.
 
 #include "HeadlessExport.h"
 
@@ -305,7 +306,8 @@ HeadlessExport::Result HeadlessExport::run(const StartupOptions &options)
                     formatProblem);
     } // if the Export menu would disable the format
 
-    // An old file at the output path would pass the existence check after a failed export.
+    // A run that fails before this point keeps an existing file. Remove it now: after a
+    // failed export, an old file would pass the existence check below.
     const QString outputPath = options.outputPath();
     if (QFileInfo::exists(outputPath) && !QFile::remove(outputPath)) {
         return fail(ExitOutputError, QStringLiteral("The old output file cannot be replaced: %1").arg(outputPath));
@@ -319,7 +321,7 @@ HeadlessExport::Result HeadlessExport::run(const StartupOptions &options)
     } else if (format == QStringLiteral("pdf-tiled")) {
         exported = controller.exportPdfTiled(outputPath, settingsJson);
     } else if (format == QStringLiteral("png")) {
-        exported = controller.exportPng(outputPath, static_cast<float>(options.exportScale()));
+        exported = controller.exportPng(outputPath);
     } else if (format == QStringLiteral("jpg") || format == QStringLiteral("jpeg")) {
         exported = controller.exportJpeg(outputPath);
     } else if (format == QStringLiteral("dxf")) {

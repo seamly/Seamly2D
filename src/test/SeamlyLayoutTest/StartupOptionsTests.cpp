@@ -81,7 +81,7 @@ private slots:
     void headlessExport_requiresInput();
     void headlessExport_rejectsTextModeForOtherFormats();
     void headlessExport_acceptsSvgTextModesCaseInsensitively();
-    void headlessExport_validatesPngScale();
+    void headlessExport_scaleOptionIsRemoved();
     void headlessExport_storesMaterialViewAndOversize();
     void headlessExport_rejectsUnknownOversizeChoice();
     void headlessExport_rejectsEmptyMaterialName();
@@ -693,7 +693,7 @@ void StartupOptionsTests::hasHeadlessArguments_matchesEveryHeadlessOption()
     for (const QString &option : {QStringLiteral("--export"), QStringLiteral("--output=x.svg"),
                                   QStringLiteral("--material"), QStringLiteral("--view=40"),
                                   QStringLiteral("--oversize"), QStringLiteral("--info"),
-                                  QStringLiteral("--settings"), QStringLiteral("--scale=2")}) {
+                                  QStringLiteral("--settings"), QStringLiteral("--svg-text-mode=asSupplied")}) {
         QVERIFY2(StartupOptions::hasHeadlessArguments(QStringList{option}), qPrintable(option));
     } // for each headless option
     QVERIFY(!StartupOptions::hasHeadlessArguments(QStringList{QStringLiteral("--svg-stdin"), QStringLiteral("a.svg")}));
@@ -760,24 +760,23 @@ void StartupOptionsTests::headlessExport_acceptsSvgTextModesCaseInsensitively()
     QCOMPARE(options.svgTextMode(), QStringLiteral("hersheyStrokes"));
 } // headlessExport_acceptsSvgTextModesCaseInsensitively
 
-// @brief PNG scale must be finite, positive, and representable by the exporter.
-void StartupOptionsTests::headlessExport_validatesPngScale()
+// @brief --scale is not an option: PNG export renders at 96 px per inch.
+void StartupOptionsTests::headlessExport_scaleOptionIsRemoved()
 {
     QTemporaryDir directory;
     QVERIFY(directory.isValid());
     const QString svgPath = makeFile(directory, QStringLiteral("pattern.svg"));
 
-    for (const QString &scale : {QStringLiteral("nan"), QStringLiteral("1e100"), QStringLiteral("1e-100")}) {
-        const StartupOptions options = StartupOptions::parse(QStringList{
-            QStringLiteral("SeamlyLayout"), QStringLiteral("--export"), QStringLiteral("png"),
-            QStringLiteral("--output"), directory.filePath(QStringLiteral("out.png")),
-            QStringLiteral("--scale"), scale, svgPath
-        });
+    const StartupOptions options = StartupOptions::parse(QStringList{
+        QStringLiteral("SeamlyLayout"), QStringLiteral("--export"), QStringLiteral("png"),
+        QStringLiteral("--output"), directory.filePath(QStringLiteral("out.png")),
+        QStringLiteral("--scale"), QStringLiteral("2"), svgPath
+    });
 
-        QCOMPARE(options.status(), StartupOptions::Status::Failed);
-        QVERIFY(options.message().contains(QStringLiteral("--scale")));
-    }
-} // headlessExport_validatesPngScale
+    QCOMPARE(options.status(), StartupOptions::Status::Failed);
+    QVERIFY(options.hasHeadlessRequest());
+    QVERIFY(options.message().contains(QStringLiteral("scale")));
+} // headlessExport_scaleOptionIsRemoved
 
 // ---------------------------------------------------------------------------
 // --help / --version

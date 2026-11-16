@@ -35,9 +35,6 @@
 #include <QIODevice>
 #include <QStringList>
 
-#include <cmath>
-#include <limits>
-
 namespace
 {
 // @brief Extension SeamlyLayout accepts, compared case-insensitively.
@@ -101,8 +98,7 @@ bool StartupOptions::hasHeadlessArguments(const QStringList &arguments)
         QStringLiteral("--output"), QStringLiteral("--destination"),
         QStringLiteral("--settings"), QStringLiteral("--layout-settings"),
         QStringLiteral("--export-options"), QStringLiteral("--svg-text-mode"),
-        QStringLiteral("--text-mode"), QStringLiteral("--scale"),
-        QStringLiteral("--material"), QStringLiteral("--view"),
+        QStringLiteral("--text-mode"), QStringLiteral("--material"), QStringLiteral("--view"),
         QStringLiteral("--oversize"), QStringLiteral("--info")
     };
 
@@ -193,12 +189,6 @@ StartupOptions StartupOptions::parse(const QStringList &arguments, QIODevice *st
         QStringLiteral("mode"));
     parser.addOption(svgTextModeOption);
 
-    const QCommandLineOption scaleOption(
-        QStringList{QStringLiteral("scale")},
-        QStringLiteral("PNG scale factor (default: 1.0)."),
-        QStringLiteral("factor"));
-    parser.addOption(scaleOption);
-
     const QCommandLineOption materialOption(
         QStringList{QStringLiteral("material")},
         QStringLiteral("Material to export, such as Fabric or Lining. Required when the input has several materials."),
@@ -241,8 +231,7 @@ StartupOptions StartupOptions::parse(const QStringList &arguments, QIODevice *st
 
     options.m_headlessRequest = parser.isSet(exportOption) || parser.isSet(outputOption) ||
         parser.isSet(settingsOption) || parser.isSet(exportOptionsOption) ||
-        parser.isSet(svgTextModeOption) || parser.isSet(scaleOption) ||
-        parser.isSet(materialOption) || parser.isSet(viewOption) ||
+        parser.isSet(svgTextModeOption) || parser.isSet(materialOption) || parser.isSet(viewOption) ||
         parser.isSet(oversizeOption) || parser.isSet(infoOption);
 
     if (parser.isSet(versionOption)) {
@@ -362,7 +351,6 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
         QStringList{QStringLiteral("export-options")});
     const QCommandLineOption svgTextModeOption(
         QStringList{QStringLiteral("svg-text-mode"), QStringLiteral("text-mode")});
-    const QCommandLineOption scaleOption(QStringList{QStringLiteral("scale")});
     const QCommandLineOption materialOption(QStringList{QStringLiteral("material")});
     const QCommandLineOption viewOption(QStringList{QStringLiteral("view")});
     const QCommandLineOption oversizeOption(QStringList{QStringLiteral("oversize")});
@@ -371,8 +359,7 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
     const bool hasExportArguments =
         parser.isSet(exportOption) || parser.isSet(outputOption) ||
         parser.isSet(settingsOption) || parser.isSet(exportOptionsOption) ||
-        parser.isSet(svgTextModeOption) || parser.isSet(scaleOption) ||
-        parser.isSet(materialOption) || parser.isSet(viewOption) ||
+        parser.isSet(svgTextModeOption) || parser.isSet(materialOption) || parser.isSet(viewOption) ||
         parser.isSet(oversizeOption) || parser.isSet(infoOption);
     if (!hasExportArguments) {
         return options;
@@ -406,8 +393,8 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
         // The report covers every material and layout, so it takes no export choice.
         const bool hasExportChoice =
             parser.isSet(exportOption) || parser.isSet(outputOption) || parser.isSet(exportOptionsOption) ||
-            parser.isSet(svgTextModeOption) || parser.isSet(scaleOption) || parser.isSet(materialOption) ||
-            parser.isSet(viewOption) || parser.isSet(oversizeOption);
+            parser.isSet(svgTextModeOption) || parser.isSet(materialOption) || parser.isSet(viewOption) ||
+            parser.isSet(oversizeOption);
         if (hasExportChoice) {
             return fail(QStringLiteral("--info prints a report and exports nothing; it takes only --settings."));
         } // if export options were given with --info
@@ -463,15 +450,6 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
         return fail(QStringLiteral("--svg-text-mode can only be used with --export svg."));
     } // if text mode is used with another format
 
-    bool scaleOk = true;
-    const double scale = parser.isSet(scaleOption)
-        ? parser.value(scaleOption).toDouble(&scaleOk)
-        : 1.0;
-    if (!scaleOk || !std::isfinite(scale) || scale <= 0.0 ||
-        scale > static_cast<double>((std::numeric_limits<float>::max)()) || static_cast<float>(scale) <= 0.0F) {
-        return fail(QStringLiteral("--scale must be a positive number."));
-    } // if scale is invalid
-
     const QFileInfo outputInfo(parser.value(outputOption));
     const QString outputPath = outputInfo.absoluteFilePath();
     if (!outputInfo.absoluteDir().exists()) {
@@ -500,7 +478,6 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
     options.m_exportOptionsPath = exportOptionsPath;
     options.m_svgTextMode = canonicalTextMode;
     options.m_svgTextModeSet = parser.isSet(svgTextModeOption);
-    options.m_exportScale = scale;
     options.m_material = parser.value(materialOption).trimmed();
     options.m_view = parser.value(viewOption).trimmed();
     options.m_oversize = oversize;

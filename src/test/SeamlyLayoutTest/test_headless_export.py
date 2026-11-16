@@ -169,6 +169,14 @@ def main():
     format_settings.write_text(json.dumps(settings_object), encoding="utf-8")
     settings = directory / "tiled.json"
     settings.write_text(json.dumps({**settings_object, "paperType": "tiled"}), encoding="utf-8")
+    # Plain PDF exports a roll or fabric; tiled paper exports as pdf-tiled (Export menu rule).
+    roll_settings = directory / "roll.json"
+    roll_settings.write_text(json.dumps({**settings_object, "mediaType": "paper", "paperType": "roll"}),
+                             encoding="utf-8")
+
+    def settings_for(format_name):
+        """Settings file for a format: tiled paper for pdf-tiled, a roll for pdf, else as given."""
+        return {"pdf-tiled": settings, "pdf": roll_settings}.get(format_name, format_settings)
     failures = []
 
     def run(name, options, expected_status=0, input_bytes=None, program=None):
@@ -207,7 +215,7 @@ def main():
         output = directory / ("layout." + format_name)
         output.unlink(missing_ok=True)
         options = ["--export", format_name, "--output", str(output), str(fixture),
-                   "--settings", str(settings if format_name == "pdf-tiled" else format_settings)]
+                   "--settings", str(settings_for(format_name))]
         result = run(format_name, options)
         if result.returncode != 0 or not output.exists() or output.stat().st_size == 0:
             failures.append(format_name + "-output")
@@ -217,7 +225,10 @@ def main():
             failures.append(format_name + "-signature")
         if format_name == "svg":
             root = xml.fromstring(content)
-            if len(root.findall(".//{http://www.w3.org/2000/svg}path")) != expected_paths:
+            # Tiled paper adds one tile marker path; every input path must survive.
+            piece_paths = [path for path in root.findall(".//{http://www.w3.org/2000/svg}path")
+                           if path.get("id") != "tileMarkerPath"]
+            if len(piece_paths) != expected_paths:
                 failures.append("svg-path-count")
             piece_count = sum(element.get("data-type") == "piece" for element in root.iter())
             if expected_pieces and piece_count != expected_pieces:
@@ -248,7 +259,17 @@ def main():
             if not boxes or any(float(x) <= 0 or float(y) <= 0 for x, y in boxes):
                 failures.append(format_name + "-page-size")
             if format_name == "pdf" and boxes:
-                if abs(float(boxes[0][0]) - width * 0.75) > 1 or abs(float(boxes[0][1]) - height * 0.75) > 1:
+                # Plain PDF uses the roll settings: compare it with an SVG of the same layout.
+                reference = directory / "roll-reference.svg"
+                run("roll-reference-svg", ["--export", "svg", "--output", str(reference), str(fixture),
+                                           "--settings", str(roll_settings)])
+                reference_root = xml.parse(reference).getroot()
+                roll_width = float(re.sub(r"[a-z]+$", "", reference_root.get("width", "0")))
+                roll_height = float(re.sub(r"[a-z]+$", "", reference_root.get("height", "0")))
+                user_unit = re.search(rb"/UserUnit\s+([\d.]+)", content)
+                scale = float(user_unit.group(1)) if user_unit else 1.0
+                if (abs(float(boxes[0][0]) * scale - roll_width * 0.75) > 1
+                        or abs(float(boxes[0][1]) * scale - roll_height * 0.75) > 1):
                     failures.append("pdf-physical-media-size")
             drawing_streams = []
             for stream in re.findall(rb"stream\r?\n(.*?)\r?\nendstream", content, re.DOTALL):
@@ -315,9 +336,11 @@ def main():
         encoding="utf-8",
     )
     insufficient_settings = directory / "insufficient.json"
+    # A 20 mm roll is narrower than the 25.4 mm pieces: headless export stops with 70.
+    # (A tiled sheet grows its tile grid, so it cannot leave a piece out.)
     insufficient_settings.write_text(json.dumps({
-        "unit": "mm", "mediaType": "paper", "paperType": "sheet",
-        "pageWidth": 27, "pageHeight": 27, "pieceGap": 1,
+        "unit": "mm", "mediaType": "paper", "paperType": "roll", "rollSize": "custom",
+        "rollWidth": 20, "pieceGap": 1,
         "marginLeft": 0, "marginRight": 0, "marginTop": 0, "marginBottom": 0,
     }), encoding="utf-8")
     for format_name in ("svg", "pdf", "png", "jpg", "jpeg", "dxf", "hpgl", "ps", "eps"):
@@ -337,10 +360,8 @@ def main():
     ], 70)
     if existing_output.read_bytes() != b"existing output must remain intact":
         failures.append("unplaced-overwrites-existing")
-    run("scale-overflow", ["--export", "png", "--scale", "1e100", "--output",
-                          str(directory / "overflow.png"), str(fixture)], 64)
-    run("scale-underflow", ["--export", "png", "--scale", "1e-100", "--output",
-                           str(directory / "underflow.png"), str(fixture)], 64)
+    run("scale-option-removed", ["--export", "png", "--scale", "2", "--output",
+                                 str(directory / "scaled.png"), str(fixture)], 64)
     run("missing-output-directory", ["--export", "svg", "--output",
                                      str(directory / "absent" / "out.svg"), str(fixture)], 64)
     run("unsupported", ["--export", "unknown", "--output", str(directory / "unknown"), str(fixture)], 64)
@@ -395,8 +416,7 @@ def main():
             output.unlink(missing_ok=True)
             options = ["--layout-export", "--layout-format", format_name,
                        "--layout-output", str(output), *companions, str(isolated_pattern)]
-            options.extend(["--layout-settings",
-                            str(settings if format_name == "pdf-tiled" else format_settings)])
+            options.extend(["--layout-settings", str(settings_for(format_name))])
             expected_status = 69 if format_name in ("gcode", "3mf") else 0
             result = run("pass-through-" + format_name, options, expected_status,
                          program=arguments.seamly2d.resolve())

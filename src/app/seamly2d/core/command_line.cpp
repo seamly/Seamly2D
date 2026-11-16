@@ -66,10 +66,8 @@
 #include <QVBoxLayout>
 
 #include <algorithm>
-#include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <limits>
 #ifdef Q_OS_WIN
 #include <windows.h>
 #endif
@@ -328,12 +326,6 @@ void VCommandLine::initOptions(VCommandLineOptions &options, QMap<QString, int> 
         translate("VCommandLine", "SVG text mode: designerFont, singleLineFont, hersheyStrokes, or asSupplied."),
         translate("VCommandLine", "mode")));
 
-    // --layout-scale: PNG scale factor passed to SeamlyLayout.
-    options_index.insert(LONG_OPTION_LAYOUT_SCALE, index++);
-    options.append(new QCommandLineOption({LONG_OPTION_LAYOUT_SCALE},
-        translate("VCommandLine", "PNG export scale factor (default 1.0)."),
-        translate("VCommandLine", "factor")));
-
     // --layout-material: material of a multi-material pattern.
     options_index.insert(LONG_OPTION_LAYOUT_MATERIAL, index++);
     options.append(new QCommandLineOption({LONG_OPTION_LAYOUT_MATERIAL},
@@ -479,9 +471,11 @@ bool VCommandLine::isNoScalingEnabled() const
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief Retrieves the path to the measurement file if applicable.
 ///
-/// Returns a measurement override only for test or layout-export mode.
+/// Returns a measurement override only for test, layout-export or layout-info mode.
+/// A relative path is resolved against the launch directory, as the pattern file is. The pattern
+/// loader resolves a relative path against the pattern folder, so it must not see one.
 ///
-/// @return QString containing the measurement file path, or empty if not applicable.
+/// @return Absolute measurement file path, or empty if not applicable.
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommandLine::measurementPathOption() const
 {
@@ -489,7 +483,8 @@ QString VCommandLine::measurementPathOption() const
     if (parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_MEASUREFILE)))
         && (isTestModeEnabled() || isLayoutExportEnabled() || isLayoutInfoEnabled()))
     {
-        measure = parser.value(*m_options_used.value(m_options_index.value(LONG_OPTION_MEASUREFILE)));
+        const QString path = parser.value(*m_options_used.value(m_options_index.value(LONG_OPTION_MEASUREFILE))).trimmed();
+        measure = path.isEmpty() ? QString() : QFileInfo(path).absoluteFilePath();
     }
 
     return measure;
@@ -633,7 +628,7 @@ QString VCommandLine::layoutExportError() const
     const bool has_export_choice =
         is_set(LONG_OPTION_LAYOUT_FORMAT) || is_set(LONG_OPTION_LAYOUT_OUTPUT) ||
         is_set(LONG_OPTION_LAYOUT_EXPORT_OPTIONS) || is_set(LONG_OPTION_SVG_TEXT_MODE) ||
-        is_set(LONG_OPTION_LAYOUT_SCALE) || is_set(LONG_OPTION_LAYOUT_MATERIAL) ||
+        is_set(LONG_OPTION_LAYOUT_MATERIAL) ||
         is_set(LONG_OPTION_LAYOUT_VIEW) || is_set(LONG_OPTION_LAYOUT_OVERSIZE);
 
     if (export_requested && info_requested)
@@ -693,18 +688,6 @@ QString VCommandLine::layoutExportError() const
         && (format != QStringLiteral("svg") || !supported_text_modes.contains(text_mode)))
     {
         return translate("VCommandLine", "Invalid --svg-text-mode for the selected export format.");
-    }
-
-    if (parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_SCALE))))
-    {
-        bool scale_ok = false;
-        const double scale = layoutScaleOption().toDouble(&scale_ok);
-        if (!scale_ok || !std::isfinite(scale) || scale <= 0.0 ||
-            scale > static_cast<double>((std::numeric_limits<float>::max)()) ||
-            static_cast<float>(scale) <= 0.0F || format != QStringLiteral("png"))
-        {
-            return translate("VCommandLine", "--layout-scale requires a positive PNG export scale.");
-        }
     }
 
     if (is_set(LONG_OPTION_LAYOUT_OVERSIZE))
@@ -801,16 +784,6 @@ QString VCommandLine::svgTextModeOption() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/// @brief Returns the requested PNG scale, defaulting to 1.0.
-//---------------------------------------------------------------------------------------------------------------------
-QString VCommandLine::layoutScaleOption() const
-{
-    const QString scale =
-        parser.value(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_SCALE))).trimmed();
-    return scale.isEmpty() ? QStringLiteral("1.0") : scale;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
 /// @brief Returns the --layout-material name; empty when not set.
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommandLine::layoutMaterialOption() const
@@ -852,12 +825,5 @@ bool VCommandLine::reservesStandardOutput() const
     return m_reserves_stdout;
 }
 
-//---------------------------------------------------------------------------------------------------------------------
-/// @brief Returns whether an explicit PNG scale was supplied.
-//---------------------------------------------------------------------------------------------------------------------
-bool VCommandLine::isLayoutScaleSet() const
-{
-    return parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_SCALE)));
-}
 
 #undef translate

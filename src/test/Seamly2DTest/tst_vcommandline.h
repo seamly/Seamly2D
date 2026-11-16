@@ -69,8 +69,7 @@ private slots:
     void LayoutExportRequiresOneInput();
     void LayoutExportRejectsUnsupportedFormat();
     void LayoutExportRejectsSvgTextModeForOtherFormats();
-    void LayoutExportScale();
-    void LayoutExportRejectsInvalidScale();
+    void LayoutScaleOptionIsRemoved();
     void LayoutExportOptionsRequireExportMode();
     void LayoutChoiceOptions();
     void LayoutChoiceOptionsAppearInHelp();
@@ -83,6 +82,7 @@ private slots:
     void LayoutInfoRequiresOneInput();
     void LayoutSettingsRequireExportOrInfo();
     void RemovedLegacyOptionsFailToParse();
+    void MeasurementOverrideIsAbsolute();
 
 private:
     Q_DISABLE_COPY(TST_VCommandLine)

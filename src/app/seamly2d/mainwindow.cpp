@@ -8277,10 +8277,6 @@ int MainWindow::exportLayoutFromCommandLine(const VCommandLinePtr &command_line)
     {
         arguments << QStringLiteral("--svg-text-mode") << command_line->svgTextModeOption();
     }
-    if (command_line->isLayoutScaleSet())
-    {
-        arguments << QStringLiteral("--scale") << command_line->layoutScaleOption();
-    }
     if (!command_line->layoutMaterialOption().isEmpty())
     {
         arguments << QStringLiteral("--material") << command_line->layoutMaterialOption();
@@ -8347,16 +8343,21 @@ int MainWindow::exportLayoutFromCommandLine(const VCommandLinePtr &command_line)
         return V_EX_SOFTWARE;
     }
 
-    // SeamlyLayout writes UTF-8.
+    // SeamlyLayout writes UTF-8 in text mode. Its CR LF line ends become LF here, because the
+    // text-mode streams of Seamly2D add the CR again.
+    const auto forwarded_text = [](const QByteArray &bytes)
+    {
+        return QString::fromUtf8(bytes).replace(QStringLiteral("\r\n"), QStringLiteral("\n"));
+    };
     const QByteArray standard_output = process.readAllStandardOutput();
     if (!standard_output.isEmpty())
     {
-        vStdOut() << QString::fromUtf8(standard_output) << Qt::flush;
+        vStdOut() << forwarded_text(standard_output) << Qt::flush;
     }
     const QByteArray standard_error = process.readAllStandardError();
     if (!standard_error.isEmpty())
     {
-        vStdErr() << QString::fromUtf8(standard_error) << Qt::flush;
+        vStdErr() << forwarded_text(standard_error) << Qt::flush;
     }
 
     if (process.exitStatus() != QProcess::NormalExit)

@@ -158,8 +158,6 @@ public:
     // @brief True for --info: print the JSON report, export nothing.
     bool isInfoRequest() const { return m_infoRequest; }
 
-    // @brief PNG scale factor.
-    double exportScale() const { return m_exportScale; }
 
     // @brief Text to show the user. Empty unless status() is ShowInformation or Failed.
     QString message() const { return m_message; }
@@ -209,7 +207,6 @@ private:
     QString m_exportOptionsPath;
     QString m_svgTextMode = QStringLiteral("designerFont");
     bool m_svgTextModeSet = false;
-    double m_exportScale = 1.0;
     QString m_material;
     QString m_view;
     QString m_oversize;

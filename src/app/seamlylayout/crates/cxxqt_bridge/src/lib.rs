@@ -871,7 +871,7 @@ pub mod qobject {
         fn export_svg(self: Pin<&mut AppController>, path: &QString, text_mode: &QString) -> bool;
 
         #[qinvokable]
-        fn export_png(self: Pin<&mut AppController>, path: &QString, scale: f32) -> bool;
+        fn export_png(self: Pin<&mut AppController>, path: &QString) -> bool;
 
         // JPEG export at 100% scale; quality is fixed (app_core::JPEG_DEFAULT_QUALITY).
         #[qinvokable]
@@ -3212,14 +3212,12 @@ impl qobject::AppController {
 
 
     // Export the assembled layout as a PNG image file.
-    // The export pipeline is fixed at 100% scale to prohibit size changes.
+    // The export pipeline is fixed at 100% scale (96 px per inch) to prohibit size changes.
     // Delegates core logic to exports::do_export_png.
-    // Called by QML 'Export PNG' button handler: onExportPNG: appController.exportPng(path, scale).
-    // Note: `scale` is currently ignored and retained only for API compatibility.
+    // Called by QML 'Export PNG' button handler: onExportPNG: appController.exportPng(path).
     fn export_png(
         mut self: std::pin::Pin<&mut Self>,
         path: &cxx_qt_lib::QString,
-        _scale: f32,
     ) -> bool {
         let path_str = path.to_string();
         log_to_file(&format!("[lib.rs AppController] export_png(): 1 requested path='{path_str}'"));
@@ -3442,8 +3440,7 @@ impl qobject::AppController {
     fn settings_json_problems(&self, settings_json: &cxx_qt_lib::QString) -> cxx_qt_lib::QString {
         match layout_tiling::validate_settings_json(&settings_json.to_string()) {
             Ok(())        => cxx_qt_lib::QString::default(),                        // valid
-            Err(problems) => cxx_qt_lib::QString::from(problems.join("
-").as_str()), // one line per problem
+            Err(problems) => cxx_qt_lib::QString::from(problems.join("\n").as_str()), // one line per problem
         } // match validation
     } // fn settings_json_problems
 
@@ -3474,8 +3471,7 @@ impl qobject::AppController {
 
     // Unplaced pieces and failed layouts of the last layout run; empty when complete.
     fn incomplete_layout_report(&self) -> cxx_qt_lib::QString {
-        cxx_qt_lib::QString::from(self.rust().incomplete_layout_lines.join("
-").as_str())
+        cxx_qt_lib::QString::from(self.rust().incomplete_layout_lines.join("\n").as_str())
     } // fn incomplete_layout_report
 
     // JSON report for `--info`; see export_rules::layout_info_json.

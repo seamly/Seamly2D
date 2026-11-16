@@ -213,43 +213,21 @@ void TST_VCommandLine::LayoutExportRejectsSvgTextModeForOtherFormats()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VCommandLine::LayoutExportScale()
+void TST_VCommandLine::LayoutScaleOptionIsRemoved()
 {
-    QTemporaryDir directory;
-    QVERIFY(directory.isValid());
+    // PNG export renders at 96 px per inch; a scale option would be ignored, so it is not offered.
     VCommandLine command_line;
     const QStringList arguments{
         QStringLiteral("seamly2d"),
         QStringLiteral("--layout-export"),
         QStringLiteral("--layout-format"), QStringLiteral("png"),
-        QStringLiteral("--layout-output"), directory.filePath(QStringLiteral("layout.png")),
+        QStringLiteral("--layout-output"), QStringLiteral("layout.png"),
         QStringLiteral("--layout-scale"), QStringLiteral("2.0"),
         QStringLiteral("pattern.sm2d")
     };
 
-    QVERIFY(command_line.parser.parse(arguments));
-    QVERIFY(command_line.isLayoutExportEnabled());
-    QCOMPARE(command_line.layoutScaleOption(), QStringLiteral("2.0"));
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void TST_VCommandLine::LayoutExportRejectsInvalidScale()
-{
-    for (const QString &scale : {QStringLiteral("0"), QStringLiteral("1e100"), QStringLiteral("1e-100")}) {
-        VCommandLine command_line;
-        const QStringList arguments{
-            QStringLiteral("seamly2d"),
-            QStringLiteral("--layout-export"),
-            QStringLiteral("--layout-format"), QStringLiteral("png"),
-            QStringLiteral("--layout-output"), QStringLiteral("layout.png"),
-            QStringLiteral("--layout-scale"), scale,
-            QStringLiteral("pattern.sm2d")
-        };
-
-        QVERIFY(command_line.parser.parse(arguments));
-        QCOMPARE(command_line.layoutExportError(),
-                 QStringLiteral("--layout-scale requires a positive PNG export scale."));
-    }
+    QVERIFY(!command_line.parser.parse(arguments));
+    QVERIFY(command_line.parser.errorText().contains(QStringLiteral("layout-scale")));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -298,7 +276,7 @@ void TST_VCommandLine::LayoutChoiceOptionsAppearInHelp()
     for (const QString &option : {QStringLiteral("--layout-material"), QStringLiteral("--layout-view"),
                                   QStringLiteral("--layout-oversize"), QStringLiteral("--layout-info"),
                                   QStringLiteral("--layout-settings"), QStringLiteral("--layout-export-options"),
-                                  QStringLiteral("--layout-scale"), QStringLiteral("--gsize"),
+                                  QStringLiteral("--gsize"),
                                   QStringLiteral("--gheight"), QStringLiteral("--test"),
                                   QStringLiteral("--no-scaling")})
     {
@@ -459,5 +437,19 @@ void TST_VCommandLine::RemovedLegacyOptionsFailToParse()
         QVERIFY2(!command_line.parser.parse({QStringLiteral("seamly2d"), option, QStringLiteral("pattern.sm2d")}),
                  qUtf8Printable(option));
         QVERIFY(command_line.parser.errorText().contains(option.mid(2)));
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::MeasurementOverrideIsAbsolute()
+{
+    // The pattern loader resolves a relative path against the pattern folder; the CLI gives it the launch folder.
+    const QString relative_path = QStringLiteral("measurements/shirt.smis");
+    for (const QString &mode : {QStringLiteral("--test"), QStringLiteral("--layout-info")})
+    {
+        VCommandLine command_line;
+        QVERIFY(command_line.parser.parse({QStringLiteral("seamly2d"), mode, QStringLiteral("--mfile"), relative_path,
+                                           QStringLiteral("patterns/shirt.sm2d")}));
+        QCOMPARE(command_line.measurementPathOption(), QFileInfo(relative_path).absoluteFilePath());
     }
 }
