@@ -1,5 +1,13 @@
 # Session handover
 
+## 2026-11-16 — CLI worktree location
+
+- Continue CLI work only in `C:\Users\susan\Projects\seamly2d-cli-1`, on `run-seamlyLayout`, as requested.
+- The CLI worktree contains the merged table dialog updates at `cd044d9b09`.
+- The main `Seamly2D-private` checkout remains detached at `cd044d9b09`. This preserves its files while the CLI worktree holds the branch.
+- The two folders share Git history. At the final handoff, release the branch from the CLI worktree and check it out in the main folder.
+- Do not edit files in the main folder during CLI work. Do not push without a request.
+
 ## 2026-11-16 — Command line help tables
 
 - Replaced the console-style help window with native Qt tables that use the parent window's font and palette.
@@ -121,3 +129,11 @@
 - [SVG attribute contract](project-docs/docs-data/SVG-DATA-ATTRIBUTES.md)
 - [Installer TODO](project-docs/docs-installer/TODO_INSTALLER.md)
 - [Completed work archive](project-docs/TODO_COMPLETED.md)
+
+### Verification in the CLI worktree — 2026-11-16
+
+- Rebuilt Seamly2D and Seamly2DTests in `C:\Users\susan\Projects\seamly2d-cli-1` with Qt 6.11.3.
+- All 40 Qt suites passed: 32629 checks, zero failures, zero skips.
+- The CLI suite passed 32 checks, including table content, font and palette inheritance, filtering, resizing, and closing.
+- The updated application is `src/app/seamly2d/bin/seamly2d.exe` in this checkout. The installed application was not replaced.
+- Continue CLI work here on `run-seamlyLayout`. No push or handoff to the main checkout occurred.

@@ -14,7 +14,7 @@ Build automated CLI regression tests and a standalone interactive Rust/Iced test
 
 - Repository: `Seamly2D-private`
 - Base branch: `run-seamlyLayout`
-- Working branch: `feature/cli-1`
+- Working branch: `run-seamlyLayout` in the CLI worktree, as requested on 2026-11-16.
 - Worktree: `C:\Users\susan\Projects\seamly2d-cli-1`
 
 Seamly2D and SeamlyLayout are contained in this same repository. Do not create or search for a separate SeamlyLayout checkout.

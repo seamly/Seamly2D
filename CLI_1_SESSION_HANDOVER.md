@@ -1,5 +1,23 @@
 # CLI.1 session handover
 
+### Completed changes and location correction
+
+- `fa4e0e47ad`: initial Help menu and console-style dialog, implemented in the CLI checkout.
+- `17b0e1e50e`: table formatting, adjustable columns, filters, tabs, font and palette inheritance; implemented in the wrong checkout.
+- `cd044d9b09`: local merge of the table feature into `run-seamlyLayout`.
+- Corrected the checkout assignment: the CLI folder now checks out `run-seamlyLayout` at that merged commit.
+- The other folder remains detached at the same commit. Its files did not change during this correction.
+- No code needs reimplementation. Rebuild and verify the existing format updates in the CLI checkout.
+- No push occurred. Visual verification remains pending after the user stopped computer control.
+
+## 2026-11-16 — CLI worktree location
+
+- Continue CLI work only in `C:\Users\susan\Projects\seamly2d-cli-1`, on `run-seamlyLayout`, as requested.
+- The CLI worktree contains the merged table dialog updates at `cd044d9b09`.
+- The main `Seamly2D-private` checkout remains detached at `cd044d9b09`. This preserves its files while the CLI worktree holds the branch.
+- The two folders share Git history. At the final handoff, release the branch from the CLI worktree and check it out in the main folder.
+- Do not edit files in the main folder during CLI work. Do not push without a request.
+
 Branch `feature/cli-1`, worktree `C:\Users\susan\Projects\seamly2d-cli-1`. Merged locally into `run-seamlyLayout` on 2026-11-16. Not pushed.
 The general handover is `SESSION_HANDOVER.md`; this file holds the CLI state only.
 
@@ -49,3 +67,11 @@ Richmond files: `git show d3197ee973^:test-seamly-layout-input/richmond-shirt_v1
 - Verified the Windows Qt 6.11.3 build and all 40 Qt suites: 32628 passed, zero failures.
 - The CLI suite includes 31 passing checks, including help content, scrolling, and closing without exiting.
 - Linux and macOS verification remains deferred to CI. No merge or push.
+
+### Verification in the CLI worktree — 2026-11-16
+
+- Rebuilt Seamly2D and Seamly2DTests in `C:\Users\susan\Projects\seamly2d-cli-1` with Qt 6.11.3.
+- All 40 Qt suites passed: 32629 checks, zero failures, zero skips.
+- The CLI suite passed 32 checks, including table content, font and palette inheritance, filtering, resizing, and closing.
+- The updated application is `src/app/seamly2d/bin/seamly2d.exe` in this checkout. The installed application was not replaced.
+- Continue CLI work here on `run-seamlyLayout`. No push or handoff to the main checkout occurred.
