@@ -59,6 +59,7 @@
 
 ## Decisions to retain
 
+- CLI Linux and macOS checks run in CI (`gh workflow run ci.yml`), not in a local WSL install (user, 2026-11-16).
 - SeamlyLayout is complete after the `develop` merge. Next focus: CLI layouts from pattern and measurement files plus parameters (user, 2026-11-15).
 - Adopt develop's `command_line.*` file names and lowerCamel `VCommandLine` method names: they match the code style (user, 2026-11-15).
 - Own CLI design (`--layout-export` to SeamlyLayout) replaces upstream console export. Lost legacy options go to `TODO_CLI.md` CLI.3 (user, 2026-11-15).

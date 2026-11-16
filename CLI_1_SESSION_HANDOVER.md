@@ -33,7 +33,7 @@ Richmond files: `git show d3197ee973^:test-seamly-layout-input/richmond-shirt_v1
 
 ## Open, outside this machine
 
-- Linux and macOS runs: WSL not installed (`wsl --status`), no Docker, no Mac. A WSL install needs an elevated prompt, a restart and Sue's approval.
+- Linux and macOS runs: in CI, not a local WSL install (Sue, 2026-11-16).
 - CI: needs a push (not allowed for this task).
 - CAD program and cutter import (CLI.2.2): none installed.
 
