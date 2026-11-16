@@ -4,12 +4,12 @@
 
 ### 2026-11-16 — CLI.1 audit and repair (feature/cli-1)
 
-- Done; CLI.1 moved to `TODO_COMPLETED.md`. Branch `feature/cli-1`, not merged, not pushed. Plan `CLI_1_PLAN.md` (D1–D16); matrix `CLI_1_OPTION_MATRIX.md`; results and acceptance checklist `CLI_1_TEST_RESULTS.md`.
-- New options: Seamly2D `--layout-material`, `--layout-view`, `--layout-oversize`, `--layout-info`; SeamlyLayout `--material`, `--view`, `--oversize`, `--info`. Removed `--layout-scale`/`--scale` (PNG fixed at 96 px/in; value was ignored).
-- Tests: CLI suite 100/100; `Seamly2DTests` 32 621/0; CollectionTest 69/0 (4 skip; start it in `bin`); ParserTest, TranslationsTest pass; `ctest` 9/9; `cargo test --workspace` 729/0; tester 15/0; Python runners pass.
+- Done; CLI.1 in `TODO_COMPLETED.md`. Branch `feature/cli-1`, not merged, not pushed. Plan `CLI_1_PLAN.md` (D1–D17); matrix `CLI_1_OPTION_MATRIX.md`; results and acceptance checklist `CLI_1_TEST_RESULTS.md`.
+- New options: Seamly2D `--layout-material`, `--layout-view`, `--layout-oversize`, `--layout-info`, `--text2paths`; SeamlyLayout `--material`, `--view`, `--oversize`, `--info`, `--text2paths`. Removed `--layout-scale`/`--scale` (PNG fixed at 96 px/in).
+- Tests: CLI suite 106/106; `local_build_msi.ps1` pass (`nmake check`, `ctest` 9/9, `cargo test` 730/0, MSI built, not installed); `TST_VCommandLine` 26; CollectionTest 69/0 (start in `bin`); tester 15/0; Python runners pass.
 - Tester: `src/test/CliTestApp` (Rust/Iced, `--batch`), built in `target\release`.
-- Blocked: Linux/macOS (no WSL, no Mac), CI (no push), Richmond `.sm2d` (not on this machine). MSI build waits for Sue (CLAUDE.md).
-- Open for Sue: merge; CLI.3 direct flags and `--text2paths` (findings in CLI.3.5); CLI.2.1 Richmond fixtures.
+- Blocked: Linux/macOS (no WSL, no Mac), CI (no push), Richmond `.sm2d` (not on this machine).
+- Next: Sue reviews and merges. CLI.3 keeps the direct layout flags (names and precedence need Sue); CLI.2.1 needs the Richmond files.
 
 ### 2026-11-15 — Piece mode Details > Export Pieces (Seamly2D.73)
 

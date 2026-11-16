@@ -11,20 +11,20 @@
 | Suite | Command | Result |
 |---|---|---|
 | Seamly2D Qt tests (40 suites) | `src\test\Seamly2DTest\target_wrapper.bat bin\Seamly2DTests.exe` (`QT_QPA_PLATFORM=offscreen`) | 32 621 pass, 0 fail |
-| `TST_VCommandLine` | part of the above | 24 pass, 0 fail |
+| `TST_VCommandLine` | part of the above | 26 pass, 0 fail |
 | CollectionTest (`TST_Seamly2DCommandLine`, `TST_SeamlyMeCommandLine`) | `bin\CollectionTest.exe`, started in `bin` (it copies its data there) | 69 pass, 0 fail, 4 skip |
 | ParserTest | `bin\ParserTest.exe` | pass (exit 0) |
 | TranslationsTest | `bin\TranslationsTest.exe` | 0 fail (QT_FORCE_STDERR_LOGGING=1 for counts) |
 | SeamlyLayout Qt tests | `ctest --preset release` | 9/9 pass |
-| SeamlyLayout Rust | `cargo test --workspace --no-fail-fast` | 729 pass, 0 fail (28 test binaries) |
+| SeamlyLayout Rust | `cargo test --workspace` | 730 pass, 0 fail |
 | CLI tester Rust | `cargo test` in `src\test\CliTestApp` | 15 pass, 0 fail |
-| CLI regression suite | `src\test\CliTest\test_cli_layout_export.ps1` | 100 cases: 100 pass, 0 fail, 0 skip (full run, about 20 min) |
+| CLI regression suite | `src\test\CliTest\test_cli_layout_export.ps1` | 106 cases: 106 pass, 0 fail, 0 skip (full run after the MSI build) |
 | Python headless runner | `test_headless_export.py ... --seamly2d ... --pattern male_shirt.sm2d` | all checks pass (47) |
 | Python pattern input runner | `test_pattern_input_status.py` | all checks pass |
 | Python measurement runner | `test_measurement_cli.py` (SeamlyMe) | all checks pass |
 | CLI tester batch | `cli_test_app --batch` on male_shirt, jacket2 (3 materials), trousers | 3 sessions pass, ZIPs read back; Marker + DXF refused (exit 2) |
 | CLI tester window | window opened; screenshots of screens 1–3 | pass (see below) |
-| `local_build_msi.ps1` | not run | CLAUDE.md: ask Sue first. Its test steps ran one by one above; the install-folder lookup ran as `layout-app-installed-folder` |
+| `local_build_msi.ps1` | full run, with tests | pass: `nmake check` (4 suites), `ctest` 9/9, `cargo test` 730/0; `seamly-x64.msi` 165.8 MB (not installed) |
 
 ## CLI regression suite
 
@@ -93,7 +93,7 @@ See `CLI_1_PLAN.md` D1–D16. Each has a case above or a unit test.
 
 - Linux and macOS: no host. WSL is not installed and there is no macOS machine. Console attach is Windows-only code.
 - CI (`ci.yml`): needs a push; the task forbids push.
-- MSI package: not built (CLAUDE.md: ask Sue before `local_build_msi.ps1`). Not a §13 criterion. Its tests ran one by one; the install-folder lookup ran from a copy of the install layout.
+- MSI package: built and its tests passed; not installed on this machine. The install-folder lookup ran from a copy of the install layout.
 - Richmond `.sm2d` and measurements: not on this machine (searched `C:\Users\susan`). Only the handoff SVG was tested, through SeamlyLayout.
 - `foldLinesOnLeftEdge` and `selvedgeWidth`: accepted and validated; their placement effects are covered by SeamlyLayout Rust tests, not by file checks here.
 - Tester window clicks were not automated; Run calls the same function as `--batch`.
