@@ -77,6 +77,7 @@ SOURCES += \
     tst_handoffpiece.cpp \
     tst_handofflabel.cpp \
     tst_handoffdocument.cpp \
+    tst_handoffsvgfile.cpp \
     tst_vpatternconverter.cpp \
     tst_labeltemplatefilename.cpp \
     tst_patternpiececopy.cpp \
@@ -121,6 +122,7 @@ HEADERS += \
     tst_handoffpiece.h \
     tst_handofflabel.h \
     tst_handoffdocument.h \
+    tst_handoffsvgfile.h \
     tst_vpatternconverter.h \
     tst_labeltemplatefilename.h \
     tst_patternpiececopy.h \

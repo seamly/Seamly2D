@@ -93,6 +93,7 @@
 #include "tst_handoffpiece.h"
 #include "tst_handofflabel.h"
 #include "tst_handoffdocument.h"
+#include "tst_handoffsvgfile.h"
 #include "tst_vpatternconverter.h"
 #include "tst_labeltemplatefilename.h"
 #include "tst_patternpiececopy.h"
@@ -264,6 +265,7 @@ int main(int argc, char** argv)
     ASSERT_TEST(new TST_HandoffPiece());
     ASSERT_TEST(new TST_HandoffLabel());
     ASSERT_TEST(new TST_HandoffDocument());
+    ASSERT_TEST(new TST_HandoffSvgFile());
     ASSERT_TEST(new TST_VPatternConverter());
     ASSERT_TEST(new TST_LabelTemplateFileName());
     ASSERT_TEST(new TST_PatternPieceCopy());
