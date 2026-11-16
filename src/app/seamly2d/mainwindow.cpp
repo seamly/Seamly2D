@@ -71,6 +71,7 @@
 #include "../ifc/xml/multi_size_converter.h"
 #include "../ifc/xml/vpatternconverter.h"
 #include "../ifc/xml/vtoolrecord.h"
+#include "../layout_handoff/handoff_svg_file.h"
 #include "../vtools/tools/vdatatool.h"
 #include <QGraphicsItem>
 #include "../tools/images/image_tool.h"
@@ -974,6 +975,80 @@ bool MainWindow::prepareMultisizePieceLists()
     recalculateAtSize(originalSize, originalHeight);
     emit pieceScene->DimensionsChanged();
     return !canceled;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief createPiecesSvg builds the tagged pieces SVG from the pieces with "in layout" set.
+ *
+ * Steps: preparePiecesForLayout(), prepareMultisizePieceLists(), generateHandoffSvgDocument().
+ * Layout mode sends the SVG to SeamlyLayout. Export Pieces writes it to a file.
+ *
+ * A message box reports: no piece, no piece in the layout, a piece that cannot be prepared, an empty SVG,
+ * and grainlines or labels without a shared place in every size. Cancel in the multisize dialog shows no message.
+ *
+ * @return the SVG document; empty after an error or Cancel.
+ */
+QString MainWindow::createPiecesSvg()
+{
+    QString pieces_svg;
+    const QHash<quint32, VPiece> pieces = currentLayoutPieces();
+    if (pattern->DataPieces()->isEmpty())
+    {
+        QMessageBox::information(this, tr("Layout mode"), tr("You can't use Layout mode yet. "
+                                                             "Please, create at least one pattern piece."),
+                                 QMessageBox::Ok, QMessageBox::Ok);
+    }
+    else if (pieces.isEmpty())
+    {
+        QMessageBox::information(this, tr("Layout mode"), tr("You can't use Layout mode yet. Please, "
+                                                             "include at least one pattern piece in layout."),
+                                 QMessageBox::Ok, QMessageBox::Ok);
+    }
+    else
+    {
+        // The called functions report a piece that cannot be calculated with VException.
+        bool prepared = false;
+        try
+        {
+            preparePiecesForLayout(pieces);
+            // Multisize: the SVG carries every size, grouped by piece. False when the user canceled.
+            prepared = prepareMultisizePieceLists();
+        }
+        catch (VException& exception)
+        {
+            QMessageBox::warning(this, tr("Layout mode"),
+                                 tr("You can't use Layout mode yet.") + QLatin1String(" \n") + exception.ErrorMessage(),
+                                 QMessageBox::Ok, QMessageBox::Ok);
+        }
+
+        if (prepared)
+        {
+            // Build from the retained pattern data; no canvas items are read.
+            QStringList annotation_warnings;
+            pieces_svg = generateHandoffSvgDocument(&annotation_warnings);
+            if (pieces_svg.isEmpty())
+            {
+                QMessageBox::warning(this, tr("Layout mode"),
+                                     tr("Could not create the layout document from the pattern pieces."),
+                                     QMessageBox::Ok, QMessageBox::Ok);
+            }
+            else if (!annotation_warnings.isEmpty())
+            {
+                QMessageBox::warning(this, tr("Layout mode"),
+                                     tr("Some grainlines or labels have no shared place inside every size's cut "
+                                        "line.\n\n%1").arg(annotation_warnings.join(QLatin1Char('\n'))),
+                                     QMessageBox::Ok, QMessageBox::Ok);
+            }
+        }
+        else
+        {
+            pieceList.clear();
+            handoff_pieces.clear();
+            sizePieceLists.clear();
+        }
+    }
+    return pieces_svg;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -3386,6 +3461,8 @@ void MainWindow::initializeToolButtons()
     connect(ui->pieceMirror_ToolButton,         &QToolButton::clicked, this, &MainWindow::handlePieceMirrorTool);
     connect(ui->copy_piece_tool_button,         &QToolButton::clicked,
             ui->duplicate_piece_action, &QAction::trigger);
+    connect(ui->export_pieces_tool_button,      &QToolButton::clicked,
+            ui->export_pieces_action, &QAction::trigger);
     connect(ui->pointAlongArc_ToolButton,       &QToolButton::clicked, this, &MainWindow::handlePointAlongArcTool);
     connect(ui->lineIntersectAxis_ToolButton,   &QToolButton::clicked, this, &MainWindow::handleLineIntersectAxisTool);
     connect(ui->curveIntersectAxis_ToolButton,  &QToolButton::clicked, this, &MainWindow::handleCurveIntersectAxisTool);
@@ -4460,70 +4537,19 @@ void MainWindow::showLayoutMode(bool checked)
         ui->pieceMode_Action->setChecked(false);
         ui->layoutMode_Action->setChecked(true);
 
-        QHash<quint32, VPiece> pieces;
-        if(!qApp->getOpeningPattern())
-        {
-            const QHash<quint32, VPiece> *allPieces = pattern->DataPieces();
-            if (allPieces->count() == 0)
-            {
-                QMessageBox::information(this, tr("Layout mode"), tr("You can't use Layout mode yet. "
-                                                                     "Please, create at least one pattern piece."),
-                                         QMessageBox::Ok, QMessageBox::Ok);
-                showDraftMode(true);
-                return;
-            }
-            else
-            {
-                QHash<quint32, VPiece>::const_iterator i = allPieces->constBegin();
-                while (i != allPieces->constEnd())
-                {
-                    if (i.value().isInLayout())
-                    {
-                        pieces.insert(i.key(), i.value());
-                    }
-                    ++i;
-                }
-
-                if (pieces.count() == 0)
-                {
-                    QMessageBox::information(this, tr("Layout mode"),  tr("You can't use Layout mode yet. Please, "
-                                                                          "include at least one pattern piece in layout."),
-                                             QMessageBox::Ok, QMessageBox::Ok);
-                    doc->getDraftStage() == Draw::Calculation ? showDraftMode(true) : showPieceMode(true);
-                    return;
-                }
-            }
-        }
-
         draft_block_combobox->setCurrentIndex(-1);// Hide pattern pieces
 
         qCDebug(vMainWindow, "Hand off layout to SeamlyLayout");
 
         SaveCurrentScene();
 
-        try
+        const QString pieces_svg = createPiecesSvg();
+        if (pieces_svg.isEmpty())
         {
-            preparePiecesForLayout(pieces);
-            // Multisize: the handoff carries every size, grouped by piece.
-            if (!prepareMultisizePieceLists())
-            {
-                // The user canceled: no message, back to the mode the user came from.
-                pieceList.clear();
-                handoff_pieces.clear();
-                doc->getDraftStage() == Draw::Calculation ? showDraftMode(true) : showPieceMode(true);
-                return;
-            }
-        }
-
-        catch (VException &exception)
-        {
-            pieceList.clear();
-            handoff_pieces.clear();
-            sizePieceLists.clear();
-            QMessageBox::warning(this, tr("Layout mode"),
-                                 tr("You can't use Layout mode yet.") + QLatin1String(" \n") + exception.ErrorMessage(),
-                                 QMessageBox::Ok, QMessageBox::Ok);
-            doc->getDraftStage() == Draw::Calculation ? showDraftMode(true) : showPieceMode(true);
+            // createPiecesSvg() showed the reason, or the user canceled: back to the mode the user came from.
+            // Piece mode needs at least one piece.
+            const bool to_draft_mode = doc->getDraftStage() == Draw::Calculation || pattern->DataPieces()->isEmpty();
+            to_draft_mode ? showDraftMode(true) : showPieceMode(true);
             return;
         }
 
@@ -4557,7 +4583,7 @@ void MainWindow::showLayoutMode(bool checked)
         // SeamlyLayout handoff: instead of running the built-in layout engine,
         // send the tagged pieces SVG to the SeamlyLayout application.
         // On failure (error already reported in a dialog) return to the prior mode.
-        if (!exportPiecesToSeamlyLayout())
+        if (!exportPiecesToSeamlyLayout(pieces_svg))
         {
             priorStage == Draw::Calculation ? showDraftMode(true) : showPieceMode(true);
             return;
@@ -4602,45 +4628,22 @@ void MainWindow::raiseSeamlyLayout() const
 /**
  * @brief exportPiecesToSeamlyLayout hands the pattern pieces over to the SeamlyLayout application.
  *
- * Workflow: build the tagged pieces SVG (data-type / data-type-number /
- * data-parent / data-name / data-letter attributes on every group, see
- * generateHandoffSvgDocument()) as one string, launch the SeamlyLayout
- * application with --svg-stdin, then write that string to its standard input
- * and close the channel. No file is created, so nothing is left beside the
- * pattern and an unsaved or read-only pattern no longer blocks Layout Mode
- * (Seamly2D.5). The process is tracked via m_seamlyLayoutProcess so its exit
- * can restore the prior mode (Seamly2D.3).
+ * Workflow: launch the SeamlyLayout application with --svg-stdin, then write
+ * the pieces SVG from createPiecesSvg() to its standard input and close the
+ * channel. No file is created, so nothing is left beside the pattern and an
+ * unsaved or read-only pattern does not block Layout Mode. The process is
+ * tracked via m_seamlyLayoutProcess so its exit can restore the prior mode.
  *
  * The user enters layout settings, generates, adjusts, saves, views and prints
- * the layout inside SeamlyLayout. Any problem (no pieces, failed SVG
- * generation, missing SeamlyLayout executable, failed launch) is reported in a
- * message box.
+ * the layout inside SeamlyLayout. A missing SeamlyLayout executable or a failed
+ * launch is reported in a message box.
  *
- * @return true when the document was generated and handed to a running
- *         SeamlyLayout; false on any failure so the caller can revert to the
- *         prior mode.
+ * @param pieces_svg tagged pieces SVG document from createPiecesSvg(); not empty.
+ * @return true when the document was handed to a running SeamlyLayout; false on
+ *         any failure so the caller can revert to the prior mode.
  */
-bool MainWindow::exportPiecesToSeamlyLayout()
+bool MainWindow::exportPiecesToSeamlyLayout(const QString& pieces_svg)
 {
-    // Build from the retained pattern data; no canvas items are read.
-    QStringList annotation_warnings;
-    const QString piecesSvg = generateHandoffSvgDocument(&annotation_warnings);
-    if (piecesSvg.isEmpty())
-    {
-        QMessageBox::warning(this, tr("Layout mode"),
-                             tr("Could not create the layout document from the pattern pieces."),
-                             QMessageBox::Ok, QMessageBox::Ok);
-        return false;
-    }
-
-    if (!annotation_warnings.isEmpty())
-    {
-        QMessageBox::warning(this, tr("Layout mode"),
-                             tr("Some grainlines or labels have no shared place inside every size's cut line.\n\n%1")
-                                 .arg(annotation_warnings.join(QLatin1Char('\n'))),
-                             QMessageBox::Ok, QMessageBox::Ok);
-    }
-
     // Locate the SeamlyLayout executable (settings override first, then the install directory).
     const QString seamlyLayout = qApp->seamlyLayoutFilePath();
     if (seamlyLayout.isEmpty())
@@ -4700,7 +4703,7 @@ bool MainWindow::exportPiecesToSeamlyLayout()
 
     // Send the document, then close the write channel: SeamlyLayout reads
     // standard input to end, so without the close it would wait forever.
-    m_seamlyLayoutProcess->write(piecesSvg.toUtf8());
+    m_seamlyLayoutProcess->write(pieces_svg.toUtf8());
     m_seamlyLayoutProcess->closeWriteChannel();
 
     // Drain the write buffer here rather than leaving it to the event loop.
@@ -4723,6 +4726,43 @@ bool MainWindow::exportPiecesToSeamlyLayout()
     }
 
     return true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief exportPiecesToSvgFile writes the Layout mode pieces SVG to an SVG file that the user selects.
+ *
+ * The SVG comes from createPiecesSvg(), so the file holds the string that Layout mode sends to SeamlyLayout.
+ * The mode and the scene do not change. The file dialog starts in the Layout folder of Preferences > Paths.
+ * Cancel in the multisize dialog or in the file dialog writes no file.
+ */
+void MainWindow::exportPiecesToSvgFile()
+{
+    // No tool may stay active while the multisize recalculation changes the pattern data. Layout mode does the same.
+    handleArrowTool(true);
+
+    const QString pieces_svg = createPiecesSvg();
+    if (!pieces_svg.isEmpty())
+    {
+        const QString file_name = layout_handoff::pieces_svg_file_name(FileName(), QDateTime::currentDateTime());
+        const QString start_path = QDir(qApp->Seamly2DSettings()->getLayoutPath()).filePath(file_name);
+        QString file_path = QFileDialog::getSaveFileName(this, tr("Export Pieces"), start_path,
+                                                         tr("SVG Files (*.svg)"), nullptr,
+                                                         qApp->Settings()->getUseNativeFileDialogs());
+
+        // Some file dialogs add no suffix. SeamlyLayout opens only .svg files.
+        if (!file_path.isEmpty() && QFileInfo(file_path).suffix().isEmpty())
+        {
+            file_path += QLatin1String(".svg");
+        }
+
+        if (!file_path.isEmpty() && !layout_handoff::write_svg_file(file_path, pieces_svg))
+        {
+            QMessageBox::warning(this, tr("Export Pieces"),
+                                 tr("Could not write the file:\n%1").arg(QDir::toNativeSeparators(file_path)),
+                                 QMessageBox::Ok, QMessageBox::Ok);
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -5770,6 +5810,7 @@ void MainWindow::setToolsEnabled(bool enable)
     ui->unitePieces_ToolButton->setEnabled(pieceTools);
     ui->pieceMirror_ToolButton->setEnabled(pieceTools);
     ui->copy_piece_tool_button->setEnabled(pieceTools);
+    ui->export_pieces_tool_button->setEnabled(pieceTools);
 
     //enable Toolbox Toolbar actions
     ui->arrow_Action->setEnabled(enable);
@@ -5845,6 +5886,7 @@ void MainWindow::setToolsEnabled(bool enable)
     ui->union_Action->setEnabled(pieceTools);
     ui->pieceMirror_Action->setEnabled(pieceTools);
     ui->duplicate_piece_action->setEnabled(pieceTools);
+    ui->export_pieces_action->setEnabled(pieceTools);
 
     ui->lastTool_Action->setEnabled(draftTools);
 
@@ -6907,6 +6949,8 @@ void MainWindow::createActions()
             ui->statusBar->showMessage(tr("Select an unlocked pattern piece to copy it."), 5000);
         }
     });
+
+    connect(ui->export_pieces_action, &QAction::triggered, this, &MainWindow::exportPiecesToSvgFile);
 
     //Tools->Piece submenu actions
     connect(ui->addPiece_Action, &QAction::triggered, this, [this]

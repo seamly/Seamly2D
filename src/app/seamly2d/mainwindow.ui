@@ -215,6 +215,7 @@
      <addaction name="union_Action"/>
      <addaction name="pieceMirror_Action"/>
      <addaction name="duplicate_piece_action"/>
+     <addaction name="export_pieces_action"/>
     </widget>
     <widget class="QMenu" name="lines_Menu">
      <property name="title">
@@ -2204,7 +2205,7 @@
              <x>0</x>
              <y>0</y>
              <width>120</width>
-             <height>207</height>
+             <height>255</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -2245,7 +2246,7 @@
               <x>0</x>
               <y>0</y>
               <width>120</width>
-              <height>178</height>
+              <height>226</height>
              </rect>
             </property>
             <property name="toolTip">
@@ -2346,6 +2347,35 @@
              <property name="icon">
               <iconset resource="share/resources/toolicon.qrc">
                <normaloff>:/toolicon/32x32/copy_piece.png</normaloff>:/toolicon/32x32/copy_piece.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>32</width>
+               <height>32</height>
+              </size>
+             </property>
+            </widget>
+            <widget class="QToolButton" name="export_pieces_tool_button">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>154</y>
+               <width>39</width>
+               <height>38</height>
+              </rect>
+             </property>
+             <property name="toolTip">
+              <string>Export Pieces (E, P)</string>
+             </property>
+             <property name="text">
+              <string notr="true">...</string>
+             </property>
+             <property name="icon">
+              <iconset resource="share/resources/toolicon.qrc">
+               <normaloff>:/toolicon/32x32/export.png</normaloff>:/toolicon/32x32/export.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -4497,6 +4527,21 @@
    </property>
    <property name="shortcut">
     <string notr="true">Ctrl+D</string>
+   </property>
+  </action>
+  <action name="export_pieces_action">
+   <property name="icon">
+    <iconset resource="share/resources/toolicon.qrc">
+     <normaloff>:/toolicon/32x32/export.png</normaloff>:/toolicon/32x32/export.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export Pieces</string>
+   </property>
+   <property name="toolTip">
+    <string>Export Pieces (E, P)</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">E, P</string>
    </property>
   </action>
  </widget>
