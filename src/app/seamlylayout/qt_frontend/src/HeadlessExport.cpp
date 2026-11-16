@@ -4,6 +4,17 @@
 //
 // @file HeadlessExport.cpp
 // @brief Runs the existing layout and export pipeline without loading QML.
+//
+// Workflow of run():
+//   1. Load preferences and settings; an explicit --settings file gets a strict check.
+//   2. Import the SVG and build each material's blank canvas.
+//   3. --info: print the JSON report and stop.
+//   4. Lay out every material and view, as the Create Layout button does; oversized
+//      pieces stop the run unless --oversize chooses split or extend.
+//   5. Refuse a layout with unplaced pieces or a failed view.
+//   6. Show the --material and --view layout, then check the format against the
+//      Export menu rules (export_rules.rs).
+//   7. Remove an old file at the output path, export, and remove a partial file on failure.
 
 #include "HeadlessExport.h"
 
@@ -95,82 +106,214 @@ QString compactJson(const QJsonObject &object)
 {
     return QString::fromUtf8(QJsonDocument(object).toJson(QJsonDocument::Compact));
 } // compactJson
+
+// @brief Index of the --view name in the tab labels; -1 when no label matches.
+//
+// Accepted names, case-insensitive: a full label ("Base Size 48", "Size 40"),
+// "marker", "nested", "base" (the Base Size tab), or a size value ("40" = "Size 40").
+int viewIndex(const QStringList &labels, const QString &view)
+{
+    const QString name = view.trimmed();
+    const QString basePrefix = QStringLiteral("Base Size ");
+    for (int index = 0; index < labels.size(); ++index) {
+        const QString &label = labels.at(index);
+        const bool matches = label.compare(name, Qt::CaseInsensitive) == 0
+            || (name.compare(QStringLiteral("base"), Qt::CaseInsensitive) == 0 && label.startsWith(basePrefix))
+            || label == QStringLiteral("Size ") + name;
+        if (matches) {
+            return index;
+        } // if the label matches
+    } // for each label
+    return -1;
+} // viewIndex
+
+// @brief Text of the run's materials for a message, e.g. "Fabric, Interfacing, Lining".
+QString materialList(const QStringList &labels, const QString &onlyMaterial)
+{
+    if (!labels.isEmpty()) {
+        return labels.join(QStringLiteral(", "));
+    } // if material tabs
+    return onlyMaterial.isEmpty() ? QStringLiteral("(no material name)") : onlyMaterial;
+} // materialList
 } // namespace
 
-// @brief Import, lay out, and export one SVG without creating a QML window.
+// @brief Import, lay out, and export one SVG, or report on it, without creating a QML window.
 // The same AppController methods used by Main.qml keep file and stdin exports
 // on the established rendering, layout, and export paths.
-int HeadlessExport::run(const StartupOptions &options, QString &errorMessage)
+HeadlessExport::Result HeadlessExport::run(const StartupOptions &options)
 {
+    Result result;
+    const auto fail = [&result](int exitCode, const QString &message) {
+        result.exitCode = exitCode;
+        result.error = message;
+        return result;
+    }; // fail
+
     PreferencesModel preferences;
     if (!preferences.load(preferences.defaultPreferencesFilePath())) {
-        errorMessage = QStringLiteral("Cannot load SeamlyLayout preferences.");
-        return ExitSoftware;
+        return fail(ExitSoftware, QStringLiteral("Cannot load SeamlyLayout preferences."));
     } // if preferences are invalid
+
+    AppController controller;
+    QString errorMessage;
+    QObject::connect(&controller, &AppController::errorOccurred, &controller,
+                     [&errorMessage](const QString &message) {
+        errorMessage = message;
+    });
+    QString oversizedMessage;
+    QObject::connect(&controller, &AppController::oversizedPiecesFound, &controller,
+                     [&oversizedMessage](const QString &message) {
+        oversizedMessage = message;
+    });
+    QString layoutWarning;
+    QObject::connect(&controller, &AppController::layoutWarning, &controller,
+                     [&layoutWarning](const QString &message) {
+        layoutWarning = message;
+    });
+
+    // An explicit settings file gets the strict check: the command line shows no dialog
+    // where a value coerced to its default could be seen.
+    if (!options.settingsPath().isEmpty()) {
+        QFile settingsFile(options.settingsPath());
+        if (!settingsFile.open(QIODevice::ReadOnly)) {
+            return fail(ExitUsage, QStringLiteral("Cannot read layout settings: %1").arg(options.settingsPath()));
+        } // if settings file cannot be opened
+        const QString problems =
+            controller.settingsJsonProblems(QString::fromUtf8(settingsFile.readAll()));
+        if (!problems.isEmpty()) {
+            return fail(ExitUsage, QStringLiteral("Invalid layout settings in %1:\n%2")
+                                       .arg(options.settingsPath(), problems));
+        } // if settings are invalid
+    } // if explicit settings file
 
     SettingsModel settings;
     const QString settingsPath = options.settingsPath().isEmpty()
         ? preferences.settingsFilePath()
         : options.settingsPath();
     if (!settings.load(settingsPath)) {
-        errorMessage = QStringLiteral("Cannot load layout settings: %1").arg(settingsPath);
-        return ExitUsage;
+        return fail(ExitUsage, QStringLiteral("Cannot load layout settings: %1").arg(settingsPath));
     } // if settings are invalid
     const QString settingsJson = settings.toJson();
 
     QJsonObject formatOptions;
     if (!readExportOptions(options.exportOptionsPath(), formatOptions, errorMessage)) {
-        return ExitUsage;
+        return fail(ExitUsage, errorMessage);
     } // if format-specific options are invalid
-
-    AppController controller;
-    QObject::connect(&controller, &AppController::errorOccurred, &controller,
-                     [&errorMessage](const QString &message) {
-        errorMessage = message;
-    });
-    QObject::connect(&controller, &AppController::oversizedPiecesFound, &controller,
-                     [&errorMessage](const QString &message) {
-        errorMessage = message;
-    });
-    bool incomplete_layout = false;
-    QObject::connect(&controller, &AppController::layoutWarning, &controller,
-                     [&errorMessage, &incomplete_layout](const QString &message) {
-        errorMessage = message;
-        incomplete_layout = true;
-    });
 
     const bool imported = options.hasFile()
         ? controller.importSvg(options.filePath())
         : controller.importSvgDocument(options.svgDocument());
     if (!imported) {
-        if (errorMessage.isEmpty()) {
-            errorMessage = QStringLiteral("The input SVG could not be imported.");
-        } // if no import error was reported
-        return ExitNoInput;
+        return fail(ExitNoInput, errorMessage.isEmpty() ? QStringLiteral("The input SVG could not be imported.")
+                                                        : errorMessage);
     } // if input import failed
 
     if (!controller.initializeLayout(settingsJson)) {
-        if (errorMessage.isEmpty()) {
-            errorMessage = QStringLiteral("The initial layout could not be prepared.");
-        } // if no initialization error was reported
-        return ExitSoftware;
+        return fail(ExitSoftware, errorMessage.isEmpty() ? QStringLiteral("The initial layout could not be prepared.")
+                                                         : errorMessage);
     } // if layout initialization failed
 
-    if (!controller.processLayout(settingsJson)) {
-        if (errorMessage.isEmpty()) {
-            errorMessage = QStringLiteral("The layout could not be calculated.");
-        } // if no layout error was reported
-        return ExitSoftware;
-    } // if layout calculation failed
-    if (incomplete_layout) {
-        return ExitSoftware;
-    } // do not silently export a layout that omits input pieces
+    if (options.isInfoRequest()) {
+        result.report = controller.layoutInfoJson(settingsJson);
+        return result;
+    } // if only the report was requested
 
-    const QString outputPath = options.outputPath();
+    // Check --material before the layout run, so a typing error costs no layout time.
+    const QStringList materials = controller.getMaterialLabels();
+    const QString onlyMaterial = controller.getActiveMaterialName();
+    int materialIndex = -1;
+    if (!options.material().isEmpty()) {
+        // One material: no material tabs; compare with the shown material's name.
+        const QStringList names = materials.isEmpty() ? QStringList{onlyMaterial} : materials;
+        for (int index = 0; index < names.size() && materialIndex < 0; ++index) {
+            if (names.at(index).compare(options.material(), Qt::CaseInsensitive) == 0) {
+                materialIndex = index;
+            } // if the name matches
+        } // for each material
+        if (materialIndex < 0) {
+            return fail(ExitUsage, QStringLiteral("The input has no material '%1'. Materials: %2.")
+                                       .arg(options.material(), materialList(materials, onlyMaterial)));
+        } // if the material is unknown
+    } else if (materials.size() > 1) {
+        return fail(ExitUsage, QStringLiteral("The input has %1 materials: %2. Select one with --material <name> "
+                                              "(Seamly2D: --layout-material <name>).")
+                                   .arg(materials.size()).arg(materials.join(QStringLiteral(", "))));
+    } // if several materials and none selected
+
+    // Lay out every material and view; the GUI shows a dialog for oversized pieces.
+    bool laidOut = controller.processLayout(settingsJson);
+    if (!laidOut && !oversizedMessage.isEmpty()) {
+        if (options.oversize().isEmpty()) {
+            return fail(ExitSoftware, QStringLiteral("These pieces do not fit the media inside its margins:\n%1\n"
+                                                     "Use --oversize split or --oversize extend "
+                                                     "(Seamly2D: --layout-oversize).")
+                                          .arg(oversizedMessage));
+        } // if no oversize choice
+        laidOut = controller.processLayoutOversized(settingsJson, options.oversize());
+    } // if oversized pieces
+    if (!laidOut) {
+        return fail(ExitSoftware, errorMessage.isEmpty() ? QStringLiteral("The layout could not be calculated.")
+                                                         : errorMessage);
+    } // if layout calculation failed
+
+    // QML runs one queued view per timer tick; here they run back to back.
+    while (controller.getIsTabLayoutPending()) {
+        controller.processNextTabLayout();
+    } // while views are queued
+
+    const QString incomplete = controller.incompleteLayoutReport();
+    if (!incomplete.isEmpty()) {
+        return fail(ExitSoftware, incomplete);
+    } // do not silently export a layout that omits input pieces
+    if (!layoutWarning.isEmpty()) {
+        result.warnings.append(layoutWarning);
+    } // if longer media, rotation or fold line notes
+
+    if (materialIndex > 0 && !controller.selectMaterial(materialIndex)) {
+        return fail(ExitSoftware, QStringLiteral("The %1 layout could not be selected.").arg(options.material()));
+    } // if another material was selected
+
+    const QStringList views = controller.getLayoutViewLabels();
+    if (!options.view().isEmpty()) {
+        if (views.isEmpty()) {
+            return fail(ExitUsage, QStringLiteral("--view selects a multisize layout; this layout has one view."));
+        } // if no views
+        const int index = viewIndex(views, options.view());
+        if (index < 0) {
+            return fail(ExitUsage, QStringLiteral("The layout has no view '%1'. Views: %2.")
+                                       .arg(options.view(), views.join(QStringLiteral(", "))));
+        } // if the view is unknown
+        if (!controller.selectLayoutView(index)) {
+            return fail(ExitSoftware, QStringLiteral("The %1 view could not be selected.").arg(views.at(index)));
+        } // if the view could not be shown
+    } // if a view was selected
+    const QString unavailable = controller.getLayoutViewUnavailableText();
+    if (!unavailable.isEmpty()) {
+        return fail(ExitUsage, unavailable);
+    } // if the view has no layout (Marker or Nested of a split run)
+
+    // Labels that are already paths take "asSupplied" unless a mode was requested.
     const QString format = options.exportFormat();
+    const bool pathLabels = controller.getLabelTextState() == QStringLiteral("pathsOnly");
+    const QString textMode = options.isSvgTextModeSet() || !pathLabels ? options.svgTextMode()
+                                                                       : QStringLiteral("asSupplied");
+    const QString formatProblem =
+        controller.exportFormatProblem(format, options.isSvgTextModeSet() ? textMode : QString());
+    if (!formatProblem.isEmpty()) {
+        return fail(format == QStringLiteral("gcode") || format == QStringLiteral("3mf") ? ExitUnavailable
+                                                                                         : ExitUsage,
+                    formatProblem);
+    } // if the Export menu would disable the format
+
+    // An old file at the output path would pass the existence check after a failed export.
+    const QString outputPath = options.outputPath();
+    if (QFileInfo::exists(outputPath) && !QFile::remove(outputPath)) {
+        return fail(ExitOutputError, QStringLiteral("The old output file cannot be replaced: %1").arg(outputPath));
+    } // if the old output file stays
+
     bool exported = false;
     if (format == QStringLiteral("svg")) {
-        exported = controller.exportSvg(outputPath, options.svgTextMode());
+        exported = controller.exportSvg(outputPath, textMode);
     } else if (format == QStringLiteral("pdf")) {
         exported = controller.exportPdf(outputPath, settingsJson);
     } else if (format == QStringLiteral("pdf-tiled")) {
@@ -186,31 +329,24 @@ int HeadlessExport::run(const StartupOptions &options, QString &errorMessage)
     } else if (format == QStringLiteral("ps") || format == QStringLiteral("eps")) {
         exported = controller.exportPostscript(outputPath, format);
     } else if (format == QStringLiteral("gcode")) {
-        if (!controller.isPaidExportAvailable(QStringLiteral("gcode"))) {
-            errorMessage = QStringLiteral("G-Code export is not available in this build.");
-            return ExitUnavailable;
-        } // if G-Code export is unavailable
         exported = controller.exportGcode(outputPath);
     } else if (format == QStringLiteral("3mf")) {
-        if (!controller.isPaidExportAvailable(QStringLiteral("3mf"))) {
-            errorMessage = QStringLiteral("3MF export is not available in this build.");
-            return ExitUnavailable;
-        } // if 3MF export is unavailable
         exported = controller.exportMesh(outputPath);
     } // if selected format
 
     if (!exported) {
-        if (errorMessage.isEmpty()) {
-            errorMessage = QStringLiteral("SeamlyLayout failed to export %1.").arg(format);
-        } // if no export error was reported
-        return ExitOutputError;
+        QFile::remove(outputPath); // no partial file stays after a failed export
+        return fail(ExitOutputError, errorMessage.isEmpty()
+                                         ? QStringLiteral("SeamlyLayout failed to export %1.").arg(format)
+                                         : errorMessage);
     } // if export failed
 
     if (!QFileInfo::exists(outputPath) || QFileInfo(outputPath).size() == 0) {
-        errorMessage = QStringLiteral("SeamlyLayout reported success but did not create an output file: %1")
-                           .arg(outputPath);
-        return ExitOutputError;
+        QFile::remove(outputPath); // an empty file is not an export
+        return fail(ExitOutputError,
+                    QStringLiteral("SeamlyLayout reported success but did not create an output file: %1")
+                        .arg(outputPath));
     } // if output file was not created
 
-    return ExitSuccess;
+    return result;
 } // HeadlessExport::run

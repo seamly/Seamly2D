@@ -84,6 +84,9 @@ use exports::{
     do_export_svg, paid_export_available, default_export_file_name, material_name_segment, tab_export_path, export_name_segment, dxf_export_name_segment, do_export_hpgl, parse_hpgl_options, do_export_postscript,
 };
 
+// Format rules and the `--info` report of headless export.
+mod export_rules;
+
 // Optional copy of the Seamly2D handoff document (SEAMLYLAYOUT_SAVE_HANDOFF).
 mod handoff_capture;
 
@@ -888,6 +891,25 @@ pub mod qobject {
         #[qinvokable]
         fn is_paid_export_available(self: &AppController, format: &QString) -> bool;
 
+        // Strict check of a settings JSON file for headless export: one problem per line; empty when valid.
+        #[qinvokable]
+        fn settings_json_problems(self: &AppController, settings_json: &QString) -> QString;
+
+        // Why `format` cannot export the shown layout; empty when it can.
+        // `text_mode` is the requested SVG text mode, empty when none was requested.
+        #[qinvokable]
+        fn export_format_problem(self: &AppController, format: &QString, text_mode: &QString) -> QString;
+
+        // Unplaced pieces and failed layouts of the last layout run, one per line; empty when complete.
+        #[qinvokable]
+        fn incomplete_layout_report(self: &AppController) -> QString;
+
+        // JSON report of the import with `settings_json`: materials, oversized pieces,
+        // and the views and formats of a whole and a split layout run.
+        // Call after initialize_layout, so each material has its blank canvas.
+        #[qinvokable]
+        fn layout_info_json(self: &AppController, settings_json: &QString) -> QString;
+
         // Paid G-Code export. Emits error_occurred until a module is available.
         #[qinvokable]
         fn export_gcode(self: Pin<&mut AppController>, path: &QString) -> bool;
@@ -1143,6 +1165,11 @@ pub struct AppControllerRust {
     // The shown material's entry stays empty: the controller holds its layouts.
     material_layouts: Vec<MaterialLayout>,
 
+    // Unplaced or failed layouts of the last layout run, one warning text per layout;
+    // empty when every piece of every layout was placed. Headless export refuses to
+    // export when it is not empty; the GUI shows the same text in `layout_warning`.
+    incomplete_layout_lines: Vec<String>,
+
 } // struct AppControllerRust
 
 impl Default for AppControllerRust {
@@ -1204,6 +1231,7 @@ impl Default for AppControllerRust {
             material_media_sizes:      cxx_qt_lib::QStringList::default(), // no layout until a layout run
             material_docs:             Vec::new(),                     // nothing imported
             material_layouts:          Vec::new(),                     // no layouts
+            incomplete_layout_lines:   Vec::new(),                     // no layout run
         } // Self
     } // fn default
 
@@ -1734,6 +1762,7 @@ impl qobject::AppController {
         // Drop the previous split, the old layouts and the layout flag first:
         // clear_layout_views copies them to the split flag and the material media sizes.
         self.as_mut().rust_mut().divide_spec = None;
+        self.as_mut().rust_mut().incomplete_layout_lines.clear();
         for layout in self.as_mut().rust_mut().material_layouts.iter_mut() {
             layout.reset_to_blank();
         } // for each material
@@ -1959,7 +1988,9 @@ impl qobject::AppController {
                 // so this is a warning (popup), not an error that aborts the layout.
                 let mut warnings: Vec<String> = media_enlargement.into_iter().collect();
                 if !result.unplaced_labels.is_empty() {
-                    warnings.push(layout_views::unplaced_warning(&result.unplaced_labels, is_fabric_layout));
+                    let unplaced = layout_views::unplaced_warning(&result.unplaced_labels, is_fabric_layout);
+                    self.as_mut().rust_mut().incomplete_layout_lines = vec![unplaced.clone()];
+                    warnings.push(unplaced);
                 } // if unplaced pieces
                 if !result.rotation_warnings.is_empty() {
                     warnings.push(layout_views::rotation_warning(&result.rotation_warnings));
@@ -2145,7 +2176,11 @@ impl qobject::AppController {
     // End a layout run: close the progress popup, enable export and Adjust,
     // and report every layout that left pieces out or failed, and fold lines off the edge.
     fn finish_tab_layouts(mut self: std::pin::Pin<&mut Self>) {
-        let warning = self.as_mut().rust_mut().tab_queue.take().and_then(|q| q.final_warning());
+        let queue = self.as_mut().rust_mut().tab_queue.take();
+        let warning = queue.as_ref().and_then(TabLayoutQueue::final_warning);
+        if let Some(queue) = queue {
+            self.as_mut().rust_mut().incomplete_layout_lines = queue.problems;
+        } // if a queue ran
 
         self.as_mut().set_is_tab_layout_pending(false);
         self.as_mut().set_is_layout_in_progress(false);
@@ -3402,6 +3437,89 @@ impl qobject::AppController {
     fn is_paid_export_available(&self, format: &cxx_qt_lib::QString) -> bool {
         paid_export_available(&format.to_string())
     } // fn is_paid_export_available
+
+    // Strict settings check for headless export; delegates to layout_tiling::validate_settings_json.
+    fn settings_json_problems(&self, settings_json: &cxx_qt_lib::QString) -> cxx_qt_lib::QString {
+        match layout_tiling::validate_settings_json(&settings_json.to_string()) {
+            Ok(())        => cxx_qt_lib::QString::default(),                        // valid
+            Err(problems) => cxx_qt_lib::QString::from(problems.join("
+").as_str()), // one line per problem
+        } // match validation
+    } // fn settings_json_problems
+
+    // Why `format` cannot export the shown layout; empty when it can.
+    // The facts come from the last layout run: its settings, its split, the shown view.
+    fn export_format_problem(&self, format: &cxx_qt_lib::QString, text_mode: &cxx_qt_lib::QString) -> cxx_qt_lib::QString {
+        let format = format.to_string();
+        let text_mode = text_mode.to_string();
+        let rust = self.rust();
+        let context = export_rules::ExportContext {
+            view:            rust.layout_views.active_kind(),
+            tiled_paper:     rust.layout_settings.as_ref().is_some_and(LayoutSettings::is_tiled_paper),
+            split:           rust.divide_spec.is_some(),
+            gcode_available: paid_export_available("gcode"),
+            mesh_available:  paid_export_available("3mf"),
+        }; // context
+        let label_text = self.label_text_state().to_string();
+        let problem = export_rules::format_problem(&format, &context).or_else(|| {
+            // Labels that are already paths take only "asSupplied", as in the Export menu.
+            let modes = export_rules::svg_text_modes(&label_text);
+            (format == "svg" && !text_mode.is_empty() && !modes.contains(&text_mode.as_str())).then(|| {
+                format!("The labels of this pattern are paths; --svg-text-mode {text_mode} needs text labels. Use: {}.",
+                        modes.join(", "))
+            }) // text mode needs text labels
+        }); // problem
+        cxx_qt_lib::QString::from(problem.unwrap_or_default().as_str())
+    } // fn export_format_problem
+
+    // Unplaced pieces and failed layouts of the last layout run; empty when complete.
+    fn incomplete_layout_report(&self) -> cxx_qt_lib::QString {
+        cxx_qt_lib::QString::from(self.rust().incomplete_layout_lines.join("
+").as_str())
+    } // fn incomplete_layout_report
+
+    // JSON report for `--info`; see export_rules::layout_info_json.
+    fn layout_info_json(&self, settings_json: &cxx_qt_lib::QString) -> cxx_qt_lib::QString {
+        let json = settings_json.to_string();
+        let tiled_paper = LayoutSettings::from_json(&json).as_ref().is_ok_and(LayoutSettings::is_tiled_paper);
+        let sizes: Vec<String> = if *self.is_multisize() {
+            self.multisize_sizes().to_string()
+                .split(',').map(str::trim).filter(|size| !size.is_empty()).map(String::from).collect()
+        } else {
+            Vec::new()
+        }; // sizes
+        let rust = self.rust();
+        let shown = usize::try_from(*self.active_material()).unwrap_or(0);
+
+        // (name, pieces, blank canvas) of each material; the controller holds the shown material's canvas.
+        let entries: Vec<(String, &svg_dom::Document, Option<&svg_dom::Document>)> = if rust.material_docs.len() > 1 {
+            rust.material_docs.iter().enumerate().map(|(material, part)| {
+                let initial = if material == shown {
+                    rust.initial_layout_dom.as_ref()
+                } else {
+                    rust.material_layouts.get(material).and_then(|layout| layout.initial_layout_dom.as_ref())
+                }; // if shown
+                (part.name.clone(), &part.doc, initial)
+            }).collect()
+        } else {
+            let name = rust.material_docs.first().map(|part| part.name.clone()).unwrap_or_default();
+            rust.input_dom.iter().map(|doc| (name.clone(), doc, rust.initial_layout_dom.as_ref())).collect()
+        }; // entries
+
+        let facts: Vec<(String, String, Vec<piece_divider::OversizedPiece>)> = entries.iter().map(|(name, doc, initial)| {
+            let oversized = initial
+                .and_then(|initial| layout_utils::do_find_oversized_pieces(&json, doc, initial).ok())
+                .unwrap_or_default();
+            (name.clone(), crate::piece_extractor::read_measurements_info(doc).base_size, oversized)
+        }).collect();
+        let materials: Vec<export_rules::MaterialFacts> = facts.iter().map(|(name, base_size, oversized)| {
+            export_rules::MaterialFacts { name, base_size, oversized }
+        }).collect();
+
+        let label_text = self.label_text_state().to_string();
+        let paid = (paid_export_available("gcode"), paid_export_available("3mf"));
+        cxx_qt_lib::QString::from(export_rules::layout_info_json(&sizes, tiled_paper, &label_text, &materials, paid).as_str())
+    } // fn layout_info_json
 
     // Export the assembled layout as G-Code.
     // Delegates to exports::do_export_gcode, which returns Err until a module is available.

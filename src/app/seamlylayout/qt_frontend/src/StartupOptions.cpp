@@ -70,27 +70,8 @@ const QStringList svgTextModes{
     QStringLiteral("hersheyStrokes"), QStringLiteral("asSupplied")
 };
 
-// @brief Detect export options even when another argument makes parsing fail.
-bool hasHeadlessExportArgument(const QStringList &arguments)
-{
-    const QStringList optionNames{
-        QStringLiteral("--export"), QStringLiteral("--format"),
-        QStringLiteral("--output"), QStringLiteral("--destination"),
-        QStringLiteral("--settings"), QStringLiteral("--layout-settings"),
-        QStringLiteral("--export-options"), QStringLiteral("--svg-text-mode"),
-        QStringLiteral("--text-mode"), QStringLiteral("--scale")
-    };
-
-    for (const QString &argument : arguments) {
-        for (const QString &optionName : optionNames) {
-            if (argument == optionName || argument.startsWith(optionName + QLatin1Char('='))) {
-                return true;
-            } // if export option is present
-        } // for each export option
-    } // for each argument
-
-    return false;
-} // hasHeadlessExportArgument
+// @brief Choices of --oversize: split the pieces, or make the media longer.
+const QStringList oversizeChoices{QStringLiteral("split"), QStringLiteral("extend")};
 
 // @brief Build the text shown for --version.
 // Falls back to the product name alone when the caller has not set the
@@ -110,6 +91,31 @@ QString versionText()
     return version.isEmpty() ? name : name + QLatin1Char(' ') + version;
 } // versionText
 } // namespace
+
+// @brief True when an argument names a headless option, also when parsing fails.
+// main() calls it before QApplication exists, to attach the console and skip WebEngine.
+bool StartupOptions::hasHeadlessArguments(const QStringList &arguments)
+{
+    const QStringList optionNames{
+        QStringLiteral("--export"), QStringLiteral("--format"),
+        QStringLiteral("--output"), QStringLiteral("--destination"),
+        QStringLiteral("--settings"), QStringLiteral("--layout-settings"),
+        QStringLiteral("--export-options"), QStringLiteral("--svg-text-mode"),
+        QStringLiteral("--text-mode"), QStringLiteral("--scale"),
+        QStringLiteral("--material"), QStringLiteral("--view"),
+        QStringLiteral("--oversize"), QStringLiteral("--info")
+    };
+
+    for (const QString &argument : arguments) {
+        for (const QString &optionName : optionNames) {
+            if (argument == optionName || argument.startsWith(optionName + QLatin1Char('='))) {
+                return true;
+            } // if headless option is present
+        } // for each headless option
+    } // for each argument
+
+    return false;
+} // StartupOptions::hasHeadlessArguments
 
 // @brief Parse and validate a command line that cannot use standard input.
 // @param arguments Full argument list including the program name at index 0.
@@ -193,6 +199,30 @@ StartupOptions StartupOptions::parse(const QStringList &arguments, QIODevice *st
         QStringLiteral("factor"));
     parser.addOption(scaleOption);
 
+    const QCommandLineOption materialOption(
+        QStringList{QStringLiteral("material")},
+        QStringLiteral("Material to export, such as Fabric or Lining. Required when the input has several materials."),
+        QStringLiteral("name"));
+    parser.addOption(materialOption);
+
+    const QCommandLineOption viewOption(
+        QStringList{QStringLiteral("view")},
+        QStringLiteral("Multisize layout to export: marker, nested, base, or a size such as 40 (default: the first layout)."),
+        QStringLiteral("name"));
+    parser.addOption(viewOption);
+
+    const QCommandLineOption oversizeOption(
+        QStringList{QStringLiteral("oversize")},
+        QStringLiteral("Pieces wider than a roll or fabric: split (split the pieces) or extend (make the media longer). "
+                       "Without it such pieces stop the export."),
+        QStringLiteral("choice"));
+    parser.addOption(oversizeOption);
+
+    const QCommandLineOption infoOption(
+        QStringList{QStringLiteral("info")},
+        QStringLiteral("Print a JSON report of the materials, layouts, oversized pieces and formats; export nothing."));
+    parser.addOption(infoOption);
+
     parser.addPositionalArgument(
         QStringLiteral("svg-file"),
         QStringLiteral("SVG pattern file to open at startup (optional)."),
@@ -203,7 +233,7 @@ StartupOptions StartupOptions::parse(const QStringList &arguments, QIODevice *st
     if (!parser.parse(arguments)) {
         // Unknown option, missing option value, etc. errorText() is already a
         // complete sentence ("Unknown option 'foo'.").
-        options.m_headlessRequest = hasHeadlessExportArgument(arguments);
+        options.m_headlessRequest = hasHeadlessArguments(arguments);
         options.m_status  = Status::Failed;
         options.m_message = parser.errorText();
         return options;
@@ -211,7 +241,9 @@ StartupOptions StartupOptions::parse(const QStringList &arguments, QIODevice *st
 
     options.m_headlessRequest = parser.isSet(exportOption) || parser.isSet(outputOption) ||
         parser.isSet(settingsOption) || parser.isSet(exportOptionsOption) ||
-        parser.isSet(svgTextModeOption) || parser.isSet(scaleOption);
+        parser.isSet(svgTextModeOption) || parser.isSet(scaleOption) ||
+        parser.isSet(materialOption) || parser.isSet(viewOption) ||
+        parser.isSet(oversizeOption) || parser.isSet(infoOption);
 
     if (parser.isSet(versionOption)) {
         // --version wins over everything else, matching every other CLI.
@@ -331,11 +363,17 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
     const QCommandLineOption svgTextModeOption(
         QStringList{QStringLiteral("svg-text-mode"), QStringLiteral("text-mode")});
     const QCommandLineOption scaleOption(QStringList{QStringLiteral("scale")});
+    const QCommandLineOption materialOption(QStringList{QStringLiteral("material")});
+    const QCommandLineOption viewOption(QStringList{QStringLiteral("view")});
+    const QCommandLineOption oversizeOption(QStringList{QStringLiteral("oversize")});
+    const QCommandLineOption infoOption(QStringList{QStringLiteral("info")});
 
     const bool hasExportArguments =
         parser.isSet(exportOption) || parser.isSet(outputOption) ||
         parser.isSet(settingsOption) || parser.isSet(exportOptionsOption) ||
-        parser.isSet(svgTextModeOption) || parser.isSet(scaleOption);
+        parser.isSet(svgTextModeOption) || parser.isSet(scaleOption) ||
+        parser.isSet(materialOption) || parser.isSet(viewOption) ||
+        parser.isSet(oversizeOption) || parser.isSet(infoOption);
     if (!hasExportArguments) {
         return options;
     } // if no export arguments
@@ -344,16 +382,56 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
         options.m_status = Status::Failed;
         options.m_message = message;
         options.m_headlessExport = false;
+        options.m_infoRequest = false;
         return options;
     };
+
+    if ((hasDocument && !positional.isEmpty()) || (!hasDocument && positional.size() != 1)) {
+        return fail(parser.isSet(infoOption)
+                        ? QStringLiteral("--info requires exactly one input SVG file or --svg-stdin.")
+                        : QStringLiteral("--export requires exactly one input SVG file or --svg-stdin."));
+    } // if input count is invalid
+
+    QString settingsPath;
+    if (parser.isSet(settingsOption)) {
+        const QFileInfo settingsInfo(parser.value(settingsOption));
+        if (!settingsInfo.exists() || !settingsInfo.isFile() || !settingsInfo.isReadable()) {
+            return fail(QStringLiteral("The layout settings file cannot be read:\n%1")
+                            .arg(settingsInfo.absoluteFilePath()));
+        } // if settings file is invalid
+        settingsPath = settingsInfo.absoluteFilePath();
+    } // if explicit settings file
+
+    if (parser.isSet(infoOption)) {
+        // The report covers every material and layout, so it takes no export choice.
+        const bool hasExportChoice =
+            parser.isSet(exportOption) || parser.isSet(outputOption) || parser.isSet(exportOptionsOption) ||
+            parser.isSet(svgTextModeOption) || parser.isSet(scaleOption) || parser.isSet(materialOption) ||
+            parser.isSet(viewOption) || parser.isSet(oversizeOption);
+        if (hasExportChoice) {
+            return fail(QStringLiteral("--info prints a report and exports nothing; it takes only --settings."));
+        } // if export options were given with --info
+        options.m_headlessExport = true;
+        options.m_infoRequest = true;
+        options.m_settingsPath = settingsPath;
+        return options;
+    } // if report requested
 
     if (!parser.isSet(exportOption)) {
         return fail(QStringLiteral("Export options require --export <format>."));
     } // if export format missing
 
-    if ((hasDocument && !positional.isEmpty()) || (!hasDocument && positional.size() != 1)) {
-        return fail(QStringLiteral("--export requires exactly one input SVG file or --svg-stdin."));
-    } // if input count is invalid
+    const QString oversize = parser.value(oversizeOption).trimmed().toLower();
+    if (parser.isSet(oversizeOption) && !oversizeChoices.contains(oversize)) {
+        return fail(QStringLiteral("Unknown --oversize choice '%1'. Use split or extend.")
+                        .arg(parser.value(oversizeOption)));
+    } // if oversize choice is unknown
+
+    for (const QCommandLineOption *nameOption : {&materialOption, &viewOption}) {
+        if (parser.isSet(*nameOption) && parser.value(*nameOption).trimmed().isEmpty()) {
+            return fail(QStringLiteral("--%1 needs a name.").arg(nameOption->names().constFirst()));
+        } // if the name is empty
+    } // for each name option
 
     if (!parser.isSet(outputOption) || parser.value(outputOption).trimmed().isEmpty()) {
         return fail(QStringLiteral("--export requires --output <path>."));
@@ -405,16 +483,6 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
                         .arg(outputPath));
     } // if output cannot be written
 
-    QString settingsPath;
-    if (parser.isSet(settingsOption)) {
-        const QFileInfo settingsInfo(parser.value(settingsOption));
-        if (!settingsInfo.exists() || !settingsInfo.isFile() || !settingsInfo.isReadable()) {
-            return fail(QStringLiteral("The layout settings file cannot be read:\n%1")
-                            .arg(settingsInfo.absoluteFilePath()));
-        } // if settings file is invalid
-        settingsPath = settingsInfo.absoluteFilePath();
-    } // if explicit settings file
-
     QString exportOptionsPath;
     if (parser.isSet(exportOptionsOption)) {
         const QFileInfo exportOptionsInfo(parser.value(exportOptionsOption));
@@ -431,7 +499,11 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
     options.m_settingsPath = settingsPath;
     options.m_exportOptionsPath = exportOptionsPath;
     options.m_svgTextMode = canonicalTextMode;
+    options.m_svgTextModeSet = parser.isSet(svgTextModeOption);
     options.m_exportScale = scale;
+    options.m_material = parser.value(materialOption).trimmed();
+    options.m_view = parser.value(viewOption).trimmed();
+    options.m_oversize = oversize;
     return options;
 } // StartupOptions::parseExportOptions
 
