@@ -100,7 +100,7 @@ See `CLI_1_PLAN.md` D1–D16. Each has a case above or a unit test.
 
 ## Gaps
 
-- Linux and macOS: no host. Tried: `wsl.exe -l` (WSL not installed), `docker` (not installed), no macOS machine. Installing WSL needs admin rights and a reboot. Console attach is Windows-only code.
+- Linux and macOS: no host. Tried: `wsl.exe -l` (WSL not installed), `docker` (not installed), no macOS machine. Installing WSL needs an elevated prompt and a restart; this session is not elevated (`net session` fails), and a system install needs Sue. Console attach is Windows-only code.
 - CI (`ci.yml`): needs a push; the task forbids push. `act` (local Actions runner) is not installed and needs Docker.
 - MSI package: built and its tests passed; not installed on this machine. The install-folder lookup ran from a copy of the install layout.
 - Richmond: the `.sm2d` and its measurements are not in the fixture folder; git history has them (`d3197ee973^:test-seamly-layout-input/`). Extracted to a scratch folder and tested end to end; not added back to the repository (personal measurements).
