@@ -11,5 +11,6 @@ Tasks in this file start with `CLI.`
 - `src/test/CliTest/test_cli_layout_export.ps1` runs Seamly2D and SeamlyLayout for every option group and export format with male_shirt, trousers and jacket2. Results: `CLI_1_TEST_RESULTS.md`.
 - SeamlyMe validates measurement inputs only; it does not read `.sm2d` patterns or export layouts.
 
-- [ ] CLI.2.1 Richmond pattern and measurement files are not in the fixtures. Only `cxxqt_bridge/test_data/richmond-shirt-handoff_pieces.svg` exists; the suite exports it through SeamlyLayout.
+- [x] CLI.2.1 Richmond pattern end to end: `richmond-shirt_v1_v061-test.sm2d` and `2025-06-08-Sue.smis` come from git history (`git show d3197ee973^:test-seamly-layout-input/<file>`). The suite runs them with `-RichmondRoot <folder>` (cases `richmond-pattern-*`).
 - [ ] CLI.2.2 Import the exports into CAD and cutter software (user check).
+  - Automated part done: `src/test/CliTest/test_cli_import_check.py` opens every DXF with ezdxf (auditor clean) and every PDF with pypdf.

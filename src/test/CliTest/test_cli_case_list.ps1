@@ -26,6 +26,7 @@
 #   LayoutApp   'missing': point paths/seamlyLayoutApp at a file that is not a program
 #   DiffersFrom name of an earlier case whose output must differ (same format)
 #   Slow        true: multisize case (about 15 s each)
+#   Richmond    true: needs -RichmondRoot ({richmond}); skipped without it
 
 Set-StrictMode -Version 3.0
 
@@ -362,6 +363,27 @@ function Get-CliTestCases
         @{ Name = 'tester-refuses-marker-dxf'; Group = 'tester'; Program = 'tester'; Slow = $true
            Arguments = @('--batch', '--pattern', $jacket, '--settings', $roll36, '--view', 'Marker', '--format', 'dxf', '--output-dir', '{outdir}')
            Exit = 2; Stderr = 'exports one size' }
+
+        # --- Richmond pattern end to end (from git history; see -RichmondRoot) --------------------------------
+        @{ Name = 'richmond-pattern-info'; Group = 'richmond'; Richmond = $true
+           Arguments = @('--layout-info', '--layout-settings', $roll36, '{richmond}\richmond-shirt_v1_v061-test.sm2d')
+           Exit = 0; Info = @{ Multisize = $false; Materials = @('Fabric'); TiledPaper = $false } }
+        @{ Name = 'richmond-pattern-svg'; Group = 'richmond'; Richmond = $true; Format = 'svg'
+           Arguments = $export + @('--layout-settings', $roll36, '{richmond}\richmond-shirt_v1_v061-test.sm2d')
+           Exit = 0; Expect = @{ MinPieces = 12; WidthIn = 36; HasText = $true } }
+        @{ Name = 'richmond-pattern-pdf'; Group = 'richmond'; Richmond = $true; Format = 'pdf'
+           Arguments = $export + @('--layout-format', 'pdf', '--layout-settings', $roll36, '{richmond}\richmond-shirt_v1_v061-test.sm2d')
+           Exit = 0; Expect = @{ Pages = 1; PageWidthIn = 36; MaxPageHeightIn = 400 } }
+        @{ Name = 'richmond-pattern-pdf-tiled'; Group = 'richmond'; Richmond = $true; Format = 'pdf-tiled'
+           Arguments = $export + @('--layout-format', 'pdf-tiled', '--layout-settings', $letter, '{richmond}\richmond-shirt_v1_v061-test.sm2d')
+           Exit = 0; Expect = @{ MinPages = 2; PageWidthIn = 8.5; PageHeightIn = 11 } }
+        @{ Name = 'richmond-pattern-dxf'; Group = 'richmond'; Richmond = $true; Format = 'dxf'
+           Arguments = $export + @('--layout-format', 'dxf', '--layout-settings', $roll36, '{richmond}\richmond-shirt_v1_v061-test.sm2d')
+           Exit = 0; Expect = @{ Version = 'AC1012'; MinBlocks = 12 } }
+        @{ Name = 'richmond-pattern-measurements'; Group = 'richmond'; Richmond = $true; Format = 'svg'
+           Arguments = $export + @('--mfile', '{richmond}\2025-06-08-Sue.smis', '--layout-settings', $roll36,
+                                   '{richmond}\richmond-shirt_v1_v061-test.sm2d')
+           Exit = 0; Expect = @{ MinPieces = 12; WidthIn = 36 } }
 
         # --- SeamlyLayout headless with the Richmond handoff ------------------------------------------------------
         @{ Name = 'richmond-handoff-svg'; Group = 'seamlylayout'; Program = 'seamlylayout'; Format = 'svg'

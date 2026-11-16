@@ -84,3 +84,5 @@ Source: `command_line.cpp`, `commandoptions.cpp`, `StartupOptions.cpp`, `Headles
 | GUI start unchanged (no console option) | working | `gui-start-unchanged`, `gui-start-with-pattern` |
 | Failed run keeps an existing output file; success replaces it | working | `shirt-oversize-no-choice`, `shirt-old-output-replaced` |
 | Unplaced pieces stop the export | working, exit 70 | `shirt-oversize-extend-too-wide` |
+| Richmond pattern end to end (Seamly2D → SeamlyLayout) | working | `richmond-pattern-*` (with `-RichmondRoot`) |
+| DXF and PDF open in independent libraries | working | `test_cli_import_check.py` (ezdxf auditor, pypdf) |

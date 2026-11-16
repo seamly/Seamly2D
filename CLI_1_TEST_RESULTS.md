@@ -19,6 +19,8 @@
 | SeamlyLayout Rust | `cargo test --workspace` | 734 pass, 0 fail |
 | CLI tester Rust | `cargo test` in `src\test\CliTestApp` | 15 pass, 0 fail |
 | CLI regression suite | `src\test\CliTest\test_cli_layout_export.ps1` | 124 cases: 124 pass, 0 fail, 0 skip (full run, after the direct flags) |
+| Independent import check | `test_cli_import_check.py cli_test_report.json` (ezdxf 1.4.4, pypdf 6.19.0) | 27 DXF/PDF files of the full run + 5 Richmond files: 0 fail; ezdxf auditor clean |
+| Richmond pattern end to end | suite `-RichmondRoot` with the pattern and measurements from git history | 6 `richmond-pattern-*` cases pass (12 pieces, 36 in, AC1012, tiled Letter) |
 | Python headless runner | `test_headless_export.py ... --seamly2d ... --pattern male_shirt.sm2d` | all checks pass (47) |
 | Python pattern input runner | `test_pattern_input_status.py` | all checks pass |
 | Python measurement runner | `test_measurement_cli.py` (SeamlyMe) | all checks pass |
@@ -98,9 +100,10 @@ See `CLI_1_PLAN.md` D1–D16. Each has a case above or a unit test.
 
 ## Gaps
 
-- Linux and macOS: no host. WSL is not installed and there is no macOS machine. Console attach is Windows-only code.
-- CI (`ci.yml`): needs a push; the task forbids push.
+- Linux and macOS: no host. Tried: `wsl.exe -l` (WSL not installed), `docker` (not installed), no macOS machine. Installing WSL needs admin rights and a reboot. Console attach is Windows-only code.
+- CI (`ci.yml`): needs a push; the task forbids push. `act` (local Actions runner) is not installed and needs Docker.
 - MSI package: built and its tests passed; not installed on this machine. The install-folder lookup ran from a copy of the install layout.
-- Richmond `.sm2d` and measurements: not on this machine (searched `C:\Users\susan`). Only the handoff SVG was tested, through SeamlyLayout.
+- Richmond: the `.sm2d` and its measurements are not in the fixture folder; git history has them (`d3197ee973^:test-seamly-layout-input/`). Extracted to a scratch folder and tested end to end; not added back to the repository (personal measurements).
+- CAD and cutter import (CLI.2.2): ezdxf and pypdf open every file clean. An import into the target CAD and cutter software needs a person with that software.
 - `foldLinesOnLeftEdge` and `selvedgeWidth`: accepted and validated; their placement effects are covered by SeamlyLayout Rust tests, not by file checks here.
 - Tester window clicks were not automated; Run calls the same function as `--batch`.

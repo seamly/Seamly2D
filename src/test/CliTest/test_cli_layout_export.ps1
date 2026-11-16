@@ -7,7 +7,11 @@
 # Usage:
 #   powershell -NoProfile -File src\test\CliTest\test_cli_layout_export.ps1 -FixtureRoot <test-seamly-layout>
 #       [-Seamly2D <seamly2d.exe>] [-SeamlyLayout <seamlylayout.exe>] [-QtBin <Qt bin>]
-#       [-OutputRoot <folder>] [-Tester <cli_test_app.exe>] [-Filter <name wildcard>] [-SkipSlow]
+#       [-OutputRoot <folder>] [-Tester <cli_test_app.exe>] [-RichmondRoot <folder>] [-Filter <name wildcard>] [-SkipSlow]
+#
+# -RichmondRoot: folder with richmond-shirt_v1_v061-test.sm2d and 2025-06-08-Sue.smis. The files are not
+# in the fixtures; git history has them (test-seamly-layout-input/ before commit d3197ee973). Without it the
+# Richmond pattern cases are skipped.
 #
 # Workflow:
 #   1. Find the programs, the Qt runtime and the fixture files; stop with exit 2 when one is missing.
@@ -25,6 +29,7 @@ param(
     [string]$QtBin,
     [string]$OutputRoot,
     [string]$Tester,
+    [string]$RichmondRoot = $env:SEAMLY_TEST_RICHMOND,
     [string]$Filter = '*',
     [switch]$SkipSlow
 )
@@ -91,7 +96,7 @@ $baseEnvironment = @{
 # @brief Replace the path tokens of one argument.
 function Expand-Token([string]$Text, [string]$CaseFolder, [string]$OutputFile)
 {
-    return $Text.Replace('{fixtures}', $FixtureRoot).Replace('{settings}', (Join-Path $PSScriptRoot 'settings')).
+    return $Text.Replace('{fixtures}', $FixtureRoot).Replace('{settings}', (Join-Path $PSScriptRoot 'settings')).Replace('{richmond}', [string]$RichmondRoot).
         Replace('{outdir}', $CaseFolder).Replace('{out}', $OutputFile).Replace('{repo}', $repo)
 }
 
@@ -121,6 +126,16 @@ foreach ($case in $cases) {
 
     $failures = New-Object System.Collections.Generic.List[string]
     $program = & $property 'Program' 'seamly2d'
+    $richmondMissing = (& $property 'Richmond' $false) -and
+        (-not $RichmondRoot -or -not (Test-Path -LiteralPath (Join-Path $RichmondRoot 'richmond-shirt_v1_v061-test.sm2d')))
+    if ($richmondMissing) {
+        $results.Add([pscustomobject]@{ name = $case.Name; group = $case.Group; status = 'skip'; program = $program
+            command = ''; arguments = $arguments; workingDirectory = $workingDirectory; exitCode = $null
+            expectedExit = $case.Exit; seconds = 0; stdout = ''; stderr = 'Richmond pattern not given (-RichmondRoot)'
+            output = $null; failures = @() })
+        Write-Host ('{0,-4} {1,-44} (no -RichmondRoot)' -f 'SKIP', $case.Name)
+        continue
+    }
     if ($program -eq 'tester' -and -not $Tester) {
         $results.Add([pscustomobject]@{ name = $case.Name; group = $case.Group; status = 'skip'; program = $program
             command = ''; arguments = $arguments; workingDirectory = $workingDirectory; exitCode = $null
