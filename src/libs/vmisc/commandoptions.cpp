@@ -61,6 +61,8 @@ const QString SINGLE_OPTION_MEASUREFILE     = QStringLiteral("m");
 const QString LONG_OPTION_TEST              = QStringLiteral("test");
 const QString SINGLE_OPTION_TEST            = QStringLiteral("t");
 
+const QString LONG_OPTION_BASESIZE          = QStringLiteral("basesize");
+
 const QString LONG_OPTION_GRADATIONSIZE     = QStringLiteral("gsize");
 const QString SINGLE_OPTION_GRADATIONSIZE   = QStringLiteral("x");
 

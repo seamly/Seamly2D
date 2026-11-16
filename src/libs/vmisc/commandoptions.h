@@ -60,6 +60,9 @@ extern const QString SINGLE_OPTION_MEASUREFILE;
 extern const QString LONG_OPTION_TEST;
 extern const QString SINGLE_OPTION_TEST;
 
+/// @brief Select the base size from the multisize measurement file.
+extern const QString LONG_OPTION_BASESIZE;
+
 extern const QString LONG_OPTION_GRADATIONSIZE;
 extern const QString SINGLE_OPTION_GRADATIONSIZE;
 

@@ -67,6 +67,8 @@ public:
 
 private slots:
     void UniqueKeys();
+    void BaseSizeSelection_data();
+    void BaseSizeSelection();
     void LayoutExportOptions();
     void LayoutExportOptionsAppearInHelp();
     void HelpDescribesLimitsAndRemovedBasename();

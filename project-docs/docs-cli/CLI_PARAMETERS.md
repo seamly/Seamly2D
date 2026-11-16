@@ -22,7 +22,8 @@ The same information appears with `--help`.
 | `-v`, `--version` | Show the version, exit 0. |
 | `-t`, `--test` | Test mode: load one pattern file, then quit without showing the main window. |
 | `-m`, `--mfile <file>` | Measurement file (`.smis`, `.smms`) for test mode, layout export and layout info. Replaces the file the pattern names. |
-| `-x`, `--gsize <cm>` | Size of a multisize pattern. Exports that one size. |
+| `--basesize` | Select the base size from the multisize measurement file. Takes no argument. Cannot accompany `--gsize`. |
+| `-x`, `--gsize <cm>` | Select a numeric multisize size. Cannot accompany `--basesize`. |
 | `-e`, `--gheight <cm>` | Height of a multisize pattern. Exports that one height. |
 | `--layout-export` | Lay out the pattern in SeamlyLayout and export it. No window opens. |
 | `--layout-info` | Print a JSON report of materials, layouts, oversized pieces and formats. Exports nothing. |
@@ -43,22 +44,27 @@ Option names are case-sensitive. Each long option also accepts `--name=value`.
 
 ## Workflow
 
-`--layout-export` and `--layout-info` load one pattern, apply `--mfile`, `--gsize` and `--gheight`,
+`--layout-export` and `--layout-info` load one pattern, apply `--mfile`, `--gsize` or `--basesize`, and `--gheight`,
 and build the tagged pieces SVG in memory, as Layout mode does. Seamly2D starts SeamlyLayout
 (`paths/seamlyLayoutApp`, else the install folder, else the build tree) with `--svg-stdin` and
 writes the SVG to its standard input. No intermediate file is written. Seamly2D waits for
 SeamlyLayout and returns its exit code. SeamlyLayout messages go to standard error.
 
-- A multisize pattern without `--gsize` and `--gheight` hands off every size at the base height.
-  SeamlyLayout makes the Marker, Nested, Base Size and Size layouts; `--layout-view` selects one.
-- With `--gsize` or `--gheight` the handoff holds one size and height, with no views.
+- Multisize console runs require --gsize <cm> or --basesize. Both options together cause exit 64.
+- --basesize reads the size from the active measurement file, including a --mfile override.
+  Seamly2D converts the measurement unit before it selects the size.
+- --basesize exports only the base size unless --layout-view selects a multisize view.
+  --layout-info still reports every available view.
+- --gsize selects one numeric size. --gheight can accompany either size option.
+- --basesize on an individual pattern causes exit 65.
+- GUI file opening does not require a size option.
 - SeamlyLayout lays out every material and view before it exports, as Create Layout does.
   An oversized piece in any material therefore needs `--layout-oversize`, also when another material is exported.
 - An unplaced piece in any layout stops the export with exit 70 and lists the pieces.
 
 ```text
 seamly2d --layout-export --layout-format pdf --layout-output C:\exports\jacket_Fabric.pdf ^
-  --layout-settings C:\settings\roll_36in.json --layout-material Fabric --layout-view marker ^
+  --layout-settings C:\settings\roll_36in.json --layout-material Fabric --basesize --layout-view marker ^
   C:\patterns\jacket.sm2d
 
 seamly2d --layout-export --layout-format pdf-tiled --layout-output shirt.pdf ^
@@ -67,7 +73,7 @@ seamly2d --layout-export --layout-format pdf-tiled --layout-output shirt.pdf ^
 seamly2d --layout-export --layout-format pdf --layout-oversize split ^
   --layout-settings roll_12in.json --layout-output shirt.pdf shirt.sm2d
 
-seamly2d --layout-info --layout-settings roll_36in.json jacket.sm2d
+seamly2d --layout-info --basesize --layout-settings roll_36in.json jacket.sm2d
 ```
 
 ## Paths
@@ -259,7 +265,7 @@ Windows examples use Command Prompt and wait for the export.
 |---|---|---|
 | SVG layout | male_shirt.sm2d | Paper > Tiled > Letter |
 | PDF layout (tiled) | male_shirt.sm2d | Paper > Tiled > Letter; pdf-tiled |
-| DXF export (R13) | jacket2_40-146.sm2d | Paper > Roll > Custom; width 42.00 inches; Fabric; base size |
+| DXF export (R13) | jacket2_40-146.sm2d | Paper > Roll > Custom; width 42.00 inches; Fabric; --basesize |
 
 DXF uses R13 by default. SVG contains the complete layout; PDF provides separate tiles.
 The commands use the remaining saved SeamlyLayout settings.

@@ -8208,8 +8208,8 @@ bool MainWindow::setHeight(const QString &text)
  *
  * Workflow: build the tagged pieces SVG as Layout mode does, start SeamlyLayout with --svg-stdin and the
  * forwarded options, write the SVG to its standard input, wait, then forward its standard output and error.
- * A multisize pattern without --gsize and --gheight hands off every size at the base height, as Layout mode.
- * With either option the SVG holds the one size and height that processCommandLine() selected.
+ * --basesize exports one size unless --layout-view or --layout-info requests the multisize views.
+ * --gsize and --gheight export the selected size and height.
  *
  * @param command_line validated command line; isLayoutExportEnabled() or isLayoutInfoEnabled() is true.
  * @return SeamlyLayout's exit code, or a V_EX_* code when Seamly2D or the process fails first.
@@ -8230,7 +8230,8 @@ int MainWindow::exportLayoutFromCommandLine(const VCommandLinePtr &command_line)
     try
     {
         preparePiecesForLayout(pieces);
-        if (!command_line->isGradationSizeSet() && !command_line->isGradationHeightSet())
+        if (!command_line->isGradationSizeSet() && !command_line->isGradationHeightSet()
+            && (!command_line->isBaseSizeSet() || info_mode || !command_line->layoutViewOption().isEmpty()))
         {
             prepareMultisizePieceLists(); // individual pattern: no change; no Cancel without a dialog
         }
@@ -8427,6 +8428,24 @@ void MainWindow::processCommandLine()
 
         if (loaded && (cmd->isTestModeEnabled() || layout_export))
         {
+            const bool multisize = qApp->patternType() == MeasurementsType::Multisize;
+            const QString size_error = cmd->sizeSelectionError(multisize);
+            if (!size_error.isEmpty())
+            {
+                vStdErr() << size_error << Qt::endl;
+                qApp->exit(multisize ? V_EX_USAGE : V_EX_DATAERR);
+                return;
+            }
+            if (cmd->isBaseSizeSet())
+            {
+                const QString measurement_size = QString::number(UnitConvertor(m_measurements->BaseSize(),
+                    m_measurements->measurementUnits(), Unit::Cm));
+                if (!setSize(measurement_size))
+                {
+                    qApp->exit(V_EX_DATAERR);
+                    return;
+                }
+            }
             if (cmd->isGradationSizeSet())
             {
                 if (!setSize(cmd->gradationSizeOption()))

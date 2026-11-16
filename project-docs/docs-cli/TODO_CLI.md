@@ -6,6 +6,8 @@ If decisions are required for any portion of a task or subtask, present the user
 
 Tasks in this file start with `CLI.`
 
+Completed S2D.78: see project-docs/TODO_COMPLETED.md under Command line multisize base size.
+
 Completed Examples tab: see project-docs/TODO_COMPLETED.md under CLI help examples.
 
 ## Task CLI.2 - run seamly2d/seamlyme/seamlylayout from the command line with an input .sm2d file and an input measurement file to create exports for each of seamlyLayout's export options; validate outputs to validate the CLI parameters

@@ -398,9 +398,65 @@ void TST_VCommandLine::HelpDialogExamplesUsePreferences()
             QVERIFY(commands.at(row).contains(QStringLiteral("--layout-unit in --layout-paper roll "
                                                              "--layout-roll-width 42.00")));
             QCOMPARE(example.layoutMaterialOption(), QStringLiteral("Fabric"));
-            QCOMPARE(example.layoutViewOption(), QStringLiteral("base"));
+            QVERIFY(example.isBaseSizeSet());
+            QVERIFY(example.layoutViewOption().isEmpty());
         }
     }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::BaseSizeSelection_data()
+{
+    QTest::addColumn<QStringList>("flags");
+    QTest::addColumn<bool>("multisize");
+    QTest::addColumn<QString>("error");
+    QTest::newRow("base") << QStringList{"--basesize"} << true << QString();
+    QTest::newRow("base-height") << QStringList{"--basesize", "--gheight", "176"} << true << QString();
+    QTest::newRow("numeric") << QStringList{"--gsize", "50"} << true << QString();
+    QTest::newRow("numeric-alias") << QStringList{"-x", "50"} << true << QString();
+    QTest::newRow("missing") << QStringList{} << true
+        << QStringLiteral("Multisize files require --gsize <cm> or --basesize.");
+    QTest::newRow("height-only") << QStringList{"--gheight", "176"} << true
+        << QStringLiteral("Multisize files require --gsize <cm> or --basesize.");
+    QTest::newRow("conflict") << QStringList{"--basesize", "--gsize", "50"} << true
+        << QStringLiteral("--gsize and --basesize cannot be used together.");
+    QTest::newRow("alias-conflict") << QStringList{"--basesize", "-x", "50"} << true
+        << QStringLiteral("--gsize and --basesize cannot be used together.");
+    QTest::newRow("individual") << QStringList{"--basesize"} << false
+        << QStringLiteral("--basesize requires a file with multisize measurements.");
+    QTest::newRow("individual-default") << QStringList{} << false << QString();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::BaseSizeSelection()
+{
+    QFETCH(QStringList, flags);
+    QFETCH(bool, multisize);
+    QFETCH(QString, error);
+    for (const QString& mode : {QStringLiteral("--test"), QStringLiteral("--layout-export"),
+                                QStringLiteral("--layout-info")})
+    {
+        VCommandLine command_line;
+        QStringList arguments{QStringLiteral("seamly2d"), mode};
+        if (mode == QStringLiteral("--layout-export"))
+        {
+            arguments << QStringLiteral("--layout-output") << QStringLiteral("layout.svg");
+        }
+        arguments << flags << QStringLiteral("pattern.sm2d");
+        QVERIFY(command_line.parser.parse(arguments));
+        QCOMPARE(command_line.isBaseSizeSet(), flags.contains(QStringLiteral("--basesize")));
+        QCOMPARE(command_line.sizeSelectionError(multisize), error);
+        if (flags.contains(QStringLiteral("--basesize")) && command_line.isGradationSizeSet())
+        {
+            QCOMPARE(command_line.layoutExportError(), error);
+        }
+        QVERIFY(command_line.helpText().contains(QStringLiteral("--basesize")));
+        QVERIFY(command_line.helpText().contains(QStringLiteral("Multisize console runs require")));
+    }
+    VCommandLine views;
+    QVERIFY(views.parser.parse({"seamly2d", "--layout-export", "--basesize", "--layout-view", "base",
+                               "--layout-output", "layout.dxf", "pattern.sm2d"}));
+    QCOMPARE(views.layoutExportError(), QString());
 }
 
 //---------------------------------------------------------------------------------------------------------------------

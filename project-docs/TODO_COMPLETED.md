@@ -1,5 +1,19 @@
 # COMPLETED — Tagged SVG Handoff to SeamlyLayout
 
+## S2D.78 — Command line multisize base size — 2026-11-16
+
+- [x] Add --basesize without an argument.
+- [x] Read the base size from the active measurement file and convert its unit.
+- [x] Require --gsize or --basesize for multisize console runs.
+- [x] Reject both size options together with exit 64.
+- [x] Reject --basesize with individual measurements with exit 65.
+- [x] Add option descriptions and limits to the Command line options dialog.
+- [x] Update the jacket example to use --basesize.
+- [x] Pass all 40 Qt suites: 32640 checks, zero failures.
+- [x] Pass seven CLI cases and compare default and overridden base-size geometry against numeric selections.
+- [x] Pass 834 Rust tests and all nine available SeamlyLayout release checks.
+
+
 ## CLI help examples — 2026-11-16
 
 - [x] Add the Examples tab with SVG, tiled PDF, and DXF R13 commands.

@@ -1,5 +1,21 @@
 # Session handover
 
+## 2026-11-16 — S2D.78 multisize base size
+
+- Implemented --basesize in the CLI worktree on run-seamlyLayout.
+- Multisize console runs require --gsize or --basesize. Both options together cause exit 64.
+- --basesize reads the active measurement base and converts its unit. Individual measurements cause exit 65.
+- --gheight can accompany either size option.
+- --basesize exports one size by default. An explicit --layout-view still selects a multisize view.
+- --layout-info with --basesize retains all available views.
+- GUI file opening does not require a size selection.
+- Added descriptions and limits to the native help dialog. Updated its jacket example.
+- Windows build passed. All 40 Qt suites passed: 32640 checks, zero failures.
+- All seven basesize CLI cases passed. Four geometry checks cover numeric selection, measurement overrides, and unit conversion.
+- All 834 Rust tests and nine available SeamlyLayout release checks passed.
+- Work remains in the CLI worktree. No push was requested.
+
+
 ## 2026-11-16 — CLI help examples
 
 - Added the Examples tab to the command line dialog in the CLI worktree on run-seamlyLayout.

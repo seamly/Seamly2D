@@ -87,6 +87,10 @@ public:
     QString                measurementPathOption() const;
     QStringList            inputFileNamesOption() const;
     bool                   isGuiEnabled()const;
+    /// @brief Report whether the command selects the measurement base size.
+    bool                   isBaseSizeSet() const;
+    /// @brief Validate size selection after the application identifies the measurement type.
+    QString                sizeSelectionError(bool multisize) const;
     bool                   isGradationSizeSet() const;
     bool                   isGradationHeightSet() const;
     QString                gradationSizeOption() const;

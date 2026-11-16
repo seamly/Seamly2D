@@ -139,7 +139,7 @@ bool isConsoleModeArgument(const QString &argument)
     const QString name = argument.section(QLatin1Char('='), 0, 0);
     static const QStringList console_names{
         QStringLiteral("--test"), QStringLiteral("--mfile"), QStringLiteral("--gsize"), QStringLiteral("--gheight"),
-        QStringLiteral("--text2paths"),
+        QStringLiteral("--text2paths"), QStringLiteral("--basesize"),
         QStringLiteral("--help"), QStringLiteral("--version"), QStringLiteral("-t"), QStringLiteral("-m"),
         QStringLiteral("-x"), QStringLiteral("-e"), QStringLiteral("-h"), QStringLiteral("-v")
     };
@@ -312,6 +312,11 @@ QList<HelpEntry> commandLineHelpEntries()
         {HelpSection::Limits, translate("VCommandLine", "Measurements"),
          translate("VCommandLine", "Measurement and gradation overrides apply in all three modes. "
                    "Size and height use centimetres, require multisize measurements, and must be supported by the pattern.")},
+        {HelpSection::Limits, translate("VCommandLine", "Multisize size selection"),
+         translate("VCommandLine", "Multisize console runs require --gsize <cm> or --basesize. "
+                   "These options cannot be combined. --basesize takes no argument and requires multisize measurements. "
+                   "Without --layout-view, --basesize exports only the base size. "
+                   "--layout-info still reports all views.")},
         {HelpSection::Limits, translate("VCommandLine", "Relative paths"),
          translate("VCommandLine", "Relative paths resolve against the folder where the command starts.")},
         {HelpSection::Limits, translate("VCommandLine", "Export choices"),
@@ -569,7 +574,7 @@ void VCommandLine::showHelpDialog(QWidget* parent) const
                         QStringLiteral("male_shirt-tiled.pdf"), QStringLiteral("male_shirt.sm2d")),
         translate("VCommandLine", "Paper > Tiled > Letter. Print the PDF at 100% scale.")});
     appendHelpRow(examples_model, {translate("VCommandLine", "DXF export (R13)"),
-        example_command(QStringLiteral("--layout-format dxf --layout-material Fabric --layout-view base "
+        example_command(QStringLiteral("--layout-format dxf --layout-material Fabric --basesize "
                                        "--layout-unit in --layout-paper roll --layout-roll-width 42.00"),
                         QStringLiteral("jacket2_40-146-r13.dxf"), QStringLiteral("jacket2_40-146.sm2d")),
         translate("VCommandLine", "Paper > Roll > Custom: 42.00 inches. DXF uses R13 by default. "
@@ -744,10 +749,16 @@ void VCommandLine::initOptions(VCommandLineOptions &options, QMap<QString, int> 
         translate("VCommandLine", "Path to a measurement file for test mode or CLI export."),
         translate("VCommandLine", "The measure file")));
 
+    options_index.insert(LONG_OPTION_BASESIZE, index++);
+    options.append(new QCommandLineOption({LONG_OPTION_BASESIZE},
+        translate("VCommandLine", "Select the base size from the multisize measurement file. "
+                                  "Use --basesize or --gsize, never both. Takes no argument.")));
+
     // --gsize: Size value for multi-size patterns
     options_index.insert(LONG_OPTION_GRADATIONSIZE, index++);
     options.append(new QCommandLineOption({SINGLE_OPTION_GRADATIONSIZE, LONG_OPTION_GRADATIONSIZE},
         translate("VCommandLine", "Set the size for a multisize pattern in test mode or CLI export. "
+                                  "Use --gsize or --basesize, never both. "
                                   "Valid values: %1cm.")
                                  .arg(MeasurementVariable::WholeListSizes(Unit::Cm).join(", ")),
         translate("VCommandLine", "The size value")));
@@ -1011,10 +1022,35 @@ bool VCommandLine::isGuiEnabled() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/// @brief Checks if a specific gradation size is set via the CLI.
-///
-/// @return true if --gradationsize option is set; otherwise false.
+/// @brief Report whether the command selects the measurement base size.
 //---------------------------------------------------------------------------------------------------------------------
+bool VCommandLine::isBaseSizeSet() const
+{
+    return parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_BASESIZE)));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Validate the required multisize selection and reject conflicting options.
+QString VCommandLine::sizeSelectionError(bool multisize) const
+{
+    QString error;
+    if (isBaseSizeSet() && isGradationSizeSet())
+    {
+        error = translate("VCommandLine", "--gsize and --basesize cannot be used together.");
+    }
+    else if (multisize && !isBaseSizeSet() && !isGradationSizeSet())
+    {
+        error = translate("VCommandLine", "Multisize files require --gsize <cm> or --basesize.");
+    }
+    else if (!multisize && isBaseSizeSet())
+    {
+        error = translate("VCommandLine", "--basesize requires a file with multisize measurements.");
+    }
+    return error;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Report whether the command selects a numeric size.
 bool VCommandLine::isGradationSizeSet() const
 {
     return parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_GRADATIONSIZE)));
@@ -1122,6 +1158,11 @@ QString VCommandLine::layoutExportError() const
         return parser.isSet(*m_options_used.value(m_options_index.value(name)));
     };
 
+    if (isBaseSizeSet() && isGradationSizeSet())
+    {
+        return translate("VCommandLine", "--gsize and --basesize cannot be used together.");
+    }
+
     const bool export_requested = is_set(LONG_OPTION_LAYOUT_EXPORT);
     const bool info_requested = is_set(LONG_OPTION_LAYOUT_INFO);
     // Options that only an export uses; --layout-settings also serves --layout-info.
@@ -1141,7 +1182,7 @@ QString VCommandLine::layoutExportError() const
         if (has_export_choice)
         {
             return translate("VCommandLine", "--layout-info prints a report and exports nothing; "
-                                             "it takes only --layout-settings, --mfile, --gsize and --gheight.");
+                                             "it takes only --layout-settings, --mfile, --gsize, --basesize and --gheight.");
         }
         if (parser.positionalArguments().size() != 1)
         {

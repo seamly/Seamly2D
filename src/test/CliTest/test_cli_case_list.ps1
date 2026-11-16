@@ -256,48 +256,63 @@ function Get-CliTestCases
            Info = @{ Multisize = $false; Materials = @('Fabric'); TiledPaper = $false; ViewsInclude = @('') } }
         @{ Name = 'info-shirt-oversized'; Group = 'info'; Arguments = @('--layout-info', '--layout-settings', $roll12, $shirt); Exit = 0
            Info = @{ OversizedMin = 5 } }
-        @{ Name = 'info-jacket-roll'; Group = 'info'; Slow = $true; Arguments = @('--layout-info', '--layout-settings', $roll36, $jacket); Exit = 0
+        @{ Name = 'info-jacket-roll'; Group = 'info'; Slow = $true; Arguments = @('--layout-info', '--layout-settings', $roll36, '--basesize', $jacket); Exit = 0
            Info = @{ Multisize = $true; Materials = @('Fabric', 'Lining', 'Interfacing'); ViewsInclude = @('Marker', 'Nested', 'Base Size 500', 'Size 400'); SplitViewsExcludeMarker = $true } }
 
+        @{ Name = 'basesize-test'; Group = 'multisize'; Arguments = @('--test', '--basesize', $jacket); Exit = 0 }
+        @{ Name = 'basesize-missing-test'; Group = 'multisize'; Arguments = @('--test', $jacket)
+           Exit = 64; Stderr = 'Multisize files require --gsize <cm> or --basesize' }
+        @{ Name = 'basesize-missing-export'; Group = 'multisize'; Arguments = $export + @($jacket)
+           Exit = 64; Stderr = 'Multisize files require'; NoOutput = $true }
+        @{ Name = 'basesize-missing-info'; Group = 'multisize'; Arguments = @('--layout-info', $jacket)
+           Exit = 64; Stderr = 'Multisize files require' }
+        @{ Name = 'basesize-conflict'; Group = 'multisize'; Arguments = @('--test', '--basesize', '--gsize', '50', $jacket)
+           Exit = 64; Stderr = '--gsize and --basesize cannot be used together' }
+        @{ Name = 'basesize-individual'; Group = 'multisize'; Arguments = @('--test', '--basesize', $shirt)
+           Exit = 65; Stderr = '--basesize requires a file with multisize measurements' }
+        @{ Name = 'basesize-export-svg'; Group = 'multisize'; Format = 'svg'
+           Arguments = $export + @('--basesize', '--layout-material', 'Fabric', '--layout-settings', $roll36, $jacket)
+           Exit = 0; Expect = @{ WidthIn = 36; MinPieces = 1 } }
+
         # --- Multisize ---------------------------------------------------------------------------------------------
-        @{ Name = 'jacket-no-material'; Group = 'material'; Slow = $true; Arguments = $export + @('--layout-settings', $roll36, $jacket)
+        @{ Name = 'jacket-no-material'; Group = 'material'; Slow = $true; Arguments = $export + @('--layout-settings', $roll36, '--basesize', $jacket)
            Exit = 64; Stderr = '3 materials: Fabric, Lining, Interfacing'; NoOutput = $true }
         @{ Name = 'jacket-fabric-marker-pdf'; Group = 'multisize'; Slow = $true; Format = 'pdf'
-           Arguments = $export + @('--layout-format', 'pdf', '--layout-material', 'Fabric', '--layout-view', 'marker', '--layout-settings', $roll36, $jacket)
+           Arguments = $export + @('--layout-format', 'pdf', '--layout-material', 'Fabric', '--layout-view', 'marker', '--layout-settings', $roll36, '--basesize', $jacket)
            Exit = 0; Expect = @{ Pages = 1; PageWidthIn = 36 } }
         @{ Name = 'jacket-fabric-nested-svg'; Group = 'multisize'; Slow = $true; Format = 'svg'
-           Arguments = $export + @('--layout-material', 'Fabric', '--layout-view', 'Nested', '--layout-settings', $roll36, $jacket)
+           Arguments = $export + @('--layout-material', 'Fabric', '--layout-view', 'Nested', '--layout-settings', $roll36, '--basesize', $jacket)
            Exit = 0; Expect = @{ WidthIn = 36; MinPieces = 8 } }
         @{ Name = 'jacket-fabric-base-dxf'; Group = 'multisize'; Slow = $true; Format = 'dxf'
-           Arguments = $export + @('--layout-format', 'dxf', '--layout-material', 'Fabric', '--layout-view', 'base', '--layout-settings', $roll36, $jacket)
+           Arguments = $export + @('--layout-format', 'dxf', '--layout-material', 'Fabric', '--layout-view', 'base', '--layout-settings', $roll36, '--basesize', $jacket)
            Exit = 0; Expect = @{ Version = 'AC1012'; MinBlocks = 8; Companion = 'rul' } }
         @{ Name = 'jacket-lining-size-400-dxf'; Group = 'multisize'; Slow = $true; Format = 'dxf'
-           Arguments = $export + @('--layout-format', 'dxf', '--layout-material', 'Lining', '--layout-view', '400', '--layout-settings', $roll36, $jacket)
+           Arguments = $export + @('--layout-format', 'dxf', '--layout-material', 'Lining', '--layout-view', '400', '--layout-settings', $roll36, '--basesize', $jacket)
            Exit = 0; Expect = @{ Version = 'AC1012'; MinBlocks = 5 } }
         @{ Name = 'jacket-marker-dxf'; Group = 'multisize'; Slow = $true
-           Arguments = $export + @('--layout-format', 'dxf', '--layout-material', 'Fabric', '--layout-view', 'marker', '--layout-settings', $roll36, $jacket)
+           Arguments = $export + @('--layout-format', 'dxf', '--layout-material', 'Fabric', '--layout-view', 'marker', '--layout-settings', $roll36, '--basesize', $jacket)
            Exit = 64; Stderr = 'dxf exports one size'; NoOutput = $true }
         @{ Name = 'jacket-unknown-view'; Group = 'multisize'; Slow = $true
-           Arguments = $export + @('--layout-material', 'Fabric', '--layout-view', '999', '--layout-settings', $roll36, $jacket)
+           Arguments = $export + @('--layout-material', 'Fabric', '--layout-view', '999', '--layout-settings', $roll36, '--basesize', $jacket)
            Exit = 64; Stderr = "no view '999'(.|\n)*Marker, Nested"; NoOutput = $true }
         @{ Name = 'jacket-interfacing-tiled-default-view'; Group = 'paper-tiled'; Slow = $true; Format = 'pdf-tiled'
-           Arguments = $export + @('--layout-format', 'pdf-tiled', '--layout-material', 'Interfacing', '--layout-settings', $letter, $jacket)
+           Arguments = $export + @('--layout-format', 'pdf-tiled', '--layout-material', 'Interfacing', '--layout-settings', $letter, '--basesize', $jacket)
            Exit = 0; Expect = @{ MinPages = 1; PageWidthIn = 8.5; PageHeightIn = 11 } }
         @{ Name = 'jacket-fabric-folded-with-nap'; Group = 'fabric'; Slow = $true; Format = 'svg'
-           Arguments = $export + @('--layout-material', 'Fabric', '--layout-view', 'Size 500', '--layout-settings', $folded, $jacket)
+           Arguments = $export + @('--layout-material', 'Fabric', '--layout-view', 'Size 500', '--layout-settings', $folded, '--basesize', $jacket)
            Exit = 0; Expect = @{ MinPieces = 5; WidthIn = (75 / 2.54) } }
         @{ Name = 'jacket-gsize-gheight-one-size'; Group = 'multisize'; Format = 'pdf'
            Arguments = $export + @('--layout-format', 'pdf', '--layout-material', 'Lining', '--gsize', '40', '--gheight', '146', '--layout-settings', $roll36, $jacket)
            Exit = 0; Expect = @{ Pages = 1; PageWidthIn = 36 } }
         @{ Name = 'jacket-handoff-not-truncated'; Group = 'transport'; Slow = $true; Format = 'svg'
            Environment = @{ SEAMLYLAYOUT_SAVE_HANDOFF = '{outdir}\handoff.svg' }
-           Arguments = $export + @('--layout-material', 'Lining', '--layout-view', 'marker', '--layout-settings', $roll36, $jacket)
+           Arguments = $export + @('--layout-material', 'Lining', '--layout-view', 'marker', '--layout-settings', $roll36, '--basesize', $jacket)
            Exit = 0; Expect = @{ WidthIn = 36 }; Handoff = @{ MinBytes = 1000000; Contains = 'data-sizes=' } }
         @{ Name = 'jacket-split-marker-unavailable'; Group = 'oversize'; Slow = $true
-           Arguments = $export + @('--layout-material', 'Fabric', '--layout-view', 'marker', '--layout-oversize', 'split', '--layout-settings', $roll12, $jacket)
+           Arguments = $export + @('--layout-material', 'Fabric', '--layout-view', 'marker', '--layout-oversize', 'split', '--layout-settings', $roll12, '--basesize', $jacket)
            Exit = 64; NoOutput = $true; Stderr = '\S' }
         @{ Name = 'jacket-split-default-view-pdf'; Group = 'oversize'; Slow = $true; Format = 'pdf'
-           Arguments = $export + @('--layout-format', 'pdf', '--layout-material', 'Fabric', '--layout-oversize', 'split', '--layout-settings', $roll12, $jacket)
+           Arguments = $export + @('--layout-format', 'pdf', '--layout-material', 'Fabric', '--layout-oversize', 'split', '--layout-settings', $roll12, '--basesize', $jacket)
            Exit = 0; Expect = @{ Pages = 1; PageWidthIn = 12 } }
 
         # --- Direct layout flags (win over --layout-settings) -----------------------------------------------------
@@ -350,7 +365,7 @@ function Get-CliTestCases
         @{ Name = 'no-packing-jacket-lining'; Group = 'no-packing'; Format = 'svg'; Slow = $true
            Arguments = $export + @('--layout-material', 'Lining', '--layout-no-packing', '--gsize', '40', '--gheight', '146', $jacket)
            Exit = 0; Expect = @{ MinPieces = 5 } }
-        @{ Name = 'no-packing-with-view'; Group = 'no-packing'; Arguments = $export + @('--layout-no-packing', '--layout-view', 'marker', $jacket)
+        @{ Name = 'no-packing-with-view'; Group = 'no-packing'; Arguments = $export + @('--layout-no-packing', '--layout-view', 'marker', '--basesize', $jacket)
            Exit = 64; Stderr = '--layout-no-packing exports the pieces as placed' }
 
         # --- Rust/Iced tester in batch mode -------------------------------------------------------------------
