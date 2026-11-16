@@ -197,7 +197,8 @@ StartupOptions StartupOptions::parse(const QStringList &arguments, QIODevice *st
 
     const QCommandLineOption viewOption(
         QStringList{QStringLiteral("view")},
-        QStringLiteral("Multisize layout to export: marker, nested, base, or a size such as 40 (default: the first layout)."),
+        QStringLiteral("Multisize layout to export: marker, nested, base, or a size as its tab shows it, "
+                       "such as 500 for Size 500 (default: the first layout)."),
         QStringLiteral("name"));
     parser.addOption(viewOption);
 

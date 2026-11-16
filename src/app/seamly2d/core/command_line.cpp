@@ -299,7 +299,8 @@ void VCommandLine::initOptions(VCommandLineOptions &options, QMap<QString, int> 
     // --layout-format: SeamlyLayout output format.
     options_index.insert(LONG_OPTION_LAYOUT_FORMAT, index++);
     options.append(new QCommandLineOption({LONG_OPTION_LAYOUT_FORMAT},
-        translate("VCommandLine", "SeamlyLayout output format: svg, pdf, pdf-tiled, png, jpg, jpeg, dxf, hpgl, ps, eps, gcode, or 3mf."),
+        translate("VCommandLine", "SeamlyLayout output format: svg, pdf, pdf-tiled, png, jpg, jpeg, dxf, hpgl, ps, eps, "
+                                  "gcode, or 3mf. Default: svg."),
         translate("VCommandLine", "format")));
 
     // --layout-output: Destination file for SeamlyLayout export.
@@ -311,7 +312,8 @@ void VCommandLine::initOptions(VCommandLineOptions &options, QMap<QString, int> 
     // --layout-settings: Layout settings JSON file passed to SeamlyLayout.
     options_index.insert(LONG_OPTION_LAYOUT_SETTINGS, index++);
     options.append(new QCommandLineOption({LONG_OPTION_LAYOUT_SETTINGS},
-        translate("VCommandLine", "Layout settings JSON file for SeamlyLayout."),
+        translate("VCommandLine", "Layout settings JSON file for SeamlyLayout. "
+                                  "Default: the settings SeamlyLayout saved last."),
         translate("VCommandLine", "path")));
 
     // --layout-export-options: Format-specific JSON options passed to SeamlyLayout.
@@ -323,7 +325,8 @@ void VCommandLine::initOptions(VCommandLineOptions &options, QMap<QString, int> 
     // --svg-text-mode: SVG label rendering mode.
     options_index.insert(LONG_OPTION_SVG_TEXT_MODE, index++);
     options.append(new QCommandLineOption({LONG_OPTION_SVG_TEXT_MODE},
-        translate("VCommandLine", "SVG text mode: designerFont, singleLineFont, hersheyStrokes, or asSupplied."),
+        translate("VCommandLine", "SVG text mode: designerFont, singleLineFont, hersheyStrokes, or asSupplied. "
+                                  "SVG only."),
         translate("VCommandLine", "mode")));
 
     // --layout-material: material of a multi-material pattern.
@@ -336,8 +339,8 @@ void VCommandLine::initOptions(VCommandLineOptions &options, QMap<QString, int> 
     // --layout-view: layout of a multisize pattern.
     options_index.insert(LONG_OPTION_LAYOUT_VIEW, index++);
     options.append(new QCommandLineOption({LONG_OPTION_LAYOUT_VIEW},
-        translate("VCommandLine", "Multisize layout to export: marker, nested, base, or a size such as 40. "
-                                  "Default: the first layout."),
+        translate("VCommandLine", "Multisize layout to export: marker, nested, base, or a size as its layout tab "
+                                  "shows it, such as 500 for Size 500. Default: the first layout."),
         translate("VCommandLine", "name")));
 
     // --layout-oversize: pieces wider than a roll or fabric.
