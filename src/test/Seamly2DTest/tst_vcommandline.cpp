@@ -65,7 +65,10 @@
 #include <QApplication>
 #include <QDialog>
 #include <QDialogButtonBox>
-#include <QPlainTextEdit>
+#include <QTableView>
+#include <QHeaderView>
+#include <QTabWidget>
+#include <QLineEdit>
 #include <QPushButton>
 #include <QScrollBar>
 #include <QTimer>
@@ -146,7 +149,7 @@ void TST_VCommandLine::HelpDescribesLimitsAndRemovedBasename()
     QVERIFY(help.startsWith(command_line.parser.helpText()));
     QVERIFY(help.contains(QStringLiteral("--test")));
     QVERIFY(help.contains(QStringLiteral("--layout-export requires --layout-output <path>")));
-    QVERIFY(help.contains(QStringLiteral("This branch does not accept --basename")));
+    QVERIFY(help.contains(QStringLiteral("This version does not accept --basename")));
     QVERIFY(help.contains(QStringLiteral("64: Incorrect command line arguments")));
     QVERIFY(!command_line.parser.parse({QStringLiteral("seamly2d"), QStringLiteral("--basename"),
                                        QStringLiteral("layout"), QStringLiteral("pattern.sm2d")}));
@@ -156,9 +159,17 @@ void TST_VCommandLine::HelpDescribesLimitsAndRemovedBasename()
 void TST_VCommandLine::HelpDialogClosesWithoutExiting()
 {
     VCommandLine command_line;
-    bool has_help = false;
+    QWidget parent;
+    QFont parent_font = parent.font();
+    parent_font.setPointSize(14);
+    parent.setFont(parent_font);
+    QPalette parent_palette = parent.palette();
+    parent_palette.setColor(QPalette::Base, QColor(QStringLiteral("#f2f4f8")));
+    parent.setPalette(parent_palette);
+    bool has_options = false;
     bool is_read_only = false;
     bool can_scroll = false;
+    bool inherits_style = false;
     bool has_close_button = false;
 
     QTimer::singleShot(0, [&]()
@@ -166,12 +177,16 @@ void TST_VCommandLine::HelpDialogClosesWithoutExiting()
         auto* dialog = qobject_cast<QDialog*>(QApplication::activeModalWidget());
         if (dialog != nullptr)
         {
-            const auto* text_edit = dialog->findChild<QPlainTextEdit*>();
-            if (text_edit != nullptr)
+            const auto* table = dialog->findChild<QTableView*>(QStringLiteral("helpOptions"));
+            if (table != nullptr)
             {
-                has_help = text_edit->toPlainText() == command_line.helpText();
-                is_read_only = text_edit->isReadOnly();
-                can_scroll = text_edit->verticalScrollBar()->maximum() > 0;
+                has_options = table->model()->rowCount()
+                    == command_line.m_options_used.size() + command_line.m_standard_help_options.size();
+                is_read_only = table->editTriggers() == QAbstractItemView::NoEditTriggers
+                    && !(table->model()->index(0, 0).flags() & Qt::ItemIsEditable);
+                can_scroll = table->verticalScrollBar()->maximum() > 0;
+                inherits_style = table->font() == parent.font() && table->style() == parent.style()
+                    && table->palette().color(QPalette::Base) == parent_palette.color(QPalette::Base);
             }
             auto* buttons = dialog->findChild<QDialogButtonBox*>();
             if (buttons != nullptr && buttons->button(QDialogButtonBox::Close) != nullptr)
@@ -186,10 +201,11 @@ void TST_VCommandLine::HelpDialogClosesWithoutExiting()
         }
     });
 
-    command_line.showHelpDialog();
-    QVERIFY(has_help);
+    command_line.showHelpDialog(&parent);
+    QVERIFY(has_options);
     QVERIFY(is_read_only);
     QVERIFY(can_scroll);
+    QVERIFY(inherits_style);
     QVERIFY(has_close_button);
     QVERIFY(command_line.parser.parse({QStringLiteral("seamly2d"), QStringLiteral("pattern.sm2d")}));
     QVERIFY(!command_line.isTestModeEnabled());
@@ -197,6 +213,104 @@ void TST_VCommandLine::HelpDialogClosesWithoutExiting()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::HelpDialogFiltersAndResizesColumns()
+{
+    VCommandLine command_line;
+    bool lists_registered_options = false;
+    bool filters_options = false;
+    bool handles_no_matches = false;
+    bool resizes_columns = false;
+    bool lists_exit_codes = false;
+    bool explains_removed_basename = false;
+
+    QTimer::singleShot(0, [&]()
+    {
+        auto* dialog = qobject_cast<QDialog*>(QApplication::activeModalWidget());
+        if (dialog != nullptr)
+        {
+            auto* table = dialog->findChild<QTableView*>(QStringLiteral("helpOptions"));
+            auto* filter = dialog->findChild<QLineEdit*>(QStringLiteral("helpFilter"));
+            auto* tabs = dialog->findChild<QTabWidget*>(QStringLiteral("helpTabs"));
+            if (table != nullptr && filter != nullptr && tabs != nullptr)
+            {
+                const auto* model = table->model();
+                lists_registered_options = true;
+                for (const QCommandLineOption* option : command_line.m_options_used)
+                {
+                    bool found = false;
+                    for (int row = 0; row < model->rowCount(); ++row)
+                    {
+                        const QString name = model->index(row, 0).data().toString().mid(2);
+                        found |= option->names().contains(name)
+                            && model->index(row, 3).data().toString() == option->description();
+                    }
+                    lists_registered_options &= found;
+                }
+                resizes_columns = true;
+                for (int column = 0; column < model->columnCount(); ++column)
+                {
+                    const int width = table->columnWidth(column) + 40;
+                    table->setColumnWidth(column, width);
+                    resizes_columns &= table->columnWidth(column) == width
+                        && table->horizontalHeader()->sectionResizeMode(column) == QHeaderView::Interactive;
+                }
+                filter->setText(QStringLiteral("LAYOUT-UNIT"));
+                table->sortByColumn(0, Qt::DescendingOrder);
+                int visible_rows = 0;
+                QString visible_option;
+                for (int row = 0; row < model->rowCount(); ++row)
+                {
+                    if (!table->isRowHidden(row))
+                    {
+                        ++visible_rows;
+                        visible_option = model->index(row, 0).data().toString();
+                    }
+                }
+                filters_options = visible_rows == 1 && visible_option == QStringLiteral("--layout-unit");
+                filter->setText(QStringLiteral("no-such-command-line-option"));
+                handles_no_matches = true;
+                for (int row = 0; row < model->rowCount(); ++row)
+                {
+                    handles_no_matches &= table->isRowHidden(row);
+                }
+                tabs->setCurrentIndex(2);
+                const auto* errors = dialog->findChild<QTableView*>(QStringLiteral("helpErrors"));
+                if (errors != nullptr && filter->text().isEmpty())
+                {
+                    for (int row = 0; row < errors->model()->rowCount(); ++row)
+                    {
+                        lists_exit_codes |= errors->model()->index(row, 0).data().toString() == QStringLiteral("64")
+                            && !errors->isRowHidden(row);
+                    }
+                }
+                tabs->setCurrentIndex(3);
+                const auto* removed = dialog->findChild<QTableView*>(QStringLiteral("helpRemoved"));
+                if (removed != nullptr)
+                {
+                    for (int row = 0; row < removed->model()->rowCount(); ++row)
+                    {
+                        explains_removed_basename |= removed->model()->index(row, 0).data().toString()
+                            .contains(QStringLiteral("--basename"))
+                            && removed->model()->index(row, 1).data().toString()
+                                .contains(QStringLiteral("--layout-export"));
+                    }
+                }
+            }
+            dialog->reject();
+        }
+    });
+
+    command_line.showHelpDialog();
+    QVERIFY(lists_registered_options);
+    QVERIFY(filters_options);
+    QVERIFY(handles_no_matches);
+    QVERIFY(resizes_columns);
+    QVERIFY(lists_exit_codes);
+    QVERIFY(explains_removed_basename);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
 void TST_VCommandLine::LayoutExportUsesDefaultSvgFormat()
 {
     QTemporaryDir directory;

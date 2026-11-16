@@ -65,10 +65,15 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QFileInfo>
-#include <QFontDatabase>
+#include <QHeaderView>
 #include <QMap>
 #include <QPair>
-#include <QPlainTextEdit>
+#include <QStandardItemModel>
+#include <QTableView>
+#include <QTabWidget>
+#include <QLineEdit>
+#include <QLabel>
+#include <QHBoxLayout>
 #include <QTextStream>
 #include <QVBoxLayout>
 
@@ -218,6 +223,7 @@ VCommandLine::VCommandLine()
     : parser()
     , m_options_used()
     , m_options_index()
+    , m_standard_help_options()
     , m_is_gui_enabled(false)
     , m_reserves_stdout(false)
 {
@@ -225,10 +231,12 @@ VCommandLine::VCommandLine()
     parser.setApplicationDescription(translate("VCommandLine", "Seamly2D open source patternmaking program."));
 
     // Adds the standard help option (-h, --help) to the parser.
-    parser.addHelpOption();
+    m_standard_help_options.append(parser.addHelpOption());
+    m_standard_help_options.append(QCommandLineOption(QStringLiteral("help-all"),
+        translate("VCommandLine", "Qt registers this option, but this version handles --help only.")));
 
     // Adds the standard version option (-v, --version) to the parser.
-    parser.addVersionOption();
+    m_standard_help_options.append(parser.addVersionOption());
 
     // Add a positional argument (not prefixed with a flag), typically the filename
     parser.addPositionalArgument("filename", translate("VCommandLine", "Seamly2D pattern file (.sm2d)"));
@@ -270,78 +278,356 @@ VCommandLine::VCommandLine()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+namespace
+{
+/// @brief Separates current limits, removed options, and exit codes in the help window.
+enum class HelpSection { Limits, RemovedOptions, ExitCodes };
+
+/// @brief Stores one help row for both the dialog and the console output.
+struct HelpEntry
+{
+    HelpSection section;
+    QString topic;
+    QString description;
+};
+
+/// @brief Keeps the dialog and console explanations consistent.
+QList<HelpEntry> commandLineHelpEntries()
+{
+    return {
+        {HelpSection::Limits, translate("VCommandLine", "Input file"),
+         translate("VCommandLine", "Supply exactly one pattern for --test, --layout-export, or --layout-info.")},
+        {HelpSection::Limits, translate("VCommandLine", "Test mode"),
+         translate("VCommandLine", "--test loads one pattern without exporting. These three modes cannot be combined.")},
+        {HelpSection::Limits, translate("VCommandLine", "Export mode"),
+         translate("VCommandLine", "--layout-export requires --layout-output <path>. The output folder must exist.")},
+        {HelpSection::Limits, translate("VCommandLine", "Layout report"),
+         translate("VCommandLine", "--layout-info prints a JSON report and exports nothing. "
+                   "It reports available materials, views, oversized pieces, and allowed formats.")},
+        {HelpSection::Limits, translate("VCommandLine", "Measurements"),
+         translate("VCommandLine", "Measurement and gradation overrides apply in all three modes. "
+                   "Size and height use centimetres, require multisize measurements, and must be supported by the pattern.")},
+        {HelpSection::Limits, translate("VCommandLine", "Relative paths"),
+         translate("VCommandLine", "Relative paths resolve against the folder where the command starts.")},
+        {HelpSection::Limits, translate("VCommandLine", "Export choices"),
+         translate("VCommandLine", "Export choices require --layout-export. "
+                   "Settings and direct layout flags also serve --layout-info.")},
+        {HelpSection::Limits, translate("VCommandLine", "Settings precedence"),
+         translate("VCommandLine", "Direct layout flags override the JSON settings file, which overrides saved settings. "
+                   "Unknown JSON keys and invalid setting values stop the command with exit code 64.")},
+        {HelpSection::Limits, translate("VCommandLine", "Material selection"),
+         translate("VCommandLine", "Select --layout-material when the pattern has several materials.")},
+        {HelpSection::Limits, translate("VCommandLine", "View selection"),
+         translate("VCommandLine", "--layout-view requires multisize measurements "
+                   "and cannot accompany --gsize or --gheight.")},
+        {HelpSection::Limits, translate("VCommandLine", "SVG text"),
+         translate("VCommandLine", "--svg-text-mode applies only to SVG and cannot accompany --text2paths.")},
+        {HelpSection::Limits, translate("VCommandLine", "Text as paths"),
+         translate("VCommandLine", "--text2paths applies to svg, pdf, pdf-tiled, ps, and eps.")},
+        {HelpSection::Limits, translate("VCommandLine", "Export without packing"),
+         translate("VCommandLine", "--layout-no-packing preserves Piece mode positions without a layout run. "
+                   "It cannot accompany --layout-view, --layout-oversize, or pdf-tiled.")},
+        {HelpSection::Limits, translate("VCommandLine", "PDF formats"),
+         translate("VCommandLine", "Use pdf for roll paper and pdf-tiled for tiled paper. "
+                   "Tiled PDF cannot export Marker layouts.")},
+        {HelpSection::Limits, translate("VCommandLine", "DXF formats"),
+         translate("VCommandLine", "DXF requires one size, not Marker or Nested layouts.")},
+        {HelpSection::Limits, translate("VCommandLine", "Oversized pieces"),
+         translate("VCommandLine", "Oversized or unplaced pieces stop export "
+                   "unless the selected oversize choice resolves them.")},
+        {HelpSection::Limits, translate("VCommandLine", "Split oversized pieces"),
+         translate("VCommandLine", "The split choice excludes dxf, pdf-tiled, gcode, 3mf, Marker, and Nested layouts.")},
+        {HelpSection::Limits, translate("VCommandLine", "Extend the media"),
+         translate("VCommandLine", "The extend choice cannot place a piece wider than the media.")},
+        {HelpSection::Limits, translate("VCommandLine", "Optional export modules"),
+         translate("VCommandLine", "G-Code and 3MF require optional export modules.")},
+        {HelpSection::Limits, translate("VCommandLine", "Argument errors"),
+         translate("VCommandLine", "Option names are case-sensitive. Unknown options and missing values are usage errors.")},
+        {HelpSection::Limits, translate("VCommandLine", "Error messages"),
+         translate("VCommandLine", "Read standard error for the cause. "
+                   "Seamly2D returns the SeamlyLayout exit code after export.")},
+        {HelpSection::RemovedOptions, QStringLiteral("-b, --basename"),
+         translate("VCommandLine", "Formerly enabled console export and supplied the output basename. "
+                   "This version does not accept --basename. Use --layout-export and --layout-output instead.")},
+        {HelpSection::RemovedOptions, QStringLiteral("--exportOnlyDetails"),
+         translate("VCommandLine", "Use --layout-no-packing to export pieces at their Piece mode positions.")},
+        {HelpSection::RemovedOptions, QStringLiteral("--destination, --format, --bdxf"),
+         translate("VCommandLine", "The legacy exporter is removed. "
+                   "Use --layout-output, --layout-format, and --layout-export-options.")},
+        {HelpSection::RemovedOptions, translate("VCommandLine", "Legacy page-layout options"),
+         translate("VCommandLine", "Use direct --layout-* flags or --layout-settings "
+                   "for page, margin, gap, and rotation settings.")},
+        {HelpSection::ExitCodes, QStringLiteral("0"),
+         translate("VCommandLine", "Success. Help and version requests also return 0.")},
+        {HelpSection::ExitCodes, QStringLiteral("64"),
+         translate("VCommandLine", "Incorrect command line arguments, missing companions, "
+                   "invalid values, or incompatible export choices.")},
+        {HelpSection::ExitCodes, QStringLiteral("65"),
+         translate("VCommandLine", "Invalid pattern data or gradation options on an individual pattern.")},
+        {HelpSection::ExitCodes, QStringLiteral("66"),
+         translate("VCommandLine", "A pattern or measurement file is missing or unreadable.")},
+        {HelpSection::ExitCodes, QStringLiteral("69"),
+         translate("VCommandLine", "SeamlyLayout cannot start, or an export module is unavailable.")},
+        {HelpSection::ExitCodes, QStringLiteral("70"),
+         translate("VCommandLine", "Oversized or unplaced pieces, or a software error.")},
+        {HelpSection::ExitCodes, QStringLiteral("73"),
+         translate("VCommandLine", "The output file cannot be written.")},
+        {HelpSection::ExitCodes, QStringLiteral("74"),
+         translate("VCommandLine", "The program cannot send the pieces data to SeamlyLayout.")},
+        {HelpSection::ExitCodes, QStringLiteral("78"),
+         translate("VCommandLine", "Invalid configuration, such as a relative SEAMLY_DATA_DIR.")}
+    };
+}
+
+/// @brief Adds selectable, read-only cells without changing the application font or palette.
+void appendHelpRow(QStandardItemModel& model, const QStringList& values)
+{
+    const int row = model.rowCount();
+    model.insertRow(row);
+    for (int column = 0; column < values.size(); ++column)
+    {
+        const QModelIndex index = model.index(row, column);
+        model.setData(index, values.at(column));
+        model.setData(index, values.at(column), Qt::ToolTipRole);
+        model.item(row, column)->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+    }
+}
+
+/// @brief Uses the table behavior of the Variables dialog with adjustable widths for every column.
+void configureHelpTable(QTableView& table, QStandardItemModel& model)
+{
+    table.setModel(&model);
+    table.setAlternatingRowColors(true);
+    table.setSelectionMode(QAbstractItemView::SingleSelection);
+    table.setSelectionBehavior(QAbstractItemView::SelectRows);
+    table.setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table.setWordWrap(true);
+    table.setTextElideMode(Qt::ElideNone);
+    table.setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+    table.setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    table.verticalHeader()->hide();
+    table.horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+    table.horizontalHeader()->setMinimumSectionSize(60);
+    table.horizontalHeader()->setStretchLastSection(false);
+    table.setSortingEnabled(true);
+    table.sortByColumn(-1, Qt::AscendingOrder);
+    QObject::connect(table.horizontalHeader(), &QHeaderView::sectionResized, &table,
+                     [&table]() { table.resizeRowsToContents(); });
+}
+} // namespace
+
+//---------------------------------------------------------------------------------------------------------------------
 void VCommandLine::showHelpDialog(QWidget* parent) const
 {
     QDialog dialog(parent);
+    if (parent != nullptr)
+    {
+        dialog.setFont(parent->font());
+        dialog.setPalette(parent->palette());
+    }
+    dialog.setObjectName(QStringLiteral("commandLineHelpDialog"));
     dialog.setWindowTitle(translate("VCommandLine", "Command line options"));
-    dialog.resize(800, 600);
+    dialog.setWindowIcon(QIcon(QStringLiteral(":/icon/32x32/table.png")));
+    dialog.setSizeGripEnabled(true);
+    dialog.setMinimumSize(700, 420);
+    dialog.resize(1100, 650);
 
     QVBoxLayout layout(&dialog);
-    QPlainTextEdit text_edit(&dialog);
-    text_edit.setReadOnly(true);
-    text_edit.setLineWrapMode(QPlainTextEdit::NoWrap);
-    text_edit.setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
-    text_edit.setPlainText(helpText());
+    QLabel usage(translate("VCommandLine", "Usage: seamly2d [options] filename"), &dialog);
+    layout.addWidget(&usage);
 
+    QHBoxLayout filter_layout;
+    QLabel filter_icon(&dialog);
+    filter_icon.setPixmap(QIcon(QStringLiteral(":/icon/32x32/filter.png")).pixmap(16, 16));
+    QLabel filter_label(translate("VCommandLine", "Filter:"), &dialog);
+    QLineEdit filter_edit(&dialog);
+    filter_edit.setObjectName(QStringLiteral("helpFilter"));
+    filter_edit.setPlaceholderText(translate("VCommandLine", "Filter list by keyword"));
+    filter_edit.setClearButtonEnabled(true);
+    filter_label.setBuddy(&filter_edit);
+    filter_layout.addWidget(&filter_icon);
+    filter_layout.addWidget(&filter_label);
+    filter_layout.addWidget(&filter_edit);
+    layout.addLayout(&filter_layout);
+
+    QTabWidget tabs(&dialog);
+    tabs.setObjectName(QStringLiteral("helpTabs"));
+    QStandardItemModel options_model(&dialog);
+    options_model.setHorizontalHeaderLabels({translate("VCommandLine", "Option"),
+        translate("VCommandLine", "Aliases"), translate("VCommandLine", "Argument"),
+        translate("VCommandLine", "Description")});
+    QTableView options_table(&tabs);
+    options_table.setObjectName(QStringLiteral("helpOptions"));
+
+    QList<QCommandLineOption> options = m_standard_help_options;
+    for (const QCommandLineOption* option : m_options_used)
+    {
+        options.append(*option);
+    }
+    for (const QCommandLineOption& option : options)
+    {
+        const QStringList names = option.names();
+        QString primary_name = names.first();
+        for (const QString& name : names)
+        {
+            if (name.size() > 1)
+            {
+                primary_name = name;
+                break;
+            }
+        }
+        const auto with_prefix = [](const QString& name)
+        {
+            return (name.size() == 1 ? QStringLiteral("-") : QStringLiteral("--")) + name;
+        };
+        QStringList aliases;
+        for (const QString& name : names)
+        {
+            if (name != primary_name)
+            {
+                aliases.append(with_prefix(name));
+            }
+        }
+        const QString argument = option.valueName().isEmpty() ? translate("VCommandLine", "None")
+            : QStringLiteral("<%1>").arg(option.valueName());
+        appendHelpRow(options_model, {with_prefix(primary_name), aliases.join(QStringLiteral(", ")),
+                                      argument, option.description()});
+    }
+
+    QStandardItemModel limits_model(&dialog);
+    limits_model.setHorizontalHeaderLabels({translate("VCommandLine", "Topic"),
+                                            translate("VCommandLine", "Information")});
+    QTableView limits_table(&tabs);
+    limits_table.setObjectName(QStringLiteral("helpLimits"));
+    QStandardItemModel errors_model(&dialog);
+    errors_model.setHorizontalHeaderLabels({translate("VCommandLine", "Exit code"),
+                                            translate("VCommandLine", "Meaning")});
+    QTableView errors_table(&tabs);
+    errors_table.setObjectName(QStringLiteral("helpErrors"));
+    QStandardItemModel removed_model(&dialog);
+    removed_model.setHorizontalHeaderLabels({translate("VCommandLine", "Removed option"),
+                                             translate("VCommandLine", "Replacement")});
+    QTableView removed_table(&tabs);
+    removed_table.setObjectName(QStringLiteral("helpRemoved"));
+    for (const HelpEntry& entry : commandLineHelpEntries())
+    {
+        QStandardItemModel* model = &limits_model;
+        if (entry.section == HelpSection::ExitCodes)
+        {
+            model = &errors_model;
+        }
+        else if (entry.section == HelpSection::RemovedOptions)
+        {
+            model = &removed_model;
+        }
+        appendHelpRow(*model, {entry.topic, entry.description});
+    }
+
+    configureHelpTable(options_table, options_model);
+    configureHelpTable(limits_table, limits_model);
+    configureHelpTable(errors_table, errors_model);
+    configureHelpTable(removed_table, removed_model);
+    tabs.addTab(&options_table, translate("VCommandLine", "Options"));
+    tabs.addTab(&limits_table, translate("VCommandLine", "Limits"));
+    tabs.addTab(&errors_table, translate("VCommandLine", "Exit codes"));
+    tabs.addTab(&removed_table, translate("VCommandLine", "Removed options"));
+    layout.addWidget(&tabs);
+
+    options_table.setColumnWidth(0, 235);
+    options_table.setColumnWidth(1, 85);
+    options_table.setColumnWidth(2, 150);
+    options_table.setColumnWidth(3, 570);
+    for (QTableView* table : {&limits_table, &errors_table, &removed_table})
+    {
+        table->setColumnWidth(0, 240);
+        table->setColumnWidth(1, 800);
+    }
+
+    QLabel result_count(&dialog);
+    result_count.setObjectName(QStringLiteral("helpResultCount"));
     QDialogButtonBox button_box(QDialogButtonBox::Close, &dialog);
+    QHBoxLayout footer;
+    footer.addWidget(&result_count);
+    footer.addStretch();
+    footer.addWidget(&button_box);
+    layout.addLayout(&footer);
+
+    const QList<QTableView*> tables{&options_table, &limits_table, &errors_table, &removed_table};
+    QObject filter_connections;
+    const auto apply_filter = [&]()
+    {
+        const QString query = filter_edit.text().trimmed();
+        for (QTableView* table : tables)
+        {
+            for (int row = 0; row < table->model()->rowCount(); ++row)
+            {
+                bool matches = query.isEmpty();
+                for (int column = 0; column < table->model()->columnCount(); ++column)
+                {
+                    matches |= table->model()->index(row, column).data().toString()
+                                   .contains(query, Qt::CaseInsensitive);
+                }
+                table->setRowHidden(row, !matches);
+            }
+        }
+        QTableView* current_table = tables.at(tabs.currentIndex());
+        int visible_rows = 0;
+        for (int row = 0; row < current_table->model()->rowCount(); ++row)
+        {
+            visible_rows += !current_table->isRowHidden(row);
+        }
+        result_count.setText(visible_rows == 0
+            ? translate("VCommandLine", "No matching entries. Clear the filter to show all rows.")
+            : translate("VCommandLine", "%1 of %2 entries").arg(visible_rows)
+                  .arg(current_table->model()->rowCount()));
+    };
+    QObject::connect(&filter_edit, &QLineEdit::textChanged, &filter_connections, apply_filter);
+    QObject::connect(&tabs, &QTabWidget::currentChanged, &filter_connections, [&]()
+    {
+        filter_edit.clear();
+        apply_filter();
+        tables.at(tabs.currentIndex())->resizeRowsToContents();
+    });
+    for (QTableView* table : tables)
+    {
+        QObject::connect(table->horizontalHeader(), &QHeaderView::sortIndicatorChanged,
+                         &filter_connections, apply_filter);
+        table->resizeRowsToContents();
+    }
     QObject::connect(&button_box, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
-    layout.addWidget(&text_edit);
-    layout.addWidget(&button_box);
+    apply_filter();
+    filter_edit.setFocus();
     dialog.exec();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommandLine::helpText() const
 {
-    return parser.helpText() + translate("VCommandLine",
-        "\nLimits and errors\n"
-        "\nModes and required arguments\n"
-        "  --test loads one pattern without exporting.\n"
-        "  --layout-export exports one pattern through SeamlyLayout without either application window.\n"
-        "  --layout-export requires --layout-output <path>. The output folder must exist.\n"
-        "  --layout-info prints a JSON report and exports nothing.\n"
-        "  Supply exactly one pattern for --test, --layout-export, or --layout-info.\n"
-        "  These three modes cannot be combined.\n"
-        "  Measurement and gradation overrides apply in all three modes.\n"
-        "  Size and height values use centimetres and require multisize measurements.\n"
-        "  The pattern must support the selected size and height.\n"
-        "  Relative paths resolve against the folder where the command starts.\n"
-        "\nLayout and format limits\n"
-        "  Export choices require --layout-export. Settings and direct layout flags also serve --layout-info.\n"
-        "  Direct layout flags override the JSON settings file, which overrides saved settings.\n"
-        "  Unknown JSON keys and invalid setting values stop the command with exit code 64.\n"
-        "  Select --layout-material when the pattern has several materials.\n"
-        "  --layout-view requires multisize measurements and cannot accompany --gsize or --gheight.\n"
-        "  --svg-text-mode applies only to SVG and cannot accompany --text2paths.\n"
-        "  --text2paths applies to svg, pdf, pdf-tiled, ps, and eps.\n"
-        "  --layout-no-packing preserves Piece mode positions without a layout run.\n"
-        "  It cannot accompany --layout-view, --layout-oversize, or pdf-tiled.\n"
-        "  Use pdf for roll paper and pdf-tiled for tiled paper.\n"
-        "  Tiled PDF cannot export Marker layouts. DXF requires one size, not Marker or Nested layouts.\n"
-        "  Oversized or unplaced pieces stop export unless the selected oversize choice resolves them.\n"
-        "  The split choice excludes dxf, pdf-tiled, gcode, 3mf, Marker, and Nested layouts.\n"
-        "  The extend choice cannot place a piece wider than the media.\n"
-        "  G-Code and 3MF require optional export modules.\n"
-        "  Use --layout-info to inspect available materials, views, oversized pieces, and allowed formats.\n"
-        "\nRemoved legacy options\n"
-        "  -b, --basename: formerly enabled console export and supplied the output basename.\n"
-        "  This branch does not accept --basename. Use --layout-export and --layout-output instead.\n"
-        "  --exportOnlyDetails is replaced by --layout-no-packing.\n"
-        "  The old --destination, --format, --bdxf, and page-layout options are removed.\n"
-        "  Use direct --layout-* flags or --layout-settings for page, margin, gap, and rotation settings.\n"
-        "\nErrors and exit codes\n"
-        "  Option names are case-sensitive. Unknown options and missing values are usage errors.\n"
-        "  Read standard error for the cause. Seamly2D returns the SeamlyLayout exit code after export.\n"
-        "  0: Success. Help and version requests also return 0.\n"
-        "  64: Incorrect command line arguments, missing companions, invalid values, or incompatible export choices.\n"
-        "  65: Invalid pattern data or gradation options on an individual pattern.\n"
-        "  66: A pattern or measurement file is missing or unreadable.\n"
-        "  69: SeamlyLayout cannot start, or an export module is unavailable.\n"
-        "  70: Oversized or unplaced pieces, or a software error.\n"
-        "  73: The output file cannot be written.\n"
-        "  74: The program cannot send the pieces data to SeamlyLayout.\n"
-        "  78: Invalid configuration, such as a relative SEAMLY_DATA_DIR.\n");
+    QString text = parser.helpText();
+    const QList<HelpEntry> entries = commandLineHelpEntries();
+    for (HelpSection section : {HelpSection::Limits, HelpSection::RemovedOptions, HelpSection::ExitCodes})
+    {
+        QString title = translate("VCommandLine", "Limits and errors");
+        if (section == HelpSection::RemovedOptions)
+        {
+            title = translate("VCommandLine", "Removed legacy options");
+        }
+        else if (section == HelpSection::ExitCodes)
+        {
+            title = translate("VCommandLine", "Errors and exit codes");
+        }
+        text += QLatin1Char('\n') + title + QLatin1Char('\n');
+        for (const HelpEntry& entry : entries)
+        {
+            if (entry.section == section)
+            {
+                text += QStringLiteral("  %1: %2\n").arg(entry.topic, entry.description);
+            }
+        }
+    }
+    return text;
 }
+
 
 /// @brief Initializes the list of command-line options and their index.
 ///

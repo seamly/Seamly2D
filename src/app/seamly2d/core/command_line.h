@@ -119,6 +119,7 @@ private:
     QCommandLineParser     parser;
     VCommandLineOptions    m_options_used;
     QMap<QString, int>     m_options_index;
+    QList<QCommandLineOption> m_standard_help_options;
     bool                   m_is_gui_enabled;
     bool                   m_reserves_stdout;
     friend class           Application2D;
