@@ -294,10 +294,15 @@ HeadlessExport::Result HeadlessExport::run(const StartupOptions &options)
     } // if the view has no layout (Marker or Nested of a split run)
 
     // Labels that are already paths take "asSupplied" unless a mode was requested.
+    // --text2paths writes SVG labels as single-stroke paths (hersheyStrokes).
     const QString format = options.exportFormat();
     const bool pathLabels = controller.getLabelTextState() == QStringLiteral("pathsOnly");
-    const QString textMode = options.isSvgTextModeSet() || !pathLabels ? options.svgTextMode()
-                                                                       : QStringLiteral("asSupplied");
+    QString textMode = options.isSvgTextModeSet() || !pathLabels ? options.svgTextMode()
+                                                                 : QStringLiteral("asSupplied");
+    if (options.isTextAsPaths()) {
+        textMode = pathLabels ? QStringLiteral("asSupplied") : QStringLiteral("hersheyStrokes");
+    } // if text as paths
+    controller.setPdfTextAsPaths(options.isTextAsPaths());
     const QString formatProblem =
         controller.exportFormatProblem(format, options.isSvgTextModeSet() ? textMode : QString());
     if (!formatProblem.isEmpty()) {

@@ -8289,6 +8289,10 @@ int MainWindow::exportLayoutFromCommandLine(const VCommandLinePtr &command_line)
     {
         arguments << QStringLiteral("--oversize") << command_line->layoutOversizeOption();
     }
+    if (command_line->isText2PathsSet())
+    {
+        arguments << QStringLiteral("--text2paths");
+    }
 
     QProcess process;
     process.setWorkingDirectory(QFileInfo(seamly_layout).absolutePath());

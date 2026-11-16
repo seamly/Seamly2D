@@ -70,6 +70,13 @@ const QStringList svgTextModes{
 // @brief Choices of --oversize: split the pieces, or make the media longer.
 const QStringList oversizeChoices{QStringLiteral("split"), QStringLiteral("extend")};
 
+// @brief Formats that write label text as paths for --text2paths.
+// PNG and JPEG are raster images; DXF keeps TEXT entities, which DXF-ASTM requires; HP-GL has no text mode.
+const QStringList textAsPathsFormats{
+    QStringLiteral("svg"), QStringLiteral("pdf"), QStringLiteral("pdf-tiled"),
+    QStringLiteral("ps"), QStringLiteral("eps")
+};
+
 // @brief Build the text shown for --version.
 // Falls back to the product name alone when the caller has not set the
 // application metadata yet (QCoreApplication::setApplicationVersion()).
@@ -99,7 +106,8 @@ bool StartupOptions::hasHeadlessArguments(const QStringList &arguments)
         QStringLiteral("--settings"), QStringLiteral("--layout-settings"),
         QStringLiteral("--export-options"), QStringLiteral("--svg-text-mode"),
         QStringLiteral("--text-mode"), QStringLiteral("--material"), QStringLiteral("--view"),
-        QStringLiteral("--oversize"), QStringLiteral("--info")
+        QStringLiteral("--oversize"), QStringLiteral("--info"),
+        QStringLiteral("--text2paths")
     };
 
     for (const QString &argument : arguments) {
@@ -214,6 +222,12 @@ StartupOptions StartupOptions::parse(const QStringList &arguments, QIODevice *st
         QStringLiteral("Print a JSON report of the materials, layouts, oversized pieces and formats; export nothing."));
     parser.addOption(infoOption);
 
+    const QCommandLineOption textAsPathsOption(
+        QStringList{QStringLiteral("text2paths")},
+        QStringLiteral("Write label text as paths: SVG as single-stroke paths, PDF as glyph outlines. "
+                       "PS and EPS draw paths already. For svg, pdf, pdf-tiled, ps and eps."));
+    parser.addOption(textAsPathsOption);
+
     parser.addPositionalArgument(
         QStringLiteral("svg-file"),
         QStringLiteral("SVG pattern file to open at startup (optional)."),
@@ -233,7 +247,7 @@ StartupOptions StartupOptions::parse(const QStringList &arguments, QIODevice *st
     options.m_headlessRequest = parser.isSet(exportOption) || parser.isSet(outputOption) ||
         parser.isSet(settingsOption) || parser.isSet(exportOptionsOption) ||
         parser.isSet(svgTextModeOption) || parser.isSet(materialOption) || parser.isSet(viewOption) ||
-        parser.isSet(oversizeOption) || parser.isSet(infoOption);
+        parser.isSet(oversizeOption) || parser.isSet(infoOption) || parser.isSet(textAsPathsOption);
 
     if (parser.isSet(versionOption)) {
         // --version wins over everything else, matching every other CLI.
@@ -356,12 +370,13 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
     const QCommandLineOption viewOption(QStringList{QStringLiteral("view")});
     const QCommandLineOption oversizeOption(QStringList{QStringLiteral("oversize")});
     const QCommandLineOption infoOption(QStringList{QStringLiteral("info")});
+    const QCommandLineOption textAsPathsOption(QStringList{QStringLiteral("text2paths")});
 
     const bool hasExportArguments =
         parser.isSet(exportOption) || parser.isSet(outputOption) ||
         parser.isSet(settingsOption) || parser.isSet(exportOptionsOption) ||
         parser.isSet(svgTextModeOption) || parser.isSet(materialOption) || parser.isSet(viewOption) ||
-        parser.isSet(oversizeOption) || parser.isSet(infoOption);
+        parser.isSet(oversizeOption) || parser.isSet(infoOption) || parser.isSet(textAsPathsOption);
     if (!hasExportArguments) {
         return options;
     } // if no export arguments
@@ -395,7 +410,7 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
         const bool hasExportChoice =
             parser.isSet(exportOption) || parser.isSet(outputOption) || parser.isSet(exportOptionsOption) ||
             parser.isSet(svgTextModeOption) || parser.isSet(materialOption) || parser.isSet(viewOption) ||
-            parser.isSet(oversizeOption);
+            parser.isSet(oversizeOption) || parser.isSet(textAsPathsOption);
         if (hasExportChoice) {
             return fail(QStringLiteral("--info prints a report and exports nothing; it takes only --settings."));
         } // if export options were given with --info
@@ -451,6 +466,14 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
         return fail(QStringLiteral("--svg-text-mode can only be used with --export svg."));
     } // if text mode is used with another format
 
+    if (parser.isSet(textAsPathsOption) && parser.isSet(svgTextModeOption)) {
+        return fail(QStringLiteral("--text2paths and --svg-text-mode cannot be used together."));
+    } // if two label modes
+    if (parser.isSet(textAsPathsOption) && !textAsPathsFormats.contains(format)) {
+        return fail(QStringLiteral("--text2paths applies to %1; %2 has no text to convert.")
+                        .arg(textAsPathsFormats.join(QStringLiteral(", ")), format));
+    } // if the format has no text mode
+
     const QFileInfo outputInfo(parser.value(outputOption));
     const QString outputPath = outputInfo.absoluteFilePath();
     if (!outputInfo.absoluteDir().exists()) {
@@ -482,6 +505,7 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
     options.m_material = parser.value(materialOption).trimmed();
     options.m_view = parser.value(viewOption).trimmed();
     options.m_oversize = oversize;
+    options.m_textAsPaths = parser.isSet(textAsPathsOption);
     return options;
 } // StartupOptions::parseExportOptions
 

@@ -89,6 +89,7 @@ private slots:
     void infoRequest_needsNoOutput();
     void infoRequest_rejectsExportChoices();
     void hasHeadlessArguments_matchesEveryHeadlessOption();
+    void textAsPaths_vectorFormatsOnly();
 
     // --help / --version
     void helpOption_statusIsShowInformation();
@@ -692,12 +693,41 @@ void StartupOptionsTests::hasHeadlessArguments_matchesEveryHeadlessOption()
 {
     for (const QString &option : {QStringLiteral("--export"), QStringLiteral("--output=x.svg"),
                                   QStringLiteral("--material"), QStringLiteral("--view=40"),
-                                  QStringLiteral("--oversize"), QStringLiteral("--info"),
+                                  QStringLiteral("--oversize"), QStringLiteral("--info"), QStringLiteral("--text2paths"),
                                   QStringLiteral("--settings"), QStringLiteral("--svg-text-mode=asSupplied")}) {
         QVERIFY2(StartupOptions::hasHeadlessArguments(QStringList{option}), qPrintable(option));
     } // for each headless option
     QVERIFY(!StartupOptions::hasHeadlessArguments(QStringList{QStringLiteral("--svg-stdin"), QStringLiteral("a.svg")}));
 } // hasHeadlessArguments_matchesEveryHeadlessOption
+
+// @brief --text2paths takes the vector formats with text and refuses a second label mode.
+void StartupOptionsTests::textAsPaths_vectorFormatsOnly()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString svgPath = makeFile(directory, QStringLiteral("pattern.svg"));
+    const auto parse = [&](const QStringList &extra) {
+        return StartupOptions::parse(QStringList{QStringLiteral("SeamlyLayout"), QStringLiteral("--output"),
+                                                 directory.filePath(QStringLiteral("out.file")),
+                                                 QStringLiteral("--text2paths")} + extra + QStringList{svgPath});
+    }; // parse
+
+    for (const QString &format : {QStringLiteral("svg"), QStringLiteral("pdf"), QStringLiteral("pdf-tiled"),
+                                  QStringLiteral("ps"), QStringLiteral("eps")}) {
+        const StartupOptions options = parse({QStringLiteral("--export"), format});
+        QVERIFY2(options.hasHeadlessExport(), qPrintable(format));
+        QVERIFY(options.isTextAsPaths());
+    } // for each vector format
+
+    const StartupOptions dxf = parse({QStringLiteral("--export"), QStringLiteral("dxf")});
+    QCOMPARE(dxf.status(), StartupOptions::Status::Failed);
+    QVERIFY(dxf.message().startsWith(QStringLiteral("--text2paths applies to")));
+
+    const StartupOptions twoModes =
+        parse({QStringLiteral("--export"), QStringLiteral("svg"), QStringLiteral("--svg-text-mode"), QStringLiteral("asSupplied")});
+    QCOMPARE(twoModes.status(), StartupOptions::Status::Failed);
+    QCOMPARE(twoModes.message(), QStringLiteral("--text2paths and --svg-text-mode cannot be used together."));
+} // textAsPaths_vectorFormatsOnly
 
 // @brief A headless export must name its destination.
 void StartupOptionsTests::headlessExport_requiresOutputPath()

@@ -429,7 +429,7 @@ void TST_VCommandLine::LayoutSettingsRequireExportOrInfo()
 void TST_VCommandLine::RemovedLegacyOptionsFailToParse()
 {
     // The old console export options stay removed; the parser names each one.
-    for (const QString &option : {QStringLiteral("--text2paths"), QStringLiteral("--basename"),
+    for (const QString &option : {QStringLiteral("--basename"),
                                   QStringLiteral("--exportOnlyDetails"), QStringLiteral("--format"),
                                   QStringLiteral("--pageformat"), QStringLiteral("--rotate")})
     {
@@ -452,4 +452,46 @@ void TST_VCommandLine::MeasurementOverrideIsAbsolute()
                                            QStringLiteral("patterns/shirt.sm2d")}));
         QCOMPARE(command_line.measurementPathOption(), QFileInfo(relative_path).absoluteFilePath());
     }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::Text2PathsForVectorFormats()
+{
+    for (const QString &format : {QStringLiteral("svg"), QStringLiteral("pdf"), QStringLiteral("pdf-tiled"),
+                                  QStringLiteral("ps"), QStringLiteral("eps")})
+    {
+        VCommandLine command_line;
+        QVERIFY(command_line.parser.parse({QStringLiteral("seamly2d"), QStringLiteral("--layout-export"),
+                                           QStringLiteral("--layout-format"), format,
+                                           QStringLiteral("--layout-output"), QStringLiteral("layout.out"),
+                                           QStringLiteral("--text2paths"), QStringLiteral("pattern.sm2d")}));
+        QVERIFY2(command_line.layoutExportError().isEmpty(), qUtf8Printable(format));
+        QVERIFY(command_line.isText2PathsSet());
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::Text2PathsRejectedCombinations()
+{
+    const QList<QPair<QStringList, QString>> cases{
+        {{QStringLiteral("--layout-format"), QStringLiteral("dxf")}, QStringLiteral("--text2paths applies to")},
+        {{QStringLiteral("--layout-format"), QStringLiteral("png")}, QStringLiteral("--text2paths applies to")},
+        {{QStringLiteral("--svg-text-mode"), QStringLiteral("hersheyStrokes")},
+         QStringLiteral("--text2paths and --svg-text-mode cannot be used together.")}
+    };
+    for (const auto &item : cases)
+    {
+        VCommandLine command_line;
+        const QStringList arguments = QStringList{QStringLiteral("seamly2d"), QStringLiteral("--layout-export"),
+                                                  QStringLiteral("--layout-output"), QStringLiteral("layout.out"),
+                                                  QStringLiteral("--text2paths")}
+                                      + item.first + QStringList{QStringLiteral("pattern.sm2d")};
+        QVERIFY(command_line.parser.parse(arguments));
+        QVERIFY2(command_line.layoutExportError().startsWith(item.second), qUtf8Printable(command_line.layoutExportError()));
+    }
+
+    VCommandLine without_export;
+    QVERIFY(without_export.parser.parse({QStringLiteral("seamly2d"), QStringLiteral("--text2paths"),
+                                         QStringLiteral("pattern.sm2d")}));
+    QCOMPARE(without_export.layoutExportError(), QStringLiteral("SeamlyLayout export options require --layout-export."));
 }

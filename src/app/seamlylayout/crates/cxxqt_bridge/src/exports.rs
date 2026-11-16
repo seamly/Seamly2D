@@ -47,6 +47,16 @@ use layout_tiling::{compute_tile_dims, measurement_to_px, LayoutSettings, TileDi
 
 // Points per inch: the default PDF user space unit is 1/72 in.
 const PDF_POINTS_PER_INCH: f32 = 72.0;
+
+// @brief How a PDF export writes label text.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum PdfText {
+    // Selectable text with embedded fonts (the Export menu).
+    #[default]
+    Embedded,
+    // Glyph outlines as paths (`--text2paths`): no font needed to view or cut.
+    Paths,
+}
 // Longest page side, in user space units, that PDF readers accept (Acrobat: 200 in).
 const PDF_MAX_PAGE_UNITS: f32 = 14_400.0;
 
@@ -55,8 +65,9 @@ const PDF_MAX_PAGE_UNITS: f32 = 14_400.0;
 //          200 in gets `/UserUnit` n: the MediaBox shrinks by n, and a reader
 //          scales it back, so the page prints at full length.
 // @param tree  Parsed page content.
+// @param text  Embedded text, or text as paths.
 // @return PDF bytes on success; Err(message) when the `/UserUnit` rewrite fails.
-pub(crate) fn render_tree_to_pdf_bytes(tree: &usvg::Tree) -> Result<Vec<u8>, String> {
+pub(crate) fn render_tree_to_pdf_bytes(tree: &usvg::Tree, text: PdfText) -> Result<Vec<u8>, String> {
     use svg2pdf::{ConversionOptions, PageOptions};
 
     // Longest page side in points at true size.
@@ -68,7 +79,9 @@ pub(crate) fn render_tree_to_pdf_bytes(tree: &usvg::Tree) -> Result<Vec<u8>, Str
 
     // svg2pdf maps `dpi` px to 72 pt, so 96 px/in times the unit gives MediaBox units of n/72 in.
     let page_options = PageOptions { dpi: LAYOUT_PPI as f32 * user_unit };
-    let pdf = svg2pdf::to_pdf(tree, ConversionOptions::default(), page_options);
+    // embed_text false: svg2pdf writes glyph outlines instead of text and fonts.
+    let conversion = ConversionOptions { embed_text: text == PdfText::Embedded, ..ConversionOptions::default() };
+    let pdf = svg2pdf::to_pdf(tree, conversion, page_options);
 
     // A page within 200 in keeps the default unit.
     if user_unit <= 1.0 {
@@ -103,10 +116,12 @@ fn set_pdf_user_unit(pdf: &[u8], user_unit: f32) -> Result<Vec<u8>, String> {
 // @brief Render an SVG DOM document to a single-page PDF byte buffer.
 // @param doc      SVG DOM page content.
 // @param context  Human-readable context included in error messages.
+// @param text     Embedded text, or text as paths.
 // @return PDF bytes on success; Err(message) on failure.
 pub(crate) fn render_svg_doc_to_pdf_bytes(
     doc: &svg_dom::Document,
     context: &str,
+    text: PdfText,
 ) -> Result<Vec<u8>, String> {
     // Serialize page DOM to SVG string for usvg parsing.
     let svg_str = doc.to_string();
@@ -118,7 +133,7 @@ pub(crate) fn render_svg_doc_to_pdf_bytes(
         .map_err(|e| format!("Tiled PDF: SVG parse failed for {context}: {e}"))?;
 
     // Render to one PDF page at true size.
-    render_tree_to_pdf_bytes(&tree)
+    render_tree_to_pdf_bytes(&tree, text)
         .map_err(|e| format!("Tiled PDF: {context}: {e}"))
 } // fn render_svg_doc_to_pdf_bytes
 
@@ -910,6 +925,7 @@ fn missing_piece_data_text(missing: &[MissingPieceData]) -> String {
 pub fn do_export_pdf(
     doc: &svg_dom::Document,
     path: &str,
+    text: PdfText,
     progress: &mut impl FnMut(i32),
 ) -> Result<(), String> {
     crate::log_to_file(&format!("[exports.rs] do_export_pdf(): 1 parsing SVG DOM to usvg tree for '{path}'"));
@@ -927,7 +943,7 @@ pub fn do_export_pdf(
     crate::log_to_file(&format!("[exports.rs] do_export_pdf(): 2 SVG parsed; rendering PDF to '{path}'"));
 
     // Step 2–3: usvg tree → PDF bytes → file.
-    let result = render_tree_to_pdf_bytes(&tree)
+    let result = render_tree_to_pdf_bytes(&tree, text)
         .and_then(|pdf| std::fs::write(path, pdf).map_err(|e| e.to_string()))
         .map_err(|e| {
             crate::log_to_file(&format!("[exports.rs] do_export_pdf(): 3 render failed: {e}"));
@@ -959,10 +975,12 @@ pub fn do_export_pdf(
 //
 // @param doc       Layout DOM to tile (already stripped / sized).
 // @param settings  Parsed LayoutSettings; must have a valid `tile_size`.
+// @param text      Embedded text, or text as paths.
 // @return Vec of single-page PDF byte buffers; Err on any failure.
 pub(crate) fn collect_tiled_pdf_page_bytes(
     doc: &svg_dom::Document,
     settings: &LayoutSettings,
+    text: PdfText,
 ) -> Result<Vec<Vec<u8>>, String> {
     // Collect per-page single-page PDF bytes.
     // Order: [thumbnail page, tile pages row-major].
@@ -992,7 +1010,7 @@ pub(crate) fn collect_tiled_pdf_page_bytes(
 
     // First page: full-layout thumbnail scaled to fit inside page margins.
     let thumb_doc = build_tiled_pdf_thumbnail_doc(doc, &tile_dims, layout_w_px, layout_h_px)?;
-    tile_pages.push(render_svg_doc_to_pdf_bytes(&thumb_doc, "thumbnail page")?);
+    tile_pages.push(render_svg_doc_to_pdf_bytes(&thumb_doc, "thumbnail page", text)?);
 
     for row in 0..tile_dims.tile_rows {
         for col in 0..tile_dims.tile_cols {
@@ -1391,6 +1409,7 @@ pub(crate) fn collect_tiled_pdf_page_bytes(
             tile_pages.push(render_svg_doc_to_pdf_bytes(
                 &tile_doc,
                 &format!("tile ({row},{col})"),
+                text,
             )?);
         } // for col
     } // for row
@@ -1423,12 +1442,13 @@ fn do_export_pdf_tile_inner(
     doc: &svg_dom::Document,
     path: &str,
     settings: &LayoutSettings,
+    text: PdfText,
 ) -> Result<(), String> {
     use std::fs;
 
     crate::log_to_file(&format!("[exports.rs] do_export_pdf_tile_inner(): 1 collecting tile pages for '{path}' tile_size='{}'", settings.tile_size));
 
-    let tile_pages = collect_tiled_pdf_page_bytes(doc, settings)?;
+    let tile_pages = collect_tiled_pdf_page_bytes(doc, settings, text)?;
     let page_count = tile_pages.len();
 
     crate::log_to_file(&format!("[exports.rs] do_export_pdf_tile_inner(): 2 merging {page_count} pages"));
@@ -1466,6 +1486,7 @@ pub fn do_export_pdf_tile(
     doc: &svg_dom::Document,
     path: &str,
     settings_json: &cxx_qt_lib::QString,
+    text: PdfText,
 ) -> Result<(), String> {
     crate::log_to_file(&format!("[exports.rs] do_export_pdf_tile(): 1 parsing settings for '{path}'"));
 
@@ -1487,7 +1508,7 @@ pub fn do_export_pdf_tile(
 
     crate::log_to_file(&format!("[exports.rs] do_export_pdf_tile(): 2 paper_type='tiled' tile_size='{}'; delegating to inner", settings.tile_size));
 
-    do_export_pdf_tile_inner(doc, path, &settings)
+    do_export_pdf_tile_inner(doc, path, &settings, text)
 } // fn do_export_pdf_tile
 
 // ---------------------------------------------------------------------------
@@ -3042,7 +3063,7 @@ mod tests {
         path.push(format!("seamly_pdf_export_test_{}.pdf", std::process::id()));
         let path_str = path.to_string_lossy().to_string();
 
-        do_export_pdf(&doc, &path_str, &mut |_| {}).expect("PDF export should succeed");
+        do_export_pdf(&doc, &path_str, PdfText::Embedded, &mut |_| {}).expect("PDF export should succeed");
 
         let bytes = std::fs::read(&path_str).expect("exported PDF file should be readable");
         let _ = std::fs::remove_file(&path_str); // best-effort cleanup
@@ -3083,7 +3104,7 @@ mod tests {
             .to_string_lossy()
             .to_string();
 
-        let result = do_export_pdf(&doc, &bad_path, &mut |_| {});
+        let result = do_export_pdf(&doc, &bad_path, PdfText::Embedded, &mut |_| {});
         assert!(result.is_err(), "do_export_pdf should return Err for unwritable path");
         let msg = result.unwrap_err();
         assert!(
@@ -3111,7 +3132,7 @@ mod tests {
 
         // Collect every progress tick emitted during the export.
         let mut ticks: Vec<i32> = Vec::new();
-        do_export_pdf(&doc, &path_str, &mut |pct| ticks.push(pct))
+        do_export_pdf(&doc, &path_str, PdfText::Embedded, &mut |pct| ticks.push(pct))
             .expect("PDF export should succeed");
         let _ = std::fs::remove_file(&path_str); // best-effort cleanup
 
@@ -3160,10 +3181,23 @@ mod tests {
             .collect()
     } // fn pdf_page_sizes
 
+    // @brief Text as paths leaves no font in the PDF; embedded text keeps the label as text.
+    #[test]
+    fn pdf_text_as_paths_writes_no_font() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="300" height="100"><text x="10" y="50" font-family="sans-serif" font-size="24">Front</text></svg>"#;
+        let doc = Document::parse(svg).expect("fixture SVG should parse");
+        let paths = render_svg_doc_to_pdf_bytes(&doc, "paths", PdfText::Paths).expect("PDF render should succeed");
+        let pdf = lopdf::Document::load_mem(&paths).expect("valid PDF");
+        let has_font = pdf.objects.values().any(|object| {
+            object.as_dict().is_ok_and(|dict| dict.get(b"Type").and_then(lopdf::Object::as_name).is_ok_and(|name| name == b"Font"))
+        }); // has_font
+        assert!(!has_font, "text as paths must not embed a font");
+    } // fn pdf_text_as_paths_writes_no_font
+
     // @brief Render an SVG string through the single-page PDF path.
     fn render_test_pdf(svg: &str) -> Vec<u8> {
         let doc = Document::parse(svg).expect("fixture SVG should parse");
-        render_svg_doc_to_pdf_bytes(&doc, "test page").expect("PDF render should succeed")
+        render_svg_doc_to_pdf_bytes(&doc, "test page", PdfText::Embedded).expect("PDF render should succeed")
     } // fn render_test_pdf
 
     // @brief 96 SVG px make one inch, 72 PDF points: a Letter page in px is 612 × 792 pt.
@@ -3228,7 +3262,7 @@ mod tests {
         ];
 
         for (tile_size, expected_width, expected_height) in cases {
-            let pages = collect_tiled_pdf_page_bytes(&doc, &settings_for(tile_size))
+            let pages = collect_tiled_pdf_page_bytes(&doc, &settings_for(tile_size), PdfText::Embedded)
                 .expect("tiled pages should render");
             assert!(pages.len() > 1, "{tile_size}: thumbnail plus tiles");
             for page in &pages {

@@ -125,7 +125,8 @@ function Test-SvgOutput([string]$Path, [hashtable]$Expect)
 }
 
 # @brief Check a PDF: header, trailer, page count and page size (with /UserUnit).
-# @param Expect Keys: Pages, MinPages, PageWidthIn, PageHeightIn, Orientation ('portrait' or 'landscape').
+# @param Expect Keys: Pages, MinPages, PageWidthIn, PageHeightIn, Orientation ('portrait' or 'landscape'),
+#        HasFont (true: an embedded font program; false: none, text drawn as paths).
 function Test-PdfOutput([string]$Path, [hashtable]$Expect)
 {
     $failures = New-Object System.Collections.Generic.List[string]
@@ -150,6 +151,11 @@ function Test-PdfOutput([string]$Path, [hashtable]$Expect)
     }
     $sizes = [regex]::Matches($text, '/MediaBox\s*\[([^\]]*)\]') | ForEach-Object { ($_.Groups[1].Value -split '\s+' | Where-Object { $_ }) -join ' ' } | Sort-Object -Unique
     if ($Expect.ContainsKey('SamePageSize') -and @($sizes).Count -gt 1) { $failures.Add("PDF pages differ in size: $($sizes -join '; ')") }
+    if ($Expect.ContainsKey('HasFont')) {
+        $fonts = [regex]::Matches($text, '/FontFile[23]?\b').Count
+        if ($Expect.HasFont -and $fonts -eq 0) { $failures.Add('PDF embeds no font; expected selectable text') }
+        if (-not $Expect.HasFont -and $fonts -gt 0) { $failures.Add("PDF embeds $fonts font program(s); expected text as paths") }
+    }
     return $failures
 }
 

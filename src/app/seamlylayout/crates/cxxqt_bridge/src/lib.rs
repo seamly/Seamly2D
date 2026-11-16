@@ -79,7 +79,7 @@ use layout_helpers::remove_group_by_id;
 
 mod exports;
 use exports::{
-    do_export_dxf, dxf_missing_piece_data_message, do_export_gcode, do_export_mesh, do_export_pdf, do_export_pdf_tile, do_export_png,
+    PdfText, do_export_dxf, dxf_missing_piece_data_message, do_export_gcode, do_export_mesh, do_export_pdf, do_export_pdf_tile, do_export_png,
     do_export_jpeg,
     do_export_svg, paid_export_available, default_export_file_name, material_name_segment, tab_export_path, export_name_segment, dxf_export_name_segment, do_export_hpgl, parse_hpgl_options, do_export_postscript,
 };
@@ -904,6 +904,10 @@ pub mod qobject {
         #[qinvokable]
         fn incomplete_layout_report(self: &AppController) -> QString;
 
+        // PDF and tiled PDF write label text as paths (true) or as embedded text (false, the default).
+        #[qinvokable]
+        fn set_pdf_text_as_paths(self: Pin<&mut AppController>, as_paths: bool);
+
         // JSON report of the import with `settings_json`: materials, oversized pieces,
         // and the views and formats of a whole and a split layout run.
         // Call after initialize_layout, so each material has its blank canvas.
@@ -1170,6 +1174,9 @@ pub struct AppControllerRust {
     // export when it is not empty; the GUI shows the same text in `layout_warning`.
     incomplete_layout_lines: Vec<String>,
 
+    // How PDF and tiled PDF exports write label text; set by headless `--text2paths`.
+    pdf_text: PdfText,
+
 } // struct AppControllerRust
 
 impl Default for AppControllerRust {
@@ -1232,6 +1239,7 @@ impl Default for AppControllerRust {
             material_docs:             Vec::new(),                     // nothing imported
             material_layouts:          Vec::new(),                     // no layouts
             incomplete_layout_lines:   Vec::new(),                     // no layout run
+            pdf_text:                  PdfText::Embedded,              // selectable text, as the Export menu
         } // Self
     } // fn default
 
@@ -3025,12 +3033,14 @@ impl qobject::AppController {
                 } // Err
             }; // layout_doc
 
+            // Read before the closure below borrows self mutably.
+            let text = self.rust().pdf_text;
             // Forward do_export_pdf progress ticks to the QML progress popup.
             let mut progress = |pct: i32| {
                 self.as_mut().set_export_progress(pct);
                 self.as_mut().progress_updated(pct);
             };
-            do_export_pdf(&layout_doc, &path_str, &mut progress)
+            do_export_pdf(&layout_doc, &path_str, text, &mut progress)
         }; // export_result
 
         match export_result {
@@ -3097,7 +3107,8 @@ impl qobject::AppController {
         self.as_mut().progress_updated(0);
 
         // export the layout as tiled PDF
-        match do_export_pdf_tile(&layout_doc, &path_str, settings_json) {
+        let text = self.rust().pdf_text;
+        match do_export_pdf_tile(&layout_doc, &path_str, settings_json, text) {
             Ok(()) => {
                 log_to_file(&format!("[lib.rs AppController] export_pdf_tiled(): 3 wrote tiled PDF '{path_str}'"));
                 self.as_mut().progress_updated(100);
@@ -3468,6 +3479,11 @@ impl qobject::AppController {
         }); // problem
         cxx_qt_lib::QString::from(problem.unwrap_or_default().as_str())
     } // fn export_format_problem
+
+    // PDF and tiled PDF write label text as paths (true) or as embedded text (false).
+    fn set_pdf_text_as_paths(mut self: std::pin::Pin<&mut Self>, as_paths: bool) {
+        self.as_mut().rust_mut().pdf_text = if as_paths { PdfText::Paths } else { PdfText::Embedded };
+    } // fn set_pdf_text_as_paths
 
     // Unplaced pieces and failed layouts of the last layout run; empty when complete.
     fn incomplete_layout_report(&self) -> cxx_qt_lib::QString {

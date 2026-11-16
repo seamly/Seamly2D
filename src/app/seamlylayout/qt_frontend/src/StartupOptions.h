@@ -158,6 +158,9 @@ public:
     // @brief True for --info: print the JSON report, export nothing.
     bool isInfoRequest() const { return m_infoRequest; }
 
+    // @brief True for --text2paths: label text as paths in SVG and PDF.
+    bool isTextAsPaths() const { return m_textAsPaths; }
+
 
     // @brief Text to show the user. Empty unless status() is ShowInformation or Failed.
     QString message() const { return m_message; }
@@ -211,6 +214,7 @@ private:
     QString m_view;
     QString m_oversize;
     bool m_infoRequest = false;
+    bool m_textAsPaths = false;
 
     // User-visible text; set only for Status::ShowInformation and Status::Failed.
     QString m_message;

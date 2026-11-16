@@ -52,13 +52,11 @@ function Get-CliTestCases
         @{ Name = 'console-help-without-redirection'; Group = 'general'; Program = 'console'; Arguments = @('--help'); Exit = 0
            Stdout = 'Usage:(.|\n)*--layout-export' }
         @{ Name = 'console-error-without-redirection'; Group = 'general'; Program = 'console'
-           Arguments = @('--text2paths', $shirt); Exit = 64; Stdout = "Unknown option 'text2paths'" }
+           Arguments = @('--basename', 'x', $shirt); Exit = 64; Stdout = "Unknown option 'basename'" }
         @{ Name = 'gui-start-unchanged'; Group = 'general'; Program = 'gui'; Arguments = @(); Exit = 0 }
         @{ Name = 'gui-start-with-pattern'; Group = 'general'; Program = 'gui'; Arguments = @($shirt); Exit = 0 }
 
         # --- Removed legacy options ----------------------------------------------------------------------------------
-        @{ Name = 'legacy-text2paths'; Group = 'legacy'; Arguments = @('--text2paths') + $export + @($shirt); Exit = 64
-           Stderr = "Unknown option 'text2paths'" }
         @{ Name = 'legacy-basename'; Group = 'legacy'; Arguments = @('--basename', 'shirt', $shirt); Exit = 64
            Stderr = "Unknown option 'basename'" }
         @{ Name = 'legacy-exportOnlyDetails'; Group = 'legacy'; Arguments = @('--exportOnlyDetails', $shirt); Exit = 64
@@ -141,7 +139,24 @@ function Get-CliTestCases
            Exit = 0; Expect = @{ MinPieces = 16; WidthIn = 36 } }
         @{ Name = 'shirt-pdf-roll-36in'; Group = 'paper-roll'; Format = 'pdf'
            Arguments = $export + @('--layout-format', 'pdf', '--layout-settings', $roll36, $shirt)
-           Exit = 0; Expect = @{ Pages = 1; PageWidthIn = 36 } }
+           Exit = 0; Expect = @{ Pages = 1; PageWidthIn = 36; HasFont = $true } }
+        @{ Name = 'shirt-pdf-text2paths'; Group = 'text'; Format = 'pdf'
+           Arguments = $export + @('--layout-format', 'pdf', '--text2paths', '--layout-settings', $roll36, $shirt)
+           Exit = 0; Expect = @{ Pages = 1; PageWidthIn = 36; HasFont = $false } }
+        @{ Name = 'shirt-pdf-tiled-text2paths'; Group = 'text'; Format = 'pdf-tiled'
+           Arguments = $export + @('--layout-format', 'pdf-tiled', '--text2paths', '--layout-settings', $letter, $shirt)
+           Exit = 0; Expect = @{ MinPages = 2; PageWidthIn = 8.5; PageHeightIn = 11; HasFont = $false } }
+        @{ Name = 'shirt-svg-text2paths'; Group = 'text'; Format = 'svg'
+           Arguments = $export + @('--text2paths', '--layout-settings', $roll36, $shirt)
+           Exit = 0; Expect = @{ MinPieces = 16; HasText = $false; WidthIn = 36 } }
+        @{ Name = 'shirt-eps-text2paths'; Group = 'text'; Format = 'eps'
+           Arguments = $export + @('--layout-format', 'eps', '--text2paths', '--layout-settings', $roll36, $shirt); Exit = 0; Expect = @{} }
+        @{ Name = 'text2paths-with-dxf'; Group = 'text'; Arguments = $export + @('--layout-format', 'dxf', '--text2paths', $shirt)
+           Exit = 64; Stderr = '--text2paths applies to' }
+        @{ Name = 'text2paths-with-text-mode'; Group = 'text'; Arguments = $export + @('--text2paths', '--svg-text-mode', 'asSupplied', $shirt)
+           Exit = 64; Stderr = '--text2paths and --svg-text-mode cannot be used together' }
+        @{ Name = 'text2paths-without-export'; Group = 'text'; Arguments = @('--text2paths', $shirt)
+           Exit = 64; Stderr = 'require --layout-export' }
         @{ Name = 'shirt-pdf-tiled-letter-portrait'; Group = 'paper-tiled'; Format = 'pdf-tiled'
            Arguments = $export + @('--layout-format', 'pdf-tiled', '--layout-settings', $letter, $shirt)
            Exit = 0; Expect = @{ MinPages = 2; PageWidthIn = 8.5; PageHeightIn = 11; SamePageSize = $true } }

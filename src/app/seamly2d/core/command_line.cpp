@@ -122,6 +122,7 @@ bool isConsoleModeArgument(const QString &argument)
     const QString name = argument.section(QLatin1Char('='), 0, 0);
     static const QStringList console_names{
         QStringLiteral("--test"), QStringLiteral("--mfile"), QStringLiteral("--gsize"), QStringLiteral("--gheight"),
+        QStringLiteral("--text2paths"),
         QStringLiteral("--help"), QStringLiteral("--version"), QStringLiteral("-t"), QStringLiteral("-m"),
         QStringLiteral("-x"), QStringLiteral("-e"), QStringLiteral("-h"), QStringLiteral("-v")
     };
@@ -355,6 +356,12 @@ void VCommandLine::initOptions(VCommandLineOptions &options, QMap<QString, int> 
     options.append(new QCommandLineOption({LONG_OPTION_LAYOUT_INFO},
         translate("VCommandLine", "Print a JSON report of the materials, layouts, oversized pieces and export "
                                   "formats of the pattern with the layout settings. Exports nothing.")));
+
+    // --text2paths: label text as paths in vector exports.
+    options_index.insert(LONG_OPTION_TEXT2PATHS, index++);
+    options.append(new QCommandLineOption({LONG_OPTION_TEXT2PATHS},
+        translate("VCommandLine", "Write label text as paths: SVG labels as single-stroke paths, PDF text as glyph "
+                                  "outlines. PS and EPS draw paths already. For svg, pdf, pdf-tiled, ps and eps.")));
 
     // --no-scaling: Disable high DPI auto-scaling (useful on some systems)
     options_index.insert(LONG_OPTION_NO_HDPI_SCALING, index++);
@@ -632,7 +639,7 @@ QString VCommandLine::layoutExportError() const
         is_set(LONG_OPTION_LAYOUT_FORMAT) || is_set(LONG_OPTION_LAYOUT_OUTPUT) ||
         is_set(LONG_OPTION_LAYOUT_EXPORT_OPTIONS) || is_set(LONG_OPTION_SVG_TEXT_MODE) ||
         is_set(LONG_OPTION_LAYOUT_MATERIAL) ||
-        is_set(LONG_OPTION_LAYOUT_VIEW) || is_set(LONG_OPTION_LAYOUT_OVERSIZE);
+        is_set(LONG_OPTION_LAYOUT_VIEW) || is_set(LONG_OPTION_LAYOUT_OVERSIZE) || is_set(LONG_OPTION_TEXT2PATHS);
 
     if (export_requested && info_requested)
     {
@@ -691,6 +698,21 @@ QString VCommandLine::layoutExportError() const
         && (format != QStringLiteral("svg") || !supported_text_modes.contains(text_mode)))
     {
         return translate("VCommandLine", "Invalid --svg-text-mode for the selected export format.");
+    }
+
+    if (is_set(LONG_OPTION_TEXT2PATHS))
+    {
+        if (is_set(LONG_OPTION_SVG_TEXT_MODE))
+        {
+            return translate("VCommandLine", "--text2paths and --svg-text-mode cannot be used together.");
+        }
+        const QStringList text_formats{QStringLiteral("svg"), QStringLiteral("pdf"), QStringLiteral("pdf-tiled"),
+                                       QStringLiteral("ps"), QStringLiteral("eps")};
+        if (!text_formats.contains(format))
+        {
+            return translate("VCommandLine", "--text2paths applies to svg, pdf, pdf-tiled, ps and eps; "
+                                             "%1 has no text to convert.").arg(format);
+        }
     }
 
     if (is_set(LONG_OPTION_LAYOUT_OVERSIZE))
@@ -808,6 +830,14 @@ QString VCommandLine::layoutViewOption() const
 QString VCommandLine::layoutOversizeOption() const
 {
     return parser.value(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_OVERSIZE))).trimmed().toLower();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Returns whether --text2paths asks for label text as paths.
+//---------------------------------------------------------------------------------------------------------------------
+bool VCommandLine::isText2PathsSet() const
+{
+    return parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_TEXT2PATHS)));
 }
 
 //---------------------------------------------------------------------------------------------------------------------

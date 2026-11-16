@@ -83,6 +83,8 @@ private slots:
     void LayoutSettingsRequireExportOrInfo();
     void RemovedLegacyOptionsFailToParse();
     void MeasurementOverrideIsAbsolute();
+    void Text2PathsForVectorFormats();
+    void Text2PathsRejectedCombinations();
 
 private:
     Q_DISABLE_COPY(TST_VCommandLine)
