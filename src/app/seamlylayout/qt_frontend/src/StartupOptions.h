@@ -41,6 +41,8 @@
 //   SeamlyLayout <file.svg>            open that file
 //   SeamlyLayout --svg-stdin           open the SVG document on standard input
 //   SeamlyLayout --export svg --output out.svg input.svg
+//   SeamlyLayout --export pdf --output out.pdf --material Lining --view 40 --oversize split input.svg
+//   SeamlyLayout --info --settings layout.json input.svg
 //   SeamlyLayout -h | --help           show usage, exit 0
 //   SeamlyLayout -v | --version        show the version, exit 0
 //
@@ -102,6 +104,10 @@ public:
     // @return A fully populated StartupOptions; never throws, never exits.
     static StartupOptions parse(const QStringList &arguments, QIODevice *standardInput);
 
+    // @brief True when an argument names a headless option (--export, --info, ...), valid or not.
+    // @param arguments Argument list; the program name may be included.
+    static bool hasHeadlessArguments(const QStringList &arguments);
+
     // @brief What the caller must do with this command line.
     Status status() const { return m_status; }
 
@@ -137,8 +143,30 @@ public:
     // @brief SVG label text mode for SVG export.
     QString svgTextMode() const { return m_svgTextMode; }
 
-    // @brief PNG scale factor.
-    double exportScale() const { return m_exportScale; }
+    // @brief True when --svg-text-mode was given; false keeps the default for the labels.
+    bool isSvgTextModeSet() const { return m_svgTextModeSet; }
+
+    // @brief --material value; empty selects the only material.
+    QString material() const { return m_material; }
+
+    // @brief --view value; empty selects the first multisize layout.
+    QString view() const { return m_view; }
+
+    // @brief --oversize choice, "split" or "extend"; empty stops on oversized pieces.
+    QString oversize() const { return m_oversize; }
+
+    // @brief True for --info: print the JSON report, export nothing.
+    bool isInfoRequest() const { return m_infoRequest; }
+
+    // @brief True for --text2paths: label text as paths in SVG and PDF.
+    bool isTextAsPaths() const { return m_textAsPaths; }
+
+    // @brief True for --no-packing: export the pieces at their Seamly2D positions.
+    bool isNoPacking() const { return m_noPacking; }
+
+    // @brief Direct layout flags as `name=value` items (`ignore-margins=` for the switch).
+    QStringList layoutFlags() const { return m_layoutFlags; }
+
 
     // @brief Text to show the user. Empty unless status() is ShowInformation or Failed.
     QString message() const { return m_message; }
@@ -160,6 +188,9 @@ private:
     // @return OpenDocument with svgDocument() set, or Failed with a message.
     static StartupOptions parseStandardInput(const QString &documentName,
                                              QIODevice *standardInput);
+
+    // @brief Direct layout flags set on the command line, as `name=value` items.
+    static QStringList layoutFlagItems(const QCommandLineParser &parser);
 
     // @brief Validate export arguments and store their absolute paths.
     static StartupOptions parseExportOptions(StartupOptions options,
@@ -187,7 +218,14 @@ private:
     QString m_settingsPath;
     QString m_exportOptionsPath;
     QString m_svgTextMode = QStringLiteral("designerFont");
-    double m_exportScale = 1.0;
+    bool m_svgTextModeSet = false;
+    QString m_material;
+    QString m_view;
+    QString m_oversize;
+    bool m_infoRequest = false;
+    bool m_textAsPaths = false;
+    QStringList m_layoutFlags;
+    bool m_noPacking = false;
 
     // User-visible text; set only for Status::ShowInformation and Status::Failed.
     QString m_message;

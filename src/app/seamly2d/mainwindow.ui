@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Author: slspencer; Copyright (C) 2026 Seamly2D Project -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later; https://www.gnu.org/licenses/gpl-3.0.html -->
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
@@ -91,6 +93,7 @@
      <string>&amp;Help</string>
     </property>
     <addaction name="shortcuts_Action"/>
+    <addaction name="commandLineOptions_Action"/>
     <addaction name="wiki_Action"/>
     <addaction name="forum_Action"/>
     <addaction name="reportBug_Action"/>
@@ -3562,6 +3565,17 @@
    </property>
    <property name="shortcut">
     <string notr="true">Ctrl+W</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="commandLineOptions_Action">
+   <property name="text">
+    <string>Command line options</string>
+   </property>
+   <property name="toolTip">
+    <string>Show command line options, limits, and errors</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

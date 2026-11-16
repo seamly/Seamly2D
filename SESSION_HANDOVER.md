@@ -1,6 +1,45 @@
 # Session handover
 
+## 2026-11-16 — CLI feature merged locally
+
+- Merged `feature/cli-1` through `fa4e0e47ad` into `run-seamlyLayout` at the user's request.
+- The merge had no conflicts. The source files match the tested feature branch.
+- Windows verification from the feature branch: the build passed; all 40 Qt suites passed with zero failures.
+- Linux and macOS verification remains deferred to CI.
+- No push. Both branch worktrees remain available.
+
+## 2026-11-16 — Command line help in the Help menu
+
+- Added **Help > Command line options** on `feature/cli-1`.
+- The window uses `VCommandLine::helpText()` for registered descriptions, limits, removed options, and exit codes.
+- `--basename` remains removed; the window explains `--layout-export` and `--layout-output` as its replacements.
+- Shared the dialog with the existing console-free `--help` fallback. Closing it from the menu does not exit Seamly2D.
+- Verified the Windows Qt 6.11.3 build and all 40 Qt suites: 32628 passed, zero failures.
+- The CLI suite includes 31 passing checks, including help content, scrolling, and closing without exiting.
+- Linux and macOS verification remains deferred to CI. No merge or push.
+
 ## Current status
+
+### 2026-11-16 — CLI.3 direct layout flags (feature/cli-1)
+
+- Done; CLI.3 moved to `TODO_COMPLETED.md`. `TODO_CLI.md` keeps CLI.2 only (CLI.2.1 Richmond files, CLI.2.2 CAD import check).
+- Seamly2D `--layout-<name> <value>` → SeamlyLayout `--<name> <value>` → `layout_tiling::apply_layout_flags` (precedence saved < `--layout-settings` < flags; media implications; conflicts → exit 64).
+- `--layout-no-packing` (`--no-packing`): pieces where Piece mode places them; bridge `useHandoffPositions`.
+- `--text2paths` back for SVG, PDF, tiled PDF, PS, EPS.
+- Decisions (CLI.3.1, CLI.3.7) are recorded in `TODO_COMPLETED.md`; Sue may rename flags.
+- Tests: CLI suite 130/130 (with `-RichmondRoot`); import check 30 files/0 fail; `cargo test --workspace` 734/0; `TST_VCommandLine` 29; `ctest` 9/9; Python headless runner pass.
+- Richmond pattern and `2025-06-08-Sue.smis`: `git show d3197ee973^:test-seamly-layout-input/<file>`; not re-added (personal measurements).
+- Import check with Inkscape 1.4.4, ezdxf, pypdf: 59 files, 0 fail. Open: a CAD program and a cutter (none installed); Linux/macOS (no WSL, no Docker, no Mac); CI (no push).
+- Next: Sue reviews and merges `feature/cli-1` (not pushed).
+
+### 2026-11-16 — CLI.1 audit and repair (feature/cli-1)
+
+- Done; CLI.1 in `TODO_COMPLETED.md`. Branch `feature/cli-1`, not merged, not pushed. Plan `CLI_1_PLAN.md` (D1–D17); matrix `CLI_1_OPTION_MATRIX.md`; results and acceptance checklist `CLI_1_TEST_RESULTS.md`.
+- New options: Seamly2D `--layout-material`, `--layout-view`, `--layout-oversize`, `--layout-info`, `--text2paths`; SeamlyLayout `--material`, `--view`, `--oversize`, `--info`, `--text2paths`. Removed `--layout-scale`/`--scale` (PNG fixed at 96 px/in).
+- Tests: CLI suite 106/106; `local_build_msi.ps1` pass (`nmake check`, `ctest` 9/9, `cargo test` 730/0, MSI built, not installed); `TST_VCommandLine` 26; CollectionTest 69/0 (start in `bin`); tester 15/0; Python runners pass.
+- Tester: `src/test/CliTestApp` (Rust/Iced, `--batch`), built in `target\release`.
+- Blocked: Linux/macOS (no WSL, no Mac), CI (no push), Richmond `.sm2d` (not on this machine).
+- Next: Sue reviews and merges. CLI.3 keeps the direct layout flags (names and precedence need Sue); CLI.2.1 needs the Richmond files.
 
 ### 2026-11-15 — Piece mode Details > Export Pieces (Seamly2D.73)
 
@@ -36,30 +75,9 @@
 - TODO: `TODO_CLI.md` new CLI.3 (legacy layout options as `--layout-*` flags); CLI.1 paths now `command_line.cpp`.
 - TODO: `TODO_SEAMLY2D.md` new Seamly2D.73 (Details > Export Pieces writes the handoff SVG string to a file).
 
-### 2026-11-15 — Fold lines on the left edge of paper and fabric (Layout.Y111)
-
-- `LayoutSettings::places_fold_lines_on_left_edge`: no folded fabric check. Layout Mode Any still ignores it.
-- Paper and open fabric: fold line pieces go first, on the left margin; the margin stays. Folded fabric unchanged: the fold, no margin, piece gap for other pieces.
-- `SettingsDialog.qml`: "Place fold lines on the left edge" on the line below Media Type; enabled for every media; "(fabric: no left margin)" dropped.
-- Default stays on: paper layouts now pin fold line pieces unless the user clears the box.
-- Tests: `fold_lines_on_left_edge_apply_to_every_media`, `fold_line_lies_on_the_left_margin_of_paper_and_open_fabric`, `jacket2_paper_and_open_fabric_place_fold_line_pieces_first`; Qt `foldLinesOnLeftEdgeCheck_belowMediaTypeForEveryMedia`.
-- Checked: `cargo test --workspace` 719 pass; `ctest` debug 9/9. Built in worktree `fold-media`; merged `--no-ff`; branch and worktree deleted.
-- Docs: SETTINGS_WORKFLOW, CREATE_LAYOUT_WORKFLOW, PROCESS LAYOUT WORKFLOW, SVG-DATA-ATTRIBUTES, `AGENT_CHECKLIST.md` §21, new §58 and OPEN row; §54 and its row removed.
-- Open: Layout.Y111.1 installed-app check with the next MSI (§58).
-
-### 2026-11-15 — Large patterns display in both canvases (Layout.Y10)
-
-- Cause: jacket2 resaved with 16 pieces; real handoff 2,024,522 chars. Fabric all-sizes, Marker and Nested SVGs went into `loadHtml()` `data:` URLs over Chromium's 2 MB limit; the load failed with no error.
-- New `qt_frontend/src/CanvasSvgSchemeHandler`: serves each canvas SVG from memory at `seamly-canvas://<canvas>/<n>.svg`. Scheme registered before `QApplication`; handler on the default profile; QML singleton.
-- `SvgCanvas.qml`: `canvasName` (`input`, `layout`); an `<img>` loads the scheme URL; "Cannot display this SVG." when `naturalWidth` is 0.
-- CMake: `Qt6::WebEngineCore`; new `CanvasSvgSchemeHandlerTests` (10 tests; offscreen, no sandbox, no GPU).
-- `webEngine_displaysSvgOverDataUrlLimit` (3 MiB SVG) fails with the old `data:` URL path.
-- Checked: `ctest` debug 9/9; `cargo test --workspace` 717 pass. Built in worktree `canvas-svg`; merged `--no-ff` with no skip-ci token (CMakeLists changed); branch and worktree deleted.
-- Docs: README "Canvas display", DECISIONS record, CXXQT_BRIDGE, CODEBASE_INDEX, rules (architecture, svg-processing, dependencies), `AGENT_CHECKLIST.md` §57 and OPEN row.
-- Open: Layout.Y10.1 installed-app check with the next MSI (§57). The WebEngine tests run first on Linux and macOS in CI.
-
 ## Decisions to retain
 
+- CLI Linux and macOS checks run in CI (`gh workflow run ci.yml`), not in a local WSL install (user, 2026-11-16).
 - SeamlyLayout is complete after the `develop` merge. Next focus: CLI layouts from pattern and measurement files plus parameters (user, 2026-11-15).
 - Adopt develop's `command_line.*` file names and lowerCamel `VCommandLine` method names: they match the code style (user, 2026-11-15).
 - Own CLI design (`--layout-export` to SeamlyLayout) replaces upstream console export. Lost legacy options go to `TODO_CLI.md` CLI.3 (user, 2026-11-15).

@@ -16,6 +16,10 @@
 //! - [`LayoutSettings`] — deserialized JSON settings (camelCase)
 //! - [`LAYOUT_PPI`]     — the canvas PPI constant (96.0)
 //!
+//! Headless validation:
+//! - [`validate_settings_json`] — strict check of a settings file for the command line
+//! - [`apply_layout_flags`]     — direct layout flags merged over the settings
+//!
 //! Tile geometry:
 //! - [`TileDimensions`]              — computed tile-grid dimensions
 //! - [`compute_tile_dims`]           — derive a tile grid from input SVG size + settings
@@ -31,12 +35,16 @@
 //! consumers install whatever log sink they prefer.
 
 pub mod layout_settings;
+pub mod settings_flags;
+pub mod settings_validation;
 pub mod tiling;
 
 // Re-export the most-used items at the crate root so callers can write
 // `use layout_tiling::LayoutSettings;` rather than
 // `use layout_tiling::layout_settings::LayoutSettings;`.
 pub use layout_settings::{LayoutSettings, LAYOUT_PPI};
+pub use settings_flags::{apply_layout_flags, LAYOUT_FLAG_NAMES, LAYOUT_SWITCH_NAMES};
+pub use settings_validation::validate_settings_json;
 pub use tiling::{
     compute_tile_dims, create_initial_tiled_layout_dom, measurement_to_px,
     pick_best_tiled_candidate, widest_piece_tile_cols, TileDimensions, TiledCandidate,

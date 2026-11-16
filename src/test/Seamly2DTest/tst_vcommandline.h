@@ -1,3 +1,8 @@
+// Author: slspencer
+// Copyright (C) 2026 Seamly2D Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+// License: https://www.gnu.org/licenses/gpl-3.0.html
+
 /***************************************************************************
  *                                                                         *
  *   Copyright (C) 2017  Seamly, LLC                                       *
@@ -64,14 +69,32 @@ private slots:
     void UniqueKeys();
     void LayoutExportOptions();
     void LayoutExportOptionsAppearInHelp();
+    void HelpDescribesLimitsAndRemovedBasename();
+    void HelpDialogClosesWithoutExiting();
     void LayoutExportUsesDefaultSvgFormat();
     void LayoutExportRequiresOutput();
     void LayoutExportRequiresOneInput();
     void LayoutExportRejectsUnsupportedFormat();
     void LayoutExportRejectsSvgTextModeForOtherFormats();
-    void LayoutExportScale();
-    void LayoutExportRejectsInvalidScale();
+    void LayoutScaleOptionIsRemoved();
     void LayoutExportOptionsRequireExportMode();
+    void LayoutChoiceOptions();
+    void LayoutChoiceOptionsAppearInHelp();
+    void LayoutOversizeRejectsUnknownChoice();
+    void LayoutNameOptionsNeedAName();
+    void LayoutViewRejectsGradationOptions();
+    void LayoutInfoMode();
+    void LayoutInfoRejectsExportChoices();
+    void LayoutInfoAndExportConflict();
+    void LayoutInfoRequiresOneInput();
+    void LayoutSettingsRequireExportOrInfo();
+    void RemovedLegacyOptionsFailToParse();
+    void MeasurementOverrideIsAbsolute();
+    void Text2PathsForVectorFormats();
+    void Text2PathsRejectedCombinations();
+    void LayoutFlagsForwardedInOrder();
+    void LayoutFlagsNeedExportOrInfo();
+    void LayoutNoPackingCombinations();
 
 private:
     Q_DISABLE_COPY(TST_VCommandLine)

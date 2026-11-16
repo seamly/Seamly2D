@@ -1622,6 +1622,7 @@ name = "seamly_svg2ezdxf"
 version = "0.1.0"
 dependencies = [
  "geometry",
+ "log",
  "svg_dom",
  "thiserror 1.0.69",
  "xmltree",

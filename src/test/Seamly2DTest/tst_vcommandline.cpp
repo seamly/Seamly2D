@@ -1,3 +1,8 @@
+// Author: slspencer
+// Copyright (C) 2026 Seamly2D Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+// License: https://www.gnu.org/licenses/gpl-3.0.html
+
 /***************************************************************************
  *                                                                         *
  *   Copyright (C) 2017  Seamly, LLC                                       *
@@ -57,6 +62,13 @@
 #include <QCommandLineParser>
 #include <QFileInfo>
 #include <QTemporaryDir>
+#include <QApplication>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QPlainTextEdit>
+#include <QPushButton>
+#include <QScrollBar>
+#include <QTimer>
 #include <QtTest>
 
 #ifdef Q_CC_MSVC
@@ -123,6 +135,65 @@ void TST_VCommandLine::LayoutExportOptionsAppearInHelp()
     QVERIFY(help.contains(QStringLiteral("--layout-output")));
     QVERIFY(help.contains(QStringLiteral("--svg-text-mode")));
     QVERIFY(help.contains(QStringLiteral("--mfile")));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::HelpDescribesLimitsAndRemovedBasename()
+{
+    VCommandLine command_line;
+    const QString help = command_line.helpText();
+
+    QVERIFY(help.startsWith(command_line.parser.helpText()));
+    QVERIFY(help.contains(QStringLiteral("--test")));
+    QVERIFY(help.contains(QStringLiteral("--layout-export requires --layout-output <path>")));
+    QVERIFY(help.contains(QStringLiteral("This branch does not accept --basename")));
+    QVERIFY(help.contains(QStringLiteral("64: Incorrect command line arguments")));
+    QVERIFY(!command_line.parser.parse({QStringLiteral("seamly2d"), QStringLiteral("--basename"),
+                                       QStringLiteral("layout"), QStringLiteral("pattern.sm2d")}));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::HelpDialogClosesWithoutExiting()
+{
+    VCommandLine command_line;
+    bool has_help = false;
+    bool is_read_only = false;
+    bool can_scroll = false;
+    bool has_close_button = false;
+
+    QTimer::singleShot(0, [&]()
+    {
+        auto* dialog = qobject_cast<QDialog*>(QApplication::activeModalWidget());
+        if (dialog != nullptr)
+        {
+            const auto* text_edit = dialog->findChild<QPlainTextEdit*>();
+            if (text_edit != nullptr)
+            {
+                has_help = text_edit->toPlainText() == command_line.helpText();
+                is_read_only = text_edit->isReadOnly();
+                can_scroll = text_edit->verticalScrollBar()->maximum() > 0;
+            }
+            auto* buttons = dialog->findChild<QDialogButtonBox*>();
+            if (buttons != nullptr && buttons->button(QDialogButtonBox::Close) != nullptr)
+            {
+                has_close_button = true;
+                buttons->button(QDialogButtonBox::Close)->click();
+            }
+            else
+            {
+                dialog->reject();
+            }
+        }
+    });
+
+    command_line.showHelpDialog();
+    QVERIFY(has_help);
+    QVERIFY(is_read_only);
+    QVERIFY(can_scroll);
+    QVERIFY(has_close_button);
+    QVERIFY(command_line.parser.parse({QStringLiteral("seamly2d"), QStringLiteral("pattern.sm2d")}));
+    QVERIFY(!command_line.isTestModeEnabled());
+    QVERIFY(!command_line.isLayoutExportEnabled());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -213,43 +284,21 @@ void TST_VCommandLine::LayoutExportRejectsSvgTextModeForOtherFormats()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VCommandLine::LayoutExportScale()
+void TST_VCommandLine::LayoutScaleOptionIsRemoved()
 {
-    QTemporaryDir directory;
-    QVERIFY(directory.isValid());
+    // PNG export renders at 96 px per inch; a scale option would be ignored, so it is not offered.
     VCommandLine command_line;
     const QStringList arguments{
         QStringLiteral("seamly2d"),
         QStringLiteral("--layout-export"),
         QStringLiteral("--layout-format"), QStringLiteral("png"),
-        QStringLiteral("--layout-output"), directory.filePath(QStringLiteral("layout.png")),
+        QStringLiteral("--layout-output"), QStringLiteral("layout.png"),
         QStringLiteral("--layout-scale"), QStringLiteral("2.0"),
         QStringLiteral("pattern.sm2d")
     };
 
-    QVERIFY(command_line.parser.parse(arguments));
-    QVERIFY(command_line.isLayoutExportEnabled());
-    QCOMPARE(command_line.layoutScaleOption(), QStringLiteral("2.0"));
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void TST_VCommandLine::LayoutExportRejectsInvalidScale()
-{
-    for (const QString &scale : {QStringLiteral("0"), QStringLiteral("1e100"), QStringLiteral("1e-100")}) {
-        VCommandLine command_line;
-        const QStringList arguments{
-            QStringLiteral("seamly2d"),
-            QStringLiteral("--layout-export"),
-            QStringLiteral("--layout-format"), QStringLiteral("png"),
-            QStringLiteral("--layout-output"), QStringLiteral("layout.png"),
-            QStringLiteral("--layout-scale"), scale,
-            QStringLiteral("pattern.sm2d")
-        };
-
-        QVERIFY(command_line.parser.parse(arguments));
-        QCOMPARE(command_line.layoutExportError(),
-                 QStringLiteral("--layout-scale requires a positive PNG export scale."));
-    }
+    QVERIFY(!command_line.parser.parse(arguments));
+    QVERIFY(command_line.parser.errorText().contains(QStringLiteral("layout-scale")));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -265,4 +314,312 @@ void TST_VCommandLine::LayoutExportOptionsRequireExportMode()
     QVERIFY(command_line.parser.parse(arguments));
     QCOMPARE(command_line.layoutExportError(),
              QStringLiteral("SeamlyLayout export options require --layout-export."));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::LayoutChoiceOptions()
+{
+    VCommandLine command_line;
+    const QStringList arguments{
+        QStringLiteral("seamly2d"),
+        QStringLiteral("--layout-export"),
+        QStringLiteral("--layout-format"), QStringLiteral("pdf"),
+        QStringLiteral("--layout-output"), QStringLiteral("layout.pdf"),
+        QStringLiteral("--layout-material"), QStringLiteral("Lining"),
+        QStringLiteral("--layout-view"), QStringLiteral("nested"),
+        QStringLiteral("--layout-oversize"), QStringLiteral("Extend"),
+        QStringLiteral("pattern.sm2d")
+    };
+
+    QVERIFY(command_line.parser.parse(arguments));
+    QVERIFY(command_line.layoutExportError().isEmpty());
+    QCOMPARE(command_line.layoutMaterialOption(), QStringLiteral("Lining"));
+    QCOMPARE(command_line.layoutViewOption(), QStringLiteral("nested"));
+    QCOMPARE(command_line.layoutOversizeOption(), QStringLiteral("extend"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::LayoutChoiceOptionsAppearInHelp()
+{
+    VCommandLine command_line;
+    const QString help = command_line.parser.helpText();
+
+    for (const QString &option : {QStringLiteral("--layout-material"), QStringLiteral("--layout-view"),
+                                  QStringLiteral("--layout-oversize"), QStringLiteral("--layout-info"),
+                                  QStringLiteral("--layout-settings"), QStringLiteral("--layout-export-options"),
+                                  QStringLiteral("--gsize"),
+                                  QStringLiteral("--gheight"), QStringLiteral("--test"),
+                                  QStringLiteral("--no-scaling")})
+    {
+        QVERIFY2(help.contains(option), qUtf8Printable(option));
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::LayoutOversizeRejectsUnknownChoice()
+{
+    VCommandLine command_line;
+    const QStringList arguments{
+        QStringLiteral("seamly2d"),
+        QStringLiteral("--layout-export"),
+        QStringLiteral("--layout-output"), QStringLiteral("layout.svg"),
+        QStringLiteral("--layout-oversize"), QStringLiteral("shrink"),
+        QStringLiteral("pattern.sm2d")
+    };
+
+    QVERIFY(command_line.parser.parse(arguments));
+    QCOMPARE(command_line.layoutExportError(), QStringLiteral("--layout-oversize must be split or extend."));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::LayoutNameOptionsNeedAName()
+{
+    for (const QString &option : {QStringLiteral("layout-material"), QStringLiteral("layout-view")})
+    {
+        VCommandLine command_line;
+        const QStringList arguments{
+            QStringLiteral("seamly2d"),
+            QStringLiteral("--layout-export"),
+            QStringLiteral("--layout-output"), QStringLiteral("layout.svg"),
+            QStringLiteral("--") + option, QStringLiteral(" "),
+            QStringLiteral("pattern.sm2d")
+        };
+
+        QVERIFY(command_line.parser.parse(arguments));
+        QCOMPARE(command_line.layoutExportError(), QStringLiteral("--%1 needs a name.").arg(option));
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::LayoutViewRejectsGradationOptions()
+{
+    for (const QString &option : {QStringLiteral("--gsize"), QStringLiteral("--gheight")})
+    {
+        VCommandLine command_line;
+        const QStringList arguments{
+            QStringLiteral("seamly2d"),
+            QStringLiteral("--layout-export"),
+            QStringLiteral("--layout-output"), QStringLiteral("layout.svg"),
+            QStringLiteral("--layout-view"), QStringLiteral("marker"),
+            option, QStringLiteral("40"),
+            QStringLiteral("pattern.sm2d")
+        };
+
+        QVERIFY(command_line.parser.parse(arguments));
+        QVERIFY(command_line.layoutExportError().startsWith(QStringLiteral("--layout-view selects")));
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::LayoutInfoMode()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString settings_path = directory.filePath(QStringLiteral("layout.json"));
+    VCommandLine command_line;
+    const QStringList arguments{
+        QStringLiteral("seamly2d"),
+        QStringLiteral("--layout-info"),
+        QStringLiteral("--layout-settings"), settings_path,
+        QStringLiteral("--gsize"), QStringLiteral("40"),
+        QStringLiteral("pattern.sm2d")
+    };
+
+    QVERIFY(command_line.parser.parse(arguments));
+    QVERIFY(command_line.layoutExportError().isEmpty());
+    QVERIFY(command_line.isLayoutInfoEnabled());
+    QVERIFY(!command_line.isLayoutExportEnabled());
+    QCOMPARE(command_line.layoutSettingsOption(), QFileInfo(settings_path).absoluteFilePath());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::LayoutInfoRejectsExportChoices()
+{
+    const QList<QStringList> choices{
+        {QStringLiteral("--layout-format"), QStringLiteral("pdf")},
+        {QStringLiteral("--layout-output"), QStringLiteral("layout.pdf")},
+        {QStringLiteral("--layout-material"), QStringLiteral("Fabric")},
+        {QStringLiteral("--layout-view"), QStringLiteral("marker")},
+        {QStringLiteral("--layout-oversize"), QStringLiteral("split")}
+    };
+    for (const QStringList &choice : choices)
+    {
+        VCommandLine command_line;
+        const QStringList arguments = QStringList{QStringLiteral("seamly2d"), QStringLiteral("--layout-info")}
+                                      + choice + QStringList{QStringLiteral("pattern.sm2d")};
+
+        QVERIFY(command_line.parser.parse(arguments));
+        QVERIFY2(command_line.layoutExportError().startsWith(QStringLiteral("--layout-info prints a report")),
+                 qUtf8Printable(choice.join(QLatin1Char(' '))));
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::LayoutInfoAndExportConflict()
+{
+    VCommandLine command_line;
+    const QStringList arguments{
+        QStringLiteral("seamly2d"),
+        QStringLiteral("--layout-export"),
+        QStringLiteral("--layout-info"),
+        QStringLiteral("--layout-output"), QStringLiteral("layout.svg"),
+        QStringLiteral("pattern.sm2d")
+    };
+
+    QVERIFY(command_line.parser.parse(arguments));
+    QCOMPARE(command_line.layoutExportError(),
+             QStringLiteral("--layout-export and --layout-info cannot be used together."));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::LayoutInfoRequiresOneInput()
+{
+    VCommandLine command_line;
+    const QStringList arguments{QStringLiteral("seamly2d"), QStringLiteral("--layout-info")};
+
+    QVERIFY(command_line.parser.parse(arguments));
+    QCOMPARE(command_line.layoutExportError(), QStringLiteral("--layout-info requires one input pattern file."));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::LayoutSettingsRequireExportOrInfo()
+{
+    VCommandLine command_line;
+    const QStringList arguments{
+        QStringLiteral("seamly2d"),
+        QStringLiteral("--layout-settings"), QStringLiteral("layout.json"),
+        QStringLiteral("pattern.sm2d")
+    };
+
+    QVERIFY(command_line.parser.parse(arguments));
+    QCOMPARE(command_line.layoutExportError(),
+             QStringLiteral("SeamlyLayout export options require --layout-export."));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::RemovedLegacyOptionsFailToParse()
+{
+    // The old console export options stay removed; the parser names each one.
+    for (const QString &option : {QStringLiteral("--basename"),
+                                  QStringLiteral("--exportOnlyDetails"), QStringLiteral("--format"),
+                                  QStringLiteral("--pageformat"), QStringLiteral("--rotate")})
+    {
+        VCommandLine command_line;
+        QVERIFY2(!command_line.parser.parse({QStringLiteral("seamly2d"), option, QStringLiteral("pattern.sm2d")}),
+                 qUtf8Printable(option));
+        QVERIFY(command_line.parser.errorText().contains(option.mid(2)));
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::MeasurementOverrideIsAbsolute()
+{
+    // The pattern loader resolves a relative path against the pattern folder; the CLI gives it the launch folder.
+    const QString relative_path = QStringLiteral("measurements/shirt.smis");
+    for (const QString &mode : {QStringLiteral("--test"), QStringLiteral("--layout-info")})
+    {
+        VCommandLine command_line;
+        QVERIFY(command_line.parser.parse({QStringLiteral("seamly2d"), mode, QStringLiteral("--mfile"), relative_path,
+                                           QStringLiteral("patterns/shirt.sm2d")}));
+        QCOMPARE(command_line.measurementPathOption(), QFileInfo(relative_path).absoluteFilePath());
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::Text2PathsForVectorFormats()
+{
+    for (const QString &format : {QStringLiteral("svg"), QStringLiteral("pdf"), QStringLiteral("pdf-tiled"),
+                                  QStringLiteral("ps"), QStringLiteral("eps")})
+    {
+        VCommandLine command_line;
+        QVERIFY(command_line.parser.parse({QStringLiteral("seamly2d"), QStringLiteral("--layout-export"),
+                                           QStringLiteral("--layout-format"), format,
+                                           QStringLiteral("--layout-output"), QStringLiteral("layout.out"),
+                                           QStringLiteral("--text2paths"), QStringLiteral("pattern.sm2d")}));
+        QVERIFY2(command_line.layoutExportError().isEmpty(), qUtf8Printable(format));
+        QVERIFY(command_line.isText2PathsSet());
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::Text2PathsRejectedCombinations()
+{
+    const QList<QPair<QStringList, QString>> cases{
+        {{QStringLiteral("--layout-format"), QStringLiteral("dxf")}, QStringLiteral("--text2paths applies to")},
+        {{QStringLiteral("--layout-format"), QStringLiteral("png")}, QStringLiteral("--text2paths applies to")},
+        {{QStringLiteral("--svg-text-mode"), QStringLiteral("hersheyStrokes")},
+         QStringLiteral("--text2paths and --svg-text-mode cannot be used together.")}
+    };
+    for (const auto &item : cases)
+    {
+        VCommandLine command_line;
+        const QStringList arguments = QStringList{QStringLiteral("seamly2d"), QStringLiteral("--layout-export"),
+                                                  QStringLiteral("--layout-output"), QStringLiteral("layout.out"),
+                                                  QStringLiteral("--text2paths")}
+                                      + item.first + QStringList{QStringLiteral("pattern.sm2d")};
+        QVERIFY(command_line.parser.parse(arguments));
+        QVERIFY2(command_line.layoutExportError().startsWith(item.second), qUtf8Printable(command_line.layoutExportError()));
+    }
+
+    VCommandLine without_export;
+    QVERIFY(without_export.parser.parse({QStringLiteral("seamly2d"), QStringLiteral("--text2paths"),
+                                         QStringLiteral("pattern.sm2d")}));
+    QCOMPARE(without_export.layoutExportError(), QStringLiteral("SeamlyLayout export options require --layout-export."));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::LayoutFlagsForwardedInOrder()
+{
+    VCommandLine command_line;
+    QVERIFY(command_line.parser.parse({QStringLiteral("seamly2d"), QStringLiteral("--layout-export"),
+                                       QStringLiteral("--layout-output"), QStringLiteral("layout.svg"),
+                                       QStringLiteral("--layout-nap"), QStringLiteral("down"),
+                                       QStringLiteral("--layout-gap"), QStringLiteral("0.1"),
+                                       QStringLiteral("--layout-ignore-margins"),
+                                       QStringLiteral("--layout-roll-width"), QStringLiteral("24"),
+                                       QStringLiteral("pattern.sm2d")}));
+    QVERIFY(command_line.layoutExportError().isEmpty());
+    // Table order (LayoutFlagNames), so a specific flag always follows the general one.
+    QCOMPARE(command_line.layoutFlagArguments(),
+             QStringList({QStringLiteral("--roll-width"), QStringLiteral("24"), QStringLiteral("--ignore-margins"),
+                          QStringLiteral("--gap"), QStringLiteral("0.1"), QStringLiteral("--nap"), QStringLiteral("down")}));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::LayoutFlagsNeedExportOrInfo()
+{
+    VCommandLine alone;
+    QVERIFY(alone.parser.parse({QStringLiteral("seamly2d"), QStringLiteral("--layout-gap"), QStringLiteral("1"),
+                                QStringLiteral("pattern.sm2d")}));
+    QCOMPARE(alone.layoutExportError(), QStringLiteral("SeamlyLayout export options require --layout-export."));
+
+    VCommandLine info;
+    QVERIFY(info.parser.parse({QStringLiteral("seamly2d"), QStringLiteral("--layout-info"),
+                               QStringLiteral("--layout-roll-width"), QStringLiteral("12"), QStringLiteral("pattern.sm2d")}));
+    QVERIFY(info.layoutExportError().isEmpty());
+    QCOMPARE(info.layoutFlagArguments(), QStringList({QStringLiteral("--roll-width"), QStringLiteral("12")}));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::LayoutNoPackingCombinations()
+{
+    VCommandLine plain;
+    QVERIFY(plain.parser.parse({QStringLiteral("seamly2d"), QStringLiteral("--layout-export"),
+                                QStringLiteral("--layout-output"), QStringLiteral("layout.svg"),
+                                QStringLiteral("--layout-no-packing"), QStringLiteral("pattern.sm2d")}));
+    QVERIFY(plain.layoutExportError().isEmpty());
+    QVERIFY(plain.isLayoutNoPackingSet());
+
+    for (const QStringList &extra : {QStringList{QStringLiteral("--layout-view"), QStringLiteral("marker")},
+                                     QStringList{QStringLiteral("--layout-oversize"), QStringLiteral("split")},
+                                     QStringList{QStringLiteral("--layout-format"), QStringLiteral("pdf-tiled")}})
+    {
+        VCommandLine command_line;
+        QVERIFY(command_line.parser.parse(QStringList{QStringLiteral("seamly2d"), QStringLiteral("--layout-export"),
+                                                      QStringLiteral("--layout-output"), QStringLiteral("layout.svg"),
+                                                      QStringLiteral("--layout-no-packing")}
+                                          + extra + QStringList{QStringLiteral("pattern.sm2d")}));
+        QVERIFY2(command_line.layoutExportError().startsWith(QStringLiteral("--layout-no-packing exports")),
+                 qUtf8Printable(extra.join(QLatin1Char(' '))));
+    }
 }

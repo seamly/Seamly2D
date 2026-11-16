@@ -1,3 +1,8 @@
+// Author: slspencer
+// Copyright (C) 2026 Seamly2D Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+// License: https://www.gnu.org/licenses/gpl-3.0.html
+
 //-----------------------------------------------------------------------------
 //  @file   mainwindow.cpp
 //  @author slspencer
@@ -135,6 +140,7 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QProgressDialog>
+#include <memory>
 #include <QScopeGuard>
 #include <QScrollBar>
 #include <QSettings>
@@ -852,7 +858,8 @@ bool MainWindow::measurementFileUnit(Unit &unit) const
  * cut seam allowance corners and the same node turn points. The size and height in
  * use before the call are restored, also when an exception leaves the function.
  *
- * A modal progress dialog with a Cancel button shows the size in work.
+ * In GUI mode a modal progress dialog with a Cancel button shows the size in work.
+ * Command-line modes have no window: no dialog, no Cancel.
  *
  * @return false when the user canceled; sizePieceLists is then empty.
  * @throws VException when a size cannot be calculated.
@@ -882,14 +889,37 @@ bool MainWindow::prepareMultisizePieceLists()
 
     // Each size takes a full recalculation. The modal dialog runs the event loop in setValue(), so Windows
     // does not mark Seamly2D "Not Responding" and Cancel works. The view skips the sizes in between.
-    QProgressDialog progress(this);
-    progress.setWindowTitle(tr("Layout mode"));
-    progress.setWindowModality(Qt::ApplicationModal);
-    progress.setMinimumDuration(0);
-    progress.setAutoClose(false);
-    progress.setAutoReset(false);
-    progress.show();
-    QCoreApplication::processEvents();
+    // Command-line modes show no window, so they get no dialog.
+    std::unique_ptr<QProgressDialog> progress;
+    if (Application2D::isGUIMode())
+    {
+        progress.reset(new QProgressDialog(this));
+        progress->setWindowTitle(tr("Layout mode"));
+        progress->setWindowModality(Qt::ApplicationModal);
+        progress->setMinimumDuration(0);
+        progress->setAutoClose(false);
+        progress->setAutoReset(false);
+        progress->show();
+        QCoreApplication::processEvents();
+    }
+    // Show the step and report Cancel; always false without a dialog.
+    const auto showStep = [&progress](const QString &label, int value)
+    {
+        if (!progress)
+        {
+            return false;
+        }
+        progress->setLabelText(label);
+        progress->setValue(value);
+        return progress->wasCanceled();
+    };
+    const auto setStepRange = [&progress](int maximum)
+    {
+        if (progress)
+        {
+            progress->setRange(0, maximum);
+        }
+    };
 
     QGuiApplication::setOverrideCursor(Qt::BusyCursor);
     ui->view->setUpdatesEnabled(false);
@@ -903,14 +933,12 @@ bool MainWindow::prepareMultisizePieceLists()
     try
     {
         const int sizeCount = gradationSizes->count();
-        progress.setRange(0, sizeCount);
+        setStepRange(sizeCount);
         for (int i = 0; i < sizeCount && !canceled; ++i)
         {
             const QString size = gradationSizes->itemText(i);
-            progress.setLabelText(tr("Preparing size %1 (%2 of %3) for SeamlyLayout")
-                                  .arg(size).arg(i + 1).arg(sizeCount));
-            progress.setValue(i);
-            canceled = progress.wasCanceled();
+            canceled = showStep(tr("Preparing size %1 (%2 of %3) for SeamlyLayout")
+                                .arg(size).arg(i + 1).arg(sizeCount), i);
             if (canceled)
             {
                 continue;
@@ -935,15 +963,13 @@ bool MainWindow::prepareMultisizePieceLists()
                     cutSizes.append(i);
                 }
             }
-            progress.setRange(0, cutSizes.size());
+            setStepRange(cutSizes.size());
         }
         for (int i = 0; i < cutSizes.size() && !canceled; ++i)
         {
             SizePieceList &sizeList = sizePieceLists[cutSizes.at(i)];
-            progress.setLabelText(tr("Matching seam allowance corners: size %1 (%2 of %3)")
-                                  .arg(sizeList.size).arg(i + 1).arg(cutSizes.size()));
-            progress.setValue(i);
-            canceled = progress.wasCanceled();
+            canceled = showStep(tr("Matching seam allowance corners: size %1 (%2 of %3)")
+                                .arg(sizeList.size).arg(i + 1).arg(cutSizes.size()), i);
             if (canceled)
             {
                 continue;
@@ -7105,6 +7131,10 @@ void MainWindow::createActions()
     });
 
     //Help menu
+    connect(ui->commandLineOptions_Action, &QAction::triggered, this, [this]()
+    {
+        qApp->commandLine()->showHelpDialog(this);
+    });
     connect(ui->shortcuts_Action, &QAction::triggered, this, [this]()
     {
         ShortcutsDialog *shortcutsDialog = new ShortcutsDialog(this);
@@ -8173,8 +8203,20 @@ bool MainWindow::setHeight(const QString &text)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief exportLayoutFromCommandLine runs SeamlyLayout headless for --layout-export or --layout-info.
+ *
+ * Workflow: build the tagged pieces SVG as Layout mode does, start SeamlyLayout with --svg-stdin and the
+ * forwarded options, write the SVG to its standard input, wait, then forward its standard output and error.
+ * A multisize pattern without --gsize and --gheight hands off every size at the base height, as Layout mode.
+ * With either option the SVG holds the one size and height that processCommandLine() selected.
+ *
+ * @param command_line validated command line; isLayoutExportEnabled() or isLayoutInfoEnabled() is true.
+ * @return SeamlyLayout's exit code, or a V_EX_* code when Seamly2D or the process fails first.
+ */
 int MainWindow::exportLayoutFromCommandLine(const VCommandLinePtr &command_line)
 {
+    const bool info_mode = command_line->isLayoutInfoEnabled();
     const QHash<quint32, VPiece> pieces = currentLayoutPieces();
     if (pieces.isEmpty())
     {
@@ -8188,6 +8230,10 @@ int MainWindow::exportLayoutFromCommandLine(const VCommandLinePtr &command_line)
     try
     {
         preparePiecesForLayout(pieces);
+        if (!command_line->isGradationSizeSet() && !command_line->isGradationHeightSet())
+        {
+            prepareMultisizePieceLists(); // individual pattern: no change; no Cancel without a dialog
+        }
     }
     catch (VException &exception)
     {
@@ -8218,8 +8264,15 @@ int MainWindow::exportLayoutFromCommandLine(const VCommandLinePtr &command_line)
 
     QStringList arguments = SeamlySuitePaths::seamlyLayoutLaunchArguments(
         SeamlySuitePaths::patternDocumentName(qApp->getFilePath()));
-    arguments << QStringLiteral("--export") << command_line->layoutFormatOption()
-              << QStringLiteral("--output") << command_line->layoutOutputOption();
+    if (info_mode)
+    {
+        arguments << QStringLiteral("--info");
+    }
+    else
+    {
+        arguments << QStringLiteral("--export") << command_line->layoutFormatOption()
+                  << QStringLiteral("--output") << command_line->layoutOutputOption();
+    }
 
     if (!command_line->layoutSettingsOption().isEmpty())
     {
@@ -8233,10 +8286,27 @@ int MainWindow::exportLayoutFromCommandLine(const VCommandLinePtr &command_line)
     {
         arguments << QStringLiteral("--svg-text-mode") << command_line->svgTextModeOption();
     }
-    if (command_line->isLayoutScaleSet())
+    if (!command_line->layoutMaterialOption().isEmpty())
     {
-        arguments << QStringLiteral("--scale") << command_line->layoutScaleOption();
+        arguments << QStringLiteral("--material") << command_line->layoutMaterialOption();
     }
+    if (!command_line->layoutViewOption().isEmpty())
+    {
+        arguments << QStringLiteral("--view") << command_line->layoutViewOption();
+    }
+    if (!command_line->layoutOversizeOption().isEmpty())
+    {
+        arguments << QStringLiteral("--oversize") << command_line->layoutOversizeOption();
+    }
+    if (command_line->isText2PathsSet())
+    {
+        arguments << QStringLiteral("--text2paths");
+    }
+    if (command_line->isLayoutNoPackingSet())
+    {
+        arguments << QStringLiteral("--no-packing");
+    }
+    arguments << command_line->layoutFlagArguments();
 
     QProcess process;
     process.setWorkingDirectory(QFileInfo(seamly_layout).absolutePath());
@@ -8291,19 +8361,30 @@ int MainWindow::exportLayoutFromCommandLine(const VCommandLinePtr &command_line)
         return V_EX_SOFTWARE;
     }
 
+    // SeamlyLayout writes UTF-8 in text mode. Its CR LF line ends become LF here, because the
+    // text-mode streams of Seamly2D add the CR again.
+    const auto forwarded_text = [](const QByteArray &bytes)
+    {
+        return QString::fromUtf8(bytes).replace(QStringLiteral("\r\n"), QStringLiteral("\n"));
+    };
     const QByteArray standard_output = process.readAllStandardOutput();
     if (!standard_output.isEmpty())
     {
-        vStdOut() << QString::fromLocal8Bit(standard_output) << Qt::flush;
+        vStdOut() << forwarded_text(standard_output) << Qt::flush;
     }
     const QByteArray standard_error = process.readAllStandardError();
     if (!standard_error.isEmpty())
     {
-        vStdErr() << QString::fromLocal8Bit(standard_error) << Qt::flush;
+        vStdErr() << forwarded_text(standard_error) << Qt::flush;
     }
 
     if (process.exitStatus() != QProcess::NormalExit)
     {
+        // A crash can stop in the middle of a write; a partial file must not look like an export.
+        if (!info_mode && QFile::exists(command_line->layoutOutputOption()))
+        {
+            QFile::remove(command_line->layoutOutputOption());
+        }
         vStdErr() << tr("SeamlyLayout terminated abnormally.") << Qt::endl;
         return V_EX_SOFTWARE;
     }
@@ -8316,7 +8397,8 @@ void MainWindow::processCommandLine()
 {
     const VCommandLinePtr cmd = qApp->commandLine();
     auto args = cmd->inputFileNamesOption();
-    const bool layout_export = cmd->isLayoutExportEnabled();
+    // --layout-info runs the same handoff as --layout-export, but SeamlyLayout prints a report.
+    const bool layout_export = cmd->isLayoutExportEnabled() || cmd->isLayoutInfoEnabled();
 
     isNoScaling = cmd->isNoScalingEnabled();
 

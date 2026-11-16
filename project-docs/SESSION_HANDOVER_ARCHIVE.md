@@ -2,6 +2,28 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-15 — Fold lines on the left edge of paper and fabric (Layout.Y111)
+
+- `LayoutSettings::places_fold_lines_on_left_edge`: no folded fabric check. Layout Mode Any still ignores it.
+- Paper and open fabric: fold line pieces go first, on the left margin; the margin stays. Folded fabric unchanged: the fold, no margin, piece gap for other pieces.
+- `SettingsDialog.qml`: "Place fold lines on the left edge" on the line below Media Type; enabled for every media; "(fabric: no left margin)" dropped.
+- Default stays on: paper layouts now pin fold line pieces unless the user clears the box.
+- Tests: `fold_lines_on_left_edge_apply_to_every_media`, `fold_line_lies_on_the_left_margin_of_paper_and_open_fabric`, `jacket2_paper_and_open_fabric_place_fold_line_pieces_first`; Qt `foldLinesOnLeftEdgeCheck_belowMediaTypeForEveryMedia`.
+- Checked: `cargo test --workspace` 719 pass; `ctest` debug 9/9. Built in worktree `fold-media`; merged `--no-ff`; branch and worktree deleted.
+- Docs: SETTINGS_WORKFLOW, CREATE_LAYOUT_WORKFLOW, PROCESS LAYOUT WORKFLOW, SVG-DATA-ATTRIBUTES, `AGENT_CHECKLIST.md` §21, new §58 and OPEN row; §54 and its row removed.
+- Open: Layout.Y111.1 installed-app check with the next MSI (§58).
+
+### 2026-11-15 — Large patterns display in both canvases (Layout.Y10)
+
+- Cause: jacket2 resaved with 16 pieces; real handoff 2,024,522 chars. Fabric all-sizes, Marker and Nested SVGs went into `loadHtml()` `data:` URLs over Chromium's 2 MB limit; the load failed with no error.
+- New `qt_frontend/src/CanvasSvgSchemeHandler`: serves each canvas SVG from memory at `seamly-canvas://<canvas>/<n>.svg`. Scheme registered before `QApplication`; handler on the default profile; QML singleton.
+- `SvgCanvas.qml`: `canvasName` (`input`, `layout`); an `<img>` loads the scheme URL; "Cannot display this SVG." when `naturalWidth` is 0.
+- CMake: `Qt6::WebEngineCore`; new `CanvasSvgSchemeHandlerTests` (10 tests; offscreen, no sandbox, no GPU).
+- `webEngine_displaysSvgOverDataUrlLimit` (3 MiB SVG) fails with the old `data:` URL path.
+- Checked: `ctest` debug 9/9; `cargo test --workspace` 717 pass. Built in worktree `canvas-svg`; merged `--no-ff` with no skip-ci token (CMakeLists changed); branch and worktree deleted.
+- Docs: README "Canvas display", DECISIONS record, CXXQT_BRIDGE, CODEBASE_INDEX, rules (architecture, svg-processing, dependencies), `AGENT_CHECKLIST.md` §57 and OPEN row.
+- Open: Layout.Y10.1 installed-app check with the next MSI (§57). The WebEngine tests run first on Linux and macOS in CI.
+
 ### 2026-11-15 — Fold line pieces go first on every tab (Layout.Y9)
 
 - Cause: the order search (hill climbing) moved left-edge pieces after other pieces. Any layout could break; the Base Size tab was right by chance.

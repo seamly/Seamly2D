@@ -12,6 +12,8 @@ svg_dom = { path = "../svg_dom" }
 geometry = { path = "../geometry" }
 xmltree = "0.10"
 thiserror = "1.0"
+# Debug lines of the conversion go to the log facade, not to the standard streams of headless export.
+log = "0.4"
 
 [[example]]
 name = "inspect_drawing"

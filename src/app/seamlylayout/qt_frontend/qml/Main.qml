@@ -235,7 +235,7 @@ ApplicationWindow {
             })
             return appController.exportDxf(path, optJson)
         } else if (fmt === "png") {
-            return appController.exportPng(path, 1.0)
+            return appController.exportPng(path)
         } else if (fmt === "jpg") {
             return appController.exportJpeg(path)
         } else if (fmt === "pdf") {

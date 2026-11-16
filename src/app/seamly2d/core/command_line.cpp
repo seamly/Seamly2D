@@ -1,3 +1,8 @@
+// Author: slspencer
+// Copyright (C) 2026 Seamly2D Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+// License: https://www.gnu.org/licenses/gpl-3.0.html
+
 //---------------------------------------------------------------------------------------------------------------------
 /// @file   command_line.cpp
 /// @author Douglas S Caskey
@@ -61,14 +66,15 @@
 #include <QDialogButtonBox>
 #include <QFileInfo>
 #include <QFontDatabase>
+#include <QMap>
+#include <QPair>
 #include <QPlainTextEdit>
 #include <QTextStream>
 #include <QVBoxLayout>
 
-#include <cmath>
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
-#include <limits>
 #ifdef Q_OS_WIN
 #include <windows.h>
 #endif
@@ -105,7 +111,33 @@ bool connectStandardStreams()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/// @brief Connects the standard streams when an argument selects test mode, layout export, help or version.
+/// @brief Checks whether an argument selects a mode that writes to the console.
+///
+/// Matches `--name`, `--name=value` and the single-letter forms of test mode, layout export, layout info,
+/// measurement and gradation overrides, help and version.
+///
+/// @param argument One application argument.
+/// @return true for a console-mode argument.
+//---------------------------------------------------------------------------------------------------------------------
+bool isConsoleModeArgument(const QString &argument)
+{
+    if (argument.startsWith(QStringLiteral("--layout-")) || argument.startsWith(QStringLiteral("--svg-text-mode")))
+    {
+        return true;
+    }
+
+    const QString name = argument.section(QLatin1Char('='), 0, 0);
+    static const QStringList console_names{
+        QStringLiteral("--test"), QStringLiteral("--mfile"), QStringLiteral("--gsize"), QStringLiteral("--gheight"),
+        QStringLiteral("--text2paths"),
+        QStringLiteral("--help"), QStringLiteral("--version"), QStringLiteral("-t"), QStringLiteral("-m"),
+        QStringLiteral("-x"), QStringLiteral("-e"), QStringLiteral("-h"), QStringLiteral("-v")
+    };
+    return console_names.contains(name);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Connects the standard streams when an argument selects a console mode.
 ///
 /// A normal GUI launch from a console stays detached from that console.
 ///
@@ -114,27 +146,7 @@ bool connectStandardStreams()
 void attachParentConsoleForCommandLine(const QStringList &arguments)
 {
 #ifdef Q_OS_WIN
-    bool is_command_line_mode = false;
-    for (const QString &argument : arguments)
-    {
-        is_command_line_mode = is_command_line_mode
-            || argument.startsWith(QStringLiteral("--layout-"))
-            || argument == QStringLiteral("--svg-text-mode")
-            || argument == QStringLiteral("--test")
-            || argument == QStringLiteral("--mfile")
-            || argument == QStringLiteral("--gsize")
-            || argument == QStringLiteral("--gheight")
-            || argument == QStringLiteral("-t")
-            || argument == QStringLiteral("-m")
-            || argument == QStringLiteral("-x")
-            || argument == QStringLiteral("-e")
-            || argument == QStringLiteral("-h")
-            || argument == QStringLiteral("--help")
-            || argument == QStringLiteral("-v")
-            || argument == QStringLiteral("--version");
-    }
-
-    if (is_command_line_mode)
+    if (std::any_of(arguments.cbegin() + (arguments.isEmpty() ? 0 : 1), arguments.cend(), isConsoleModeArgument))
     {
         connectStandardStreams();
     }
@@ -142,7 +154,54 @@ void attachParentConsoleForCommandLine(const QStringList &arguments)
     Q_UNUSED(arguments);
 #endif
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Writes one command-line error line to standard error.
+///
+/// Connects the console first: an unknown option is not a console-mode argument, so the console
+/// may still be detached. Writes plain text: qCritical() would quote the string and, before the log
+/// handler exists, send it to the debugger instead of the console.
+///
+/// @param message Error text without a line end.
+//---------------------------------------------------------------------------------------------------------------------
+void printCommandLineError(const QString &message)
+{
+    connectStandardStreams();
+    vStdErr() << message << Qt::endl;
+}
 } // namespace
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Value name and help text of a direct layout flag; an empty value name marks a switch.
+/// SeamlyLayout merges the flags over the settings (layout_tiling::apply_layout_flags).
+//---------------------------------------------------------------------------------------------------------------------
+static QPair<QString, QString> layoutFlagHelp(const QString &name)
+{
+    static const QMap<QString, QPair<QString, QString>> help{
+        {QStringLiteral("unit"), {QStringLiteral("unit"), QStringLiteral("Layout unit: in, cm or mm.")}},
+        {QStringLiteral("media"), {QStringLiteral("media"), QStringLiteral("Media type: paper or fabric.")}},
+        {QStringLiteral("paper"), {QStringLiteral("type"), QStringLiteral("Paper type: tiled or roll.")}},
+        {QStringLiteral("tile-size"), {QStringLiteral("name"), QStringLiteral("Tile size: Letter, A4, ARCH D, ... or Custom.")}},
+        {QStringLiteral("tile-orientation"), {QStringLiteral("orientation"), QStringLiteral("Tile orientation: portrait or landscape.")}},
+        {QStringLiteral("tile-width"), {QStringLiteral("number"), QStringLiteral("Custom tile width, in the unit.")}},
+        {QStringLiteral("tile-height"), {QStringLiteral("number"), QStringLiteral("Custom tile height, in the unit.")}},
+        {QStringLiteral("roll-width"), {QStringLiteral("number"), QStringLiteral("Paper roll width, in the unit.")}},
+        {QStringLiteral("fabric-width"), {QStringLiteral("number"), QStringLiteral("Fabric width, in the unit.")}},
+        {QStringLiteral("fabric-folded"), {QStringLiteral("yes|no"), QStringLiteral("Fabric folded.")}},
+        {QStringLiteral("selvedge-width"), {QStringLiteral("number"), QStringLiteral("Selvedge width, in the unit.")}},
+        {QStringLiteral("margins"), {QStringLiteral("number"), QStringLiteral("All four margins, in the unit.")}},
+        {QStringLiteral("margin-top"), {QStringLiteral("number"), QStringLiteral("Top margin, in the unit.")}},
+        {QStringLiteral("margin-left"), {QStringLiteral("number"), QStringLiteral("Left margin, in the unit.")}},
+        {QStringLiteral("margin-right"), {QStringLiteral("number"), QStringLiteral("Right margin, in the unit.")}},
+        {QStringLiteral("margin-bottom"), {QStringLiteral("number"), QStringLiteral("Bottom margin, in the unit.")}},
+        {QStringLiteral("ignore-margins"), {QString(), QStringLiteral("Set every margin to 0.")}},
+        {QStringLiteral("gap"), {QStringLiteral("number"), QStringLiteral("Piece gap, in the unit.")}},
+        {QStringLiteral("mode"), {QStringLiteral("mode"), QStringLiteral("Layout mode: alongGrainline, withNap or any.")}},
+        {QStringLiteral("nap"), {QStringLiteral("up|down"), QStringLiteral("Nap direction; selects layout mode withNap.")}},
+        {QStringLiteral("no-grainline"), {QStringLiteral("rule"), QStringLiteral("Pieces without a grainline: upright or free.")}},
+    };
+    return help.value(name);
+}
 
 VCommandLinePtr VCommandLine::command_line = nullptr;
 
@@ -160,6 +219,7 @@ VCommandLine::VCommandLine()
     , m_options_used()
     , m_options_index()
     , m_is_gui_enabled(false)
+    , m_reserves_stdout(false)
 {
     // Sets a brief description of the application shown in the help output.
     parser.setApplicationDescription(translate("VCommandLine", "Seamly2D open source patternmaking program."));
@@ -195,7 +255,7 @@ VCommandLine::VCommandLine()
 //---------------------------------------------------------------------------------------------------------------------
 [[noreturn]] void VCommandLine::showHelp(int exit_code) const
 {
-    const QString text = parser.helpText();
+    const QString text = helpText();
 
     if (connectStandardStreams())
     {
@@ -203,29 +263,86 @@ VCommandLine::VCommandLine()
     }
     else
     {
-        QDialog dialog;
-        dialog.setWindowTitle(QCoreApplication::applicationName());
-        dialog.resize(750, 550);
-
-        auto *layout = new QVBoxLayout(&dialog);
-        auto *text_edit = new QPlainTextEdit(&dialog);
-        text_edit->setReadOnly(true);
-        text_edit->setLineWrapMode(QPlainTextEdit::NoWrap);
-        text_edit->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
-        text_edit->setPlainText(text);
-
-        auto *button_box = new QDialogButtonBox(QDialogButtonBox::Ok, &dialog);
-        QObject::connect(button_box, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
-
-        layout->addWidget(text_edit);
-        layout->addWidget(button_box);
-        dialog.exec();
+        showHelpDialog();
     }
 
     std::exit(exit_code);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+void VCommandLine::showHelpDialog(QWidget* parent) const
+{
+    QDialog dialog(parent);
+    dialog.setWindowTitle(translate("VCommandLine", "Command line options"));
+    dialog.resize(800, 600);
+
+    QVBoxLayout layout(&dialog);
+    QPlainTextEdit text_edit(&dialog);
+    text_edit.setReadOnly(true);
+    text_edit.setLineWrapMode(QPlainTextEdit::NoWrap);
+    text_edit.setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    text_edit.setPlainText(helpText());
+
+    QDialogButtonBox button_box(QDialogButtonBox::Close, &dialog);
+    QObject::connect(&button_box, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    layout.addWidget(&text_edit);
+    layout.addWidget(&button_box);
+    dialog.exec();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+QString VCommandLine::helpText() const
+{
+    return parser.helpText() + translate("VCommandLine",
+        "\nLimits and errors\n"
+        "\nModes and required arguments\n"
+        "  --test loads one pattern without exporting.\n"
+        "  --layout-export exports one pattern through SeamlyLayout without either application window.\n"
+        "  --layout-export requires --layout-output <path>. The output folder must exist.\n"
+        "  --layout-info prints a JSON report and exports nothing.\n"
+        "  Supply exactly one pattern for --test, --layout-export, or --layout-info.\n"
+        "  These three modes cannot be combined.\n"
+        "  Measurement and gradation overrides apply in all three modes.\n"
+        "  Size and height values use centimetres and require multisize measurements.\n"
+        "  The pattern must support the selected size and height.\n"
+        "  Relative paths resolve against the folder where the command starts.\n"
+        "\nLayout and format limits\n"
+        "  Export choices require --layout-export. Settings and direct layout flags also serve --layout-info.\n"
+        "  Direct layout flags override the JSON settings file, which overrides saved settings.\n"
+        "  Unknown JSON keys and invalid setting values stop the command with exit code 64.\n"
+        "  Select --layout-material when the pattern has several materials.\n"
+        "  --layout-view requires multisize measurements and cannot accompany --gsize or --gheight.\n"
+        "  --svg-text-mode applies only to SVG and cannot accompany --text2paths.\n"
+        "  --text2paths applies to svg, pdf, pdf-tiled, ps, and eps.\n"
+        "  --layout-no-packing preserves Piece mode positions without a layout run.\n"
+        "  It cannot accompany --layout-view, --layout-oversize, or pdf-tiled.\n"
+        "  Use pdf for roll paper and pdf-tiled for tiled paper.\n"
+        "  Tiled PDF cannot export Marker layouts. DXF requires one size, not Marker or Nested layouts.\n"
+        "  Oversized or unplaced pieces stop export unless the selected oversize choice resolves them.\n"
+        "  The split choice excludes dxf, pdf-tiled, gcode, 3mf, Marker, and Nested layouts.\n"
+        "  The extend choice cannot place a piece wider than the media.\n"
+        "  G-Code and 3MF require optional export modules.\n"
+        "  Use --layout-info to inspect available materials, views, oversized pieces, and allowed formats.\n"
+        "\nRemoved legacy options\n"
+        "  -b, --basename: formerly enabled console export and supplied the output basename.\n"
+        "  This branch does not accept --basename. Use --layout-export and --layout-output instead.\n"
+        "  --exportOnlyDetails is replaced by --layout-no-packing.\n"
+        "  The old --destination, --format, --bdxf, and page-layout options are removed.\n"
+        "  Use direct --layout-* flags or --layout-settings for page, margin, gap, and rotation settings.\n"
+        "\nErrors and exit codes\n"
+        "  Option names are case-sensitive. Unknown options and missing values are usage errors.\n"
+        "  Read standard error for the cause. Seamly2D returns the SeamlyLayout exit code after export.\n"
+        "  0: Success. Help and version requests also return 0.\n"
+        "  64: Incorrect command line arguments, missing companions, invalid values, or incompatible export choices.\n"
+        "  65: Invalid pattern data or gradation options on an individual pattern.\n"
+        "  66: A pattern or measurement file is missing or unreadable.\n"
+        "  69: SeamlyLayout cannot start, or an export module is unavailable.\n"
+        "  70: Oversized or unplaced pieces, or a software error.\n"
+        "  73: The output file cannot be written.\n"
+        "  74: The program cannot send the pieces data to SeamlyLayout.\n"
+        "  78: Invalid configuration, such as a relative SEAMLY_DATA_DIR.\n");
+}
+
 /// @brief Initializes the list of command-line options and their index.
 ///
 /// This method defines the supported test-mode, display, and layout-export options.
@@ -234,6 +351,7 @@ VCommandLine::VCommandLine()
 /// @param options A reference to the list where all VCommandLineOptions will be stored.
 /// @param options_index A map that associates each long-form option string with its index
 ///        in the options list.
+//---------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------
 void VCommandLine::initOptions(VCommandLineOptions &options, QMap<QString, int> &options_index)
 {
@@ -279,7 +397,8 @@ void VCommandLine::initOptions(VCommandLineOptions &options, QMap<QString, int> 
     // --layout-format: SeamlyLayout output format.
     options_index.insert(LONG_OPTION_LAYOUT_FORMAT, index++);
     options.append(new QCommandLineOption({LONG_OPTION_LAYOUT_FORMAT},
-        translate("VCommandLine", "SeamlyLayout output format: svg, pdf, pdf-tiled, png, jpg, jpeg, dxf, hpgl, ps, eps, gcode, or 3mf."),
+        translate("VCommandLine", "SeamlyLayout output format: svg, pdf, pdf-tiled, png, jpg, jpeg, dxf, hpgl, ps, eps, "
+                                  "gcode, or 3mf. Default: svg."),
         translate("VCommandLine", "format")));
 
     // --layout-output: Destination file for SeamlyLayout export.
@@ -291,7 +410,8 @@ void VCommandLine::initOptions(VCommandLineOptions &options, QMap<QString, int> 
     // --layout-settings: Layout settings JSON file passed to SeamlyLayout.
     options_index.insert(LONG_OPTION_LAYOUT_SETTINGS, index++);
     options.append(new QCommandLineOption({LONG_OPTION_LAYOUT_SETTINGS},
-        translate("VCommandLine", "Layout settings JSON file for SeamlyLayout."),
+        translate("VCommandLine", "Layout settings JSON file for SeamlyLayout. "
+                                  "Default: the settings SeamlyLayout saved last."),
         translate("VCommandLine", "path")));
 
     // --layout-export-options: Format-specific JSON options passed to SeamlyLayout.
@@ -303,14 +423,57 @@ void VCommandLine::initOptions(VCommandLineOptions &options, QMap<QString, int> 
     // --svg-text-mode: SVG label rendering mode.
     options_index.insert(LONG_OPTION_SVG_TEXT_MODE, index++);
     options.append(new QCommandLineOption({LONG_OPTION_SVG_TEXT_MODE},
-        translate("VCommandLine", "SVG text mode: designerFont, singleLineFont, hersheyStrokes, or asSupplied."),
+        translate("VCommandLine", "SVG text mode: designerFont, singleLineFont, hersheyStrokes, or asSupplied. "
+                                  "SVG only."),
         translate("VCommandLine", "mode")));
 
-    // --layout-scale: PNG scale factor passed to SeamlyLayout.
-    options_index.insert(LONG_OPTION_LAYOUT_SCALE, index++);
-    options.append(new QCommandLineOption({LONG_OPTION_LAYOUT_SCALE},
-        translate("VCommandLine", "PNG export scale factor (default 1.0)."),
-        translate("VCommandLine", "factor")));
+    // --layout-material: material of a multi-material pattern.
+    options_index.insert(LONG_OPTION_LAYOUT_MATERIAL, index++);
+    options.append(new QCommandLineOption({LONG_OPTION_LAYOUT_MATERIAL},
+        translate("VCommandLine", "Material to export, such as Fabric or Lining. "
+                                  "Required when the pattern has several materials."),
+        translate("VCommandLine", "name")));
+
+    // --layout-view: layout of a multisize pattern.
+    options_index.insert(LONG_OPTION_LAYOUT_VIEW, index++);
+    options.append(new QCommandLineOption({LONG_OPTION_LAYOUT_VIEW},
+        translate("VCommandLine", "Multisize layout to export: marker, nested, base, or a size as its layout tab "
+                                  "shows it, such as 500 for Size 500. Default: the first layout."),
+        translate("VCommandLine", "name")));
+
+    // --layout-oversize: pieces wider than a roll or fabric.
+    options_index.insert(LONG_OPTION_LAYOUT_OVERSIZE, index++);
+    options.append(new QCommandLineOption({LONG_OPTION_LAYOUT_OVERSIZE},
+        translate("VCommandLine", "Pieces wider than a roll or fabric: split (split the pieces) or extend "
+                                  "(make the media longer). Without it such pieces stop the export."),
+        translate("VCommandLine", "choice")));
+
+    // --layout-info: JSON report of materials, layouts, oversized pieces and formats.
+    options_index.insert(LONG_OPTION_LAYOUT_INFO, index++);
+    options.append(new QCommandLineOption({LONG_OPTION_LAYOUT_INFO},
+        translate("VCommandLine", "Print a JSON report of the materials, layouts, oversized pieces and export "
+                                  "formats of the pattern with the layout settings. Exports nothing.")));
+
+    // --text2paths: label text as paths in vector exports.
+    options_index.insert(LONG_OPTION_TEXT2PATHS, index++);
+    options.append(new QCommandLineOption({LONG_OPTION_TEXT2PATHS},
+        translate("VCommandLine", "Write label text as paths: SVG labels as single-stroke paths, PDF text as glyph "
+                                  "outlines. PS and EPS draw paths already. For svg, pdf, pdf-tiled, ps and eps.")));
+
+    // --layout-no-packing: pieces where Piece mode places them, no layout run.
+    options_index.insert(LONG_OPTION_LAYOUT_NO_PACKING, index++);
+    options.append(new QCommandLineOption({LONG_OPTION_LAYOUT_NO_PACKING},
+        translate("VCommandLine", "Export the pieces where Piece mode places them, without a layout run. "
+                                  "Not with --layout-view, --layout-oversize or pdf-tiled.")));
+
+    // --layout-<name>: direct layout flags; they win over --layout-settings.
+    for (const QString &name : LayoutFlagNames())
+    {
+        const QPair<QString, QString> help = layoutFlagHelp(name);
+        options_index.insert(QStringLiteral("layout-") + name, index++);
+        options.append(new QCommandLineOption({QStringLiteral("layout-") + name},
+            translate("VCommandLine", "%1 Wins over --layout-settings.").arg(help.second), help.first));
+    }
 
     // --no-scaling: Disable high DPI auto-scaling (useful on some systems)
     options_index.insert(LONG_OPTION_NO_HDPI_SCALING, index++);
@@ -340,7 +503,7 @@ VCommandLinePtr VCommandLine::getCommandLine(const QCoreApplication &app)
 
     if (!command_line->parser.parse(app.arguments()))
     {
-        qCritical() << command_line->parser.errorText();
+        printCommandLineError(command_line->parser.errorText());
         command_line->showHelp(V_EX_USAGE);
     }
 
@@ -357,12 +520,14 @@ VCommandLinePtr VCommandLine::getCommandLine(const QCoreApplication &app)
     // Each mode that runs without the GUI must be added here.
     const bool test_mode = command_line->isTestModeEnabled();
     const bool layout_export_mode = command_line->isLayoutExportEnabled();
-    if (test_mode && layout_export_mode)
+    const bool layout_info_mode = command_line->isLayoutInfoEnabled();
+    if (test_mode && (layout_export_mode || layout_info_mode))
     {
-        qCritical() << translate("VCommandLine", "--test and --layout-export cannot be used together.");
+        printCommandLineError(translate("VCommandLine", "--test cannot be used with --layout-export or --layout-info."));
         command_line->showHelp(V_EX_USAGE);
     }
-    command_line->m_is_gui_enabled = !test_mode && !layout_export_mode;
+    command_line->m_is_gui_enabled = !test_mode && !layout_export_mode && !layout_info_mode;
+    command_line->m_reserves_stdout = layout_export_mode || layout_info_mode;
 
     return command_line;
 }
@@ -406,7 +571,7 @@ bool VCommandLine::isTestModeEnabled() const
     // Ensure exactly one positional argument is provided when in test mode
     if (r && parser.positionalArguments().size() != 1)
     {
-        qCritical() << translate("VCommandLine", "Test option can be used with single input file only.") << "\n";
+        printCommandLineError(translate("VCommandLine", "Test option can be used with single input file only."));
         showHelp(V_EX_USAGE);
     }
 
@@ -428,17 +593,20 @@ bool VCommandLine::isNoScalingEnabled() const
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief Retrieves the path to the measurement file if applicable.
 ///
-/// Returns a measurement override only for test or layout-export mode.
+/// Returns a measurement override only for test, layout-export or layout-info mode.
+/// A relative path is resolved against the launch directory, as the pattern file is. The pattern
+/// loader resolves a relative path against the pattern folder, so it must not see one.
 ///
-/// @return QString containing the measurement file path, or empty if not applicable.
+/// @return Absolute measurement file path, or empty if not applicable.
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommandLine::measurementPathOption() const
 {
     QString measure;
     if (parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_MEASUREFILE)))
-        && (isTestModeEnabled() || isLayoutExportEnabled()))
+        && (isTestModeEnabled() || isLayoutExportEnabled() || isLayoutInfoEnabled()))
     {
-        measure = parser.value(*m_options_used.value(m_options_index.value(LONG_OPTION_MEASUREFILE)));
+        const QString path = parser.value(*m_options_used.value(m_options_index.value(LONG_OPTION_MEASUREFILE))).trimmed();
+        measure = path.isEmpty() ? QString() : QFileInfo(path).absoluteFilePath();
     }
 
     return measure;
@@ -498,7 +666,7 @@ QString VCommandLine::gradationSizeOption() const
     const QString size = parser.value(*m_options_used.value(m_options_index.value(LONG_OPTION_GRADATIONSIZE)));
     if (!MeasurementVariable::IsGradationSizeValid(size))
     {
-        qCritical() << translate("VCommandLine", "Invalid gradation size value.") << "\n";
+        printCommandLineError(translate("VCommandLine", "Invalid gradation size value: %1.").arg(size));
         showHelp(V_EX_USAGE);
     }
 
@@ -519,7 +687,7 @@ QString VCommandLine::gradationHeightOption() const
     const QString height = parser.value(*m_options_used.value(m_options_index.value(LONG_OPTION_GRADATIONHEIGHT)));
     if (!MeasurementVariable::IsGradationHeightValid(height))
     {
-        qCritical() << translate("VCommandLine", "Invalid gradation height value.") << "\n";
+        printCommandLineError(translate("VCommandLine", "Invalid gradation height value: %1.").arg(height));
         showHelp(V_EX_USAGE);
     }
 
@@ -538,11 +706,30 @@ bool VCommandLine::isLayoutExportEnabled() const
     const QString error = layoutExportError();
     if (!error.isEmpty())
     {
-        qCritical() << error;
+        printCommandLineError(error);
         showHelp(V_EX_USAGE);
     }
 
     return parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_EXPORT)));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Checks whether --layout-info asks for the SeamlyLayout JSON report.
+///
+/// Validation is shared with isLayoutExportEnabled(): an invalid combination prints the error and exits.
+///
+/// @return true when --layout-info is set and its companions are valid.
+//---------------------------------------------------------------------------------------------------------------------
+bool VCommandLine::isLayoutInfoEnabled() const
+{
+    const QString error = layoutExportError();
+    if (!error.isEmpty())
+    {
+        printCommandLineError(error);
+        showHelp(V_EX_USAGE);
+    }
+
+    return parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_INFO)));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -552,17 +739,39 @@ bool VCommandLine::isLayoutExportEnabled() const
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommandLine::layoutExportError() const
 {
-    const bool export_requested =
-        parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_EXPORT)));
-    const bool has_export_option =
-        parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_FORMAT))) ||
-        parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_OUTPUT))) ||
-        parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_SETTINGS))) ||
-        parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_EXPORT_OPTIONS))) ||
-        parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_SVG_TEXT_MODE))) ||
-        parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_SCALE)));
+    const auto is_set = [this](const QString &name)
+    {
+        return parser.isSet(*m_options_used.value(m_options_index.value(name)));
+    };
 
-    if (!export_requested && has_export_option)
+    const bool export_requested = is_set(LONG_OPTION_LAYOUT_EXPORT);
+    const bool info_requested = is_set(LONG_OPTION_LAYOUT_INFO);
+    // Options that only an export uses; --layout-settings also serves --layout-info.
+    const bool has_export_choice =
+        is_set(LONG_OPTION_LAYOUT_FORMAT) || is_set(LONG_OPTION_LAYOUT_OUTPUT) ||
+        is_set(LONG_OPTION_LAYOUT_EXPORT_OPTIONS) || is_set(LONG_OPTION_SVG_TEXT_MODE) ||
+        is_set(LONG_OPTION_LAYOUT_MATERIAL) ||
+        is_set(LONG_OPTION_LAYOUT_VIEW) || is_set(LONG_OPTION_LAYOUT_OVERSIZE) || is_set(LONG_OPTION_TEXT2PATHS) ||
+        is_set(LONG_OPTION_LAYOUT_NO_PACKING);
+
+    if (export_requested && info_requested)
+    {
+        return translate("VCommandLine", "--layout-export and --layout-info cannot be used together.");
+    }
+    if (info_requested)
+    {
+        if (has_export_choice)
+        {
+            return translate("VCommandLine", "--layout-info prints a report and exports nothing; "
+                                             "it takes only --layout-settings, --mfile, --gsize and --gheight.");
+        }
+        if (parser.positionalArguments().size() != 1)
+        {
+            return translate("VCommandLine", "--layout-info requires one input pattern file.");
+        }
+        return QString();
+    }
+    if (!export_requested && (has_export_choice || is_set(LONG_OPTION_LAYOUT_SETTINGS) || !layoutFlagArguments().isEmpty()))
     {
         return translate("VCommandLine", "SeamlyLayout export options require --layout-export.");
     }
@@ -604,16 +813,49 @@ QString VCommandLine::layoutExportError() const
         return translate("VCommandLine", "Invalid --svg-text-mode for the selected export format.");
     }
 
-    if (parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_SCALE))))
+    if (is_set(LONG_OPTION_LAYOUT_NO_PACKING)
+        && (is_set(LONG_OPTION_LAYOUT_VIEW) || is_set(LONG_OPTION_LAYOUT_OVERSIZE) || format == QStringLiteral("pdf-tiled")))
     {
-        bool scale_ok = false;
-        const double scale = layoutScaleOption().toDouble(&scale_ok);
-        if (!scale_ok || !std::isfinite(scale) || scale <= 0.0 ||
-            scale > static_cast<double>((std::numeric_limits<float>::max)()) ||
-            static_cast<float>(scale) <= 0.0F || format != QStringLiteral("png"))
+        return translate("VCommandLine", "--layout-no-packing exports the pieces as placed; "
+                                         "it takes no --layout-view, --layout-oversize or pdf-tiled.");
+    }
+
+    if (is_set(LONG_OPTION_TEXT2PATHS))
+    {
+        if (is_set(LONG_OPTION_SVG_TEXT_MODE))
         {
-            return translate("VCommandLine", "--layout-scale requires a positive PNG export scale.");
+            return translate("VCommandLine", "--text2paths and --svg-text-mode cannot be used together.");
         }
+        const QStringList text_formats{QStringLiteral("svg"), QStringLiteral("pdf"), QStringLiteral("pdf-tiled"),
+                                       QStringLiteral("ps"), QStringLiteral("eps")};
+        if (!text_formats.contains(format))
+        {
+            return translate("VCommandLine", "--text2paths applies to svg, pdf, pdf-tiled, ps and eps; "
+                                             "%1 has no text to convert.").arg(format);
+        }
+    }
+
+    if (is_set(LONG_OPTION_LAYOUT_OVERSIZE))
+    {
+        const QString oversize = layoutOversizeOption();
+        if (oversize != QStringLiteral("split") && oversize != QStringLiteral("extend"))
+        {
+            return translate("VCommandLine", "--layout-oversize must be split or extend.");
+        }
+    }
+
+    for (const QString &name : {LONG_OPTION_LAYOUT_MATERIAL, LONG_OPTION_LAYOUT_VIEW})
+    {
+        if (is_set(name) && parser.value(*m_options_used.value(m_options_index.value(name))).trimmed().isEmpty())
+        {
+            return translate("VCommandLine", "--%1 needs a name.").arg(name);
+        }
+    }
+
+    if (is_set(LONG_OPTION_LAYOUT_VIEW) && (isGradationSizeSet() || isGradationHeightSet()))
+    {
+        return translate("VCommandLine", "--layout-view selects a layout of every size; "
+                                         "--gsize and --gheight export one size without views.");
     }
 
     return QString();
@@ -687,13 +929,65 @@ QString VCommandLine::svgTextModeOption() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/// @brief Returns the requested PNG scale, defaulting to 1.0.
+/// @brief Returns the --layout-material name; empty when not set.
 //---------------------------------------------------------------------------------------------------------------------
-QString VCommandLine::layoutScaleOption() const
+QString VCommandLine::layoutMaterialOption() const
 {
-    const QString scale =
-        parser.value(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_SCALE))).trimmed();
-    return scale.isEmpty() ? QStringLiteral("1.0") : scale;
+    return parser.value(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_MATERIAL))).trimmed();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Returns the --layout-view name; empty when not set.
+//---------------------------------------------------------------------------------------------------------------------
+QString VCommandLine::layoutViewOption() const
+{
+    return parser.value(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_VIEW))).trimmed();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Returns the --layout-oversize choice in lower case; empty when not set.
+//---------------------------------------------------------------------------------------------------------------------
+QString VCommandLine::layoutOversizeOption() const
+{
+    return parser.value(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_OVERSIZE))).trimmed().toLower();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Returns the direct layout flags as SeamlyLayout arguments: `--<name> <value>`, or `--ignore-margins`.
+//---------------------------------------------------------------------------------------------------------------------
+QStringList VCommandLine::layoutFlagArguments() const
+{
+    QStringList arguments;
+    for (const QString &name : LayoutFlagNames())
+    {
+        const QCommandLineOption *option = m_options_used.value(m_options_index.value(QStringLiteral("layout-") + name));
+        if (!parser.isSet(*option))
+        {
+            continue;
+        }
+        arguments << QStringLiteral("--") + name;
+        if (!option->valueName().isEmpty())
+        {
+            arguments << parser.value(*option).trimmed();
+        }
+    }
+    return arguments;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Returns whether --layout-no-packing asks for the pieces as placed.
+//---------------------------------------------------------------------------------------------------------------------
+bool VCommandLine::isLayoutNoPackingSet() const
+{
+    return parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_NO_PACKING)));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Returns whether --text2paths asks for label text as paths.
+//---------------------------------------------------------------------------------------------------------------------
+bool VCommandLine::isText2PathsSet() const
+{
+    return parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_TEXT2PATHS)));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -705,11 +999,14 @@ bool VCommandLine::isSvgTextModeSet() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/// @brief Returns whether an explicit PNG scale was supplied.
+/// @brief Returns whether standard output carries only the result of --layout-export or --layout-info.
+///
+/// The log handler then writes debug and info lines to the log file only, so a caller can parse the output.
 //---------------------------------------------------------------------------------------------------------------------
-bool VCommandLine::isLayoutScaleSet() const
+bool VCommandLine::reservesStandardOutput() const
 {
-    return parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_SCALE)));
+    return m_reserves_stdout;
 }
+
 
 #undef translate

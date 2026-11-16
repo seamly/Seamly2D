@@ -134,28 +134,24 @@ void setMacOSTitleBarColor(QQuickWindow *window, int r, int g, int b)
 
 namespace
 {
-// @brief Identify CLI export options before initializing WebEngine.
+// @brief Identify CLI export and --info options before initializing WebEngine.
 bool hasHeadlessExportOption(int argc, char *argv[])
 {
-    const QStringList optionNames{
-        QStringLiteral("--export"), QStringLiteral("--format"),
-        QStringLiteral("--output"), QStringLiteral("--destination"),
-        QStringLiteral("--settings"), QStringLiteral("--layout-settings"),
-        QStringLiteral("--export-options"), QStringLiteral("--svg-text-mode"),
-        QStringLiteral("--text-mode"), QStringLiteral("--scale")
-    };
-
+    QStringList arguments;
     for (int index = 1; index < argc; ++index) {
-        const QString argument = QString::fromLocal8Bit(argv[index]);
-        for (const QString &optionName : optionNames) {
-            if (argument == optionName || argument.startsWith(optionName + QLatin1Char('='))) {
-                return true;
-            } // if export option is present
-        } // for each export option
+        arguments.append(QString::fromLocal8Bit(argv[index]));
     } // for each argument
-
-    return false;
+    return StartupOptions::hasHeadlessArguments(arguments);
 } // hasHeadlessExportOption
+
+// @brief Write UTF-8 text and a line end to a standard stream.
+void writeLine(FILE *stream, const QString &text)
+{
+    const QByteArray bytes = text.toUtf8();
+    std::fwrite(bytes.constData(), 1, static_cast<size_t>(bytes.size()), stream);
+    std::fputc('\n', stream);
+    std::fflush(stream);
+} // writeLine
 
 // @brief Attach direct CLI launches to a parent console without replacing redirected pipes.
 void attachParentConsoleForHeadlessExport()
@@ -276,7 +272,7 @@ int main(int argc, char *argv[])
 
     if (startupOptions.status() == StartupOptions::Status::ShowInformation) {
         if (startupOptions.hasHeadlessRequest()) {
-            std::fprintf(stdout, "%s\n", qPrintable(startupOptions.message()));
+            writeLine(stdout, startupOptions.message());
             return 0;
         } // if headless help or version
         // --help / --version. This is a WIN32-subsystem binary with no console
@@ -287,18 +283,22 @@ int main(int argc, char *argv[])
 
     if (startupOptions.hasHeadlessRequest()) {
         if (!startupOptions.hasHeadlessExport()) {
-            std::fprintf(stderr, "%s\n", qPrintable(startupOptions.message()));
+            writeLine(stderr, startupOptions.message());
             return 64;
         } // if invalid CLI export request
 
-        QString errorMessage;
-        const int exitCode = HeadlessExport::run(startupOptions, errorMessage);
-        if (!errorMessage.isEmpty()) {
-            std::fprintf(stderr, "SeamlyLayout: %s\n", qPrintable(errorMessage));
-        } else if (exitCode == 0) {
-            std::fprintf(stdout, "SeamlyLayout: exported %s\n", qPrintable(startupOptions.outputPath()));
-        } // if export failed or succeeded
-        return exitCode;
+        const HeadlessExport::Result result = HeadlessExport::run(startupOptions);
+        for (const QString &warning : result.warnings) {
+            writeLine(stderr, QStringLiteral("SeamlyLayout: warning: ") + warning);
+        } // for each layout note
+        if (!result.error.isEmpty()) {
+            writeLine(stderr, QStringLiteral("SeamlyLayout: ") + result.error);
+        } else if (startupOptions.isInfoRequest()) {
+            writeLine(stdout, result.report);
+        } else if (result.exitCode == 0) {
+            writeLine(stdout, QStringLiteral("SeamlyLayout: exported ") + startupOptions.outputPath());
+        } // if failed, report, or exported
+        return result.exitCode;
     } // if headless export requested
 
     Logger::log(QStringLiteral("main(): startup file = '%1', message = '%2'")
