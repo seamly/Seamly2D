@@ -908,6 +908,11 @@ pub mod qobject {
         #[qinvokable]
         fn set_pdf_text_as_paths(self: Pin<&mut AppController>, as_paths: bool);
 
+        // Make the shown material's pieces the layout where the handoff placed them: no packing.
+        // False when nothing is imported.
+        #[qinvokable]
+        fn use_handoff_positions(self: Pin<&mut AppController>) -> bool;
+
         // Direct layout flags (`name=value` per line) merged over `settings_json`; empty on a problem.
         #[qinvokable]
         fn layout_flags_json(self: &AppController, settings_json: &QString, flags: &QString) -> QString;
@@ -3487,6 +3492,24 @@ impl qobject::AppController {
         }); // problem
         cxx_qt_lib::QString::from(problem.unwrap_or_default().as_str())
     } // fn export_format_problem
+
+    // Headless `--no-packing`: the imported pieces, at their Seamly2D positions, become the layout.
+    // No views, no split; the export functions read layout_dom as after a layout run.
+    fn use_handoff_positions(mut self: std::pin::Pin<&mut Self>) -> bool {
+        let Some(input) = self.rust().input_dom.clone() else {
+            self.as_mut().error_occurred(cxx_qt_lib::QString::from("No SVG imported."));
+            return false;
+        }; // input
+        self.as_mut().clear_layout_views();
+        {
+            let mut rust = self.as_mut().rust_mut();
+            rust.divide_spec = None;
+            rust.incomplete_layout_lines.clear();
+            rust.layout_dom = Some(input);
+        } // rust borrow dropped
+        self.as_mut().set_is_layout_ready(true);
+        true
+    } // fn use_handoff_positions
 
     // Direct layout flags merged over the settings; see layout_tiling::apply_layout_flags.
     fn layout_flags_json(&self, settings_json: &cxx_qt_lib::QString, flags: &cxx_qt_lib::QString) -> cxx_qt_lib::QString {

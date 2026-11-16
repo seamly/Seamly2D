@@ -528,3 +528,27 @@ void TST_VCommandLine::LayoutFlagsNeedExportOrInfo()
     QVERIFY(info.layoutExportError().isEmpty());
     QCOMPARE(info.layoutFlagArguments(), QStringList({QStringLiteral("--roll-width"), QStringLiteral("12")}));
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::LayoutNoPackingCombinations()
+{
+    VCommandLine plain;
+    QVERIFY(plain.parser.parse({QStringLiteral("seamly2d"), QStringLiteral("--layout-export"),
+                                QStringLiteral("--layout-output"), QStringLiteral("layout.svg"),
+                                QStringLiteral("--layout-no-packing"), QStringLiteral("pattern.sm2d")}));
+    QVERIFY(plain.layoutExportError().isEmpty());
+    QVERIFY(plain.isLayoutNoPackingSet());
+
+    for (const QStringList &extra : {QStringList{QStringLiteral("--layout-view"), QStringLiteral("marker")},
+                                     QStringList{QStringLiteral("--layout-oversize"), QStringLiteral("split")},
+                                     QStringList{QStringLiteral("--layout-format"), QStringLiteral("pdf-tiled")}})
+    {
+        VCommandLine command_line;
+        QVERIFY(command_line.parser.parse(QStringList{QStringLiteral("seamly2d"), QStringLiteral("--layout-export"),
+                                                      QStringLiteral("--layout-output"), QStringLiteral("layout.svg"),
+                                                      QStringLiteral("--layout-no-packing")}
+                                          + extra + QStringList{QStringLiteral("pattern.sm2d")}));
+        QVERIFY2(command_line.layoutExportError().startsWith(QStringLiteral("--layout-no-packing exports")),
+                 qUtf8Printable(extra.join(QLatin1Char(' '))));
+    }
+}

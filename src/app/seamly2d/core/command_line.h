@@ -94,6 +94,7 @@ public:
     bool                   isSvgTextModeSet() const;
     bool                   isText2PathsSet() const;
     QStringList            layoutFlagArguments() const;
+    bool                   isLayoutNoPackingSet() const;
     bool                   reservesStandardOutput() const;
 
 protected:

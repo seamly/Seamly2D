@@ -87,6 +87,7 @@ private slots:
     void Text2PathsRejectedCombinations();
     void LayoutFlagsForwardedInOrder();
     void LayoutFlagsNeedExportOrInfo();
+    void LayoutNoPackingCombinations();
 
 private:
     Q_DISABLE_COPY(TST_VCommandLine)

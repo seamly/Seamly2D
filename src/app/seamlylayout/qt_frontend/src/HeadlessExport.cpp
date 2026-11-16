@@ -9,7 +9,8 @@
 //   1. Load preferences and settings; an explicit --settings file gets a strict check.
 //   2. Import the SVG and build each material's blank canvas.
 //   3. --info: return the JSON report and stop.
-//   4. Lay out every material and view, as the Create Layout button does; oversized
+//   4. --no-packing: show the material's pieces where Seamly2D placed them, then go to step 7.
+//      Otherwise lay out every material and view, as the Create Layout button does; oversized
 //      pieces stop the run unless --oversize chooses split or extend.
 //   5. Refuse a layout with unplaced pieces or a failed view.
 //   6. Show the --material and --view layout, then check the format against the
@@ -137,6 +138,89 @@ QString materialList(const QStringList &labels, const QString &onlyMaterial)
     } // if material tabs
     return onlyMaterial.isEmpty() ? QStringLiteral("(no material name)") : onlyMaterial;
 } // materialList
+// @brief Check the format against the shown layout, then write the output file.
+// @param controller    Controller with the layout to export (laid out, or pieces as placed).
+// @param options       Validated command-line request.
+// @param preferences   Preferences for the HP-GL pens.
+// @param settingsJson  Layout settings of the run.
+// @param formatOptions Format-specific options from --export-options.
+// @param errorMessage  Last error the controller reported; updated during the export.
+// @param result        Result so far (warnings); returned with the exit code and error.
+HeadlessExport::Result exportLayout(AppController &controller, const StartupOptions &options,
+                                    const PreferencesModel &preferences, const QString &settingsJson,
+                                    const QJsonObject &formatOptions, const QString &errorMessage,
+                                    HeadlessExport::Result result)
+{
+    const auto fail = [&result](int exitCode, const QString &message) {
+        result.exitCode = exitCode;
+        result.error = message;
+        return result;
+    }; // fail
+
+    // Labels that are already paths take "asSupplied" unless a mode was requested.
+    // --text2paths writes SVG labels as single-stroke paths (hersheyStrokes).
+    const QString format = options.exportFormat();
+    const bool pathLabels = controller.getLabelTextState() == QStringLiteral("pathsOnly");
+    QString textMode = options.isSvgTextModeSet() || !pathLabels ? options.svgTextMode()
+                                                                 : QStringLiteral("asSupplied");
+    if (options.isTextAsPaths()) {
+        textMode = pathLabels ? QStringLiteral("asSupplied") : QStringLiteral("hersheyStrokes");
+    } // if text as paths
+    controller.setPdfTextAsPaths(options.isTextAsPaths());
+    const QString formatProblem =
+        controller.exportFormatProblem(format, options.isSvgTextModeSet() ? textMode : QString());
+    if (!formatProblem.isEmpty()) {
+        return fail(format == QStringLiteral("gcode") || format == QStringLiteral("3mf") ? ExitUnavailable
+                                                                                         : ExitUsage,
+                    formatProblem);
+    } // if the Export menu would disable the format
+
+    // A run that fails before this point keeps an existing file. Remove it now: after a
+    // failed export, an old file would pass the existence check below.
+    const QString outputPath = options.outputPath();
+    if (QFileInfo::exists(outputPath) && !QFile::remove(outputPath)) {
+        return fail(ExitOutputError, QStringLiteral("The old output file cannot be replaced: %1").arg(outputPath));
+    } // if the old output file stays
+
+    bool exported = false;
+    if (format == QStringLiteral("svg")) {
+        exported = controller.exportSvg(outputPath, textMode);
+    } else if (format == QStringLiteral("pdf")) {
+        exported = controller.exportPdf(outputPath, settingsJson);
+    } else if (format == QStringLiteral("pdf-tiled")) {
+        exported = controller.exportPdfTiled(outputPath, settingsJson);
+    } else if (format == QStringLiteral("png")) {
+        exported = controller.exportPng(outputPath);
+    } else if (format == QStringLiteral("jpg") || format == QStringLiteral("jpeg")) {
+        exported = controller.exportJpeg(outputPath);
+    } else if (format == QStringLiteral("dxf")) {
+        exported = controller.exportDxf(outputPath, compactJson(dxfOptions(options, formatOptions)));
+    } else if (format == QStringLiteral("hpgl")) {
+        exported = controller.exportHpgl(outputPath, compactJson(hpglOptions(preferences, formatOptions)));
+    } else if (format == QStringLiteral("ps") || format == QStringLiteral("eps")) {
+        exported = controller.exportPostscript(outputPath, format);
+    } else if (format == QStringLiteral("gcode")) {
+        exported = controller.exportGcode(outputPath);
+    } else if (format == QStringLiteral("3mf")) {
+        exported = controller.exportMesh(outputPath);
+    } // if selected format
+
+    if (!exported) {
+        QFile::remove(outputPath); // no partial file stays after a failed export
+        return fail(ExitOutputError, errorMessage.isEmpty()
+                                         ? QStringLiteral("SeamlyLayout failed to export %1.").arg(format)
+                                         : errorMessage);
+    } // if export failed
+
+    if (!QFileInfo::exists(outputPath) || QFileInfo(outputPath).size() == 0) {
+        QFile::remove(outputPath); // an empty file is not an export
+        return fail(ExitOutputError,
+                    QStringLiteral("SeamlyLayout reported success but did not create an output file: %1")
+                        .arg(outputPath));
+    } // if output file was not created
+
+    return result;
+} // exportLayout
 } // namespace
 
 // @brief Import, lay out, and export one SVG, or report on it, without creating a QML window.
@@ -263,6 +347,18 @@ HeadlessExport::Result HeadlessExport::run(const StartupOptions &options)
                                    .arg(materials.size()).arg(materials.join(QStringLiteral(", "))));
     } // if several materials and none selected
 
+    // --no-packing: the pieces stay where Seamly2D placed them; no layout run, no views.
+    if (options.isNoPacking()) {
+        if (materialIndex > 0 && !controller.selectMaterial(materialIndex)) {
+            return fail(ExitSoftware, QStringLiteral("The %1 pieces could not be selected.").arg(options.material()));
+        } // if another material was selected
+        if (!controller.useHandoffPositions()) {
+            return fail(ExitSoftware, errorMessage.isEmpty() ? QStringLiteral("The pieces could not be placed.")
+                                                             : errorMessage);
+        } // if no pieces
+        return exportLayout(controller, options, preferences, settingsJson, formatOptions, errorMessage, result);
+    } // if no packing
+
     // Lay out every material and view; the GUI shows a dialog for oversized pieces.
     bool laidOut = controller.processLayout(settingsJson);
     if (!laidOut && !oversizedMessage.isEmpty()) {
@@ -315,67 +411,5 @@ HeadlessExport::Result HeadlessExport::run(const StartupOptions &options)
         return fail(ExitUsage, unavailable);
     } // if the view has no layout (Marker or Nested of a split run)
 
-    // Labels that are already paths take "asSupplied" unless a mode was requested.
-    // --text2paths writes SVG labels as single-stroke paths (hersheyStrokes).
-    const QString format = options.exportFormat();
-    const bool pathLabels = controller.getLabelTextState() == QStringLiteral("pathsOnly");
-    QString textMode = options.isSvgTextModeSet() || !pathLabels ? options.svgTextMode()
-                                                                 : QStringLiteral("asSupplied");
-    if (options.isTextAsPaths()) {
-        textMode = pathLabels ? QStringLiteral("asSupplied") : QStringLiteral("hersheyStrokes");
-    } // if text as paths
-    controller.setPdfTextAsPaths(options.isTextAsPaths());
-    const QString formatProblem =
-        controller.exportFormatProblem(format, options.isSvgTextModeSet() ? textMode : QString());
-    if (!formatProblem.isEmpty()) {
-        return fail(format == QStringLiteral("gcode") || format == QStringLiteral("3mf") ? ExitUnavailable
-                                                                                         : ExitUsage,
-                    formatProblem);
-    } // if the Export menu would disable the format
-
-    // A run that fails before this point keeps an existing file. Remove it now: after a
-    // failed export, an old file would pass the existence check below.
-    const QString outputPath = options.outputPath();
-    if (QFileInfo::exists(outputPath) && !QFile::remove(outputPath)) {
-        return fail(ExitOutputError, QStringLiteral("The old output file cannot be replaced: %1").arg(outputPath));
-    } // if the old output file stays
-
-    bool exported = false;
-    if (format == QStringLiteral("svg")) {
-        exported = controller.exportSvg(outputPath, textMode);
-    } else if (format == QStringLiteral("pdf")) {
-        exported = controller.exportPdf(outputPath, settingsJson);
-    } else if (format == QStringLiteral("pdf-tiled")) {
-        exported = controller.exportPdfTiled(outputPath, settingsJson);
-    } else if (format == QStringLiteral("png")) {
-        exported = controller.exportPng(outputPath);
-    } else if (format == QStringLiteral("jpg") || format == QStringLiteral("jpeg")) {
-        exported = controller.exportJpeg(outputPath);
-    } else if (format == QStringLiteral("dxf")) {
-        exported = controller.exportDxf(outputPath, compactJson(dxfOptions(options, formatOptions)));
-    } else if (format == QStringLiteral("hpgl")) {
-        exported = controller.exportHpgl(outputPath, compactJson(hpglOptions(preferences, formatOptions)));
-    } else if (format == QStringLiteral("ps") || format == QStringLiteral("eps")) {
-        exported = controller.exportPostscript(outputPath, format);
-    } else if (format == QStringLiteral("gcode")) {
-        exported = controller.exportGcode(outputPath);
-    } else if (format == QStringLiteral("3mf")) {
-        exported = controller.exportMesh(outputPath);
-    } // if selected format
-
-    if (!exported) {
-        QFile::remove(outputPath); // no partial file stays after a failed export
-        return fail(ExitOutputError, errorMessage.isEmpty()
-                                         ? QStringLiteral("SeamlyLayout failed to export %1.").arg(format)
-                                         : errorMessage);
-    } // if export failed
-
-    if (!QFileInfo::exists(outputPath) || QFileInfo(outputPath).size() == 0) {
-        QFile::remove(outputPath); // an empty file is not an export
-        return fail(ExitOutputError,
-                    QStringLiteral("SeamlyLayout reported success but did not create an output file: %1")
-                        .arg(outputPath));
-    } // if output file was not created
-
-    return result;
+    return exportLayout(controller, options, preferences, settingsJson, formatOptions, errorMessage, result);
 } // HeadlessExport::run

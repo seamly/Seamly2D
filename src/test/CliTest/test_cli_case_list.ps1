@@ -339,6 +339,19 @@ function Get-CliTestCases
         @{ Name = 'flags-info-narrow-roll'; Group = 'flags'; Arguments = @('--layout-info', '--layout-roll-width', '12', $shirt)
            Exit = 0; Info = @{ TiledPaper = $false; OversizedMin = 5 } }
 
+        # --- Pieces as placed in Piece mode (no layout run) --------------------------------------------------
+        @{ Name = 'no-packing-svg'; Group = 'no-packing'; Format = 'svg'
+           Arguments = $export + @('--layout-no-packing', $shirt); Exit = 0; Expect = @{ MinPieces = 16 } }
+        @{ Name = 'no-packing-pdf'; Group = 'no-packing'; Format = 'pdf'
+           Arguments = $export + @('--layout-format', 'pdf', '--layout-no-packing', $shirt); Exit = 0; Expect = @{ Pages = 1 } }
+        @{ Name = 'no-packing-dxf'; Group = 'no-packing'; Format = 'dxf'
+           Arguments = $export + @('--layout-format', 'dxf', '--layout-no-packing', $shirt); Exit = 0; Expect = @{ Version = 'AC1012'; MinBlocks = 16 } }
+        @{ Name = 'no-packing-jacket-lining'; Group = 'no-packing'; Format = 'svg'; Slow = $true
+           Arguments = $export + @('--layout-material', 'Lining', '--layout-no-packing', '--gsize', '40', '--gheight', '146', $jacket)
+           Exit = 0; Expect = @{ MinPieces = 5 } }
+        @{ Name = 'no-packing-with-view'; Group = 'no-packing'; Arguments = $export + @('--layout-no-packing', '--layout-view', 'marker', $jacket)
+           Exit = 64; Stderr = '--layout-no-packing exports the pieces as placed' }
+
         # --- Rust/Iced tester in batch mode -------------------------------------------------------------------
         @{ Name = 'tester-shirt-pdf-roll'; Group = 'tester'; Program = 'tester'
            Arguments = @('--batch', '--pattern', $shirt, '--settings', $roll36, '--format', 'pdf', '--output-dir', '{outdir}')

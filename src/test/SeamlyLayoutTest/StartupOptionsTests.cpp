@@ -91,6 +91,7 @@ private slots:
     void hasHeadlessArguments_matchesEveryHeadlessOption();
     void textAsPaths_vectorFormatsOnly();
     void layoutFlags_storedInTableOrder();
+    void noPacking_refusesLayoutChoices();
 
     // --help / --version
     void helpOption_statusIsShowInformation();
@@ -754,6 +755,30 @@ void StartupOptionsTests::layoutFlags_storedInTableOrder()
     QCOMPARE(info.layoutFlags(), QStringList({QStringLiteral("roll-width=12")}));
     QVERIFY(StartupOptions::hasHeadlessArguments(QStringList{QStringLiteral("--tile-size=A4")}));
 } // layoutFlags_storedInTableOrder
+
+// @brief --no-packing exports the pieces as placed: no view, no oversize choice, no tiled PDF.
+void StartupOptionsTests::noPacking_refusesLayoutChoices()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString svgPath = makeFile(directory, QStringLiteral("pattern.svg"));
+    const auto parse = [&](const QStringList &extra) {
+        return StartupOptions::parse(QStringList{QStringLiteral("SeamlyLayout"), QStringLiteral("--no-packing"),
+                                                 QStringLiteral("--output"), directory.filePath(QStringLiteral("out.file"))}
+                                     + extra + QStringList{svgPath});
+    }; // parse
+
+    const StartupOptions plain = parse({QStringLiteral("--export"), QStringLiteral("svg")});
+    QVERIFY(plain.hasHeadlessExport());
+    QVERIFY(plain.isNoPacking());
+    for (const QStringList &extra : {QStringList{QStringLiteral("--export"), QStringLiteral("pdf-tiled")},
+                                     QStringList{QStringLiteral("--export"), QStringLiteral("svg"), QStringLiteral("--view"), QStringLiteral("marker")},
+                                     QStringList{QStringLiteral("--export"), QStringLiteral("svg"), QStringLiteral("--oversize"), QStringLiteral("split")}}) {
+        const StartupOptions options = parse(extra);
+        QCOMPARE(options.status(), StartupOptions::Status::Failed);
+        QVERIFY(options.message().startsWith(QStringLiteral("--no-packing exports")));
+    } // for each refused choice
+} // noPacking_refusesLayoutChoices
 
 // @brief A headless export must name its destination.
 void StartupOptionsTests::headlessExport_requiresOutputPath()

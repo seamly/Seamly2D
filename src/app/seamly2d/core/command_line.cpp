@@ -397,6 +397,12 @@ void VCommandLine::initOptions(VCommandLineOptions &options, QMap<QString, int> 
         translate("VCommandLine", "Write label text as paths: SVG labels as single-stroke paths, PDF text as glyph "
                                   "outlines. PS and EPS draw paths already. For svg, pdf, pdf-tiled, ps and eps.")));
 
+    // --layout-no-packing: pieces where Piece mode places them, no layout run.
+    options_index.insert(LONG_OPTION_LAYOUT_NO_PACKING, index++);
+    options.append(new QCommandLineOption({LONG_OPTION_LAYOUT_NO_PACKING},
+        translate("VCommandLine", "Export the pieces where Piece mode places them, without a layout run. "
+                                  "Not with --layout-view, --layout-oversize or pdf-tiled.")));
+
     // --layout-<name>: direct layout flags; they win over --layout-settings.
     for (const QString &name : LayoutFlagNames())
     {
@@ -682,7 +688,8 @@ QString VCommandLine::layoutExportError() const
         is_set(LONG_OPTION_LAYOUT_FORMAT) || is_set(LONG_OPTION_LAYOUT_OUTPUT) ||
         is_set(LONG_OPTION_LAYOUT_EXPORT_OPTIONS) || is_set(LONG_OPTION_SVG_TEXT_MODE) ||
         is_set(LONG_OPTION_LAYOUT_MATERIAL) ||
-        is_set(LONG_OPTION_LAYOUT_VIEW) || is_set(LONG_OPTION_LAYOUT_OVERSIZE) || is_set(LONG_OPTION_TEXT2PATHS);
+        is_set(LONG_OPTION_LAYOUT_VIEW) || is_set(LONG_OPTION_LAYOUT_OVERSIZE) || is_set(LONG_OPTION_TEXT2PATHS) ||
+        is_set(LONG_OPTION_LAYOUT_NO_PACKING);
 
     if (export_requested && info_requested)
     {
@@ -741,6 +748,13 @@ QString VCommandLine::layoutExportError() const
         && (format != QStringLiteral("svg") || !supported_text_modes.contains(text_mode)))
     {
         return translate("VCommandLine", "Invalid --svg-text-mode for the selected export format.");
+    }
+
+    if (is_set(LONG_OPTION_LAYOUT_NO_PACKING)
+        && (is_set(LONG_OPTION_LAYOUT_VIEW) || is_set(LONG_OPTION_LAYOUT_OVERSIZE) || format == QStringLiteral("pdf-tiled")))
+    {
+        return translate("VCommandLine", "--layout-no-packing exports the pieces as placed; "
+                                         "it takes no --layout-view, --layout-oversize or pdf-tiled.");
     }
 
     if (is_set(LONG_OPTION_TEXT2PATHS))
@@ -895,6 +909,14 @@ QStringList VCommandLine::layoutFlagArguments() const
         }
     }
     return arguments;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Returns whether --layout-no-packing asks for the pieces as placed.
+//---------------------------------------------------------------------------------------------------------------------
+bool VCommandLine::isLayoutNoPackingSet() const
+{
+    return parser.isSet(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_NO_PACKING)));
 }
 
 //---------------------------------------------------------------------------------------------------------------------

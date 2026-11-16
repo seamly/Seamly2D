@@ -8293,6 +8293,10 @@ int MainWindow::exportLayoutFromCommandLine(const VCommandLinePtr &command_line)
     {
         arguments << QStringLiteral("--text2paths");
     }
+    if (command_line->isLayoutNoPackingSet())
+    {
+        arguments << QStringLiteral("--no-packing");
+    }
     arguments << command_line->layoutFlagArguments();
 
     QProcess process;

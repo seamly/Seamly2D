@@ -78,6 +78,7 @@ const QString LONG_OPTION_LAYOUT_VIEW             = QStringLiteral("layout-view"
 const QString LONG_OPTION_LAYOUT_OVERSIZE         = QStringLiteral("layout-oversize");
 const QString LONG_OPTION_LAYOUT_INFO             = QStringLiteral("layout-info");
 const QString LONG_OPTION_TEXT2PATHS              = QStringLiteral("text2paths");
+const QString LONG_OPTION_LAYOUT_NO_PACKING       = QStringLiteral("layout-no-packing");
 
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief Direct layout flag names; Seamly2D adds "layout-", SeamlyLayout takes them as they are.
@@ -108,7 +109,7 @@ QStringList AllKeys()
          << LONG_OPTION_LAYOUT_EXPORT_OPTIONS << LONG_OPTION_SVG_TEXT_MODE
          << LONG_OPTION_LAYOUT_MATERIAL
          << LONG_OPTION_LAYOUT_VIEW << LONG_OPTION_LAYOUT_OVERSIZE << LONG_OPTION_LAYOUT_INFO
-         << LONG_OPTION_TEXT2PATHS
+         << LONG_OPTION_TEXT2PATHS << LONG_OPTION_LAYOUT_NO_PACKING
          << LONG_OPTION_NO_HDPI_SCALING;
 
     for (const QString &name : LayoutFlagNames())

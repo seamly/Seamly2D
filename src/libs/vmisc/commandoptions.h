@@ -77,6 +77,7 @@ extern const QString LONG_OPTION_LAYOUT_VIEW;
 extern const QString LONG_OPTION_LAYOUT_OVERSIZE;
 extern const QString LONG_OPTION_LAYOUT_INFO;
 extern const QString LONG_OPTION_TEXT2PATHS;
+extern const QString LONG_OPTION_LAYOUT_NO_PACKING;
 
 QStringList AllKeys();
 

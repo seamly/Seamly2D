@@ -141,7 +141,7 @@ bool StartupOptions::hasHeadlessArguments(const QStringList &arguments)
         QStringLiteral("--export-options"), QStringLiteral("--svg-text-mode"),
         QStringLiteral("--text-mode"), QStringLiteral("--material"), QStringLiteral("--view"),
         QStringLiteral("--oversize"), QStringLiteral("--info"),
-        QStringLiteral("--text2paths")
+        QStringLiteral("--text2paths"), QStringLiteral("--no-packing")
     };
     QStringList allNames = optionNames;
     for (const LayoutFlag &flag : layoutFlagTable) {
@@ -279,6 +279,12 @@ StartupOptions StartupOptions::parse(const QStringList &arguments, QIODevice *st
                        "PS and EPS draw paths already. For svg, pdf, pdf-tiled, ps and eps."));
     parser.addOption(textAsPathsOption);
 
+    const QCommandLineOption noPackingOption(
+        QStringList{QStringLiteral("no-packing")},
+        QStringLiteral("Export the pieces where Seamly2D placed them, without a layout run. "
+                       "Not with --view, --oversize or pdf-tiled."));
+    parser.addOption(noPackingOption);
+
     // Direct layout flags win over --settings.
     for (const LayoutFlag &flag : layoutFlagTable) {
         parser.addOption(QCommandLineOption(QStringList{QLatin1String(flag.name)},
@@ -306,7 +312,7 @@ StartupOptions StartupOptions::parse(const QStringList &arguments, QIODevice *st
         parser.isSet(settingsOption) || parser.isSet(exportOptionsOption) ||
         parser.isSet(svgTextModeOption) || parser.isSet(materialOption) || parser.isSet(viewOption) ||
         parser.isSet(oversizeOption) || parser.isSet(infoOption) || parser.isSet(textAsPathsOption) ||
-        !layoutFlagItems(parser).isEmpty();
+        parser.isSet(QStringLiteral("no-packing")) || !layoutFlagItems(parser).isEmpty();
 
     if (parser.isSet(versionOption)) {
         // --version wins over everything else, matching every other CLI.
@@ -436,7 +442,7 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
         parser.isSet(settingsOption) || parser.isSet(exportOptionsOption) ||
         parser.isSet(svgTextModeOption) || parser.isSet(materialOption) || parser.isSet(viewOption) ||
         parser.isSet(oversizeOption) || parser.isSet(infoOption) || parser.isSet(textAsPathsOption) ||
-        !layoutFlagItems(parser).isEmpty();
+        parser.isSet(QStringLiteral("no-packing")) || !layoutFlagItems(parser).isEmpty();
     if (!hasExportArguments) {
         return options;
     } // if no export arguments
@@ -470,7 +476,7 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
         const bool hasExportChoice =
             parser.isSet(exportOption) || parser.isSet(outputOption) || parser.isSet(exportOptionsOption) ||
             parser.isSet(svgTextModeOption) || parser.isSet(materialOption) || parser.isSet(viewOption) ||
-            parser.isSet(oversizeOption) || parser.isSet(textAsPathsOption);
+            parser.isSet(oversizeOption) || parser.isSet(textAsPathsOption) || parser.isSet(QStringLiteral("no-packing"));
         if (hasExportChoice) {
             return fail(QStringLiteral("--info prints a report and exports nothing; it takes only --settings."));
         } // if export options were given with --info
@@ -527,6 +533,11 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
         return fail(QStringLiteral("--svg-text-mode can only be used with --export svg."));
     } // if text mode is used with another format
 
+    if (parser.isSet(QStringLiteral("no-packing"))
+        && (parser.isSet(viewOption) || parser.isSet(oversizeOption) || format == QStringLiteral("pdf-tiled"))) {
+        return fail(QStringLiteral("--no-packing exports the pieces as placed; it takes no --view, --oversize or pdf-tiled."));
+    } // if no packing with a layout choice
+
     if (parser.isSet(textAsPathsOption) && parser.isSet(svgTextModeOption)) {
         return fail(QStringLiteral("--text2paths and --svg-text-mode cannot be used together."));
     } // if two label modes
@@ -568,6 +579,7 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
     options.m_oversize = oversize;
     options.m_textAsPaths = parser.isSet(textAsPathsOption);
     options.m_layoutFlags = layoutFlagItems(parser);
+    options.m_noPacking = parser.isSet(QStringLiteral("no-packing"));
     return options;
 } // StartupOptions::parseExportOptions
 

@@ -161,6 +161,9 @@ public:
     // @brief True for --text2paths: label text as paths in SVG and PDF.
     bool isTextAsPaths() const { return m_textAsPaths; }
 
+    // @brief True for --no-packing: export the pieces at their Seamly2D positions.
+    bool isNoPacking() const { return m_noPacking; }
+
     // @brief Direct layout flags as `name=value` items (`ignore-margins=` for the switch).
     QStringList layoutFlags() const { return m_layoutFlags; }
 
@@ -222,6 +225,7 @@ private:
     bool m_infoRequest = false;
     bool m_textAsPaths = false;
     QStringList m_layoutFlags;
+    bool m_noPacking = false;
 
     // User-visible text; set only for Status::ShowInformation and Status::Failed.
     QString m_message;
