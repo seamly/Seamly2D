@@ -2,6 +2,17 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-15 — Fold lines on the left edge of paper and fabric (Layout.Y111)
+
+- `LayoutSettings::places_fold_lines_on_left_edge`: no folded fabric check. Layout Mode Any still ignores it.
+- Paper and open fabric: fold line pieces go first, on the left margin; the margin stays. Folded fabric unchanged: the fold, no margin, piece gap for other pieces.
+- `SettingsDialog.qml`: "Place fold lines on the left edge" on the line below Media Type; enabled for every media; "(fabric: no left margin)" dropped.
+- Default stays on: paper layouts now pin fold line pieces unless the user clears the box.
+- Tests: `fold_lines_on_left_edge_apply_to_every_media`, `fold_line_lies_on_the_left_margin_of_paper_and_open_fabric`, `jacket2_paper_and_open_fabric_place_fold_line_pieces_first`; Qt `foldLinesOnLeftEdgeCheck_belowMediaTypeForEveryMedia`.
+- Checked: `cargo test --workspace` 719 pass; `ctest` debug 9/9. Built in worktree `fold-media`; merged `--no-ff`; branch and worktree deleted.
+- Docs: SETTINGS_WORKFLOW, CREATE_LAYOUT_WORKFLOW, PROCESS LAYOUT WORKFLOW, SVG-DATA-ATTRIBUTES, `AGENT_CHECKLIST.md` §21, new §58 and OPEN row; §54 and its row removed.
+- Open: Layout.Y111.1 installed-app check with the next MSI (§58).
+
 ### 2026-11-15 — Large patterns display in both canvases (Layout.Y10)
 
 - Cause: jacket2 resaved with 16 pieces; real handoff 2,024,522 chars. Fabric all-sizes, Marker and Nested SVGs went into `loadHtml()` `data:` URLs over Chromium's 2 MB limit; the load failed with no error.

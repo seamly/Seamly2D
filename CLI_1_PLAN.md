@@ -42,7 +42,7 @@ Results: `CLI_1_TEST_RESULTS.md`. Options: `CLI_1_OPTION_MATRIX.md`.
 
 ## Decisions
 
-- Layout Settings controls map to `--layout-settings` JSON keys. Direct flags stay in CLI.3 (flag names and precedence need Sue).
+- Layout Settings controls map to `--layout-settings` JSON keys and to direct flags `--layout-<name>` (CLI.3, done on this branch). Precedence: saved settings, the file, the flags.
 - Removed legacy options stay removed: exit 64 "Unknown option". Exception: `--text2paths` (CLI_1_TASK §7, CLI.3.5): SVG single-stroke paths, PDF glyph outlines; PS and EPS draw paths already.
 - Option names are lowercase kebab-case already; no aliases added.
 - Multisize without `--gsize`/`--gheight`: every size at the base height, as Layout mode. With either: one size and height, no views.

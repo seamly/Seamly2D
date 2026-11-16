@@ -27,6 +27,8 @@ Usage: `seamly2d [options] filename`
 | `--layout-view <name>` | Multisize layout: `marker`, `nested`, `base`, a size as its tab shows it (`500` for "Size 500"), or the full tab label. Default: the first layout. |
 | `--layout-oversize <choice>` | Pieces wider than a roll or fabric: `split` (split the pieces) or `extend` (make the media longer). Default: stop with exit 70. |
 | `--text2paths` | Label text as paths: SVG labels as single-stroke paths (as `--svg-text-mode hersheyStrokes`), PDF and tiled PDF text as glyph outlines (no embedded font). PS and EPS draw paths already. Formats `svg`, `pdf`, `pdf-tiled`, `ps`, `eps`. |
+| `--layout-no-packing` | Export the pieces where Piece mode places them, without a layout run. Not with `--layout-view`, `--layout-oversize` or `pdf-tiled`. |
+| `--layout-<name> <value>` | Direct layout flags; see "Direct layout flags". They win over `--layout-settings`. |
 | `--no-scaling` | Turn off high DPI scaling. Same as `QT_AUTO_SCREEN_SCALE_FACTOR=0`. |
 
 Option names are case-sensitive. Each long option also accepts `--name=value`.
@@ -121,6 +123,41 @@ An unknown key or an invalid value stops the export with exit 64 and names the k
 
 `CLI_1_OPTION_MATRIX.md` in the repository root maps each Layout Settings control to its key.
 
+## Direct layout flags
+
+Each flag sets keys of the settings above. Precedence: saved settings, `--layout-settings`, then the flags.
+They also work with `--layout-info`.
+
+| Flag | Value | Keys | Implies |
+|---|---|---|---|
+| `--layout-unit` | `in`, `cm`, `mm` | `unit` | |
+| `--layout-media` | `paper`, `fabric` | `mediaType` | |
+| `--layout-paper` | `tiled`, `roll` | `paperType` | paper |
+| `--layout-tile-size` | catalog name or `Custom` | `tileSize` | tiled paper |
+| `--layout-tile-orientation` | `portrait`, `landscape` | `tileOrientation` | tiled paper |
+| `--layout-tile-width`, `--layout-tile-height` | number | `tileWidth`, `tileHeight`; `tileSize` Custom | tiled paper |
+| `--layout-roll-width` | number | `rollSize` custom, `rollWidth` | paper roll |
+| `--layout-fabric-width` | number | `fabricWidth` | fabric |
+| `--layout-fabric-folded` | `yes`, `no` | `fabricFolded` | fabric |
+| `--layout-selvedge-width` | number | `selvedgeWidth` | fabric |
+| `--layout-margins` | number | all four margins | |
+| `--layout-margin-top`, `-left`, `-right`, `-bottom` | number | one margin; wins over `--layout-margins` | |
+| `--layout-ignore-margins` | none | every margin 0 | |
+| `--layout-gap` | number | `pieceGap` | |
+| `--layout-mode` | `alongGrainline`, `withNap`, `any` | `layoutMode` | |
+| `--layout-nap` | `up`, `down` | `rotationStep` 0 or 180 | `layoutMode` withNap |
+| `--layout-no-grainline` | `upright`, `free` | `noGrainlineRotation` | |
+
+Exit 64 for: paper and fabric flags together; tile flags with a roll; a tile width with a named tile size;
+`--layout-ignore-margins` with a margin flag; `--layout-nap` with a mode other than withNap; a flag twice;
+a value that is not a number or not a listed value.
+
+```text
+seamly2d --layout-export --layout-format pdf --layout-roll-width 24 --layout-margins 0.5 --layout-output shirt.pdf shirt.sm2d
+seamly2d --layout-export --layout-unit cm --layout-fabric-width 150 --layout-fabric-folded yes --layout-nap down ^
+  --layout-output shirt.svg shirt.sm2d
+```
+
 ## Exit codes
 
 | Code | Meaning |
@@ -161,7 +198,8 @@ These options of the old Seamly2D writer stay removed and fail with exit 64 and 
 
 - `--text2paths` is back, for the vector formats above. DXF keeps TEXT entities: DXF-ASTM requires them.
 - `--layout-scale` is removed: PNG export renders at 96 px per inch.
-- Page, margin and gap options: use the `--layout-settings` keys above.
+- Page, margin, gap and rotation options: the direct layout flags above.
+- `--exportOnlyDetails`: `--layout-no-packing`.
 
 ## SeamlyLayout headless options
 
@@ -179,6 +217,8 @@ Seamly2D maps its options to these. They also work on a saved pieces SVG.
 | `--layout-oversize` | `--oversize` |
 | `--layout-info` | `--info` |
 | `--text2paths` | `--text2paths` |
+| `--layout-no-packing` | `--no-packing` |
+| `--layout-<name> <value>` | `--<name> <value>` |
 
 ```text
 seamlylayout --export dxf --output out.dxf --settings roll.json pieces.svg

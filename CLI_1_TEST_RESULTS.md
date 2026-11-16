@@ -11,14 +11,14 @@
 | Suite | Command | Result |
 |---|---|---|
 | Seamly2D Qt tests (40 suites) | `src\test\Seamly2DTest\target_wrapper.bat bin\Seamly2DTests.exe` (`QT_QPA_PLATFORM=offscreen`) | 32 621 pass, 0 fail |
-| `TST_VCommandLine` | part of the above | 26 pass, 0 fail |
+| `TST_VCommandLine` | part of the above | 29 pass, 0 fail |
 | CollectionTest (`TST_Seamly2DCommandLine`, `TST_SeamlyMeCommandLine`) | `bin\CollectionTest.exe`, started in `bin` (it copies its data there) | 69 pass, 0 fail, 4 skip |
 | ParserTest | `bin\ParserTest.exe` | pass (exit 0) |
 | TranslationsTest | `bin\TranslationsTest.exe` | 0 fail (QT_FORCE_STDERR_LOGGING=1 for counts) |
 | SeamlyLayout Qt tests | `ctest --preset release` | 9/9 pass |
-| SeamlyLayout Rust | `cargo test --workspace` | 730 pass, 0 fail |
+| SeamlyLayout Rust | `cargo test --workspace` | 734 pass, 0 fail |
 | CLI tester Rust | `cargo test` in `src\test\CliTestApp` | 15 pass, 0 fail |
-| CLI regression suite | `src\test\CliTest\test_cli_layout_export.ps1` | 106 cases: 106 pass, 0 fail, 0 skip (full run after the MSI build) |
+| CLI regression suite | `src\test\CliTest\test_cli_layout_export.ps1` | 124 cases: 124 pass, 0 fail, 0 skip (full run, after the direct flags) |
 | Python headless runner | `test_headless_export.py ... --seamly2d ... --pattern male_shirt.sm2d` | all checks pass (47) |
 | Python pattern input runner | `test_pattern_input_status.py` | all checks pass |
 | Python measurement runner | `test_measurement_cli.py` (SeamlyMe) | all checks pass |
@@ -44,6 +44,8 @@ Report: `cli_test_report.json` (command, arguments, working folder, stdout, stde
 | fabric, margins | folded with nap (150 cm → 75 cm), open fabric 60 in with margins | SVG/PDF width |
 | material | jacket2 without material, unknown material, `fabric` (any case) | exit 64 lists the materials |
 | multisize | Marker PDF, Nested SVG, Base Size DXF + `.rul`, Size 400 DXF, Marker DXF refused, unknown view, `--gsize`/`--gheight` one size | views follow the tabs; DXF one size only |
+| flags | roll width, A4 landscape mm, custom tile, folded fabric with nap, flags over the file, ignore margins, mode/gap/no-grainline, conflicts, bad values, info | page sizes and widths follow the flags; changed output for margins and mode |
+| no-packing | SVG, PDF, DXF, jacket2 Lining one size, with a view | pieces exported as placed; a view is refused |
 | oversize | no choice (exit 70, old file kept), split PDF/SVG, split DXF refused, extend too wide (exit 70), jacket2 split Marker refused, split default view | page width 12 in after a split |
 | transport | jacket2 handoff copy | ≥ 1 MB, ends `</svg>`, valid XML: no truncation |
 | info | shirt roll, shirt oversized, jacket2 roll, info with format | stdout is one JSON document; views, split views, oversized pieces |
@@ -88,6 +90,11 @@ See `CLI_1_PLAN.md` D1–D16. Each has a case above or a unit test.
 - PDF and tiled PDF: glyph outlines, no embedded font (svg2pdf `embed_text = false`). `shirt-pdf-text2paths`, `shirt-pdf-tiled-text2paths`: no `/FontFile`; without the flag, `shirt-pdf-roll-36in` has one.
 - PS and EPS: no font operators; labels are paths already.
 - DXF keeps TEXT entities (DXF-ASTM); raster formats have no text: exit 64.
+
+## CLI.3 (direct layout flags)
+
+- Done on the same branch: `--layout-<name>` flags, `--layout-no-packing`, `--text2paths`. Decisions in `TODO_COMPLETED.md` (CLI.3.1, CLI.3.7).
+- The MSI build ran before the flags; the flags changed no `.pro`, `.pri`, CMake or packaging file.
 
 ## Gaps
 

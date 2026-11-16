@@ -2233,3 +2233,39 @@ Branch `feature/cli-1`. Plan `CLI_1_PLAN.md`, matrix `CLI_1_OPTION_MATRIX.md`, r
 - [x] CLI.1.11 Option names are lowercase kebab-case already; no aliases needed (decision in `CLI_1_PLAN.md`).
 - [x] CLI.1.12 `TST_VCommandLine` covers every option and the failure modes.
 - [x] CLI.1.13 `--help` text and `CLI_PARAMETERS.md` describe the verified behavior.
+
+## [x] Task CLI.3 - Legacy layout options as direct `--layout-*` flags
+
+Seamly2D `--layout-<name> <value>` → SeamlyLayout `--<name> <value>` → `layout_tiling::apply_layout_flags`.
+The merged settings are checked by `validate_settings_json` and loaded through SettingsModel.
+
+| Legacy option | Now |
+|---|---|
+| `-b`/`--basename`, `-d`/`--destination` | `--layout-output` |
+| `-f`/`--format` | `--layout-format` |
+| `-p`/`--pageformat` | `--layout-paper tiled`, `--layout-tile-size`, `--layout-tile-orientation` |
+| `-W`/`--pagew`, `-H`/`--pageh` | `--layout-tile-width`, `--layout-tile-height` (Custom tile); `--layout-roll-width` |
+| `-U`/`--pageunits`, `-l`/`--layounits` | `--layout-unit` |
+| `-L`, `-R`, `-T`, `-B` | `--layout-margin-left/right/top/bottom`; `--layout-margins` for all four |
+| `-i`/`--ignoremargins` | `--layout-ignore-margins` |
+| `-G`/`--gapwidth` | `--layout-gap` |
+| `-r`/`--rotate` | `--layout-mode`, `--layout-nap`, `--layout-no-grainline` |
+| `-c`/`--crop`, `-u`/`--unite` | always: a roll is trimmed below the lowest piece and exports as one page |
+| `--text2paths` | `--text2paths` |
+| `--exportOnlyDetails` | `--layout-no-packing` |
+| fabric (new) | `--layout-media`, `--layout-fabric-width`, `--layout-fabric-folded`, `--layout-selvedge-width` |
+
+- [x] CLI.3.1 Names: `--layout-` plus the setting in kebab-case (Seamly2D); the same without the prefix (SeamlyLayout). Precedence: saved settings, `--layout-settings`, then the flags; a specific margin wins over `--layout-margins`. Paper, tile and roll flags imply paper media; fabric flags imply fabric; two media are an error.
+- [x] CLI.3.2 Paper, tile size and orientation, custom tile size, roll width, unit, margins, no margins, gap.
+- [x] CLI.3.3 Layout mode, nap direction (implies withNap), no-grainline rotation.
+- [x] CLI.3.4 Roll export trims unused length and writes one page: `shirt-pdf-roll-36in`, `flags-roll-width-pdf` (one page, height under the 500 in default).
+- [x] CLI.3.5 Text as paths: `--text2paths` (SVG single-stroke paths, PDF glyph outlines; PS and EPS draw paths already).
+- [x] CLI.3.6 `--layout-no-packing`: pieces where Piece mode places them; no view, no oversize choice, no pdf-tiled.
+- [x] CLI.3.7 Decisions:
+  - `--savelen`, `--groups`, `--shiftlen`: not ported. The SeamlyLayout packer has its own piece order search and trims the used length.
+  - `--bdxf`: not ported. The writer and DXF-ASTM/AAMA readers use ASCII DXF.
+  - BMP, TIFF, PPM: not ported. PNG and JPEG cover raster output.
+  - OBJ: not ported. 3D output is 3MF (paid module).
+  - DXF flavor and version: `--layout-export-options` `dxfVersion` R13 (AC1012) or R11 (AC1009), `aama`, `clo3dGroup250`; verified by `shirt-dxf-r13`, `shirt-dxf-aama-r11`, `shirt-dxf-clo3d`. Other AutoCAD versions are not offered.
+- [x] CLI.3.8 Tests: `TST_VCommandLine::LayoutFlags*`, `LayoutNoPackingCombinations`; `StartupOptionsTests::layoutFlags_storedInTableOrder`, `noPacking_refusesLayoutChoices`; Rust `settings_flags`; CLI suite `flags-*`, `no-packing-*`.
+- [x] CLI.3.9 `CLI_PARAMETERS.md` and `--help` list the flags.

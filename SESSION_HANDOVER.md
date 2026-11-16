@@ -2,6 +2,16 @@
 
 ## Current status
 
+### 2026-11-16 — CLI.3 direct layout flags (feature/cli-1)
+
+- Done; CLI.3 moved to `TODO_COMPLETED.md`. `TODO_CLI.md` keeps CLI.2 only (CLI.2.1 Richmond files, CLI.2.2 CAD import check).
+- Seamly2D `--layout-<name> <value>` → SeamlyLayout `--<name> <value>` → `layout_tiling::apply_layout_flags` (precedence saved < `--layout-settings` < flags; media implications; conflicts → exit 64).
+- `--layout-no-packing` (`--no-packing`): pieces where Piece mode places them; bridge `useHandoffPositions`.
+- `--text2paths` back for SVG, PDF, tiled PDF, PS, EPS.
+- Decisions (CLI.3.1, CLI.3.7) are recorded in `TODO_COMPLETED.md`; Sue may rename flags.
+- Tests: CLI suite 124/124; `cargo test --workspace` 734/0; `TST_VCommandLine` 29; `ctest` 9/9; Python headless runner pass.
+- Next: Sue reviews and merges `feature/cli-1` (not pushed).
+
 ### 2026-11-16 — CLI.1 audit and repair (feature/cli-1)
 
 - Done; CLI.1 in `TODO_COMPLETED.md`. Branch `feature/cli-1`, not merged, not pushed. Plan `CLI_1_PLAN.md` (D1–D17); matrix `CLI_1_OPTION_MATRIX.md`; results and acceptance checklist `CLI_1_TEST_RESULTS.md`.
@@ -44,17 +54,6 @@
 - Checked: no `convertPdfToPs`/`PDFTOPS` in code; no old `VCommandLine` names. Then: ask before `local_build_msi.ps1`; commit. No skip-ci token: `*.pro`, `*.pri`, packaging changed.
 - TODO: `TODO_CLI.md` new CLI.3 (legacy layout options as `--layout-*` flags); CLI.1 paths now `command_line.cpp`.
 - TODO: `TODO_SEAMLY2D.md` new Seamly2D.73 (Details > Export Pieces writes the handoff SVG string to a file).
-
-### 2026-11-15 — Fold lines on the left edge of paper and fabric (Layout.Y111)
-
-- `LayoutSettings::places_fold_lines_on_left_edge`: no folded fabric check. Layout Mode Any still ignores it.
-- Paper and open fabric: fold line pieces go first, on the left margin; the margin stays. Folded fabric unchanged: the fold, no margin, piece gap for other pieces.
-- `SettingsDialog.qml`: "Place fold lines on the left edge" on the line below Media Type; enabled for every media; "(fabric: no left margin)" dropped.
-- Default stays on: paper layouts now pin fold line pieces unless the user clears the box.
-- Tests: `fold_lines_on_left_edge_apply_to_every_media`, `fold_line_lies_on_the_left_margin_of_paper_and_open_fabric`, `jacket2_paper_and_open_fabric_place_fold_line_pieces_first`; Qt `foldLinesOnLeftEdgeCheck_belowMediaTypeForEveryMedia`.
-- Checked: `cargo test --workspace` 719 pass; `ctest` debug 9/9. Built in worktree `fold-media`; merged `--no-ff`; branch and worktree deleted.
-- Docs: SETTINGS_WORKFLOW, CREATE_LAYOUT_WORKFLOW, PROCESS LAYOUT WORKFLOW, SVG-DATA-ATTRIBUTES, `AGENT_CHECKLIST.md` §21, new §58 and OPEN row; §54 and its row removed.
-- Open: Layout.Y111.1 installed-app check with the next MSI (§58).
 
 ## Decisions to retain
 
