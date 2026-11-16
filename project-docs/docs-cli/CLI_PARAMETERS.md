@@ -26,6 +26,7 @@ Usage: `seamly2d [options] filename`
 | `--layout-material <name>` | Material to export, such as `Fabric`. Required when the pattern has several materials. Not case-sensitive. |
 | `--layout-view <name>` | Multisize layout: `marker`, `nested`, `base`, a size as its tab shows it (`500` for "Size 500"), or the full tab label. Default: the first layout. |
 | `--layout-oversize <choice>` | Pieces wider than a roll or fabric: `split` (split the pieces) or `extend` (make the media longer). Default: stop with exit 70. |
+| `--text2paths` | Label text as paths: SVG labels as single-stroke paths (as `--svg-text-mode hersheyStrokes`), PDF and tiled PDF text as glyph outlines (no embedded font). PS and EPS draw paths already. Formats `svg`, `pdf`, `pdf-tiled`, `ps`, `eps`. |
 | `--no-scaling` | Turn off high DPI scaling. Same as `QT_AUTO_SCREEN_SCALE_FACTOR=0`. |
 
 Option names are case-sensitive. Each long option also accepts `--name=value`.
@@ -75,6 +76,7 @@ seamly2d --layout-info --layout-settings roll_36in.json jacket.sm2d
 | `--layout-info` with an export choice (format, output, material, view, oversize, text mode, export options) | exit 64 |
 | `--layout-export` without `--layout-output`, or with no or two patterns | exit 64 |
 | `--svg-text-mode` with a format other than `svg` | exit 64 |
+| `--text2paths` with `--svg-text-mode`, or with `png`, `jpg`, `jpeg`, `dxf`, `hpgl`, `gcode`, `3mf` | exit 64 |
 | `--layout-view` with `--gsize` or `--gheight` | exit 64 |
 | `--layout-view` on an individual pattern, or a view the layout does not have | exit 64; the message lists the views |
 | No `--layout-material` on a pattern with several materials, or an unknown material | exit 64; the message lists the materials |
@@ -151,13 +153,13 @@ A normal start (no console option) does not attach to a console.
 ## Removed legacy options
 
 These options of the old Seamly2D writer stay removed and fail with exit 64 and "Unknown option":
-`-b`/`--basename`, `-d`/`--destination`, `-f`/`--format`, `--bdxf`, `--text2paths`,
+`-b`/`--basename`, `-d`/`--destination`, `-f`/`--format`, `--bdxf`,
 `--exportOnlyDetails`, `-p`/`--pageformat`, `-W`/`--pagew`, `-H`/`--pageh`, `-U`/`--pageunits`,
 `-i`/`--ignoremargins`, `-L`/`--lmargin`, `-R`/`--rmargin`, `-T`/`--tmargin`, `-B`/`--bmargin`,
 `-r`/`--rotate`, `-c`/`--crop`, `-u`/`--unite`, `-S`/`--savelen`, `-l`/`--layounits`,
 `-s`/`--shiftlen`, `-G`/`--gapwidth`, `-g`/`--groups`.
 
-- `--text2paths`: `--svg-text-mode hersheyStrokes` writes labels as stroke paths in SVG.
+- `--text2paths` is back, for the vector formats above. DXF keeps TEXT entities: DXF-ASTM requires them.
 - `--layout-scale` is removed: PNG export renders at 96 px per inch.
 - Page, margin and gap options: use the `--layout-settings` keys above.
 
@@ -176,6 +178,7 @@ Seamly2D maps its options to these. They also work on a saved pieces SVG.
 | `--layout-view` | `--view` |
 | `--layout-oversize` | `--oversize` |
 | `--layout-info` | `--info` |
+| `--text2paths` | `--text2paths` |
 
 ```text
 seamlylayout --export dxf --output out.dxf --settings roll.json pieces.svg

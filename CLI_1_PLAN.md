@@ -23,6 +23,7 @@ Results: `CLI_1_TEST_RESULTS.md`. Options: `CLI_1_OPTION_MATRIX.md`.
 | D14 | `--layout-scale` accepted but ignored: PNG export is fixed at 96 px/in | CLI, headless, bridge | removed |
 | D15 | INFO log lines, DXF converter debug lines and doubled CR on stdout/stderr | log handler, `converter.rs`, forwarding | fixed |
 | D16 | Python headless runner: stale expectations (unplaced on tiled paper, tile marker path) | `test_headless_export.py` | updated |
+| D17 | No text-as-paths export: PDF embeds fonts; `--text2paths` was removed | CLI, headless, `exports.rs` | fixed: `--text2paths` |
 
 ## Tasks
 
@@ -42,7 +43,7 @@ Results: `CLI_1_TEST_RESULTS.md`. Options: `CLI_1_OPTION_MATRIX.md`.
 ## Decisions
 
 - Layout Settings controls map to `--layout-settings` JSON keys. Direct flags stay in CLI.3 (flag names and precedence need Sue).
-- Removed legacy options stay removed, `--text2paths` included: exit 64 "Unknown option". `--svg-text-mode hersheyStrokes` gives stroke paths for SVG; CLI.3.5 owns PDF/PS/EPS.
+- Removed legacy options stay removed: exit 64 "Unknown option". Exception: `--text2paths` (CLI_1_TASK §7, CLI.3.5): SVG single-stroke paths, PDF glyph outlines; PS and EPS draw paths already.
 - Option names are lowercase kebab-case already; no aliases added.
 - Multisize without `--gsize`/`--gheight`: every size at the base height, as Layout mode. With either: one size and height, no views.
 - Several materials need `--layout-material`; the tester runs one command per material.

@@ -79,14 +79,15 @@ See `CLI_1_PLAN.md` D1–D16. Each has a case above or a unit test.
 | Regressions introduced by this work resolved | stale license fingerprint (fixed); Python runner rules updated for the new format rules | met |
 | Environmental limitations documented | Gaps below | met |
 | §9.1–15 regression list | groups in the suite table cover each item; 14 and 15 by the `tester-*` cases | met |
-| `--text2paths` (§7 coverage) | `legacy-text2paths`: exit 64 "Unknown option". Findings below | met (tested; not reintroduced, §6) |
+| `--text2paths` (§7 coverage) | `*-text2paths` cases; section below | met |
 
-## `--text2paths` findings
+## `--text2paths`
 
-- SVG: `--svg-text-mode hersheyStrokes` writes labels as paths (`shirt-svg-hershey-strokes`: no `<text>`).
-- PS and EPS: no font operators; labels are drawn as paths already.
-- PDF: keeps text (embedded fonts, `BT` text operators). svg2pdf `ConversionOptions::embed_text = false` would write paths.
-- Reintroducing the flag needs a name and precedence decision: `TODO_CLI.md` CLI.3.1 and CLI.3.5. §6 forbids it without a documented requirement.
+- Before: removed (exit 64). §7 lists it as required coverage, and `TODO_CLI.md` CLI.3.5 documents the requirement, so it is back under its old name.
+- SVG: labels as single-stroke paths (`hersheyStrokes`). `shirt-svg-text2paths`: no `<text>`.
+- PDF and tiled PDF: glyph outlines, no embedded font (svg2pdf `embed_text = false`). `shirt-pdf-text2paths`, `shirt-pdf-tiled-text2paths`: no `/FontFile`; without the flag, `shirt-pdf-roll-36in` has one.
+- PS and EPS: no font operators; labels are paths already.
+- DXF keeps TEXT entities (DXF-ASTM); raster formats have no text: exit 64.
 
 ## Gaps
 

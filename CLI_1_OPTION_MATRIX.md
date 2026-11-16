@@ -60,7 +60,8 @@ Source: `command_line.cpp`, `commandoptions.cpp`, `StartupOptions.cpp`, `Headles
 | `--no-scaling` | flag | scaling on | — | — | — | working (parsed; GUI display only) | `TST_VCommandLine::LayoutChoiceOptionsAppearInHelp` |
 | filename | `.sm2d` path; relative to launch folder | — | — | missing: exit 66 | — | working | `missing-pattern`, `shirt-relative-paths` |
 | `--layout-scale` | — | — | — | removed: PNG export is fixed at 96 px/in, the value was ignored | — | removed | `legacy-layout-scale`, `TST_VCommandLine::LayoutScaleOptionIsRemoved`, `StartupOptionsTests::headlessExport_scaleOptionIsRemoved` |
-| `--text2paths`, `--basename`, `--format`, `--exportOnlyDetails` and the other legacy writer options | — | — | — | removed: exit 64 "Unknown option" | — | removed | `legacy-*`, `TST_VCommandLine::RemovedLegacyOptionsFailToParse` |
+| `--text2paths` | flag | text kept as text | `--layout-export`; format `svg`, `pdf`, `pdf-tiled`, `ps`, `eps` | with `--svg-text-mode` or another format: exit 64 | `--text2paths` → SVG `hersheyStrokes`; PDF `setPdfTextAsPaths` (svg2pdf `embed_text = false`) | working | `shirt-svg-text2paths` (no `<text>`), `shirt-pdf-text2paths` and `shirt-pdf-tiled-text2paths` (no `/FontFile`; `shirt-pdf-roll-36in` has one), `shirt-eps-text2paths`, `text2paths-with-*`, `text2paths-without-export`, `TST_VCommandLine::Text2Paths*`, `StartupOptionsTests::textAsPaths_vectorFormatsOnly`, `rust:pdf_text_as_paths_writes_no_font` |
+| `--basename`, `--format`, `--exportOnlyDetails` and the other legacy writer options | — | — | — | removed: exit 64 "Unknown option" | — | removed | `legacy-*`, `TST_VCommandLine::RemovedLegacyOptionsFailToParse` |
 
 ## Transport and process behavior
 
