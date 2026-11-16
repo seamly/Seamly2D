@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-11-15 — Preferences > Paths: SeamlyLayout row removed (Seamly2D.200)
+
+- `preferencespathpage.cpp`: row 10 "SeamlyLayout Application" removed from `initializeTable()`, `Apply()`, `defaultPath()`, `editPath()`. Table has 10 rows.
+- Kept `paths/seamlyLayoutApp` and `VSettings::get/setSeamlyLayoutAppPath()`: `smsi_ensure_user_data.ps1` seeds the key; `Application2D::seamlyLayoutFilePath()` reads it first.
+- Checked: `cl /Zs` on the file passes. No new test (UI row only).
+- Built in worktree `layout-app-path`; merged `--no-ff` with no skip-ci token (diff removes an `#ifdef Q_OS_WIN` block); branch and worktree deleted.
+- Open: Seamly2D.200.2 build check with the next `local_build_msi.ps1`.
+
 ### 2026-11-15 — Upstream `develop` merge in progress (a85828a6d0)
 
 - `git merge develop` on `run-seamlyLayout` (bc458ff16a). Backup branch `intermediate` at the same commit. Not committed.
@@ -49,16 +57,6 @@
 - Checked: `cargo test --workspace` 717 pass; `ctest` debug 8/8. Built in worktree `fold-sizes`; merged `--no-ff`; branch and worktree deleted.
 - Docs: PROCESS LAYOUT WORKFLOW (piece-order search), CREATE_LAYOUT_WORKFLOW, `AGENT_CHECKLIST.md` new §56 and OPEN row.
 - Open: Layout.Y9.1 installed-app check with the next MSI (§56).
-
-### 2026-11-15 — Layout rotation Any samples 10° steps (Layout.Y8)
-
-- `pack_types`: `ANY_ROTATION_STEP_DEG` = 10. `PieceRotationRule::Any` gives 0°, 10°, … 350° (36 angles, was 360).
-- `SettingsDialog.qml` Piece Gap tip: "Layout rotation Any samples 10° steps."
-- Handoff unchanged: `data-rotation="1"` still means Any.
-- Tests: `piece_rotation_rules_resolve_by_layout_mode`, `any_piece_uses_non_quarter_turn_to_fit`, `mixed_piece_rules_keep_allowed_angles_and_unplaced_ids` (84×75 bin, 40°).
-- Checked after the merge with Layout.Y7: `cargo test --workspace` 714 pass; `ctest` debug 8/8. Built in worktree `rotation-step`; merged `--no-ff`; branch and worktree deleted.
-- Docs: SVG-DATA-ATTRIBUTES `data-rotation`, SETTINGS_WORKFLOW, LAYOUT_ROTATION_PLAN, `TODO_ROTATION.md`, `AGENT_CHECKLIST.md` §40 tip text, new §55 and row.
-- Open: Layout.Y8.1 installed-app check with the next MSI (§55).
 
 ## Decisions to retain
 

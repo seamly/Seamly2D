@@ -153,8 +153,6 @@ void PreferencesPathPage::Apply()
     settings->setBackupFilePath(path_for_row(8));
     settings->setBodyScansPath(path_for_row(9));
 
-    // Not a data path: the SeamlyLayout executable is never rebased onto the data root.
-    settings->setSeamlyLayoutAppPath(ui->pathTable->item(10, 1)->text());
     initializeTable();
 }
 
@@ -202,11 +200,6 @@ void PreferencesPathPage::defaultPath()
         case 9: // body scans
             path = VCommonSettings::getDefaultBodyScansPath();
             break;
-        case 10: // SeamlyLayout application
-            // Empty means "not configured": the executable is then looked up
-            // next to the Seamly2D executable (see Application2D::seamlyLayoutFilePath()).
-            path = QString();
-            break;
         default:
             break;
     }
@@ -217,10 +210,7 @@ void PreferencesPathPage::defaultPath()
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief editPath opens a picker dialog for the currently selected table row.
- *
- * Directory rows open a directory picker; the SeamlyLayout application row
- * opens a file picker because it points at an executable, not a folder.
+ * @brief editPath opens a directory picker for the currently selected table row.
  */
 void PreferencesPathPage::editPath()
 {
@@ -264,28 +254,6 @@ void PreferencesPathPage::editPath()
         case 9: // body scans
                 path = qApp->Seamly2DSettings()->getBodyScansPath();
                 break;
-        case 10: // SeamlyLayout application
-        {
-            // Executable file, not a directory: use a file picker and skip the
-            // directory handling below.
-            const QString appPath = qApp->Seamly2DSettings()->getSeamlyLayoutAppPath();
-#ifdef Q_OS_WIN
-            const QString filter = tr("Applications (*.exe);;All files (*.*)");
-#else
-            const QString filter = tr("All files (*.*)");
-#endif
-            const QString filename = fileDialog(this, tr("Select SeamlyLayout Application"),
-                                                QFileInfo(appPath).absolutePath(), filter, nullptr,
-                                                qApp->Seamly2DSettings()->getUseNativeFileDialogs(),
-                                                QFileDialog::ExistingFile,
-                                                QFileDialog::AcceptOpen);
-            if (!filename.isEmpty())
-            {
-                item->setText(filename);
-                item->setToolTip(filename);
-            }
-            return;
-        }
         default:
             break;
     }
@@ -344,7 +312,7 @@ void PreferencesPathPage::editPath()
  */
 void PreferencesPathPage::initializeTable()
 {
-    ui->pathTable->setRowCount(11);
+    ui->pathTable->setRowCount(10);
     ui->pathTable->setColumnCount(2);
 
     const VSettings *settings = qApp->Seamly2DSettings();
@@ -440,17 +408,6 @@ void PreferencesPathPage::initializeTable()
         item = new QTableWidgetItem(settings->getBodyScansPath());
         item->setToolTip(settings->getBodyScansPath());
         ui->pathTable->setItem(9, 1, item);
-    }
-
-    {
-        // Path of the SeamlyLayout executable used by the Layout Mode handoff.
-        // Empty means "auto-detect next to the Seamly2D executable".
-        QTableWidgetItem *item = new QTableWidgetItem(tr("SeamlyLayout Application"));
-        item->setIcon(QIcon("://icon/32x32/layout.png"));
-        ui->pathTable->setItem(10, 0, item);
-        item = new QTableWidgetItem(settings->getSeamlyLayoutAppPath());
-        item->setToolTip(settings->getSeamlyLayoutAppPath());
-        ui->pathTable->setItem(10, 1, item);
     }
 
     ui->pathTable->verticalHeader()->setDefaultSectionSize(20);
