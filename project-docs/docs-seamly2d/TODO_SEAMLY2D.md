@@ -42,6 +42,27 @@ Rotation, arrow line, label, extended fold line, SeamlyLayout fold placement and
 
 ## Not required for SeamlyLayout release
 
+### [ ] Task Seamly2D.73 - Implement - Piece Mode - Export Pieces to an SVG file
+
+Layout mode sends the pieces SVG to SeamlyLayout as a string in memory (`generateHandoffSvgDocument()`). Export Pieces writes the same string to an SVG file that the user selects.
+
+- [ ] Seamly2D.73.1 Details menu: add `export_pieces_action` below Copy Piece (`duplicate_piece_action`).
+  - Text "Export Pieces"; tooltip "Export Pieces (E, P)"; shortcut `E, P`. All three come from develop.
+  - Icon `:/toolicon/32x32/export.png` (develop's icon; already in `toolicon.qrc`).
+  - Enabled in Piece mode only, like Copy Piece.
+  - Piece mode toolbox, Details page: `export_pieces_tool_button` below `copy_piece_tool_button` (y 154). Add 48 px to `details_Page` and `piece_ToolBox` heights. The button triggers `export_pieces_action`.
+- [ ] Seamly2D.73.2 Build the string with the Layout mode steps: pieces with "in layout" set, `preparePiecesForLayout()`, `prepareMultisizePieceLists()`, `generateHandoffSvgDocument()`.
+  - Move the steps into one function. Layout mode and Export Pieces call it. Do not copy the steps.
+  - Same messages as Layout mode: no piece in layout, empty SVG, grainline and label warnings.
+  - Cancel in the multisize dialog stops the export with no message.
+  - The mode and the scene do not change.
+- [ ] Seamly2D.73.3 File picker: `QFileDialog::getSaveFileName`, filter "SVG Files (*.svg)".
+  - Default file name: `<patternbasename>_pieces_<YYMMDDHHMM>.svg`. `FileName()` gives the base name ("unnamed" for a new pattern). Time: `QDateTime::currentDateTime().toString("yyMMddHHmm")`.
+  - Start folder: `VSettings::getLayoutPath()` (Preferences > Paths > Layout). User decision.
+  - Write UTF-8. A write error shows a message box with the path.
+- [ ] Seamly2D.73.4 Tests: default file name format; the file content equals the `generateHandoffSvgDocument()` string.
+- [ ] Seamly2D.73.5 Verify (User): Piece mode > Details > Export Pieces. SeamlyLayout opens the file and shows the same pieces as Layout mode. Also with a multisize pattern.
+
 ## Verify
 
 ### [ ] Task Seamly2D.10 — Verify - Handoff: seam allowance width per notch

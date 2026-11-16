@@ -2,6 +2,17 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-15 — Fold edge option in the Fabric section (Layout.Y7)
+
+- `SettingsDialog.qml`: "Place fold lines on the left edge" moved to the Fabric section, below "Fabric Folded". Enabled only when Fabric Folded is checked.
+- Default on: `LayoutSettings` serde default, `SettingsModel` member and `resetToDefaults`, `default_settings.json`.
+- `LayoutSettings::is_folded_fabric`: `places_fold_lines_on_left_edge` and the zero left margin need folded fabric. Paper and open fabric ignore a saved value.
+- `layout_utils.rs` uses `is_folded_fabric` at both fold checks.
+- Tests: `fold_lines_on_left_edge_apply_to_folded_fabric_only`, `fold_lines_on_left_edge_default_on`; paper and across-grain cases in `layout_utils`; Qt `foldLinesOnLeftEdge_defaultsOnAndRoundtrips`, `foldLinesOnLeftEdgeCheck_enabledOnlyForFoldedFabric`.
+- Checked: `cargo test --workspace` 714 pass; `ctest` debug 8/8. Built in worktree `fold-edge`; merged `--no-ff`; branch and worktree deleted.
+- Docs: SETTINGS_WORKFLOW, CREATE_LAYOUT_WORKFLOW, SVG-DATA-ATTRIBUTES, `AGENT_CHECKLIST.md` §21, §39, new §54 and OPEN row.
+- Open: Layout.Y7.3 installed-app check with the next MSI (§54).
+
 ### 2026-11-14 — Paper roll and fabric keep their width (Layout.Y6)
 
 - `layout_utils::do_process_layout`: every non-tiled pack uses `bin_w`, the contentRect width. Removed `pack_bin_w`, `mr_px`, `set_content_width` (`layout_assembler.rs`).

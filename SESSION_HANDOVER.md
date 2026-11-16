@@ -2,6 +2,22 @@
 
 ## Current status
 
+### 2026-11-15 — Upstream `develop` merge in progress (a85828a6d0)
+
+- `git merge develop` on `run-seamlyLayout` (bc458ff16a). Backup branch `intermediate` at the same commit. Not committed.
+- Staged: `common.pri` = HEAD (no OpenSSL); `out/out.pro` removed; upstream DMG files in `packaging/macos/dmg/` (InstMacOS.01).
+- `vcmdexport.*` → `command_line.*`: develop's method names, HEAD's `--layout-*` logic. Help prints to the console when stdout or stderr has a handle, else the upstream dialog.
+- `mainwindow.cpp`: `DoExport` dropped; HEAD's `processCommandLine` and `exportLayoutFromCommandLine` with develop's names. Test files staged with the new names.
+- Copy Piece: develop's Duplicate code removed. New `PatternPieceTool::copyPiece()` runs the right-click item and Details > Copy Piece (Ctrl+D, `duplicate_piece_action`). Both use `copy_piece.png`.
+- New icon `toolicon/32x32/copy_piece.png` and `@2x` in `toolicon.qrc`; source `toolicon/svg/copy_piece.svg`. Edit menu Duplicate item removed.
+- Unstaged: Piece mode Details page `copy_piece_tool_button` below the mirror button; triggers `duplicate_piece_action`. Toolbox +48 px.
+- All conflicts resolved and staged. `mainwindowsnogui.cpp`: old print and export code stays deleted; header has both authors, "2013-2017 Valentina project", "2017-2026 Seamly2D project", SPDX.
+- `vabstracttool.*`: our public `PrepareNodes`/`PrepareNode`; develop's `bloack_name` dropped; `blockName` → `block_name` in `AddRecord` and `PrepareNode`.
+- Kept develop #1827 (062a71c901): the Move tool moves its rotation point with the objects, selected or not. It deletes 2 `TST_VToolMove` tests.
+- Checked: no `convertPdfToPs`/`PDFTOPS` in code; no old `VCommandLine` names. Then: ask before `local_build_msi.ps1`; commit. No skip-ci token: `*.pro`, `*.pri`, packaging changed.
+- TODO: `TODO_CLI.md` new CLI.3 (legacy layout options as `--layout-*` flags); CLI.1 paths now `command_line.cpp`.
+- TODO: `TODO_SEAMLY2D.md` new Seamly2D.73 (Details > Export Pieces writes the handoff SVG string to a file).
+
 ### 2026-11-15 — Fold lines on the left edge of paper and fabric (Layout.Y111)
 
 - `LayoutSettings::places_fold_lines_on_left_edge`: no folded fabric check. Layout Mode Any still ignores it.
@@ -44,19 +60,14 @@
 - Docs: SVG-DATA-ATTRIBUTES `data-rotation`, SETTINGS_WORKFLOW, LAYOUT_ROTATION_PLAN, `TODO_ROTATION.md`, `AGENT_CHECKLIST.md` §40 tip text, new §55 and row.
 - Open: Layout.Y8.1 installed-app check with the next MSI (§55).
 
-### 2026-11-15 — Fold edge option in the Fabric section (Layout.Y7)
-
-- `SettingsDialog.qml`: "Place fold lines on the left edge" moved to the Fabric section, below "Fabric Folded". Enabled only when Fabric Folded is checked.
-- Default on: `LayoutSettings` serde default, `SettingsModel` member and `resetToDefaults`, `default_settings.json`.
-- `LayoutSettings::is_folded_fabric`: `places_fold_lines_on_left_edge` and the zero left margin need folded fabric. Paper and open fabric ignore a saved value.
-- `layout_utils.rs` uses `is_folded_fabric` at both fold checks.
-- Tests: `fold_lines_on_left_edge_apply_to_folded_fabric_only`, `fold_lines_on_left_edge_default_on`; paper and across-grain cases in `layout_utils`; Qt `foldLinesOnLeftEdge_defaultsOnAndRoundtrips`, `foldLinesOnLeftEdgeCheck_enabledOnlyForFoldedFabric`.
-- Checked: `cargo test --workspace` 714 pass; `ctest` debug 8/8. Built in worktree `fold-edge`; merged `--no-ff`; branch and worktree deleted.
-- Docs: SETTINGS_WORKFLOW, CREATE_LAYOUT_WORKFLOW, SVG-DATA-ATTRIBUTES, `AGENT_CHECKLIST.md` §21, §39, new §54 and OPEN row.
-- Open: Layout.Y7.3 installed-app check with the next MSI (§54).
-
 ## Decisions to retain
 
+- SeamlyLayout is complete after the `develop` merge. Next focus: CLI layouts from pattern and measurement files plus parameters (user, 2026-11-15).
+- Adopt develop's `command_line.*` file names and lowerCamel `VCommandLine` method names: they match the code style (user, 2026-11-15).
+- Own CLI design (`--layout-export` to SeamlyLayout) replaces upstream console export. Lost legacy options go to `TODO_CLI.md` CLI.3 (user, 2026-11-15).
+- Upstream per-app DMG files stay in `packaging/macos/dmg/` for a later 3-app DMG Finder layout (user, 2026-11-15).
+- Keep our Copy Piece (`PatternPieceCopy`); remove develop's Duplicate. Details > Copy Piece calls our code with Sue's `copy_piece` icon (user, 2026-11-15).
+- Keep develop's #1827 Move tool fix over our #853 rule: it fixed a problem (user, 2026-11-15).
 - Canvas SVG goes to WebEngine through `CanvasSvgSchemeHandler` (`seamly-canvas://`, from memory). No `data:` URL: the 2 MB limit is not acceptable (user, 2026-11-15).
 - Pieces with a fold line go first, down the left edge from the top, on every layout and tab, on paper and fabric (user, 2026-11-15).
 - Piece Layout rotation Any samples 10° steps, not 1°; 1° steps are not efficient (user, 2026-11-15).

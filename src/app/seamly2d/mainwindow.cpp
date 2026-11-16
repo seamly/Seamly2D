@@ -3384,6 +3384,8 @@ void MainWindow::initializeToolButtons()
     connect(ui->pointAlongSpline_ToolButton,    &QToolButton::clicked, this, &MainWindow::handlePointAlongSplineTool);
     connect(ui->unitePieces_ToolButton,         &QToolButton::clicked, this, &MainWindow::handleUnionTool);
     connect(ui->pieceMirror_ToolButton,         &QToolButton::clicked, this, &MainWindow::handlePieceMirrorTool);
+    connect(ui->copy_piece_tool_button,         &QToolButton::clicked,
+            ui->duplicate_piece_action, &QAction::trigger);
     connect(ui->pointAlongArc_ToolButton,       &QToolButton::clicked, this, &MainWindow::handlePointAlongArcTool);
     connect(ui->lineIntersectAxis_ToolButton,   &QToolButton::clicked, this, &MainWindow::handleLineIntersectAxisTool);
     connect(ui->curveIntersectAxis_ToolButton,  &QToolButton::clicked, this, &MainWindow::handleCurveIntersectAxisTool);
@@ -5767,6 +5769,7 @@ void MainWindow::setToolsEnabled(bool enable)
     //Details
     ui->unitePieces_ToolButton->setEnabled(pieceTools);
     ui->pieceMirror_ToolButton->setEnabled(pieceTools);
+    ui->copy_piece_tool_button->setEnabled(pieceTools);
 
     //enable Toolbox Toolbar actions
     ui->arrow_Action->setEnabled(enable);

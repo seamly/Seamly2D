@@ -2204,7 +2204,7 @@
              <x>0</x>
              <y>0</y>
              <width>120</width>
-             <height>159</height>
+             <height>207</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -2245,7 +2245,7 @@
               <x>0</x>
               <y>0</y>
               <width>120</width>
-              <height>130</height>
+              <height>178</height>
              </rect>
             </property>
             <property name="toolTip">
@@ -2323,6 +2323,35 @@
              </property>
              <property name="checkable">
               <bool>true</bool>
+             </property>
+            </widget>
+            <widget class="QToolButton" name="copy_piece_tool_button">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>106</y>
+               <width>39</width>
+               <height>38</height>
+              </rect>
+             </property>
+             <property name="toolTip">
+              <string>Copy the Selected Piece (Ctrl+D)</string>
+             </property>
+             <property name="text">
+              <string notr="true">...</string>
+             </property>
+             <property name="icon">
+              <iconset resource="share/resources/toolicon.qrc">
+               <normaloff>:/toolicon/32x32/copy_piece.png</normaloff>:/toolicon/32x32/copy_piece.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>32</width>
+               <height>32</height>
+              </size>
              </property>
             </widget>
            </widget>
