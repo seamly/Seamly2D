@@ -495,3 +495,36 @@ void TST_VCommandLine::Text2PathsRejectedCombinations()
                                          QStringLiteral("pattern.sm2d")}));
     QCOMPARE(without_export.layoutExportError(), QStringLiteral("SeamlyLayout export options require --layout-export."));
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::LayoutFlagsForwardedInOrder()
+{
+    VCommandLine command_line;
+    QVERIFY(command_line.parser.parse({QStringLiteral("seamly2d"), QStringLiteral("--layout-export"),
+                                       QStringLiteral("--layout-output"), QStringLiteral("layout.svg"),
+                                       QStringLiteral("--layout-nap"), QStringLiteral("down"),
+                                       QStringLiteral("--layout-gap"), QStringLiteral("0.1"),
+                                       QStringLiteral("--layout-ignore-margins"),
+                                       QStringLiteral("--layout-roll-width"), QStringLiteral("24"),
+                                       QStringLiteral("pattern.sm2d")}));
+    QVERIFY(command_line.layoutExportError().isEmpty());
+    // Table order (LayoutFlagNames), so a specific flag always follows the general one.
+    QCOMPARE(command_line.layoutFlagArguments(),
+             QStringList({QStringLiteral("--roll-width"), QStringLiteral("24"), QStringLiteral("--ignore-margins"),
+                          QStringLiteral("--gap"), QStringLiteral("0.1"), QStringLiteral("--nap"), QStringLiteral("down")}));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::LayoutFlagsNeedExportOrInfo()
+{
+    VCommandLine alone;
+    QVERIFY(alone.parser.parse({QStringLiteral("seamly2d"), QStringLiteral("--layout-gap"), QStringLiteral("1"),
+                                QStringLiteral("pattern.sm2d")}));
+    QCOMPARE(alone.layoutExportError(), QStringLiteral("SeamlyLayout export options require --layout-export."));
+
+    VCommandLine info;
+    QVERIFY(info.parser.parse({QStringLiteral("seamly2d"), QStringLiteral("--layout-info"),
+                               QStringLiteral("--layout-roll-width"), QStringLiteral("12"), QStringLiteral("pattern.sm2d")}));
+    QVERIFY(info.layoutExportError().isEmpty());
+    QCOMPARE(info.layoutFlagArguments(), QStringList({QStringLiteral("--roll-width"), QStringLiteral("12")}));
+}

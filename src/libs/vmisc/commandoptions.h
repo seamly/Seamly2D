@@ -80,4 +80,7 @@ extern const QString LONG_OPTION_TEXT2PATHS;
 
 QStringList AllKeys();
 
+/// @brief Direct layout flag names without the "layout-" prefix, in precedence order.
+QStringList LayoutFlagNames();
+
 #endif // COMMANDOPTIONS_H

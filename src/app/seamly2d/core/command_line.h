@@ -93,6 +93,7 @@ public:
     QString                layoutOversizeOption() const;
     bool                   isSvgTextModeSet() const;
     bool                   isText2PathsSet() const;
+    QStringList            layoutFlagArguments() const;
     bool                   reservesStandardOutput() const;
 
 protected:

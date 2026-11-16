@@ -31,6 +31,7 @@
 #include <QFileInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QTemporaryFile>
 
 namespace
 {
@@ -194,7 +195,28 @@ HeadlessExport::Result HeadlessExport::run(const StartupOptions &options)
     if (!settings.load(settingsPath)) {
         return fail(ExitUsage, QStringLiteral("Cannot load layout settings: %1").arg(settingsPath));
     } // if settings are invalid
-    const QString settingsJson = settings.toJson();
+    QString settingsJson = settings.toJson();
+
+    // Direct layout flags win over the settings file. The merged object is loaded through
+    // SettingsModel, so roll sizes and fabric selvedges take the same path as a settings file.
+    if (!options.layoutFlags().isEmpty()) {
+        const QString flags = options.layoutFlags().join(QLatin1Char('\n'));
+        const QString problems = controller.layoutFlagsProblems(settingsJson, flags);
+        if (!problems.isEmpty()) {
+            return fail(ExitUsage, QStringLiteral("Invalid layout flags:\n%1").arg(problems));
+        } // if the flags do not apply
+        QTemporaryFile mergedFile;
+        if (!mergedFile.open()) {
+            return fail(ExitSoftware, QStringLiteral("Cannot write the merged layout settings."));
+        } // if no temporary file
+        mergedFile.write(controller.layoutFlagsJson(settingsJson, flags).toUtf8());
+        mergedFile.close();
+        SettingsModel mergedSettings;
+        if (!mergedSettings.load(mergedFile.fileName())) {
+            return fail(ExitSoftware, QStringLiteral("Cannot load the merged layout settings."));
+        } // if the merged settings do not load
+        settingsJson = mergedSettings.toJson();
+    } // if direct layout flags
 
     QJsonObject formatOptions;
     if (!readExportOptions(options.exportOptionsPath(), formatOptions, errorMessage)) {

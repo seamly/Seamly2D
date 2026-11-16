@@ -61,6 +61,8 @@
 #include <QDialogButtonBox>
 #include <QFileInfo>
 #include <QFontDatabase>
+#include <QMap>
+#include <QPair>
 #include <QPlainTextEdit>
 #include <QTextStream>
 #include <QVBoxLayout>
@@ -163,6 +165,38 @@ void printCommandLineError(const QString &message)
     vStdErr() << message << Qt::endl;
 }
 } // namespace
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Value name and help text of a direct layout flag; an empty value name marks a switch.
+/// SeamlyLayout merges the flags over the settings (layout_tiling::apply_layout_flags).
+//---------------------------------------------------------------------------------------------------------------------
+static QPair<QString, QString> layoutFlagHelp(const QString &name)
+{
+    static const QMap<QString, QPair<QString, QString>> help{
+        {QStringLiteral("unit"), {QStringLiteral("unit"), QStringLiteral("Layout unit: in, cm or mm.")}},
+        {QStringLiteral("media"), {QStringLiteral("media"), QStringLiteral("Media type: paper or fabric.")}},
+        {QStringLiteral("paper"), {QStringLiteral("type"), QStringLiteral("Paper type: tiled or roll.")}},
+        {QStringLiteral("tile-size"), {QStringLiteral("name"), QStringLiteral("Tile size: Letter, A4, ARCH D, ... or Custom.")}},
+        {QStringLiteral("tile-orientation"), {QStringLiteral("orientation"), QStringLiteral("Tile orientation: portrait or landscape.")}},
+        {QStringLiteral("tile-width"), {QStringLiteral("number"), QStringLiteral("Custom tile width, in the unit.")}},
+        {QStringLiteral("tile-height"), {QStringLiteral("number"), QStringLiteral("Custom tile height, in the unit.")}},
+        {QStringLiteral("roll-width"), {QStringLiteral("number"), QStringLiteral("Paper roll width, in the unit.")}},
+        {QStringLiteral("fabric-width"), {QStringLiteral("number"), QStringLiteral("Fabric width, in the unit.")}},
+        {QStringLiteral("fabric-folded"), {QStringLiteral("yes|no"), QStringLiteral("Fabric folded.")}},
+        {QStringLiteral("selvedge-width"), {QStringLiteral("number"), QStringLiteral("Selvedge width, in the unit.")}},
+        {QStringLiteral("margins"), {QStringLiteral("number"), QStringLiteral("All four margins, in the unit.")}},
+        {QStringLiteral("margin-top"), {QStringLiteral("number"), QStringLiteral("Top margin, in the unit.")}},
+        {QStringLiteral("margin-left"), {QStringLiteral("number"), QStringLiteral("Left margin, in the unit.")}},
+        {QStringLiteral("margin-right"), {QStringLiteral("number"), QStringLiteral("Right margin, in the unit.")}},
+        {QStringLiteral("margin-bottom"), {QStringLiteral("number"), QStringLiteral("Bottom margin, in the unit.")}},
+        {QStringLiteral("ignore-margins"), {QString(), QStringLiteral("Set every margin to 0.")}},
+        {QStringLiteral("gap"), {QStringLiteral("number"), QStringLiteral("Piece gap, in the unit.")}},
+        {QStringLiteral("mode"), {QStringLiteral("mode"), QStringLiteral("Layout mode: alongGrainline, withNap or any.")}},
+        {QStringLiteral("nap"), {QStringLiteral("up|down"), QStringLiteral("Nap direction; selects layout mode withNap.")}},
+        {QStringLiteral("no-grainline"), {QStringLiteral("rule"), QStringLiteral("Pieces without a grainline: upright or free.")}},
+    };
+    return help.value(name);
+}
 
 VCommandLinePtr VCommandLine::command_line = nullptr;
 
@@ -362,6 +396,15 @@ void VCommandLine::initOptions(VCommandLineOptions &options, QMap<QString, int> 
     options.append(new QCommandLineOption({LONG_OPTION_TEXT2PATHS},
         translate("VCommandLine", "Write label text as paths: SVG labels as single-stroke paths, PDF text as glyph "
                                   "outlines. PS and EPS draw paths already. For svg, pdf, pdf-tiled, ps and eps.")));
+
+    // --layout-<name>: direct layout flags; they win over --layout-settings.
+    for (const QString &name : LayoutFlagNames())
+    {
+        const QPair<QString, QString> help = layoutFlagHelp(name);
+        options_index.insert(QStringLiteral("layout-") + name, index++);
+        options.append(new QCommandLineOption({QStringLiteral("layout-") + name},
+            translate("VCommandLine", "%1 Wins over --layout-settings.").arg(help.second), help.first));
+    }
 
     // --no-scaling: Disable high DPI auto-scaling (useful on some systems)
     options_index.insert(LONG_OPTION_NO_HDPI_SCALING, index++);
@@ -658,7 +701,7 @@ QString VCommandLine::layoutExportError() const
         }
         return QString();
     }
-    if (!export_requested && (has_export_choice || is_set(LONG_OPTION_LAYOUT_SETTINGS)))
+    if (!export_requested && (has_export_choice || is_set(LONG_OPTION_LAYOUT_SETTINGS) || !layoutFlagArguments().isEmpty()))
     {
         return translate("VCommandLine", "SeamlyLayout export options require --layout-export.");
     }
@@ -830,6 +873,28 @@ QString VCommandLine::layoutViewOption() const
 QString VCommandLine::layoutOversizeOption() const
 {
     return parser.value(*m_options_used.value(m_options_index.value(LONG_OPTION_LAYOUT_OVERSIZE))).trimmed().toLower();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Returns the direct layout flags as SeamlyLayout arguments: `--<name> <value>`, or `--ignore-margins`.
+//---------------------------------------------------------------------------------------------------------------------
+QStringList VCommandLine::layoutFlagArguments() const
+{
+    QStringList arguments;
+    for (const QString &name : LayoutFlagNames())
+    {
+        const QCommandLineOption *option = m_options_used.value(m_options_index.value(QStringLiteral("layout-") + name));
+        if (!parser.isSet(*option))
+        {
+            continue;
+        }
+        arguments << QStringLiteral("--") + name;
+        if (!option->valueName().isEmpty())
+        {
+            arguments << parser.value(*option).trimmed();
+        }
+    }
+    return arguments;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

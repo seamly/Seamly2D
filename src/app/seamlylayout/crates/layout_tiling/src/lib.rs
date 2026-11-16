@@ -18,6 +18,7 @@
 //!
 //! Headless validation:
 //! - [`validate_settings_json`] — strict check of a settings file for the command line
+//! - [`apply_layout_flags`]     — direct layout flags merged over the settings
 //!
 //! Tile geometry:
 //! - [`TileDimensions`]              — computed tile-grid dimensions
@@ -34,6 +35,7 @@
 //! consumers install whatever log sink they prefer.
 
 pub mod layout_settings;
+pub mod settings_flags;
 pub mod settings_validation;
 pub mod tiling;
 
@@ -41,6 +43,7 @@ pub mod tiling;
 // `use layout_tiling::LayoutSettings;` rather than
 // `use layout_tiling::layout_settings::LayoutSettings;`.
 pub use layout_settings::{LayoutSettings, LAYOUT_PPI};
+pub use settings_flags::{apply_layout_flags, LAYOUT_FLAG_NAMES, LAYOUT_SWITCH_NAMES};
 pub use settings_validation::validate_settings_json;
 pub use tiling::{
     compute_tile_dims, create_initial_tiled_layout_dom, measurement_to_px,

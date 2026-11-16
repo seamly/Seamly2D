@@ -35,6 +35,8 @@
 #include <QIODevice>
 #include <QStringList>
 
+#include <utility>
+
 namespace
 {
 // @brief Extension SeamlyLayout accepts, compared case-insensitively.
@@ -69,6 +71,38 @@ const QStringList svgTextModes{
 
 // @brief Choices of --oversize: split the pieces, or make the media longer.
 const QStringList oversizeChoices{QStringLiteral("split"), QStringLiteral("extend")};
+
+// @brief Direct layout flags: name, value name (empty for a switch), help text.
+// layout_tiling::apply_layout_flags gives each its settings keys, implications and conflicts.
+struct LayoutFlag
+{
+    const char *name;
+    const char *valueName;
+    const char *help;
+};
+const LayoutFlag layoutFlagTable[] = {
+    {"unit", "unit", "Layout unit: in, cm or mm."},
+    {"media", "media", "Media type: paper or fabric."},
+    {"paper", "type", "Paper type: tiled or roll."},
+    {"tile-size", "name", "Tile size: Letter, A4, ARCH D, ... or Custom."},
+    {"tile-orientation", "orientation", "Tile orientation: portrait or landscape."},
+    {"tile-width", "number", "Custom tile width, in the unit."},
+    {"tile-height", "number", "Custom tile height, in the unit."},
+    {"roll-width", "number", "Paper roll width, in the unit."},
+    {"fabric-width", "number", "Fabric width, in the unit."},
+    {"fabric-folded", "yes|no", "Fabric folded."},
+    {"selvedge-width", "number", "Selvedge width, in the unit."},
+    {"margins", "number", "All four margins, in the unit."},
+    {"margin-top", "number", "Top margin, in the unit."},
+    {"margin-left", "number", "Left margin, in the unit."},
+    {"margin-right", "number", "Right margin, in the unit."},
+    {"margin-bottom", "number", "Bottom margin, in the unit."},
+    {"ignore-margins", "", "Set every margin to 0."},
+    {"gap", "number", "Piece gap, in the unit."},
+    {"mode", "mode", "Layout mode: alongGrainline, withNap or any."},
+    {"nap", "up|down", "Nap direction; selects layout mode withNap."},
+    {"no-grainline", "rule", "Pieces without a grainline: upright or free."},
+};
 
 // @brief Formats that write label text as paths for --text2paths.
 // PNG and JPEG are raster images; DXF keeps TEXT entities, which DXF-ASTM requires; HP-GL has no text mode.
@@ -109,9 +143,13 @@ bool StartupOptions::hasHeadlessArguments(const QStringList &arguments)
         QStringLiteral("--oversize"), QStringLiteral("--info"),
         QStringLiteral("--text2paths")
     };
+    QStringList allNames = optionNames;
+    for (const LayoutFlag &flag : layoutFlagTable) {
+        allNames.append(QStringLiteral("--") + QLatin1String(flag.name));
+    } // for each layout flag
 
     for (const QString &argument : arguments) {
-        for (const QString &optionName : optionNames) {
+        for (const QString &optionName : std::as_const(allNames)) {
             if (argument == optionName || argument.startsWith(optionName + QLatin1Char('='))) {
                 return true;
             } // if headless option is present
@@ -120,6 +158,19 @@ bool StartupOptions::hasHeadlessArguments(const QStringList &arguments)
 
     return false;
 } // StartupOptions::hasHeadlessArguments
+
+// @brief Direct layout flags of the command line as `name=value` items, in flag table order.
+QStringList StartupOptions::layoutFlagItems(const QCommandLineParser &parser)
+{
+    QStringList items;
+    for (const LayoutFlag &flag : layoutFlagTable) {
+        const QString name = QLatin1String(flag.name);
+        if (parser.isSet(name)) {
+            items.append(name + QLatin1Char('=') + parser.value(name).trimmed());
+        } // if the flag is set
+    } // for each layout flag
+    return items;
+} // StartupOptions::layoutFlagItems
 
 // @brief Parse and validate a command line that cannot use standard input.
 // @param arguments Full argument list including the program name at index 0.
@@ -228,6 +279,13 @@ StartupOptions StartupOptions::parse(const QStringList &arguments, QIODevice *st
                        "PS and EPS draw paths already. For svg, pdf, pdf-tiled, ps and eps."));
     parser.addOption(textAsPathsOption);
 
+    // Direct layout flags win over --settings.
+    for (const LayoutFlag &flag : layoutFlagTable) {
+        parser.addOption(QCommandLineOption(QStringList{QLatin1String(flag.name)},
+                                            QLatin1String(flag.help) + QStringLiteral(" Wins over --settings."),
+                                            QLatin1String(flag.valueName)));
+    } // for each layout flag
+
     parser.addPositionalArgument(
         QStringLiteral("svg-file"),
         QStringLiteral("SVG pattern file to open at startup (optional)."),
@@ -247,7 +305,8 @@ StartupOptions StartupOptions::parse(const QStringList &arguments, QIODevice *st
     options.m_headlessRequest = parser.isSet(exportOption) || parser.isSet(outputOption) ||
         parser.isSet(settingsOption) || parser.isSet(exportOptionsOption) ||
         parser.isSet(svgTextModeOption) || parser.isSet(materialOption) || parser.isSet(viewOption) ||
-        parser.isSet(oversizeOption) || parser.isSet(infoOption) || parser.isSet(textAsPathsOption);
+        parser.isSet(oversizeOption) || parser.isSet(infoOption) || parser.isSet(textAsPathsOption) ||
+        !layoutFlagItems(parser).isEmpty();
 
     if (parser.isSet(versionOption)) {
         // --version wins over everything else, matching every other CLI.
@@ -376,7 +435,8 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
         parser.isSet(exportOption) || parser.isSet(outputOption) ||
         parser.isSet(settingsOption) || parser.isSet(exportOptionsOption) ||
         parser.isSet(svgTextModeOption) || parser.isSet(materialOption) || parser.isSet(viewOption) ||
-        parser.isSet(oversizeOption) || parser.isSet(infoOption) || parser.isSet(textAsPathsOption);
+        parser.isSet(oversizeOption) || parser.isSet(infoOption) || parser.isSet(textAsPathsOption) ||
+        !layoutFlagItems(parser).isEmpty();
     if (!hasExportArguments) {
         return options;
     } // if no export arguments
@@ -417,6 +477,7 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
         options.m_headlessExport = true;
         options.m_infoRequest = true;
         options.m_settingsPath = settingsPath;
+        options.m_layoutFlags = layoutFlagItems(parser);
         return options;
     } // if report requested
 
@@ -506,6 +567,7 @@ StartupOptions StartupOptions::parseExportOptions(StartupOptions options,
     options.m_view = parser.value(viewOption).trimmed();
     options.m_oversize = oversize;
     options.m_textAsPaths = parser.isSet(textAsPathsOption);
+    options.m_layoutFlags = layoutFlagItems(parser);
     return options;
 } // StartupOptions::parseExportOptions
 

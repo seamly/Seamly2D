@@ -139,7 +139,7 @@ function Get-CliTestCases
            Exit = 0; Expect = @{ MinPieces = 16; WidthIn = 36 } }
         @{ Name = 'shirt-pdf-roll-36in'; Group = 'paper-roll'; Format = 'pdf'
            Arguments = $export + @('--layout-format', 'pdf', '--layout-settings', $roll36, $shirt)
-           Exit = 0; Expect = @{ Pages = 1; PageWidthIn = 36; HasFont = $true } }
+           Exit = 0; Expect = @{ Pages = 1; PageWidthIn = 36; HasFont = $true; MaxPageHeightIn = 400 } }
         @{ Name = 'shirt-pdf-text2paths'; Group = 'text'; Format = 'pdf'
            Arguments = $export + @('--layout-format', 'pdf', '--text2paths', '--layout-settings', $roll36, $shirt)
            Exit = 0; Expect = @{ Pages = 1; PageWidthIn = 36; HasFont = $false } }
@@ -298,6 +298,46 @@ function Get-CliTestCases
         @{ Name = 'jacket-split-default-view-pdf'; Group = 'oversize'; Slow = $true; Format = 'pdf'
            Arguments = $export + @('--layout-format', 'pdf', '--layout-material', 'Fabric', '--layout-oversize', 'split', '--layout-settings', $roll12, $jacket)
            Exit = 0; Expect = @{ Pages = 1; PageWidthIn = 12 } }
+
+        # --- Direct layout flags (win over --layout-settings) -----------------------------------------------------
+        @{ Name = 'flags-roll-width-pdf'; Group = 'flags'; Format = 'pdf'
+           Arguments = $export + @('--layout-format', 'pdf', '--layout-unit', 'in', '--layout-roll-width', '24', $shirt)
+           Exit = 0; Expect = @{ Pages = 1; PageWidthIn = 24; MaxPageHeightIn = 400 } }
+        @{ Name = 'flags-override-settings-file'; Group = 'flags'; Format = 'pdf'
+           Arguments = $export + @('--layout-format', 'pdf', '--layout-settings', $roll36, '--layout-roll-width', '30', $shirt)
+           Exit = 0; Expect = @{ Pages = 1; PageWidthIn = 30 } }
+        @{ Name = 'flags-tile-a4-landscape-mm'; Group = 'flags'; Format = 'pdf-tiled'
+           Arguments = $export + @('--layout-format', 'pdf-tiled', '--layout-unit', 'mm', '--layout-tile-size', 'A4',
+                                   '--layout-tile-orientation', 'landscape', '--layout-margins', '10', $shirt)
+           Exit = 0; Expect = @{ MinPages = 2; PageWidthIn = 11.69; PageHeightIn = 8.27 } }
+        @{ Name = 'flags-custom-tile'; Group = 'flags'; Format = 'pdf-tiled'
+           Arguments = $export + @('--layout-format', 'pdf-tiled', '--layout-unit', 'in', '--layout-tile-width', '10',
+                                   '--layout-tile-height', '12', '--layout-tile-orientation', 'portrait', $shirt)
+           Exit = 0; Expect = @{ MinPages = 2; PageWidthIn = 10; PageHeightIn = 12 } }
+        @{ Name = 'flags-fabric-folded-nap'; Group = 'flags'; Format = 'svg'
+           Arguments = $export + @('--layout-unit', 'cm', '--layout-fabric-width', '150', '--layout-fabric-folded', 'yes',
+                                   '--layout-selvedge-width', '1', '--layout-nap', 'down', $shirt)
+           Exit = 0; Expect = @{ MinPieces = 16; WidthIn = (75 / 2.54) } }
+        @{ Name = 'flags-ignore-margins'; Group = 'flags'; Format = 'svg'
+           Arguments = $export + @('--svg-text-mode', 'designerFont', '--layout-settings', $roll36, '--layout-ignore-margins', $shirt)
+           Exit = 0; Expect = @{ MinPieces = 16; WidthIn = 36 }; DiffersFrom = 'shirt-svg-designer-font' }
+        @{ Name = 'flags-mode-gap-no-grainline'; Group = 'flags'; Format = 'svg'
+           Arguments = $export + @('--svg-text-mode', 'designerFont', '--layout-settings', $roll36, '--layout-mode', 'any',
+                                   '--layout-gap', '0.3', '--layout-no-grainline', 'free', $shirt)
+           Exit = 0; Expect = @{ MinPieces = 16; WidthIn = 36 }; DiffersFrom = 'shirt-svg-designer-font' }
+        @{ Name = 'flags-conflict-fabric-paper'; Group = 'flags'
+           Arguments = $export + @('--layout-fabric-width', '60', '--layout-paper', 'roll', $shirt)
+           Exit = 64; Stderr = 'conflict'; NoOutput = $true }
+        @{ Name = 'flags-not-a-number'; Group = 'flags'; Arguments = $export + @('--layout-gap', 'wide', $shirt)
+           Exit = 64; Stderr = "gap: 'wide' is not a number"; NoOutput = $true }
+        @{ Name = 'flags-invalid-value'; Group = 'flags'; Arguments = $export + @('--layout-tile-orientation', 'Portrait', $shirt)
+           Exit = 64; Stderr = 'tileOrientation'; NoOutput = $true }
+        @{ Name = 'flags-nap-with-mode-any'; Group = 'flags'; Arguments = $export + @('--layout-nap', 'up', '--layout-mode', 'any', $shirt)
+           Exit = 64; Stderr = 'nap needs layout mode withNap'; NoOutput = $true }
+        @{ Name = 'flags-without-export'; Group = 'flags'; Arguments = @('--layout-gap', '1', $shirt)
+           Exit = 64; Stderr = 'require --layout-export' }
+        @{ Name = 'flags-info-narrow-roll'; Group = 'flags'; Arguments = @('--layout-info', '--layout-roll-width', '12', $shirt)
+           Exit = 0; Info = @{ TiledPaper = $false; OversizedMin = 5 } }
 
         # --- Rust/Iced tester in batch mode -------------------------------------------------------------------
         @{ Name = 'tester-shirt-pdf-roll'; Group = 'tester'; Program = 'tester'

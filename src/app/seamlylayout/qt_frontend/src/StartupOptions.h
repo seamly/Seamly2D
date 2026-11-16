@@ -161,6 +161,9 @@ public:
     // @brief True for --text2paths: label text as paths in SVG and PDF.
     bool isTextAsPaths() const { return m_textAsPaths; }
 
+    // @brief Direct layout flags as `name=value` items (`ignore-margins=` for the switch).
+    QStringList layoutFlags() const { return m_layoutFlags; }
+
 
     // @brief Text to show the user. Empty unless status() is ShowInformation or Failed.
     QString message() const { return m_message; }
@@ -182,6 +185,9 @@ private:
     // @return OpenDocument with svgDocument() set, or Failed with a message.
     static StartupOptions parseStandardInput(const QString &documentName,
                                              QIODevice *standardInput);
+
+    // @brief Direct layout flags set on the command line, as `name=value` items.
+    static QStringList layoutFlagItems(const QCommandLineParser &parser);
 
     // @brief Validate export arguments and store their absolute paths.
     static StartupOptions parseExportOptions(StartupOptions options,
@@ -215,6 +221,7 @@ private:
     QString m_oversize;
     bool m_infoRequest = false;
     bool m_textAsPaths = false;
+    QStringList m_layoutFlags;
 
     // User-visible text; set only for Status::ShowInformation and Status::Failed.
     QString m_message;

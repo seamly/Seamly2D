@@ -908,6 +908,14 @@ pub mod qobject {
         #[qinvokable]
         fn set_pdf_text_as_paths(self: Pin<&mut AppController>, as_paths: bool);
 
+        // Direct layout flags (`name=value` per line) merged over `settings_json`; empty on a problem.
+        #[qinvokable]
+        fn layout_flags_json(self: &AppController, settings_json: &QString, flags: &QString) -> QString;
+
+        // Problems of the direct layout flags, one per line; empty when they apply.
+        #[qinvokable]
+        fn layout_flags_problems(self: &AppController, settings_json: &QString, flags: &QString) -> QString;
+
         // JSON report of the import with `settings_json`: materials, oversized pieces,
         // and the views and formats of a whole and a split layout run.
         // Call after initialize_layout, so each material has its blank canvas.
@@ -3479,6 +3487,20 @@ impl qobject::AppController {
         }); // problem
         cxx_qt_lib::QString::from(problem.unwrap_or_default().as_str())
     } // fn export_format_problem
+
+    // Direct layout flags merged over the settings; see layout_tiling::apply_layout_flags.
+    fn layout_flags_json(&self, settings_json: &cxx_qt_lib::QString, flags: &cxx_qt_lib::QString) -> cxx_qt_lib::QString {
+        let flags: Vec<String> = flags.to_string().lines().filter(|line| !line.is_empty()).map(String::from).collect();
+        let merged = layout_tiling::apply_layout_flags(&settings_json.to_string(), &flags).unwrap_or_default();
+        cxx_qt_lib::QString::from(merged.as_str())
+    } // fn layout_flags_json
+
+    // Problems of the direct layout flags, one per line; empty when they apply.
+    fn layout_flags_problems(&self, settings_json: &cxx_qt_lib::QString, flags: &cxx_qt_lib::QString) -> cxx_qt_lib::QString {
+        let flags: Vec<String> = flags.to_string().lines().filter(|line| !line.is_empty()).map(String::from).collect();
+        let problems = layout_tiling::apply_layout_flags(&settings_json.to_string(), &flags).err().unwrap_or_default();
+        cxx_qt_lib::QString::from(problems.join("\n").as_str())
+    } // fn layout_flags_problems
 
     // PDF and tiled PDF write label text as paths (true) or as embedded text (false).
     fn set_pdf_text_as_paths(mut self: std::pin::Pin<&mut Self>, as_paths: bool) {

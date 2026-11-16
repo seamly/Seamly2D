@@ -90,6 +90,7 @@ private slots:
     void infoRequest_rejectsExportChoices();
     void hasHeadlessArguments_matchesEveryHeadlessOption();
     void textAsPaths_vectorFormatsOnly();
+    void layoutFlags_storedInTableOrder();
 
     // --help / --version
     void helpOption_statusIsShowInformation();
@@ -728,6 +729,31 @@ void StartupOptionsTests::textAsPaths_vectorFormatsOnly()
     QCOMPARE(twoModes.status(), StartupOptions::Status::Failed);
     QCOMPARE(twoModes.message(), QStringLiteral("--text2paths and --svg-text-mode cannot be used together."));
 } // textAsPaths_vectorFormatsOnly
+
+// @brief Layout flags reach the request as name=value items, in table order, also with --info.
+void StartupOptionsTests::layoutFlags_storedInTableOrder()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString svgPath = makeFile(directory, QStringLiteral("pattern.svg"));
+
+    const StartupOptions exportRequest = StartupOptions::parse(QStringList{
+        QStringLiteral("SeamlyLayout"), QStringLiteral("--export"), QStringLiteral("pdf"),
+        QStringLiteral("--output"), directory.filePath(QStringLiteral("out.pdf")),
+        QStringLiteral("--gap"), QStringLiteral("0.2"), QStringLiteral("--ignore-margins"),
+        QStringLiteral("--unit"), QStringLiteral("cm"), svgPath
+    });
+    QVERIFY(exportRequest.hasHeadlessExport());
+    QCOMPARE(exportRequest.layoutFlags(), QStringList({QStringLiteral("unit=cm"), QStringLiteral("ignore-margins="),
+                                                       QStringLiteral("gap=0.2")}));
+
+    const StartupOptions info = StartupOptions::parse(QStringList{
+        QStringLiteral("SeamlyLayout"), QStringLiteral("--info"), QStringLiteral("--roll-width"), QStringLiteral("12"), svgPath
+    });
+    QVERIFY(info.isInfoRequest());
+    QCOMPARE(info.layoutFlags(), QStringList({QStringLiteral("roll-width=12")}));
+    QVERIFY(StartupOptions::hasHeadlessArguments(QStringList{QStringLiteral("--tile-size=A4")}));
+} // layoutFlags_storedInTableOrder
 
 // @brief A headless export must name its destination.
 void StartupOptionsTests::headlessExport_requiresOutputPath()

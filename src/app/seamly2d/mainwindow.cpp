@@ -8293,6 +8293,7 @@ int MainWindow::exportLayoutFromCommandLine(const VCommandLinePtr &command_line)
     {
         arguments << QStringLiteral("--text2paths");
     }
+    arguments << command_line->layoutFlagArguments();
 
     QProcess process;
     process.setWorkingDirectory(QFileInfo(seamly_layout).absolutePath());

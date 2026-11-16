@@ -145,6 +145,10 @@ function Test-PdfOutput([string]$Path, [hashtable]$Expect)
     $heightIn = ([double]$box.Groups[4].Value - [double]$box.Groups[2].Value) * $scale / 72.0
     if ($Expect.ContainsKey('PageWidthIn')) { $p = Compare-Length 'PDF page width (in)' $widthIn $Expect.PageWidthIn 0.02; if ($p) { $failures.Add($p) } }
     if ($Expect.ContainsKey('PageHeightIn')) { $p = Compare-Length 'PDF page height (in)' $heightIn $Expect.PageHeightIn 0.02; if ($p) { $failures.Add($p) } }
+    # A roll is trimmed below the lowest piece; untrimmed it keeps the 500 in default length.
+    if ($Expect.ContainsKey('MaxPageHeightIn') -and $heightIn -gt $Expect.MaxPageHeightIn) {
+        $failures.Add(('PDF page height is {0:N1} in; expected at most {1} in (roll not trimmed)' -f $heightIn, $Expect.MaxPageHeightIn))
+    }
     if ($Expect.ContainsKey('Orientation')) {
         $actual = if ($widthIn -gt $heightIn) { 'landscape' } else { 'portrait' }
         if ($actual -ne $Expect.Orientation) { $failures.Add("PDF pages are $actual; expected $($Expect.Orientation)") }
