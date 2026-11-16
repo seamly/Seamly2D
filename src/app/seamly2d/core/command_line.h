@@ -82,14 +82,19 @@ public:
     QString                gradationSizeOption() const;
     QString                gradationHeightOption() const;
     bool                   isLayoutExportEnabled() const;
+    bool                   isLayoutInfoEnabled() const;
     QString                layoutFormatOption() const;
     QString                layoutOutputOption() const;
     QString                layoutSettingsOption() const;
     QString                layoutExportOptionsOption() const;
     QString                svgTextModeOption() const;
     QString                layoutScaleOption() const;
+    QString                layoutMaterialOption() const;
+    QString                layoutViewOption() const;
+    QString                layoutOversizeOption() const;
     bool                   isSvgTextModeSet() const;
     bool                   isLayoutScaleSet() const;
+    bool                   reservesStandardOutput() const;
 
 protected:
                            VCommandLine();
@@ -104,6 +109,7 @@ private:
     VCommandLineOptions    m_options_used;
     QMap<QString, int>     m_options_index;
     bool                   m_is_gui_enabled;
+    bool                   m_reserves_stdout;
     friend class           Application2D;
 
     [[noreturn]] void      showHelp(int exit_code) const;

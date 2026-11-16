@@ -72,6 +72,17 @@ private slots:
     void LayoutExportScale();
     void LayoutExportRejectsInvalidScale();
     void LayoutExportOptionsRequireExportMode();
+    void LayoutChoiceOptions();
+    void LayoutChoiceOptionsAppearInHelp();
+    void LayoutOversizeRejectsUnknownChoice();
+    void LayoutNameOptionsNeedAName();
+    void LayoutViewRejectsGradationOptions();
+    void LayoutInfoMode();
+    void LayoutInfoRejectsExportChoices();
+    void LayoutInfoAndExportConflict();
+    void LayoutInfoRequiresOneInput();
+    void LayoutSettingsRequireExportOrInfo();
+    void RemovedLegacyOptionsFailToParse();
 
 private:
     Q_DISABLE_COPY(TST_VCommandLine)

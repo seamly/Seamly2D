@@ -73,6 +73,10 @@ extern const QString LONG_OPTION_LAYOUT_SETTINGS;
 extern const QString LONG_OPTION_LAYOUT_EXPORT_OPTIONS;
 extern const QString LONG_OPTION_SVG_TEXT_MODE;
 extern const QString LONG_OPTION_LAYOUT_SCALE;
+extern const QString LONG_OPTION_LAYOUT_MATERIAL;
+extern const QString LONG_OPTION_LAYOUT_VIEW;
+extern const QString LONG_OPTION_LAYOUT_OVERSIZE;
+extern const QString LONG_OPTION_LAYOUT_INFO;
 
 QStringList AllKeys();
 

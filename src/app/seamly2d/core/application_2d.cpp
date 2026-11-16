@@ -169,6 +169,8 @@ inline void noisyFailureMsgHandler(QtMsgType type, const QMessageLogContext &con
     const bool isGuiThread = instance && (QThread::currentThread() == instance->thread());
 
     {
+        // Layout export and layout info keep standard output for the result; debug and info lines go to the log.
+        const bool stdout_reserved = qApp->commandLine() && qApp->commandLine()->reservesStandardOutput();
         QString debugdate = "[" + QDateTime::currentDateTime().toString(QStringLiteral("yyyy.MM.dd hh:mm:ss"));
 
         switch (type)
@@ -176,7 +178,10 @@ inline void noisyFailureMsgHandler(QtMsgType type, const QMessageLogContext &con
             case QtDebugMsg:
                 debugdate += QString(":DEBUG:%1(%2)] %3: %4: %5").arg(context.file).arg(context.line)
                              .arg(context.function).arg(context.category).arg(msg);
-                vStdOut()  <<  QApplication::translate("vNoisyHandler", "DEBUG:")  <<  msg  <<  "\n";
+                if (!stdout_reserved)
+                {
+                    vStdOut()  <<  QApplication::translate("vNoisyHandler", "DEBUG:")  <<  msg  <<  "\n";
+                }
                 break;
             case QtWarningMsg:
                 debugdate += QString(":WARNING:%1(%2)] %3: %4: %5").arg(context.file).arg(context.line)
@@ -197,7 +202,10 @@ inline void noisyFailureMsgHandler(QtMsgType type, const QMessageLogContext &con
             case QtInfoMsg:
                 debugdate += QString(":INFO:%1(%2)] %3: %4: %5").arg(context.file).arg(context.line)
                              .arg(context.function).arg(context.category).arg(msg);
-                vStdOut()  <<  QApplication::translate("vNoisyHandler", "INFO:")  <<  msg  <<  "\n";
+                if (!stdout_reserved)
+                {
+                    vStdOut()  <<  QApplication::translate("vNoisyHandler", "INFO:")  <<  msg  <<  "\n";
+                }
                 break;
             #endif
             default:

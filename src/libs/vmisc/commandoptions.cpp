@@ -74,6 +74,10 @@ const QString LONG_OPTION_LAYOUT_SETTINGS        = QStringLiteral("layout-settin
 const QString LONG_OPTION_LAYOUT_EXPORT_OPTIONS  = QStringLiteral("layout-export-options");
 const QString LONG_OPTION_SVG_TEXT_MODE           = QStringLiteral("svg-text-mode");
 const QString LONG_OPTION_LAYOUT_SCALE            = QStringLiteral("layout-scale");
+const QString LONG_OPTION_LAYOUT_MATERIAL         = QStringLiteral("layout-material");
+const QString LONG_OPTION_LAYOUT_VIEW             = QStringLiteral("layout-view");
+const QString LONG_OPTION_LAYOUT_OVERSIZE         = QStringLiteral("layout-oversize");
+const QString LONG_OPTION_LAYOUT_INFO             = QStringLiteral("layout-info");
 
 //---------------------------------------------------------------------------------------------------------------------
 QStringList AllKeys()
@@ -86,7 +90,8 @@ QStringList AllKeys()
          << LONG_OPTION_LAYOUT_EXPORT << LONG_OPTION_LAYOUT_FORMAT
          << LONG_OPTION_LAYOUT_OUTPUT << LONG_OPTION_LAYOUT_SETTINGS
          << LONG_OPTION_LAYOUT_EXPORT_OPTIONS << LONG_OPTION_SVG_TEXT_MODE
-         << LONG_OPTION_LAYOUT_SCALE
+         << LONG_OPTION_LAYOUT_SCALE << LONG_OPTION_LAYOUT_MATERIAL
+         << LONG_OPTION_LAYOUT_VIEW << LONG_OPTION_LAYOUT_OVERSIZE << LONG_OPTION_LAYOUT_INFO
          << LONG_OPTION_NO_HDPI_SCALING;
 
     return list;
