@@ -4,13 +4,12 @@
 
 ### 2026-11-16 — CLI.1 audit and repair (feature/cli-1)
 
-- Done; CLI.1 moved to `TODO_COMPLETED.md`. Branch `feature/cli-1`, not merged, not pushed. Plan `CLI_1_PLAN.md` (D1–D16); matrix `CLI_1_OPTION_MATRIX.md`; results `CLI_1_TEST_RESULTS.md`.
+- Done; CLI.1 moved to `TODO_COMPLETED.md`. Branch `feature/cli-1`, not merged, not pushed. Plan `CLI_1_PLAN.md` (D1–D16); matrix `CLI_1_OPTION_MATRIX.md`; results and acceptance checklist `CLI_1_TEST_RESULTS.md`.
 - New options: Seamly2D `--layout-material`, `--layout-view`, `--layout-oversize`, `--layout-info`; SeamlyLayout `--material`, `--view`, `--oversize`, `--info`. Removed `--layout-scale`/`--scale` (PNG fixed at 96 px/in; value was ignored).
-- Fixed: console attach before errors; relative `--mfile`; multisize CLI hands off every size; headless lays out every queued view and material; strict settings JSON; Export menu format rules; stale/partial output; stdout noise.
-- Tests: `src/test/CliTest/test_cli_layout_export.ps1` 99/99; `Seamly2DTests` 32 621/0; `ctest` 9/9; `cargo test --workspace` 729/0; tester `cargo test` 15/0; Python runners pass.
-- Tester: `src/test/CliTestApp` (Rust/Iced, `--batch`). Built in `target\release`.
-- Build: in-source qmake + jom and `cmake --preset release` in the worktree; `local_build_msi.ps1` not run.
-- Open for Sue: merge decision; CLI.3 direct layout flags and `--text2paths` for PDF/PS/EPS; CLI.2.1 Richmond fixtures; MSI and Linux/macOS runs. `CLI_1_SESSION_HANDOVER.md` (untracked) is stale.
+- Tests: CLI suite 100/100; `Seamly2DTests` 32 621/0; CollectionTest 69/0 (4 skip; start it in `bin`); ParserTest, TranslationsTest pass; `ctest` 9/9; `cargo test --workspace` 729/0; tester 15/0; Python runners pass.
+- Tester: `src/test/CliTestApp` (Rust/Iced, `--batch`), built in `target\release`.
+- Blocked: Linux/macOS (no WSL, no Mac), CI (no push), Richmond `.sm2d` (not on this machine). MSI build waits for Sue (CLAUDE.md).
+- Open for Sue: merge; CLI.3 direct flags and `--text2paths` (findings in CLI.3.5); CLI.2.1 Richmond fixtures.
 
 ### 2026-11-15 — Piece mode Details > Export Pieces (Seamly2D.73)
 

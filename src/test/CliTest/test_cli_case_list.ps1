@@ -10,7 +10,7 @@
 #   Name        unique name; also the output file name
 #   Group       option group of CLI_1_OPTION_MATRIX.md
 #   Program     seamly2d (default), seamlylayout, console (console attach probe), gui (GUI start probe)
-#               or tester (cli_test_app --batch; skipped when not built)
+#               tester (cli_test_app --batch; skipped when not built) or installed (copies in the MSI folder layout)
 #   ZipEntries  tester: number of files the session ZIP must hold
 #   Arguments   argument list; tokens: {fixtures} {settings} {out} {outdir} {repo}
 #   Exit        expected exit code
@@ -116,6 +116,8 @@ function Get-CliTestCases
            Exit = 64; Stderr = 'not valid JSON'; NoOutput = $true }
         @{ Name = 'output-directory-missing'; Group = 'paths'; Arguments = @('--layout-export', '--layout-output', '{outdir}\no_such_dir\x.svg', $shirt)
            Exit = 64; Stderr = 'output directory does not exist' }
+        @{ Name = 'layout-app-installed-folder'; Group = 'general'; Program = 'installed'; Format = 'svg'
+           Arguments = $export + @('--layout-settings', $roll36, $shirt); Exit = 0; Expect = @{ MinPieces = 16; WidthIn = 36 } }
         @{ Name = 'layout-app-not-a-program'; Group = 'general'; LayoutApp = 'missing'; Arguments = $export + @($shirt)
            Exit = 69; Stderr = 'SeamlyLayout could not be started'; NoOutput = $true }
 

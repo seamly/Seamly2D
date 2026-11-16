@@ -12,16 +12,19 @@
 |---|---|---|
 | Seamly2D Qt tests (40 suites) | `src\test\Seamly2DTest\target_wrapper.bat bin\Seamly2DTests.exe` (`QT_QPA_PLATFORM=offscreen`) | 32 621 pass, 0 fail |
 | `TST_VCommandLine` | part of the above | 24 pass, 0 fail |
+| CollectionTest (`TST_Seamly2DCommandLine`, `TST_SeamlyMeCommandLine`) | `bin\CollectionTest.exe`, started in `bin` (it copies its data there) | 69 pass, 0 fail, 4 skip |
+| ParserTest | `bin\ParserTest.exe` | pass (exit 0) |
+| TranslationsTest | `bin\TranslationsTest.exe` | 0 fail (QT_FORCE_STDERR_LOGGING=1 for counts) |
 | SeamlyLayout Qt tests | `ctest --preset release` | 9/9 pass |
 | SeamlyLayout Rust | `cargo test --workspace --no-fail-fast` | 729 pass, 0 fail (28 test binaries) |
 | CLI tester Rust | `cargo test` in `src\test\CliTestApp` | 15 pass, 0 fail |
-| CLI regression suite | `src\test\CliTest\test_cli_layout_export.ps1` | 99 cases: 99 pass, 0 fail, 0 skip (full run, about 20 min) |
+| CLI regression suite | `src\test\CliTest\test_cli_layout_export.ps1` | 100 cases: 100 pass, 0 fail, 0 skip (full run, about 20 min) |
 | Python headless runner | `test_headless_export.py ... --seamly2d ... --pattern male_shirt.sm2d` | all checks pass (47) |
 | Python pattern input runner | `test_pattern_input_status.py` | all checks pass |
 | Python measurement runner | `test_measurement_cli.py` (SeamlyMe) | all checks pass |
 | CLI tester batch | `cli_test_app --batch` on male_shirt, jacket2 (3 materials), trousers | 3 sessions pass, ZIPs read back; Marker + DXF refused (exit 2) |
 | CLI tester window | window opened; screenshots of screens 1–3 | pass (see below) |
-| `local_build_msi.ps1` | not run | needs Sue (CLAUDE.md); MSI install layout not tested |
+| `local_build_msi.ps1` | not run | CLAUDE.md: ask Sue first. Its test steps ran one by one above; the install-folder lookup ran as `layout-app-installed-folder` |
 
 ## CLI regression suite
 
@@ -30,7 +33,7 @@ Report: `cli_test_report.json` (command, arguments, working folder, stdout, stde
 
 | Group | Cases | What the checks prove |
 |---|---|---|
-| general | help, version, console help, console error, GUI start ×2, test mode, conflicts | help/version on stdout; error then help on an attached console without redirection; GUI start keeps its event loop |
+| general | help, version, console help, console error, GUI start ×2, test mode, conflicts, install folder | help/version on stdout; error then help on an attached console without redirection; GUI start keeps its event loop; SeamlyLayout found in the `SeamlyLayout` subfolder when `paths/seamlyLayoutApp` names a missing file |
 | legacy | `--text2paths`, `--basename`, `--exportOnlyDetails`, `-f`, `--layout-scale` | exit 64, "Unknown option '<name>'" |
 | export, paths | companions, unknown format, text mode with PDF, missing output folder, relative pattern, `--mfile`, settings and output | exit 64/66 with the message; relative paths from the launch folder |
 | settings | missing file, invalid JSON, invalid values, scale grid | exit 64 naming `marginTOP` and `tileOrientation`; `scale_grid` element present only when set |
@@ -58,10 +61,38 @@ See `CLI_1_PLAN.md` D1–D16. Each has a case above or a unit test.
 - Screen 3 (male_shirt, tiled Letter): format svg, SVG text designerFont; pdf, gcode, 3mf with reasons; the command with Copy.
 - Interaction (clicks) was not automated; the Run path is the same function as `--batch` (`export_run::run_session`).
 
+## Acceptance criteria (CLI_1_TASK.md §13, §9)
+
+| Criterion | Evidence | State |
+|---|---|---|
+| Every advertised option has documented, verified behavior | `CLI_1_OPTION_MATRIX.md` (status and test per option); `CLI_PARAMETERS.md` | met |
+| Every supported option has automated coverage | matrix "Test coverage" column; suite + `TST_VCommandLine` + `StartupOptionsTests` | met |
+| Valid combinations produce verified outputs | formats, paper, fabric, margins, multisize cases: page sizes, widths, DXF versions, piece counts | met |
+| Invalid combinations fail with useful diagnostics | 40+ failure cases check exit code and message text | met |
+| Console help and error messages work | `console-help-without-redirection`, `console-error-without-redirection` (screen buffer read) | met |
+| Headless SeamlyLayout export succeeds | every export case; `richmond-handoff-*` | met |
+| Iced app generates and executes commands | `tester-*` cases; screenshots of screens 1–3 | met |
+| Multi-material exports archived correctly | `tester-jacket-auto-split`: 3 files, 1 ZIP, names checked | met |
+| Normal GUI behavior unchanged | `gui-start-*`; Seamly2D Qt suites; `ExportMenuTests`; GUI Layout mode keeps its progress dialog (code path unchanged in GUI mode) | met |
+| Documentation matches tested functionality | `CLI_PARAMETERS.md` rows link to cases in the matrix | met |
+| Available unit and integration tests pass | table above | met |
+| Regressions introduced by this work resolved | stale license fingerprint (fixed); Python runner rules updated for the new format rules | met |
+| Environmental limitations documented | Gaps below | met |
+| §9.1–15 regression list | groups in the suite table cover each item; 14 and 15 by the `tester-*` cases | met |
+| `--text2paths` (§7 coverage) | `legacy-text2paths`: exit 64 "Unknown option". Findings below | met (tested; not reintroduced, §6) |
+
+## `--text2paths` findings
+
+- SVG: `--svg-text-mode hersheyStrokes` writes labels as paths (`shirt-svg-hershey-strokes`: no `<text>`).
+- PS and EPS: no font operators; labels are drawn as paths already.
+- PDF: keeps text (embedded fonts, `BT` text operators). svg2pdf `ConversionOptions::embed_text = false` would write paths.
+- Reintroducing the flag needs a name and precedence decision: `TODO_CLI.md` CLI.3.1 and CLI.3.5. §6 forbids it without a documented requirement.
+
 ## Gaps
 
-- Linux and macOS: not run. Console attach is Windows-only code; other platforms print to their terminal.
-- MSI: not built; the installed-folder lookup of SeamlyLayout (`SeamlyLayout\` beside Seamly2D) is untested here.
-- Richmond `.sm2d` and its measurements are not in the fixtures; only the handoff SVG was tested.
-- CI (`ci.yml`) not run: no push.
+- Linux and macOS: no host. WSL is not installed and there is no macOS machine. Console attach is Windows-only code.
+- CI (`ci.yml`): needs a push; the task forbids push.
+- MSI package: not built (CLAUDE.md: ask Sue before `local_build_msi.ps1`). Not a §13 criterion. Its tests ran one by one; the install-folder lookup ran from a copy of the install layout.
+- Richmond `.sm2d` and measurements: not on this machine (searched `C:\Users\susan`). Only the handoff SVG was tested, through SeamlyLayout.
 - `foldLinesOnLeftEdge` and `selvedgeWidth`: accepted and validated; their placement effects are covered by SeamlyLayout Rust tests, not by file checks here.
+- Tester window clicks were not automated; Run calls the same function as `--batch`.

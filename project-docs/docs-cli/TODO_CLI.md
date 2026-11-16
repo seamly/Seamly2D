@@ -56,6 +56,7 @@ Design:
 - [ ] CLI.3.3 Add the layout mode, nap direction and no-grainline rotation flags
 - [ ] CLI.3.4 Verify headless roll export trims unused length and writes one sheet (`--crop`, `--unite`)
 - [ ] CLI.3.5 Add text as paths for PDF, PS and EPS, if the exports keep text as text today
+  - Checked: PS and EPS draw labels as paths already. PDF keeps text (embedded fonts); svg2pdf `embed_text = false` writes paths. SVG: `--svg-text-mode hersheyStrokes`.
 - [ ] CLI.3.6 Add a flag that exports pieces at their handoff positions without packing
 - [ ] CLI.3.7 Evaluate `--savelen`, `--groups`, `--bdxf`, BMP, TIFF, PPM, OBJ and the DXF flavor and version; record each decision here
 - [ ] CLI.3.8 Tests: `tst_vcommandline` for each Seamly2D flag; SeamlyLayout startup option tests for each forwarded flag

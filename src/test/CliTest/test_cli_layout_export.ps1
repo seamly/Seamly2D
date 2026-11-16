@@ -193,6 +193,19 @@ foreach ($case in $cases) {
             }
             if ($exited) { $failures.Add("Seamly2D exited after start (code $($guiProcess.ExitCode)); the GUI event loop must keep running") }
         }
+        'installed' {
+            # The install layout of the MSI: Seamly2D, and SeamlyLayout in its "SeamlyLayout" subfolder.
+            # The settings name a SeamlyLayout that does not exist, so the lookup must fall back to that folder.
+            $installFolder = Join-Path $OutputRoot 'installed'
+            if (-not (Test-Path -LiteralPath (Join-Path $installFolder 'SeamlyLayout\SeamlyLayout.exe'))) {
+                New-Item -ItemType Directory -Force -Path (Join-Path $installFolder 'SeamlyLayout') | Out-Null
+                Get-ChildItem -LiteralPath (Split-Path -Parent $Seamly2D) -File | Copy-Item -Destination $installFolder
+                Copy-Item -LiteralPath $SeamlyLayout -Destination (Join-Path $installFolder 'SeamlyLayout\SeamlyLayout.exe')
+            }
+            $environment.SEAMLY_DATA_DIR = New-DataFolder (Join-Path $OutputRoot 'data-installed') (Join-Path $OutputRoot 'no_such_folder\SeamlyLayout.exe')
+            $run = Invoke-CliProcess -Executable (Join-Path $installFolder (Split-Path -Leaf $Seamly2D)) -Arguments $arguments `
+                -WorkingDirectory $workingDirectory -Environment $environment
+        }
         default {
             $run = Invoke-CliProcess -Executable $Seamly2D -Arguments $arguments -WorkingDirectory $workingDirectory -Environment $environment
         }

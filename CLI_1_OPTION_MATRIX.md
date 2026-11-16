@@ -68,6 +68,7 @@ Source: `command_line.cpp`, `commandoptions.cpp`, `StartupOptions.cpp`, `Headles
 |---|---|---|
 | Handoff through stdin, no intermediate file; 2 MB jacket2 handoff arrives whole | working | `jacket-handoff-not-truncated` (SEAMLYLAYOUT_SAVE_HANDOFF copy ≥ 1 MB, ends `</svg>`, valid XML) |
 | `paths/seamlyLayoutApp` resolves SeamlyLayout | working | every export case (isolated `SEAMLY_DATA_DIR` ini) |
+| A missing `paths/seamlyLayoutApp` file falls back to the install folder (`SeamlyLayout\SeamlyLayout.exe`) | working | `layout-app-installed-folder` |
 | SeamlyLayout cannot start | working, exit 69 | `layout-app-not-a-program` |
 | stdout carries only the result in layout modes | working | `shirt-dxf-r13`, `info-*` (stdout parses as JSON) |
 | Errors print on the parent console without redirection | working | `console-error-without-redirection` |
