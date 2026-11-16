@@ -46,7 +46,7 @@ foreach ($library in $libraries) {
 $application = Join-Path $build 'application'
 New-Item -ItemType Directory -Force $application | Out-Null
 $source = Get-Content (Join-Path $root 'src\app\seamly2d\mainwindow.cpp') -Raw
-$marker = '        if (loaded && (cmd->IsTestModeEnabled() || layout_export))'
+$marker = '        if (loaded && (cmd->isTestModeEnabled() || layout_export))'
 if (-not $source.Contains($marker)) {
     throw 'The loaded-pattern capture insertion point changed. Update the test probe.'
 }

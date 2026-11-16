@@ -1704,6 +1704,22 @@ p, li { white-space: pre-wrap; }
         <translation>Επιλογή</translation>
     </message>
     <message>
+        <source>Geometry</source>
+        <translation>Γεωμετρία</translation>
+    </message>
+    <message>
+        <source>Length:</source>
+        <translation>Μήκος:</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Τιμή</translation>
+    </message>
+    <message>
+        <source>Angle:</source>
+        <translation>Γωνία:</translation>
+    </message>
+    <message>
         <source>Attributes</source>
         <translation>Χαρακτηριστικά</translation>
     </message>
@@ -6361,6 +6377,14 @@ Do you want to save your changes?</source>
         <translation>Εμφάνιση πληροφοριών εγγράφου</translation>
     </message>
     <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Αντιγραφή κομματιού πατρόν</translation>
+    </message>
+    <message>
+        <source>Duplicate selected pattern piece</source>
+        <translation>Αντιγραφή επιλεγμένου κομματιού πατρόν</translation>
+    </message>
+    <message>
         <source>Measurement file doesn&apos;t include all the required measurements.</source>
         <translation>Το αρχείο μετρήσεων δεν περιλαμβάνει όλες τις απαιτούμενες μετρήσεις.</translation>
     </message>
@@ -6373,16 +6397,32 @@ Do you want to save your changes?</source>
         <translation>&lt;b&gt;Tool::Operations - Περιστροφή:&lt;/b&gt; Επιλέξτε ένα ή περισσότερα αντικείμενα - Κρατήστε πατημένο το &lt;b&gt;%1&lt;/b&gt; για πολλαπλή επιλογή, πατήστε &lt;b&gt;ENTER&lt;/b&gt; για επιβεβαίωση της επιλογής</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Rotation:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Tool::Operations - Περιστροφή:&lt;/b&gt; Vyberte jeden nebo více objektů – Kliknutím na vybraný objekt jej z výběru odeberete. Výběr potvrďte stisknutím klávesy &lt;b&gt;ENTER&lt;/b&gt;</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Επιλέξτε ένα ή περισσότερα αντικείμενα - Κρατήστε πατημένο το &lt;b&gt;%1&lt;/b&gt; για πολλαπλή επιλογή, πατήστε &lt;b&gt;ENTER&lt;/b&gt; για επιβεβαίωση της επιλογής</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Vyberte jeden nebo více objektů – Kliknutím na vybraný objekt jej z výběru odeberete. Výběr potvrďte stisknutím klávesy &lt;b&gt;ENTER&lt;/b&gt;</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Επιλέξτε ένα ή περισσότερα αντικείμενα - Κρατήστε πατημένο το &lt;b&gt;%1&lt;/b&gt; για πολλαπλή επιλογή, πατήστε &lt;b&gt;ENTER&lt;/b&gt; για επιβεβαίωση της επιλογής</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Vyberte jeden nebo více objektů – Kliknutím na vybraný objekt jej z výběru odeberete. Výběr potvrďte stisknutím klávesy &lt;b&gt;ENTER&lt;/b&gt;</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Tool::Operations - Μετακίνηση:&lt;/b&gt; Επιλογή ενός ή περισσότερων αντικειμένων - Κρατήστε πατημένο το &lt;b&gt;%1&lt;/b&gt; για πολλαπλή επιλογή, Πατήστε &lt;b&gt;ENTER&lt;/b&gt; για επιβεβαίωση της επιλογής</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Tool::Operations - Μετακίνηση:&lt;/b&gt; Vyberte jeden nebo více objektů – Kliknutím na vybraný objekt jej z výběru odeberete. Výběr potvrďte stisknutím klávesy &lt;b&gt;ENTER&lt;/b&gt;</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - TrueDarts:&lt;/b&gt; Select the first base line point</source>
@@ -8276,6 +8316,14 @@ Press enter to temporarily add it to the list.</source>
         <translation>Τρέχων περιθώριο ραφής</translation>
     </message>
     <message>
+        <source>%1 copy</source>
+        <translation>%1 αντίγραφο</translation>
+    </message>
+    <message>
+        <source>%1 copy %2</source>
+        <translation>%1 αντίγραφο %2</translation>
+    </message>
+    <message>
         <source>move pattern piece label</source>
         <translation>μετακίνηση ετικέτας κομματιού πατρόν</translation>
     </message>
@@ -8354,6 +8402,10 @@ Press enter to temporarily add it to the list.</source>
     <message>
         <source>Show Piece Label</source>
         <translation>Εμφάνιση ετικέτας κομματιού</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>Διπλότυπο</translation>
     </message>
     <message>
         <source>Rename...</source>
@@ -8438,6 +8490,10 @@ Press enter to temporarily add it to the list.</source>
     <message>
         <source>Update Node Angle</source>
         <translation>Ενημέρωση γωνίας κόμβου</translation>
+    </message>
+    <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Αντιγραφή κομματιού πατρόν</translation>
     </message>
     <message>
         <source>Update Notch</source>
@@ -8946,14 +9002,6 @@ Press enter to temporarily add it to the list.</source>
         <source>Theme:</source>
         <translation>Θέμα:</translation>
     </message>
-    <message>
-        <source>Customize colors...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Workspace background and drawing colors (Graphics page)</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>PreferencesGraphicsViewPage</name>
@@ -9048,6 +9096,10 @@ Press enter to temporarily add it to the list.</source>
     <message>
         <source>Colors</source>
         <translation>Χρώματα</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Σε σκούρο φόντο, εμφανίστε τις σκούρες γραμμές, τα σημεία και τις ετικέτες πιο ανοιχτά, ώστε να παραμένουν ορατά (το μαύρο εμφανίζεται ως ανοιχτό γκρι). Το μοτίβο διατηρεί τα πραγματικά του χρώματα για αποθήκευση, εκτύπωση και εξαγωγή.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Zoom Rubberband</source>
@@ -9187,6 +9239,14 @@ Press enter to temporarily add it to the list.</source>
         <translation>Να χρησιμοποιείτε πάντα τρέχουσα πένα</translation>
     </message>
     <message>
+        <source>Operations Tools</source>
+        <translation>Εργαλεία Λειτουργιών</translation>
+    </message>
+    <message>
+        <source>Use CTRL for multiple object selection</source>
+        <translation>Χρησιμοποιήστε το πλήκτρο CTRL για επιλογή πολλαπλών αντικειμένων</translation>
+    </message>
+    <message>
         <source>Dialogs</source>
         <translation>Διάλογοι</translation>
     </message>
@@ -9256,11 +9316,7 @@ Press enter to temporarily add it to the list.</source>
     </message>
     <message>
         <source>Adapt colors to a dark background</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.</source>
-        <translation type="unfinished"></translation>
+        <translation>Προσαρμογή χρωμάτων σε σκούρο φόντο</translation>
     </message>
 </context>
 <context>
@@ -12096,6 +12152,10 @@ load in SeamlyME as usual.
         <translation>Μπλε άνθος καλαμποκιού</translation>
     </message>
     <message>
+        <source>Black | White</source>
+        <translation>Μαύρο | Λευκό</translation>
+    </message>
+    <message>
         <source>Black</source>
         <translation>Μαύρο</translation>
     </message>
@@ -12245,11 +12305,11 @@ load in SeamlyME as usual.
     </message>
     <message>
         <source>Charcoal</source>
-        <translation type="unfinished"></translation>
+        <translation>Ανθρακί</translation>
     </message>
     <message>
         <source>Graphite</source>
-        <translation type="unfinished"></translation>
+        <translation>Γραφίτης</translation>
     </message>
 </context>
 <context>

@@ -150,6 +150,9 @@ TMainWindow::TMainWindow(QWidget *parent)
 
 	qApp->Settings()->getOsSeparator() ? setLocale(QLocale()) : setLocale(QLocale::c());
 
+    ui->caption_Label->setText(QStringLiteral(""));
+    ui->description_Label->setText(QStringLiteral(""));
+
 	ui->find_LineEdit->setClearButtonEnabled(true);
 	ui->lineEditName->setClearButtonEnabled(true);
 	ui->lineEditFullName->setClearButtonEnabled(true);
@@ -813,7 +816,7 @@ void TMainWindow::exportToCSVData(const QString &fileName, const DialogExportToC
 		{
 			if (!ui->tableWidget->isColumnHidden(column))
 			{
-				QTableWidgetItem *header = ui->tableWidget->horizontalHeaderItem(colCount);
+				QTableWidgetItem *header = ui->tableWidget->horizontalHeaderItem(column);
 				csv.setHeaderText(colCount, header->text());
 				++colCount;
 			}

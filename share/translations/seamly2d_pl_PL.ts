@@ -1696,6 +1696,22 @@ p, li { white-space: pre-wrap; }
         <translation>Drugi punkt:</translation>
     </message>
     <message>
+        <source>Geometry</source>
+        <translation>Geometria</translation>
+    </message>
+    <message>
+        <source>Length:</source>
+        <translation>Długość:</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Wartość</translation>
+    </message>
+    <message>
+        <source>Angle:</source>
+        <translation>Kąt:</translation>
+    </message>
+    <message>
         <source>Attributes</source>
         <translation>Atrybuty</translation>
     </message>
@@ -6465,6 +6481,14 @@ Program jest dostarczany w stanie&quot;TAK JAK JEST&quot;bez ŻADNEJ GWARANCJI, 
         <translation>Następny blok roboczy</translation>
     </message>
     <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Duplikuj element wykroju</translation>
+    </message>
+    <message>
+        <source>Duplicate selected pattern piece</source>
+        <translation>Duplikuj wybrany element wykroju</translation>
+    </message>
+    <message>
         <source>New pattern</source>
         <translation>Nowy wzór</translation>
     </message>
@@ -6653,16 +6677,32 @@ Program jest dostarczany w stanie&quot;TAK JAK JEST&quot;bez ŻADNEJ GWARANCJI, 
         <translation>&lt;b&gt;Narzędzie::Operacje - Obrót:&lt;/b&gt; Wybierz jeden lub więcej obiektów - przytrzymaj &lt;b&gt;%1&lt;/b&gt;, aby dokonać wielokrotnego wyboru, naciśnij &lt;b&gt;ENTER&lt;/b&gt;, aby potwierdzić wybór</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Rotation:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Narzędzie::Operacje - Obrót:&lt;/b&gt; Wybierz jeden lub więcej obiektów – kliknij wybrany obiekt, aby cofnąć jego zaznaczenie. Zatwierdź wybór, naciskając klawisz &lt;b&gt;ENTER&lt;/b&gt;</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Narzędzie::Operacje - Lustro według linii:&lt;/b&gt; Wybierz jeden lub więcej obiektów - przytrzymaj &lt;b&gt;%1&lt;/b&gt;, aby wybrać wiele obiektów, naciśnij &lt;b&gt;ENTER&lt;/b&gt;, aby potwierdzić wybór</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Narzędzie::Operacje - Lustro według linii:&lt;/b&gt; Wybierz jeden lub więcej obiektów – kliknij wybrany obiekt, aby cofnąć jego zaznaczenie. Zatwierdź wybór, naciskając klawisz &lt;b&gt;ENTER&lt;/b&gt;</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Narzędzie::Operacje - Lustro według osi:&lt;/b&gt; Wybierz jeden lub więcej obiektów - przytrzymaj &lt;b&gt;%1&lt;/b&gt;, aby wybrać wiele obiektów, naciśnij &lt;b&gt;ENTER&lt;/b&gt;, aby potwierdzić wybór</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Narzędzie::Operacje - Lustro według osi:&lt;/b&gt; Wybierz jeden lub więcej obiektów – kliknij wybrany obiekt, aby cofnąć jego zaznaczenie. Zatwierdź wybór, naciskając klawisz &lt;b&gt;ENTER&lt;/b&gt;</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Narzędzie::Operacje - Przesuń:&lt;/b&gt; Wybierz jeden lub więcej obiektów - przytrzymaj &lt;b&gt;%1&lt;/b&gt;, aby wybrać wiele obiektów, naciśnij &lt;b&gt;ENTER&lt;/b&gt;, aby potwierdzić wybór</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Narzędzie::Operacje - Przesuń:&lt;/b&gt; Wybierz jeden lub więcej obiektów – kliknij wybrany obiekt, aby cofnąć jego zaznaczenie. Zatwierdź wybór, naciskając klawisz &lt;b&gt;ENTER&lt;/b&gt;</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - TrueDarts:&lt;/b&gt; Select the first base line point</source>
@@ -8274,6 +8314,18 @@ Czy chcesz zapisać zmiany?</translation>
         <translation>Aktualny dodatek na szew</translation>
     </message>
     <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Duplikuj element wykroju</translation>
+    </message>
+    <message>
+        <source>%1 copy</source>
+        <translation>%1 – kopia</translation>
+    </message>
+    <message>
+        <source>%1 copy %2</source>
+        <translation>%1 – kopia %2</translation>
+    </message>
+    <message>
         <source>move pattern piece label</source>
         <translation>przesuń etykietę elementu wzoru</translation>
     </message>
@@ -8352,6 +8404,10 @@ Czy chcesz zapisać zmiany?</translation>
     <message>
         <source>Show Piece Label</source>
         <translation>Pokaż etykietę elementu</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>Duplikat</translation>
     </message>
     <message>
         <source>Rename...</source>
@@ -8944,14 +9000,6 @@ Czy chcesz zapisać zmiany?</translation>
         <source>Theme:</source>
         <translation>Motyw:</translation>
     </message>
-    <message>
-        <source>Customize colors...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Workspace background and drawing colors (Graphics page)</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>PreferencesGraphicsViewPage</name>
@@ -9098,6 +9146,10 @@ Czy chcesz zapisać zmiany?</translation>
     <message>
         <source>Background:</source>
         <translation>Tło:</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Na ciemnym tle pokazuj ciemne linie, punkty i etykiety jako jaśniejsze, aby pozostały widoczne (czarny wyświetla się jako jasnoszary). Wzór zachowuje swoje rzeczywiste kolory podczas zapisywania, drukowania i eksportu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Zoom Rubberband</source>
@@ -9249,16 +9301,20 @@ Czy chcesz zapisać zmiany?</translation>
         <translation>Automatyczne czyszczenie formuły</translation>
     </message>
     <message>
+        <source>Operations Tools</source>
+        <translation>Narzędzia operacyjne</translation>
+    </message>
+    <message>
+        <source>Use CTRL for multiple object selection</source>
+        <translation>Użyj klawisza CTRL, aby wybrać wiele obiektów</translation>
+    </message>
+    <message>
         <source>Use native dialogs</source>
         <translation>Korzystaj z natywnych okien dialogowych</translation>
     </message>
     <message>
         <source>Adapt colors to a dark background</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.</source>
-        <translation type="unfinished"></translation>
+        <translation>Dostosuj kolory do ciemnego tła</translation>
     </message>
 </context>
 <context>
@@ -12093,6 +12149,10 @@ Czy chcesz zapisać zmiany?</translation>
         <translation>Kwiat kukurydzy niebieski</translation>
     </message>
     <message>
+        <source>Black | White</source>
+        <translation>Czarny | Biały</translation>
+    </message>
+    <message>
         <source>Black</source>
         <translation>Czarny</translation>
     </message>
@@ -12242,11 +12302,11 @@ Czy chcesz zapisać zmiany?</translation>
     </message>
     <message>
         <source>Charcoal</source>
-        <translation type="unfinished"></translation>
+        <translation>Antracyt</translation>
     </message>
     <message>
         <source>Graphite</source>
-        <translation type="unfinished"></translation>
+        <translation>Grafit</translation>
     </message>
 </context>
 <context>

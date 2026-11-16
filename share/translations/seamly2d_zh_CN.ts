@@ -1704,6 +1704,22 @@ p, li { 空白:预换行； }
         <translation>选择</translation>
     </message>
     <message>
+        <source>Geometry</source>
+        <translation>几何学</translation>
+    </message>
+    <message>
+        <source>Length:</source>
+        <translation>长度:</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>价值</translation>
+    </message>
+    <message>
+        <source>Angle:</source>
+        <translation>角度:</translation>
+    </message>
+    <message>
         <source>Attributes</source>
         <translation>属性</translation>
     </message>
@@ -6359,6 +6375,14 @@ Do you want to save your changes?</source>
         <translation>显示文档信息</translation>
     </message>
     <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>复制纸样裁片</translation>
+    </message>
+    <message>
+        <source>Duplicate selected pattern piece</source>
+        <translation>复制选定的纸样裁片</translation>
+    </message>
+    <message>
         <source>Measurement file doesn&apos;t include all the required measurements.</source>
         <translation>测量文件不包括所有必需的测量值.</translation>
     </message>
@@ -6371,16 +6395,32 @@ Do you want to save your changes?</source>
         <translation>&lt;b&gt;工具::操作 - 旋转:&lt;/b&gt; 选择一个或多个对象 - 按住&lt;b&gt;%1&lt;/b&gt;进行多项选择，按&lt;b&gt;ENTER&lt;/b&gt;确认选择</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Rotation:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;工具::操作 - 旋转:&lt;/b&gt; 选择一个或多个对象——点击已选对象即可取消选择。按下 &lt;b&gt;ENTER&lt;/b&gt; 键确认所选内容</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;工具::操作 - 按线镜像:&lt;/b&gt; 选择一个或多个对象 - 按住 &lt;b&gt;%1&lt;/b&gt; 进行多项选择，按 &lt;b&gt;ENTER&lt;/b&gt; 确认选择</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;工具::操作 - 按线镜像:&lt;/b&gt; 选择一个或多个对象——点击已选对象即可取消选择。按下 &lt;b&gt;ENTER&lt;/b&gt; 键确认所选内容</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;工具::操作 - 按轴镜像:&lt;/b&gt; 选择一个或多个对象 - 按住 &lt;b&gt;%1&lt;/b&gt; 进行多项选择，按 &lt;b&gt;ENTER&lt;/b&gt; 确认选择</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;工具::操作 - 按轴镜像:&lt;/b&gt; 选择一个或多个对象——点击已选对象即可取消选择。按下 &lt;b&gt;ENTER&lt;/b&gt; 键确认所选内容</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;工具::操作 - 移动:&lt;/b&gt; 选择一个或多个对象 - 按住&lt;b&gt;%1&lt;/b&gt;进行多项选择，按&lt;b&gt;ENTER&lt;/b&gt;确认选择</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;工具::操作 - 移动:&lt;/b&gt; 选择一个或多个对象——点击已选对象即可取消选择。按下 &lt;b&gt;ENTER&lt;/b&gt; 键确认所选内容</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - TrueDarts:&lt;/b&gt; Select the first base line point</source>
@@ -8274,6 +8314,14 @@ Press enter to temporarily add it to the list.</source>
         <translation>当前缝份</translation>
     </message>
     <message>
+        <source>%1 copy</source>
+        <translation>%1 副本</translation>
+    </message>
+    <message>
+        <source>%1 copy %2</source>
+        <translation>%1 副本 %2</translation>
+    </message>
+    <message>
         <source>move pattern piece label</source>
         <translation>移动样板标签</translation>
     </message>
@@ -8352,6 +8400,10 @@ Press enter to temporarily add it to the list.</source>
     <message>
         <source>Show Piece Label</source>
         <translation>显示裁片标签</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>复制</translation>
     </message>
     <message>
         <source>Rename...</source>
@@ -8436,6 +8488,10 @@ Press enter to temporarily add it to the list.</source>
     <message>
         <source>Update Node Angle</source>
         <translation>更新节点角度</translation>
+    </message>
+    <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>复制纸样裁片</translation>
     </message>
     <message>
         <source>Update Notch</source>
@@ -8944,14 +9000,6 @@ Press enter to temporarily add it to the list.</source>
         <source>Theme:</source>
         <translation>主题:</translation>
     </message>
-    <message>
-        <source>Customize colors...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Workspace background and drawing colors (Graphics page)</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>PreferencesGraphicsViewPage</name>
@@ -9046,6 +9094,10 @@ Press enter to temporarily add it to the list.</source>
     <message>
         <source>Colors</source>
         <translation>颜色</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;在深色背景上，将深色线条、点和标签显示得更浅，以便保持可见（黑色显示为浅灰色). 图案在保存、打印和导出时保留其实际颜色.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Zoom Rubberband</source>
@@ -9185,6 +9237,14 @@ Press enter to temporarily add it to the list.</source>
         <translation>始终使用当前笔</translation>
     </message>
     <message>
+        <source>Operations Tools</source>
+        <translation>操作工具</translation>
+    </message>
+    <message>
+        <source>Use CTRL for multiple object selection</source>
+        <translation>使用 CTRL 键进行多选</translation>
+    </message>
+    <message>
         <source>Dialogs</source>
         <translation>对话框</translation>
     </message>
@@ -9254,11 +9314,7 @@ Press enter to temporarily add it to the list.</source>
     </message>
     <message>
         <source>Adapt colors to a dark background</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.</source>
-        <translation type="unfinished"></translation>
+        <translation>适配深色背景</translation>
     </message>
 </context>
 <context>
@@ -12095,6 +12151,10 @@ load in SeamlyME as usual.
         <translation>矢车菊蓝</translation>
     </message>
     <message>
+        <source>Black | White</source>
+        <translation>黑色 | 白色</translation>
+    </message>
+    <message>
         <source>Black</source>
         <translation>黑色的</translation>
     </message>
@@ -12244,11 +12304,11 @@ load in SeamlyME as usual.
     </message>
     <message>
         <source>Charcoal</source>
-        <translation type="unfinished"></translation>
+        <translation>深炭灰</translation>
     </message>
     <message>
         <source>Graphite</source>
-        <translation type="unfinished"></translation>
+        <translation>石墨色</translation>
     </message>
 </context>
 <context>

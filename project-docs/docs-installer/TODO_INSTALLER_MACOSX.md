@@ -15,6 +15,18 @@ Fix the casing, update references to these files
 - [ ] ICON = ../../../packaging/assets/seamly2d.icns — the file is Seamly2D.icns
 - [ ] QMAKE_INFO_PLIST = .../seamly2d/info.plist — the file is Info.plist
 
+## Task InstMacOS.01 - Finder layout for the 3-app DMG
+
+Upstream `develop` makes one DMG per app with a background image, a Finder layout and an `Applications` link.
+`packaging/macos/macos.pro` makes one DMG with all three apps, so the upstream files are not used yet.
+The upstream files are in `packaging/macos/dmg/`: `create_dmg.sh`, `background.svg`, `background.tiff`, `Seamly2D.DS_Store`, `SeamlyME.DS_Store`.
+
+- [ ] InstMacOS.01.1 - Change `create_dmg.sh` to stage all three `.app` bundles, the `Applications` link and `.background/background.tiff`
+- [ ] InstMacOS.01.2 - Change `background.svg` for three app icons, then export `background.tiff`
+- [ ] InstMacOS.01.3 - Make `Seamly2D-macos.DS_Store` in Finder on a Mac: three app icons, `Applications` link, background. Delete the two per-app `.DS_Store` files
+- [ ] InstMacOS.01.4 - Call `create_dmg.sh` from the `seamlysuitedmg` target in `packaging/macos/macos.pro`
+- [ ] InstMacOS.01.5 - Verify on macOS: the DMG opens with the background and icon positions; drag-install works for all three apps
+
 ## Task InstMacOS.0 — macOS installer (.pkg) for the Seamly suite (parity with the Windows MSI)
 
 Today macOS ships as a drag-installed `.app`/`.dmg` (`packaging/macos/build_dmg.sh`) with no installer, no install-location choice, and no way to clear a prior standalone install. Provide a real macOS installer — a signed/notarized `productbuild`/`pkgbuild` `.pkg` bundling all three apps — matching the Windows MSI capabilities. Where a native `.pkg` cannot do something (arbitrary install-location choice is limited in Installer.app; drag-install has no uninstall hook), record the design decision rather than forcing it. The in-app first-run **data-directory** chooser is **Task 35**; this task is the installer/packaging side and may supersede or complement that first-run prompt with an install-time prompt.

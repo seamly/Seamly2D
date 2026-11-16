@@ -332,6 +332,9 @@ public:
     bool                 getConstrainModKey() const;
     void                 setConstrainModKey(const bool &value);
 
+    bool                 useControlSelect() const;
+    void                 setControlSelect(const bool &value);
+
     QString              getCompanyName() const;
     void                 setCompanyName(const QString &value);
 
@@ -574,8 +577,8 @@ public:
     bool                 getUseToolColor() const;
     void                 setUseToolColor(bool value);
 
-    bool                 getAdaptColors() const;
-    void                 setAdaptColors(bool value);
+    bool                 isAdaptiveColorEnabled() const;
+    void                 setAdaptiveColorEnabled(bool value);
 
     int                  getGuiFontSize() const;
     void                 setGuiFontSize(int value);

@@ -1,53 +1,52 @@
-/***************************************************************************
- **  @file   vabstracttool.cpp
- **  @author Douglas S Caskey
- **  @date   17 Sep, 2023
- **
- **  @copyright
- **  Copyright (C) 2017 - 2023 Seamly, LLC
- **  https://github.com/fashionfreedom/seamly2d
- **
- **  @brief
- **  Seamly2D is free software: you can redistribute it and/or modify
- **  it under the terms of the GNU General Public License as published by
- **  the Free Software Foundation, either version 3 of the License, or
- **  (at your option) any later version.
- **
- **  Seamly2D is distributed in the hope that it will be useful,
- **  but WITHOUT ANY WARRANTY; without even the implied warranty of
- **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- **  GNU General Public License for more details.
- **
- **  You should have received a copy of the GNU General Public License
- **  along with Seamly2D. If not, see <http://www.gnu.org/licenses/>.
- **************************************************************************/
+//---------------------------------------------------------------------------------------------------------------------
+/// @file   vabstracttool.cpp
+/// @author Douglas S Caskey
+/// @date   17 Sep, 2023
+///
+/// @copyright
+/// Copyright (C) 2017 - 2026 Seamly, LLC
+/// https://github.com/fashionfreedom/seamly2d
+///
+/// @brief
+/// Seamly2D is free software: you can redistribute it and/or modify
+/// it under the terms of the GNU General Public License as published by
+/// the Free Software Foundation, either version 3 of the License, or
+/// (at your option) any later version.
+///
+/// Seamly2D is distributed in the hope that it will be useful,
+/// but WITHOUT ANY WARRANTY; without even the implied warranty of
+/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+/// GNU General Public License for more details.
+///
+/// You should have received a copy of the GNU General Public License
+/// along with Seamly2D. If not, see <http://www.gnu.org/licenses/>.
+//---------------------------------------------------------------------------------------------------------------------
 
-/************************************************************************
- **  @file   vabstracttool.cpp
- **  @author Roman Telezhynskyi <dismine(at)gmail.com>
- **  @date   November 15, 2013
- **
- **  @brief
- **  @copyright
- **  This source code is part of the Valentina project, a pattern making
- **  program, whose allow create and modeling patterns of clothing.
- **  Copyright (C) 2013 Valentina project
- **  <https://bitbucket.org/dismine/valentina> All Rights Reserved.
- **
- **  Valentina is free software: you can redistribute it and/or modify
- **  it under the terms of the GNU General Public License as published by
- **  the Free Software Foundation, either version 3 of the License, or
- **  (at your option) any later version.
- **
- **  Valentina is distributed in the hope that it will be useful,
- **  but WITHOUT ANY WARRANTY; without even the implied warranty of
- **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- **  GNU General Public License for more details.
- **
- **  You should have received a copy of the GNU General Public License
- **  along with Seamly2D.  If not, see <http://www.gnu.org/licenses/>.
- **
- *************************************************************************/
+//---------------------------------------------------------------------------------------------------------------------
+/// @file   vabstracttool.cpp
+/// @author Roman Telezhynskyi <dismine(at)gmail.com>
+/// @date   November 15, 2013
+///
+/// @brief
+/// @copyright
+/// This source code is part of the Valentina project, a pattern making
+/// program, whose allow create and modeling patterns of clothing.
+/// Copyright (C) 2013 Valentina project
+/// <https://bitbucket.org/dismine/valentina> All Rights Reserved.
+///
+/// Valentina is free software: you can redistribute it and/or modify
+/// it under the terms of the GNU General Public License as published by
+/// the Free Software Foundation, either version 3 of the License, or
+/// (at your option) any later version.
+///
+/// Valentina is distributed in the hope that it will be useful,
+/// but WITHOUT ANY WARRANTY; without even the implied warranty of
+/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+/// GNU General Public License for more details.
+///
+/// You should have received a copy of the GNU General Public License
+/// along with Seamly2D.  If not, see <http://www.gnu.org/licenses/>.
+//---------------------------------------------------------------------------------------------------------------------
 
 #include "vabstracttool.h"
 
@@ -388,7 +387,14 @@ QMap<QString, QString> VAbstractTool::ColorsList()
                 break;
             case 0: // ColorBlack
             default:
-                name = tr("Black");
+                if (qApp->Settings()->isAdaptiveColorEnabled())
+                {
+                    name = tr("Black | White");
+                }
+                else
+                {
+                    name = tr("Black");
+                }
                 break;
         }
 
@@ -460,7 +466,7 @@ QPixmap VAbstractTool::createColorIcon(const int w, const int h, const QString &
     QPainter painter(&pixmap);
     painter.setPen(Qt::black);
 
-    const QRect rectangle = QRect(1, 1, w-2, h-2);
+    QRect rectangle = QRect(1, 1, w-2, h-2);
 
     qDebug() << "createColorIcon - color = " << color;
 
@@ -477,6 +483,11 @@ QPixmap VAbstractTool::createColorIcon(const int w, const int h, const QString &
         painter.setFont(font);
         painter.fillRect(rectangle, QColor(Qt::white));
         painter.drawText(rectangle, Qt::AlignCenter, "GROUP");
+    }
+    else if (color == ColorBlack && qApp->Settings()->isAdaptiveColorEnabled())
+    {
+        rectangle = QRect(w / 2 + 1, 1, w - 2, h - 2);
+        painter.fillRect(rectangle, QColor(Qt::white));
     }
     else
     {
@@ -564,14 +575,14 @@ void VAbstractTool::ToolCreation(const Source &typeCreation)
  * @param id object id in container
  * @param toolType tool type
  * @param doc dom document container
- * @param blockName draft block that holds the tool; empty for the active draft block. A tool made in Piece mode
+ * @param block_name draft block that holds the tool; empty for the active draft block. A tool made in Piece mode
  *        names its block, because the active draft block belongs to Draft mode.
  */
-void VAbstractTool::AddRecord(const quint32 id, const Tool &toolType, VAbstractPattern *doc, const QString &blockName)
+void VAbstractTool::AddRecord(const quint32 id, const Tool &toolType, VAbstractPattern *doc, const QString &block_name)
 {
     QVector<VToolRecord> *history = doc->getHistory();
-    const QString recordBlock = blockName.isEmpty() ? doc->getActiveDraftBlockName() : blockName;
-    VToolRecord record = VToolRecord(id, toolType, recordBlock);
+    const QString record_block = block_name.isEmpty() ? doc->getActiveDraftBlockName() : block_name;
+    VToolRecord record = VToolRecord(id, toolType, record_block);
     if (history->contains(record))
     {
         return;
@@ -756,12 +767,12 @@ QVector<VPieceNode> VAbstractTool::PrepareNodes(const VPiecePath &path, VMainGra
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief PrepareNode makes the piece node copy of a draft object.
- * @param blockName draft block that holds the copy; empty for the draft block that is active when its undo command
+ * @param block_name draft block that holds the copy; empty for the draft block that is active when its undo command
  *        runs.
  * @return id of the copy; NULL_ID for an unknown node type.
  */
 quint32 VAbstractTool::PrepareNode(const VPieceNode &node, VMainGraphicsScene *scene,
-                                   VAbstractPattern *doc, VContainer *data, const QString &blockName)
+                                   VAbstractPattern *doc, VContainer *data, const QString &block_name)
 {
     SCASSERT(scene != nullptr)
     SCASSERT(doc != nullptr)
@@ -772,23 +783,23 @@ quint32 VAbstractTool::PrepareNode(const VPieceNode &node, VMainGraphicsScene *s
     {
         case (Tool::NodePoint):
             id = CreateNode<VPointF>(data, node.GetId());
-            VNodePoint::Create(doc, data, scene, id, node.GetId(), Document::FullParse, Source::FromGui, blockName);
+            VNodePoint::Create(doc, data, scene, id, node.GetId(), Document::FullParse, Source::FromGui, block_name);
             break;
         case (Tool::NodeArc):
             id = CreateNode<VArc>(data, node.GetId());
-            VNodeArc::Create(doc, data, id, node.GetId(), Document::FullParse, Source::FromGui, blockName);
+            VNodeArc::Create(doc, data, id, node.GetId(), Document::FullParse, Source::FromGui, block_name);
             break;
         case (Tool::NodeElArc):
             id = CreateNode<VEllipticalArc>(data, node.GetId());
-            VNodeEllipticalArc::Create(doc, data, id, node.GetId(), Document::FullParse, Source::FromGui, blockName);
+            VNodeEllipticalArc::Create(doc, data, id, node.GetId(), Document::FullParse, Source::FromGui, block_name);
             break;
         case (Tool::NodeSpline):
             id = CreateNodeSpline(data, node.GetId());
-            VNodeSpline::Create(doc, data, id, node.GetId(), Document::FullParse, Source::FromGui, blockName);
+            VNodeSpline::Create(doc, data, id, node.GetId(), Document::FullParse, Source::FromGui, block_name);
             break;
         case (Tool::NodeSplinePath):
             id = CreateNodeSplinePath(data, node.GetId());
-            VNodeSplinePath::Create(doc, data, id, node.GetId(), Document::FullParse, Source::FromGui, blockName);
+            VNodeSplinePath::Create(doc, data, id, node.GetId(), Document::FullParse, Source::FromGui, block_name);
             break;
         default:
             qWarning() << "May be wrong tool type!!! Ignoring."<<Q_FUNC_INFO;

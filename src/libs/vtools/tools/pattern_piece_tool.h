@@ -137,6 +137,7 @@ public slots:
     void                 updatePatternLabel();
     void                 updateGrainline();
     void                 editPieceProperties();
+    void                 copyPiece() const;
 
 protected slots:
     void                 saveMovePiece(const QPointF &ptPos);
@@ -177,7 +178,7 @@ private:
     QPainterPath            m_mainPath;    // Must be first to prevent crash
     QRectF                  m_pieceRect;
     QPainterPath            m_cutPath;
-    VMainGraphicsScene     *m_pieceScene;  /// @brief pieceScene pointer to the scene. */
+    VMainGraphicsScene     *m_pieceScene;  /// @brief pieceScene pointer to the scene.
     QString                 m_blockName;
     NonScalingFillPathItem *m_cutLine;
     NonScalingFillPathItem *m_allowanceFill;

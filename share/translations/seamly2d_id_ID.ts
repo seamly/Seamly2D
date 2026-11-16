@@ -1704,6 +1704,22 @@ p, li { spasi: pra-bungkus; }
         <translation>Pilihan</translation>
     </message>
     <message>
+        <source>Geometry</source>
+        <translation>Geometri</translation>
+    </message>
+    <message>
+        <source>Length:</source>
+        <translation>Panjang:</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Nilai</translation>
+    </message>
+    <message>
+        <source>Angle:</source>
+        <translation>Sudut:</translation>
+    </message>
+    <message>
         <source>Attributes</source>
         <translation>Atribut</translation>
     </message>
@@ -6359,6 +6375,14 @@ Apakah anda ingin menyimpan perubahan anda?</translation>
         <translation>Tampilkan Info dokumen</translation>
     </message>
     <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Duplikat Bagian Pola</translation>
+    </message>
+    <message>
+        <source>Duplicate selected pattern piece</source>
+        <translation>Duplikat bagian pola yang dipilih</translation>
+    </message>
+    <message>
         <source>Measurement file doesn&apos;t include all the required measurements.</source>
         <translation>File pengukuran tidak menyertakan semua pengukuran yang diperlukan.</translation>
     </message>
@@ -6371,16 +6395,32 @@ Apakah anda ingin menyimpan perubahan anda?</translation>
         <translation>&lt;b&gt;Alat::Operasi - Rotasi:&lt;/b&gt; Pilih satu atau lebih objek - Tahan &lt;b&gt;%1&lt;/b&gt; untuk pilihan ganda, Tekan &lt;b&gt;ENTER&lt;/b&gt; untuk mengonfirmasi pilihan</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Rotation:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Alat::Operasi - Rotasi:&lt;/b&gt; Pilih objek (klik lagi untuk membatalkan), lalu tekan &lt;b&gt;ENTER&lt;/b&gt; untuk mengonfirmasi</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Pilih satu atau lebih objek - Tahan &lt;b&gt;%1&lt;/b&gt; untuk pilihan ganda, Tekan &lt;b&gt;ENTER&lt;/b&gt; untuk mengonfirmasi pilihan</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Pilih objek (klik lagi untuk membatalkan), lalu tekan &lt;b&gt;ENTER&lt;/b&gt; untuk mengonfirmasi</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Tool::Operations - Cermin menurut Sumbu:&lt;/b&gt; Pilih satu atau lebih objek - Tahan &lt;b&gt;%1&lt;/b&gt; untuk pilihan ganda, Tekan &lt;b&gt;ENTER&lt;/b&gt; untuk mengonfirmasi pilihan</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Tool::Operations - Cermin menurut Sumbu:&lt;/b&gt; Pilih objek (klik lagi untuk membatalkan), lalu tekan &lt;b&gt;ENTER&lt;/b&gt; untuk mengonfirmasi</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Tool::Operations - Pindah:&lt;/b&gt; Pilih satu atau lebih objek - Tahan &lt;b&gt;%1&lt;/b&gt; untuk pilihan ganda, Tekan &lt;b&gt;ENTER&lt;/b&gt; untuk mengonfirmasi pilihan</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Tool::Operations - Pindah:&lt;/b&gt; Pilih objek (klik lagi untuk membatalkan), lalu tekan &lt;b&gt;ENTER&lt;/b&gt; untuk mengonfirmasi</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - TrueDarts:&lt;/b&gt; Select the first base line point</source>
@@ -8274,6 +8314,14 @@ Tekan enter untuk menambahkannya sementara ke daftar.</translation>
         <translation>Kelonggaran jahitan saat ini</translation>
     </message>
     <message>
+        <source>%1 copy</source>
+        <translation>Salinan %1</translation>
+    </message>
+    <message>
+        <source>%1 copy %2</source>
+        <translation>Salinan %1 %2</translation>
+    </message>
+    <message>
         <source>move pattern piece label</source>
         <translation>pindahkan label potongan pola</translation>
     </message>
@@ -8352,6 +8400,10 @@ Tekan enter untuk menambahkannya sementara ke daftar.</translation>
     <message>
         <source>Show Piece Label</source>
         <translation>Tampilkan label bagian</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>Duplikat</translation>
     </message>
     <message>
         <source>Rename...</source>
@@ -8436,6 +8488,10 @@ Tekan enter untuk menambahkannya sementara ke daftar.</translation>
     <message>
         <source>Update Node Angle</source>
         <translation>Perbarui Sudut Node</translation>
+    </message>
+    <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Duplikat Bagian Pola</translation>
     </message>
     <message>
         <source>Update Notch</source>
@@ -8944,14 +9000,6 @@ Tekan enter untuk menambahkannya sementara ke daftar.</translation>
         <source>Theme:</source>
         <translation>Tema:</translation>
     </message>
-    <message>
-        <source>Customize colors...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Workspace background and drawing colors (Graphics page)</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>PreferencesGraphicsViewPage</name>
@@ -9046,6 +9094,10 @@ Tekan enter untuk menambahkannya sementara ke daftar.</translation>
     <message>
         <source>Colors</source>
         <translation>Warna</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pada latar belakang gelap, tampilkan garis gelap, titik, dan label dengan warna lebih terang agar tetap terlihat (hitam beralih menjadi abu-abu muda). Pola mempertahankan warna aslinya saat disimpan, dicetak, dan diekspor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Zoom Rubberband</source>
@@ -9185,6 +9237,14 @@ Tekan enter untuk menambahkannya sementara ke daftar.</translation>
         <translation>Selalu gunakan pena saat ini</translation>
     </message>
     <message>
+        <source>Operations Tools</source>
+        <translation>Alat Operasional</translation>
+    </message>
+    <message>
+        <source>Use CTRL for multiple object selection</source>
+        <translation>Gunakan CTRL untuk pemilihan beberapa objek</translation>
+    </message>
+    <message>
         <source>Dialogs</source>
         <translation>Dialog</translation>
     </message>
@@ -9254,11 +9314,7 @@ Tekan enter untuk menambahkannya sementara ke daftar.</translation>
     </message>
     <message>
         <source>Adapt colors to a dark background</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.</source>
-        <translation type="unfinished"></translation>
+        <translation>Sesuaikan warna dengan latar belakang gelap</translation>
     </message>
 </context>
 <context>
@@ -12094,6 +12150,10 @@ unggah ke SeamlyME seperti biasa.
         <translation>Bunga Jagung Biru</translation>
     </message>
     <message>
+        <source>Black | White</source>
+        <translation>Hitam | Putih</translation>
+    </message>
+    <message>
         <source>Black</source>
         <translation>Hitam</translation>
     </message>
@@ -12243,11 +12303,11 @@ unggah ke SeamlyME seperti biasa.
     </message>
     <message>
         <source>Charcoal</source>
-        <translation type="unfinished"></translation>
+        <translation>Arang</translation>
     </message>
     <message>
         <source>Graphite</source>
-        <translation type="unfinished"></translation>
+        <translation>Grafit</translation>
     </message>
 </context>
 <context>

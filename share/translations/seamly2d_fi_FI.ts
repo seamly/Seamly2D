@@ -1704,6 +1704,22 @@ p, li { white-space: pre-wrap; }
         <translation>Valinta</translation>
     </message>
     <message>
+        <source>Geometry</source>
+        <translation>Geometria</translation>
+    </message>
+    <message>
+        <source>Length:</source>
+        <translation>Pituus:</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Arvo</translation>
+    </message>
+    <message>
+        <source>Angle:</source>
+        <translation>Kulma:</translation>
+    </message>
+    <message>
         <source>Attributes</source>
         <translation>Ominaisuudet</translation>
     </message>
@@ -6359,6 +6375,14 @@ Haluatko tallentaa muutokset?</translation>
         <translation>Näytä asiakirjan tiedot</translation>
     </message>
     <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Monista kaavan osa</translation>
+    </message>
+    <message>
+        <source>Duplicate selected pattern piece</source>
+        <translation>Monista valittu kaavan osa</translation>
+    </message>
+    <message>
         <source>Measurement file doesn&apos;t include all the required measurements.</source>
         <translation>Mittaustiedosto ei sisällä kaikkia vaadittuja mittauksia.</translation>
     </message>
@@ -6371,16 +6395,32 @@ Haluatko tallentaa muutokset?</translation>
         <translation>&lt;b&gt;Tool::Operations - Rotation:&lt;/b&gt; Valitse yksi tai useampi objekti - Pidä &lt;b&gt;%1&lt;/b&gt; painettuna valitaksesi useita, paina &lt;b&gt;ENTER&lt;/b&gt; vahvistaaksesi valinnan</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Rotation:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Tool::Operations - Rotation:&lt;/b&gt; Valitse yksi tai useampi objekti – Napsauta valittua objektia poistaaksesi sen valinnasta. Vahvista valinta painamalla &lt;b&gt;ENTER&lt;/b&gt;-näppäintä</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Tool::Operations - Peilikuva viivalla:&lt;/b&gt; Valitse yksi tai useampi objekti - Pidä &lt;b&gt;%1&lt;/b&gt;-näppäintä painettuna valitaksesi useita objekteja, paina &lt;b&gt;ENTER&lt;/b&gt;-näppäintä vahvistaaksesi valinnan</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Tool::Operations - Peilikuva viivalla:&lt;/b&gt; Valitse yksi tai useampi objekti – Napsauta valittua objektia poistaaksesi sen valinnasta. Vahvista valinta painamalla &lt;b&gt;ENTER&lt;/b&gt;-näppäintä</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Tool::Operations - Peilikuva akselin mukaan:&lt;/b&gt; Valitse yksi tai useampi objekti - Pidä &lt;b&gt;%1&lt;/b&gt; painettuna useita valintoja varten, paina &lt;b&gt;ENTER&lt;/b&gt; vahvistaaksesi valinnan</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Tool::Operations - Peilikuva akselin mukaan:&lt;/b&gt; Valitse yksi tai useampi objekti – Napsauta valittua objektia poistaaksesi sen valinnasta. Vahvista valinta painamalla &lt;b&gt;ENTER&lt;/b&gt;-näppäintä</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Tool::Operations - Siirrä:&lt;/b&gt; Valitse yksi tai useampi objekti - Pidä &lt;b&gt;%1&lt;/b&gt; painettuna useita valintoja varten, paina &lt;b&gt;ENTER&lt;/b&gt; vahvistaaksesi valinnan</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Tool::Operations - Siirrä:&lt;/b&gt; Valitse yksi tai useampi objekti – Napsauta valittua objektia poistaaksesi sen valinnasta. Vahvista valinta painamalla &lt;b&gt;ENTER&lt;/b&gt;-näppäintä</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - TrueDarts:&lt;/b&gt; Select the first base line point</source>
@@ -8274,6 +8314,14 @@ Lisää se väliaikaisesti listaan painamalla Enter-näppäintä.</translation>
         <translation>Nykyinen saumanvara</translation>
     </message>
     <message>
+        <source>%1 copy</source>
+        <translation>%1 kopio</translation>
+    </message>
+    <message>
+        <source>%1 copy %2</source>
+        <translation>%1 kopio %2</translation>
+    </message>
+    <message>
         <source>move pattern piece label</source>
         <translation>siirrä kaavapalan tunniste</translation>
     </message>
@@ -8352,6 +8400,10 @@ Lisää se väliaikaisesti listaan painamalla Enter-näppäintä.</translation>
     <message>
         <source>Show Piece Label</source>
         <translation>Näytä palan tunniste</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>Kopio</translation>
     </message>
     <message>
         <source>Rename...</source>
@@ -8436,6 +8488,10 @@ Lisää se väliaikaisesti listaan painamalla Enter-näppäintä.</translation>
     <message>
         <source>Update Node Angle</source>
         <translation>Päivitä solmun kulma</translation>
+    </message>
+    <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Monista kaavan osa</translation>
     </message>
     <message>
         <source>Update Notch</source>
@@ -8944,14 +9000,6 @@ Lisää se väliaikaisesti listaan painamalla Enter-näppäintä.</translation>
         <source>Theme:</source>
         <translation>Teema:</translation>
     </message>
-    <message>
-        <source>Customize colors...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Workspace background and drawing colors (Graphics page)</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>PreferencesGraphicsViewPage</name>
@@ -9046,6 +9094,10 @@ Lisää se väliaikaisesti listaan painamalla Enter-näppäintä.</translation>
     <message>
         <source>Colors</source>
         <translation>Värit</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tumman taustan päällä tummat viivat, pisteet ja etiketit näytetään vaaleampina, jotta ne pysyvät näkyvissä (musta näkyy vaaleanharmaana). Kuvio säilyttää todelliset värinsä tallennusta, tulostusta ja vientiä varten.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Zoom Rubberband</source>
@@ -9185,6 +9237,14 @@ Lisää se väliaikaisesti listaan painamalla Enter-näppäintä.</translation>
         <translation>Käytä aina nykyistä kynää</translation>
     </message>
     <message>
+        <source>Operations Tools</source>
+        <translation>Toimintotyökalut</translation>
+    </message>
+    <message>
+        <source>Use CTRL for multiple object selection</source>
+        <translation>Käytä CTRL-näppäintä usean kohteen valitsemiseen</translation>
+    </message>
+    <message>
         <source>Dialogs</source>
         <translation>Valintaikkunat</translation>
     </message>
@@ -9254,11 +9314,7 @@ Lisää se väliaikaisesti listaan painamalla Enter-näppäintä.</translation>
     </message>
     <message>
         <source>Adapt colors to a dark background</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.</source>
-        <translation type="unfinished"></translation>
+        <translation>Mukauta värit tummalle taustalle</translation>
     </message>
 </context>
 <context>
@@ -12094,6 +12150,10 @@ Haluatko tallentaa muutokset?</translation>
         <translation>Sininen maissinkukka</translation>
     </message>
     <message>
+        <source>Black | White</source>
+        <translation>Musta | Valkoinen</translation>
+    </message>
+    <message>
         <source>Black</source>
         <translation>Musta</translation>
     </message>
@@ -12243,11 +12303,11 @@ Haluatko tallentaa muutokset?</translation>
     </message>
     <message>
         <source>Charcoal</source>
-        <translation type="unfinished"></translation>
+        <translation>Hiili</translation>
     </message>
     <message>
         <source>Graphite</source>
-        <translation type="unfinished"></translation>
+        <translation>Grafiitti</translation>
     </message>
 </context>
 <context>

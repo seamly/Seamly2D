@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+     viewBox="0 0 1254 1254" role="img" aria-labelledby="title desc">
+  <title id="title">Copy piece</title>
+  <desc id="desc">A black garment piece overlaps a red duplicate inside a thin gray square border.</desc>
+  <rect id="background" width="1254" height="1254" fill="#f0f0f0"/>
+  <rect id="border" x="191" y="194" width="872" height="868"
+        fill="none" stroke="#969696" stroke-width="13"/>
+  <g id="pieces" fill="#f0f0f0" stroke-width="13"
+     stroke-linecap="butt" stroke-linejoin="miter">
+    <path id="red-copy" stroke="#ff0000"
+          d="M 555,370 C 615,369 670,352 719,324
+             C 753,371 799,399 854,403
+             L 823,515 Q 818,532 818,544
+             L 818,790 L 601,790 L 601,535
+             C 599,492 582,458 555,432 Z"/>
+    <path id="black-original" stroke="#000000"
+          d="M 399,471 C 463,470 526,447 575,416
+             C 609,463 656,490 709,497
+             L 678,620 Q 673,637 673,650
+             L 673,877 L 446,877 L 446,623
+             C 445,580 430,546 399,524 Z"/>
+  </g>
+</svg>

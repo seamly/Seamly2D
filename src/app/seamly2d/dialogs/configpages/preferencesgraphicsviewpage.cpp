@@ -94,7 +94,7 @@ PreferencesGraphicsViewPage::PreferencesGraphicsViewPage (QWidget *parent)
     // Background Color
     ui->bgColor_ComboBox->setItems(VAbstractTool::backgroundColorsList());
     setIndex(ui->bgColor_ComboBox, qApp->Seamly2DSettings()->getBackgroundColor());
-    ui->adaptColors_CheckBox->setChecked(qApp->Seamly2DSettings()->getAdaptColors());
+    ui->adaptColors_CheckBox->setChecked(qApp->Seamly2DSettings()->isAdaptiveColorEnabled());
 
     // Zoom Rubberband colors
     setIndex(ui->zrbPositiveColor_ComboBox, qApp->Seamly2DSettings()->getZoomRBPositiveColor());
@@ -139,8 +139,9 @@ PreferencesGraphicsViewPage::PreferencesGraphicsViewPage (QWidget *parent)
     // Constrain Angle Value & Modifier Key
     ui->constrainValue_DoubleSpinBox->setValue(qApp->Seamly2DSettings()->getConstrainValue());
     ui->constrainModKey_CheckBox->setChecked(qApp->Seamly2DSettings()->getConstrainModKey());
+    ui->cvontrol_select_checkbox->setChecked(qApp->Seamly2DSettings()->useControlSelect());
 
-    // Zoom double mouse click to selected IsTestModeEnabled
+    // Zoom double mouse click to selected isTestModeEnabled
     ui->zoomDoubleClick_CheckBox->setChecked(qApp->Seamly2DSettings()->isZoomDoubleClick());
 
     // Pan Zoom while Space Key pressed
@@ -246,7 +247,7 @@ void PreferencesGraphicsViewPage::Apply()
     // Color preferences
     // Background color
     settings->setBackgroundColor(ui->bgColor_ComboBox->currentData().toString());
-    settings->setAdaptColors(ui->adaptColors_CheckBox->isChecked());
+    settings->setAdaptiveColorEnabled(ui->adaptColors_CheckBox->isChecked());
 
 
     // Zoom Rubberband colors
@@ -284,8 +285,9 @@ void PreferencesGraphicsViewPage::Apply()
     // Constrain Angle Value & Modifier Key
     settings->setConstrainValue(ui->constrainValue_DoubleSpinBox->value());
     settings->setConstrainModKey(ui->constrainModKey_CheckBox->isChecked());
-
-    // Zoom double mouse click to selected IsTestModeEnabled
+    settings->setControlSelect(ui->cvontrol_select_checkbox->isChecked());
+    
+    // Zoom double mouse click to selected isTestModeEnabled
     settings->setZoomDoubleClick(ui->zoomDoubleClick_CheckBox->isChecked());
 
     // Pan Zoom while Space key pressed

@@ -214,6 +214,7 @@
      </property>
      <addaction name="union_Action"/>
      <addaction name="pieceMirror_Action"/>
+     <addaction name="duplicate_piece_action"/>
     </widget>
     <widget class="QMenu" name="lines_Menu">
      <property name="title">
@@ -4452,6 +4453,21 @@
    </property>
    <property name="shortcut">
     <string>Del</string>
+   </property>
+  </action>
+  <action name="duplicate_piece_action">
+   <property name="icon">
+    <iconset resource="share/resources/toolicon.qrc">
+     <normaloff>:/toolicon/32x32/copy_piece.png</normaloff>:/toolicon/32x32/copy_piece.png</iconset>
+   </property>
+   <property name="text">
+    <string>Copy Piece</string>
+   </property>
+   <property name="toolTip">
+    <string>Copy the Selected Piece (Ctrl+D)</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Ctrl+D</string>
    </property>
   </action>
  </widget>

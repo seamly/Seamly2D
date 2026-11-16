@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------
 //  @file   vcommonsettings.cpp
 //  @author slspencer
 //  @date   17 Sep, 2023
@@ -22,9 +22,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with Seamly2D.  If not, see <http://www.gnu.org/licenses/>.
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------
 //  @file   vcommonsettings.cpp
 //  @author Roman Telezhynskyi <dismine(at)gmail.com>
 //  @date   15 7, 2015
@@ -48,7 +48,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with Valentina.  If not, see <http://www.gnu.org/licenses/>.
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------
 
 #include "vcommonsettings.h"
 
@@ -174,6 +174,7 @@ const QString settingGraphicsViewTertiaryColor           = QStringLiteral("graph
 
 const QString settingGraphicsViewConstrainValue          = QStringLiteral("graphicsview/constrainValue");
 const QString settingGraphicsViewConstrainModKey         = QStringLiteral("graphicsview/constrainModKey");
+const QString settingGraphicsViewConytrolSelect          = QStringLiteral("graphicsview/controlSelect");
 
 const QString settingGraphicsViewPointNameSize           = QStringLiteral("graphicsview/pointNameSize");
 const QString settingGraphicsViewGuiFontSize             = QStringLiteral("graphicsview/guiFontSize");
@@ -183,7 +184,7 @@ const QString settingGraphicsViewWireframe               = QStringLiteral("graph
 const QString settingGraphicsViewShowControlPoints       = QStringLiteral("graphicsview/showControlPoints");
 const QString settingGraphicsViewShowAnchorPoints        = QStringLiteral("graphicsview/showAnchorPoints");
 const QString settingGraphicsUseToolColor                = QStringLiteral("graphicsview/useToolColor");
-const QString settingGraphicsAdaptColors                 = QStringLiteral("graphicsview/adaptColors");
+const QString settingGraphicsAdaptiveColor               = QStringLiteral("graphicsview/adaptColors");
 
 const QString settingPatternUndo                         = QStringLiteral("pattern/undo");
 const QString settingSelectionSound                      = QStringLiteral("pattern/selectionSound");
@@ -1918,6 +1919,18 @@ void VCommonSettings::setConstrainModKey(const bool &value)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+bool VCommonSettings::useControlSelect() const
+{
+    return value(settingGraphicsViewConytrolSelect, 1).toBool();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void VCommonSettings::setControlSelect(const bool &value)
+{
+    setValue(settingGraphicsViewConytrolSelect, value);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 QString VCommonSettings::getCompanyName() const
 {
     return value(settingConfigurationCompanyName, "").toString();
@@ -3018,17 +3031,17 @@ void VCommonSettings::setUseToolColor(bool value)
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief getAdaptColors whether drawing colors adapt to a dark workspace background.
 /// @return true if colors adapt, default true.
-bool VCommonSettings::getAdaptColors() const
+bool VCommonSettings::isAdaptiveColorEnabled() const
 {
-    return value(settingGraphicsAdaptColors, true).toBool();
+    return value(settingGraphicsAdaptiveColor, true).toBool();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/// @brief setAdaptColors set whether drawing colors adapt to a dark workspace background.
+/// @brief setAdaptiveColorEnabled set whether drawing colors adapt to a dark workspace background.
 /// @param value true to adapt colors.
-void VCommonSettings::setAdaptColors(bool value)
+void VCommonSettings::setAdaptiveColorEnabled(bool value)
 {
-    setValue(settingGraphicsAdaptColors, value);
+    setValue(settingGraphicsAdaptiveColor, value);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

@@ -782,7 +782,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Length:</source>
-        <translation>&gt;Longueur :</translation>
+        <translation>Longueur :</translation>
     </message>
     <message>
         <source>Center point:</source>
@@ -837,7 +837,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Length:</source>
-        <translation>&gt;Longueur :</translation>
+        <translation>Longueur :</translation>
     </message>
     <message>
         <source>Formula wizard</source>
@@ -1153,7 +1153,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Length:</source>
-        <translation>&gt;Longueur :</translation>
+        <translation>Longueur :</translation>
     </message>
     <message>
         <source>Formula wizard</source>
@@ -1224,7 +1224,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Length:</source>
-        <translation>&gt;Longueur :</translation>
+        <translation>Longueur :</translation>
     </message>
     <message>
         <source>Formula wizard</source>
@@ -1295,7 +1295,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Length:</source>
-        <translation>&gt;Longueur :</translation>
+        <translation>Longueur :</translation>
     </message>
     <message>
         <source>Formula wizard</source>
@@ -1496,7 +1496,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Length:</source>
-        <translation>&gt;Longueur :</translation>
+        <translation>Longueur :</translation>
     </message>
     <message>
         <source>Formula wizard</source>
@@ -1709,6 +1709,22 @@ p, li { white-space: pre-wrap; }
     <message>
         <source>Selection</source>
         <translation>Sélection</translation>
+    </message>
+    <message>
+        <source>Geometry</source>
+        <translation>Géométrie</translation>
+    </message>
+    <message>
+        <source>Length:</source>
+        <translation>Longueur :</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Valeur</translation>
+    </message>
+    <message>
+        <source>Angle:</source>
+        <translation>Angle :</translation>
     </message>
     <message>
         <source>Attributes</source>
@@ -1984,7 +2000,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Length:</source>
-        <translation>&gt;Longueur :</translation>
+        <translation>Longueur :</translation>
     </message>
     <message>
         <source>Suffix:</source>
@@ -2078,7 +2094,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Length:</source>
-        <translation>&gt;Longueur :</translation>
+        <translation>Longueur :</translation>
     </message>
     <message>
         <source>Formula wizard</source>
@@ -2539,7 +2555,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Length:</source>
-        <translation>&gt;Longueur :</translation>
+        <translation>Longueur :</translation>
     </message>
     <message>
         <source>Formula wizard</source>
@@ -2646,7 +2662,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Length:</source>
-        <translation>&gt;Longueur :</translation>
+        <translation>Longueur :</translation>
     </message>
     <message>
         <source>Formula wizard</source>
@@ -2797,7 +2813,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Length:</source>
-        <translation>&gt;Longueur :</translation>
+        <translation>Longueur :</translation>
     </message>
     <message>
         <source>Formula wizard</source>
@@ -4788,7 +4804,7 @@ Voulez-vous la télécharger ?</translation>
     </message>
     <message>
         <source>Length:</source>
-        <translation>&gt;Longueur :</translation>
+        <translation>Longueur :</translation>
     </message>
     <message>
         <source>Select main path objects, Use &lt;b&gt;SHIFT&lt;/b&gt; to reverse curve direction, Press &lt;b&gt;ENTER&lt;/b&gt; to finish path creation </source>
@@ -6383,6 +6399,14 @@ Voulez-vous sauvegarder les changements ?</translation>
         <translation>Afficher les informations du document</translation>
     </message>
     <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Dupliquer la pièce de patron</translation>
+    </message>
+    <message>
+        <source>Duplicate selected pattern piece</source>
+        <translation>Dupliquer la pièce de patron sélectionnée</translation>
+    </message>
+    <message>
         <source>Measurement file doesn&apos;t include all the required measurements.</source>
         <translation>Le fichier de mesures n&apos;inclut pas toutes les mesures requises.</translation>
     </message>
@@ -7045,6 +7069,22 @@ Voulez-vous sauvegarder les changements ?</translation>
     <message>
         <source>&lt;b&gt;Tool::Arc - Elliptical:&lt;/b&gt; Select point of center of elliptical arc</source>
         <translation>&lt;b&gt;Outil::Arc - Ellipse :&lt;/b&gt; Sélectionner le point central de l&apos;ellipse</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Rotation:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Outil::Opérations - Rotation :&lt;/b&gt; Sélectionnez un ou plusieurs objets ; cliquez sur un objet sélectionné pour le désélectionner. Confirmez la sélection en appuyant sur la touche &lt;b&gt;ENTRÉE&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Outil::Opérations - Symétrie par ligne :&lt;/b&gt; Sélectionnez un ou plusieurs objets ; cliquez sur un objet sélectionné pour le désélectionner. Confirmez la sélection en appuyant sur la touche &lt;b&gt;ENTRÉE&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Outil::Opérations - Symétrie par axe :&lt;/b&gt; Sélectionnez un ou plusieurs objets ; cliquez sur un objet sélectionné pour le désélectionner. Confirmez la sélection en appuyant sur la touche &lt;b&gt;ENTRÉE&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Outil::Opérations - Déplacer :&lt;/b&gt; Sélectionnez un ou plusieurs objets ; cliquez sur un objet sélectionné pour le désélectionner. Confirmez la sélection en appuyant sur la touche &lt;b&gt;ENTRÉE&lt;/b&gt;</translation>
     </message>
     <message>
         <source>Could not load the image.</source>
@@ -7952,7 +7992,7 @@ Appuyez sur Entrée pour l&apos;ajouter temporairement à la liste.</translation
     </message>
     <message>
         <source>Length:</source>
-        <translation>&gt;Longueur :</translation>
+        <translation>Longueur :</translation>
     </message>
     <message>
         <source>Arrows</source>
@@ -8298,6 +8338,14 @@ Appuyez sur Entrée pour l&apos;ajouter temporairement à la liste.</translation
         <translation>Marge de couture actuelle</translation>
     </message>
     <message>
+        <source>%1 copy</source>
+        <translation>Copie de %1</translation>
+    </message>
+    <message>
+        <source>%1 copy %2</source>
+        <translation>Copie de %1 %2</translation>
+    </message>
+    <message>
         <source>move pattern piece label</source>
         <translation>déplace l&apos;étiquette de la pièce de patron</translation>
     </message>
@@ -8376,6 +8424,10 @@ Appuyez sur Entrée pour l&apos;ajouter temporairement à la liste.</translation
     <message>
         <source>Show Piece Label</source>
         <translation>Afficher l&apos;étiquette de la pièce</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>Dupliquer</translation>
     </message>
     <message>
         <source>Rename...</source>
@@ -8460,6 +8512,10 @@ Appuyez sur Entrée pour l&apos;ajouter temporairement à la liste.</translation
     <message>
         <source>Update Node Angle</source>
         <translation>Mise à jour de l&apos;angle du nœud</translation>
+    </message>
+    <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Dupliquer la pièce de patron</translation>
     </message>
     <message>
         <source>Update Notch</source>
@@ -8970,14 +9026,6 @@ Appuyez sur Entrée pour l&apos;ajouter temporairement à la liste.</translation
         <source>Theme:</source>
         <translation>Thème :</translation>
     </message>
-    <message>
-        <source>Customize colors...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Workspace background and drawing colors (Graphics page)</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>PreferencesGraphicsViewPage</name>
@@ -9072,6 +9120,10 @@ Appuyez sur Entrée pour l&apos;ajouter temporairement à la liste.</translation
     <message>
         <source>Colors</source>
         <translation>Couleurs</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sur un fond sombre, afficher les lignes sombres, les points et les étiquettes plus clairs pour qu&apos;ils restent visibles (le noir s&apos;affiche en gris clair). Le motif conserve ses couleurs réelles pour l&apos;enregistrement, l&apos;impression et l&apos;exportation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Zoom Rubberband</source>
@@ -9203,6 +9255,14 @@ Appuyez sur Entrée pour l&apos;ajouter temporairement à la liste.</translation
         <translation>Qualité :</translation>
     </message>
     <message>
+        <source>Operations Tools</source>
+        <translation>Outils d&apos;opérations</translation>
+    </message>
+    <message>
+        <source>Use CTRL for multiple object selection</source>
+        <translation>Utilisez la touche CTRL pour sélectionner plusieurs objets</translation>
+    </message>
+    <message>
         <source>Dialogs</source>
         <translation>Dialogues</translation>
     </message>
@@ -9280,11 +9340,7 @@ Appuyez sur Entrée pour l&apos;ajouter temporairement à la liste.</translation
     </message>
     <message>
         <source>Adapt colors to a dark background</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.</source>
-        <translation type="unfinished"></translation>
+        <translation>Adapter les couleurs à un fond sombre</translation>
     </message>
 </context>
 <context>
@@ -9406,7 +9462,7 @@ Appuyez sur Entrée pour l&apos;ajouter temporairement à la liste.</translation
     </message>
     <message>
         <source>Length:</source>
-        <translation>&gt;Longueur :</translation>
+        <translation>Longueur :</translation>
     </message>
     <message>
         <source>Width:</source>
@@ -12123,6 +12179,10 @@ charger dans SeamlyME comme d&apos;habitude.
         <translation>Bleu Bleuet</translation>
     </message>
     <message>
+        <source>Black | White</source>
+        <translation>Noir | Blanc</translation>
+    </message>
+    <message>
         <source>Black</source>
         <translation>Noir</translation>
     </message>
@@ -12272,11 +12332,11 @@ charger dans SeamlyME comme d&apos;habitude.
     </message>
     <message>
         <source>Charcoal</source>
-        <translation type="unfinished"></translation>
+        <translation>Anthracite</translation>
     </message>
     <message>
         <source>Graphite</source>
-        <translation type="unfinished"></translation>
+        <translation>Graphite</translation>
     </message>
 </context>
 <context>
@@ -13526,7 +13586,7 @@ charger dans SeamlyME comme d&apos;habitude.
     </message>
     <message>
         <source>Length:</source>
-        <translation>&gt;Longueur :</translation>
+        <translation>Longueur :</translation>
     </message>
     <message>
         <source>Angle:</source>

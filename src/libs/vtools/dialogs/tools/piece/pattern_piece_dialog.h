@@ -279,6 +279,7 @@ private:
     void                        initializeAnchorsTab();
     void                        initializeNotchesTab();
     void                        initAnchorPointComboboxes();
+    bool                        isAnchorIdInUse(quint32 id) const;
 
     void                        setSeamAllowanceWidthFormula(const QString &formula);
 

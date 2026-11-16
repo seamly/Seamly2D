@@ -1689,6 +1689,22 @@ p, li { white-space: pre-wrap; }
         <translation>Selectie</translation>
     </message>
     <message>
+        <source>Geometry</source>
+        <translation>Geometrie</translation>
+    </message>
+    <message>
+        <source>Length:</source>
+        <translation>Lengte:</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Waarde</translation>
+    </message>
+    <message>
+        <source>Angle:</source>
+        <translation>Hoek:</translation>
+    </message>
+    <message>
         <source>Attributes</source>
         <translation>Kenmerken</translation>
     </message>
@@ -6342,6 +6358,14 @@ Wil je de veranderingen opslaan?</translation>
         <translation>Toon Document Info</translation>
     </message>
     <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Patroondeel dupliceren</translation>
+    </message>
+    <message>
+        <source>Duplicate selected pattern piece</source>
+        <translation>Geselecteerd patroondeel dupliceren</translation>
+    </message>
+    <message>
         <source>Measurement file doesn&apos;t include all the required measurements.</source>
         <translation>Matenbestand bevat niet alle benodigde maten.</translation>
     </message>
@@ -6354,16 +6378,32 @@ Wil je de veranderingen opslaan?</translation>
         <translation>&lt;b&gt;Gereedschap::Bewerkingen - Draaiing:&lt;/b&gt; Kies een of meer objecten - Druk &lt;b&gt;%1&lt;/b&gt; voor meervoudige selectie, Druk &lt;b&gt;ENTER&lt;/b&gt; om selectie te bevestigen</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Rotation:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Gereedschap::Bewerkingen - Draaiing:&lt;/b&gt; Kies een of meer objecten. Klik op een geselecteerd object om de selectie ervan ongedaan te maken. Bevestig de selectie door op &lt;b&gt;ENTER&lt;/b&gt; te drukken</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Gereedschap::Bewerkingen - Spiegel over Lijn:&lt;/b&gt; Kies een of meer objecten. Druk &lt;b&gt;%1&lt;/b&gt; voor meervoudige selectxie, Druk &lt;b&gt;ENTER&lt;/b&gt; om selectie te bevestigen</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Gereedschap::Bewerkingen - Spiegel over Lijn:&lt;/b&gt; Kies een of meer objecten. Klik op een geselecteerd object om de selectie ervan ongedaan te maken. Bevestig de selectie door op &lt;b&gt;ENTER&lt;/b&gt; te drukken</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Gereedschap::Bewerkingen - Spiegel over As:&lt;/b&gt; Kies een of meerdere objecten - Druk &lt;b&gt;%1&lt;/b&gt; voor meervoudige selectxie, Druk &lt;b&gt;ENTER&lt;/b&gt; om selectie te bevestigen</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Kies een of meer objecten. Klik op een geselecteerd object om de selectie ervan ongedaan te maken. Bevestig de selectie door op &lt;b&gt;ENTER&lt;/b&gt; te drukken</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Gereedschap::Bewerkingen - Verplaats:&lt;/b&gt; Kies een of meerdere objecten - Druk &lt;b&gt;%1&lt;/b&gt; voor meervoudige selectxie, Druk &lt;b&gt;ENTER&lt;/b&gt; om selectie te bevestigen</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Gereedschap::Bewerkingen - Verplaats:&lt;/b&gt; Kies een of meer objecten. Klik op een geselecteerd object om de selectie ervan ongedaan te maken. Bevestig de selectie door op &lt;b&gt;ENTER&lt;/b&gt; te drukken</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - TrueDarts:&lt;/b&gt; Select the first base line point</source>
@@ -8257,6 +8297,14 @@ Druk op enter om deze tijdelijk toe te voegen aan de lijst.</translation>
         <translation>Huidige naadtoeslag</translation>
     </message>
     <message>
+        <source>%1 copy</source>
+        <translation>Kopie van %1</translation>
+    </message>
+    <message>
+        <source>%1 copy %2</source>
+        <translation>Kopie van %1 %2&gt;</translation>
+    </message>
+    <message>
         <source>move pattern piece label</source>
         <translation>Verplaats patroondeellabel</translation>
     </message>
@@ -8335,6 +8383,10 @@ Druk op enter om deze tijdelijk toe te voegen aan de lijst.</translation>
     <message>
         <source>Show Piece Label</source>
         <translation>Toon label Patroondeel</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>Dubbel</translation>
     </message>
     <message>
         <source>Rename...</source>
@@ -8419,6 +8471,10 @@ Druk op enter om deze tijdelijk toe te voegen aan de lijst.</translation>
     <message>
         <source>Update Node Angle</source>
         <translation>Knooppunthoek bijwerken</translation>
+    </message>
+    <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Patroondeel dupliceren</translation>
     </message>
     <message>
         <source>Update Notch</source>
@@ -8927,14 +8983,6 @@ Druk op enter om deze tijdelijk toe te voegen aan de lijst.</translation>
         <source>Theme:</source>
         <translation>Thema:</translation>
     </message>
-    <message>
-        <source>Customize colors...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Workspace background and drawing colors (Graphics page)</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>PreferencesGraphicsViewPage</name>
@@ -9029,6 +9077,10 @@ Druk op enter om deze tijdelijk toe te voegen aan de lijst.</translation>
     <message>
         <source>Colors</source>
         <translation>Kleuren</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Toon op een donkere achtergrond donkere lijnen, punten en labels lichter zodat ze zichtbaar blijven (zwart wordt lichtgrijs). Het patroon behoudt zijn echte kleuren voor opslaan, afdrukken en exporteren.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Zoom Rubberband</source>
@@ -9168,6 +9220,14 @@ Druk op enter om deze tijdelijk toe te voegen aan de lijst.</translation>
         <translation>Gebruik altijd een actuele pen</translation>
     </message>
     <message>
+        <source>Operations Tools</source>
+        <translation>Bewerkingen Gereedschappen</translation>
+    </message>
+    <message>
+        <source>Use CTRL for multiple object selection</source>
+        <translation>Gebruik CTRL voor meervoudige objectselectie</translation>
+    </message>
+    <message>
         <source>Dialogs</source>
         <translation>Dialogen</translation>
     </message>
@@ -9237,11 +9297,7 @@ Druk op enter om deze tijdelijk toe te voegen aan de lijst.</translation>
     </message>
     <message>
         <source>Adapt colors to a dark background</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.</source>
-        <translation type="unfinished"></translation>
+        <translation>Kleuren aanpassen aan een donkere achtergrond</translation>
     </message>
 </context>
 <context>
@@ -12076,6 +12132,10 @@ load in SeamlyME as usual.
         <translation>Korenbloemblauw</translation>
     </message>
     <message>
+        <source>Black | White</source>
+        <translation>Zwart | Wit</translation>
+    </message>
+    <message>
         <source>Black</source>
         <translation>Zwart</translation>
     </message>
@@ -12225,11 +12285,11 @@ load in SeamlyME as usual.
     </message>
     <message>
         <source>Charcoal</source>
-        <translation type="unfinished"></translation>
+        <translation>Antraciet</translation>
     </message>
     <message>
         <source>Graphite</source>
-        <translation type="unfinished"></translation>
+        <translation>Grafiet</translation>
     </message>
 </context>
 <context>

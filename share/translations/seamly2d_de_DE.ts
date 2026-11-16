@@ -1689,6 +1689,22 @@ p, li { white-space: pre-wrap; }
         <translation>Auswahl</translation>
     </message>
     <message>
+        <source>Geometry</source>
+        <translation>Geometrie</translation>
+    </message>
+    <message>
+        <source>Length:</source>
+        <translation>Länge:</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Wert</translation>
+    </message>
+    <message>
+        <source>Angle:</source>
+        <translation>Winkel:</translation>
+    </message>
+    <message>
         <source>Attributes</source>
         <translation>Eigenschaften</translation>
     </message>
@@ -6342,6 +6358,14 @@ Sollen die Änderungen gespeichert werden?</translation>
         <translation>Dokument Info anzeigen</translation>
     </message>
     <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Schnittteil duplizieren</translation>
+    </message>
+    <message>
+        <source>Duplicate selected pattern piece</source>
+        <translation>Ausgewähltes Schnittteil duplizieren</translation>
+    </message>
+    <message>
         <source>Measurement file doesn&apos;t include all the required measurements.</source>
         <translation>Maßdatei beinhaltet nicht alle erforderlichen Maße.</translation>
     </message>
@@ -6350,16 +6374,32 @@ Sollen die Änderungen gespeichert werden?</translation>
         <translation>&lt;b&gt;Werkzeug::Operationen - Gruppe erstellen:&lt;/b&gt; Wähle ein oder mehrere Objekte aus - Halte &lt;b&gt;%1&lt;/b&gt; für Mehrfachauswahl, mit &lt;b&gt;ENTER&lt;/b&gt; die Gruppenerstellung abschließen </translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Rotation:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Werkzeug::Operationen - Drehung:&lt;/b&gt; Wähle ein oder mehrere Objekte aus - Klicken Sie auf das ausgewählte Objekt, um die Auswahl aufzuheben. mit &lt;b&gt;ENTER&lt;/b&gt; die Auswahl bestätigen</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Werkzeug::Operationen - Spiegeln an einer Linie:&lt;/b&gt; wähle ein oder mehrere Objekte aus - Halten &lt;b&gt;%1&lt;/b&gt; für Mehrfachauswahl, mit &lt;b&gt;ENTER&lt;/b&gt; die Auswahl bestätigen</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Werkzeug::Operationen - Spiegeln an einer Linie:&lt;/b&gt; Wähle ein oder mehrere Objekte aus - Klicken Sie auf das ausgewählte Objekt, um die Auswahl aufzuheben. mit &lt;b&gt;ENTER&lt;/b&gt; die Auswahl bestätigen</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Werkzeug::Operationen - Spiegeln an einer Achse:&lt;/b&gt; wähle ein oder mehrere Objekte aus - Halten &lt;b&gt;%1&lt;/b&gt; für Mehrfachauswahl, mit &lt;b&gt;ENTER&lt;/b&gt; die Auswahl bestätigen</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Werkzeug::Operationen - Spiegeln an einer Achse:&lt;/b&gt; Wähle ein oder mehrere Objekte aus - Klicken Sie auf das ausgewählte Objekt, um die Auswahl aufzuheben. mit &lt;b&gt;ENTER&lt;/b&gt; die Auswahl bestätigen</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Werkzeug::Operationen - Bewegen:&lt;/b&gt; Wähle ein oder mehrere Objekte aus - Halten &lt;b&gt;%1&lt;/b&gt; für Mehrfachauswahl, mit &lt;b&gt;ENTER&lt;/b&gt; die Auswahl bestätigen</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Werkzeug::Operationen - Bewegen:&lt;/b&gt; Wähle ein oder mehrere Objekte aus - Klicken Sie auf das ausgewählte Objekt, um die Auswahl aufzuheben. mit &lt;b&gt;ENTER&lt;/b&gt; die Auswahl bestätigen</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - TrueDarts:&lt;/b&gt; Select the first base line point</source>
@@ -8257,6 +8297,14 @@ Drücken Sie die Eingabetaste, um ihn vorübergehend in die Liste aufzunehmen.</
         <translation>Aktuelle Nahtzugabe</translation>
     </message>
     <message>
+        <source>%1 copy</source>
+        <translation>%1 Kopie</translation>
+    </message>
+    <message>
+        <source>%1 copy %2</source>
+        <translation>%1 Kopie %2</translation>
+    </message>
+    <message>
         <source>move pattern piece label</source>
         <translation>Schnittteil Etikett bewegen</translation>
     </message>
@@ -8335,6 +8383,10 @@ Drücken Sie die Eingabetaste, um ihn vorübergehend in die Liste aufzunehmen.</
     <message>
         <source>Show Piece Label</source>
         <translation>Schnittteil Etikett anzeigen</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>Duplizieren</translation>
     </message>
     <message>
         <source>Rename...</source>
@@ -8419,6 +8471,10 @@ Drücken Sie die Eingabetaste, um ihn vorübergehend in die Liste aufzunehmen.</
     <message>
         <source>Update Node Angle</source>
         <translation>Aktualisieren des Knotenwinkels</translation>
+    </message>
+    <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Schnittteil duplizieren</translation>
     </message>
     <message>
         <source>Update Notch</source>
@@ -8928,14 +8984,6 @@ Drücken Sie die Eingabetaste, um ihn vorübergehend in die Liste aufzunehmen.</
         <source>Theme:</source>
         <translation>Thema:</translation>
     </message>
-    <message>
-        <source>Customize colors...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Workspace background and drawing colors (Graphics page)</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>PreferencesGraphicsViewPage</name>
@@ -9030,6 +9078,10 @@ Drücken Sie die Eingabetaste, um ihn vorübergehend in die Liste aufzunehmen.</
     <message>
         <source>Colors</source>
         <translation>Farben</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Zeigen Sie auf einem dunklen Hintergrund dunkle Linien, Punkte und Beschriftungen heller an, damit sie sichtbar bleiben (Schwarz wird als Hellgrau angezeigt). Das Muster behält seine echten Farben beim Speichern, Drucken und Exportieren bei.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Zoom Rubberband</source>
@@ -9169,6 +9221,14 @@ Drücken Sie die Eingabetaste, um ihn vorübergehend in die Liste aufzunehmen.</
         <translation>Verwenden Sie immer den aktuellen Stift</translation>
     </message>
     <message>
+        <source>Operations Tools</source>
+        <translation>Operations Werkzeuge</translation>
+    </message>
+    <message>
+        <source>Use CTRL for multiple object selection</source>
+        <translation>Verwenden Sie STRG für die Mehrfachauswahl von Objekten</translation>
+    </message>
+    <message>
         <source>Dialogs</source>
         <translation>Dialoge</translation>
     </message>
@@ -9238,11 +9298,7 @@ Drücken Sie die Eingabetaste, um ihn vorübergehend in die Liste aufzunehmen.</
     </message>
     <message>
         <source>Adapt colors to a dark background</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.</source>
-        <translation type="unfinished"></translation>
+        <translation>Farben an einen dunklen Hintergrund anpassen</translation>
     </message>
 </context>
 <context>
@@ -12078,6 +12134,10 @@ wie gewohnt in SeamlyME laden können.
         <translation>Kornblumenblau</translation>
     </message>
     <message>
+        <source>Black | White</source>
+        <translation>Schwarz | Weiß</translation>
+    </message>
+    <message>
         <source>Black</source>
         <translation>Schwarz</translation>
     </message>
@@ -12229,11 +12289,11 @@ wie gewohnt in SeamlyME laden können.
     </message>
     <message>
         <source>Charcoal</source>
-        <translation type="unfinished"></translation>
+        <translation>Kohle</translation>
     </message>
     <message>
         <source>Graphite</source>
-        <translation type="unfinished"></translation>
+        <translation>Graphit</translation>
     </message>
 </context>
 <context>

@@ -1689,6 +1689,22 @@ p, li { white-space: pre-wrap; }
         <translation>Seleção</translation>
     </message>
     <message>
+        <source>Geometry</source>
+        <translation>Geometria</translation>
+    </message>
+    <message>
+        <source>Length:</source>
+        <translation>Comprimento:</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Valor</translation>
+    </message>
+    <message>
+        <source>Angle:</source>
+        <translation>Ângulo:</translation>
+    </message>
+    <message>
         <source>Attributes</source>
         <translation>Atributos</translation>
     </message>
@@ -6344,6 +6360,14 @@ Deseja salvar suas alterações?</translation>
         <translation>Exibir informações do documento</translation>
     </message>
     <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Duplicar parte do molde</translation>
+    </message>
+    <message>
+        <source>Duplicate selected pattern piece</source>
+        <translation>Duplicar a parte do molde selecionada</translation>
+    </message>
+    <message>
         <source>Measurement file doesn&apos;t include all the required measurements.</source>
         <translation>O arquivo de medições não inclui todas as medidas necessárias.</translation>
     </message>
@@ -6356,16 +6380,32 @@ Deseja salvar suas alterações?</translation>
         <translation>&lt;b&gt;Ferramenta::Operações - Rotação:&lt;/b&gt; Selecione um ou mais objetos - segure &lt;b&gt;%1&lt;/b&gt; para seleção múltipla, pressione &lt;b&gt;ENTER&lt;/b&gt; para confirmar a seleção</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Rotation:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Ferramenta::Operações - Rotação:&lt;/b&gt; Selecione um ou mais objetos – clique em um objeto selecionado para desmarcá-lo; pressione &lt;b&gt;ENTER&lt;/b&gt; para confirmar a seleção</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Ferramenta::Operações - Espelhar por linha:&lt;/b&gt; Selecione um ou mais objetos - segure &lt;b&gt;%1&lt;/b&gt; para seleção múltipla, pressione &lt;b&gt;ENTER&lt;/b&gt; para confirmar a seleção</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Ferramenta::Operações - Espelhar por linha:&lt;/b&gt; Selecione um ou mais objetos – clique em um objeto selecionado para desmarcá-lo; pressione &lt;b&gt;ENTER&lt;/b&gt; para confirmar a seleção</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Ferramenta::Operações - Espelhar por eixo:&lt;/b&gt; Selecione um ou mais objetos - segure &lt;b&gt;%1&lt;/b&gt; para seleção múltipla, pressione &lt;b&gt;ENTER&lt;/b&gt; para confirmar a seleção</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Ferramenta::Operações - Espelhar por eixo:&lt;/b&gt; Selecione um ou mais objetos – clique em um objeto selecionado para desmarcá-lo; pressione &lt;b&gt;ENTER&lt;/b&gt; para confirmar a seleção</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Ferramenta::Operações - Mover:&lt;/b&gt; Selecione um ou mais objetos - segure &lt;b&gt;%1&lt;/b&gt; para seleção múltipla, pressione &lt;b&gt;ENTER&lt;/b&gt; para confirmar a seleção</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Ferramenta::Operações - Mover:&lt;/b&gt; Selecione um ou mais objetos – clique em um objeto selecionado para desmarcá-lo; pressione &lt;b&gt;ENTER&lt;/b&gt; para confirmar a seleção</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - TrueDarts:&lt;/b&gt; Select the first base line point</source>
@@ -8260,6 +8300,14 @@ Pressione Enter para adicioná-lo temporariamente à lista.</translation>
         <translation>Margem de costura atual</translation>
     </message>
     <message>
+        <source>%1 copy</source>
+        <translation>Cópia de %1</translation>
+    </message>
+    <message>
+        <source>%1 copy %2</source>
+        <translation>Cópia de %1 %2</translation>
+    </message>
+    <message>
         <source>move pattern piece label</source>
         <translation>mover etiqueta da peça do molde</translation>
     </message>
@@ -8338,6 +8386,10 @@ Pressione Enter para adicioná-lo temporariamente à lista.</translation>
     <message>
         <source>Show Piece Label</source>
         <translation>Mostrar rótulo da peça</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>Duplicar</translation>
     </message>
     <message>
         <source>Rename...</source>
@@ -8422,6 +8474,10 @@ Pressione Enter para adicioná-lo temporariamente à lista.</translation>
     <message>
         <source>Update Node Angle</source>
         <translation>Atualizar ângulo do nó</translation>
+    </message>
+    <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Duplicar parte do molde</translation>
     </message>
     <message>
         <source>Update Notch</source>
@@ -8930,14 +8986,6 @@ Pressione Enter para adicioná-lo temporariamente à lista.</translation>
         <source>Theme:</source>
         <translation>Tema:</translation>
     </message>
-    <message>
-        <source>Customize colors...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Workspace background and drawing colors (Graphics page)</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>PreferencesGraphicsViewPage</name>
@@ -9032,6 +9080,10 @@ Pressione Enter para adicioná-lo temporariamente à lista.</translation>
     <message>
         <source>Colors</source>
         <translation>Cores</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Num fundo escuro, mostrar linhas, pontos e etiquetas escuras mais claros para que permaneçam visíveis (o preto aparece como cinzento claro). O padrão mantém as suas cores reais para guardar, imprimir e exportar.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Zoom Rubberband</source>
@@ -9171,6 +9223,14 @@ Pressione Enter para adicioná-lo temporariamente à lista.</translation>
         <translation>Usar sempre a caneta atual</translation>
     </message>
     <message>
+        <source>Operations Tools</source>
+        <translation>Ferramentas de operações</translation>
+    </message>
+    <message>
+        <source>Use CTRL for multiple object selection</source>
+        <translation>Use CTRL para seleção de múltiplos objetos</translation>
+    </message>
+    <message>
         <source>Dialogs</source>
         <translation>Diálogos</translation>
     </message>
@@ -9240,11 +9300,7 @@ Pressione Enter para adicioná-lo temporariamente à lista.</translation>
     </message>
     <message>
         <source>Adapt colors to a dark background</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.</source>
-        <translation type="unfinished"></translation>
+        <translation>Adaptar cores a um fundo escuro</translation>
     </message>
 </context>
 <context>
@@ -12081,6 +12137,10 @@ carregar no SeamlyME como de costume.
         <translation>Azul flor-de-milho</translation>
     </message>
     <message>
+        <source>Black | White</source>
+        <translation>Preto | Branco</translation>
+    </message>
+    <message>
         <source>Black</source>
         <translation>Preto</translation>
     </message>
@@ -12230,11 +12290,11 @@ carregar no SeamlyME como de costume.
     </message>
     <message>
         <source>Charcoal</source>
-        <translation type="unfinished"></translation>
+        <translation>Carvão</translation>
     </message>
     <message>
         <source>Graphite</source>
-        <translation type="unfinished"></translation>
+        <translation>Grafite</translation>
     </message>
 </context>
 <context>

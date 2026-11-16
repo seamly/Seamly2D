@@ -1696,6 +1696,22 @@ p, li { white-space: pre-wrap; }
         <translation>Második pont:</translation>
     </message>
     <message>
+        <source>Geometry</source>
+        <translation>Geometria</translation>
+    </message>
+    <message>
+        <source>Length:</source>
+        <translation>Hossz:</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Érték</translation>
+    </message>
+    <message>
+        <source>Angle:</source>
+        <translation>Szög:</translation>
+    </message>
+    <message>
         <source>Attributes</source>
         <translation>Attribútumok</translation>
     </message>
@@ -6464,6 +6480,14 @@ A programot A JELENLEGI ÁLLAPOTUKBAN biztosítjuk, SEMMILYEN GARANCIA NÉLKÜL,
         <translation>Következő vázlatblokk</translation>
     </message>
     <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Szabásminta-darab duplikálása</translation>
+    </message>
+    <message>
+        <source>Duplicate selected pattern piece</source>
+        <translation>Kijelölt szabásminta-darab duplikálása</translation>
+    </message>
+    <message>
         <source>New pattern</source>
         <translation>Új minta</translation>
     </message>
@@ -6649,19 +6673,35 @@ A programot A JELENLEGI ÁLLAPOTUKBAN biztosítjuk, SEMMILYEN GARANCIA NÉLKÜL,
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - Rotation:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
-        <translation>&lt;b&gt;Eszköz::Műveletek - Forgatás:&lt;/b&gt; Válasszon ki egy vagy több objektumot - Tartsa lenyomva a &lt;b&gt;%1&lt;/b&gt; billentyűt többszörös kijelöléshez, nyomja meg az &lt;b&gt;ENTER&lt;/b&gt; billentyűt a kijelölés megerősítéséhez</translation>
+        <translation>&lt;b&gt;Eszköz::Műveletek - Forgatás:&lt;/b&gt; Jelöljön ki objektumokat (többszörös kijelöléshez tartsa lenyomva: &lt;b&gt;%1&lt;/b&gt;, majd erősítse meg az &lt;b&gt;ENTER&lt;/b&gt; billentyűvel</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Rotation:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Eszköz::Műveletek - Forgatás:&lt;/b&gt; Jelöljön ki objektumokat (újabb kattintással megszüntethető), majd erősítse meg az &lt;b&gt;ENTER&lt;/b&gt; billentyűvel</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
-        <translation>&lt;b&gt;Eszköz::Műveletek - Vonalról vonalra tükrözés:&lt;/b&gt; Jelöljön ki egy vagy több objektumot - Tartsa lenyomva a &lt;b&gt;%1&lt;/b&gt; billentyűt többszörös kijelöléshez, nyomja meg az &lt;b&gt;ENTER&lt;/b&gt; billentyűt a kijelölés megerősítéséhez</translation>
+        <translation>&lt;b&gt;Eszköz::Műveletek - Vonalról vonalra tükrözés:&lt;/b&gt; Jelöljön ki objektumokat (többszörös kijelöléshez tartsa lenyomva: &lt;b&gt;%1&lt;/b&gt;, majd erősítse meg az &lt;b&gt;ENTER&lt;/b&gt; billentyűvel</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Eszköz::Műveletek - Vonalról vonalra tükrözés:&lt;/b&gt; Jelöljön ki objektumokat (újabb kattintással megszüntethető), majd erősítse meg az &lt;b&gt;ENTER&lt;/b&gt; billentyűvel</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
-        <translation>&lt;b&gt;Eszköz::Műveletek - Tengely szerinti tükrözés:&lt;/b&gt; Válasszon ki egy vagy több objektumot - Tartsa lenyomva a &lt;b&gt;%1&lt;/b&gt; billentyűt többszörös kijelöléshez, nyomja meg az &lt;b&gt;ENTER&lt;/b&gt; billentyűt a kijelölés megerősítéséhez</translation>
+        <translation>&lt;b&gt;Eszköz::Műveletek - Tengely szerinti tükrözés:&lt;/b&gt; Jelöljön ki objektumokat (többszörös kijelöléshez tartsa lenyomva: &lt;b&gt;%1&lt;/b&gt;, majd erősítse meg az &lt;b&gt;ENTER&lt;/b&gt; billentyűvel</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Jelöljön ki objektumokat (újabb kattintással megszüntethető), majd erősítse meg az &lt;b&gt;ENTER&lt;/b&gt; billentyűvel</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
-        <translation>&lt;b&gt;Eszköz::Műveletek - Mozgatás:&lt;/b&gt; Válasszon ki egy vagy több objektumot - Tartsa lenyomva a &lt;b&gt;%1&lt;/b&gt; billentyűt többszörös kijelöléshez, nyomja meg az &lt;b&gt;ENTER&lt;/b&gt; billentyűt a kijelölés megerősítéséhez</translation>
+        <translation>&lt;b&gt;Eszköz::Műveletek - Mozgatás:&lt;/b&gt; Jelöljön ki objektumokat (többszörös kijelöléshez tartsa lenyomva: &lt;b&gt;%1&lt;/b&gt;, majd erősítse meg az &lt;b&gt;ENTER&lt;/b&gt; billentyűvel</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Eszköz::Műveletek - Mozgatás:&lt;/b&gt; Jelöljön ki objektumokat (újabb kattintással megszüntethető), majd erősítse meg az &lt;b&gt;ENTER&lt;/b&gt; billentyűvel</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - TrueDarts:&lt;/b&gt; Select the first base line point</source>
@@ -6681,7 +6721,7 @@ A programot A JELENLEGI ÁLLAPOTUKBAN biztosítjuk, SEMMILYEN GARANCIA NÉLKÜL,
     </message>
     <message>
         <source>&lt;b&gt;Tool::Piece - Insert Nodes:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
-        <translation>&lt;b&gt;Eszköz::Darab - Csomópontok beszúrása:&lt;/b&gt; Válasszon ki egy vagy több objektumot - Tartsa lenyomva a &lt;b&gt;%1&lt;/b&gt; billentyűt többszörös kijelöléshez, nyomja meg az &lt;b&gt;ENTER&lt;/b&gt; billentyűt a kijelölés megerősítéséhez</translation>
+        <translation>&lt;b&gt;Eszköz::Darab - Csomópontok beszúrása:&lt;/b&gt; Jelöljön ki objektumokat (többszörös kijelöléshez tartsa lenyomva: &lt;b&gt;%1&lt;/b&gt;, majd erősítse meg az &lt;b&gt;ENTER&lt;/b&gt; billentyűvel</translation>
     </message>
     <message>
         <source>Could not load the image.</source>
@@ -8273,6 +8313,18 @@ Menti a módosításokat?</translation>
         <translation>Jelenlegi varrásráhagyás</translation>
     </message>
     <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Szabásminta-darab duplikálása</translation>
+    </message>
+    <message>
+        <source>%1 copy</source>
+        <translation>%1 másolat</translation>
+    </message>
+    <message>
+        <source>%1 copy %2</source>
+        <translation>%1 másolat %2</translation>
+    </message>
+    <message>
         <source>move pattern piece label</source>
         <translation>mintadarab címkéjének áthelyezése</translation>
     </message>
@@ -8351,6 +8403,10 @@ Menti a módosításokat?</translation>
     <message>
         <source>Show Piece Label</source>
         <translation>Darabcímke megjelenítése</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>Másodpéldány</translation>
     </message>
     <message>
         <source>Rename...</source>
@@ -8943,14 +8999,6 @@ Menti a módosításokat?</translation>
         <source>Theme:</source>
         <translation>Téma:</translation>
     </message>
-    <message>
-        <source>Customize colors...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Workspace background and drawing colors (Graphics page)</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>PreferencesGraphicsViewPage</name>
@@ -9097,6 +9145,10 @@ Menti a módosításokat?</translation>
     <message>
         <source>Background:</source>
         <translation>Háttér:</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sötét háttér esetén a sötét vonalak, pontok és címkék világosabban jelenjenek meg, hogy láthatóak maradjanak (a fekete világosszürkén jelenik meg). A minta megőrzi a valódi színeit a mentéshez, nyomtatáshoz és exporthoz.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Zoom Rubberband</source>
@@ -9248,16 +9300,20 @@ Menti a módosításokat?</translation>
         <translation>Automatikusan törlődő képlet</translation>
     </message>
     <message>
+        <source>Operations Tools</source>
+        <translation>Műveleti eszközök</translation>
+    </message>
+    <message>
+        <source>Use CTRL for multiple object selection</source>
+        <translation>Több objektum kiválasztásához használja a CTRL billentyűt</translation>
+    </message>
+    <message>
         <source>Use native dialogs</source>
         <translation>Használjon natív párbeszédablakokat</translation>
     </message>
     <message>
         <source>Adapt colors to a dark background</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.</source>
-        <translation type="unfinished"></translation>
+        <translation>Színek igazítása a sötét háttérhez</translation>
     </message>
 </context>
 <context>
@@ -12092,6 +12148,10 @@ Menti a módosításokat?</translation>
         <translation>Kukoricavirág kék</translation>
     </message>
     <message>
+        <source>Black | White</source>
+        <translation>Fekete | Fehér</translation>
+    </message>
+    <message>
         <source>Black</source>
         <translation>Fekete</translation>
     </message>
@@ -12241,11 +12301,11 @@ Menti a módosításokat?</translation>
     </message>
     <message>
         <source>Charcoal</source>
-        <translation type="unfinished"></translation>
+        <translation>Antracit</translation>
     </message>
     <message>
         <source>Graphite</source>
-        <translation type="unfinished"></translation>
+        <translation>Grafit</translation>
     </message>
 </context>
 <context>

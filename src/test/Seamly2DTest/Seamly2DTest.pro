@@ -42,7 +42,7 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\"
 SOURCES += \
     TestHandoffAnnotationAlignment.cpp \
     qttestmainlambda.cpp \
-    ../../app/seamly2d/core/vcmdexport.cpp \
+    ../../app/seamly2d/core/command_line.cpp \
     tst_vspline.cpp \
     tst_nameregexp.cpp \
     tst_vlayoutdetail.cpp \

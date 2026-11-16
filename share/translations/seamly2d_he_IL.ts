@@ -1689,6 +1689,22 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Geometry</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Length:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Angle:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Attributes</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6324,6 +6340,14 @@ Do you want to save your changes?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Duplicate selected pattern piece</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Measurement file doesn&apos;t include all the required measurements.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6340,7 +6364,15 @@ Do you want to save your changes?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Rotation:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6348,7 +6380,15 @@ Do you want to save your changes?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -8238,6 +8278,14 @@ Press enter to temporarily add it to the list.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>%1 copy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 copy %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>move pattern piece label</source>
         <translation type="unfinished"></translation>
     </message>
@@ -8315,6 +8363,10 @@ Press enter to temporarily add it to the list.</source>
     </message>
     <message>
         <source>Show Piece Label</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -8399,6 +8451,10 @@ Press enter to temporarily add it to the list.</source>
     </message>
     <message>
         <source>Update Node Angle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Duplicate Pattern Piece</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -8908,14 +8964,6 @@ Press enter to temporarily add it to the list.</source>
         <source>Theme:</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Customize colors...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Workspace background and drawing colors (Graphics page)</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>PreferencesGraphicsViewPage</name>
@@ -9009,6 +9057,10 @@ Press enter to temporarily add it to the list.</source>
     </message>
     <message>
         <source>Colors</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -9149,6 +9201,14 @@ Press enter to temporarily add it to the list.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Operations Tools</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use CTRL for multiple object selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Dialogs</source>
         <translation type="unfinished"></translation>
     </message>
@@ -9218,10 +9278,6 @@ Press enter to temporarily add it to the list.</source>
     </message>
     <message>
         <source>Adapt colors to a dark background</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -12048,6 +12104,10 @@ load in SeamlyME as usual.
     </message>
     <message>
         <source>Corn Flower Blue</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Black | White</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

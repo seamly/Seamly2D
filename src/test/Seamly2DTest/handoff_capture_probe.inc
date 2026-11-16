@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // License: https://www.gnu.org/licenses/gpl-3.0.html
 
-if (loaded && cmd->IsTestModeEnabled() && !qEnvironmentVariable("HANDOFF_CAPTURE_DIRECTORY").isEmpty())
+if (loaded && cmd->isTestModeEnabled() && !qEnvironmentVariable("HANDOFF_CAPTURE_DIRECTORY").isEmpty())
 {
     preparePiecesForLayout(currentLayoutPieces());
     if (!prepareMultisizePieceLists())

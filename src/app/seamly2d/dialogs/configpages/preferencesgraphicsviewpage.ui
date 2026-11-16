@@ -1511,7 +1511,7 @@
                </font>
               </property>
               <property name="toolTip">
-               <string>On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
                <string>Adapt colors to a dark background</string>
@@ -3284,6 +3284,37 @@ border-radius: 4px;
            <widget class="QCheckBox" name="autoClearFx_CheckBox">
             <property name="text">
              <string>Auto clear formula</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="snap_to_origin_groupbox">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="title">
+          <string>Operations Tools</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_28">
+          <item>
+           <widget class="QCheckBox" name="cvontrol_select_checkbox">
+            <property name="text">
+             <string>Use CTRL for multiple object selection</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>

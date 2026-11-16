@@ -50,7 +50,7 @@
  *************************************************************************/
 
 #include "tst_vcommandline.h"
-#include "vcmdexport.h"
+#include "command_line.h"
 #include "../vmisc/commandoptions.h"
 #include "../vmisc/logging.h"
 
@@ -104,12 +104,12 @@ void TST_VCommandLine::LayoutExportOptions()
     };
 
     QVERIFY(command_line.parser.parse(arguments));
-    QVERIFY(command_line.IsLayoutExportEnabled());
-    QCOMPARE(command_line.OptLayoutFormat(), QStringLiteral("svg"));
-    QCOMPARE(command_line.OptLayoutOutput(), QFileInfo(output_path).absoluteFilePath());
-    QCOMPARE(command_line.OptLayoutSettings(), QFileInfo(settings_path).absoluteFilePath());
-    QCOMPARE(command_line.OptLayoutExportOptions(), QFileInfo(export_options_path).absoluteFilePath());
-    QCOMPARE(command_line.OptSvgTextMode(), QStringLiteral("hersheyStrokes"));
+    QVERIFY(command_line.isLayoutExportEnabled());
+    QCOMPARE(command_line.layoutFormatOption(), QStringLiteral("svg"));
+    QCOMPARE(command_line.layoutOutputOption(), QFileInfo(output_path).absoluteFilePath());
+    QCOMPARE(command_line.layoutSettingsOption(), QFileInfo(settings_path).absoluteFilePath());
+    QCOMPARE(command_line.layoutExportOptionsOption(), QFileInfo(export_options_path).absoluteFilePath());
+    QCOMPARE(command_line.svgTextModeOption(), QStringLiteral("hersheyStrokes"));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -139,9 +139,9 @@ void TST_VCommandLine::LayoutExportUsesDefaultSvgFormat()
     };
 
     QVERIFY(command_line.parser.parse(arguments));
-    QVERIFY(command_line.IsLayoutExportEnabled());
-    QCOMPARE(command_line.OptLayoutFormat(), QStringLiteral("svg"));
-    QCOMPARE(command_line.OptSvgTextMode(), QStringLiteral("designerFont"));
+    QVERIFY(command_line.isLayoutExportEnabled());
+    QCOMPARE(command_line.layoutFormatOption(), QStringLiteral("svg"));
+    QCOMPARE(command_line.svgTextModeOption(), QStringLiteral("designerFont"));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -157,7 +157,7 @@ void TST_VCommandLine::LayoutExportRequiresOutput()
     };
 
     QVERIFY(command_line.parser.parse(arguments));
-    QVERIFY(command_line.OptLayoutOutput().isEmpty());
+    QVERIFY(command_line.layoutOutputOption().isEmpty());
     QCOMPARE(command_line.layoutExportError(),
              QStringLiteral("--layout-export requires --layout-output <path>."));
 }
@@ -228,8 +228,8 @@ void TST_VCommandLine::LayoutExportScale()
     };
 
     QVERIFY(command_line.parser.parse(arguments));
-    QVERIFY(command_line.IsLayoutExportEnabled());
-    QCOMPARE(command_line.OptLayoutScale(), QStringLiteral("2.0"));
+    QVERIFY(command_line.isLayoutExportEnabled());
+    QCOMPARE(command_line.layoutScaleOption(), QStringLiteral("2.0"));
 }
 
 //---------------------------------------------------------------------------------------------------------------------

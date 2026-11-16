@@ -1704,6 +1704,22 @@ p, li { boşluk: ön sarma; }
         <translation>Seçim</translation>
     </message>
     <message>
+        <source>Geometry</source>
+        <translation>Geometri</translation>
+    </message>
+    <message>
+        <source>Length:</source>
+        <translation>Uzunluk:</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Değer</translation>
+    </message>
+    <message>
+        <source>Angle:</source>
+        <translation>Açı:</translation>
+    </message>
+    <message>
         <source>Attributes</source>
         <translation>Özellikler</translation>
     </message>
@@ -6359,6 +6375,14 @@ Do you want to save your changes?</translation>
         <translation>Belge Bilgilerini Görüntüle</translation>
     </message>
     <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Kalıp Parçasını Çoğalt</translation>
+    </message>
+    <message>
+        <source>Duplicate selected pattern piece</source>
+        <translation>Seçili kalıp parçasını çoğalt</translation>
+    </message>
+    <message>
         <source>Measurement file doesn&apos;t include all the required measurements.</source>
         <translation>Ölçüm dosyası gerekli tüm ölçümleri içermiyor.</translation>
     </message>
@@ -6371,16 +6395,32 @@ Do you want to save your changes?</translation>
         <translation>&lt;b&gt;Araç::İşlemler - Döndürme:&lt;/b&gt; Bir veya daha fazla nesne seçin - Çoklu seçim için &lt;b&gt;%1&lt;/b&gt;&apos;i basılı tutun, seçimi onaylamak için &lt;b&gt;ENTER&lt;/b&gt;&apos;a basın</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Rotation:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Araç::İşlemler - Döndürme:&lt;/b&gt;Selectați unul sau mai multe obiecte – faceți clic pe un obiect selectat pentru a-l deselecta; apăsați &lt;b&gt;ENTER&lt;/b&gt; pentru a confirma selecția</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Araç::İşlemler - Satır Satır Yansıtma:&lt;/b&gt; Bir veya daha fazla nesne seçin - Çoklu seçim için &lt;b&gt;%1&lt;/b&gt;&apos;i basılı tutun, seçimi onaylamak için &lt;b&gt;ENTER&lt;/b&gt;&apos;a basın</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Araç::İşlemler - Satır Satır Yansıtma:&lt;/b&gt;Selectați unul sau mai multe obiecte – faceți clic pe un obiect selectat pentru a-l deselecta; apăsați &lt;b&gt;ENTER&lt;/b&gt; pentru a confirma selecția</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Araç::İşlemler - Eksenle Aynalama:&lt;/b&gt; Bir veya daha fazla nesne seçin - Çoklu seçim için &lt;b&gt;%1&lt;/b&gt;&apos;i basılı tutun, seçimi onaylamak için &lt;b&gt;ENTER&lt;/b&gt;&apos;a basın</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Araç::İşlemler - Eksenle Aynalama:&lt;/b&gt;Selectați unul sau mai multe obiecte – faceți clic pe un obiect selectat pentru a-l deselecta; apăsați &lt;b&gt;ENTER&lt;/b&gt; pentru a confirma selecția</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Araç::İşlemler - Taşı:&lt;/b&gt; Bir veya daha fazla nesneyi seçin - Çoklu seçim için &lt;b&gt;%1&lt;/b&gt;&apos;i basılı tutun, seçimi onaylamak için &lt;b&gt;ENTER&lt;/b&gt;&apos;a basın</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Araç::İşlemler - Taşı:&lt;/b&gt;Selectați unul sau mai multe obiecte – faceți clic pe un obiect selectat pentru a-l deselecta; apăsați &lt;b&gt;ENTER&lt;/b&gt; pentru a confirma selecția</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - TrueDarts:&lt;/b&gt; Select the first base line point</source>
@@ -8274,6 +8314,14 @@ Geçici olarak listeye eklemek için enter&apos;a basın.</translation>
         <translation>Mevcut dikiş payı</translation>
     </message>
     <message>
+        <source>%1 copy</source>
+        <translation>%1 kopya</translation>
+    </message>
+    <message>
+        <source>%1 copy %2</source>
+        <translation>%1 kopya %2</translation>
+    </message>
+    <message>
         <source>move pattern piece label</source>
         <translation>desen parçası etiketini taşı</translation>
     </message>
@@ -8352,6 +8400,10 @@ Geçici olarak listeye eklemek için enter&apos;a basın.</translation>
     <message>
         <source>Show Piece Label</source>
         <translation>Parça etiketini göster</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>Çoğalt</translation>
     </message>
     <message>
         <source>Rename...</source>
@@ -8436,6 +8488,10 @@ Geçici olarak listeye eklemek için enter&apos;a basın.</translation>
     <message>
         <source>Update Node Angle</source>
         <translation>Düğüm Açısını Güncelle</translation>
+    </message>
+    <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Kalıp Parçasını Çoğalt</translation>
     </message>
     <message>
         <source>Update Notch</source>
@@ -8944,14 +9000,6 @@ Geçici olarak listeye eklemek için enter&apos;a basın.</translation>
         <source>Theme:</source>
         <translation>Tema:</translation>
     </message>
-    <message>
-        <source>Customize colors...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Workspace background and drawing colors (Graphics page)</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>PreferencesGraphicsViewPage</name>
@@ -9046,6 +9094,10 @@ Geçici olarak listeye eklemek için enter&apos;a basın.</translation>
     <message>
         <source>Colors</source>
         <translation>Renkler</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Koyu bir arka planda, koyu çizgileri, noktaları ve etiketleri görünür kalmaları için daha açık renkli göster (siyah renk açık gri olarak görünür). Desen kaydetme, yazdırma ve dışa aktarma işlemleri için gerçek renklerini korur.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Zoom Rubberband</source>
@@ -9185,6 +9237,14 @@ Geçici olarak listeye eklemek için enter&apos;a basın.</translation>
         <translation>Her zaman geçerli kalemi kullan</translation>
     </message>
     <message>
+        <source>Operations Tools</source>
+        <translation>İşlem Araçları</translation>
+    </message>
+    <message>
+        <source>Use CTRL for multiple object selection</source>
+        <translation>Birden fazla nesne seçimi için CTRL tuşunu kullanın</translation>
+    </message>
+    <message>
         <source>Dialogs</source>
         <translation>Diyaloglar</translation>
     </message>
@@ -9254,11 +9314,7 @@ Geçici olarak listeye eklemek için enter&apos;a basın.</translation>
     </message>
     <message>
         <source>Adapt colors to a dark background</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.</source>
-        <translation type="unfinished"></translation>
+        <translation>Renkleri koyu bir arka plana uyarla</translation>
     </message>
 </context>
 <context>
@@ -12094,6 +12150,10 @@ load in SeamlyME as usual.
         <translation>Mısır Çiçeği Mavisi</translation>
     </message>
     <message>
+        <source>Black | White</source>
+        <translation>Siyah | Beyaz</translation>
+    </message>
+    <message>
         <source>Black</source>
         <translation>Siyah</translation>
     </message>
@@ -12243,11 +12303,11 @@ load in SeamlyME as usual.
     </message>
     <message>
         <source>Charcoal</source>
-        <translation type="unfinished"></translation>
+        <translation>Antrasit</translation>
     </message>
     <message>
         <source>Graphite</source>
-        <translation type="unfinished"></translation>
+        <translation>Grafit</translation>
     </message>
 </context>
 <context>

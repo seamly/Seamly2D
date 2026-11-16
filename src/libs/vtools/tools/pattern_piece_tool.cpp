@@ -1206,8 +1206,8 @@ void PatternPieceTool::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     QMenu menu;
     QAction *editProperties = menu.addAction(QIcon::fromTheme("preferences-other"), tr("Properties") + "\tP");
     editProperties->setEnabled(lock);
-    QAction *copyPiece = menu.addAction(QIcon::fromTheme("edit-copy"), tr("Copy Piece"));
-    copyPiece->setEnabled(lock);
+    QAction* copy_piece_action = menu.addAction(QIcon(":/toolicon/32x32/copy_piece.png"), tr("Copy Piece"));
+    copy_piece_action->setEnabled(lock);
 
     QAction *actionLockPiece = menu.addAction(tr("Lock Pattern Piece") + "\tCtrl + L");
     actionLockPiece->setCheckable(true);
@@ -1285,20 +1285,9 @@ void PatternPieceTool::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     {
         editPieceProperties();
     }
-    else if (selectedAction == copyPiece)
+    else if (selectedAction == copy_piece_action)
     {
-        PatternPieceCopyResult copy = PatternPieceCopy::reconstruct(*doc, m_id, &VContainer::getNextId);
-        if (!copy.error.isEmpty())
-        {
-            QMessageBox::warning(nullptr, tr("Copy Piece"), copy.error);
-            return;
-        }
-        // Copy numeric geometry and formulas; place the separate piece beside its source.
-        const qreal offset = qApp->fromPixel(boundingRect().width() + ToPixel(2, Unit::Cm));
-        copy.piece.setAttribute(AttrMx, copy.piece.attribute(AttrMx).toDouble() + offset);
-        CopyPatternPiece *command = new CopyPatternPiece(copy, doc);
-        connect(command, &VUndoCommand::NeedFullParsing, doc, &VAbstractPattern::NeedFullParsing);
-        qApp->getUndoStack()->push(command);
+        copyPiece();
     }
     else if (selectedAction == actionLockPiece)
     {
@@ -2638,6 +2627,30 @@ void PatternPieceTool::editPieceProperties()
     connect(m_dialog.data(), &DialogTool::DialogApplied, this, &PatternPieceTool::FullUpdateFromGuiApply);
     SetDialog();
     m_dialog->show();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief copyPiece adds an independent copy of this piece beside it as one undo step.
+///
+/// The copy gets its own modeling nodes and keeps live links to the draft objects, so it follows draft changes.
+/// A reconstruction error shows a warning and adds no piece.
+//---------------------------------------------------------------------------------------------------------------------
+void PatternPieceTool::copyPiece() const
+{
+    PatternPieceCopyResult copy = PatternPieceCopy::reconstruct(*doc, m_id, &VContainer::getNextId);
+    if (!copy.error.isEmpty())
+    {
+        QMessageBox::warning(nullptr, tr("Copy Piece"), copy.error);
+    }
+    else
+    {
+        // Place the copy one piece width plus 2 cm to the right of its source.
+        const qreal offset = qApp->fromPixel(boundingRect().width() + ToPixel(2, Unit::Cm));
+        copy.piece.setAttribute(AttrMx, copy.piece.attribute(AttrMx).toDouble() + offset);
+        CopyPatternPiece* command = new CopyPatternPiece(copy, doc);
+        connect(command, &VUndoCommand::NeedFullParsing, doc, &VAbstractPattern::NeedFullParsing);
+        qApp->getUndoStack()->push(command);
+    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------

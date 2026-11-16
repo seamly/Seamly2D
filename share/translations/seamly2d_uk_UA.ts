@@ -1704,6 +1704,22 @@ p, li { white-space: pre-wrap; }
         <translation>Вибір</translation>
     </message>
     <message>
+        <source>Geometry</source>
+        <translation>Геометрія</translation>
+    </message>
+    <message>
+        <source>Length:</source>
+        <translation>Довжина:</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Значення</translation>
+    </message>
+    <message>
+        <source>Angle:</source>
+        <translation>Кут:</translation>
+    </message>
+    <message>
         <source>Attributes</source>
         <translation>Атрибути</translation>
     </message>
@@ -6400,6 +6416,14 @@ Do you want to save your changes?</source>
         <translation>Відобразити інформацію про документ</translation>
     </message>
     <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Дублювати деталь викрійки</translation>
+    </message>
+    <message>
+        <source>Duplicate selected pattern piece</source>
+        <translation>Дублювати вибрану деталь викрійки</translation>
+    </message>
+    <message>
         <source>Measurement file doesn&apos;t include all the required measurements.</source>
         <translation>«Файл вимірювань не містить усіх необхідних вимірювань».</translation>
     </message>
@@ -6412,16 +6436,32 @@ Do you want to save your changes?</source>
         <translation>&lt;b&gt;Інструмент::Операції - Обертання:&lt;/b&gt; Виберіть один або декілька об&apos;єктів - Утримуйте &lt;b&gt;%1&lt;/b&gt; для множинного вибору, натисніть &lt;b&gt;ENTER&lt;/b&gt; для підтвердження вибору</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Rotation:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Інструмент::Операції - Обертання:&lt;/b&gt; Виберіть один або кілька об'єктів — клацніть вибраний об'єкт, щоб скасувати його вибір. Натисніть &lt;b&gt;ENTER&lt;/b&gt;, щоб підтвердити вибір</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Інструмент::Операції - Дзеркальне відображення по лінії:&lt;/b&gt; Виберіть один або кілька об&apos;єктів - Утримуйте &lt;b&gt;%1&lt;/b&gt; для множинного вибору, натисніть &lt;b&gt;ENTER&lt;/b&gt; для підтвердження вибору</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Інструмент::Операції - Дзеркальне відображення по лінії:&lt;/b&gt; Виберіть один або кілька об'єктів — клацніть вибраний об'єкт, щоб скасувати його вибір. Натисніть &lt;b&gt;ENTER&lt;/b&gt;, щоб підтвердити вибір</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Інструмент::Операції - Дзеркальне відображення за віссю:&lt;/b&gt; Виберіть один або декілька об&apos;єктів - Утримуйте &lt;b&gt;%1&lt;/b&gt; для множинного вибору, натисніть &lt;b&gt;ENTER&lt;/b&gt; для підтвердження вибору</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Інструмент::Операції - Дзеркальне відображення за віссю:&lt;/b&gt;  Виберіть один або кілька об'єктів — клацніть вибраний об'єкт, щоб скасувати його вибір. Натисніть &lt;b&gt;ENTER&lt;/b&gt;, щоб підтвердити вибір</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Інструмент::Операції - Переміщення:&lt;/b&gt; Виберіть один або декілька об&apos;єктів - Утримуйте &lt;b&gt;%1&lt;/b&gt; для множинного вибору, натисніть &lt;b&gt;ENTER&lt;/b&gt; для підтвердження вибору</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Інструмент::Операції - Переміщення:&lt;/b&gt; Виберіть один або кілька об'єктів — клацніть вибраний об'єкт, щоб скасувати його вибір. Натисніть &lt;b&gt;ENTER&lt;/b&gt;, щоб підтвердити вибір</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - TrueDarts:&lt;/b&gt; Select the first base line point</source>
@@ -8271,6 +8311,14 @@ Press enter to temporarily add it to the list.</source>
         <translation>Поточна прибавка на шви</translation>
     </message>
     <message>
+        <source>%1 copy</source>
+        <translation>%1 — копія</translation>
+    </message>
+    <message>
+        <source>%1 copy %2</source>
+        <translation>%1 — копія %2</translation>
+    </message>
+    <message>
         <source>move pattern piece label</source>
         <translation>пере Публикуй мітку деталі</translation>
     </message>
@@ -8349,6 +8397,10 @@ Press enter to temporarily add it to the list.</source>
     <message>
         <source>Show Piece Label</source>
         <translation>Показати етикетку елемента</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>Дублікат</translation>
     </message>
     <message>
         <source>Rename...</source>
@@ -8433,6 +8485,10 @@ Press enter to temporarily add it to the list.</source>
     <message>
         <source>Update Node Angle</source>
         <translation>Оновити кут вузла</translation>
+    </message>
+    <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Дублювати деталь викрійки</translation>
     </message>
     <message>
         <source>Update Notch</source>
@@ -8941,14 +8997,6 @@ Press enter to temporarily add it to the list.</source>
         <source>Point name text:</source>
         <translation>Текст назви точки:</translation>
     </message>
-    <message>
-        <source>Customize colors...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Workspace background and drawing colors (Graphics page)</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>PreferencesGraphicsViewPage</name>
@@ -9053,6 +9101,10 @@ Press enter to temporarily add it to the list.</source>
         <translation>Фон:</translation>
     </message>
     <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt; На темному фоні темні лінії, точки та мітки відображаються світлішими, щоб вони залишалися видимими (чорний відображається як світло-сірий). Шаблон зберігає свої справжні кольори для збереження, друку та експорту.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
         <source>Zoom Rubberband</source>
         <translation>Гумка для збільшення</translation>
     </message>
@@ -9148,6 +9200,14 @@ Press enter to temporarily add it to the list.</source>
     <message>
         <source>Auto clear formula</source>
         <translation>Формула автоматичного очищення</translation>
+    </message>
+    <message>
+        <source>Operations Tools</source>
+        <translation>Інструменти операцій</translation>
+    </message>
+    <message>
+        <source>Use CTRL for multiple object selection</source>
+        <translation>Використовуйте CTRL для вибору кількох об'єктів</translation>
     </message>
     <message>
         <source>Zoom</source>
@@ -9251,11 +9311,7 @@ Press enter to temporarily add it to the list.</source>
     </message>
     <message>
         <source>Adapt colors to a dark background</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.</source>
-        <translation type="unfinished"></translation>
+        <translation>Адаптувати кольори до темного фону</translation>
     </message>
 </context>
 <context>
@@ -12090,6 +12146,10 @@ load in SeamlyME as usual.
         <translation>Кукурудзяна квітка синя</translation>
     </message>
     <message>
+        <source>Black | White</source>
+        <translation>Чорний | Білий</translation>
+    </message>
+    <message>
         <source>Black</source>
         <translation>Чорний</translation>
     </message>
@@ -12239,11 +12299,11 @@ load in SeamlyME as usual.
     </message>
     <message>
         <source>Charcoal</source>
-        <translation type="unfinished"></translation>
+        <translation>Антрацит</translation>
     </message>
     <message>
         <source>Graphite</source>
-        <translation type="unfinished"></translation>
+        <translation>Графіт</translation>
     </message>
 </context>
 <context>

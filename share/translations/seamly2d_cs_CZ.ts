@@ -1704,6 +1704,22 @@ p, li { white-space: pre-wrap; }
         <translation>Výběr</translation>
     </message>
     <message>
+        <source>Geometry</source>
+        <translation>Geometrie</translation>
+    </message>
+    <message>
+        <source>Length:</source>
+        <translation>Délka:</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Hodnota</translation>
+    </message>
+    <message>
+        <source>Angle:</source>
+        <translation>Úhel:</translation>
+    </message>
+    <message>
         <source>Attributes</source>
         <translation>Atributy</translation>
     </message>
@@ -6357,6 +6373,14 @@ Chcete uložit své změny?</translation>
         <translation>Zobrazit informace o dokumentu</translation>
     </message>
     <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Duplikovat díl střihu</translation>
+    </message>
+    <message>
+        <source>Duplicate selected pattern piece</source>
+        <translation>Duplikovat vybraný díl střihu</translation>
+    </message>
+    <message>
         <source>Measurement file doesn&apos;t include all the required measurements.</source>
         <translation>Soubor s měřením neobsahuje všechna požadovaná měření.</translation>
     </message>
@@ -6369,16 +6393,32 @@ Chcete uložit své změny?</translation>
         <translation>&lt;b&gt;Nástroj::Operace - Rotace:&lt;/b&gt; Vyberte jeden nebo více objektů - Podržte &lt;b&gt;%1&lt;/b&gt; pro vícenásobný výběr, stiskněte &lt;b&gt;ENTER&lt;/b&gt; pro potvrzení výběru</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Rotation:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Nástroj::Operace - Rotace:&lt;/b&gt; Vyberte jeden nebo více objektů – Kliknutím na vybraný objekt jej z výběru odeberete. Výběr potvrďte stisknutím klávesy &lt;b&gt;ENTER&lt;/b&gt;</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Nástroj::Operace - Zrcadlení po řádku:&lt;/b&gt; Vyberte jeden nebo více objektů - Podržte &lt;b&gt;%1&lt;/b&gt; pro vícenásobný výběr, stiskněte &lt;b&gt;ENTER&lt;/b&gt; pro potvrzení výběru</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Line:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Nástroj::Operace - Zrcadlení po řádku:&lt;/b&gt; Vyberte jeden nebo více objektů – Kliknutím na vybraný objekt jej z výběru odeberete. Výběr potvrďte stisknutím klávesy &lt;b&gt;ENTER&lt;/b&gt;</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Nástroj::Operace - Zrcadlení podle osy:&lt;/b&gt; Vyberte jeden nebo více objektů - Podržte &lt;b&gt;%1&lt;/b&gt; pro vícenásobný výběr, stiskněte &lt;b&gt;ENTER&lt;/b&gt; pro potvrzení výběru</translation>
     </message>
     <message>
+        <source>&lt;b&gt;Tool::Operations - Mirror by Axis:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Nástroj::Operace - Zrcadlení podle osy:&lt;/b&gt; Vyberte jeden nebo více objektů – Kliknutím na vybraný objekt jej z výběru odeberete. Výběr potvrďte stisknutím klávesy &lt;b&gt;ENTER&lt;/b&gt;</translation>
+    </message>
+    <message>
         <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - Hold &lt;b&gt;%1&lt;/b&gt; for multiple selection, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
         <translation>&lt;b&gt;Nástroj::Operace - Přesun:&lt;/b&gt; Vyberte jeden nebo více objektů - Podržte &lt;b&gt;%1&lt;/b&gt; pro vícenásobný výběr, stiskněte &lt;b&gt;ENTER&lt;/b&gt; pro potvrzení výběru</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Tool::Operations - Move:&lt;/b&gt; Select one or more objects - click selected object to deselect it, Press &lt;b&gt;ENTER&lt;/b&gt; to confirm selection</source>
+        <translation>&lt;b&gt;Nástroj::Operace - Přesun:&lt;/b&gt; Vyberte jeden nebo více objektů – Kliknutím na vybraný objekt jej z výběru odeberete. Výběr potvrďte stisknutím klávesy &lt;b&gt;ENTER&lt;/b&gt;</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Operations - TrueDarts:&lt;/b&gt; Select the first base line point</source>
@@ -8272,6 +8312,14 @@ Stisknutím klávesy Enter jej dočasně přidáte do seznamu.</translation>
         <translation>Aktuální švový přídavek</translation>
     </message>
     <message>
+        <source>%1 copy</source>
+        <translation>%1 kopie</translation>
+    </message>
+    <message>
+        <source>%1 copy %2</source>
+        <translation> %1 kopie %2</translation>
+    </message>
+    <message>
         <source>move pattern piece label</source>
         <translation>přesunout popisek dílu vzoru</translation>
     </message>
@@ -8350,6 +8398,10 @@ Stisknutím klávesy Enter jej dočasně přidáte do seznamu.</translation>
     <message>
         <source>Show Piece Label</source>
         <translation>Zobrazit popisek kusu</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>Duplikát</translation>
     </message>
     <message>
         <source>Rename...</source>
@@ -8434,6 +8486,10 @@ Stisknutím klávesy Enter jej dočasně přidáte do seznamu.</translation>
     <message>
         <source>Update Node Angle</source>
         <translation>Aktualizovat úhel uzlu</translation>
+    </message>
+    <message>
+        <source>Duplicate Pattern Piece</source>
+        <translation>Duplikovat díl střihu</translation>
     </message>
     <message>
         <source>Update Notch</source>
@@ -8942,14 +8998,6 @@ Stisknutím klávesy Enter jej dočasně přidáte do seznamu.</translation>
         <source>Theme:</source>
         <translation>Téma:</translation>
     </message>
-    <message>
-        <source>Customize colors...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Workspace background and drawing colors (Graphics page)</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>PreferencesGraphicsViewPage</name>
@@ -9044,6 +9092,10 @@ Stisknutím klávesy Enter jej dočasně přidáte do seznamu.</translation>
     <message>
         <source>Colors</source>
         <translation>Barvy</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Na tmavém pozadí zobrazte tmavé čáry, body a štítky světlejší, aby zůstaly viditelné (černá se zobrazuje jako světle šedá).Vzor si zachovává své skutečné barvy pro ukládání, tisk a export.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Zoom Rubberband</source>
@@ -9183,6 +9235,14 @@ Stisknutím klávesy Enter jej dočasně přidáte do seznamu.</translation>
         <translation>Vždy používat aktuální pero</translation>
     </message>
     <message>
+        <source>Operations Tools</source>
+        <translation>Provozní nástroje</translation>
+    </message>
+    <message>
+        <source>Use CTRL for multiple object selection</source>
+        <translation>Pro výběr více objektů použijte klávesu CTRL</translation>
+    </message>
+    <message>
         <source>Dialogs</source>
         <translation>Dialogy</translation>
     </message>
@@ -9252,11 +9312,7 @@ Stisknutím klávesy Enter jej dočasně přidáte do seznamu.</translation>
     </message>
     <message>
         <source>Adapt colors to a dark background</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>On a dark background, show dark lines, points and labels lighter so they stay visible (black shows light grey). The pattern keeps its real colors for saving, printing and export.</source>
-        <translation type="unfinished"></translation>
+        <translation>Přizpůsobit barvy tmavému pozadí</translation>
     </message>
 </context>
 <context>
@@ -12092,6 +12148,10 @@ SeamlyME jako obvykle.
         <translation>Modrá kukuřičná květina</translation>
     </message>
     <message>
+        <source>Black | White</source>
+        <translation>Černá | Bílá</translation>
+    </message>
+    <message>
         <source>Black</source>
         <translation>Černá</translation>
     </message>
@@ -12241,11 +12301,11 @@ SeamlyME jako obvykle.
     </message>
     <message>
         <source>Charcoal</source>
-        <translation type="unfinished"></translation>
+        <translation>Dřevěné uhlí</translation>
     </message>
     <message>
         <source>Graphite</source>
-        <translation type="unfinished"></translation>
+        <translation>Grafit</translation>
     </message>
 </context>
 <context>
