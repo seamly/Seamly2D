@@ -6,6 +6,8 @@ If decisions are required for any portion of a task or subtask, present the user
 
 Tasks in this file start with `CLI.`
 
+Completed Examples tab: see project-docs/TODO_COMPLETED.md under CLI help examples.
+
 ## Task CLI.2 - run seamly2d/seamlyme/seamlylayout from the command line with an input .sm2d file and an input measurement file to create exports for each of seamlyLayout's export options; validate outputs to validate the CLI parameters
 
 - `src/test/CliTest/test_cli_layout_export.ps1` runs Seamly2D and SeamlyLayout for every option group and export format with male_shirt, trousers and jacket2. Results: `CLI_1_TEST_RESULTS.md`.

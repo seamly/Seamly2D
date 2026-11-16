@@ -59,7 +59,12 @@
 #include "../vformat/measurements.h"
 #include "../vmisc/commandoptions.h"
 #include "../vmisc/def.h"
+#include "../vmisc/vabstractapplication.h"
+#include "../vmisc/vsettings.h"
 
+#include <QClipboard>
+#include <QDir>
+#include <QPushButton>
 #include <QDebug>
 #include <QCoreApplication>
 #include <QDialog>
@@ -523,14 +528,63 @@ void VCommandLine::showHelpDialog(QWidget* parent) const
         appendHelpRow(*model, {entry.topic, entry.description});
     }
 
+    const auto* settings = qobject_cast<VSettings*>(qApp->Settings());
+    const QDir pattern_dir(settings != nullptr ? settings->getPatternPath() : VSettings::getDefaultPatternPath());
+    const QDir output_dir(settings != nullptr ? settings->getLayoutPath() : VSettings::getDefaultLayoutPath());
+    const auto quote_path = [](const QString& path)
+    {
+#ifdef Q_OS_WIN
+        return QStringLiteral("\"%1\"").arg(QDir::toNativeSeparators(path));
+#else
+        QString escaped = path;
+        escaped.replace(QStringLiteral("\\"), QStringLiteral("\\\\"));
+        escaped.replace(QStringLiteral("\""), QStringLiteral("\\\""));
+        escaped.replace(QStringLiteral("$"), QStringLiteral("\\$"));
+        escaped.replace(QChar(0x60), QStringLiteral("\\") + QChar(0x60));
+        return QStringLiteral("\"%1\"").arg(escaped);
+#endif
+    };
+    QString executable = quote_path(QCoreApplication::applicationFilePath());
+#ifdef Q_OS_WIN
+    executable.prepend(QStringLiteral("start /wait \"\" "));
+#endif
+    const auto example_command = [&](const QString& flags, const QString& output, const QString& pattern)
+    {
+        return executable + QStringLiteral(" --layout-export ") + flags
+            + QStringLiteral(" --layout-output ") + quote_path(output_dir.absoluteFilePath(output))
+            + QLatin1Char(' ') + quote_path(pattern_dir.absoluteFilePath(pattern));
+    };
+    QStandardItemModel examples_model(&dialog);
+    examples_model.setHorizontalHeaderLabels({translate("VCommandLine", "Example"),
+        translate("VCommandLine", "Command"), translate("VCommandLine", "Information")});
+    QTableView examples_table(&tabs);
+    examples_table.setObjectName(QStringLiteral("helpExamples"));
+    appendHelpRow(examples_model, {translate("VCommandLine", "SVG layout"),
+        example_command(QStringLiteral("--layout-format svg --layout-paper tiled --layout-tile-size Letter"),
+                        QStringLiteral("male_shirt-layout.svg"), QStringLiteral("male_shirt.sm2d")),
+        translate("VCommandLine", "Paper > Tiled > Letter. SVG contains the complete layout; "
+                                  "PDF provides separate tiles.")});
+    appendHelpRow(examples_model, {translate("VCommandLine", "PDF layout (tiled)"),
+        example_command(QStringLiteral("--layout-format pdf-tiled --layout-paper tiled --layout-tile-size Letter"),
+                        QStringLiteral("male_shirt-tiled.pdf"), QStringLiteral("male_shirt.sm2d")),
+        translate("VCommandLine", "Paper > Tiled > Letter. Print the PDF at 100% scale.")});
+    appendHelpRow(examples_model, {translate("VCommandLine", "DXF export (R13)"),
+        example_command(QStringLiteral("--layout-format dxf --layout-material Fabric --layout-view base "
+                                       "--layout-unit in --layout-paper roll --layout-roll-width 42.00"),
+                        QStringLiteral("jacket2_40-146-r13.dxf"), QStringLiteral("jacket2_40-146.sm2d")),
+        translate("VCommandLine", "Paper > Roll > Custom: 42.00 inches. DXF uses R13 by default. "
+                                  "This command exports Fabric at the base size.")});
+
     configureHelpTable(options_table, options_model);
     configureHelpTable(limits_table, limits_model);
     configureHelpTable(errors_table, errors_model);
     configureHelpTable(removed_table, removed_model);
+    configureHelpTable(examples_table, examples_model);
     tabs.addTab(&options_table, translate("VCommandLine", "Options"));
     tabs.addTab(&limits_table, translate("VCommandLine", "Limits"));
     tabs.addTab(&errors_table, translate("VCommandLine", "Exit codes"));
     tabs.addTab(&removed_table, translate("VCommandLine", "Removed options"));
+    tabs.addTab(&examples_table, translate("VCommandLine", "Examples"));
     layout.addWidget(&tabs);
 
     options_table.setColumnWidth(0, 235);
@@ -543,16 +597,38 @@ void VCommandLine::showHelpDialog(QWidget* parent) const
         table->setColumnWidth(1, 800);
     }
 
+    examples_table.setColumnWidth(0, 180);
+    examples_table.setColumnWidth(1, 600);
+    examples_table.setColumnWidth(2, 260);
+    QLabel examples_note(&dialog);
+    examples_note.setWordWrap(true);
+#ifdef Q_OS_WIN
+    examples_note.setText(translate("VCommandLine", "Run these commands in Windows Command Prompt."));
+#else
+    examples_note.setText(translate("VCommandLine", "Run these commands in a terminal."));
+#endif
+    examples_note.setText(examples_note.text() + QLatin1Char(' ')
+        + translate("VCommandLine", "Paths use the pattern and layout folders from Preferences. "
+                                  "Keep the samples' measurement files in their original folders. "
+                                  "Existing output files will be replaced."));
+    examples_note.hide();
+    layout.addWidget(&examples_note);
+    QPushButton copy_command(translate("VCommandLine", "Copy command"), &dialog);
+    copy_command.setObjectName(QStringLiteral("helpCopyCommand"));
+    copy_command.hide();
+
     QLabel result_count(&dialog);
     result_count.setObjectName(QStringLiteral("helpResultCount"));
     QDialogButtonBox button_box(QDialogButtonBox::Close, &dialog);
     QHBoxLayout footer;
     footer.addWidget(&result_count);
     footer.addStretch();
+    footer.addWidget(&copy_command);
     footer.addWidget(&button_box);
     layout.addLayout(&footer);
 
-    const QList<QTableView*> tables{&options_table, &limits_table, &errors_table, &removed_table};
+    const QList<QTableView*> tables{
+        &options_table, &limits_table, &errors_table, &removed_table, &examples_table};
     QObject filter_connections;
     const auto apply_filter = [&]()
     {
@@ -576,6 +652,8 @@ void VCommandLine::showHelpDialog(QWidget* parent) const
         {
             visible_rows += !current_table->isRowHidden(row);
         }
+        copy_command.setEnabled(examples_table.currentIndex().isValid()
+            && !examples_table.isRowHidden(examples_table.currentIndex().row()));
         result_count.setText(visible_rows == 0
             ? translate("VCommandLine", "No matching entries. Clear the filter to show all rows.")
             : translate("VCommandLine", "%1 of %2 entries").arg(visible_rows)
@@ -584,6 +662,9 @@ void VCommandLine::showHelpDialog(QWidget* parent) const
     QObject::connect(&filter_edit, &QLineEdit::textChanged, &filter_connections, apply_filter);
     QObject::connect(&tabs, &QTabWidget::currentChanged, &filter_connections, [&]()
     {
+        const bool shows_examples = tabs.currentWidget() == &examples_table;
+        examples_note.setVisible(shows_examples);
+        copy_command.setVisible(shows_examples);
         filter_edit.clear();
         apply_filter();
         tables.at(tabs.currentIndex())->resizeRowsToContents();
@@ -594,6 +675,17 @@ void VCommandLine::showHelpDialog(QWidget* parent) const
                          &filter_connections, apply_filter);
         table->resizeRowsToContents();
     }
+    QObject::connect(examples_table.selectionModel(), &QItemSelectionModel::currentChanged,
+                     &filter_connections, apply_filter);
+    QObject::connect(&copy_command, &QPushButton::clicked, &filter_connections, [&]()
+    {
+        const QModelIndex index = examples_table.currentIndex();
+        if (index.isValid() && !examples_table.isRowHidden(index.row()))
+        {
+            QApplication::clipboard()->setText(examples_model.index(index.row(), 1).data().toString());
+        }
+    });
+    examples_table.selectRow(0);
     QObject::connect(&button_box, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
     apply_filter();
     filter_edit.setFocus();

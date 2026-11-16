@@ -1,5 +1,19 @@
 # Session handover
 
+## 2026-11-16 — CLI help examples
+
+- Added the Examples tab to the command line dialog in the CLI worktree on run-seamlyLayout.
+- Added SVG and tiled PDF commands for male_shirt.sm2d, with Paper > Tiled > Letter.
+- Added a DXF R13 command for jacket2_40-146.sm2d, with a custom 42.00-inch paper roll.
+- The jacket command selects Fabric and the base size.
+- Paths come from the executable and the pattern and layout folders in Preferences.
+- Added a Copy command button. The tab retains adjustable columns, filtering, and the application theme.
+- Windows build passed. All 40 Qt suites passed: 32630 checks, zero failures.
+- Rust workspace: 834 passed. SeamlyLayout: all nine release checks passed; this checkout has no debug build.
+- Inspected the native dialog with separate preview settings. The sample commands did not run.
+- The user requested a local commit and integration into run-seamlyLayout. No push was requested.
+
+
 ## 2026-11-16 — CLI worktree location
 
 - Continue CLI work only in `C:\Users\susan\Projects\seamly2d-cli-1`, on `run-seamlyLayout`, as requested.

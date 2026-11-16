@@ -246,3 +246,22 @@ seamlylayout --info --settings roll.json pieces.svg
 - Interactive: `src\test\CliTestApp` (Rust, Iced). See its `README.md`.
 - Older runners: `src\test\SeamlyLayoutTest\test_headless_export.py`,
   `src\test\CollectionTest\test_pattern_input_status.py`, `src\test\Seamly2DTest\test_measurement_cli.py`.
+
+## Examples tab
+
+Open **Help > Command line options > Examples**.
+
+The tab builds commands from the executable path and the pattern and layout folders in Preferences.
+Each command quotes file paths. Select a row and click **Copy command**.
+Windows examples use Command Prompt and wait for the export.
+
+| Example | Pattern | Settings |
+|---|---|---|
+| SVG layout | male_shirt.sm2d | Paper > Tiled > Letter |
+| PDF layout (tiled) | male_shirt.sm2d | Paper > Tiled > Letter; pdf-tiled |
+| DXF export (R13) | jacket2_40-146.sm2d | Paper > Roll > Custom; width 42.00 inches; Fabric; base size |
+
+DXF uses R13 by default. SVG contains the complete layout; PDF provides separate tiles.
+The commands use the remaining saved SeamlyLayout settings.
+Keep the sample measurement files in their original folders.
+The commands replace existing output files.

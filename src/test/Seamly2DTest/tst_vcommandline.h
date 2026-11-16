@@ -72,6 +72,7 @@ private slots:
     void HelpDescribesLimitsAndRemovedBasename();
     void HelpDialogClosesWithoutExiting();
     void HelpDialogFiltersAndResizesColumns();
+    void HelpDialogExamplesUsePreferences();
     void LayoutExportUsesDefaultSvgFormat();
     void LayoutExportRequiresOutput();
     void LayoutExportRequiresOneInput();

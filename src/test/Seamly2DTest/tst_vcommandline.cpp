@@ -58,7 +58,12 @@
 #include "command_line.h"
 #include "../vmisc/commandoptions.h"
 #include "../vmisc/logging.h"
+#include "../vmisc/vabstractapplication.h"
+#include "../vmisc/vsettings.h"
 
+#include <QClipboard>
+#include <QDir>
+#include <QProcess>
 #include <QCommandLineParser>
 #include <QFileInfo>
 #include <QTemporaryDir>
@@ -311,6 +316,94 @@ void TST_VCommandLine::HelpDialogFiltersAndResizesColumns()
 
 //---------------------------------------------------------------------------------------------------------------------
 
+void TST_VCommandLine::HelpDialogExamplesUsePreferences()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    auto* settings = qobject_cast<VSettings*>(qApp->Settings());
+    QVERIFY(settings != nullptr);
+    const QString old_pattern_path = settings->getPatternPath();
+    const QString old_layout_path = settings->getLayoutPath();
+    const QString pattern_path = directory.filePath(QStringLiteral("sample patterns"));
+    const QString layout_path = directory.filePath(QStringLiteral("example layouts"));
+    settings->SetPathPattern(pattern_path);
+    settings->SetPathLayout(layout_path);
+    const QString previous_clipboard = QApplication::clipboard()->text();
+    QStringList commands;
+    bool copied_selected_command = false;
+    bool filter_disables_copy = false;
+    bool columns_resize = false;
+    VCommandLine command_line;
+    QTimer::singleShot(0, [&]()
+    {
+        auto* dialog = qobject_cast<QDialog*>(QApplication::activeModalWidget());
+        if (dialog != nullptr)
+        {
+            auto* tabs = dialog->findChild<QTabWidget*>(QStringLiteral("helpTabs"));
+            auto* table = dialog->findChild<QTableView*>(QStringLiteral("helpExamples"));
+            auto* copy = dialog->findChild<QPushButton*>(QStringLiteral("helpCopyCommand"));
+            auto* filter = dialog->findChild<QLineEdit*>(QStringLiteral("helpFilter"));
+            if (tabs != nullptr && table != nullptr && copy != nullptr && filter != nullptr)
+            {
+                tabs->setCurrentWidget(table);
+                for (int row = 0; row < table->model()->rowCount(); ++row)
+                {
+                    commands.append(table->model()->index(row, 1).data().toString());
+                }
+                table->selectRow(2);
+                copy->click();
+                copied_selected_command = commands.size() == 3
+                    && QApplication::clipboard()->text() == commands.at(2) && copy->isVisible();
+                filter->setText(QStringLiteral("no matching example"));
+                filter_disables_copy = !copy->isEnabled();
+                filter->clear();
+                const int width = table->columnWidth(1) + 40;
+                table->setColumnWidth(1, width);
+                columns_resize = table->columnWidth(1) == width
+                    && table->horizontalHeader()->sectionResizeMode(1) == QHeaderView::Interactive;
+            }
+            dialog->reject();
+        }
+    });
+    command_line.showHelpDialog();
+    settings->SetPathPattern(old_pattern_path);
+    settings->SetPathLayout(old_layout_path);
+    QApplication::clipboard()->setText(previous_clipboard);
+    QCOMPARE(commands.size(), 3);
+    QVERIFY(copied_selected_command);
+    QVERIFY(filter_disables_copy);
+    QVERIFY(columns_resize);
+    const QStringList formats{QStringLiteral("svg"), QStringLiteral("pdf-tiled"), QStringLiteral("dxf")};
+    for (int row = 0; row < commands.size(); ++row)
+    {
+#ifdef Q_OS_WIN
+        QVERIFY(commands.at(row).startsWith(QStringLiteral("start /wait \"\" \"")));
+#endif
+        const QString arguments = QStringLiteral("seamly2d ")
+            + commands.at(row).mid(commands.at(row).indexOf(QStringLiteral("--layout-export")));
+        VCommandLine example;
+        QVERIFY(example.parser.parse(QProcess::splitCommand(arguments)));
+        QCOMPARE(example.layoutExportError(), QString());
+        QCOMPARE(example.layoutFormatOption(), formats.at(row));
+        QVERIFY(example.layoutOutputOption().startsWith(layout_path));
+        const QString file = row == 2 ? QStringLiteral("jacket2_40-146.sm2d") : QStringLiteral("male_shirt.sm2d");
+        QCOMPARE(QDir::fromNativeSeparators(example.parser.positionalArguments().first()),
+                 QDir(pattern_path).absoluteFilePath(file));
+        if (row < 2)
+        {
+            QVERIFY(commands.at(row).contains(QStringLiteral("--layout-paper tiled --layout-tile-size Letter")));
+        }
+        else
+        {
+            QVERIFY(commands.at(row).contains(QStringLiteral("--layout-unit in --layout-paper roll "
+                                                             "--layout-roll-width 42.00")));
+            QCOMPARE(example.layoutMaterialOption(), QStringLiteral("Fabric"));
+            QCOMPARE(example.layoutViewOption(), QStringLiteral("base"));
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 void TST_VCommandLine::LayoutExportUsesDefaultSvgFormat()
 {
     QTemporaryDir directory;

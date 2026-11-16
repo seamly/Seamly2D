@@ -1,5 +1,15 @@
 # COMPLETED — Tagged SVG Handoff to SeamlyLayout
 
+## CLI help examples — 2026-11-16
+
+- [x] Add the Examples tab with SVG, tiled PDF, and DXF R13 commands.
+- [x] Use the pattern and layout folders from Preferences.
+- [x] Add adjustable columns, filtering, and a Copy command button.
+- [x] Build Seamly2D and pass all 40 Qt suites: 32630 checks, zero failures.
+- [x] Pass 834 Rust tests and all nine available SeamlyLayout release checks.
+- [x] Inspect the native dialog in a separate application instance.
+
+
 ## Command line help tables — 2026-11-16
 
 - [x] Match the Variables dialog with native tables, application font, and application colors.
