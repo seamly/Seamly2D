@@ -1,3 +1,8 @@
+// Author: slspencer
+// Copyright (C) 2026 Seamly2D Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+// License: https://www.gnu.org/licenses/gpl-3.0.html
+
 //---------------------------------------------------------------------------------------------------------------------
 /// @file   command_line.h
 /// @author Douglas S Caskey
@@ -64,6 +69,7 @@
 #include "../vmisc/vsysexits.h"
 
 class VCommandLine;
+class QWidget;
 typedef std::shared_ptr<VCommandLine> VCommandLinePtr;
 typedef QList<QCommandLineOption *> VCommandLineOptions;
 
@@ -72,6 +78,10 @@ class VCommandLine
 public:
     virtual               ~VCommandLine();
 
+    /// @brief Shows the command line help without changing modes or exiting the application.
+    void                   showHelpDialog(QWidget* parent = nullptr) const;
+    /// @brief Returns the registered options, limits, and error information.
+    QString                helpText() const;
     bool                   isTestModeEnabled() const;
     bool                   isNoScalingEnabled() const;
     QString                measurementPathOption() const;

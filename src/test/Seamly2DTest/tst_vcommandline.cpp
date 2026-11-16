@@ -1,3 +1,8 @@
+// Author: slspencer
+// Copyright (C) 2026 Seamly2D Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+// License: https://www.gnu.org/licenses/gpl-3.0.html
+
 /***************************************************************************
  *                                                                         *
  *   Copyright (C) 2017  Seamly, LLC                                       *
@@ -57,6 +62,13 @@
 #include <QCommandLineParser>
 #include <QFileInfo>
 #include <QTemporaryDir>
+#include <QApplication>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QPlainTextEdit>
+#include <QPushButton>
+#include <QScrollBar>
+#include <QTimer>
 #include <QtTest>
 
 #ifdef Q_CC_MSVC
@@ -123,6 +135,65 @@ void TST_VCommandLine::LayoutExportOptionsAppearInHelp()
     QVERIFY(help.contains(QStringLiteral("--layout-output")));
     QVERIFY(help.contains(QStringLiteral("--svg-text-mode")));
     QVERIFY(help.contains(QStringLiteral("--mfile")));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::HelpDescribesLimitsAndRemovedBasename()
+{
+    VCommandLine command_line;
+    const QString help = command_line.helpText();
+
+    QVERIFY(help.startsWith(command_line.parser.helpText()));
+    QVERIFY(help.contains(QStringLiteral("--test")));
+    QVERIFY(help.contains(QStringLiteral("--layout-export requires --layout-output <path>")));
+    QVERIFY(help.contains(QStringLiteral("This branch does not accept --basename")));
+    QVERIFY(help.contains(QStringLiteral("64: Incorrect command line arguments")));
+    QVERIFY(!command_line.parser.parse({QStringLiteral("seamly2d"), QStringLiteral("--basename"),
+                                       QStringLiteral("layout"), QStringLiteral("pattern.sm2d")}));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VCommandLine::HelpDialogClosesWithoutExiting()
+{
+    VCommandLine command_line;
+    bool has_help = false;
+    bool is_read_only = false;
+    bool can_scroll = false;
+    bool has_close_button = false;
+
+    QTimer::singleShot(0, [&]()
+    {
+        auto* dialog = qobject_cast<QDialog*>(QApplication::activeModalWidget());
+        if (dialog != nullptr)
+        {
+            const auto* text_edit = dialog->findChild<QPlainTextEdit*>();
+            if (text_edit != nullptr)
+            {
+                has_help = text_edit->toPlainText() == command_line.helpText();
+                is_read_only = text_edit->isReadOnly();
+                can_scroll = text_edit->verticalScrollBar()->maximum() > 0;
+            }
+            auto* buttons = dialog->findChild<QDialogButtonBox*>();
+            if (buttons != nullptr && buttons->button(QDialogButtonBox::Close) != nullptr)
+            {
+                has_close_button = true;
+                buttons->button(QDialogButtonBox::Close)->click();
+            }
+            else
+            {
+                dialog->reject();
+            }
+        }
+    });
+
+    command_line.showHelpDialog();
+    QVERIFY(has_help);
+    QVERIFY(is_read_only);
+    QVERIFY(can_scroll);
+    QVERIFY(has_close_button);
+    QVERIFY(command_line.parser.parse({QStringLiteral("seamly2d"), QStringLiteral("pattern.sm2d")}));
+    QVERIFY(!command_line.isTestModeEnabled());
+    QVERIFY(!command_line.isLayoutExportEnabled());
 }
 
 //---------------------------------------------------------------------------------------------------------------------

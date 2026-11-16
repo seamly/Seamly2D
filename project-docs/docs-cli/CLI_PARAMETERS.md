@@ -6,6 +6,14 @@ Usage: `seamly2d [options] filename`
 |---|---|
 | `filename` | Pattern file (`.sm2d`). |
 
+## Help menu
+
+Select **Help > Command line options** to open the scrollable, read-only option list.
+The window uses the current parser descriptions and includes limits, removed options, and exit codes.
+Resize the window or use its scroll bars to read the full list.
+Select **Close** to return to the pattern without changing the command line mode.
+The same information appears with `--help`.
+
 ## Options
 
 | Option | Definition |

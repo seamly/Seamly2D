@@ -1,3 +1,8 @@
+// Author: slspencer
+// Copyright (C) 2026 Seamly2D Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+// License: https://www.gnu.org/licenses/gpl-3.0.html
+
 //-----------------------------------------------------------------------------
 //  @file   mainwindow.cpp
 //  @author slspencer
@@ -7126,6 +7131,10 @@ void MainWindow::createActions()
     });
 
     //Help menu
+    connect(ui->commandLineOptions_Action, &QAction::triggered, this, [this]()
+    {
+        qApp->commandLine()->showHelpDialog(this);
+    });
     connect(ui->shortcuts_Action, &QAction::triggered, this, [this]()
     {
         ShortcutsDialog *shortcutsDialog = new ShortcutsDialog(this);

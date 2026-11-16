@@ -1,3 +1,8 @@
+// Author: slspencer
+// Copyright (C) 2026 Seamly2D Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+// License: https://www.gnu.org/licenses/gpl-3.0.html
+
 //---------------------------------------------------------------------------------------------------------------------
 /// @file   command_line.cpp
 /// @author Douglas S Caskey
@@ -250,7 +255,7 @@ VCommandLine::VCommandLine()
 //---------------------------------------------------------------------------------------------------------------------
 [[noreturn]] void VCommandLine::showHelp(int exit_code) const
 {
-    const QString text = parser.helpText();
+    const QString text = helpText();
 
     if (connectStandardStreams())
     {
@@ -258,29 +263,86 @@ VCommandLine::VCommandLine()
     }
     else
     {
-        QDialog dialog;
-        dialog.setWindowTitle(QCoreApplication::applicationName());
-        dialog.resize(750, 550);
-
-        auto *layout = new QVBoxLayout(&dialog);
-        auto *text_edit = new QPlainTextEdit(&dialog);
-        text_edit->setReadOnly(true);
-        text_edit->setLineWrapMode(QPlainTextEdit::NoWrap);
-        text_edit->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
-        text_edit->setPlainText(text);
-
-        auto *button_box = new QDialogButtonBox(QDialogButtonBox::Ok, &dialog);
-        QObject::connect(button_box, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
-
-        layout->addWidget(text_edit);
-        layout->addWidget(button_box);
-        dialog.exec();
+        showHelpDialog();
     }
 
     std::exit(exit_code);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+void VCommandLine::showHelpDialog(QWidget* parent) const
+{
+    QDialog dialog(parent);
+    dialog.setWindowTitle(translate("VCommandLine", "Command line options"));
+    dialog.resize(800, 600);
+
+    QVBoxLayout layout(&dialog);
+    QPlainTextEdit text_edit(&dialog);
+    text_edit.setReadOnly(true);
+    text_edit.setLineWrapMode(QPlainTextEdit::NoWrap);
+    text_edit.setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    text_edit.setPlainText(helpText());
+
+    QDialogButtonBox button_box(QDialogButtonBox::Close, &dialog);
+    QObject::connect(&button_box, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    layout.addWidget(&text_edit);
+    layout.addWidget(&button_box);
+    dialog.exec();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+QString VCommandLine::helpText() const
+{
+    return parser.helpText() + translate("VCommandLine",
+        "\nLimits and errors\n"
+        "\nModes and required arguments\n"
+        "  --test loads one pattern without exporting.\n"
+        "  --layout-export exports one pattern through SeamlyLayout without either application window.\n"
+        "  --layout-export requires --layout-output <path>. The output folder must exist.\n"
+        "  --layout-info prints a JSON report and exports nothing.\n"
+        "  Supply exactly one pattern for --test, --layout-export, or --layout-info.\n"
+        "  These three modes cannot be combined.\n"
+        "  Measurement and gradation overrides apply in all three modes.\n"
+        "  Size and height values use centimetres and require multisize measurements.\n"
+        "  The pattern must support the selected size and height.\n"
+        "  Relative paths resolve against the folder where the command starts.\n"
+        "\nLayout and format limits\n"
+        "  Export choices require --layout-export. Settings and direct layout flags also serve --layout-info.\n"
+        "  Direct layout flags override the JSON settings file, which overrides saved settings.\n"
+        "  Unknown JSON keys and invalid setting values stop the command with exit code 64.\n"
+        "  Select --layout-material when the pattern has several materials.\n"
+        "  --layout-view requires multisize measurements and cannot accompany --gsize or --gheight.\n"
+        "  --svg-text-mode applies only to SVG and cannot accompany --text2paths.\n"
+        "  --text2paths applies to svg, pdf, pdf-tiled, ps, and eps.\n"
+        "  --layout-no-packing preserves Piece mode positions without a layout run.\n"
+        "  It cannot accompany --layout-view, --layout-oversize, or pdf-tiled.\n"
+        "  Use pdf for roll paper and pdf-tiled for tiled paper.\n"
+        "  Tiled PDF cannot export Marker layouts. DXF requires one size, not Marker or Nested layouts.\n"
+        "  Oversized or unplaced pieces stop export unless the selected oversize choice resolves them.\n"
+        "  The split choice excludes dxf, pdf-tiled, gcode, 3mf, Marker, and Nested layouts.\n"
+        "  The extend choice cannot place a piece wider than the media.\n"
+        "  G-Code and 3MF require optional export modules.\n"
+        "  Use --layout-info to inspect available materials, views, oversized pieces, and allowed formats.\n"
+        "\nRemoved legacy options\n"
+        "  -b, --basename: formerly enabled console export and supplied the output basename.\n"
+        "  This branch does not accept --basename. Use --layout-export and --layout-output instead.\n"
+        "  --exportOnlyDetails is replaced by --layout-no-packing.\n"
+        "  The old --destination, --format, --bdxf, and page-layout options are removed.\n"
+        "  Use direct --layout-* flags or --layout-settings for page, margin, gap, and rotation settings.\n"
+        "\nErrors and exit codes\n"
+        "  Option names are case-sensitive. Unknown options and missing values are usage errors.\n"
+        "  Read standard error for the cause. Seamly2D returns the SeamlyLayout exit code after export.\n"
+        "  0: Success. Help and version requests also return 0.\n"
+        "  64: Incorrect command line arguments, missing companions, invalid values, or incompatible export choices.\n"
+        "  65: Invalid pattern data or gradation options on an individual pattern.\n"
+        "  66: A pattern or measurement file is missing or unreadable.\n"
+        "  69: SeamlyLayout cannot start, or an export module is unavailable.\n"
+        "  70: Oversized or unplaced pieces, or a software error.\n"
+        "  73: The output file cannot be written.\n"
+        "  74: The program cannot send the pieces data to SeamlyLayout.\n"
+        "  78: Invalid configuration, such as a relative SEAMLY_DATA_DIR.\n");
+}
+
 /// @brief Initializes the list of command-line options and their index.
 ///
 /// This method defines the supported test-mode, display, and layout-export options.
@@ -289,6 +351,7 @@ VCommandLine::VCommandLine()
 /// @param options A reference to the list where all VCommandLineOptions will be stored.
 /// @param options_index A map that associates each long-form option string with its index
 ///        in the options list.
+//---------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------
 void VCommandLine::initOptions(VCommandLineOptions &options, QMap<QString, int> &options_index)
 {

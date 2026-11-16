@@ -1,3 +1,8 @@
+// Author: slspencer
+// Copyright (C) 2026 Seamly2D Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+// License: https://www.gnu.org/licenses/gpl-3.0.html
+
 /***************************************************************************
  *                                                                         *
  *   Copyright (C) 2017  Seamly, LLC                                       *
@@ -64,6 +69,8 @@ private slots:
     void UniqueKeys();
     void LayoutExportOptions();
     void LayoutExportOptionsAppearInHelp();
+    void HelpDescribesLimitsAndRemovedBasename();
+    void HelpDialogClosesWithoutExiting();
     void LayoutExportUsesDefaultSvgFormat();
     void LayoutExportRequiresOutput();
     void LayoutExportRequiresOneInput();

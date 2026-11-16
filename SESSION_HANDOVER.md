@@ -1,5 +1,15 @@
 # Session handover
 
+## 2026-11-16 — Command line help in the Help menu
+
+- Added **Help > Command line options** on `feature/cli-1`.
+- The window uses `VCommandLine::helpText()` for registered descriptions, limits, removed options, and exit codes.
+- `--basename` remains removed; the window explains `--layout-export` and `--layout-output` as its replacements.
+- Shared the dialog with the existing console-free `--help` fallback. Closing it from the menu does not exit Seamly2D.
+- Verified the Windows Qt 6.11.3 build and all 40 Qt suites: 32628 passed, zero failures.
+- The CLI suite includes 31 passing checks, including help content, scrolling, and closing without exiting.
+- Linux and macOS verification remains deferred to CI. No merge or push.
+
 ## Current status
 
 ### 2026-11-16 — CLI.3 direct layout flags (feature/cli-1)

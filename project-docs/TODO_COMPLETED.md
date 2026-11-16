@@ -1,5 +1,12 @@
 # COMPLETED — Tagged SVG Handoff to SeamlyLayout
 
+## CLI help menu — 2026-11-16
+
+- [x] Add **Help > Command line options** from the `feature/cli-1` parser.
+- [x] Include current limits, removed options, and exit codes.
+- [x] Verify scrolling, read-only text, and closing without exiting.
+- [x] Build Seamly2D and pass all 40 Qt suites on Windows with Qt 6.11.3.
+
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
 ## Completed subtasks from Task Seamly2D.71 — Piece mode fold line: arrow line, label and extended fold line
