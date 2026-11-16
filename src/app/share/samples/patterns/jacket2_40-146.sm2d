@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pattern>
-    <!--Pattern created with Seamly2D v26.10.2719 (https://seamly.io).-->
-    <version>0.7.7</version>
+    <!--Pattern created with Seamly2D v26.11.1513 (https://seamly.io).-->
+    <version>0.7.9</version>
     <unit>mm</unit>
     <description/>
     <notes/>
@@ -180,10 +180,18 @@
             <point id="309" idObject="87" inUse="true" mx="-8.05159" my="7.80181" type="modeling"/>
             <spline id="310" idObject="80" inUse="true" type="modelingPath"/>
             <point id="311" idObject="209" inUse="true" mx="-23.1804" my="-2.05343" type="modeling"/>
+            <point id="340" idObject="50" inUse="true" mx="1.32292" my="2.64583" type="modeling"/>
+            <arc id="341" idObject="76" inUse="true" type="modeling"/>
+            <point id="342" idObject="61" inUse="true" mx="1.32292" my="2.64583" type="modeling"/>
+            <point id="343" idObject="71" inUse="true" mx="1.32292" my="2.64583" type="modeling"/>
+            <point id="344" idObject="97" inUse="true" mx="1.32292" my="2.64583" type="modeling"/>
+            <spline id="345" idObject="98" inUse="true" type="modelingSpline"/>
+            <point id="346" idObject="95" inUse="true" mx="1.32292" my="2.64583" type="modeling"/>
+            <point id="347" idObject="203" inUse="true" mx="11.3928" my="-10.445" showPointName="true" type="modeling"/>
         </modeling>
         <pieces>
-            <piece closed="1" color="white" fill="nobrush" hideMainPath="false" id="124" inLayout="true" locked="false" mx="686.661" my="-9.49939" name="Подборт" seamAllowance="true" united="false" version="2" width="7">
-                <data annotation="" fontSize="0" height="1" letter="G" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+            <piece closed="1" color="white" fill="nobrush" flip="None" hideMainPath="false" id="124" inLayout="true" locked="false" material="Fabric" mx="698.876" my="-7.46352" name="Facing" seamAllowance="true" united="false" version="2" width="7">
+                <data annotation="" fontSize="0" height="1" letter="G" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" tiltDegrees="0" visible="false" width="1"/>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="12.7" arrows="0" length="50.8" mx="0" my="0" rotation="90" visible="false"/>
                 <nodes>
@@ -196,14 +204,14 @@
                     <node idObject="123" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="0" color="#ffeadc" fill="solidpattern" hideMainPath="false" id="253" inLayout="true" locked="false" material="Fabric" mx="-28.0985" my="44.9608" name="Back" seamAllowance="true" united="false" version="2" width="7">
-                <data annotation="" fontSize="0" height="50" letter="A" mx="950.443" my="3136.56" onFold="true" orientation="Right" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="50">
+            <piece closed="0" color="#ffeadc" fill="solidpattern" flip="None" hideMainPath="false" id="253" inLayout="true" locked="false" material="Fabric" mx="-60.9056" my="2.31158" name="Back" seamAllowance="true" united="false" version="2" width="7">
+                <data annotation="" fontSize="0" height="50" letter="A" mx="514.965" my="2973.79" onFold="true" orientation="Right" quantity="1" rotation="0" rotationWay="None" tilt="None" tiltDegrees="0" visible="true" width="50">
                     <line alignment="4" bold="true" italic="false" sfIncrement="6" text="%pLetter%"/>
                     <line alignment="4" bold="true" italic="false" sfIncrement="2" text="%pName%"/>
                     <line alignment="4" bold="false" italic="false" sfIncrement="0" text="%mFabric%, %wCut% %pQuantity%"/>
                 </data>
                 <patternInfo fontSize="0" height="50" mx="503.062" my="3153.44" rotation="0" visible="true" width="50"/>
-                <grainline arrowLength="12.7" arrows="0" length="100" mx="814.752" my="3422.4" rotation="90" visible="true"/>
+                <grainline arrowLength="12.7" arrows="0" length="100" mx="765.154" my="3416.2" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="246" reverse="0" type="NodeSplinePath"/>
                     <node idObject="247" type="NodePoint"/>
@@ -215,8 +223,8 @@
                     <node before="0" foldLine="true" idObject="245" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" color="#20ff54" fill="solidpattern" flip="None" hideMainPath="false" id="299" inLayout="true" locked="false" material="Fabric" mx="25.768" my="-25.6197" name="Detail 2" seamAllowance="true" united="false" version="2" width="7">
-                <data annotation="" fontSize="0" height="1" letter="B" mx="0" my="0" onFold="true" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" tiltDegrees="0" visible="false" width="1"/>
+            <piece closed="1" color="#20ff54" fill="solidpattern" flip="None" hideMainPath="false" id="299" inLayout="true" locked="false" material="Fabric" mx="21.6962" my="-113.162" name="Yoke Upper" seamAllowance="true" united="false" version="2" width="7">
+                <data annotation="" fontSize="0" height="1" letter="B" mx="0" my="0" onFold="false" orientation="Undefined" quantity="2" rotation="0" rotationWay="None" tilt="None" tiltDegrees="0" visible="false" width="1"/>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="12.7" arrows="0" length="100" mx="2212.95" my="2691.32" rotation="90" visible="true"/>
                 <nodes>
@@ -225,41 +233,57 @@
                     <node idObject="292" type="NodePoint"/>
                     <node idObject="293" type="NodePoint"/>
                     <node idObject="294" reverse="0" type="NodeArc"/>
-                    <node after="10" foldLine="true" idObject="295" type="NodePoint"/>
-                    <node before="10" foldLine="true" idObject="296" type="NodePoint"/>
+                    <node after="10" idObject="295" type="NodePoint"/>
+                    <node before="10" idObject="296" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" color="white" fill="nobrush" hideMainPath="false" id="305" inLayout="true" locked="false" mx="15.4084" my="-2.3127" name="Detail 3" seamAllowance="true" united="false" version="2" width="7">
-                <data annotation="" fontSize="0" height="1" letter="C" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+            <piece closed="1" color="white" fill="nobrush" flip="None" hideMainPath="false" id="305" inLayout="true" locked="false" material="Fabric" mx="19.7851" my="-77.1646" name="Yoke Lower" seamAllowance="true" united="false" version="2" width="7">
+                <data annotation="" fontSize="0" height="1" letter="C" mx="0" my="0" onFold="false" orientation="Undefined" quantity="2" rotation="0" rotationWay="None" tilt="None" tiltDegrees="0" visible="false" width="1"/>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="12.7" arrows="0" length="30" mx="2577.78" my="3000.93" rotation="90" visible="true"/>
                 <nodes>
                     <node after="10" idObject="300" type="NodePoint"/>
                     <node before="10" idObject="301" type="NodePoint"/>
-                    <node idObject="302" type="NodePoint"/>
-                    <node idObject="303" reverse="1" type="NodeSplinePath"/>
+                    <node excluded="true" idObject="302" type="NodePoint"/>
+                    <node excluded="true" idObject="303" reverse="1" type="NodeSplinePath"/>
                     <node idObject="304" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" color="#deffe2" fill="solidpattern" hideMainPath="false" id="312" inLayout="true" locked="false" material="Lining" mx="21.7402" my="56.6207" name="Detail 4" seamAllowance="true" united="false" version="2" width="7">
-                <data annotation="" fontSize="0" height="50" letter="D" mx="2101.56" my="3530.43" onFold="false" orientation="Undefined" quantity="2" rotation="0" rotationWay="None" tilt="None" visible="true" width="50">
+            <piece closed="1" color="#deffe2" fill="solidpattern" flip="None" hideMainPath="false" id="312" inLayout="true" locked="false" material="Lining" mx="19.3994" my="50.3785" name="Front" seamAllowance="true" united="false" version="2" width="7">
+                <data annotation="" fontSize="0" height="50" letter="D" mx="2146.64" my="3428.87" onFold="false" orientation="Undefined" quantity="2" rotation="0" rotationWay="None" tilt="None" tiltDegrees="0" visible="true" width="50">
                     <line alignment="4" bold="true" italic="false" sfIncrement="6" text="%pLetter%"/>
                     <line alignment="4" bold="true" italic="false" sfIncrement="2" text="%pName%"/>
                     <line alignment="4" bold="false" italic="false" sfIncrement="0" text="%mFabric%, %wCut% %pQuantity%"/>
                 </data>
-                <patternInfo fontSize="0" height="50" mx="1730.42" my="3623.22" rotation="0" visible="true" width="50"/>
-                <grainline arrowLength="12.7" arrows="0" length="100" mx="1968.48" my="3866.62" rotation="90" visible="true"/>
+                <patternInfo fontSize="0" height="50" mx="2146.31" my="3576.99" rotation="0" visible="true" width="50"/>
+                <grainline arrowLength="12.7" arrows="0" length="100" mx="2355.08" my="3759.27" rotation="90" visible="true"/>
                 <nodes>
                     <node after="10" idObject="306" type="NodePoint"/>
                     <node before="10" idObject="307" type="NodePoint"/>
                     <node idObject="308" type="NodePoint"/>
                     <node idObject="309" type="NodePoint"/>
                     <node idObject="310" reverse="1" type="NodeSplinePath"/>
-                    <node idObject="311" type="NodePoint"/>
+                    <node excluded="true" idObject="311" type="NodePoint"/>
+                    <node idObject="347" type="NodePoint"/>
+                </nodes>
+            </piece>
+            <piece closed="1" color="#ffff7f" fill="diagcrosspattern" flip="None" hideMainPath="false" id="339" inLayout="true" locked="false" material="Interfacing" mx="887.167" my="21.0387" name="Facing Interfacing Any" seamAllowance="true" united="false" version="2" width="7">
+                <data annotation="" fontSize="0" height="1" letter="G-2" mx="0" my="0" onFold="false" orientation="Undefined" quantity="2" rotation="0" rotationWay="Any" tilt="None" tiltDegrees="0" visible="false" width="1"/>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="12.7" arrows="0" length="50.8" mx="0" my="0" rotation="90" visible="false"/>
+                <nodes>
+                    <node idObject="340" type="NodePoint"/>
+                    <node idObject="341" reverse="0" type="NodeArc"/>
+                    <node after="10" idObject="342" type="NodePoint"/>
+                    <node after="10" before="10" idObject="343" type="NodePoint"/>
+                    <node before="10" idObject="344" type="NodePoint"/>
+                    <node idObject="345" reverse="1" type="NodeSpline"/>
+                    <node idObject="346" type="NodePoint"/>
                 </nodes>
             </piece>
         </pieces>
         <groups/>
+        <images/>
     </draftBlock>
     <draftBlock name="Рукав">
         <calculation>
@@ -340,8 +364,8 @@
             <point id="332" idObject="229" inUse="true" mx="1.32292" my="2.64583" type="modeling"/>
         </modeling>
         <pieces>
-            <piece closed="1" color="white" fill="nobrush" hideMainPath="false" id="326" inLayout="true" locked="false" mx="30.7237" my="-62.3135" name="Sleeve 2" seamAllowance="true" united="false" version="2" width="7">
-                <data annotation="" fontSize="0" height="1" letter="F" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+            <piece closed="1" color="white" fill="nobrush" flip="None" hideMainPath="false" id="326" inLayout="true" locked="false" material="Fabric" mx="24.6161" my="-62.3135" name="Sleeve 2" seamAllowance="true" united="false" version="2" width="7">
+                <data annotation="" fontSize="0" height="1" letter="F" mx="0" my="0" onFold="false" orientation="Undefined" quantity="2" rotation="0" rotationWay="None" tilt="None" tiltDegrees="0" visible="false" width="1"/>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="12.7" arrows="0" length="100" mx="4016.26" my="4037" rotation="90" visible="true"/>
                 <nodes>
@@ -353,8 +377,8 @@
                     <node idObject="325" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" color="#b4beff" fill="solidpattern" hideMainPath="false" id="333" inLayout="true" locked="false" material="Fabric" mx="35.0805" my="-63.5407" name="Sleeve 1" seamAllowance="true" united="false" version="2" width="7">
-                <data annotation="" fontSize="0" height="50" letter="E" mx="3375.25" my="3728.2" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="50">
+            <piece closed="1" color="#ffffff" fill="nobrush" flip="None" hideMainPath="false" id="333" inLayout="true" locked="false" material="Fabric" mx="35.0805" my="-63.5407" name="Sleeve 1" seamAllowance="true" united="false" version="2" width="7">
+                <data annotation="" fontSize="0" height="50" letter="E" mx="3257.45" my="3759.2" onFold="false" orientation="Undefined" quantity="2" rotation="0" rotationWay="None" tilt="None" tiltDegrees="0" visible="true" width="50">
                     <line alignment="4" bold="true" italic="false" sfIncrement="6" text="%pLetter%"/>
                     <line alignment="4" bold="true" italic="false" sfIncrement="2" text="%pName%"/>
                     <line alignment="4" bold="false" italic="false" sfIncrement="0" text="%mFabric%, %wCut% %pQuantity%"/>
@@ -372,6 +396,7 @@
             </piece>
         </pieces>
         <groups/>
+        <images/>
     </draftBlock>
     <draftBlock name="Комір">
         <calculation>
@@ -386,10 +411,14 @@
             <point id="197" idObject="194" inUse="true" mx="1.32292" my="2.64583" type="modeling"/>
             <point id="198" idObject="192" inUse="true" mx="1.32292" my="2.64583" type="modeling"/>
             <point id="199" idObject="190" inUse="true" mx="1.32292" my="2.64583" type="modeling"/>
+            <point id="335" idObject="193" inUse="true" mx="1.32292" my="2.64583" type="modeling"/>
+            <point id="336" idObject="194" inUse="true" mx="1.32292" my="2.64583" type="modeling"/>
+            <point id="337" idObject="192" inUse="true" mx="1.32292" my="2.64583" type="modeling"/>
+            <point id="338" idObject="190" inUse="true" mx="1.32292" my="2.64583" type="modeling"/>
         </modeling>
         <pieces>
-            <piece closed="1" color="white" fill="nobrush" hideMainPath="false" id="200" inLayout="true" locked="false" mx="76.4546" my="-143.503" name="Комір" seamAllowance="true" united="false" version="2" width="10">
-                <data annotation="" fontSize="0" height="1" letter="H" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+            <piece closed="1" color="white" fill="nobrush" flip="None" hideMainPath="false" id="200" inLayout="true" locked="false" material="Fabric" mx="115.136" my="-216.794" name="Collar" seamAllowance="true" united="false" version="2" width="10">
+                <data annotation="" fontSize="0" height="1" letter="H" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" tiltDegrees="0" visible="false" width="1"/>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="12.7" arrows="0" length="50.8" mx="3274.69" my="2756.6" rotation="90" visible="true"/>
                 <nodes>
@@ -399,7 +428,19 @@
                     <node before="7" idObject="199" type="NodePoint"/>
                 </nodes>
             </piece>
+            <piece closed="1" color="#ffff7f" fill="diagcrosspattern" flip="None" hideMainPath="false" id="334" inLayout="true" locked="false" material="Interfacing" mx="113.425" my="-308.409" name="Collar Interfacing Any" seamAllowance="true" united="false" version="2" width="10">
+                <data annotation="" fontSize="0" height="1" letter="H-2" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="Any" tilt="None" tiltDegrees="0" visible="false" width="1"/>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="12.7" arrows="0" length="50.8" mx="3274.69" my="2756.6" rotation="90" visible="true"/>
+                <nodes>
+                    <node after="7" idObject="335" type="NodePoint"/>
+                    <node before="7" idObject="336" type="NodePoint"/>
+                    <node after="7" idObject="337" type="NodePoint"/>
+                    <node before="7" idObject="338" type="NodePoint"/>
+                </nodes>
+            </piece>
         </pieces>
         <groups/>
+        <images/>
     </draftBlock>
 </pattern>

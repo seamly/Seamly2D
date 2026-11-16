@@ -2204,3 +2204,13 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 ### [x] Layout.Y7 multisize > Paper=roll > custom > width=16.0: for jacket 2, why wasn't the user prompted to either 'split the pieces' or 'make the media longer'? - check one more time, if the dialog doesn't appear then run this as an implementation task.
 
 ### [x] Layout.Y3 - multisize - Nested: When a piece has corners but none are 90 degrees then align the sizes along the cutline's longest edge.
+
+### [x] zz Layout.Y7 - Settings - Improve display and processing of the 'Place fold lines on the left edge (fabric: no left margin)' setting.
+
+### [x] Layout.Y8 - Rotation - Improve efficiency of rotation degree steps - the Layout Settings user instructions state that a piece's  Layout rotation setting 'Any' samples 1 degree steps. This is not efficient -- change the rotation step from 1 degree to 10 degrees.
+
+### [ ] Layout.Y9 - multisize > Fabric (folded): fix placing of pieces with foldlines so that they are always placed along the fabric's left edge, and that placing pieces with foldlines occurs before placing piecing without foldlines. This is an essential part of the layout process. The base Size has pieces with folddlines that are placed correctly, but subsequent sizes have pieces with foldlines that are placed incorrectly. This implies that the base size layout applies this rule correctly but the remaining size layouts do not apply this rule correctly. All size layouts must follow this rule: place pieces with foldlines such that pieces with foldlines are aligned along the fabric's left edge; after all pieces with foldlines have been placed (extending the media longer if needed) then place the pieces without foldlines.
+
+### [ ] Layout.Y111 - foldlines - Improve the foldline processing so that foldlines can be placed along the left edge for paper and for fabric. To do this, move the 'Place the foldlines along the left edge' checkbox on the line below the 'Media type' label and radio buttons, above the 'Fabric' section. Enable the 'Place the foldlines...' checkbox for either media. When this checkbox is selected then place the pieces along the media's left edge, extending the media's total length as needed, then place the remaining pieces.
+
+### [ ] Layout.Y10 - Large patterns: display SVGs over the 2 MB `data:` URL limit in both canvases. jacket2 (16 pieces): Fabric graded pieces, Marker and Nested layouts did not display.

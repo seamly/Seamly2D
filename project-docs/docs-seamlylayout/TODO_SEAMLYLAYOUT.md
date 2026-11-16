@@ -4,27 +4,6 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Little things to fix
 
-- [ ] zz Layout.Y7 - Settings - Improve display and processing of the 'Place fold lines on the left edge (fabric: no left margin)' setting.
-  - [x] Layout.Y7.1 - Move the 'Place fold lines...' label and checkbox into the Fabric section, on the line below the 'Fabric Folded' checkbox; It should be displayed with the Fabric section.
-    - Result: `SettingsDialog.qml` Fabric grid, below "Fabric Folded". Test: `foldLinesOnLeftEdgeCheck_enabledOnlyForFoldedFabric`.
-  - [x] Layout.Y7.2 - Enable the 'Place fold lines...' checkbox when the 'Fabric Folded' checkbox is selected, it's default setting is checked.
-    - Result: enabled only when Fabric Folded is checked; default on (`LayoutSettings`, `SettingsModel`, `default_settings.json`). Paper and open fabric ignore a saved value (`LayoutSettings::is_folded_fabric`).
-  - [ ] Layout.Y7.3 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §54.
-
-- [ ] zz Layout.Y8 - Rotation - Improve efficiency of rotation degree steps - the Layout Settings user instructions state that a piece's  Layout rotation setting 'Any' samples 1 degree steps. This is not efficient -- change the rotation step from 1 degree to 10 degrees.
-  - [x] Change the layout algorithm so that if layout settings 'Layout Mode'='Any' and piece property setting 'Layout rotation'='Any' then the piece can be rotated in 10 degree steps to find optimal placement.
-    - Result: `pack_types::ANY_ROTATION_STEP_DEG` = 10; `PieceRotationRule::Any` tries 0°, 10°, … 350° (36 angles, was 360). Handoff `data-rotation="1"` unchanged. Tests: `piece_rotation_rules_resolve_by_layout_mode`, `any_piece_uses_non_quarter_turn_to_fit`, `mixed_piece_rules_keep_allowed_angles_and_unplaced_ids`.
-  - [x] Change the text in Layout Settings to state that 'Layout rotation Any samples 10 degree steps.'
-    - Result: `SettingsDialog.qml` Piece Gap tip reads "Layout rotation Any samples 10° steps." Docs: SVG-DATA-ATTRIBUTES `data-rotation`, `TODO_ROTATION.md`, `AGENT_CHECKLIST.md` §40.
-  - [ ] Layout.Y8.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §55.
-
-- [ ] qq Layout.Y111 - foldlines - Improve the foldline processing so that foldlines can be placed along the left edge for paper and for fabric. To do this, move the 'Place the foldlines along the left edge' checkbox on the line below the 'Media type' label and radio buttons, above the 'Fabric' section. Enable the 'Place the foldlines...' checkbox for either media. When this checkbox is selected then place the pieces along the media's left edge, extending the media's total length as needed, then place the remaining pieces.
-  - [x] Move the checkbox to the line below Media Type; enable it for paper and fabric.
-    - Result: `SettingsDialog.qml` Media grid, below the Media Type buttons; text "Place fold lines on the left edge"; default on. Test: `foldLinesOnLeftEdgeCheck_belowMediaTypeForEveryMedia`.
-  - [x] Place fold line pieces first on the left edge of paper and fabric; the media gets longer when it must.
-    - Result: `LayoutSettings::places_fold_lines_on_left_edge` has no folded fabric check. Paper and open fabric: the left margin stays. Folded fabric: the fold, no margin. Tests: `fold_lines_on_left_edge_apply_to_every_media`, `fold_line_lies_on_the_left_margin_of_paper_and_open_fabric`, `jacket2_paper_and_open_fabric_place_fold_line_pieces_first`.
-  - [ ] Layout.Y111.1 - Installed-app check with the next MSI: `AGENT_CHECKLIST.md` §58.
-
 - [ ] Layout.Y10 - Large patterns: display SVGs over the 2 MB `data:` URL limit in both canvases. jacket2 (16 pieces): Fabric graded pieces, Marker and Nested layouts did not display.
   - [x] Serve canvas SVGs from memory through a custom URL scheme.
     - Result: `CanvasSvgSchemeHandler` serves `seamly-canvas://<canvas>/<n>.svg`; `SvgCanvas.qml` loads it in an `<img>`; no `data:` URL. Test: `webEngine_displaysSvgOverDataUrlLimit` (3 MiB SVG). Docs: README "Canvas display", DECISIONS record.
