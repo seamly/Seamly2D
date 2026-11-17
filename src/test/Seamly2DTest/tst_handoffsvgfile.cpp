@@ -9,6 +9,14 @@
 
 #include "tst_handoffsvgfile.h"
 #include "../layout_handoff/handoff_svg_file.h"
+#include "../layout_handoff/handoff_document.h"
+#include "../vpatterndb/vpiece.h"
+#include "../vpatterndb/vcontainer.h"
+#include "../vpatterndb/vpiecenode.h"
+#include "../vpatterndb/floatItemData/vpiecelabeldata.h"
+#include "../vpatterndb/floatItemData/vpatternlabeldata.h"
+#include "../vpatterndb/floatItemData/vgrainlinedata.h"
+#include "../vgeometry/vpointf.h"
 
 #include <QDate>
 #include <QDateTime>
@@ -97,4 +105,50 @@ void TST_HandoffSvgFile::writeErrorReturnsFalse() const
 
     QVERIFY(!layout_handoff::write_svg_file(file_path, QStringLiteral("<svg/>")));
     QVERIFY(!QFile::exists(file_path));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Checks that individual and multisize documents keep their exact UTF-8 bytes on disk.
+void TST_HandoffSvgFile::generatedDocumentIsWrittenWithoutChanges() const
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const Unit unit = Unit::Mm;
+    VContainer data(nullptr, &unit);
+    data.UpdateGObject(1, new VPointF(0, 0, "A", 0, 0));
+    data.UpdateGObject(2, new VPointF(400, 0, "B", 0, 0));
+    data.UpdateGObject(3, new VPointF(250, 300, "C", 0, 0));
+    VPiece piece;
+    for (quint32 id : {1U, 2U, 3U})
+    {
+        piece.GetPath().Append(VPieceNode(id, Tool::NodePoint));
+    }
+    piece.SetName(QStringLiteral("Ärmel"));
+    piece.GetPatternPieceData().SetVisible(false);
+    piece.GetPatternInfo().SetVisible(false);
+    piece.GetGrainlineGeometry().SetVisible(false);
+    for (bool multisize : {false, true})
+    {
+        layout_handoff::HandoffDocument document;
+        document.set_sheet(QRectF(0, 0, 500, 500), 96);
+        if (multisize)
+        {
+            document.set_multisize({"40", "42"}, "40", "168");
+        }
+        for (const QString& size : (multisize ? QStringList{"40", "42"} : QStringList{QString()}))
+        {
+            layout_handoff::HandoffPlacedPiece placed;
+            placed.info = layout_handoff::HandoffPieceInfo::create(piece, size, multisize ? "1" : "");
+            placed.piece = layout_handoff::HandoffPiece::create(piece, &data);
+            document.add_piece(placed);
+        }
+        const QString svg = document.to_svg_string();
+        QVERIFY(svg.contains(QStringLiteral("data-type=\"piece\"")));
+        const QString path = QDir(directory.path()).filePath(QStringLiteral("pieces.svg"));
+        QVERIFY(layout_handoff::write_svg_file(path, svg));
+        QCOMPARE(read_file_bytes(path), svg.toUtf8());
+        QDomDocument parsed;
+        QVERIFY(parsed.setContent(read_file_bytes(path)));
+        QCOMPARE(parsed.elementsByTagName(QStringLiteral("svg")).size(), 1);
+    }
 }

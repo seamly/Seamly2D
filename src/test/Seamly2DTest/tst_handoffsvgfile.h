@@ -24,6 +24,7 @@ private slots:
     void fileNameHasPatternNameAndTime() const;
     void fileHoldsTheSvgAsUtf8() const;
     void writeErrorReturnsFalse() const;
+    void generatedDocumentIsWrittenWithoutChanges() const;
 };
 
 #endif // TST_HANDOFF_SVG_FILE_H
