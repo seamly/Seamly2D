@@ -1,10 +1,12 @@
 //-----------------------------------------------------------------------------
 //  @file   historyDialog.cpp
 //  @author Douglas S Caskey
+//  @author slspencer
 //  @date   17 Sep, 2023
 //
 //  @copyright
 //  Copyright (C) 2015 - 2023 Seamly, LLC
+//  Copyright (C) 2026 Seamly2D Project
 //  https://github.com/fashionfreedom/seamly2d
 //
 //  @brief
@@ -351,7 +353,7 @@ QT_WARNING_DISABLE_GCC("-Wswitch-default")
 RowData HistoryDialog::record(const VToolRecord &tool)
 {
     // This check helps to find missed tools in the switch
-    Q_STATIC_ASSERT_X(static_cast<int>(Tool::LAST_ONE_DO_NOT_USE) == 55, "Not all tools were used in history.");
+    Q_STATIC_ASSERT_X(static_cast<int>(Tool::LAST_ONE_DO_NOT_USE) == 56, "Not all tools were used in history.");
 
     RowData rowData;
     const quint32 &toolId = tool.getId();
@@ -378,6 +380,7 @@ RowData HistoryDialog::record(const VToolRecord &tool)
             case Tool::Midpoint:// Same as Tool::AlongLine, but tool will never has such type
             case Tool::ArcIntersectAxis:// Same as Tool::CurveIntersectAxis, but tool will never has such type
             case Tool::BackgroundImage:
+            case Tool::CopyPiece:
             case Tool::LAST_ONE_DO_NOT_USE:
                 Q_UNREACHABLE(); //-V501
                 break;

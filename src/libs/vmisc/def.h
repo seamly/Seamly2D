@@ -334,6 +334,7 @@ enum class Tool : ToolVisHolderType
     InsertNodes,
     BackgroundImage,
     PieceMirror,
+    CopyPiece,          // Piece mode pick tool only; the pattern history never holds it.
     LAST_ONE_DO_NOT_USE //add new stuffs above this, this constant must be last and never used
 };
 
