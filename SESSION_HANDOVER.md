@@ -14,6 +14,14 @@
 - Export Drafts retains the construction scene, as the user requested.
 - Tests cover all flips, two sizes, seam allowances, fold lines, paths, notches, markings, and grainlines.
 - The handoff piece suite passed 41 checks. The handoff document suite passed 33 checks.
+
+## 2026-11-16 — S2D.76 flipped grainline anchors
+
+- Grainlines now use the same display flip and tilt as their anchor points.
+- Grainline edits remove the display transform before storing pattern coordinates.
+- Draft coordinates remain unchanged.
+- Tests cover 24 combinations of flips, tilts, and anchor modes, with repeated refreshes.
+- The piece markings suite passed 33 checks.
 - All branches start at local run-seamlyLayout commit 31a216de4a.
 - The main checkout and its three uncommitted documentation edits remain unchanged.
 - The four branches remain local and unmerged.

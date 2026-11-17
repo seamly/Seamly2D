@@ -209,6 +209,7 @@ private:
     void                  reportMissingMarkingPoints(const QString &piece_name, const QVector<quint32> &point_ids);
     void                  applyFlipToGeometry(PieceFlip flip);
     void                  applyTiltToGeometry(int signed_degrees);
+    QTransform            grainlineDisplayTransform() const;
     void                  applyDisplayTransformToDetails(const QTransform &transform);
     void                  updateInternalPaths();
 

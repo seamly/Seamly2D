@@ -15,6 +15,13 @@
 #include "../../libs/vtools/dialogs/tools/piece/PieceMarkingsEditor.h"
 #include "../../libs/vtools/dialogs/tools/piece/pattern_piece_dialog.h"
 #include "../../libs/vtools/tools/nodeDetails/anchorpoint_tool.h"
+#include "../../libs/vtools/tools/nodeDetails/vnodepoint.h"
+#include "../../libs/vtools/tools/pattern_piece_tool.h"
+#include "../../libs/vwidgets/vmaingraphicsscene.h"
+#include "../../libs/vwidgets/vgrainlineitem.h"
+#include "../../libs/vpatterndb/floatItemData/vgrainlinedata.h"
+#include "../../libs/vpatterndb/floatItemData/vpiecelabeldata.h"
+#include "../../libs/vpatterndb/floatItemData/vpatternlabeldata.h"
 #include "../../libs/ifc/xml/PatternPieceCopy.h"
 #include "../../libs/ifc/xml/vpatternconverter.h"
 #include "../../libs/ifc/xml/vdomdocument.h"
@@ -578,4 +585,119 @@ void TST_PieceMarkings::pieceDialogReferencesUsePathNodes()
     pages->setCurrentRow(TabOrder::Properties);
     pages->setCurrentRow(TabOrder::ReferenceLines);
     QVERIFY(reference->markingsValid());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_PieceMarkings::flippedGrainlineFollowsAnchors_data()
+{
+    QTest::addColumn<int>("flip");
+    QTest::addColumn<int>("tilt");
+    QTest::addColumn<bool>("center_anchor");
+    for (int flip = 0; flip < 4; ++flip)
+    {
+        for (int tilt : {-20, 0, 20})
+        {
+            for (bool center_anchor : {false, true})
+            {
+                const QByteArray name = QByteArray::number(flip) + "-" + QByteArray::number(tilt)
+                                        + (center_anchor ? "-center" : "-endpoints");
+                QTest::newRow(name.constData()) << flip << tilt << center_anchor;
+            }
+        }
+    }
+}
+
+/// @brief Checks the live graphics item across flips, tilts, anchor modes, and repeated refreshes.
+void TST_PieceMarkings::flippedGrainlineFollowsAnchors()
+{
+    QFETCH(int, flip);
+    QFETCH(int, tilt);
+    QFETCH(bool, center_anchor);
+    const Unit unit = Unit::Mm;
+    qApp->setPatternUnit(unit);
+    VContainer data(nullptr, &unit);
+    MarkingsTestDocument document;
+    QVERIFY(document.setContent(QStringLiteral(
+        "<pattern><draftBlock name=\"Block\"><modeling/><pieces><piece id=\"20\" version=\"2\"/>"
+        "</pieces></draftBlock></pattern>")));
+    VMainGraphicsScene scene;
+    const bool show_grainlines = qApp->Settings()->showGrainlines();
+    qApp->Settings()->setShowGrainlines(true);
+    const auto cleanup = qScopeGuard([&]
+    {
+        qApp->Settings()->setShowGrainlines(show_grainlines);
+        for (quint32 id : {1U, 2U, 3U, 4U, 20U})
+        {
+            VAbstractPattern::RemoveTool(id);
+        }
+    });
+    const QVector<QPointF> corners{{0, 0}, {400, 0}, {400, 400}, {0, 400}};
+    VPiece piece;
+    piece.SetName(QStringLiteral("Anchored grainline"));
+    piece.GetPatternPieceData().SetVisible(false);
+    piece.GetPatternInfo().SetVisible(false);
+    for (int index = 0; index < corners.size(); ++index)
+    {
+        const quint32 id = index + 1;
+        data.UpdateGObject(id, new VPointF(corners.at(index), QStringLiteral("A%1").arg(id), 0, 0));
+        piece.GetPath().Append(VPieceNode(id, Tool::NodePoint));
+        VNodePoint::Create(&document, &data, &scene, id, id, Document::FullParse, Source::FromFile, "Block");
+    }
+    data.UpdateGObject(5, new VPointF(100, 300, "Bottom", 0, 0));
+    data.UpdateGObject(6, new VPointF(150, 120, "Top", 0, 0));
+    data.UpdateGObject(7, new VPointF(120, 220, "Center", 0, 0));
+    piece.setAnchors({5, 6, 7});
+    VGrainlineData& grainline = piece.GetGrainlineGeometry();
+    grainline.SetVisible(true);
+    grainline.setLength(QStringLiteral("40"));
+    grainline.setArrowLength(QStringLiteral("2"));
+    grainline.setRotation(QStringLiteral("65"));
+    grainline.setArrowType(ArrowType::Both);
+    QLineF stored(QPointF(100, 300), QPointF(150, 120));
+    if (center_anchor)
+    {
+        grainline.setCenterAnchorPoint(7);
+        const qreal length = ToPixel(40, unit);
+        const QPointF start = VGrainlineData::centeredStart(QPointF(120, 220), 65, length);
+        stored = QLineF(start, start + QPointF(length, 0));
+        stored.setAngle(65);
+    }
+    else
+    {
+        grainline.setBottomAnchorPoint(5);
+        grainline.setTopAnchorPoint(6);
+    }
+    piece.setFlip(static_cast<PieceFlip>(flip));
+    piece.GetPatternPieceData().SetTilt(tilt < 0 ? PieceTilt::Clockwise : PieceTilt::CounterClockwise);
+    piece.GetPatternPieceData().setTiltDegrees(qAbs(tilt));
+    QString width = QStringLiteral("0");
+    PatternPieceTool* tool = PatternPieceTool::Create(20, piece, width, &scene, &document, &data,
+                                                     Document::FullParse, Source::FromFile, "Block");
+    QVERIFY(tool != nullptr);
+    VGrainlineItem* item = nullptr;
+    for (QGraphicsItem* child : tool->childItems())
+    {
+        if (auto* grain = dynamic_cast<VGrainlineItem*>(child))
+        {
+            item = grain;
+        }
+    }
+    QVERIFY(item != nullptr);
+    const QTransform transform = pieceDisplayTransform(static_cast<PieceFlip>(flip), tilt, QPointF(200, 200));
+    const QLineF expected = transform.map(stored);
+    for (int repeat = 0; repeat < 3; ++repeat)
+    {
+        tool->RefreshGeometry();
+        tool->updateGrainline();
+        QVERIFY(item->isVisible());
+        QVERIFY2(QLineF(item->pos(), expected.p1()).length() < 1e-7, "The start must follow its mirrored anchor.");
+        QVERIFY(qAbs(item->length() - stored.length()) < 1e-7);
+        const QPainterPath drawn = item->mapToParent(item->shape());
+        const QSizeF tolerance(0.02, 0.02);
+        QVERIFY(drawn.intersects(QRectF(expected.p1() - QPointF(0.01, 0.01), tolerance)));
+        QVERIFY(drawn.intersects(QRectF(expected.p2() - QPointF(0.01, 0.01), tolerance)));
+        QCOMPARE(static_cast<QPointF>(*data.GeometricObject<VPointF>(5)), QPointF(100, 300));
+        QCOMPARE(static_cast<QPointF>(*data.GeometricObject<VPointF>(6)), QPointF(150, 120));
+        QCOMPARE(static_cast<QPointF>(*data.GeometricObject<VPointF>(7)), QPointF(120, 220));
+    }
 }

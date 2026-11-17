@@ -689,7 +689,7 @@ void PatternPieceTool::updatePatternLabel()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/// @brief updateGrainline draws the grainline item; a tilted piece turns its grainline with it.
+/// @brief Draws the grainline with the same flip and tilt as its anchors.
 //---------------------------------------------------------------------------------------------------------------------
 void PatternPieceTool::updateGrainline()
 {
@@ -707,11 +707,12 @@ void PatternPieceTool::updateGrainline()
         const VGrainlineItem::MoveTypes type = findGrainlineGeometry(data, length, rotation, arrow_length, pos);
         if (!(type & VGrainlineItem::Error))
         {
-            // The pattern stores a level grainline. Turn it about the piece tilt center; the labels stay level.
             const Unit unit = *VDataTool::data.GetPatternUnit();
-            const QTransform tilt = pieceTiltTransform(m_tilt_degrees, m_tilt_center);
+            QLineF line(pos, pos + QPointF(1, 0));
+            line.setAngle(rotation);
+            line = grainlineDisplayTransform().map(line);
             m_grainLine->setMoveType(type);
-            m_grainLine->updateGeometry(tilt.map(pos), rotation + m_tilt_degrees, ToPixel(length, unit),
+            m_grainLine->updateGeometry(line.p1(), line.angle(), ToPixel(length, unit),
                                         data.getArrowType(), ToPixel(arrow_length, unit));
             shown = true;
         }
@@ -827,13 +828,13 @@ void PatternPieceTool::SaveRotationPattern(qreal dRot)
 
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief SaveMoveGrainline saves the grainline position after the user moves it.
-/// @param ptPos grainline start point on the canvas, turned with the piece tilt.
+/// @param ptPos Grainline start point after the piece flip and tilt.
 void PatternPieceTool::SaveMoveGrainline(const QPointF &ptPos)
 {
     VPiece oldPiece = VAbstractTool::data.GetPiece(m_id);
     VPiece newPiece = oldPiece;
-    // The pattern stores the grainline without the piece tilt.
-    newPiece.GetGrainlineGeometry().SetPos(pieceTiltTransform(-m_tilt_degrees, m_tilt_center).map(ptPos));
+    // Keep display transforms out of the stored pattern coordinates.
+    newPiece.GetGrainlineGeometry().SetPos(grainlineDisplayTransform().inverted().map(ptPos));
 
     SavePieceOptions *moveCommand = new SavePieceOptions(oldPiece, newPiece, doc, m_id);
     moveCommand->setText(tr("move grainline"));
@@ -849,8 +850,7 @@ void PatternPieceTool::SaveResizeGrainline(qreal dLength)
     VPiece newPiece = oldPiece;
 
     dLength = FromPixel(dLength, *VDataTool::data.GetPatternUnit());
-    // The pattern stores the grainline without the piece tilt.
-    newPiece.GetGrainlineGeometry().SetPos(pieceTiltTransform(-m_tilt_degrees, m_tilt_center).map(m_grainLine->pos()));
+    newPiece.GetGrainlineGeometry().SetPos(grainlineDisplayTransform().inverted().map(m_grainLine->pos()));
     newPiece.GetGrainlineGeometry().setLength(QString().setNum(dLength));
     SavePieceOptions *resizeCommand = new SavePieceOptions(oldPiece, newPiece, doc, m_id);
     resizeCommand->setText(tr("resize grainline"));
@@ -859,19 +859,19 @@ void PatternPieceTool::SaveResizeGrainline(qreal dLength)
 
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief SaveRotateGrainline saves the grainline angle and position after the user turns it.
-/// @param dRot grainline angle on the canvas in radians, counterclockwise, turned with the piece tilt.
-/// @param ptPos grainline start point on the canvas, turned with the piece tilt.
+/// @param dRot Grainline angle after the piece flip and tilt, in counterclockwise radians.
+/// @param ptPos Grainline start point after the piece flip and tilt.
 void PatternPieceTool::SaveRotateGrainline(qreal dRot, const QPointF &ptPos)
 {
     VPiece oldPiece = VAbstractTool::data.GetPiece(m_id);
     VPiece newPiece = oldPiece;
 
-    // A grainline turned past horizontal flips end for end, so it keeps pointing up around the same midpoint.
-    // The pattern stores the midpoint and the angle without the piece tilt.
     const qreal length = m_grainLine->length();
-    const QPointF canvas_midpoint = ptPos + QPointF(length / 2.0 * qCos(dRot), -length / 2.0 * qSin(dRot));
-    const QPointF midpoint = pieceTiltTransform(-m_tilt_degrees, m_tilt_center).map(canvas_midpoint);
-    const qreal angle = VGrainlineData::upwardAngle(qRadiansToDegrees(dRot) - m_tilt_degrees);
+    const QPointF direction(qCos(dRot), -qSin(dRot));
+    const QTransform inverse = grainlineDisplayTransform().inverted();
+    const QLineF stored_line = inverse.map(QLineF(ptPos, ptPos + direction));
+    const QPointF midpoint = inverse.map(ptPos + direction * (length / 2.0));
+    const qreal angle = VGrainlineData::upwardAngle(stored_line.angle());
 
     newPiece.GetGrainlineGeometry().setRotation(QString().setNum(angle));
     newPiece.GetGrainlineGeometry().SetPos(VGrainlineData::centeredStart(midpoint, angle, length));
@@ -1865,7 +1865,7 @@ void PatternPieceTool::RefreshGeometry()
  * @brief applyFlipToGeometry mirrors the drawn outline of the piece on the Piece Mode canvas.
  * @param flip mirror to show.
  *
- * The mirror runs about the center of the drawn outline. Labels and the grainline keep their place and stay readable.
+ * The mirror uses the outline center. The grainline uses the same mirror when it refreshes.
  */
 void PatternPieceTool::applyFlipToGeometry(PieceFlip flip)
 {
@@ -1936,6 +1936,14 @@ void PatternPieceTool::applyTiltToGeometry(int signed_degrees)
         m_mainPath = tilt.map(m_mainPath);
         m_pieceRect = tilt.mapRect(m_pieceRect);
     }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Returns the display transform without changing the stored anchor coordinates.
+QTransform PatternPieceTool::grainlineDisplayTransform() const
+{
+    const VPiece piece = VAbstractTool::data.GetPiece(m_id);
+    return pieceDisplayTransform(piece.getFlip(), m_tilt_degrees, m_tilt_center);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
