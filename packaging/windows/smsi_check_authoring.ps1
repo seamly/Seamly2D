@@ -649,7 +649,9 @@ Assert-That -Name 'the shortcuts checkbox sets SEAMLYDESKTOPSHORTCUTS' `
 
 $components = Get-MsiRows -Sql "SELECT ``Component``, ``Condition`` FROM ``Component``" -Columns 'Component', 'Condition'
 # All three must be conditional, or unticking the checkbox leaves one behind.
-foreach ($component in @('Seamly2DDesktopShortcutComponent', 'SeamlyMeDesktopShortcutComponent', 'SeamlyLayoutDesktopShortcutComponent')) {
+$desktopComponents = @('Seamly2DDesktopShortcutComponent', 'SeamlyMeDesktopShortcutComponent', 'SeamlyLayoutDesktopShortcutComponent')
+if ($Arch -eq 'x64') { $desktopComponents += 'SeamlyCLIDesktopShortcutComponent' }
+foreach ($component in $desktopComponents) {
     $row = @($components | Where-Object { $_.Component -eq $component })
     Assert-That -Name "$component is conditional on the checkbox" `
         -Succeeded ($row.Count -eq 1 -and $row[0].Condition -eq 'SEAMLYDESKTOPSHORTCUTS')
@@ -688,7 +690,13 @@ $shortcuts = $shortcuts | ForEach-Object {
 }
 # Every package carries all three apps: the two-app package built with
 # smsi.ps1 -NoSeamlyLayout is gone, and both architectures ship SeamlyLayout.
+$suitePath = @(Get-MsiRows -Sql "SELECT ``Name``, ``Value`` FROM ``Environment`` WHERE ``Environment``='SeamlySuitePath'" -Columns 'Name', 'Value')
+Assert-That -Name 'the installer adds the application folder to the system PATH' -Succeeded ($suitePath.Count -eq 1 -and $suitePath[0].Name -like '*PATH' -and $suitePath[0].Name.Contains('*') -and $suitePath[0].Value -like '*[[]INSTALLFOLDER[]]*')
 $expectedStartMenu = @('Seamly2D', 'SeamlyMe', 'SeamlyLayout')
+if ($Arch -eq 'x64') { $expectedStartMenu += 'SeamlyCLI' }
+$cliFiles = @(Get-MsiRows -Sql "SELECT ``FileName`` FROM ``File`` WHERE ``File``='SeamlyCLIExe'" -Columns 'FileName')
+Assert-That -Name 'SeamlyCLI is packaged only for x64' -Succeeded ($cliFiles.Count -eq $(if ($Arch -eq 'x64') { 1 } else { 0 }))
+
 foreach ($name in $expectedStartMenu) {
     # Target of an advertised shortcut is the feature it belongs to, not a path.
     $row = @($shortcuts | Where-Object { $_.Directory -eq 'ProgramMenuFolder' -and $_.Name -eq $name })
@@ -699,7 +707,7 @@ foreach ($name in $expectedStartMenu) {
 # All three, matching what the checkbox on SeamlyShortcutsDlg promises.
 # SeamlyLayout opens standalone with no argument, so a desktop launch is a
 # supported way to start it.
-foreach ($name in @('Seamly2D', 'SeamlyMe', 'SeamlyLayout')) {
+foreach ($name in $expectedStartMenu) {
     $row = @($shortcuts | Where-Object { $_.Directory -eq 'DesktopFolder' -and $_.Name -eq $name })
     Assert-That -Name "desktop shortcut '$name' targets the installed executable" `
         -Succeeded ($row.Count -eq 1 -and $row[0].Target -like '`[INSTALLFOLDER`]*.exe' -and $row[0].Icon -ne '') `
@@ -755,7 +763,7 @@ foreach ($app in @('SeamlyMe', 'SeamlyLayout')) {
 # Every desktop-shortcut breadcrumb used to land in the
 # Seamly2D key, so a reader could not tell which app a shortcut belonged to.
 # Each one now goes under its own app key.
-foreach ($app in @('Seamly2D', 'SeamlyMe', 'SeamlyLayout')) {
+foreach ($app in $expectedStartMenu) {
     Assert-That -Name "DesktopShortcut$app is recorded under HKLM\SOFTWARE\Seamly\$app" `
         -Succeeded (@($registry | Where-Object {
             $_.Root -eq '2' -and $_.Key -eq "SOFTWARE\Seamly\$app" -and
@@ -1150,7 +1158,8 @@ foreach ($button in @(@{ Control = 'Retry'; Action = 'SeamlyFindRunningApps' },
 }
 foreach ($app in @(@{ Control = 'Seamly2DRunning'; Property = 'SEAMLYRUNNING2D' },
                    @{ Control = 'SeamlyMeRunning'; Property = 'SEAMLYRUNNINGME' },
-                   @{ Control = 'SeamlyLayoutRunning'; Property = 'SEAMLYRUNNINGLAYOUT' })) {
+                   @{ Control = 'SeamlyLayoutRunning'; Property = 'SEAMLYRUNNINGLAYOUT' },
+                   @{ Control = 'SeamlyCLIRunning'; Property = 'SEAMLYRUNNINGCLI' })) {
     $conditions = @(Get-MsiRows -Sql "SELECT ``Action``, ``Condition`` FROM ``ControlCondition`` WHERE ``Dialog_``='SeamlyAppsRunningDlg' AND ``Control_``='$($app.Control)'" `
         -Columns 'Action', 'Condition')
     Assert-That -Name "the running-app page shows $($app.Control) on $($app.Property)" `

@@ -58,6 +58,7 @@ struct SeamlyApp
 constexpr SeamlyApp seamlyApps[] = {
     {L"seamly2d.exe", L"SEAMLYRUNNING2D"},
     {L"seamlyme.exe", L"SEAMLYRUNNINGME"},
+    {L"seamlycli.exe", L"SEAMLYRUNNINGCLI"},
     {L"seamlylayout.exe", L"SEAMLYRUNNINGLAYOUT"},
 };
 

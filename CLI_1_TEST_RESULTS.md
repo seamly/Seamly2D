@@ -17,13 +17,13 @@
 | TranslationsTest | `bin\TranslationsTest.exe` | 0 fail (QT_FORCE_STDERR_LOGGING=1 for counts) |
 | SeamlyLayout Qt tests | `ctest --preset release` | 9/9 pass |
 | SeamlyLayout Rust | `cargo test --workspace` | 734 pass, 0 fail |
-| CLI tester Rust | `cargo test` in `src\test\CliTestApp` | 15 pass, 0 fail |
+| CLI tester Rust | `cargo test` in `src\app\seamlycli` | 15 pass, 0 fail |
 | CLI regression suite | `src\test\CliTest\test_cli_layout_export.ps1` | 130 cases: 130 pass, 0 fail, 0 skip (full run with `-RichmondRoot`) |
 | Richmond pattern end to end | suite `-RichmondRoot` with the pattern and measurements from git history | 6 `richmond-pattern-*` cases pass (12 pieces, 36 in, AC1012, tiled Letter) |
 | Python headless runner | `test_headless_export.py ... --seamly2d ... --pattern male_shirt.sm2d` | all checks pass (47) |
 | Python pattern input runner | `test_pattern_input_status.py` | all checks pass |
 | Python measurement runner | `test_measurement_cli.py` (SeamlyMe) | all checks pass |
-| CLI tester batch | `cli_test_app --batch` on male_shirt, jacket2 (3 materials), trousers | 3 sessions pass, ZIPs read back; Marker + DXF refused (exit 2) |
+| CLI tester batch | `seamlycli --batch` on male_shirt, jacket2 (3 materials), trousers | 3 sessions pass, ZIPs read back; Marker + DXF refused (exit 2) |
 | CLI tester window | window opened; screenshots of screens 1–3 | pass (see below) |
 | `local_build_msi.ps1` | full run, with tests | pass: `nmake check` (4 suites), `ctest` 9/9, `cargo test` 730/0; `seamly-x64.msi` 165.8 MB (not installed) |
 
@@ -120,3 +120,14 @@ See `CLI_1_PLAN.md` D1–D16. Each has a case above or a unit test.
 - Verified the Windows Qt 6.11.3 build and all 40 Qt suites: 32628 passed, zero failures.
 - The CLI suite includes 31 passing checks, including help content, scrolling, and closing without exiting.
 - Linux and macOS verification remains deferred to CI. No merge or push.
+
+## SeamlyCLI application update — 2026-11-16
+
+- Source: src/app/seamlycli. Executable: target/release/seamlycli.exe.
+- The Rust/Iced app needs no Qt library dependency.
+- All 25 release unit tests passed.
+- Individual and multisize PDF sessions passed and created ZIP archives.
+- A visual run with entered Letter settings created an SVG and ZIP archive.
+- Pattern and measurement dialogs opened in the configured preference directories.
+- A settings file disabled the controls. Clearing the file enabled the controls.
+- The Windows x64 installer build includes SeamlyCLI, shortcuts, and system PATH registration.

@@ -229,7 +229,12 @@
                  ShowCondition="SEAMLYRUNNINGLAYOUT" HideCondition="NOT SEAMLYRUNNINGLAYOUT"
                  Text="SeamlyLayout" />
 
-        <Control Id="Explain" Type="Text" X="20" Y="126" Width="330" Height="60"
+        <Control Id="SeamlyCLIRunning" Type="Text" X="30" Y="116" Width="320" Height="12"
+                 NoPrefix="yes" TabSkip="yes" Hidden="yes"
+                 ShowCondition="SEAMLYRUNNINGCLI" HideCondition="NOT SEAMLYRUNNINGCLI"
+                 Text="SeamlyCLI" />
+
+        <Control Id="Explain" Type="Text" X="20" Y="132" Width="330" Height="60"
                  NoPrefix="yes" TabSkip="yes"
                  Text="Click Retry after you close them. Click Close Apps to let Setup close them. Setup asks each app to close, so an app with unsaved work asks you to save it first." />
 
@@ -420,7 +425,7 @@
                  Text="Start Menu shortcuts are always created. Desktop shortcuts are optional." />
         <Control Id="DesktopShortcutsCheckBox" Type="CheckBox" X="20" Y="94" Width="330" Height="18"
                  Property="SEAMLYDESKTOPSHORTCUTS" CheckBoxValue="1"
-                 Text="Create &amp;desktop shortcuts for Seamly2D, SeamlyLayout, and SeamlyMe" />
+                 Text="Create &amp;desktop shortcuts for the Seamly applications" />
 
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
                  Text="&amp;Back">

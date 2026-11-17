@@ -102,6 +102,13 @@
                            RebootPrompt="no"
                            PromptToContinue="yes" />
 
+    <?if $(var.IncludeSeamlyCLI) = 1 ?>
+    <util:CloseApplication Id="CloseSeamlyCLI" Target="seamlycli.exe"
+                           Description="SeamlyCLI is running. Setup will close it to continue."
+                           CloseMessage="yes" ElevatedCloseMessage="yes"
+                           RebootPrompt="no" PromptToContinue="yes" />
+    <?endif?>
+
     <!-- Early running-app check for the wizard (SeamlyAppsRunningDlg in
          smsi_ui.wxs). Restart Manager finds running apps only in
          InstallValidate, after a slow scan of every packaged file. These

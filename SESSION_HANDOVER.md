@@ -1,5 +1,25 @@
 # Session handover
 
+## 2026-11-16 — SeamlyCLI application and installer
+
+- Work uses Seamly2D-private on run-seamlyLayout.
+- SeamlyCLI now resides in src/app/seamlycli and builds seamlycli.exe with Rust and Iced.
+- The app needs no Qt to build or show its interface.
+- Multisize report queries and exports support the required --basesize selection.
+- The interface finds seamly2d through PATH and has no program selector.
+- Pattern and measurement pickers use Seamly2D Preferences.
+- Measurement selection uses the pattern or current measurement file to choose the individual or multisize folder.
+- The interface edits layout settings or uses a selected JSON file with disabled controls.
+- Unit changes convert physical lengths.
+- The x64 MSI builds and packages SeamlyCLI with shortcuts and system PATH registration.
+- ARM64 keeps its existing three applications.
+- The complete Windows build and its Qt/Rust checks passed.
+- The final SeamlyCLI build passed 25 unit tests.
+- Visual checks covered the preference folders, disabled controls, and successful SVG/ZIP creation from entered settings.
+- Development seamly2d/bin held Qt 6.11.1 DLLs. The matching packaged Qt 6.11.3 runtime passed the export checks.
+- No installer ran on the user's system. No push was requested.
+
+
 ## 2026-11-16 — Copy Piece pick tool
 
 - Defect: the Copy Piece button copied only a piece selected before the click. A click on a piece after the button did nothing.
@@ -138,7 +158,7 @@
 - Done; CLI.1 in `TODO_COMPLETED.md`. Branch `feature/cli-1`, not merged, not pushed. Plan `CLI_1_PLAN.md` (D1–D17); matrix `CLI_1_OPTION_MATRIX.md`; results and acceptance checklist `CLI_1_TEST_RESULTS.md`.
 - New options: Seamly2D `--layout-material`, `--layout-view`, `--layout-oversize`, `--layout-info`, `--text2paths`; SeamlyLayout `--material`, `--view`, `--oversize`, `--info`, `--text2paths`. Removed `--layout-scale`/`--scale` (PNG fixed at 96 px/in).
 - Tests: CLI suite 106/106; `local_build_msi.ps1` pass (`nmake check`, `ctest` 9/9, `cargo test` 730/0, MSI built, not installed); `TST_VCommandLine` 26; CollectionTest 69/0 (start in `bin`); tester 15/0; Python runners pass.
-- Tester: `src/test/CliTestApp` (Rust/Iced, `--batch`), built in `target\release`.
+- Tester: `src/app/seamlycli` (Rust/Iced, `--batch`), built in `target\release`.
 - Blocked: Linux/macOS (no WSL, no Mac), CI (no push), Richmond `.sm2d` (not on this machine).
 - Next: Sue reviews and merges. CLI.3 keeps the direct layout flags (names and precedence need Sue); CLI.2.1 needs the Richmond files.
 

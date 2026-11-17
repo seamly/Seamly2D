@@ -87,6 +87,10 @@
     Directory holding seamlyme.exe, built with CONFIG+=deferDeploy so no Qt
     runtime is deployed beside it yet - this script deploys it. Required.
 
+.PARAMETER SeamlyCLIBin
+    Directory containing seamlycli.exe. The x64 MSI requires this app.
+    Default: src\app\seamlycli\target\release.
+
 .PARAMETER SeamlyLayoutBuildDir
     Directory holding the release seamlylayout.exe.
     Default: <repo>\src\app\seamlylayout\qt_frontend\build\Release — where
@@ -135,6 +139,9 @@ param(
 
     # SeamlyLayout's CMake release output. Defaults to ci.yml's build path.
     [string]$SeamlyLayoutBuildDir,
+
+    # SeamlyCLI release output. Required for the x64 package.
+    [string]$SeamlyCLIBin,
 
     # windeployqt.exe from the Qt kit that built SeamlyLayout.
     [Parameter(Mandatory = $true)]
@@ -243,6 +250,11 @@ function Find-CrtDirectory {
 # partial deploy.
 if (-not $SeamlyLayoutBuildDir) { $SeamlyLayoutBuildDir = Join-Path $repoRoot 'src\app\seamlylayout\qt_frontend\build\Release' }
 
+if (-not $SeamlyCLIBin) { $SeamlyCLIBin = Join-Path $repoRoot 'src\app\seamlycli\target\release' }
+if ($Arch -eq 'x64' -and -not (Test-Path (Join-Path $SeamlyCLIBin 'seamlycli.exe'))) {
+    throw "Missing seamlycli.exe: build src\app\seamlycli with cargo build --release --locked."
+}
+
 foreach ($required in @(
         @{ Path = (Join-Path $Seamly2DBin 'seamly2d.exe'); What = 'seamly2d.exe (-Seamly2DBin must name a completed release build)' },
         @{ Path = (Join-Path $SeamlyMeBin 'seamlyme.exe'); What = 'seamlyme.exe (-SeamlyMeBin must name a completed release build)' },
@@ -291,6 +303,13 @@ Write-Host "msvc crt    : $crtDir"
 # A new -OutputDirName needs a matching .gitignore entry and CI artifact-path
 # update, or the ~165 MB package becomes committable.
 $stageRoot = Join-Path $PSScriptRoot (Join-Path $OutputDirName $Arch)
+$stageRoot = [System.IO.Path]::GetFullPath($stageRoot)
+$stageParent = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot $OutputDirName))
+if (-not $stageParent.StartsWith(([System.IO.Path]::GetFullPath($PSScriptRoot) + [System.IO.Path]::DirectorySeparatorChar),
+    [System.StringComparison]::OrdinalIgnoreCase) -or
+    [System.IO.Path]::GetDirectoryName($stageRoot) -ne $stageParent) {
+    throw "The MSI staging directory must stay inside packaging/windows."
+}
 if (Test-Path $stageRoot) {
     Remove-Item $stageRoot -Recurse -Force
 }
@@ -348,6 +367,10 @@ if (Test-Path $licensesSrc) {
 }
 
 Move-Item -Path (Join-Path $parentDir 'seamlylayout.exe') -Destination $exesDir
+if ($Arch -eq 'x64') {
+    Copy-Item -LiteralPath (Join-Path $SeamlyCLIBin 'seamlycli.exe') -Destination $exesDir
+}
+
 
 # App-local CRT deployment: DLL resolution is per-directory, so the shared
 # install directory needs only one copy for all three apps.
@@ -397,6 +420,7 @@ $wixArguments = @('build') + $wxsFiles + @(
     '-ext', 'WixToolset.UI.wixext',
     '-ext', 'WixToolset.Util.wixext',
     '-d', "ProductVersion=$Version",
+    '-d', "IncludeSeamlyCLI=$(if ($Arch -eq 'x64') { '1' } else { '0' })",
     '-d', "RepoRoot=$repoRoot",
     # SeamlyLayout's runtime is merged into ParentStagingDir, so the .wxs
     # harvests one runtime tree plus one exe tree.

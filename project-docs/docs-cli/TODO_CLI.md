@@ -19,3 +19,5 @@ Completed Examples tab: see project-docs/TODO_COMPLETED.md under CLI help exampl
 - [ ] CLI.2.2 Import the exports into CAD and cutter software (user check).
   - Done here: `src/test/CliTest/test_cli_import_check.py --inkscape <inkscape.com>` opens every DXF (ezdxf auditor), PDF (pypdf) and DXF, PDF, SVG, HP-GL (Inkscape 1.4.4): 59 files, 0 fail.
   - Open: a CAD program and a cutter; none is installed on the build machine.
+
+Completed SeamlyCLI application and Windows MSI work: see project-docs/TODO_COMPLETED.md.

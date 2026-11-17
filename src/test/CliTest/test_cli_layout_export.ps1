@@ -7,7 +7,7 @@
 # Usage:
 #   powershell -NoProfile -File src\test\CliTest\test_cli_layout_export.ps1 -FixtureRoot <test-seamly-layout>
 #       [-Seamly2D <seamly2d.exe>] [-SeamlyLayout <seamlylayout.exe>] [-QtBin <Qt bin>]
-#       [-OutputRoot <folder>] [-Tester <cli_test_app.exe>] [-RichmondRoot <folder>] [-Filter <name wildcard>] [-SkipSlow]
+#       [-OutputRoot <folder>] [-Tester <seamlycli.exe>] [-RichmondRoot <folder>] [-Filter <name wildcard>] [-SkipSlow]
 #
 # -RichmondRoot: folder with richmond-shirt_v1_v061-test.sm2d and 2025-06-08-Sue.smis. The files are not
 # in the fixtures; git history has them (test-seamly-layout-input/ before commit d3197ee973). Without it the
@@ -44,7 +44,7 @@ if (-not $Seamly2D) { $Seamly2D = Join-Path $repo 'src\app\seamly2d\bin\seamly2d
 if (-not $SeamlyLayout) { $SeamlyLayout = Join-Path $repo 'src\app\seamlylayout\qt_frontend\build\Release\seamlylayout.exe' }
 if (-not $Tester) {
     # The Rust/Iced tester is optional: its cases are skipped when it is not built.
-    $Tester = @('release', 'debug') | ForEach-Object { Join-Path $repo "src\test\CliTestApp\target\$_\cli_test_app.exe" } |
+    $Tester = @('release', 'debug') | ForEach-Object { Join-Path $repo "src\app\seamlycli\target\$_\seamlycli.exe" } |
         Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
 }
 if (-not $QtBin) {
@@ -139,9 +139,9 @@ foreach ($case in $cases) {
     if ($program -eq 'tester' -and -not $Tester) {
         $results.Add([pscustomobject]@{ name = $case.Name; group = $case.Group; status = 'skip'; program = $program
             command = ''; arguments = $arguments; workingDirectory = $workingDirectory; exitCode = $null
-            expectedExit = $case.Exit; seconds = 0; stdout = ''; stderr = 'cli_test_app is not built'
+            expectedExit = $case.Exit; seconds = 0; stdout = ''; stderr = 'seamlycli is not built'
             output = $null; failures = @() })
-        Write-Host ('{0,-4} {1,-44} (cli_test_app is not built)' -f 'SKIP', $case.Name)
+        Write-Host ('{0,-4} {1,-44} (seamlycli is not built)' -f 'SKIP', $case.Name)
         continue
     }
     switch ($program) {

@@ -61,6 +61,13 @@
     <!-- ================= executables, shortcuts, associations ============ -->
     <ComponentGroup Id="SuiteExecutables" Directory="INSTALLFOLDER">
 
+      <Component Id="SeamlySuitePathComponent">
+        <Environment Id="SeamlySuitePath" Name="PATH" Value="[INSTALLFOLDER]"
+                     Action="set" Part="last" System="yes" Permanent="no" />
+        <RegistryValue Root="HKLM" Key="SOFTWARE\Seamly\Suite" Name="PathRegistered"
+                       Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+
       <!-- seamly2d: Start Menu shortcut + .sm2d pattern association -->
       <Component Id="Seamly2DExeComponent">
         <File Id="Seamly2DExe" Source="$(var.ExeStagingDir)\seamly2d.exe" KeyPath="yes">
@@ -134,6 +141,16 @@
                     Advertise="yes" />
         </File>
       </Component>
+
+      <?if $(var.IncludeSeamlyCLI) = 1 ?>
+      <Component Id="SeamlyCLIExeComponent">
+        <File Id="SeamlyCLIExe" Source="$(var.ExeStagingDir)\seamlycli.exe" KeyPath="yes">
+          <Shortcut Id="SeamlyCLIShortcut" Directory="ProgramMenuFolder" Name="SeamlyCLI"
+                    Description="SeamlyCLI command line export tester" WorkingDirectory="INSTALLFOLDER"
+                    Icon="seamly2d.ico" Advertise="yes" />
+        </File>
+      </Component>
+      <?endif?>
 
       <!-- Creates the standard data subfolders and seeds the per-user settings
            ini files after install, so no app needs a Preferences > Paths

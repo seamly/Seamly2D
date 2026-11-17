@@ -35,7 +35,7 @@ The general handover is `SESSION_HANDOVER.md`; this file holds the CLI state onl
 | `Seamly2DTests`, CollectionTest (start in `bin`), ParserTest, TranslationsTest | 0 fail |
 | `ctest --preset release` | 9/9 |
 | `cargo test --workspace` | 734/0 |
-| `src\test\CliTestApp`: `cargo test` | 15/0 |
+| `src\app\seamlycli`: `cargo test` | 15/0 |
 | `local_build_msi.ps1` | pass; MSI not installed |
 
 ## Commands

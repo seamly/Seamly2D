@@ -36,7 +36,7 @@ Results: `CLI_1_TEST_RESULTS.md`. Options: `CLI_1_OPTION_MATRIX.md`.
 7. [x] Seamly2D `--layout-material`, `--layout-view`, `--layout-oversize`, `--layout-info`; D11, D13, D14, D15.
 8. [x] Unit tests: `TST_VCommandLine` (24), `StartupOptionsTests`, `rust:settings_validation`, `rust:export_rules`.
 9. [x] PowerShell suite `src/test/CliTest/` with JSON report.
-10. [x] Rust/Iced tester `src/test/CliTestApp/` (GUI and `--batch`).
+10. [x] Rust/Iced tester `src/app/seamlycli/` (GUI and `--batch`).
 11. [x] Full regression run; results in `CLI_1_TEST_RESULTS.md`.
 12. [x] Docs: `--help`, `project-docs/docs-cli/CLI_PARAMETERS.md`, option matrix, `TODO_CLI.md`.
 

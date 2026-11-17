@@ -76,6 +76,9 @@ impl ExportRequest {
             "--layout-output".to_string(),
             output.display().to_string(),
         ];
+        if self.view.is_some() {
+            arguments.push("--basesize".to_string());
+        } // if multisize measurements
         let mut add = |option: &str, value: String| {
             arguments.push(option.to_string());
             arguments.push(value);
@@ -165,7 +168,7 @@ mod tests {
     fn arguments_carry_every_choice() {
         let arguments = request().arguments("Lining", Path::new("out/j_Lining.svg"));
         assert_eq!(arguments, vec![
-            "--layout-export", "--layout-format", "svg", "--layout-output", "out/j_Lining.svg",
+            "--layout-export", "--layout-format", "svg", "--layout-output", "out/j_Lining.svg", "--basesize",
             "--mfile", "m.smms", "--layout-settings", "roll.json", "--layout-material", "Lining",
             "--layout-view", "Size 40", "--layout-oversize", "split", "--svg-text-mode", "hersheyStrokes",
             "C:/patterns/jacket 2.sm2d",
@@ -182,6 +185,13 @@ mod tests {
         assert!(!arguments.contains(&"--layout-material".to_string()));
         assert!(!arguments.contains(&"--svg-text-mode".to_string()));
     } // single_material_pdf_omits_material_and_text_mode
+
+    #[test]
+    fn individual_pattern_omits_base_size() {
+        let mut request = request();
+        request.view = None;
+        assert!(!request.arguments("Fabric", Path::new("o.svg")).contains(&"--basesize".to_string()));
+    }
 
     // Spaces and quotes are quoted the way the program reads them back.
     #[test]

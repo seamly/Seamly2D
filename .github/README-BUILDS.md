@@ -293,3 +293,23 @@ All installers ship the committed files in `packaging/licenses/`:
 - `project-docs/PROJECT_PLAN.md` — the approved implementation plan.
 - `.github/workflows/README_WORKFLOWS.md` — CI workflow details.
 - `src/app/seamlylayout/CHANGELOG.md` — history of seamlyLayout's settings-directory moves (e.g. `<exeDir>/settings/` → AppConfigLocation).
+
+## SeamlyCLI in the Windows x64 MSI
+
+SeamlyCLI resides in src/app/seamlycli and uses Rust with Iced.
+It needs no Qt to build or display its interface.
+It launches Seamly2D and SeamlyLayout, which use the MSI's shared Qt runtime.
+
+The local Windows build runs cargo build --release --locked for SeamlyCLI.
+It also runs cargo test --release --locked unless SkipTests is set.
+The x64 CI job builds and tests the same crate before it packages the MSI.
+
+The x64 MSI requires seamlycli.exe and installs it beside the other applications.
+It includes a Start Menu shortcut and an optional desktop shortcut.
+The ARM64 MSI keeps its existing three applications.
+The installer detects a running SeamlyCLI before it replaces program files.
+
+The MSI adds the shared application folder to the system PATH.
+SeamlyCLI calls seamly2d through PATH and shows no executable picker.
+Its pattern and measurement pickers use Seamly2D Preferences.
+Selecting a settings file disables the editable layout settings controls.

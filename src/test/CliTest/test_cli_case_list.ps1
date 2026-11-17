@@ -10,7 +10,7 @@
 #   Name        unique name; also the output file name
 #   Group       option group of CLI_1_OPTION_MATRIX.md
 #   Program     seamly2d (default), seamlylayout, console (console attach probe), gui (GUI start probe)
-#               tester (cli_test_app --batch; skipped when not built) or installed (copies in the MSI folder layout)
+#               tester (seamlycli --batch; skipped when not built) or installed (copies in the MSI folder layout)
 #   ZipEntries  tester: number of files the session ZIP must hold
 #   Arguments   argument list; tokens: {fixtures} {settings} {out} {outdir} {repo}
 #   Exit        expected exit code

@@ -145,6 +145,11 @@ impl LayoutReport {
     } // fn format_reason
 } // impl LayoutReport
 
+/// @brief Detect the required size selection from a failed discovery run.
+fn requires_base_size(exit_code: Option<i32>, stderr: &str) -> bool {
+    exit_code == Some(64) && stderr.contains("--basesize") && stderr.contains("--gsize")
+}
+
 /// @brief Run `seamly2d --layout-info` and parse its report.
 /// @param seamly2d Seamly2D executable.
 /// @param pattern Pattern file.
@@ -161,10 +166,19 @@ pub fn query_report(seamly2d: &Path, pattern: &Path, measurements: Option<&Path>
         arguments.extend(["--layout-settings".to_string(), settings.display().to_string()]);
     } // if settings
     arguments.push(pattern.display().to_string());
-    let output = Command::new(seamly2d)
+    let mut output = Command::new(seamly2d)
         .args(&arguments)
         .output()
-        .map_err(|error| format!("{} could not be started: {error}", seamly2d.display()))?;
+        .map_err(|error| format!("Cannot start {}: {error}. Check that the Seamly application folder is on PATH.",
+                                     seamly2d.display()))?;
+    if requires_base_size(output.status.code(), &String::from_utf8_lossy(&output.stderr)) {
+        arguments.insert(1, "--basesize".to_string());
+        output = Command::new(seamly2d)
+            .args(&arguments)
+            .output()
+            .map_err(|error| format!("Cannot start {}: {error}. Check that the Seamly application folder is on PATH.",
+                                     seamly2d.display()))?;
+    } // if multisize discovery needs an explicit size
     if !output.status.success() {
         return Err(format!(
             "seamly2d --layout-info failed (exit {}):\n{}",
@@ -190,6 +204,14 @@ mod tests {
         "multisize":true,"sizes":["40"],"svgTextModes":["designerFont","asSupplied"],"tiledPaper":false}"#;
 
     // An oversized piece in any material asks for the split run, which has no Marker.
+    #[test]
+    fn size_selection_retry_requires_the_cli_usage_error() {
+        assert!(requires_base_size(Some(64), "Multisize files require --gsize <cm> or --basesize."));
+        assert!(!requires_base_size(Some(65), "--basesize requires multisize measurements."));
+        assert!(!requires_base_size(Some(64), "Invalid layout settings."));
+        assert!(!requires_base_size(Some(0), "--gsize --basesize"));
+    }
+
     #[test]
     fn oversized_piece_selects_split_and_hides_marker() {
         let report = LayoutReport::parse(MULTISIZE).unwrap();

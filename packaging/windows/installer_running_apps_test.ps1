@@ -73,7 +73,7 @@ function Get-SessionProperty {
 
 # Real Seamly apps can run while this test runs. The find checks expect them,
 # and the close check is skipped, because it would close them too.
-$appProperties = [ordered]@{ seamly2d = 'SEAMLYRUNNING2D'; seamlyme = 'SEAMLYRUNNINGME'; seamlylayout = 'SEAMLYRUNNINGLAYOUT' }
+$appProperties = [ordered]@{ seamly2d = 'SEAMLYRUNNING2D'; seamlyme = 'SEAMLYRUNNINGME'; seamlylayout = 'SEAMLYRUNNINGLAYOUT'; seamlycli = 'SEAMLYRUNNINGCLI' }
 $realApps = @(Get-Process -Name @($appProperties.Keys) -ErrorAction SilentlyContinue |
     ForEach-Object { $_.ProcessName.ToLowerInvariant() } | Sort-Object -Unique)
 

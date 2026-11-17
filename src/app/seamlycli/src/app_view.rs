@@ -23,13 +23,14 @@ use crate::cli_command::{DxfVariant, ExportRequest};
 use crate::export_run::{plan_session, run_session, PlannedRun, SessionResult};
 use crate::layout_report::{query_report, LayoutReport};
 use crate::output_naming::session_stamp;
-use crate::preferences_layout_folder::layout_folder;
+use crate::layout_settings_editor::{self, LayoutSettingsEditor};
+use crate::preferences_paths::{layout_folder, pattern_folder, measurement_folder};
 
 /// @brief Open the window.
 /// @param arguments Program arguments: `--seamly2d`, `--pattern`, `--mfile`, `--settings`, `--basename` and
 ///        `--output-dir` fill the input fields; `--next` reads the pattern at once.
 pub fn run(arguments: Vec<String>) -> iced::Result {
-    iced::application("Seamly2D CLI Tester", App::update, App::view)
+    iced::application("SeamlyCLI", App::update, App::view)
         .window_size(iced::Size::new(1040.0, 800.0))
         .run_with(move || App::new(&arguments))
 } // fn run
@@ -37,7 +38,7 @@ pub fn run(arguments: Vec<String>) -> iced::Result {
 /// @brief Write the DXF export options of `variant` to a file in the temporary folder.
 /// @return Path of the options file.
 pub fn write_dxf_options(variant: DxfVariant) -> Result<PathBuf, String> {
-    let path = std::env::temp_dir().join(format!("cli_test_app_dxf_{}.json", std::process::id()));
+    let path = std::env::temp_dir().join(format!("seamlycli_dxf_{}.json", std::process::id()));
     std::fs::write(&path, variant.options_json()).map_err(|error| format!("{} cannot be written: {error}", path.display()))?;
     Ok(path)
 } // fn write_dxf_options
@@ -63,7 +64,6 @@ enum Screen {
 /// @brief File fields with a Browse button.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Field {
-    Seamly2d,
     Pattern,
     Measurements,
     Settings,
@@ -77,6 +77,8 @@ enum Message {
     Browse(Field),
     Picked(Field, Option<PathBuf>),
     Next,
+    LayoutSetting(layout_settings_editor::Message),
+    ClearSettingsFile,
     ReportLoaded(Result<LayoutReport, String>),
     ViewSelected(String),
     ToFormat,
@@ -96,6 +98,9 @@ struct App {
     pattern: String,
     measurements: String,
     settings: String,
+    entered_settings: LayoutSettingsEditor,
+    file_settings: Option<LayoutSettingsEditor>,
+    active_settings: Option<PathBuf>,
     basename: String,
     output_folder: String,
     busy: Option<String>,
@@ -122,6 +127,9 @@ impl App {
             pattern,
             measurements: value("--mfile").unwrap_or_default(),
             settings: value("--settings").unwrap_or_default(),
+            entered_settings: LayoutSettingsEditor::default(),
+            file_settings: value("--settings").and_then(|file| LayoutSettingsEditor::read(Path::new(&file)).ok()),
+            active_settings: None,
             basename: value("--basename").unwrap_or(stem),
             output_folder: value("--output-dir").unwrap_or_else(|| layout_folder().display().to_string()),
             busy: None,
@@ -156,7 +164,7 @@ impl App {
             seamly2d: PathBuf::from(self.seamly2d.trim()),
             pattern: PathBuf::from(self.pattern.trim()),
             measurements: Self::optional(&self.measurements),
-            settings: Self::optional(&self.settings),
+            settings: self.active_settings.clone(),
             view: self.view.clone(),
             split: self.split,
             format: self.format.clone().unwrap_or_default(),
@@ -169,7 +177,7 @@ impl App {
     /// @brief Rebuild the commands shown on the format screen; one stamp per session.
     fn refresh_plan(&mut self) {
         self.stamp = session_stamp(&chrono::Local::now());
-        let placeholder = (self.format.as_deref() == Some("dxf")).then(|| std::env::temp_dir().join("cli_test_app_dxf.json"));
+        let placeholder = (self.format.as_deref() == Some("dxf")).then(|| std::env::temp_dir().join("seamlycli_dxf.json"));
         self.plan = match (&self.report, &self.format) {
             (Some(report), Some(_)) => {
                 plan_session(&self.request(placeholder), report, Path::new(self.output_folder.trim()), self.basename.trim(), &self.stamp)
@@ -198,10 +206,18 @@ impl App {
                     self.default_basename(&value);
                 } // if pattern
                 *self.field_mut(field) = value;
+                if field == Field::Settings {
+                    self.file_settings = LayoutSettingsEditor::read(Path::new(self.settings.trim())).ok();
+                }
             } // Edited
             Message::BasenameEdited(value) => self.basename = value,
             Message::Browse(field) => {
-                let start = PathBuf::from(self.field(field).trim());
+                let start = match field {
+                    Field::Pattern => pattern_folder(),
+                    Field::Measurements => measurement_folder(Path::new(self.pattern.trim()),
+                                                               Path::new(self.measurements.trim())),
+                    _ => PathBuf::from(self.field(field).trim()),
+                };
                 return Task::perform(on_worker(move || pick(field, &start)), move |path| Message::Picked(field, path));
             } // Browse
             Message::Picked(field, Some(path)) => {
@@ -210,8 +226,18 @@ impl App {
                     self.default_basename(&value);
                 } // if pattern
                 *self.field_mut(field) = value;
+                if field == Field::Settings {
+                    self.file_settings = LayoutSettingsEditor::read(Path::new(self.settings.trim())).ok();
+                }
             } // Picked
             Message::Picked(_, None) => {} // dialog cancelled
+            Message::LayoutSetting(message) => {
+                self.entered_settings.update(message, self.settings.trim().is_empty() && self.busy.is_none());
+            }
+            Message::ClearSettingsFile => {
+                self.settings.clear();
+                self.file_settings = None;
+            }
             Message::Next => {
                 self.error = None;
                 if !Path::new(self.pattern.trim()).is_file() {
@@ -220,7 +246,20 @@ impl App {
                 } // if no pattern
                 self.busy = Some("Reading the pattern and the layout settings...".to_string());
                 let (seamly2d, pattern) = (PathBuf::from(self.seamly2d.trim()), PathBuf::from(self.pattern.trim()));
-                let (measurements, settings) = (Self::optional(&self.measurements), Self::optional(&self.settings));
+                let measurements = Self::optional(&self.measurements);
+                let settings = if let Some(path) = Self::optional(&self.settings) {
+                    Some(path)
+                } else {
+                    match self.entered_settings.write() {
+                        Ok(path) => Some(path),
+                        Err(error) => {
+                            self.busy = None;
+                            self.error = Some(error);
+                            return Task::none();
+                        }
+                    }
+                };
+                self.active_settings = settings.clone();
                 return Task::perform(
                     on_worker(move || query_report(&seamly2d, &pattern, measurements.as_deref(), settings.as_deref())),
                     Message::ReportLoaded,
@@ -323,7 +362,6 @@ impl App {
 
     fn field(&self, field: Field) -> &String {
         match field {
-            Field::Seamly2d => &self.seamly2d,
             Field::Pattern => &self.pattern,
             Field::Measurements => &self.measurements,
             Field::Settings => &self.settings,
@@ -333,7 +371,6 @@ impl App {
 
     fn field_mut(&mut self, field: Field) -> &mut String {
         match field {
-            Field::Seamly2d => &mut self.seamly2d,
             Field::Pattern => &mut self.pattern,
             Field::Measurements => &mut self.measurements,
             Field::Settings => &mut self.settings,
@@ -376,11 +413,20 @@ impl App {
     } // fn path_row
 
     fn inputs_view(&self) -> Element<'_, Message> {
+        let use_file = !self.settings.trim().is_empty();
+        let editor = if use_file { self.file_settings.as_ref().unwrap_or(&self.entered_settings) }
+                     else { &self.entered_settings };
         column![
-            self.path_row("Seamly2D program", Field::Seamly2d, "seamly2d.exe"),
             self.path_row("Pattern", Field::Pattern, "pattern.sm2d"),
             self.path_row("Measurements", Field::Measurements, "optional: .smis or .smms, overrides the pattern's file"),
-            self.path_row("Layout settings", Field::Settings, "optional: settings JSON; empty uses SeamlyLayout's saved settings"),
+            self.path_row("Settings file", Field::Settings, "optional: choose saved layout settings"),
+            row![
+                text(if use_file { "The selected file supplies the layout settings. Controls are disabled." }
+                     else { "Enter the layout settings below, or choose a settings file." }).size(13),
+                horizontal_space(),
+                button("Use entered settings").on_press_maybe(use_file.then_some(Message::ClearSettingsFile)),
+            ].spacing(8),
+            editor.view(!use_file && self.busy.is_none()).map(Message::LayoutSetting),
             row![
                 text("Output basename").width(Length::Fixed(160.0)),
                 text_input("pattern basename", &self.basename).on_input(Message::BasenameEdited),
@@ -487,7 +533,7 @@ impl App {
             let material = if run.material.is_empty() { "(no material name)".to_string() } else { run.material.clone() };
             list = list.push(
                 column![
-                    row![text(material).size(16), horizontal_space(), button("Copy").on_press(Message::Copy(run.command.clone()))],
+                    row![text(material).size(16), horizontal_space(), button("Copy").width(Length::Fixed(72.0)).on_press(Message::Copy(run.command.clone()))],
                     text(run.command.clone()).size(13),
                 ]
                 .spacing(4),
@@ -511,7 +557,7 @@ impl App {
                     .size(16)
                     .style(if material.succeeded() { text::success } else { text::danger }),
                 text(detail),
-                row![text(material.run.command.clone()).size(12), horizontal_space(), button("Copy").on_press(Message::Copy(material.run.command.clone()))],
+                row![text(material.run.command.clone()).size(12), horizontal_space(), button("Copy").width(Length::Fixed(72.0)).on_press(Message::Copy(material.run.command.clone()))],
             ]
             .spacing(4);
             for companion in &material.companions {
@@ -540,11 +586,9 @@ fn pick(field: Field, start: &Path) -> Option<PathBuf> {
     let folder = if start.is_dir() { Some(start.to_path_buf()) } else { start.parent().map(Path::to_path_buf) };
     let mut dialog = rfd::FileDialog::new();
     if let Some(folder) = folder.filter(|folder| folder.is_dir()) {
-        dialog = dialog.set_directory(folder);
+        dialog = dialog.set_directory(folder.canonicalize().unwrap_or(folder));
     } // if a start folder exists
     match field {
-        Field::Seamly2d if cfg!(windows) => dialog.add_filter("Program", &["exe"]).pick_file(),
-        Field::Seamly2d => dialog.pick_file(),
         Field::Pattern => dialog.add_filter("Seamly2D pattern", &["sm2d"]).pick_file(),
         Field::Measurements => dialog.add_filter("Measurements", &["smis", "smms", "vit", "vst"]).pick_file(),
         Field::Settings => dialog.add_filter("Layout settings", &["json"]).pick_file(),

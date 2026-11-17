@@ -1,4 +1,4 @@
-# CLI tester (`cli_test_app`)
+# SeamlyCLI
 
 Interactive and batch tester of the Seamly2D command-line layout export. Rust and Iced; no Qt.
 It builds `seamly2d --layout-export` commands from your choices, runs them, checks the files,
@@ -7,7 +7,7 @@ and archives them. The choices come from `seamly2d --layout-info`, so the tester
 ## Build
 
 ```powershell
-cd src\test\CliTestApp
+cd src\app\seamlycli
 cargo build --release
 cargo test
 ```
@@ -18,15 +18,16 @@ Seamly2D needs its Qt runtime on `PATH` and must find SeamlyLayout (`paths/seaml
 the install folder, or the build tree).
 
 ```powershell
-target\release\cli_test_app.exe
-target\release\cli_test_app.exe --pattern C:\patterns\jacket.sm2d --settings C:\settings\roll.json --next
+target\release\seamlycli.exe
+target\release\seamlycli.exe --pattern C:\patterns\jacket.sm2d --settings C:\settings\roll.json --next
 ```
 
-Seamly2D program: `--seamly2d`, else `SEAMLY2D_EXE`, else beside the tester, else the build tree, else `PATH`.
+SeamlyCLI finds Seamly2D through PATH. The MSI adds its application folder to the system PATH.
+Batch tests can use --seamly2d to name a specific build.
 
 ## Screens
 
-1. Inputs: Seamly2D program, pattern, measurements (optional), layout settings JSON (optional),
+1. Inputs: pattern, measurements (optional), editable layout settings or a settings JSON file,
    output basename (default: pattern name), output folder (default: Preferences > Paths > Layout).
    Next reads the pattern with `--layout-info`. A piece wider than the media turns on Split the pieces.
 2. Layout (multisize patterns only): Marker, Nested, Base Size, sizes. A split run lists Marker
@@ -47,9 +48,35 @@ Seamly2D program: `--seamly2d`, else `SEAMLY2D_EXE`, else beside the tester, els
 Same steps, no window. Exit 0 when every material and the archive passed, 1 on a failed run, 2 on bad input.
 
 ```powershell
-cli_test_app.exe --batch --pattern <file.sm2d> [--mfile <file>] [--settings <file.json>]
+seamlycli.exe --batch --pattern <file.sm2d> [--mfile <file>] [--settings <file.json>]
     [--basename <name>] [--output-dir <folder>] [--view <label>] [--format <format>]
     [--svg-text-mode <mode>] [--dxf r13|clo3d|aama] [--seamly2d <seamly2d.exe>]
 ```
 
 Without `--view` and `--format` it takes the first allowed choice.
+
+## Multisize patterns
+
+SeamlyCLI adds --basesize when Seamly2D requires a multisize selection.
+Select Base Size on the Layout screen to export the measurement base size.
+Select another layout to export that view.
+Individual patterns use no size flag.
+
+## Windows installer
+
+The Windows x64 MSI builds and installs SeamlyCLI beside Seamly2D, SeamlyMe, and SeamlyLayout.
+Run packaging/windows/local_build_msi.ps1 from the repository root to build the installer.
+The MSI includes a Start Menu shortcut and an optional desktop shortcut.
+SeamlyCLI uses Rust and Iced. It needs no Qt to build or display its interface.
+The Seamly2D and SeamlyLayout processes use the shared Qt runtime in the MSI.
+
+## Input folders and layout settings
+
+The pattern picker opens in Preferences > Paths > Patterns.
+The measurement picker opens in the individual or multisize measurement folder from Preferences.
+SeamlyCLI uses the selected pattern or measurement file to choose that folder.
+
+Enter units, packing, paper, tiles, roll width, fabric, and margins in the layout settings controls.
+Select a settings JSON file to use its values and disable the controls.
+Select Use entered settings to clear the file selection and enable the controls.
+SeamlyCLI writes entered settings to a temporary JSON file for report and export commands.

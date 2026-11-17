@@ -104,6 +104,15 @@
                        Value="1"
                        KeyPath="yes" />
       </Component>
+      <?if $(var.IncludeSeamlyCLI) = 1 ?>
+      <Component Id="SeamlyCLIDesktopShortcutComponent" Condition="SEAMLYDESKTOPSHORTCUTS">
+        <Shortcut Id="SeamlyCLIDesktopShortcut" Directory="DesktopFolder" Name="SeamlyCLI"
+                  Description="SeamlyCLI command line export tester" Target="[INSTALLFOLDER]seamlycli.exe"
+                  WorkingDirectory="INSTALLFOLDER" Icon="seamly2d.ico" />
+        <RegistryValue Root="HKLM" Key="SOFTWARE\Seamly\SeamlyCLI" Name="DesktopShortcutSeamlyCLI"
+                       Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+      <?endif?>
     </ComponentGroup>
 
   </Fragment>

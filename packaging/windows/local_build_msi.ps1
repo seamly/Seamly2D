@@ -5,7 +5,7 @@
 # **
 # **  @brief
 # **  Local, developer-machine build of the Windows x64 MSI: builds seamly2d,
-# **  seamlyme and SeamlyLayout release binaries, runs the Qt and Rust unit
+# **  seamlyme, SeamlyLayout, and SeamlyCLI release binaries, runs the Qt and Rust unit
 # **  tests, then runs smsi.ps1 against the binaries. packaging\windows\README.md records the project's
 # **  documented "CI builds the MSI" decision (a dev-machine default can carry
 # **  the wrong Qt/CRT runtime); this script exists because the local Qt kit is
@@ -29,8 +29,8 @@
     Currently this script is set to use 4 CPUs for jom.
 
 .DESCRIPTION
-     Stamps the version, builds seamly2d, seamlyme, and SeamlyLayout, runs the
-     unit tests unless -SkipTests is specified, and packages the three apps into
+     Stamps the version, builds seamly2d, seamlyme, SeamlyLayout, and SeamlyCLI, runs the
+     unit tests unless -SkipTests is specified, and packages the four apps into
      an MSI with packaging\windows\smsi.ps1. Test binaries remain in
      src\test\*\bin and the SeamlyLayout build directory, and are not staged.
 
@@ -38,6 +38,7 @@
        - nmake check: Seamly2DTest, CollectionTest, ParserTest, TranslationsTest.
        - ctest --preset release: the SeamlyLayout Qt suites.
        - cargo test --workspace: the SeamlyLayout Rust crates.
+       - cargo test --release --locked: SeamlyCLI.
      A failing suite stops the build before smsi.ps1 runs.
 
     packaging\version.sh writes the version into
@@ -188,6 +189,7 @@ if (-not (Test-Path $VcVarsAll)) {
     throw "VS 18 Community vcvars64.bat not found at: $VcVarsAll"
 }
 
+$cliAppDir = Join-Path $repoRoot 'src\app\seamlycli'
 $layoutAppDir = Join-Path $repoRoot 'src\app\seamlylayout'
 $layoutFrontendDir = Join-Path $layoutAppDir 'qt_frontend'
 $smsiScript = Join-Path $PSScriptRoot 'smsi.ps1'
@@ -265,6 +267,9 @@ if errorlevel 1 exit /b 1
 "@
 }
 
+$CliTestSection = if ($SkipTests) { '' } else {
+    "cargo test --release --locked" + [Environment]::NewLine + "if errorlevel 1 exit /b 1"
+}
 $TempBat = [System.IO.Path]::GetTempFileName() + '.bat'
 $BatchContent = @"
 @echo off
@@ -297,6 +302,12 @@ echo === run cmake : build seamlyLayout.exe ===
 cmake --build --preset release
 if errorlevel 1 exit /b 1
 $LayoutTestSection
+
+echo === build SeamlyCLI ===
+cd /d "$cliAppDir"
+cargo build --release --locked
+if errorlevel 1 exit /b 1
+$CliTestSection
 
 echo.
 rem No > or < in echo text: cmd reads them as redirection and writes a stray file.

@@ -12,9 +12,10 @@ mod app_view;
 mod cli_command;
 mod export_run;
 mod layout_report;
+mod layout_settings_editor;
 mod output_check;
 mod output_naming;
-mod preferences_layout_folder;
+mod preferences_paths;
 mod zip_archive;
 
 use std::path::PathBuf;
@@ -22,25 +23,10 @@ use std::path::PathBuf;
 use cli_command::{DxfVariant, ExportRequest};
 use layout_report::query_report;
 
-/// @brief Seamly2D next to this program, in the build tree, or on PATH.
+/// @brief Resolve Seamly2D through the system PATH.
 pub fn default_seamly2d() -> PathBuf {
-    let name = if cfg!(windows) { "seamly2d.exe" } else { "seamly2d" };
-    if let Some(path) = std::env::var_os("SEAMLY2D_EXE").map(PathBuf::from).filter(|path| path.is_file()) {
-        return path;
-    } // if set in the environment
-    let beside = std::env::current_exe().ok().and_then(|exe| exe.parent().map(|folder| folder.join(name)));
-    if let Some(path) = beside.filter(|path| path.is_file()) {
-        return path;
-    } // if beside this program
-    // Build tree: <repo>/src/test/CliTestApp/target/<profile>/ → <repo>/src/app/seamly2d/bin/.
-    let in_tree = std::env::current_exe().ok().and_then(|exe| {
-        exe.ancestors().find_map(|folder| {
-            let candidate = folder.join("src").join("app").join("seamly2d").join("bin").join(name);
-            candidate.is_file().then_some(candidate)
-        })
-    }); // in_tree
-    in_tree.unwrap_or_else(|| PathBuf::from(name))
-} // fn default_seamly2d
+    PathBuf::from("seamly2d")
+}
 
 /// @brief Value after `--name` in the argument list.
 pub fn option_value(arguments: &[String], name: &str) -> Option<String> {
@@ -59,7 +45,7 @@ fn run_batch(arguments: &[String]) -> i32 {
     let settings = option_value(arguments, "--settings").map(PathBuf::from);
     let output_folder = option_value(arguments, "--output-dir")
         .map(PathBuf::from)
-        .unwrap_or_else(preferences_layout_folder::layout_folder);
+        .unwrap_or_else(preferences_paths::layout_folder);
     let basename = option_value(arguments, "--basename").unwrap_or_else(|| {
         pattern.file_stem().map(|stem| stem.to_string_lossy().to_string()).unwrap_or_else(|| "layout".to_string())
     }); // basename
@@ -189,3 +175,13 @@ fn main() {
         std::process::exit(1);
     } // if the window failed
 } // fn main
+
+#[cfg(test)]
+mod application_tests {
+    use super::*;
+
+    #[test]
+    fn seamly2d_uses_path_without_a_program_picker() {
+        assert_eq!(default_seamly2d(), PathBuf::from("seamly2d"));
+    }
+}

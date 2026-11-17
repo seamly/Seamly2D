@@ -523,12 +523,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "cli_test_app"
+name = "seamlycli"
 version = "0.1.0"
 dependencies = [
  "chrono",
  "iced",
  "rfd",
+ "roxmltree",
  "serde",
  "serde_json",
  "tempfile",

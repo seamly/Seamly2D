@@ -1,5 +1,21 @@
 # COMPLETED — Tagged SVG Handoff to SeamlyLayout
 
+## SeamlyCLI application and Windows x64 MSI — 2026-11-16
+
+- [x] Move the Rust/Iced app to src/app/seamlycli and build seamlycli.exe.
+- [x] Support the required --basesize selection for multisize reports and exports.
+- [x] Find Seamly2D through PATH and remove the program selector.
+- [x] Open pattern and measurement pickers in the folders from Seamly2D Preferences.
+- [x] Use the individual or multisize measurement folder for the selected pattern.
+- [x] Add editable layout settings for units, packing, media, tiled paper, rolls, fabric, and margins.
+- [x] Disable the controls when a settings file supplies the values.
+- [x] Preserve physical lengths when the selected unit changes.
+- [x] Build, test, and package SeamlyCLI in the Windows x64 MSI.
+- [x] Add Start Menu and optional desktop shortcuts, PATH registration, and running-app detection.
+- [x] Pass 25 SeamlyCLI unit tests and the complete Windows build checks.
+- [x] Verify preference-based pickers, disabled controls, and an entered-settings export in the interface.
+
+
 ## S2D.78 — Command line multisize base size — 2026-11-16
 
 - [x] Add --basesize without an argument.
@@ -2097,7 +2113,7 @@ Branch `feature/cli-1`. Plan `CLI_1_PLAN.md`, matrix `CLI_1_OPTION_MATRIX.md`, r
 - [x] CLI.1.6 Workflow examples, options, statuses and `--help` in `CLI_PARAMETERS.md`.
 - [x] CLI.1.7 Option matrix in Layout Settings dialog order: `CLI_1_OPTION_MATRIX.md`.
 - [x] CLI.1.8 Every option exercised on jacket2, male_shirt and trousers; defects D1-D16 in `CLI_1_PLAN.md`.
-- [x] CLI.1.9 Rust/Iced tester `src/test/CliTestApp` (inputs, layout, format, per-material commands, ZIP; `--batch`).
+- [x] CLI.1.9 Rust/Iced tester `src/app/seamlycli` (inputs, layout, format, per-material commands, ZIP; `--batch`).
 - [x] CLI.1.10 Broken and ignored options fixed or removed; console attach before every CLI message.
 - [x] CLI.1.11 Option names are lowercase kebab-case already; no aliases needed (decision in `CLI_1_PLAN.md`).
 - [x] CLI.1.12 `TST_VCommandLine` covers every option and the failure modes.

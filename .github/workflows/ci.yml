@@ -444,7 +444,9 @@ jobs:
       - name: 'Cache cargo build'
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: src/app/seamlylayout
+          workspaces: |
+            src/app/seamlylayout
+            src/app/seamlycli
           # Separate arch keys prevent the two arches from sharing cache data.
           key: ${{ matrix.arch }}
 
@@ -459,6 +461,16 @@ jobs:
           cmake --preset release -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR" -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           cmake --build --preset release
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: 'Build and test SeamlyCLI - x64'
+        if: matrix.arch == 'x64'
+        working-directory: src/app/seamlycli
+        shell: pwsh
+        run: |
+          cargo test --release --locked
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --locked
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       # ----- Create MSI installer -----
@@ -485,7 +497,7 @@ jobs:
       # Uses `packaging/windows/smsi.ps1` -- stages Qt, builds & tests the MSI, 
       # and outputs the installer MSI file to `packaging/windows/seamly-msi/x64/seamly-x64.msi`
       # and `packaging/windows/seamly-msi/arm64/seamly-arm64.msi`.
-      - name: 'Build MSI (all three apps) ${{ matrix.arch }}'
+      - name: 'Build MSI (Seamly applications) ${{ matrix.arch }}'
         shell: pwsh
         run: |
           .\packaging\windows\smsi.ps1 -Arch ${{ matrix.arch }} -Version $env:VERSION_NUMBER `
