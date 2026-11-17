@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  @file   vlayoutpiece.cpp
 //  @author Douglas S Caskey
+//  @author slspencer
 //  @date   17 Sep, 2023
 //
 //  @copyright
@@ -1938,9 +1939,14 @@ void VLayoutPiece::createFoldLineArrowItem(QGraphicsItem* parent, const pattern_
 void VLayoutPiece::createFoldLineLabelItem(QGraphicsItem* parent, const pattern_piece::FoldLineGraphic& graphic,
                                            bool text_as_paths) const
 {
-    const QColor  color = QColor(qApp->Settings()->getDefaultFoldLineColor());
-    const QFont   font  = graphic.labelFont(qApp->Settings()->getLabelFont());
-    const QString text  = pattern_piece::FoldLineGraphic::labelText();
+    const QColor        color   = QColor(qApp->Settings()->getDefaultFoldLineColor());
+    const QFont         font    = graphic.labelFont(qApp->Settings()->getLabelFont());
+    const QString       text    = pattern_piece::FoldLineGraphic::labelText();
+    const QFontMetricsF metrics(font);
+
+    // Font metrics, not QGraphicsSimpleTextItem::boundingRect(): on Linux the two give different text heights.
+    // HandoffDocument centers the label with the same metrics.
+    const QTransform transform = graphic.labelTransform(QSizeF(metrics.horizontalAdvance(text), metrics.height()));
 
     QGraphicsPathItem* label = new QGraphicsPathItem(parent);
     label->setData(PieceItemData::ItemType, QStringLiteral("fold_line_label"));
@@ -1948,14 +1954,13 @@ void VLayoutPiece::createFoldLineLabelItem(QGraphicsItem* parent, const pattern_
     if (text_as_paths)
     {
         // Glyph outlines with their top left corner at (0, 0), like the text item below.
-        const QFontMetricsF metrics(font);
         QPainterPath text_path;
         text_path.addText(0, metrics.ascent(), font, text);
         QGraphicsPathItem* outline = new QGraphicsPathItem(label);
         outline->setPath(text_path);
         outline->setPen(Qt::NoPen);
         outline->setBrush(QBrush(color));
-        outline->setTransform(graphic.labelTransform(QSizeF(metrics.horizontalAdvance(text), metrics.height())));
+        outline->setTransform(transform);
     }
     else
     {
@@ -1963,7 +1968,7 @@ void VLayoutPiece::createFoldLineLabelItem(QGraphicsItem* parent, const pattern_
         line->setFont(font);
         line->setText(text);
         line->setBrush(QBrush(color));
-        line->setTransform(graphic.labelTransform(line->boundingRect().size()));
+        line->setTransform(transform);
     }
 }
 
