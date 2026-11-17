@@ -1,6 +1,8 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  @file   handoff_piece.cpp
 //  @author slspencer
+//  SPDX-License-Identifier: GPL-3.0-or-later
+//  https://www.gnu.org/licenses/gpl-3.0.html
 //
 //  @brief
 //  Geometry of one piece in the SeamlyLayout handoff.
@@ -409,6 +411,63 @@ HandoffPiece HandoffPiece::create(const VPiece &piece, const VContainer *pattern
     if (!handoff.set_markings(holes, references))
     {
         return handoff;
+    }
+
+    // Match the canvas mirror before the writer aligns annotations and arranges the sheet.
+    if (piece.getFlip() != PieceFlip::None)
+    {
+        QPainterPath outline;
+        outline.addPolygon(QPolygonF(main_path_points));
+        QPainterPath allowance;
+        allowance.addPolygon(QPolygonF(cut_points));
+        const QRectF bounds = outline.united(allowance).boundingRect();
+        if (bounds.isNull())
+        {
+            return handoff;
+        }
+        const QTransform mirror = pieceFlipTransform(piece.getFlip(), bounds.center());
+        const auto map_points = [&mirror](QVector<QPointF>& points)
+        {
+            for (QPointF& point : points)
+            {
+                point = mirror.map(point);
+            }
+        };
+        for (HandoffLine* line : {&handoff.m_seam_line, &handoff.m_cut_line,
+                                 &handoff.m_built_in_cut_line, &handoff.m_built_in_seam_line})
+        {
+            map_points(line->points);
+        }
+        for (QVector<HandoffPath>* paths : {&handoff.m_internal_paths, &handoff.m_cutout_paths})
+        {
+            for (HandoffPath& path : *paths)
+            {
+                map_points(path.line.points);
+            }
+        }
+        for (QLineF& line : handoff.m_notches.lines)
+        {
+            line = mirror.map(line);
+        }
+        for (HandoffDrillHole& hole : handoff.m_drill_holes)
+        {
+            hole.center = mirror.map(hole.center);
+        }
+        for (HandoffReferenceLine& line : handoff.m_reference_lines)
+        {
+            line.line = mirror.map(line.line);
+        }
+        map_points(handoff.m_grainline_points);
+        map_points(handoff.m_grain_axis);
+        if (!handoff.m_fold_line.isNull())
+        {
+            handoff.m_fold_line = mirror.map(handoff.m_fold_line);
+            handoff.m_fold_line_graphic = handoff.m_fold_line_graphic.mapped(mirror);
+        }
+        if (!handoff.m_fold_line_on_cut_line.isNull())
+        {
+            handoff.m_fold_line_on_cut_line = mirror.map(handoff.m_fold_line_on_cut_line);
+        }
     }
     return handoff;
 }

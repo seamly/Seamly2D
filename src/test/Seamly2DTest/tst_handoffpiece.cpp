@@ -43,6 +43,7 @@
 #include "../vmisc/vabstractapplication.h"
 
 #include <QtTest>
+#include <QPainterPath>
 
 using namespace layout_handoff;
 
@@ -692,4 +693,116 @@ void TST_HandoffPiece::unifySkipsLineWithDifferentNodeCount() const
              old_full.getInternalPaths().first().turnPoints());
     QCOMPARE(new_fewer.cutout_paths().first().line.turn_points,
              old_fewer.getCutoutPaths().first().turnPoints());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_HandoffPiece::flippedGeometryKeepsPieceOrientation_data() const
+{
+    QTest::addColumn<int>("flip");
+    QTest::addColumn<bool>("built_in");
+    QTest::addColumn<bool>("on_fold");
+    for (int flip = 0; flip < 4; ++flip)
+    {
+        for (bool built_in : {false, true})
+        {
+            for (bool on_fold : {false, true})
+            {
+                const QByteArray name = QByteArray::number(flip) + (built_in ? "-built-in" : "-allowance")
+                                        + (on_fold ? "-fold" : "-closed");
+                QTest::newRow(name.constData()) << flip << built_in << on_fold;
+            }
+        }
+    }
+}
+
+/// @brief Checks every geometry component across flips, seam allowances, fold lines, and two sizes.
+void TST_HandoffPiece::flippedGeometryKeepsPieceOrientation() const
+{
+    QFETCH(int, flip);
+    QFETCH(bool, built_in);
+    QFETCH(bool, on_fold);
+    const Unit unit = Unit::Mm;
+    qApp->setPatternUnit(unit);
+    for (const qreal size : {400.0, 500.0})
+    {
+        VContainer data(nullptr, &unit);
+        VPiece piece = on_fold ? square_piece_on_fold(&data, true, built_in)
+                              : square_piece_with_slit(&data, true, built_in);
+        data.UpdateGObject(3, new VPointF(size, 0, "A3", 0, 0));
+        data.UpdateGObject(4, new VPointF(size - 60, size, "A4", 0, 0));
+        data.UpdateGObject(5, new VPointF(0, size, "A5", 0, 0));
+        add_paths(&data, &piece);
+        data.UpdateGObject(10, new VPointF(120, 220, "Anchor", 0, 0));
+        piece.setAnchors({10});
+        piece.setDrillHoles({{10, 2.0}});
+        piece.setReferenceLines({{1, 4, QStringLiteral("stripe")}});
+        show_grainline(&piece, QStringLiteral("40"), ArrowType::Both);
+        piece.GetGrainlineGeometry().setCenterAnchorPoint(10);
+        const HandoffPiece original = HandoffPiece::create(piece, &data);
+        QPainterPath outline;
+        outline.addPolygon(QPolygonF(piece.mainPathPoints(&data)));
+        QPainterPath allowance;
+        allowance.addPolygon(QPolygonF(piece.seamAllowancePoints(&data)));
+        const QPointF center = outline.united(allowance).boundingRect().center();
+        const auto expected_point = [flip, center](QPointF point)
+        {
+            if (flip == 1 || flip == 3)
+            {
+                point.setX(2 * center.x() - point.x());
+            }
+            if (flip == 2 || flip == 3)
+            {
+                point.setY(2 * center.y() - point.y());
+            }
+            return point;
+        };
+        const auto expected_points = [&expected_point](QVector<QPointF> points)
+        {
+            for (QPointF& point : points)
+            {
+                point = expected_point(point);
+            }
+            return points;
+        };
+        piece.setFlip(static_cast<PieceFlip>(flip));
+        const HandoffPiece flipped = HandoffPiece::create(piece, &data);
+        QVERIFY(flipped.marking_error().isEmpty());
+        QCOMPARE(flipped.seam_line().points, expected_points(original.seam_line().points));
+        QCOMPARE(flipped.cut_line().points, expected_points(original.cut_line().points));
+        QCOMPARE(flipped.built_in_cut_line().points, expected_points(original.built_in_cut_line().points));
+        QCOMPARE(flipped.built_in_seam_line().points, expected_points(original.built_in_seam_line().points));
+        QCOMPARE(flipped.seam_line().turn_points, original.seam_line().turn_points);
+        QCOMPARE(flipped.seam_line().node_indices, original.seam_line().node_indices);
+        QCOMPARE(flipped.internal_paths().first().line.points,
+                 expected_points(original.internal_paths().first().line.points));
+        QCOMPARE(flipped.cutout_paths().first().line.points,
+                 expected_points(original.cutout_paths().first().line.points));
+        QVERIFY(!original.grainline_points().isEmpty());
+        QCOMPARE(flipped.grainline_points(), expected_points(original.grainline_points()));
+        QCOMPARE(flipped.grain_axis(), expected_points(original.grain_axis()));
+        QCOMPARE(flipped.drill_holes().first().center, expected_point(original.drill_holes().first().center));
+        QCOMPARE(flipped.drill_holes().first().diameter, original.drill_holes().first().diameter);
+        QCOMPARE(flipped.reference_lines().first().line.p1(),
+                 expected_point(original.reference_lines().first().line.p1()));
+        QCOMPARE(flipped.reference_lines().first().line.p2(),
+                 expected_point(original.reference_lines().first().line.p2()));
+        QCOMPARE(flipped.notches().lines.size(), original.notches().lines.size());
+        for (int index = 0; index < original.notches().lines.size(); ++index)
+        {
+            QCOMPARE(flipped.notches().lines.at(index).p1(), expected_point(original.notches().lines.at(index).p1()));
+            QCOMPARE(flipped.notches().lines.at(index).p2(), expected_point(original.notches().lines.at(index).p2()));
+        }
+        if (on_fold)
+        {
+            QCOMPARE(flipped.fold_line().p1(), expected_point(original.fold_line().p1()));
+            QCOMPARE(flipped.fold_line().p2(), expected_point(original.fold_line().p2()));
+            QCOMPARE(flipped.fold_line_graphic().arrowLine(),
+                     expected_points(original.fold_line_graphic().arrowLine()));
+            QCOMPARE(flipped.fold_line_graphic().labelCenter(),
+                     expected_point(original.fold_line_graphic().labelCenter()));
+        }
+        QCOMPARE(static_cast<QPointF>(*data.GeometricObject<VPointF>(10)), QPointF(120, 220));
+        piece.setFlip(PieceFlip::None);
+        QCOMPARE(HandoffPiece::create(piece, &data).seam_line().points, original.seam_line().points);
+    }
 }

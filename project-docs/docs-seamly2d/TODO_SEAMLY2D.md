@@ -37,3 +37,10 @@ The Application Preferences > Paths section displays the path to SeamlyLayout. T
 - [x] Seamly2D.200.1 - remove the SeamlyLayout path from displaying/editing in Application Preferences > Paths.
   - Done: `preferencespathpage.cpp` has 10 rows. `paths/seamlyLayoutApp` stays: the MSI seeds it; `Application2D::seamlyLayoutFilePath()` reads it first.
 - [ ] Seamly2D.200.2 `local_build_msi.ps1` passes. Verify (User): Preferences > Paths has no SeamlyLayout row; Layout mode still starts SeamlyLayout.
+
+### [ ] S2D.75 — Retain flipped piece geometry in SVG exports and handoff
+
+- [x] Mirror the shared handoff geometry for Export Pieces and the SVG handoff.
+- [x] Keep Export Drafts as the construction scene. Apply flips only when an export contains pieces.
+- [x] Cover every flip, two sizes, seam allowances, fold lines, internal paths, notches, markings, and grainlines.
+- [ ] User: inspect flipped pieces in the exported SVG and the SeamlyLayout input canvas.
