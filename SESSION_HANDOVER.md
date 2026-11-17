@@ -22,6 +22,13 @@
 - Draft coordinates remain unchanged.
 - Tests cover 24 combinations of flips, tilts, and anchor modes, with repeated refreshes.
 - The piece markings suite passed 33 checks.
+
+## 2026-11-16 — S2D.77 Copy Piece button
+
+- The toolbox button now uses duplicate_piece_action as its default action.
+- The button follows the action state and calls the existing context-menu copy implementation.
+- The main-window check passed: Draft mode disabled, Piece mode enabled, shared action, copy, undo, and redo.
+- The existing piece copy suite passed 15 checks.
 - All branches start at local run-seamlyLayout commit 31a216de4a.
 - The main checkout and its three uncommitted documentation edits remain unchanged.
 - The four branches remain local and unmerged.

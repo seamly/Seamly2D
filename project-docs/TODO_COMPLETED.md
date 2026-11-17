@@ -2314,3 +2314,10 @@ The merged settings are checked by `validate_settings_json` and loaded through S
 - Removed the display transform when storing grainline edits.
 - Kept draft anchor coordinates unchanged.
 - Passed 24 live geometry cases across flips, tilts, and anchor modes. The suite passed 33 checks.
+
+### [x] S2D.77 — Enable the Copy Piece toolbox button
+
+- Bound the button to the existing Copy Piece action.
+- Verified the enabled state across Draft and Piece modes.
+- Verified a button click creates one copy. Undo removes it, and redo restores it.
+- The existing piece copy suite passed 15 checks.
