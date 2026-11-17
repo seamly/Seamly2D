@@ -2342,7 +2342,7 @@
               </rect>
              </property>
              <property name="toolTip">
-              <string>Copy the Selected Piece (Ctrl+D)</string>
+              <string>Copy Piece (Ctrl+D)</string>
              </property>
              <property name="text">
               <string notr="true">...</string>
@@ -2356,6 +2356,9 @@
                <width>32</width>
                <height>32</height>
               </size>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
              </property>
             </widget>
             <widget class="QToolButton" name="export_pieces_tool_button">
@@ -4537,7 +4540,7 @@
     <string>Copy Piece</string>
    </property>
    <property name="toolTip">
-    <string>Copy the Selected Piece (Ctrl+D)</string>
+    <string>Copy Piece (Ctrl+D)</string>
    </property>
    <property name="shortcut">
     <string notr="true">Ctrl+D</string>

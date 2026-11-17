@@ -568,6 +568,7 @@ void MainWindow::initializeScenes()
     connect(this, &MainWindow::EnableNodeLabelSelection, pieceScene, &VMainGraphicsScene::ToggleNodeLabelSelection);
     connect(this, &MainWindow::EnableNodePointSelection, pieceScene, &VMainGraphicsScene::ToggleNodePointSelection);
     connect(this, &MainWindow::enablePieceSelection,     pieceScene, &VMainGraphicsScene::togglePieceSelection);
+    connect(pieceScene, &VMainGraphicsScene::ChosenObject, this, &MainWindow::copyChosenPiece);
 
     // Piece scene Hover events
     connect(this, &MainWindow::EnableNodeLabelHover, pieceScene, &VMainGraphicsScene::ToggleNodeLabelHover);
@@ -1098,6 +1099,24 @@ void MainWindow::checkRequiredMeasurements(const MeasurementDoc *measurements)
     }
 }
 
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setToolCursor sets the view cursor of a tool; a HiDPI screen gets the double-size image if it exists.
+ * @param cursor resource path of the normal-size cursor image.
+ */
+void MainWindow::setToolCursor(const QString& cursor)
+{
+    QString cursor_resource = cursor;
+    if (qApp->devicePixelRatio() >= 2)
+    {
+        const QString hidpi_resource = QString(cursor).replace(".png", "@2x.png");
+        if (QFileInfo(hidpi_resource).exists())
+        {
+            cursor_resource = hidpi_resource;
+        }
+    }
+    ui->view->viewport()->setCursor(QCursor(QPixmap(cursor_resource), 2, 2));
+}
 
 /// @brief SetToolButton set tool and show dialog.
 /// @param checked true if tool button checked.
@@ -1115,19 +1134,7 @@ void MainWindow::SetToolButton(bool checked, Tool t, const QString &cursor, cons
         CancelTool();
         emit EnableItemMove(false);
         currentTool = lastUsedTool = t;
-        auto cursorResource = cursor;
-        if (qApp->devicePixelRatio() >= 2)
-        {
-            // Try to load HiDPI versions of the cursors if available
-            auto cursorHidpiResource = QString(cursor).replace(".png", "@2x.png");
-            if (QFileInfo(cursorHidpiResource).exists())
-            {
-                cursorResource = cursorHidpiResource;
-            }
-        }
-        QPixmap pixmap(cursorResource);
-        QCursor cur(pixmap, 2, 2);
-        ui->view->viewport()->setCursor(cur);
+        setToolCursor(cursor);
         setStatusMessage(toolTip);
         ui->view->setShowToolOptions(false);
         dialogTool = QSharedPointer<Dialog>(new Dialog(pattern, 0, this));
@@ -2257,6 +2264,65 @@ void MainWindow::closePieceMirrorDialog(int result)
     }
     handleArrowTool(true);
     doc->LiteParseTree(Document::LiteParse);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief handleCopyPieceTool starts the Copy Piece tool; the next click on an unlocked piece copies that piece.
+ * @param checked true - button checked. A click on the checked button keeps the tool on.
+ */
+void MainWindow::handleCopyPieceTool(bool checked)
+{
+    selectPieceTool();
+    if (checked)
+    {
+        CancelTool();
+        emit EnableItemMove(false);
+        currentTool = lastUsedTool = Tool::CopyPiece;
+        setToolCursor(":/cursor/copy_piece_cursor.png");
+        setStatusMessage(tr("<b>Tool::Pieces - Copy Piece:</b> Select an unlocked pattern piece"));
+        ui->view->setShowToolOptions(false);
+        emit ui->view->itemClicked(nullptr);  // Clear Property Editor with non valid tool selection
+    }
+    else
+    {
+        ui->copy_piece_tool_button->setChecked(true);
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief copyChosenPiece copies the piece that the user clicks while the Copy Piece tool is on.
+ * @param id   id of the clicked object.
+ * @param type type of the clicked object; only a piece counts.
+ * @details A locked piece keeps the tool on. The copy ends the tool.
+ */
+void MainWindow::copyChosenPiece(quint32 id, SceneObject type)
+{
+    if (currentTool == Tool::CopyPiece && type == SceneObject::Piece)
+    {
+        if (pattern->GetPiece(id).isLocked())
+        {
+            setStatusMessage(tr("<b>Tool::Pieces - Copy Piece:</b> The piece is locked. "
+                                "Select an unlocked pattern piece"));
+        }
+        else
+        {
+            // The copy rebuilds the piece scene and deletes the clicked piece, so copy after its mouse event ends.
+            QMetaObject::invokeMethod(this, [this, id]()
+            {
+                if (currentTool == Tool::CopyPiece)
+                {
+                    handleArrowTool(true);
+                    PatternPieceTool* piece_tool = qobject_cast<PatternPieceTool*>(VAbstractPattern::getTool(id));
+                    if (piece_tool != nullptr)
+                    {
+                        piece_tool->copyPiece();
+                    }
+                }
+            }, Qt::QueuedConnection);
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -3460,7 +3526,7 @@ void MainWindow::initializeToolButtons()
     connect(ui->arrowPointer_ToolButton, &QToolButton::clicked, this, &MainWindow::handleArrowTool);
 
     // This check helps to find missed tools
-    Q_STATIC_ASSERT_X(static_cast<int>(Tool::LAST_ONE_DO_NOT_USE) == 55, "Check if all tools were connected.");
+    Q_STATIC_ASSERT_X(static_cast<int>(Tool::LAST_ONE_DO_NOT_USE) == 56, "Check if all tools were connected.");
 
     connect(ui->pointAtDistanceAngle_ToolButton, &QToolButton::clicked,
             this, &MainWindow::handlePointAtDistanceAngleTool);
@@ -3485,7 +3551,7 @@ void MainWindow::initializeToolButtons()
     connect(ui->pointAlongSpline_ToolButton,    &QToolButton::clicked, this, &MainWindow::handlePointAlongSplineTool);
     connect(ui->unitePieces_ToolButton,         &QToolButton::clicked, this, &MainWindow::handleUnionTool);
     connect(ui->pieceMirror_ToolButton,         &QToolButton::clicked, this, &MainWindow::handlePieceMirrorTool);
-    ui->copy_piece_tool_button->setDefaultAction(ui->duplicate_piece_action);
+    connect(ui->copy_piece_tool_button,         &QToolButton::clicked, this, &MainWindow::handleCopyPieceTool);
     connect(ui->export_pieces_tool_button,      &QToolButton::clicked,
             ui->export_pieces_action, &QAction::trigger);
     connect(ui->pointAlongArc_ToolButton,       &QToolButton::clicked, this, &MainWindow::handlePointAlongArcTool);
@@ -3974,7 +4040,7 @@ QT_WARNING_DISABLE_GCC("-Wswitch-default")
 void MainWindow::CancelTool()
 {
     // This check helps to find missed tools in the switch
-    Q_STATIC_ASSERT_X(static_cast<int>(Tool::LAST_ONE_DO_NOT_USE) == 55, "Not all tools were handled.");
+    Q_STATIC_ASSERT_X(static_cast<int>(Tool::LAST_ONE_DO_NOT_USE) == 56, "Not all tools were handled.");
 
     qCDebug(vMainWindow, "Canceling tool.");
     dialogTool.clear();
@@ -4090,6 +4156,9 @@ void MainWindow::CancelTool()
             break;
         case Tool::PieceMirror:
             ui->pieceMirror_ToolButton->setChecked(false);
+            break;
+        case Tool::CopyPiece:
+            ui->copy_piece_tool_button->setChecked(false);
             break;
         case Tool::CutArc:
             ui->pointAlongArc_ToolButton->setChecked(false);
@@ -5772,7 +5841,7 @@ void MainWindow::setToolsEnabled(bool enable)
     }
 
     // This check helps to find missed tools
-    Q_STATIC_ASSERT_X(static_cast<int>(Tool::LAST_ONE_DO_NOT_USE) == 55, "Not all tools were handled.");
+    Q_STATIC_ASSERT_X(static_cast<int>(Tool::LAST_ONE_DO_NOT_USE) == 56, "Not all tools were handled.");
 
     //Toolbox Drafting Tools
     //Points
@@ -6273,7 +6342,7 @@ QT_WARNING_DISABLE_GCC("-Wswitch-default")
 void MainWindow::LastUsedTool()
 {
     // This check helps to find missed tools in the switch
-    Q_STATIC_ASSERT_X(static_cast<int>(Tool::LAST_ONE_DO_NOT_USE) == 55, "Not all tools were handled.");
+    Q_STATIC_ASSERT_X(static_cast<int>(Tool::LAST_ONE_DO_NOT_USE) == 56, "Not all tools were handled.");
 
     if (currentTool == lastUsedTool)
     {
@@ -6398,6 +6467,10 @@ void MainWindow::LastUsedTool()
         case Tool::PieceMirror:
             ui->pieceMirror_ToolButton->setChecked(true);
             handlePieceMirrorTool(true);
+            break;
+        case Tool::CopyPiece:
+            ui->copy_piece_tool_button->setChecked(true);
+            handleCopyPieceTool(true);
             break;
         case Tool::CutArc:
             ui->pointAlongArc_ToolButton->setChecked(true);
@@ -6950,29 +7023,11 @@ void MainWindow::createActions()
         handlePieceMirrorTool(true);
     });
 
-    // Copy the first selected unlocked piece; the piece context menu Copy Piece item runs the same code.
     connect(ui->duplicate_piece_action, &QAction::triggered, this, [this]
     {
-        PatternPieceTool* piece_tool = nullptr;
-        const QList<QGraphicsItem*> selected_items = pieceScene->selectedItems();
-        for (QGraphicsItem* item : selected_items)
-        {
-            PatternPieceTool* candidate = dynamic_cast<PatternPieceTool*>(item);
-            if (piece_tool == nullptr && candidate != nullptr
-                && !pattern->GetPiece(candidate->getId()).isLocked())
-            {
-                piece_tool = candidate;
-            }
-        }
-
-        if (piece_tool != nullptr)
-        {
-            piece_tool->copyPiece();
-        }
-        else
-        {
-            ui->statusBar->showMessage(tr("Select an unlocked pattern piece to copy it."), 5000);
-        }
+        ui->piece_ToolBox->setCurrentWidget(ui->details_Page);
+        ui->copy_piece_tool_button->setChecked(true);
+        handleCopyPieceTool(true);
     });
 
     connect(ui->export_pieces_action, &QAction::triggered, this, &MainWindow::exportPiecesToSvgFile);

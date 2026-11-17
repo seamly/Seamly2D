@@ -242,7 +242,8 @@ private slots:
     void handlePatternPieceTool(bool checked);
     void handleUnionTool(bool checked);
     void handlePieceMirrorTool(bool checked);
-
+    void handleCopyPieceTool(bool checked);
+    void copyChosenPiece(quint32 id, SceneObject type);
 
     void changeDraftBlock(Selection selection);
 
@@ -392,6 +393,7 @@ private:
 
     void               MinimumScrollBar();
 
+    void               setToolCursor(const QString& cursor);
     template <typename Dialog, typename Func>
     void               SetToolButton(bool checked, Tool t, const QString &cursor, const QString &toolTip,
                                      Func closeDialogSlot);

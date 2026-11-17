@@ -2140,3 +2140,12 @@ The merged settings are checked by `validate_settings_json` and loaded through S
 - Verified the enabled state across Draft and Piece modes.
 - Verified a button click creates one copy. Undo removes it, and redo restores it.
 - The existing piece copy suite passed 15 checks.
+
+Fix: the button copied only a piece selected before the click. A click on a piece after the button did nothing.
+
+- Copy Piece is now a pick tool (`Tool::CopyPiece`), like Union and Piece Mirror.
+- The button, Details > Copy Piece, and Ctrl+D start the tool. The next click on an unlocked piece copies it. The Arrow tool then returns.
+- A click on a locked piece shows a status message. The tool stays on.
+- New cursor `cursor/copy_piece_cursor.png` and its double-size image: the arrow plus the Copy Piece icon.
+- Compile check of the changed files passed. No app build yet.
+- [ ] Verify (User) in the next MSI: button, Ctrl+D, and Details > Copy Piece start the tool. A click copies one piece. Escape cancels. A locked piece shows the message. Undo and redo work.

@@ -1,6 +1,7 @@
 //-----------------------------------------------------------------------------
 //  @file   groups_widget.h
 //  @author Douglas S Caskey
+//  @author slspencer
 //  @date   11 Jun, 2023
 //
 //  @brief
@@ -8,6 +9,7 @@
 //  This source code is part of the Seamly2D project, a pattern making
 //  program, whose allow create and modeling patterns of clothing.
 //  Copyright (C) 2013-2026 Seamly2D project
+//  Copyright (C) 2026 Seamly2D Project
 //  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
 //
 //  Seamly2D is free software: you can redistribute it and/or modify
@@ -758,7 +760,7 @@ QT_WARNING_DISABLE_GCC("-Wswitch-default")
 void GroupsWidget::addGroupItem(const quint32 &tool_id, const quint32 &obj_id, const Tool &tool_type)
 {
     // This check helps to find missing tools in the switch
-    Q_STATIC_ASSERT_X(static_cast<int>(Tool::LAST_ONE_DO_NOT_USE) == 55, "Not all tools were used in history.");
+    Q_STATIC_ASSERT_X(static_cast<int>(Tool::LAST_ONE_DO_NOT_USE) == 56, "Not all tools were used in history.");
 
     QString iconFileName = "";
     QString objName = tr("Unknown Object");
@@ -781,6 +783,7 @@ void GroupsWidget::addGroupItem(const quint32 &tool_id, const quint32 &obj_id, c
                 case Tool::Midpoint:            // Same as Tool::AlongLine, but tool will never have such type
                 case Tool::ArcIntersectAxis:    // Same as Tool::CurveIntersectAxis, but tool will never have such type
                 case Tool::BackgroundImage:
+                case Tool::CopyPiece:
                 case Tool::LAST_ONE_DO_NOT_USE:
                     Q_UNREACHABLE(); //-V501
                     break;

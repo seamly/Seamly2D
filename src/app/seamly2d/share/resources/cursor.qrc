@@ -36,6 +36,8 @@
         <file>cursor/union_cursor@2x.png</file>
         <file>cursor/piece_mirror_cursor.png</file>
         <file>cursor/piece_mirror_cursor@2x.png</file>
+        <file>cursor/copy_piece_cursor.png</file>
+        <file>cursor/copy_piece_cursor@2x.png</file>
         <file>cursor/arc_cut_cursor.png</file>
         <file>cursor/arc_cut_cursor@2x.png</file>
         <file>cursor/cursor-arrow-closehand.png</file>
