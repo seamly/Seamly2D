@@ -132,8 +132,9 @@ jobs:
   # Runs on non-push events and on pushes to run-seamlyLayout, for non-weblate users
   # For x64 arch.
   # TODO: implement for arm64 arch.
+  # Off: platform builds start one at a time, after the Windows MSIs pass. Remove "false && " to turn it on.
   linux:
-    if: (github.event_name != 'push' || github.ref == 'refs/heads/run-seamlyLayout') && github.event.pull_request.user.login != 'weblate'
+    if: false && (github.event_name != 'push' || github.ref == 'refs/heads/run-seamlyLayout') && github.event.pull_request.user.login != 'weblate'
     name: 'Linux: Build AppImage'
     runs-on: ubuntu-22.04
     needs: [version, linux-test]
@@ -237,8 +238,9 @@ jobs:
   # ---------------------------------------------------------------------------
   # Build the MacOS DMG.
   # Runs on non-push events and on pushes to run-seamlyLayout, for non-weblate users
+  # Off: platform builds start one at a time, after the Linux build passes. Remove "false && " to turn it on.
   macos:
-    if: (github.event_name != 'push' || github.ref == 'refs/heads/run-seamlyLayout') && github.event.pull_request.user.login != 'weblate'
+    if: false && (github.event_name != 'push' || github.ref == 'refs/heads/run-seamlyLayout') && github.event.pull_request.user.login != 'weblate'
     name: 'macOS: Build DMG'
     runs-on: macos-26
     needs: [version, linux-test]
@@ -336,12 +338,13 @@ jobs:
   # ---------------------------------------------------------------------------
   # Build Windows MSIs. 
   # Runs on non-push events and on pushes to run-seamlyLayout, for non-weblate users
-  # For x64 and arm64 arches
+  # For x64 and arm64 arches. arm64 is off until the x64 MSI builds.
+  # Does not wait for linux-test: a Linux test failure does not stop the MSI build.
   windows-msi:
     if: (github.event_name != 'push' || github.ref == 'refs/heads/run-seamlyLayout') && github.event.pull_request.user.login != 'weblate'
     name: 'Windows: Build MSI - (${{ matrix.arch }})'
     runs-on: ${{ matrix.runner }}
-    needs: [version, linux-test]
+    needs: version
     env:
       VERSION_NUMBER: ${{ needs.version.outputs.version_number }}
     strategy:
@@ -359,12 +362,13 @@ jobs:
             qt-host: windows
             qt-arch: win64_msvc2022_64
             qt-modules: qtmultimedia qtwebengine qtwebchannel qtpositioning
-          - arch: arm64
-            runner: windows-11-arm
-            msvc-arch: arm64
-            qt-host: windows_arm64
-            qt-arch: win64_msvc2022_arm64
-            qt-modules: qtmultimedia qtwebengine qtwebchannel qtpositioning
+          # Off until the x64 MSI builds. Uncomment to turn it on.
+          # - arch: arm64
+          #   runner: windows-11-arm
+          #   msvc-arch: arm64
+          #   qt-host: windows_arm64
+          #   qt-arch: win64_msvc2022_arm64
+          #   qt-modules: qtmultimedia qtwebengine qtwebchannel qtpositioning
 
     steps:
       - name: 'Checkout repository - ${{ matrix.arch }}'

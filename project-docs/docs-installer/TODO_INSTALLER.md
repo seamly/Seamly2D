@@ -119,3 +119,15 @@ Task Layout.14 ships notices for the Rust crates, the Qt runtime and the SVG exp
 - [x] Installer.7.2 - pdftops (Poppler, GPL-2.0-or-later): no longer shipped; Layout.53 replaced it with SeamlyLayout's own PS/EPS writer
 - [ ] Installer.7.3 - MSVC runtime DLLs (Microsoft redistributable terms), Windows only
 - [ ] Installer.7.4 - Add the notices to `packaging/licenses/` (all three installers pick up that folder); document in `.github/README-BUILDS.md`
+
+## [ ] Installer.8 - Prove each platform build in `ci.yml`, one platform at a time
+
+A push of `run-seamlyLayout` to `origin` runs `ci.yml`. Turn on the next platform only after the previous one builds its artifact in CI (user decision).
+
+- [ ] Installer.8.1 - Windows 11 x64 `.msi` only. `linux` and `macos` jobs off (`false &&`), arm64 matrix entry commented out. `windows-msi` does not wait for `linux-test`. Open: CI pass.
+- [ ] Installer.8.2 - Windows 11 arm64 `.msi`: uncomment the arm64 matrix entry.
+- [ ] Installer.8.3 - Linux Debian (latest) artifact. Open decision: `.deb` package, or AppImage built on Debian (the `linux` job builds an AppImage on `ubuntu-22.04`).
+- [ ] Installer.8.4 - macOS (latest) artifact: turn on the `macos` job.
+- [ ] Installer.8.5 - Update the Flathub Seamly Flatpak workflow. See `TODO_INSTALLER_LINUX_FLATPAK.md`.
+- [ ] Installer.8.6 - Windows and macOS code signing, after every platform build passes. The signing steps skip while the `SEAMLY_SIGNING_PROJECT_ID` and `apple_sign_identity` secrets are not set.
+- [ ] Installer.8.7 - Confirm the publish jobs run again: `publish-all-dev`, `publish` and `document` need every build job, so they skip while a build job is off.
