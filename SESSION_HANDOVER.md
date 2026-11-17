@@ -25,12 +25,14 @@
 - a91d3e7e96: upstream `ci.yml` restored beside it, identical to `develop`'s copy (user decision). Rule in CLAUDE.md CI section.
 - Upstream `ci.yml` fails on our tree (no `Seamly2D.pro`, `scripts/version.sh`, `seamly2d-installer.nsi`).
 - Workflow "CI" (`ci.yml`) disabled in seamly/Seamly2D: `gh workflow disable ci.yml` (user decision). Upstream still runs it. Re-enable: `gh workflow enable ci.yml --repo seamly/Seamly2D`.
-- Local `run-seamlyLayout`: 15 commits ahead of origin. Merges carry no skip-ci token.
+- Sue pushed (origin at d1fea41371). CI Layout run 44165339525 failed:
+  - `version` job wrote `2026.11.17.2004`; `version.sh` needs `YY.M.DDHH`. The 10-10 `develop` merge brought upstream's formula back. Fixed in `ci-layout.yml`; merge-upstream skill notes it.
+  - `linux-test`: parallel qmake runs (make -j) wrote and read the missing version header at once. New `project_version.pri`, included first by `Seamly.pro`. Scratch qmake check passed.
 - Not run since: Linux ctest and cargo (11-02), platform builds (10-19). More failures possible.
 - Extra origin branches: `gh-pages` (`document` job, `builddocs.yml`), `dependabot/cargo/src/app/seamlycli/cargo-4cb1234933` (PR #32).
 - Open: Export Draft Blocks SVG writer to replace `SvgGenerator` (a: vformat draft-only writer, recommended; b: `QSvgGenerator`).
 - Open: skip-ci default in CLAUDE.md stops push builds; keep or drop.
-- Next: Sue pushes; watch the x64 MSI job; then Installer.8.2 (arm64).
+- Next: Sue pushes the fix; watch `linux-test` and the x64 MSI job; then Installer.8.2 (arm64).
 
 ### 2026-11-16 — Utilities menu launches SeamlyCLI
 
