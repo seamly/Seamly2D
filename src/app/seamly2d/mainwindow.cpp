@@ -3485,8 +3485,7 @@ void MainWindow::initializeToolButtons()
     connect(ui->pointAlongSpline_ToolButton,    &QToolButton::clicked, this, &MainWindow::handlePointAlongSplineTool);
     connect(ui->unitePieces_ToolButton,         &QToolButton::clicked, this, &MainWindow::handleUnionTool);
     connect(ui->pieceMirror_ToolButton,         &QToolButton::clicked, this, &MainWindow::handlePieceMirrorTool);
-    connect(ui->copy_piece_tool_button,         &QToolButton::clicked,
-            ui->duplicate_piece_action, &QAction::trigger);
+    ui->copy_piece_tool_button->setDefaultAction(ui->duplicate_piece_action);
     connect(ui->export_pieces_tool_button,      &QToolButton::clicked,
             ui->export_pieces_action, &QAction::trigger);
     connect(ui->pointAlongArc_ToolButton,       &QToolButton::clicked, this, &MainWindow::handlePointAlongArcTool);

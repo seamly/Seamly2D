@@ -1,5 +1,21 @@
 # Session handover
 
+## 2026-11-16 — S2D.77 Copy Piece button
+
+- The toolbox button now uses duplicate_piece_action as its default action.
+- The button follows the action state and calls the existing context-menu copy implementation.
+- The main-window check passed: Draft mode disabled, Piece mode enabled, shared action, copy, undo, and redo.
+- The existing piece copy suite passed 15 checks.
+- All branches start at local run-seamlyLayout commit 31a216de4a.
+- The main checkout and its three uncommitted documentation edits remain unchanged.
+- The four branches remain local and unmerged.
+- Verification used Qt 6.11.3 and MSVC 2022.
+- The combined focused harness passed 130 checks.
+- Existing SeamlyLayout debug checks passed 8/8. Rust workspace tests passed 734 checks.
+- The full MSI build did not run. Native visual acceptance checks remain for the user.
+- The origin fetch did not finish. Local develop matched its stored origin ref and was already an ancestor.
+- Next: review the branches, merge the accepted changes, and run the full Windows build.
+
 ## 2026-11-16 — Returned to the main worktree
 
 - The user ended the isolated CLI work and requested a return to Seamly2D-private.
