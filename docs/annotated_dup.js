@@ -1,5 +1,8 @@
 var annotated_dup =
 [
+    [ "anonymous_namespace{piece_info_dialog.cpp}", "dc/dd2/namespaceanonymous__namespace_02piece__info__dialog_8cpp_03.html", [
+      [ "NumericItem", "d6/dbf/classanonymous__namespace_02piece__info__dialog_8cpp_03_1_1NumericItem.html", "d6/dbf/classanonymous__namespace_02piece__info__dialog_8cpp_03_1_1NumericItem" ]
+    ] ],
     [ "qmu", "da/d92/namespaceqmu.html", [
       [ "Test", "d8/d1e/namespaceqmu_1_1Test.html", [
         [ "QmuParserTester", "da/d59/classqmu_1_1Test_1_1QmuParserTester.html", "da/d59/classqmu_1_1Test_1_1QmuParserTester" ]
@@ -331,6 +334,7 @@ var annotated_dup =
     [ "EntityResolver", "dc/db4/classEntityResolver.html", "dc/db4/classEntityResolver" ],
     [ "ErrorHandler", "d8/d53/classErrorHandler.html", "d8/d53/classErrorHandler" ],
     [ "ExpandingTextEdit", "db/dac/classExpandingTextEdit.html", "db/dac/classExpandingTextEdit" ],
+    [ "ExportFormat", "d4/d95/structExportFormat.html", "d4/d95/structExportFormat" ],
     [ "ExportFormatCombobox", "d4/d06/classExportFormatCombobox.html", "d4/d06/classExportFormatCombobox" ],
     [ "ExportLayoutDialog", "de/dbd/classExportLayoutDialog.html", "de/dbd/classExportLayoutDialog" ],
     [ "ExportProgressDialog", "d7/deb/classExportProgressDialog.html", "d7/deb/classExportProgressDialog" ],
@@ -459,6 +463,7 @@ var annotated_dup =
     [ "PenToolBar", "d5/dd9/classPenToolBar.html", "d5/dd9/classPenToolBar" ],
     [ "PieceAnchorPointVisual", "dd/d5b/classPieceAnchorPointVisual.html", "dd/d5b/classPieceAnchorPointVisual" ],
     [ "PieceFillComboBox", "d8/d5b/classPieceFillComboBox.html", "d8/d5b/classPieceFillComboBox" ],
+    [ "PieceInfoDialog", "d0/d9c/classPieceInfoDialog.html", "d0/d9c/classPieceInfoDialog" ],
     [ "PiecesWidget", "d4/dc9/classPiecesWidget.html", "d4/dc9/classPiecesWidget" ],
     [ "PieceTableWidgetItem", "d7/df0/classPieceTableWidgetItem.html", "d7/df0/classPieceTableWidgetItem" ],
     [ "point2d_s", "dc/d79/structpoint2d__s.html", "dc/d79/structpoint2d__s" ],
