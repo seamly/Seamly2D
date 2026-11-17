@@ -13,4 +13,4 @@ male_shirt, trousers, and jacket2
 
 - [ ] Layout.Z2 - Verify with CLO3D
 
-- [ ] Layout.Z3 - Implement PRs from upstream that affect exports
+- [ ] Layout.Z3 - Implement PRs from upstream that affect DXF AAMA exports

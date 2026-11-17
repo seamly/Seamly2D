@@ -1,5 +1,15 @@
 # Session handover
 
+## 2026-11-16 — Fix multisize collection tests
+
+- The MSI build stopped because 10 CollectionTest cases omitted the required multisize size option.
+- Added --basesize to the successful multisize TestMode case and the shared GOST collection command.
+- Updated src/test/CollectionTest/tst_seamly2dcommandline.cpp and its required license header.
+- Rebuilt CollectionTest. The SeamlyMe suite passed 17 checks. The Seamly2D suite passed 52 checks, with four filesystem skips.
+- The focused nmake check returned zero. The full MSI build remains unverified.
+- The existing three documentation edits remain unchanged. No commit or push.
+- Next step: rerun packaging/windows/local_build_msi.ps1 to complete all tests and MSI packaging.
+
 ## 2026-11-16 — Feature branches merged and deleted
 
 - Merged all four feature branches into local run-seamlyLayout with separate merge commits.

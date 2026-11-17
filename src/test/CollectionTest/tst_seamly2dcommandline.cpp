@@ -1,5 +1,6 @@
 /******************************************************************************
  *   @file   tst_seamly2dcommandline.cpp
+ **  @author slspencer
  **  @author Douglas S Caskey
  **  @date   30 Nov, 2023
  **
@@ -8,6 +9,9 @@
  **  This source code is part of the Seamly2D project, a pattern making
  **  program to create and model patterns of clothing.
  **  Copyright (C) 2017-2023 Seamly2D project
+ **  Copyright (C) 2026 Seamly2D Project
+ **  SPDX-License-Identifier: GPL-3.0-or-later
+ **  <https://www.gnu.org/licenses/gpl-3.0.html>
  **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
  **
  **  Seamly2D is free software: you can redistribute it and/or modify
@@ -170,7 +174,7 @@ void TST_Seamly2DCommandLine::TestMode_data() const
                                << V_EX_NOINPUT;
 
     QTest::newRow("Issue #256. Correct multisize measurements.")<< "issue_256.sm2d"
-                               << QString("--test;;-m;;%1").arg(tmp + QDir::separator() +
+                               << QString("--test;;--basesize;;-m;;%1").arg(tmp + QDir::separator() +
                                                                 QLatin1String("issue_256_correct.smms"))
                                << V_EX_OK;
 
@@ -214,7 +218,8 @@ void TST_Seamly2DCommandLine::TestOpenCollection_data() const
     QTest::addColumn<int>("exitCode");
 
     const QString tmp = QCoreApplication::applicationDirPath() + QDir::separator() + tmpTestCollectionFolder;
-    const QString testGOST = QString("--test;;-m;;%1").arg(tmp + QDir::separator() + QLatin1String("gost_man_ru.smms"));
+    const QString testGOST = QString("--test;;--basesize;;-m;;%1")
+        .arg(tmp + QDir::separator() + QLatin1String("gost_man_ru.smms"));
     const QString keyTest = QStringLiteral("--test");
     const QString testTrousers068 = QString("--test;;-m;;%1")
         .arg(tmp + QDir::separator() + QLatin1String("trousers_v0_6_8.smis"));

@@ -26,141 +26,23 @@
 
 ## Command line help tables — 2026-11-16
 
-- [x] Match the Variables dialog with native tables, application font, and application colors.
-- [x] Add adjustable columns, filtering, sorting, and separate reference tabs.
-- [x] Verify the Windows build and all 40 Qt suites with zero failures.
-- Visual verification remains pending after the user stopped computer control.
-
 ## CLI help menu — 2026-11-16
 
-- [x] Add **Help > Command line options** from the `feature/cli-1` parser.
-- [x] Include current limits, removed options, and exit codes.
-- [x] Verify scrolling, read-only text, and closing without exiting.
-- [x] Build Seamly2D and pass all 40 Qt suites on Windows with Qt 6.11.3.
+## Seamly2D.71 — Piece mode fold line: arrow line, label and extended fold line
 
-Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
+## Seamly2D.11 — Built-in seam allowance: calculation, display and export
 
-## Completed subtasks from Task Seamly2D.71 — Piece mode fold line: arrow line, label and extended fold line
+## Seamly2D.12 — Layout: SeamlyLayout opens behind Seamly2D
 
-Open in `TODO_SEAMLY2D.md`: Seamly2D.71.9 (Qt suites, next MSI), Seamly2D.71.10 (user check).
+## Layout.75 — Multisize: scroll bar for the size tabs
 
-- [x] Seamly2D.71.1 Rearrange the main path nodes
-  - Apply and OK rotate the main path so it ends with the fold line start and end nodes. The rows below the fold line end node move to the top, in their order (`PatternPieceDialog::SaveData()`, `VPiece::endPathAtFoldLine()`)
-  - The cut line then ends with the extended fold line
-  - Risk: a custom seam allowance that starts at the fold line end node wraps past the path end after the rotation; `VPiece::GetValidRecords()` drops it
-- [x] Seamly2D.71.2 Fold line arrow line: `pattern_piece::FoldLineGraphic` (`src/libs/vpatterndb/FoldLineGraphic.{h,cpp}`)
-  - Half the fold line length, parallel to it, centered between its nodes. The first and last tenth bend 90 degrees toward the fold line; filled arrow heads touch it
-  - Inside the piece: the main path turn direction gives the side
-  - Preferences fold line style (color, line type, weight). Always shown with a fold line; no check box
-  - Piece mode: `PatternPieceTool::refreshFoldLine()`. Handoff: `fold_line_arrow` group inside `fold_line`
-- [x] Seamly2D.71.3 Fold line label "Foldline"
-  - Reads along the fold line (90 degrees for a vertical one). Centered between the fold line and the arrow line, and between the arrow line ends
-  - Text height: half the room between the two lines. Fold line color, Preferences label font
-  - Handoff: `fold_line_label` group inside `fold_line`, one `<text>` element
-  - Decision taken: the ids follow the `<type>_<pieceName>` scheme: `fold_line_Back`, `fold_line_arrow_Back`, `fold_line_label_Back`, not `Back_foldline` and `Back_foldline_label`
-- [x] Seamly2D.71.4 No seam allowance on the fold line
-  - Kept: the fold line edge offsets by 0 (`VPiece::seamAllowancePoints()`), whatever the node widths. The cut line runs along the fold line and past both nodes
-  - Tests: `TST_VPiece::FoldLineHasNoSeamAllowance`, `CutLineEndsWithFoldLine`
-- [x] Seamly2D.71.5 Extended fold line
-  - `VPiece::foldLineOnCutLine()`: the fold line from where the cut line meets its start side to where it meets its end side
-  - Piece mode draws it while the cut line shows. The handoff `fold_line` path carries it when a `cutline` is sent
-  - SeamlyLayout reads the first path outside the tagged parts (`svg_dom::fold_line_d`) in `fold_line_edge.rs`. The DXF mirror line ignores the arrow line (`converter.rs`)
-- [x] Seamly2D.71.6 SeamlyLayout Nested: sizes with a fold line stack on its first point (`svg_dom::center_piece_sets`)
-  - Import: each size's grainline and labels take the base size's offset from the same stack point (`annotation_alignment.rs`), so they still stack
-  - A piece-set whose sizes share one fold line goes on the left edge like a piece (`fold_line_edge.rs`). Sizes apart: warning
-  - `piece_divider` splits only the fold line path; the arrow line and label go whole to the nearest part
-  - DXF: arrow line layer 8, label layer 15; DXF-ASTM writes neither. HPGL: arrow line a mark, label a label. Text modes rewrite the label (`svg_label_text`)
-- [x] Seamly2D.71.7 Tests
-  - Qt `TST_VPiece`: `EndPathAtFoldLine` (7 rows), `FoldLineOnCutLine` (3 rows), `FoldLineOnCutLineKeepsFoldLineWithoutRun`, `CutLineEndsWithFoldLine`, `FoldLineGraphicPlacesArrowAndLabel` (3 rows), `FoldLineGraphicNeedsFoldLineAndOutline`, `FoldLineGraphicMapsUpright`, `FoldLineLabelFitsRoom`, `ConverterEndsMainPathAtFoldLine` (5 rows); `LayoutPieceTakesFoldLine` checks the extended fold line
-  - Qt `TST_SvgComponentTags`: `FoldLineGroupHoldsArrowAndLabel`; `FoldLineSendsFoldLineGroup` updated
-  - Rust (`cargo test --workspace` 621 passed): `jacket2_nested_stacks_each_piece_set_annotations` expects "Back: piece label past the cut line in sizes 220"; `center_piece_sets_stacks_fold_lines_on_their_start`, `center_piece_sets_centres_when_a_size_has_no_fold_line`, `fold_line_d_skips_tagged_parts`, `piece_set_on_a_shared_fold_line_is_pinned`, `fold_line_group_with_arrow_and_label_reads_the_fold_line`, `fold_line_arrow_and_label_go_whole_to_the_nearest_part`, `fold_line_arrow_and_label_are_not_the_mirror_line`, `fold_line_arrow_and_label_layers`, `fold_line_label_uses_the_label_pen`, `fold_line_label_text_is_label_text`
-- [x] Seamly2D.71.8 Schema: no change. The format 0.7.7 conversion rotates older main paths to end with the fold line (`VPatternConverter::endMainPathAtFoldLineV0_7_7()`)
-  - Decision taken: in the 0.7.7 step, not a new 0.7.8. No MSI writes 0.7.7 yet: the next MSI is the first with it
-- Docs: `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`, `seamlylayout_SETTINGS_WORKFLOW.md`; `AGENT_CHECKLIST.md` §21 Nested step
+## Layout.73 — Assign unique piece names at import 
 
-## Completed subtasks from Task Seamly2D.11 — Built-in seam allowance: calculation, display and export
+## Layout.69 — PNG/JPG resolution metadata
 
-Seamly2D.11.8–11.10: "Task Seamly2D.11" below.
+## Layout.24 — Multisize export names: tab name before the timestamp
 
-- [x] Seamly2D.11.1 Display the seam line
-  - `PatternPieceTool::RefreshGeometry()`: the main path is the cut line (`m_cutLine`, cut line style). The item draws `VPiece::builtInSeamLinePath()` in the seam line style. The hatch fills the space between them while seam allowances are shown
-  - Piece dialog preview: `PatternPieceVisual` draws the seam line in the seam line color and line type. It follows Built in, Hide Seam Line and width changes
-  - Both lines show by default. Hide Seam Line hides the seam line; the cut line stays
-  - Decision taken: View > Seam Allowance off keeps both lines; only the hatch goes. The cut line is the main path, so it always shows
-- [x] Seamly2D.11.2 Seam line inside the main path
-  - The main path is the cut line. Seam line = main path offset inward (`VPiece::builtInSeamLinePoints()`, Layout.28.1). Corner types shape only the cut line
-  - Decision taken: Piece Properties keeps the Automatic tab (width, before, after) enabled for a built-in seam allowance: the widths place the seam line. The Custom tab and the Angle list are disabled. Before, the whole tab was disabled, so a built-in width could not change
-  - Fix: checking Seam allowance again re-enabled no tab. It emitted `toggled`; only `stateChanged` had a receiver
-- [x] Seamly2D.11.3 Fold line along the main path
-  - The fold line edge offsets by 0 (`setFoldLineWidths`); `openAtFoldLine` removes the seam line run on the fold line. The seam line is open: it starts and ends on the fold line, and does not cross it
-  - At an obtuse corner the seam line meets the fold line farther from the node than the width
-- [x] Seamly2D.11.4 Handoff and piece exports: `cutline` (main path), `seamline` (open with a fold line), `fold_line`
-  - `VLayoutPiece::setBuiltInSeamLinePoints(..., closed)`, `isBuiltInSeamLineClosed()`: open SVG path, open turn points (both ends count); `unifyTurnPoints` matches open lines as open
-  - Piece mode Export Pieces As uses the same items (`GetItem`). DXF-AAMA layer 8 now holds the built-in seam line; before, it held the main path again, on the layer 1 outline
-  - SeamlyLayout: no code change. DXF-ASTM keeps the open seam line as an open layer 14 sew line; its ends lie on the layer 6 mirror line
-  - `src/libs/vlayout` is deprecated and goes at the SeamlyLayout release (user). The handoff producer that replaces it must keep the open seam line rule (`SVG-DATA-ATTRIBUTES.md`)
-- [x] Seamly2D.11.5 Tests
-  - Qt: `TST_VPiece::BuiltInSeamLineStopsAtFoldLine` (3 rows), `BuiltInSeamLineStopsAtFoldLineAfterCurve`; `BuiltInSeamLineUsesWiderNodeWidth` checks a closed line; `TST_SvgComponentTags::BuiltInPieceWithFoldLineSendsOpenSeamline`
-  - Rust: `seamly_svg2ezdxf` `built_in_seam_line_stops_on_the_fold_line`
-  - Temporary test program (test objects and in-tree libs of `f788586157`, changed sources rebuilt): every Seamly2D suite passed; TST_VPiece 105, TST_SvgComponentTags 48. `cargo test -p seamly_svg2ezdxf`: 68 passed. `cl /Zs` clean on every changed `.cpp`
-- [x] Seamly2D.11.6 Schema: no change. The seam line is computed from the existing widths and `foldLine` nodes; no new pattern data
-- [x] Seamly2D.11.7 Docs: `SVG-DATA-ATTRIBUTES.md` (built-in seam allowance, `fold_line`), `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`
-
-## Task Seamly2D.12 — Layout: SeamlyLayout opens behind Seamly2D (completed 2026-10-21)
-
-jacket2 (26 sizes, labels visible): Seamly2D did not respond for about 26 s, then SeamlyLayout opened behind Seamly2D. The user saw no window and pressed Layout again: two SeamlyLayout windows.
-
-Found: piece labels cost 4 s → 20 s (installed 26.10.1615, pattern copies with and without labels). Stack samples: `VTextManager::FitFontSize` loads a new font engine for every pixel size it tries.
-
-- [x] Seamly2D.12.1 Window in front: `WindowsForegroundWindow::allowForeground` after the start (`AllowSetForegroundWindow`); `seamlyLayout_main.mm` raises and activates its window before the import
-- [x] Seamly2D.12.2 Progress: modal `QProgressDialog` per size, with Cancel; Cancel restores the size and the prior mode
-- [x] Seamly2D.12.3 One SeamlyLayout per Seamly2D window: a second Layout says "already open" and brings SeamlyLayout to the front (Windows); Layout in Layout mode brings it to the front
-- [x] Seamly2D.12.4 `waitForStarted()` failure shows a message, not nothing
-- [x] Seamly2D.12.5 Label fit: `VTextManager::largestFittingSize` starts at the estimated size (jacket2 labels: 13 and 28 measurements → 2 and 3); `FitFontSize` keeps each result per thread
-- [x] Seamly2D.12.6 Test `TST_VTextManager::LargestFittingSize`; `cl /Zs` on the changed sources
-- [x] Seamly2D.12.7 `local_build_msi.ps1` passes (`nmake check`). Passed in MSI 26.10.2023.
-- [x] Seamly2D.12.8 User: jacket2 Layout shows the progress dialog and SeamlyLayout opens in front, well under 26 s; Cancel; second Layout. Passed (MSI 26.10.2023).
-
-## Task Layout.75 — Multisize: scroll bar for the size tabs (completed 2026-10-21)
-
-In multisize layouts, the size tabs ran past the right edge of the canvas, with no scroll bar.
-
-- [x] Layout.75.1 Horizontal scroll bar for the size tabs. `Main.qml`: `Flickable layoutViewTabStrip` holds the `TabBar`; the scroll bar sits below the tabs and shows only when tabs are out of view; the mouse wheel scrolls the tabs; the shown tab scrolls into view. Checked: QML compiles (debug build, `ctest --preset debug` 6 of 6); a `qml` test render with 29 tabs in a 700 px window shows the bar and the selected tab.
-- [x] Layout.75.2 User check: jacket2 (26 sizes), all size tabs are accessible. Passed (MSI 26.10.2023).
-
-## Task Layout.73 — Assign unique piece names at import (completed 2026-10-21)
-
-Give every piece a unique name before a layout, in every size. Rule: `docs-data/SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout piece names".
-
-Finding: the names do not cause the jacket2 Missing Piece Data dialog. jacket2 hides piece labels and grainlines (`visible="false"`), so the handoff has no `piece_label` or `grainline` groups (Layout.26). The dialog stays; it now lists `Size_500_Piece_3_Detail` instead of `Detail (3)`.
-
-- [x] Layout.73.1 `piece_naming::assign_unique_piece_names`, called by `finish_import`. Individual: `Piece_<n>[_<name>][_<letter>]`. Multisize: `Size_<size>_Piece_<n>[_<name>][_<letter>]`. A run of spaces becomes one `_` (user decision). Piece-set: name without the size. Marker `data-name-assigned="true"`, kept on a later import.
-- [x] Layout.73.2 Import warning when the sizes have different piece counts.
-- [x] Layout.73.3 No "(size N)" label suffix on an assigned name.
-- [x] Layout.73.4 Tests: 6 `piece_naming` tests, `piece_extractor` `assigned_name_label_has_no_size_suffix`, `layout_utils` `jacket2_assigned_names_reach_the_base_size_export`.
-- [x] Layout.73.5 User check, `AGENT_CHECKLIST.md` §1 and §5. Passed (MSI 26.10.2023). The Base Size 500 DXF names `Size_500_Piece_1_…` to `Size_500_Piece_7_…`.
-
-## Task Layout.69 — PNG/JPG resolution metadata (completed 2026-10-21)
-
-MSI 26.10.1311 exported correct pixels at 96 dpi (jacket2 PNG: 4608 × 48000) but omitted physical resolution metadata, so printing at actual size could be wrong.
-
-- [x] Layout.69.1 Write PNG `pHYs` = 3780 px/m and JPG JFIF density = 96 × 96 dpi.
-- [x] Layout.69.2 Rust tests verify PNG `pHYs` and JPG JFIF density.
-- [x] Layout.69.3 User check, "PNG and JPG resolution". Passed (MSI 26.10.2023).
-
-## Task Layout.24 — Multisize export names: tab name before the timestamp (completed 2026-10-21)
-
-Default name of a multisize export: `<base>[_<segment>]_<tab>_<stamp>[_tiled].<ext>`. Example: `mypatternname_R13_Size220_202610112043.dxf`. An individual pattern keeps `<base>[_<segment>]_<stamp>[_tiled].<ext>`.
-
-- [x] Layout.24.1 Add optional tab segment before `<stamp>` in `exports::default_export_file_name`.
-- [x] Layout.24.2 Remove spaces from tab labels; replace non-alphanumeric characters (except `-`) with `-`. "Size 220" → `Size220`.
-- [x] Layout.24.3 Include the selected tab in single-export default names.
-- [x] Layout.24.4 Apply the rule to Export All. Replace `layout_views::tab_file_path` (put `_size-220` after the timestamp). For renamed files, insert `_<tab>` before the extension.
-- [x] Layout.24.5 Test names with/without tab, tiled names, `/` in labels, and Export All.
-- [x] Layout.24.6 Docs: export file name rule in the SeamlyLayout docs, `TEST_CHECKLIST.md`
-- [x] Layout.24.7 User check, "Export file names". Passed (MSI 26.10.2023) for Fabric, Lining, Nested and Marker. Example: `jacket2_40-146_Fabric_Size340_202610211332.svg`.
-
-## Task Dead.1 — Remove the orphaned layout code; orphaned when calling SeamlyLayout instead of the previous layout code and workflow (completed 2026-10-14)
+##  Dead.1 — Remove the orphaned layout code; orphaned when calling SeamlyLayout instead of the previous layout code and workflow
 
 - [x] Dead.1.1 - locate the seamly2d code (vlayout*.cpp, etc.) that was orphaned by calling the new seamlylayout.exe
   - Layout Mode's built-in canvas (tempSceneLayout, scenes, showLayoutPages(),
@@ -202,35 +84,15 @@ Default name of a multisize export: `<base>[_<segment>]_<tab>_<stamp>[_tiled].<e
 - [x] Dead.1.4 - check that tests are run for SeamlyLayout during the linux-test job in ci.yml
   - `linux-test` runs `ctest --preset debug` (qt_frontend) and `cargo test --workspace` (seamlylayout).
 
-## Task DXF.23 — jacket2 size 240: a tight bend is not a turn point (completed 2026-10-13)
+##  DXF.23 — jacket2 size 240: a tight bend is not a turn point
 
 aw.fyi reports in `test-seamly-layout/layouts/jacket2/`: "Corners missing from layer 2". Seamly2D `data-turn-points` declares no turn point at either bend.
 
-| Block | Bend | Dense vertex turns | Reduced layer 1 |
-|---|---|---|---|
-| Detail (4) `piece_Detail_s240-12_M`, L1 pt 14 | 6.5° over 10 mm, after a straight run | 2.5°, 2.9°, 1.1° | 5.2° at pt 14; 0.6° and −0.5° beside it |
-| Detail (6) `piece_Detail_s240-14_M` | 40° within 2 mm | 7.1°, 8.9°, 16.3°, 8.1° | 45.4° at pt 6 |
-
-- A sharp corner fits each bend within the 0.25 mm curve tolerance. aw.fyi reads a corner; SeamlyLayout reads a curve.
-- No `astm_contour.rs` rule applies. Detail (4): 2.5° is not 2 × the next vertex's 2.9° (`TANGENT_BREAK_RATIO`). Detail (6): no straight run; `TURN_ANGLE_DEG` (25°) applies only to untagged input.
-- Detail (6) size 500 bends over 15 mm: a curve. A turn point at size 240 only makes the sizes differ, and grading fails (Layout.27.3).
-- [x] DXF.23.1 Detail (6): accept as a reader advisory (user decision)
-- [x] DXF.23.2 Detail (4): accept as a reader advisory; add it to the DXF.22.1 report (user decision)
-- No code change.
-
-## Task Layout.29 — Notch attributes: one value per notch, not per line segment (completed 2026-10-12)
+##  Layout.29 — Notch attributes: one value per notch, not per line segment
 
 Found in `TEST_CHECKLIST.md` §2: BackPanel `data-notch-type` holds 15 words for 2 notches (`slit` + 14 × `uNotch`). One word per notch (user decision: D1).
 
-- [x] Layout.29.1 Seamly2D: `VPiece::createNotchLines` returns one type and one width per notch node, and the line count of each notch
-- [x] Layout.29.2 `VLayoutPiece`: store per-notch types, widths and line counts. `createNotchesItem` writes `data-notch-type` and `data-seam-allowances` (one value per notch) and `data-notch-segments` (line count per notch, `d` order). Sum of `data-notch-segments` = `M` count in `d`
-- [x] Layout.29.3 SeamlyLayout `converter::notch_polylines`: spread each per-notch width over its segments with `data-notch-segments`. A list of the wrong length is ignored
-- [x] Layout.29.4 Tests: `TST_SvgComponentTags::NotchGroupCarriesNotchTypes`, `TST_VPiece::NotchTypesFollowNodes`, Rust `notch_polylines` with a 14-segment U-notch
-- [x] Layout.29.5 Docs: `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`, compliance doc "Notch rules", `TEST_CHECKLIST.md`
-- Verified: `local_build_msi.ps1` `nmake check` (MSI 26.10.1220); a second run of that build's `Seamly2DTests.exe`, 0 failed; `cargo test --workspace`, 472 passed.
-- Open: user re-check of `TEST_CHECKLIST.md` §2 `data-notch-type` line on MSI 26.10.1220. The captured `male_shirt_202610121755.svg` predates the fix
-
-## Task Layout.66 — Seamly2D producer attributes (completed 2026-10-11)
+##  Layout.66 — Seamly2D producer attributes 
 
 `data-material` moved to Seamly2D.7 / Layout.15.
 
@@ -242,46 +104,15 @@ Found in `TEST_CHECKLIST.md` §2: BackPanel `data-notch-type` holds 15 words for
 - Verified: `cargo test --workspace`, `ctest --preset debug`, `local_build_msi.ps1` (`nmake check`, MSI 26.10.1115).
 - Open question for the user: on-fold quantity `N,0`.
 
-## Task DXF.20 — Low-priority report advisories (completed 2026-10-10)
+## DXF.19 — Turn points only where the tangent breaks
 
-From the `male_shirt_R13_202610071908.dxf` report. Checked on the `male_shirt_R13_202610101837.dxf` report.
+## DXF.17 — Every notch is a slit, half the seam allowance long
 
-- [x] DXF.20.1 Yoke_M L14 pt 14: turn point mid straight edge. DXF.19 removed it; the 2026-10-10 report does not flag Yoke_M
-- [x] DXF.20.2 ShortSleeve_M L14 pt 31: still "maybe". No change: the sew line turns 18.9° there, between two straight segments (20.3 mm and 180.8 mm). Seamly2D tags it correctly
-- [x] DXF.20.3 FullSleeve_M slit end 0.21 mm from the cut-line turn point: left as is (user decision). Seamly2D geometry
+## Layout.65 — Notches reach the DXF
 
-## Task DXF.19 — Turn points only where the tangent breaks (completed 2026-10-10)
-
-aw.fyi report on `male_shirt_R13_202610071908.dxf` (folder `test-seamly-layout-input/male_shirt_R12_202610071908/`): DXF.15 and DXF.16 repeat. DXF.16 made every straight run end a turn point; a single straight segment did not count as a run.
-
-- [x] DXF.19.1 `astm_contour.rs` `straight_run_ends`: a line end is a turn point when its direction change > 2 × the next curve vertex's, and > 1°
-- [x] DXF.19.2 A single segment ≥ 20 mm is a line; a run with inner vertices needs ≥ 10 mm
-- [x] DXF.19.3 Closed loop split from its first known turn point
-- [x] DXF.19.4 Open contour ends are curve points (user decision); reverses `open_polyline_ends_are_turn_points`
-- [x] DXF.19.5 Tests: `open_polyline_ends_are_curve_points`, `line_ends_are_turn_points_where_the_tangent_breaks`, `single_segment_line_end_is_a_turn_point_only_where_the_tangent_breaks`; `writer_astm_test.rs` FrontPanel 16 turn points
-- [x] DXF.19.6 Compliance doc "Contour rules"
-- [x] DXF.19.7 User: re-export male_shirt DXF-ASTM (R13); run aw.fyi (DXF.8). Report on `male_shirt_R13_202610101837.dxf`: FullSleeve hem end and CollarBase points pass; open line ends follow in DXF.21; FrontPanel L1 junction in DXF.22
-- Checked on `male_shirt_202610071910.svg`: FrontPanel junction (71.10 / 71.35) now a turn point; FullSleeve hem end 345.88 / 345.77 now a curve point (252.5 stays a turn point, 1.9° vs 0.3°); L8/L11 ends curve points; one CollarBase and one CollarBaseInterface curve turn point removed; Yoke L14 mid-edge turn point removed. No other change.
-
-## Task DXF.17 — Every notch is a slit, half the seam allowance long (completed 2026-10-05)
-
-Report on `male_shirt_R13_202610041815.dxf`: layer 4 had 4 notches, layer 83 (U) had 3; depths 2.5 and 1.25 mm. The seam allowance is 10 mm.
-
-- [x] DXF.17.1 `astm_notch.rs`: write every notch as a slit on layer 4, whatever shape Seamly2D drew
-- [x] DXF.17.2 Slit depth = half the piece's seam allowance width (user decision, 2026-10-04)
-  - Seamly2D sends no width. `seam_allowance_at`: distance from the notch base to the nearest sew line, per notch. No cut line or no sew line: drawn depth.
-  - User decision: keep each edge's seam allowance as Seamly2D defines it. A piece-wide median was replaced.
-- [x] DXF.17.3 Tests: `astm_piece_test.rs` `every_notch_shape_is_a_layer_4_slit_half_the_seam_allowance_deep`, `slit_depth_follows_the_seam_allowance_of_its_edge`, `slit_keeps_drawn_depth_without_sew_line`, `seam_allowance_at_is_cut_line_to_nearest_sew_line`
-- [x] DXF.17.4 Update the compliance doc "Notch rules"
-- Checked on `test-seamly-layout-input/male_shirt_202610050911.svg`: 7 notches, all slits, depth 5.00 mm.
-
-## Task Layout.65 — Notches reach the DXF (completed 2026-10-05)
-
-- Seamly2D wrote empty notch paths (`M x,y Z`) to the handoff SVG. Fixed by Seamly2D.6.
-- Seamly2D builds notch shapes from a notch type template (slit, T, U, V, castle, diamond). The handoff carries the drawn shape.
 - DXF writes every notch as a slit, half the seam allowance width deep (DXF.17).
 
-## Task Seamly2D.6 — Piece Mode draws cutline notches on the seamline (completed 2026-10-05)
+## Seamly2D.6 — Piece Mode draws cutline notches on the seamline (completed 2026-10-05)
 
 Pattern settings and the piece node context menu say "notch on cutline". The canvas draws the notch on the seamline.
 
@@ -304,7 +135,7 @@ User decision (2026-10-04): fix on `run-seamlyLayout`, not upstream first. The u
   - Fix: `vlayoutpiece.cpp` passes the seam allowance points, as the canvas does.
   - Test: `TST_VPiece::LayoutNotchesMatchCanvas` (diamond notch, concave corner).
 
-## Task DXF.16 — Straight runs between curves end in turn points (completed 2026-10-05)
+##  DXF.16 — Straight runs between curves end in turn points (completed 2026-10-05)
 
 aw.fyi departure on `male_shirt_R13_202610041815.dxf`: FullSleeve_M, 10 of 80 declared points miscategorized, on a straight segment. The hem has a straight run with pleat vertices between two curves. Seamly2D tags no turn point there: the tangent breaks are under 5°.
 
@@ -313,14 +144,14 @@ aw.fyi departure on `male_shirt_R13_202610041815.dxf`: FullSleeve_M, 10 of 80 de
 - [x] DXF.16.3 Tests: `astm_piece_test.rs` `straight_run_ends_are_turn_points_with_tags`, `vertex_inserted_on_a_curve_segment_is_not_a_straight_run`
 - Checked on the report file's layers 84/87: new turn points at the FullSleeve hem run ends (both lines), the FrontPanel top junction (DXF.15), BackPanel hem start, one CollarBase and one CollarBaseInterface point.
 
-## Task DXF.15 — Line-to-curve junction is a turn point (completed 2026-10-05)
+##  DXF.15 — Line-to-curve junction is a turn point (completed 2026-10-05)
 
 aw.fyi departure on `male_shirt_R13_202610041815.dxf`: FrontPanel_M, layer 2 misses 1 of 14 corners. The top edge runs straight from the corner, through one vertex, then turns into a curve at about 3°. Seamly2D tags it only above 5°.
 
 - [x] DXF.15.1 Same rule as DXF.16: the straight run's far end is a turn point (`astm_contour.rs` `straight_run_ends`)
 - [x] DXF.15.2 Test: `straight_run_ends_are_turn_points_with_tags` (top edge)
 
-## Task DXF.14 — Every real value has 2 decimals (completed 2026-10-03)
+##  DXF.14 — Every real value has 2 decimals (completed 2026-10-03)
 
 aw.fyi finding "Coordinates not full precision" on the R13 export. The R13 upgrade wrote fixed values with 1 decimal: POLYLINE dummy point, VPORT, LTYPE, STYLE and layout BLOCK base points (`0.0`, `1.0`, `10.0`, `1.5`, `50.0`, `2.5`). R12 output already had 2 decimals.
 
@@ -329,7 +160,7 @@ aw.fyi finding "Coordinates not full precision" on the R13 export. The R13 upgra
 - [x] DXF.14.3 Update the compliance doc "Units" row
 - Decision (user): 2-decimal precision.
 
-## Task DXF.13 — No `Category:` piece text (completed 2026-10-03)
+##  DXF.13 — No `Category:` piece text (completed 2026-10-03)
 
 aw.fyi report on `male_shirt_202610032115.dxf`: `Category` is an ANSI/AAMA-292 identifier, not defined by D6673.
 
@@ -339,7 +170,7 @@ aw.fyi report on `male_shirt_202610032115.dxf`: `Category` is an ANSI/AAMA-292 i
 - Decision (user): `Category:` is DXF-AAMA only; not valid in any DXF-ASTM format. Reverses DXF.7.6.
 - Piece text order: `Piece Name:`, `Size Name:`, `Quantity:`, `Material:`.
 
-## Task DXF.12 — Piece text `Size Name:`, not `Size:` (completed 2026-10-03)
+##  DXF.12 — Piece text `Size Name:`, not `Size:` (completed 2026-10-03)
 
 aw.fyi report on `male_shirt_202610032115.dxf`: `Size` is the AAMA-292 identifier; D6673-01 renamed it `Size Name`.
 
@@ -348,7 +179,7 @@ aw.fyi report on `male_shirt_202610032115.dxf`: `Size` is the AAMA-292 identifie
 - [x] DXF.12.3 Docs: compliance doc, `SVG-DATA-ATTRIBUTES.md`, `seamlylayout_DXF_ASTM_D6673_MATERIAL.md`
 - Decision (user): `Size Name:`. `Category:` is unchanged.
 
-## Task DXF.11 — Key points pass a chord-length reader spline (completed 2026-10-03)
+##  DXF.11 — Key points pass a chord-length reader spline (completed 2026-10-03)
 
 aw.fyi report on `male_shirt_202610032115.dxf`: CollarTopInterface_M layer 84 off by 0.8469, CollarTop_M layer 87 off by 0.8423; limit 0.5. Same span on both: the collar seam line leaves its corner in a tight hook, with chords of 2.15, 15.5, 55.8 and 112 mm. Our centripetal stand-in measured 0.17 mm. A chord-length cubic measured 0.82–0.90 mm. aw.fyi's spline method is still unknown.
 
@@ -360,7 +191,7 @@ aw.fyi report on `male_shirt_202610032115.dxf`: CollarTopInterface_M layer 84 of
 - male_shirt fixture curve points: 278 → 311. Natural chord-length cubic, worst span: 1.07 → 0.31 mm. Collar spans: 0.91 → 0.30 mm.
 - Not re-validated on aw.fyi yet (DXF.8).
 
-## Task Layout.19 — DXF-ASTM (CLO3D) export name has `_CLO3D`; CLO3D writes R13 (completed 2026-10-03)
+##  Layout.19 — DXF-ASTM (CLO3D) export name has `_CLO3D`; CLO3D writes R13 (completed 2026-10-03)
 
 - [x] Layout.19.1 `Main.qml` `chooseDxfPath`: CLO3D puts `_CLO3D` before the timestamp. Example: `male_shirt_CLO3D_202610031234.dxf`
 - [x] Layout.19.2 Uppercase `CLO3D`
@@ -370,7 +201,7 @@ aw.fyi report on `male_shirt_202610032115.dxf`: CollarTopInterface_M layer 84 of
 - [x] Layout.19.6 Test: `default_export_file_name_places_segment_before_stamp` covers `CLO3D`
 - Decision (user): DXF-ASTM (CLO3D) writes R13 (`AC1012`), not R12, so it is D6673-10 compliant. CLO3D name has no version segment: it is always R13.
 
-## Task DXF.10 — DXF-ASTM export name shows the DXF version (completed 2026-10-03)
+##  DXF.10 — DXF-ASTM export name shows the DXF version (completed 2026-10-03)
 
 The R12 and R13 exports had the same default name. The user could not tell the files apart.
 
@@ -380,7 +211,7 @@ The R12 and R13 exports had the same default name. The user could not tell the f
 - [x] DXF.10.4 Test: `default_export_file_name_places_segment_before_stamp`
 - Decisions: CLO3D gets no version segment; Layout.19 gives it `_CLO3D`. Segment case follows the menu text (`R12`, `R13`).
 
-## Task DXF.7 — Category, Material, Size piece text (completed 2026-10-03)
+##  DXF.7 — Category, Material, Size piece text (completed 2026-10-03)
 
 The D6673 report showed blank Category, Material and Size columns.
 
@@ -398,7 +229,7 @@ The D6673 report showed blank Category, Material and Size columns.
 - Layout.15.4 replaces `Fabric` with the piece `data-material`.
 - Not checked in the running app.
 
-## Task DXF.6 — Style Name is the input file base name (completed 2026-10-03)
+##  DXF.6 — Style Name is the input file base name (completed 2026-10-03)
 
 Today `cxxqt_bridge/src/exports.rs` sets `style_name` from the output path stem (`male_shirt_202610031234`). User decision: use the base name of the input file (`male_shirt`).
 
@@ -412,7 +243,7 @@ Today `cxxqt_bridge/src/exports.rs` sets `style_name` from the output path stem 
 - Tests: `exports.rs` `dxf_style_name_is_imported_file_base_name`, `dxf_style_name_is_document_name`, `dxf_style_name_without_input_name_is_output_stem`, `dxf_style_name_without_input_name_keeps_pattern_name`.
 - Not checked in the running app.
 
-## Task DXF.5 — Warn about pieces with no Quantity, label, or grainline (completed 2026-10-03)
+##  DXF.5 — Warn about pieces with no Quantity, label, or grainline (completed 2026-10-03)
 
 A piece with no `Cut N` label gets no `Quantity:`, and a piece with no grainline gets no layer 7. Both make the DXF less usable in downstream CAD.
 
@@ -425,7 +256,7 @@ A piece with no `Cut N` label gets no `Quantity:`, and a piece with no grainline
 - Tests: `astm_piece_test.rs` `missing_piece_data_names_incomplete_pieces`, `label_without_cut_line_misses_quantity_only`; `exports.rs` `dxf_missing_piece_data_names_male_shirt_interface_pieces`, `missing_piece_data_text_is_empty_when_complete`.
 - No QML test harness exists. The dialog shows the Rust text unchanged; the male_shirt test pins that text. Dialog not yet checked in the running app.
 
-## Task DXF.4 — Fewer curve points where a spline needs fewer (completed 2026-10-03)
+##  DXF.4 — Fewer curve points where a spline needs fewer (completed 2026-10-03)
 
 Re-checked on the fixture after DXF.2: Yoke_M layer 14 still had 14 curve points. `astm_contour::prune_to_spline` now drops each curve point the spline does not need; the least-needed point goes first.
 
@@ -436,7 +267,7 @@ Re-checked on the fixture after DXF.2: Yoke_M layer 14 still had 14 curve points
 - Tests: `astm_piece_test.rs` `unneeded_curve_points_are_dropped`; `writer_astm_test.rs` `male_shirt_curves_carry_only_needed_curve_points`.
 - Not re-validated on aw.fyi yet (DXF.8).
 
-## Task DXF.2 — Reconstructed curves stay within tolerance (completed 2026-10-03)
+##  DXF.2 — Reconstructed curves stay within tolerance (completed 2026-10-03)
 
 Stand-in spline: centripetal Catmull-Rom. With Douglas–Peucker alone, the sleeves were 0.40 mm off on layers 84 and 87; after, all male_shirt contours are within 0.24 mm.
 
@@ -446,14 +277,14 @@ Stand-in spline: centripetal Catmull-Rom. With Douglas–Peucker alone, the slee
 - [x] DXF.2.4 Rust test: every contour in the male_shirt fixture is within `CURVE_TOLERANCE_MM` on layers 84–87. User decision: the limit is 0.25 mm, not 2×
 - [x] DXF.2.5 Update the compliance doc
 
-## Task DXF.9 — `Author:` is `vendor;application;release #` (completed 2026-10-03)
+##  DXF.9 — `Author:` is `vendor;application;release #` (completed 2026-10-03)
 
 D6673 §4.3.1.1 needs three `;`-separated fields. `Seamly2D 26.10.314` failed the aw.fyi check. User decision: `Seamly;Seamly2D;<suite version>`.
 
 - [x] DXF.9.1 `ezdxf2dxfastm/src/writer.rs`: write `Author:Seamly;Seamly2D;<release>`
 - [x] DXF.9.2 `writer_astm_test.rs`: expect `Author:Seamly;Seamly2D;1.2.3`
 
-## Task DXF.1 — Seamly2D marks turn points in the handoff SVG (completed 2026-10-03)
+##  DXF.1 — Seamly2D marks turn points in the handoff SVG (completed 2026-10-03)
 
 Cause: `astm_contour.rs` `is_straight_chord` treats one long interpolated segment inside a flat curve as a straight line, so both ends become turn points. Example: FrontPanel hem vertices bend 1–2° but are on layer 2. Geometry cannot tell a coarse curve segment from a real line. Seamly2D knows the node types, so it sends them (user decision: producer tags, not a heuristic).
 
@@ -474,7 +305,7 @@ Cause: `astm_contour.rs` `is_straight_chord` treats one long interpolated segmen
 - Tests: `TST_VAbstractPiece::TurnPointIndices`, `EquidistantReportsNodeVertices`, `TST_SvgComponentTags::PathComponentsCarryTurnPoints`, `UnknownTurnPointsEmitNoAttribute`; Rust `astm_piece_test.rs`, `writer_astm_test.rs`.
 - Not re-validated on aw.fyi yet (DXF.8).
 
-## Task Layout.6 — Export stubs for paid export modules (completed 2026-09-27)
+##  Layout.6 — Export stubs for paid export modules (completed 2026-09-27)
 
 Hidden Export-menu items and a no-op Rust path for two paid formats.
 
@@ -486,7 +317,7 @@ Hidden Export-menu items and a no-op Rust path for two paid formats.
 - To ship a module: replace the gate body with the module or license check, then the stub bodies.
 - Tests: 3 new in `exports.rs`. `cargo test --workspace` and `ctest --preset debug` passed.
 
-## Task — New pattern pieces read Preferences > Pattern defaults (completed 2026-09-26)
+##  — New pattern pieces read Preferences > Pattern defaults (completed 2026-09-26)
 
 User report: new pieces from Add New Pattern Piece got no usable labels.
 
@@ -500,7 +331,7 @@ User report: new pieces from Add New Pattern Piece got no usable labels.
 - Removed label/grainline `qDebug()` trace lines from `pattern_piece_tool.cpp`.
 - Tests: `TST_VPiece` (grainline fit, template fallback), `TST_DataRoot` (seeding, no overwrite).
 
-## Task — MSI finds running Seamly apps at wizard start (completed 2026-09-23)
+##  — MSI finds running Seamly apps at wizard start (completed 2026-09-23)
 
 User report: "Validating install" paused a long time before "Seamly apps are running" appeared.
 
@@ -513,19 +344,19 @@ User report: "Validating install" paused a long time before "Seamly apps are run
 - Tests: `smsi_check_authoring.ps1` section 12; new `installer_running_apps_test.ps1` runs both actions in the built MSI against a stand-in `seamlyme.exe`.
 - Verified on screen 2026-09-23 by the user: the page appears at once; Retry, Close Apps and Cancel work.
 
-## Task — SeamlyLayout piece bbox/outline filter matched real Seamly2D group ids (completed 2026-09-21)
+##  — SeamlyLayout piece bbox/outline filter matched real Seamly2D group ids (completed 2026-09-21)
 
 User report: packed pieces were placed in boxes bigger than the piece itself, on straight-edge and curved-edge pieces alike. Root cause: `piece_extractor::is_non_outline_group` and `polygon_pack::svg_extract::is_non_outline_group` (the filters that keep notch/tuck/grainline/internal_path/drill/hole decoration out of a piece's packing box and out of cutline/outline candidacy) matched by `id` prefix only (`starts_with("notch")`, etc.). Real Seamly2D tagged exports namespace every sibling id with the piece's own id (`piece-3-notch-1`), which never starts with the bare word, so the filter never matched anything on real files — only on hand-written test fixtures using bare ids. A stray notch point (or other decoration geometry) far outside the cutline dragged the whole piece's bounding box out with it, confirmed on `richmond-shirt-handoff_pieces.svg` (packed boxes up to ~10x the true cutline size on 7 of 12 real pieces).
 
 Both filters now check the `data-type` attribute (`notch`, `tuck`, `grainline`, `internal_path`, `drill`, `hole`) first, falling back to the existing id-prefix check for older exports and hand-built fixtures. Two new regression tests pin the real id format: `piece_extractor::tests::real_id_format_notch_and_internal_path_not_inflated` and `svg_extract::tests::find_outline_group_skips_notch_with_real_id_namespacing`. Merged into `run-seamlyLayout` (`627d53d921`).
 
-## Task — Seamly2D tagged component groups renamed to name-based ids (completed 2026-09-21)
+##  — Seamly2D tagged component groups renamed to name-based ids (completed 2026-09-21)
 
 Grainline (and every other tagged component group) is now identifiable by piece name — e.g. `id="grainline_Sleeve"` — instead of the counter-based `piece-1-grainline-1`. `SvgGenerator::addComponentGroups()` (`src/libs/vformat/svg_generator.cpp`) builds `<type>_<pieceName>` for components that occur once per piece (seamline, cutline, grainline, notch) and `<type>_<n>_<pieceName>` for components that can repeat (internal_path, cut_path, piece_label, pattern_label). The piece name is sanitized to a valid XML id (invalid characters become `_`, a leading digit gets a `_` prefix); a piece with no usable name falls back to the legacy `<pieceId>-<type>-<n>` id, which stays unique by construction; two pieces sharing a (sanitized) name get the later one's id suffixed with its piece `data-type-number` to stay unique. `data-type` and `data-type-number` are unchanged; a component's `data-parent` now holds the piece's name instead of its numeric id (confirmed unread by any SeamlyLayout production code — documentation-level only). Piece- and pattern-level ids (`piece-<n>`, `pattern-1`) are deliberately unchanged — a prior version of this contract used the raw piece name as the piece id and had to revert it, because piece names aren't guaranteed unique.
 
 Covered by `TST_SvgComponentTags` (`src/test/Seamly2DTest/tst_svgcomponenttags.cpp`): the existing cut_path/internal_path id assertions updated to the new scheme, plus new coverage for the singleton-type id shape, name sanitization vs. the raw `data-parent`, the no-name fallback, and the cross-piece collision suffix. `project-docs/data-docs/SVG-DATA-ATTRIBUTES.md` and `NEW-ATTRIBUTES.csv` updated to match. No SeamlyLayout-side change was needed: `is_non_outline_group()` in both `piece_extractor.rs` and `svg_extract.rs` already matches decoration groups by `data-type` first (see the task above), so it recognizes the new ids without modification.
 
-## Task MSI1b.1 — installer dialogs logged Error 2826: controls overflowed their dialog (completed 2026-09-02)
+##  MSI1b.1 — installer dialogs logged Error 2826: controls overflowed their dialog (completed 2026-09-02)
 
 Found while walking `project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, step 1b. A `/l*v` wizard install of build 26.9.2.996 wrote exactly 15 `Error 2826` lines, every one "to the right by 7 pixels". Cosmetic — the install completed and every verified result was correct — but it was noise in every install log, and noise hides the next real failure.
 
@@ -540,7 +371,7 @@ Found while walking `project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, step 1b. 
 
 `project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md` step 1b was rewritten at the same time. It specified `msiexec /i seamly-x64.msi /quiet /norestart`, and a silent install builds no dialogs, so the step it belongs to could never have found this defect. It now runs the wizard with `/l*v` and gains 1b-i, 1b-ii and 1b-iii.
 
-## Task Layout.10 — SeamlyLayout logs moved to `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs` (completed 2026-09-02)
+##  Layout.10 — SeamlyLayout logs moved to `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs` (completed 2026-09-02)
 
 Found during MSI Test Case verification (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, step B.3). SeamlyLayout wrote its session log to `%LOCALAPPDATA%\SeamlyLayout\output\log_<timestamp>.txt` — outside the shared `Seamly` organization folder that holds `qt6_seamlylayout.ini`, and under a directory named `output` rather than `logs`. Seamly2D's pattern is `%LOCALAPPDATA%\Seamly\Seamly2D\logs`.
 
@@ -556,7 +387,7 @@ Two independent causes, both fixed:
 
 New Qt suite `src/test/SeamlyLayoutTest/LoggerTests.cpp` with its own CMake target locks the path: it asserts the `logs` leaf, the organization and application segments, the absence of an `output` segment, the `log_YYMMDDHHMMSS.txt` name, and the startup clean-up. It runs under `QStandardPaths::setTestModeEnabled(true)`, so it never touches the real user configuration. 7 checks, all passing.
 
-## Task Layout.7 and Task SeamlyMe.3 — desktop-shortcut flags moved to their own registry keys (completed 2026-09-02)
+##  Layout.7 and  SeamlyMe.3 — desktop-shortcut flags moved to their own registry keys (completed 2026-09-02)
 
 Found during MSI Test Case verification (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, step B.1c). `smsi_shortcuts.wxs` wrote all three `DesktopShortcut*` values into `HKLM\SOFTWARE\Seamly\Seamly2D`, so a reader could not tell which app a shortcut belonged to. Fixed together, because it was one defect in one file.
 
@@ -564,7 +395,7 @@ Found during MSI Test Case verification (`project-docs/TEST_MSI_WIN_X64_Test_Cas
 - [x] Layout.7.2 / SeamlyMe.3.2 Neither check script asserted the old key, so neither broke. `smsi_check_authoring.ps1` had no assertion at all on these values — which is why the defect survived every earlier pass — and gained three, one per app. `local_install_msi.ps1` read all three breadcrumbs out of the Seamly2D key and never checked SeamlyLayout; it now reads each from its own key and covers all three.
 - [x] Layout.7.3 / SeamlyMe.3.3 Verified 2026-09-02 on build 26.9.2.996. After a fresh wizard install each key carries exactly its own flag: `Seamly2D\DesktopShortcutSeamly2D`, `SeamlyMe\DesktopShortcutSeamlyMe`, `SeamlyLayout\DesktopShortcutSeamlyLayout`, all `1`. All three desktop shortcuts exist with correct targets.
 
-## Task SeamlyMe.5 — write SeamlyMe log files to `%LOCALAPPDATA%\Seamly\SeamlyMe\logs` (completed 2026-09-02)
+##  SeamlyMe.5 — write SeamlyMe log files to `%LOCALAPPDATA%\Seamly\SeamlyMe\logs` (completed 2026-09-02)
 
 Found during MSI Test Case verification, step B.2b-v (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, 2026-09-01). SeamlyMe writes no log files and creates no logs directory — `ApplicationME` has no equivalent of `Application2D::logDirPath()`/`beginLogging()` (`src/app/seamly2d/core/application_2d.cpp:605`). Seamly2D writes to `%LOCALAPPDATA%\Seamly\Seamly2D\logs`; SeamlyMe must mirror that pattern.
 
@@ -572,7 +403,7 @@ Found during MSI Test Case verification, step B.2b-v (`project-docs/TEST_MSI_WIN
 - [x] SeamlyMe.5.2 Verified 2026-09-02 on build 26.9.2.664, Test Case 1b-i step B.2b-v. A fresh `/quiet` install then a SeamlyMe run from Seamly2D created `%LOCALAPPDATA%\Seamly\SeamlyMe\logs\seamlyme-pid30712.log` (2417 bytes). The log opens with the `ApplicationME::initOptions()` version, build-revision, Qt, command-line and pid lines, matching the Seamly2D format.
 - [x] SeamlyMe.5.3 Doxygen briefs on `logDirPath()`/`logFile()`; inline comments at the handler write and `initOptions()` ordering
 
-## Task Seamly2D.2 — Fix File Open dialog default directory (completed 2026-09-01)
+##  Seamly2D.2 — Fix File Open dialog default directory (completed 2026-09-01)
 
 Found during MSI Test Case 1 (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`,
 steps 7a-ii and 7a-v).
@@ -598,7 +429,7 @@ File Open now opens in `%DATAROOT%\patterns`). 2.2 confirmed by code trace,
 a live run at the time of the fix, and the 26.9.1.778 human walkthrough
 (B.2b-i..iv, all three SeamlyMe dialogs opened in their correct folders).
 
-## Task Seamly2D.3 — Restore Piece Mode focus after closing SeamlyLayout (completed 2026-09-01)
+##  Seamly2D.3 — Restore Piece Mode focus after closing SeamlyLayout (completed 2026-09-01)
 
 Found during MSI Test Case 1, step 7b-iv: closing SeamlyLayout returned focus
 to Seamly2D's Layout Mode, not the mode active before SeamlyLayout launched.
@@ -615,29 +446,29 @@ to Seamly2D's Layout Mode, not the mode active before SeamlyLayout launched.
   child — deleting it there would take SeamlyLayout down solely because
   Seamly2D closed first.
 
-## Task SettingsFiles.7 — getDefaultDataRoot() leaf aligned to SeamlyData (completed 2026-09-01)
+##  SettingsFiles.7 — getDefaultDataRoot() leaf aligned to SeamlyData (completed 2026-09-01)
 
 **Superseded 2026-09-15 by `Installer.6`** (`project-docs/TODO_INSTALLER.md`): user
 feedback asked to keep the data directory at `C:\Users\<user>\seamly2d`, so
 `getDefaultDataRoot()` reverted to that fixed path on every platform, and the
 `Documents\SeamlyData` design this task built is gone. Left as history below.
 
-`VCommonSettings::getDefaultDataRoot()` returned `<Documents>/Seamly` (Task 60), but the
+`VCommonSettings::getDefaultDataRoot()` returned `<Documents>/Seamly` ( 60), but the
 MSI's default `SEAMLYDATAROOT` is `<Documents>\SeamlyData` (`smsi.wxs`) and SeamlyLayout's
-no-installer fallback is `<Documents>/SeamlyData` (Task Layout.11). A no-installer run of
+no-installer fallback is `<Documents>/SeamlyData` ( Layout.11). A no-installer run of
 Seamly2D/SeamlyMe therefore used a different root than the installer and SeamlyLayout.
 
 - 7.1 Leaf changed `Seamly` → `SeamlyData` (`vcommonsettings.cpp`); doc comment records
-  the new decision and supersedes Task 60's "Data is redundant" reasoning.
+  the new decision and supersedes  60's "Data is redundant" reasoning.
 - 7.2 New `VCommonSettings::getLegacyDocumentsDataRoot()` returns `<Documents>/Seamly`.
   `chooseFirstRunDataRoot()` now takes a `QStringList` of legacy roots, probed newest
   first: `<Documents>/Seamly`, then `~/seamly2d`. An adopted tree is migrated to the
-  current default by the existing Task 60 flow — the apps now pass the resolved root
+  current default by the existing  60 flow — the apps now pass the resolved root
   (not hardcoded `getLegacyDataRoot()`) to `LegacyDataMigration::run()`, and prune both
   legacy skeletons.
 - 7.3 `TST_DataRoot` updated: default pinned to `<Documents>/SeamlyData`
   (`DefaultDataRootIsSeamlyDataUnderDocuments`), new
-  `LegacyDocumentsDataRootIsTheTask60Folder` and `FirstRunPrefersTheNewestLegacyRoot`
+  `LegacyDocumentsDataRootIsThe60Folder` and `FirstRunPrefersTheNewestLegacyRoot`
   cases, list-signature updates throughout.
 - 7.4 Swept remaining `<Documents>/Seamly` references: `.github/README-BUILDS.md`
   (default row, naming lineage, first-run cases, prune paragraph, testing note),
@@ -650,7 +481,7 @@ Verified 2026-09-01: full local qmake/nmake release build in `build/qmake-test`;
 `Seamly2DTests.exe` all 25 suites pass — `TST_DataRoot` 50 passed / 0 failed / 1
 pre-existing skip. Live MSI re-verification happens in the next Test Case 1b-i loop pass.
 
-## Task SettingsFiles.4 — migration custom actions no longer mangle their path arguments (completed 2026-09-01)
+##  SettingsFiles.4 — migration custom actions no longer mangle their path arguments (completed 2026-09-01)
 
 Found 2026-08-31 while verifying SettingsFiles.3. `SEAMLYDATAROOT` and `INSTALLFOLDER`
 resolve with a trailing backslash; PowerShell's command-line parser reads
@@ -672,10 +503,10 @@ the same defect; its fix (SettingsFiles.3) set the idiom.
   repointed, old root untouched. Test case B (pre-SeamlyLayout old version) cannot run
   on this machine (no legacy install exists); the Old-mode command line uses the
   identical idiom and the same script parsing, covered by the padded-argument test.
-- Side observation, filed as Task Installer.5 (`TODO_INSTALLER.md`): the recorded
+- Side observation, filed as  Installer.5 (`TODO_INSTALLER.md`): the recorded
   `DataParent` stayed `<Documents>\` instead of the explicit `SEAMLYDATAPARENT`.
 
-## Task SettingsFiles.6 — SeamlyLayout now creates preferences\default_preferences.json (completed 2026-09-01)
+##  SettingsFiles.6 — SeamlyLayout now creates preferences\default_preferences.json (completed 2026-09-01)
 
 Found by MSI Test Case 1b-i item B.0a: after a fresh install and a first SeamlyLayout
 run, `settings\default_settings.json` existed but `preferences\default_preferences.json`
@@ -698,7 +529,7 @@ deprecated first-run seeding, which was the only path that wrote the profile.
   SeamlyData/app-config paths. B.0a's remaining misses are Layout.10 (`logs`) and
   SeamlyMe.5 only.
 
-## Task Seamly2D.2 — First run seeds the patterns folder from the bundled samples (completed 2026-08-28)
+##  Seamly2D.2 — First run seeds the patterns folder from the bundled samples (completed 2026-08-28)
 
 MSI Test Case 1b-i step 6a-i found that `%PROGRAMDIR%\samples\patterns\*.sm2d` cannot be
 opened and saved back in place: a standard user has no write access to the Program Files
@@ -722,14 +553,14 @@ editable starting point.
 
 **Scope:** Seamly2D only — the report was about `.sm2d` pattern files specifically. SeamlyMe's
 sample measurements/templates were a separate concern at the time, not covered here — see
-Task Seamly2D.3 below, which closes that gap.
+ Seamly2D.3 below, which closes that gap.
 
 **Verification:** no local build or test script exists for Seamly2D (see `README-BUILDS.md`);
 `ci.yml` builds and runs `Seamly2DTest` on push.
 
-## Task Seamly2D.3 — Seed sample measurement files too (completed 2026-08-28)
+##  Seamly2D.3 — Seed sample measurement files too (completed 2026-08-28)
 
-Follow-up to Task Seamly2D.2. MSI Test Case 1b-i step 3e found that
+Follow-up to  Seamly2D.2. MSI Test Case 1b-i step 3e found that
 `%DATADIR%\measurements\individual\male_chest_102cm.smis` was still missing after a fresh
 install and first run: `SeedSamplePatterns()` copies only `.sm2d` patterns, and no equivalent
 existed for measurement files, even though the bundled sample is present at
@@ -760,7 +591,7 @@ constraint as Seamly2D.2: a standard user cannot save back into Program Files.
 **Verification:** no local build or test script exists for Seamly2D (see `README-BUILDS.md`);
 `ci.yml` builds and runs `Seamly2DTest` on push. Not run locally this session.
 
-## Task InstWinX64.0 — Verify the baseline x64 MSI build (completed 2026-08-12)
+##  InstWinX64.0 — Verify the baseline x64 MSI build (completed 2026-08-12)
 
 The gate on every other Windows x64 installer task: prove the MSI builds in CI
 before changing what it contains.
@@ -784,13 +615,13 @@ Known non-blocking warnings, both expected and still expected:
 - `WIX1076 / ICE61`: a consequence of `AllowSameVersionUpgrades="yes"`.
 - `windeployqt`: the unused `qtposition_nmea.dll` lacks `Qt6SerialPort.dll`.
 
-## Task 59 — SeamlyLayout packed the whole pattern as one piece: the handoff nests every piece inside `<g data-type="pattern">` (completed 2026-07-27)
+##  59 — SeamlyLayout packed the whole pattern as one piece: the handoff nests every piece inside `<g data-type="pattern">` (completed 2026-07-27)
 
-Task 49 made the handoff *open*; this makes it *lay out*. The tagged SVG `SvgGenerator` writes wraps all 12 pieces in a single `<g id="pattern-1" data-type="pattern">`, but `piece_extractor::extract_piece_rects()` treated each **direct child `<g>` of the SVG root** as one piece. The packer was therefore handed one object the size of the whole sheet and placed nothing — `0 placements, 1 unplaced: ["pattern-1"]` — and the failure was reported to the user as the meaningless id `pattern-1`.
+ 49 made the handoff *open*; this makes it *lay out*. The tagged SVG `SvgGenerator` writes wraps all 12 pieces in a single `<g id="pattern-1" data-type="pattern">`, but `piece_extractor::extract_piece_rects()` treated each **direct child `<g>` of the SVG root** as one piece. The packer was therefore handed one object the size of the whole sheet and placed nothing — `0 placements, 1 unplaced: ["pattern-1"]` — and the failure was reported to the user as the meaningless id `pattern-1`.
 
 **The fix normalises the document once instead of teaching eight call sites a new tree shape.** `extract_piece_rects` is not the only consumer of the flat "one piece per top-level `<g>`" assumption: `extract_piece_rects_and_polygons`, `layout_assembler::create_layout`, `oversized::build_oversized_svg`, `remaining::build_sheet_doc` and `sheets::build_sheet_export_inputs` all resolve a piece back to its element through `PieceRect::group_index` — an index into the root's `<g>` children — and `svg_dom::verticalize_dom` / `svg_dom::translate_dom` iterate `doc.root.children` directly, so with a wrapper in place they would have verticalized and translated *the pattern* as a single piece. Re-parenting the tagged pieces to the root fixes every one of those stages at once and leaves their code untouched.
 
-- [X] **Piece discovery follows the contract.** New `piece_extractor::hoist_tagged_pieces(doc)` lifts every `data-type="piece"` element to the SVG root, and both extractors then select only tagged groups when the document carries any tagging, falling back to the historical "every top-level `<g>`" rule for untagged drawings — which SeamlyLayout deliberately still opens (the Task 49 `import_warning` path). The tagged/untagged decision searches the **whole tree**, not just the root's children: a handoff that ever reached extraction un-hoisted now yields zero pieces and a visible "No pattern pieces found" error, instead of silently packing the wrapper as one blob
+- [X] **Piece discovery follows the contract.** New `piece_extractor::hoist_tagged_pieces(doc)` lifts every `data-type="piece"` element to the SVG root, and both extractors then select only tagged groups when the document carries any tagging, falling back to the historical "every top-level `<g>`" rule for untagged drawings — which SeamlyLayout deliberately still opens (the  49 `import_warning` path). The tagged/untagged decision searches the **whole tree**, not just the root's children: a handoff that ever reached extraction un-hoisted now yields zero pieces and a visible "No pattern pieces found" error, instead of silently packing the wrapper as one blob
 - [X] **Every consumer of the top-level-`<g>` shape checked.** None needed changing, because the hoist runs before them and `group_index` therefore stays a valid index into the root's `<g>` children. `g_idx` is still incremented for *every* top-level `<g>` including skipped ones, so a wrapper that survives the hoist (see below) shifts no index. Pinned by `group_index_indexes_root_groups_after_hoist`, which resolves each `PieceRect` back to its element and asserts the ids match
 - [X] **The pattern wrapper is re-parented, not double-transformed.** Each hoisted piece inherits the concatenation of its former ancestors' `transform` attributes, prepended to its own (`"<ancestor> <own>"`, the order SVG applied when nested). A wrapper left with no element children is dropped; one that still holds content (a legend, a title group) is kept but can no longer pack, because in tagged mode only `data-type="piece"` counts. Seamly2D writes no transform on the pattern group today — the composition is defensive, and pinned by a test, because a silently moved piece would be very expensive to find later
 - [X] **Piece identity reaches the output.** `PieceRect` gained `name` (`data-name`) and `letter` (`data-letter`) beside `id`, plus `label()` resolving `data-name` → `data-letter` → `id`. `label()` now supplies the unplaced-piece warning and the three `PackError` messages, so a user reads "Front Bodice" rather than `piece-7`; `name`, `letter` and `label` were added to both piece bbox JSON builders, and `AdjustScene::loadLayout` passes the label to the new `PieceOverlayItem::setDisplayLabel()` so the piece context menu shows it. `id` remains the identity key everywhere — the display label is never used for lookup. The attributes reach the layout SVG for free: `create_layout` clones the whole piece `<g>`
@@ -799,9 +630,9 @@ Task 49 made the handoff *open*; this makes it *lay out*. The tagged SVG `SvgGen
 - [X] **End-to-end, as a permanent test rather than a one-off run.** The genuine exporter output — `seamly2d.exe input/richmond-shirt_v1_v061-test.sm2d -b handoff -d <dir> -f 0 --exportOnlyDetails`, 12 `data-type="piece"` groups — is committed as `src/app/seamlylayout/crates/cxxqt_bridge/test_data/richmond-shirt-handoff_pieces.svg` — deliberately beside its test rather than in the app's `input/` directory, because `include_str!` makes it a *compile-time* dependency that must be tracked unconditionally, while `input/` is tracked only until development is complete — and driven through `do_initialize_layout` + `do_process_layout` (the exact `ProcessLayoutArgs` the QML `process_layout` wrapper builds) by `richmond_shirt_handoff_packs_twelve_individual_pieces`. It asserts 12 placements, zero unplaced, 12 *distinct* slot positions, that piece names ("Front", "Back") reach the layout, and that `pattern-1` never appears as a placed piece. **Confirmed load-bearing:** with the hoist call disabled the test fails
 - [X] **Documented** in `src/app/seamlylayout/CLAUDE.md` (two new handoff-contract bullets: the hoist and the rule that any new pre-processing entry point must call it; `id` is identity, `data-name` is what a user reads) and in `project-docs/SVG-DATA-ATTRIBUTES.md` (new "Piece discovery" and "Piece identity in the layout" contract points, including the warning that a producer-side change adding another wrapper level silently changes what SeamlyLayout packs)
 
-**Verified locally.** `cargo test --workspace` **265 passed / 0 failed** (was 252 at Task 49). SeamlyLayout `ctest --preset debug` **5/5 suites**. Debug build via `build.ps1 -Preset debug` clean, exit 0. Launching `SeamlyLayout.exe <the handoff>` still logs `[import_svg] 12 tagged pattern piece(s) found`, so the Task 49 import path is unaffected. No Seamly2D (parent) source was touched.
+**Verified locally.** `cargo test --workspace` **265 passed / 0 failed** (was 252 at  49). SeamlyLayout `ctest --preset debug` **5/5 suites**. Debug build via `build.ps1 -Preset debug` clean, exit 0. Launching `SeamlyLayout.exe <the handoff>` still logs `[import_svg] 12 tagged pattern piece(s) found`, so the  49 import path is unaffected. No Seamly2D (parent) source was touched.
 
-## Task 49 — SeamlyLayout ignored the SVG path seamly2d passed it, so the handoff opened an empty app (completed 2026-07-27)
+##  49 — SeamlyLayout ignored the SVG path seamly2d passed it, so the handoff opened an empty app (completed 2026-07-27)
 
 `MainWindow::exportPiecesToSeamlyLayout()` wrote the tagged `<pattern>.pieces.svg` and launched the daughter app with it — but `qt_frontend/main.cpp` handed `argc`/`argv` to `QApplication` and read nothing else, so the window came up empty and the user had to click **Import SVG** and navigate to the file seamly2d had just written. The handoff is the whole point of the daughter app; it had never worked.
 
@@ -817,15 +648,15 @@ Task 49 made the handoff *open*; this makes it *lay out*. The tagged SVG `SvgGen
 
 **End-to-end, with a real handoff file.** A tagged pieces SVG was exported from the test pattern through seamly2d's own generator — `seamly2d.exe richmond-shirt_v1_v061-test.sm2d -b handoff -d <dir> -f 0 --exportOnlyDetails`, which reaches the same `exportSVG()` that `generatePiecesSvg()` uses — producing 12 `data-type="piece"` groups. Launching `SeamlyLayout.exe <that file>` logs `main(): opening startup file …` followed by `[import_svg] 12 tagged pattern piece(s) found`, with the pattern on the left canvas and no warning. The two other paths were exercised the same way: the untagged `richmond-shirt-baseline_pieces.svg` logs `no data-type="piece" groups — not a Seamly2D handoff file` and shows the warning popup; a non-existent path logs `startup error: The file does not exist: …` and shows the error dialog over an empty canvas.
 
-**Found by that end-to-end run, filed as Task 59, NOT fixed here:** the layout stage then packs the *whole pattern as a single piece*. `piece_extractor::extract_piece_rects()` treats each direct child `<g>` of the SVG root as a piece, but the tagged handoff nests all 12 pieces inside one `<g id="pattern-1" data-type="pattern">`, so the packer gets one sheet-sized object and reports `0 placements, 1 unplaced: ["pattern-1"]`. Task 49's scope was making the handoff *open*; making it lay out correctly is the next task.
+**Found by that end-to-end run, filed as  59, NOT fixed here:** the layout stage then packs the *whole pattern as a single piece*. `piece_extractor::extract_piece_rects()` treats each direct child `<g>` of the SVG root as a piece, but the tagged handoff nests all 12 pieces inside one `<g id="pattern-1" data-type="pattern">`, so the packer gets one sheet-sized object and reports `0 placements, 1 unplaced: ["pattern-1"]`.  49's scope was making the handoff *open*; making it lay out correctly is the next task.
 
-**The `CollectionTest` failure carried in `SESSION_HANDOVER.md` is now confirmed pre-existing.** The baseline check the previous session started was finished here: with all Task 49 source changes stashed and the tree rebuilt, `TST_Seamly2DCommandLine::TestOpenCollection(07_armhole_adjustment_010)` fails identically (42 passed / 1 failed). It is unrelated — the only caller of the changed code is the GUI Layout Mode handoff, which a console `seamly2d --test <pattern>` run never enters. Two further facts about that suite, found while checking: it must be run **with the working directory set to its own `bin/`** (`initTestCase()` removes `tst_seamly2d_tmp` relative to the CWD but creates it under `applicationDirPath()`, so running it from anywhere else aborts on a leftover directory from a previous run), and the failure presents as either "Program crashed" or "The finish operation timed out" against the 120 s `AbstractTest::Run()` limit.
+**The `CollectionTest` failure carried in `SESSION_HANDOVER.md` is now confirmed pre-existing.** The baseline check the previous session started was finished here: with all  49 source changes stashed and the tree rebuilt, `TST_Seamly2DCommandLine::TestOpenCollection(07_armhole_adjustment_010)` fails identically (42 passed / 1 failed). It is unrelated — the only caller of the changed code is the GUI Layout Mode handoff, which a console `seamly2d --test <pattern>` run never enters. Two further facts about that suite, found while checking: it must be run **with the working directory set to its own `bin/`** (`initTestCase()` removes `tst_seamly2d_tmp` relative to the CWD but creates it under `applicationDirPath()`, so running it from anywhere else aborts on a leftover directory from a previous run), and the failure presents as either "Program crashed" or "The finish operation timed out" against the 120 s `AbstractTest::Run()` limit.
 
-## Task 50 — A developer's absolute home path is hard-coded in `application_2d.cpp` (completed 2026-07-27)
+##  50 — A developer's absolute home path is hard-coded in `application_2d.cpp` (completed 2026-07-27)
 
 `Application2D::seamlyLayoutFilePath()`'s development fallback embedded one machine's checkout path — `C:/Users/susan/Projects/Seamly2D-private/src/app/seamlylayout/qt_frontend/build/Debug/SeamlyLayout.exe` — in shipped GPL source headed for the upstream PR. It named the *private* repo directory, helped exactly one machine, and on that machine silently pinned a possibly stale **Debug** build.
 
-- [X] **Replaced with a machine-independent lookup**: new `SeamlySuitePaths::locateSeamlyLayoutDevBuild(startDirectory)` in `src/libs/vmisc/seamly_suite_paths.cpp`. It walks up from the running executable's directory, treating each ancestor as a candidate checkout root and testing `<root>/src/app/seamlylayout/qt_frontend/build/<config>/SeamlyLayout(.exe)`. Both project shadow-build layouts resolve without being named — the release build at `<checkout>/build/…` (five levels up) and `sd.ps1`'s debug build at `<checkout>/scripts/seamly2d-build-debug/…` (six). The walk is bounded at eight parents so it cannot climb to the filesystem root probing unrelated directories. Placed in `vmisc` beside `locateSeamlyLayout()` so the test suite can reach it, and **parameterized on the start directory** — the same rule Task 34/53 established — so tests point it at a `QTemporaryDir` instead of a real path
+- [X] **Replaced with a machine-independent lookup**: new `SeamlySuitePaths::locateSeamlyLayoutDevBuild(startDirectory)` in `src/libs/vmisc/seamly_suite_paths.cpp`. It walks up from the running executable's directory, treating each ancestor as a candidate checkout root and testing `<root>/src/app/seamlylayout/qt_frontend/build/<config>/SeamlyLayout(.exe)`. Both project shadow-build layouts resolve without being named — the release build at `<checkout>/build/…` (five levels up) and `sd.ps1`'s debug build at `<checkout>/scripts/seamly2d-build-debug/…` (six). The walk is bounded at eight parents so it cannot climb to the filesystem root probing unrelated directories. Placed in `vmisc` beside `locateSeamlyLayout()` so the test suite can reach it, and **parameterized on the start directory** — the same rule  34/53 established — so tests point it at a `QTemporaryDir` instead of a real path
 - [X] **Release preferred over Debug**, and still the last resort: the configured `paths/seamlyLayoutApp` setting and the installed-copy lookup both run first, so a source tree above an installed application can never shadow the installation. Because it only matches inside a *built* checkout, it is inert on an end user's machine
 - [X] **Note in the coding rules** — new "No absolute machine-specific paths in source" rule in `.github/README-CODE-STYLES.md` (the authority per `CLAUDE.md`), with the allowed alternatives, the explicit carve-out for placeholder examples and test data, and a `git grep` command to run before pushing
 
@@ -835,38 +666,38 @@ Task 49 made the handoff *open*; this makes it *lay out*. The tagged SVG `SvgGen
 
 - [X] Tests: `TST_SeamlySuitePaths` 5 → 13 cases, all against `QTemporaryDir` fixtures — empty start directory, no-checkout (the end user's case), found from the release shadow build, found from the deeper debug shadow build, Release-beats-Debug, Debug-when-Release-absent, a directory named like the executable rejected by the `isFile()` guard, and the depth bound (a checkout ten levels up is not found, three levels up is)
 
-## Task 45 — Stale `C:\Qt\6.10.1` paths remain in the Claude settings allowlists (completed 2026-07-27)
+##  45 — Stale `C:\Qt\6.10.1` paths remain in the Claude settings allowlists (completed 2026-07-27)
 
-Three permission allowlist entries still named the retired Qt 6.10.1 kit, so they no longer matched the commands actually run and had stopped pre-approving them. Harmless (a non-matching entry just means an extra prompt) but misleading documentation of a toolchain that moved to 6.11.1 in Task 30.
+Three permission allowlist entries still named the retired Qt 6.10.1 kit, so they no longer matched the commands actually run and had stopped pre-approving them. Harmless (a non-matching entry just means an extra prompt) but misleading documentation of a toolchain that moved to 6.11.1 in  30.
 
 Both files turned out to be **fully redundant with broader rules already present**, so the fix was removal rather than a version bump — which also satisfies the "make them version-agnostic so the next Qt bump does not stale them again" preference, permanently.
 
 - [X] `.claude/settings.json:154` (shared) — the compound `Test-Path "C:\Qt\6.10.1\…\qmake.exe"; & …vswhere.exe …` entry was already covered by `PowerShell(Test-Path *)` on line 10. Replaced with one version-agnostic entry that names no Qt version at all: `PowerShell(& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" *)`, a prefix pattern covering any vswhere query
 - [X] `.claude/settings.local.json:17` and `:19` (developer-local) — both **deleted**. The file opens with `PowerShell(*)` and `Bash(*)`, which already allow everything in it; line 19's `cmd /c "call vcvars64.bat && … qmake.exe …"` was additionally covered by `PowerShell(cmd /c *)` in the shared file
 
-**Correction (2026-07-27):** this entry originally said the file was "gitignored (`.gitignore:189`), so that half of the fix … is not in the commit". That was **wrong**. `.gitignore:189` read `!.claude/settings.local.json` — a *negation* that force-tracked the file, commented "track Claude Code personal overrides". The deletions were absent from commit `4a6054ab14` because they were never **staged**, not because git ignored them; they reached origin later inside `fc487aec93`. The fix itself stands (no `6.10.1` entry survives anywhere). During Task 49 the file was untracked for real — `git rm --cached` plus a plain ignore rule at `.gitignore:193` — in commit `84724ac5c2`, because the harness rewrites it on every permission grant and it kept accumulating absolute `C:\Users\susan\…` paths and session ids.
+**Correction (2026-07-27):** this entry originally said the file was "gitignored (`.gitignore:189`), so that half of the fix … is not in the commit". That was **wrong**. `.gitignore:189` read `!.claude/settings.local.json` — a *negation* that force-tracked the file, commented "track Claude Code personal overrides". The deletions were absent from commit `4a6054ab14` because they were never **staged**, not because git ignored them; they reached origin later inside `fc487aec93`. The fix itself stands (no `6.10.1` entry survives anywhere). During  49 the file was untracked for real — `git rm --cached` plus a plain ignore rule at `.gitignore:193` — in commit `84724ac5c2`, because the harness rewrites it on every permission grant and it kept accumulating absolute `C:\Users\susan\…` paths and session ids.
 
 Both files re-validated as parseable JSON after the edit.
 
-## Task 53 — Rename the default data root to `~/seamlyData`; delete the merged settings stray and the empty legacy tree (completed 2026-07-26)
+##  53 — Rename the default data root to `~/seamlyData`; delete the merged settings stray and the empty legacy tree (completed 2026-07-26)
 
-Follow-on to Task 34, raised by the user after inspecting the result on their own machine. Three changes, all in the same area:
+Follow-on to  34, raised by the user after inspecting the result on their own machine. Three changes, all in the same area:
 
-- [X] **Default data root `~/seamly` → `~/seamlyData`** (`VCommonSettings::getDefaultDataRoot()`). Task 34's `seamly` proved too generic a name to claim: on the developer's machine `G:\My Drive\seamly` was already a 73 GB business folder (Finances, Team, Security, …), so pointing a data root there would have scattered the nine app subfolders through it — discovered before any such write happened. `seamlyData` says what the folder holds. The legacy `~/seamly2d` name is unchanged and still adopted on first run
+- [X] **Default data root `~/seamly` → `~/seamlyData`** (`VCommonSettings::getDefaultDataRoot()`).  34's `seamly` proved too generic a name to claim: on the developer's machine `G:\My Drive\seamly` was already a 73 GB business folder (Finances, Team, Security, …), so pointing a data root there would have scattered the nine app subfolders through it — discovered before any such write happened. `seamlyData` says what the folder holds. The legacy `~/seamly2d` name is unchanged and still adopted on first run
 - [X] **`mergeStrayCommonSettings()` now deletes the stray** it has merged, and removes the `Unknown Organization` folder with it. Gated on re-reading the destination and confirming every stray key arrived there — a key held with a *different* value counts as accounted for, since that means the user changed it after the stray was written. Removal uses `QDir::rmdir()`, never `removeRecursively()`, so anything else living in that folder keeps it alive and is untouched; if verification fails the stray survives for the next run
-- [X] **`pruneEmptyLegacyDataRoot(legacyRoot, configuredRoot)`** removes the empty `~/seamly2d` skeleton the rename leaves behind (`ensureDataRootTree()` stocks whatever root is configured, so what remains after a move looks like data but is not). Two gates: the legacy root must not be the configured root — Task 34 *adopts* an existing `~/seamly2d`, which makes it an upgrading user's live tree — and the tree must hold no file at any depth. Only empty directories are removed, deepest first
+- [X] **`pruneEmptyLegacyDataRoot(legacyRoot, configuredRoot)`** removes the empty `~/seamly2d` skeleton the rename leaves behind (`ensureDataRootTree()` stocks whatever root is configured, so what remains after a move looks like data but is not). Two gates: the legacy root must not be the configured root —  34 *adopts* an existing `~/seamly2d`, which makes it an upgrading user's live tree — and the tree must hold no file at any depth. Only empty directories are removed, deepest first
 - [X] Unit tests: `TST_DataRoot` 16 → 22 cases, covering the rename, all four prune refusals (populated, configured, nested-configured, missing/not-a-directory) and the merge-then-delete path. Local suite 32119 passed / 0 failed
-- [X] Docs: `.github/README-BUILDS.md` data-root section rewritten (rename rationale, prune rules, stray deletion, the call-site placement rule); `~/seamly` references across `project-docs/TODO_MIGRATE.md` Tasks 14/35/36/37/38 updated to `~/seamlyData`
+- [X] Docs: `.github/README-BUILDS.md` data-root section rewritten (rename rationale, prune rules, stray deletion, the call-site placement rule); `~/seamly` references across `project-docs/TODO_MIGRATE.md` s 14/35/36/37/38 updated to `~/seamlyData`
 
-**Call-site placement rule established here.** `pruneEmptyLegacyDataRoot()` is called with real home paths *only* from `Application2D::openSettings()` and `ApplicationME::openSettings()` — never from `initializeDataRoot()`, because the test harness calls that. Task 34's harness mirroring of `initializeDataRoot()` was removed from `qttestmainlambda.cpp` for the same reason: that constructor runs before any `initTestCase()`, so it executes against the developer's real settings, and a test run proved it by deleting the real `%APPDATA%\Unknown Organization` folder (verified redundant first, so nothing was lost — but the suite must not mutate the machine it runs on). See [[qt-homepath-not-fakeable-windows]] for the related hazard.
+**Call-site placement rule established here.** `pruneEmptyLegacyDataRoot()` is called with real home paths *only* from `Application2D::openSettings()` and `ApplicationME::openSettings()` — never from `initializeDataRoot()`, because the test harness calls that.  34's harness mirroring of `initializeDataRoot()` was removed from `qttestmainlambda.cpp` for the same reason: that constructor runs before any `initTestCase()`, so it executes against the developer's real settings, and a test run proved it by deleting the real `%APPDATA%\Unknown Organization` folder (verified redundant first, so nothing was lost — but the suite must not mutate the machine it runs on). See [[qt-homepath-not-fakeable-windows]] for the related hazard.
 
-**Not done here:** nothing moves files. Repointing the root still leaves the old tree where it is — the check-and-move flow is folded into **Task 14**. The same empty-organization defect still affects `VSettings`' eight accessors (`%APPDATA%\Unknown Organization.ini`) — that is **Task 52**.
+**Not done here:** nothing moves files. Repointing the root still leaves the old tree where it is — the check-and-move flow is folded into ** 14**. The same empty-organization defect still affects `VSettings`' eight accessors (`%APPDATA%\Unknown Organization.ini`) — that is ** 52**.
 
-## Task 34 — Rename the default user-data root `~/seamly2d` → `~/seamly` and make it a single, relocatable "data root" (shared, all platforms) (completed 2026-07-26)
+##  34 — Rename the default user-data root `~/seamly2d` → `~/seamly` and make it a single, relocatable "data root" (shared, all platforms) (completed 2026-07-26)
 
-> **Superseded in part by Task 53 (above):** the default root is now `~/seamlyData`, not `~/seamly`. The subtask text below records what Task 34 itself did and is left unedited.
+> **Superseded in part by  53 (above):** the default root is now `~/seamlyData`, not `~/seamly`. The subtask text below records what  34 itself did and is left unedited.
 
-Today each app hard-codes its user-data subfolders under `QDir::homePath() + "/seamly2d/"` — the `GetDef*Path()` family in `src/libs/vmisc/vcommonsettings.cpp` builds `~/seamly2d/<subdir>` independently for individual and multisize **measurements**, **templates**, **bodyscans**, **label templates**, **images**, and **backups** (lines ~431-551). There is no single "data root" the user can point elsewhere, so relocating the tree to another drive or a cloud folder (e.g. `G:\My Drive\seamly`) requires moving files by hand — the exact pain point this work removes. This task is the **shared, cross-platform foundation** the per-platform choosers build on: the Windows installer prompt (Task 14) and the macOS / AppImage / Flatpak first-run choosers (Tasks 35-37) all set and honor this one setting.
+Today each app hard-codes its user-data subfolders under `QDir::homePath() + "/seamly2d/"` — the `GetDef*Path()` family in `src/libs/vmisc/vcommonsettings.cpp` builds `~/seamly2d/<subdir>` independently for individual and multisize **measurements**, **templates**, **bodyscans**, **label templates**, **images**, and **backups** (lines ~431-551). There is no single "data root" the user can point elsewhere, so relocating the tree to another drive or a cloud folder (e.g. `G:\My Drive\seamly`) requires moving files by hand — the exact pain point this work removes. This task is the **shared, cross-platform foundation** the per-platform choosers build on: the Windows installer prompt ( 14) and the macOS / AppImage / Flatpak first-run choosers (s 35-37) all set and honor this one setting.
 
 - [X] Introduce one settings-backed **data root** (e.g. `paths/dataRoot` in the existing `QSettings`) that every `GetDef*Path()` derives its subfolder from, replacing the seven independent `QDir::homePath() + "/seamly2d/…"` literals in `src/libs/vmisc/vcommonsettings.cpp` with `<dataRoot>/<subdir>` — done: `paths/dataRoot` in the shared common settings file, with `VCommonSettings::dataRoot()`/`dataSubdirPath()`/`getDataRoot()`/`setDataRoot()`. **Nine** literals, not seven: `src/libs/vmisc/vsettings.cpp` held two more (`patterns`, `layouts`), and both now derive from the same root
 - [X] Change the built-in default data root from `~/seamly2d` to `~/seamly` (`QDir::homePath() + "/seamly"`) — done, `VCommonSettings::getDefaultDataRoot()`; the pre-rename location is kept as `getLegacyDataRoot()` for first-run adoption
@@ -874,43 +705,43 @@ Today each app hard-codes its user-data subfolders under `QDir::homePath() + "/s
 - [X] Migrate an existing `~/seamly2d` tree to the new root on first run (or adopt it in place as the root) so upgrading users keep patterns/measurements without hand-moving files; never delete the old tree automatically — **adopt in place**, the safer of the two options offered: `initializeDataRoot()` (called from every app's `openSettings()`) records the existing `~/seamly2d` as the root when `~/seamly` does not exist yet. Nothing is copied, moved or deleted — an upgrading user's tree can be gigabytes and may sit on a cloud drive. The decision is `chooseFirstRunDataRoot()`, split out as a pure function so it can be tested against throwaway directories
 - [X] Keep the data root editable after install in **Preferences → Paths** (`src/app/seamly2d/dialogs/configpages/preferencespathpage.cpp`, and the SeamlyMe equivalent) so it can be changed on any platform, not only at install/first-run time — done: new first row "My Seamly Data" in both pages. Both dialogs write every row back as an absolute override, so changing the root alone would have relocated nothing; `VCommonSettings::rebaseOntoDataRoot()` now moves the rows still inside the old root and leaves a folder deliberately parked elsewhere untouched
 - [X] Update docs (`.github/README-BUILDS.md` settings/data-location sections) and any remaining `~/seamly2d` references; add unit tests for the data-root default, override, and `~/seamly2d`→`~/seamly` migration — new "User data tree — the relocatable data root" section in `.github/README-BUILDS.md` plus the stale `~/seamly2d` references there; 16 new cases in `TST_DataRoot` (`src/test/Seamly2DTest/tst_dataroot.cpp`), full suite 32113 passed / 0 failed locally
-- [X] This is the base for **Task 14** (Windows installer prompt), **Task 35** (macOS), **Task 36** (Linux AppImage), and **Task 37** (Linux Flatpak) — land it first — landed; those four can now read and write the one `paths/dataRoot` setting
+- [X] This is the base for ** 14** (Windows installer prompt), ** 35** (macOS), ** 36** (Linux AppImage), and ** 37** (Linux Flatpak) — land it first — landed; those four can now read and write the one `paths/dataRoot` setting
 
-**Also fixed here (prerequisite):** the shared common settings file was resolving to `%APPDATA%\Unknown Organization\qt6_common.ini`. The apps construct `VCommonSettings` from an explicit settings *file path*, for which `QSettings` records no organization, so `organizationName()` was empty at every `paths/*` accessor — and QSettings substitutes the literal `"Unknown Organization"` for an empty organization. The data root has to be readable by all three apps and writable by the Task 14 installer, so this had to be correct: `commonSettingsOrganization()` falls back to the application-wide organization name, and `mergeStrayCommonSettings()` brings any stranded value forward on first run (only where the correct file has none; the stray file is never modified or deleted). Confirmed on the developer machine, where the stray file held a `bodyscans` path the correct file did not have.
+**Also fixed here (prerequisite):** the shared common settings file was resolving to `%APPDATA%\Unknown Organization\qt6_common.ini`. The apps construct `VCommonSettings` from an explicit settings *file path*, for which `QSettings` records no organization, so `organizationName()` was empty at every `paths/*` accessor — and QSettings substitutes the literal `"Unknown Organization"` for an empty organization. The data root has to be readable by all three apps and writable by the  14 installer, so this had to be correct: `commonSettingsOrganization()` falls back to the application-wide organization name, and `mergeStrayCommonSettings()` brings any stranded value forward on first run (only where the correct file has none; the stray file is never modified or deleted). Confirmed on the developer machine, where the stray file held a `bodyscans` path the correct file did not have.
 
 **Testing hazard recorded:** `QDir::homePath()` **cannot be redirected on Windows** — `QFileSystemEngine::homePath()` asks the OS via `GetUserProfileDirectory()` and only falls back to `USERPROFILE`/`HOME` when that fails. A test that creates or removes `~/seamly` / `~/seamly2d` therefore operates on the **real** user's data tree no matter what the environment says; an early draft of `TST_DataRoot` did exactly that and deleted the developer's `C:\Users\susan\seamly2d`. `TST_DataRoot` now works only inside a `QTemporaryDir` and tests first-run resolution through `chooseFirstRunDataRoot()`. Noted in `.github/README-BUILDS.md` too.
 
-## Task 30 — Upgrade SeamlyLayout to build with Qt 6.11 (match the Seamly2D parent apps) (completed 2026-07-25)
+##  30 — Upgrade SeamlyLayout to build with Qt 6.11 (match the Seamly2D parent apps) (completed 2026-07-25)
 
-SeamlyLayout currently builds against **Qt 6.10.1** while seamly2d/seamlyme build against **Qt 6.11.1** (the parent Qt was bumped to 6.11.1 to match `ci.yml`; see Task 13). Move SeamlyLayout to the same **Qt 6.11.1 `msvc2022_64`** release so the whole suite shares one Qt version. This unblocks a real simplification: Task 13's MSI ships **two** separate Qt runtimes today — a shared one for the parents in `…\Seamly2D\` and SeamlyLayout's own copy in `…\Seamly2D\SeamlyLayout\` — precisely because the two Qt releases have identical DLL names that can't co-exist in a flat directory (`packaging/windows/seamly-family.wxs`). Unifying on 6.11.1 lets all three apps share a single Qt runtime.
+SeamlyLayout currently builds against **Qt 6.10.1** while seamly2d/seamlyme build against **Qt 6.11.1** (the parent Qt was bumped to 6.11.1 to match `ci.yml`; see  13). Move SeamlyLayout to the same **Qt 6.11.1 `msvc2022_64`** release so the whole suite shares one Qt version. This unblocks a real simplification:  13's MSI ships **two** separate Qt runtimes today — a shared one for the parents in `…\Seamly2D\` and SeamlyLayout's own copy in `…\Seamly2D\SeamlyLayout\` — precisely because the two Qt releases have identical DLL names that can't co-exist in a flat directory (`packaging/windows/seamly-family.wxs`). Unifying on 6.11.1 lets all three apps share a single Qt runtime.
 
 **Prerequisite / dependency check:** confirm the CXX-Qt bridge (`crates/cxxqt_bridge`) and the QtWebEngine-based canvas support Qt 6.11.1 before committing to the bump.
 
-- [X] Verify toolchain compatibility: confirm CXX-Qt / cxx-qt-build and the Corrosion CMake integration support Qt 6.11.1, and that QtWebEngine 6.11 is available in the installed kit (the `SvgCanvas.qml` WebEngine dependency) — **CXX-Qt and Corrosion confirmed compatible** (2026-07-25): `cargo clean -p cxxqt_bridge` + `cargo build -p cxxqt_bridge` recompiles the bridge from scratch against Qt 6.11.1 (cxx-qt/cxx-qt-build/cxx-qt-lib `=0.7.3`, Qt found via qmake) with only the pre-existing `build_tiled_pdf_tile_doc` dead-code warning, and a CMake configure against `C:/Qt/6.11.1/msvc2022_64` completes with `-- CXX-Qt Found crate(s): cxxqt_bridge` and `-- Using Corrosion as a subdirectory`. **QtWebEngine 6.11 is present but the local kit is incomplete**: `Qt6WebEngineCore`/`Qt6WebEngineQuick` DLLs and CMake config packages exist, yet `Qt6WebEngineCoreDependencies.cmake` also requires `Qt6WebChannel` and `Qt6Positioning`, neither of which is installed — so `find_package(Qt6 6.11.1 REQUIRED ... WebEngineQuick)` fails with *"Qt6WebEngineQuick could not be found because dependency Qt6WebEngineCore could not be found"*. That is a **machine-setup gap, not a Qt 6.11 incompatibility** (CI already installs all three modules explicitly) — tracked as **Task 44**; it blocks the full-app build in the verify item below
+- [X] Verify toolchain compatibility: confirm CXX-Qt / cxx-qt-build and the Corrosion CMake integration support Qt 6.11.1, and that QtWebEngine 6.11 is available in the installed kit (the `SvgCanvas.qml` WebEngine dependency) — **CXX-Qt and Corrosion confirmed compatible** (2026-07-25): `cargo clean -p cxxqt_bridge` + `cargo build -p cxxqt_bridge` recompiles the bridge from scratch against Qt 6.11.1 (cxx-qt/cxx-qt-build/cxx-qt-lib `=0.7.3`, Qt found via qmake) with only the pre-existing `build_tiled_pdf_tile_doc` dead-code warning, and a CMake configure against `C:/Qt/6.11.1/msvc2022_64` completes with `-- CXX-Qt Found crate(s): cxxqt_bridge` and `-- Using Corrosion as a subdirectory`. **QtWebEngine 6.11 is present but the local kit is incomplete**: `Qt6WebEngineCore`/`Qt6WebEngineQuick` DLLs and CMake config packages exist, yet `Qt6WebEngineCoreDependencies.cmake` also requires `Qt6WebChannel` and `Qt6Positioning`, neither of which is installed — so `find_package(Qt6 6.11.1 REQUIRED ... WebEngineQuick)` fails with *"Qt6WebEngineQuick could not be found because dependency Qt6WebEngineCore could not be found"*. That is a **machine-setup gap, not a Qt 6.11 incompatibility** (CI already installs all three modules explicitly) — tracked as ** 44**; it blocks the full-app build in the verify item below
 - [X] Bump the Qt pin in `src/app/seamlylayout/qt_frontend/CMakeLists.txt` (`find_package(Qt6 6.10.1 REQUIRED ...)` → `6.11.1`) and any CMake preset `CMAKE_PREFIX_PATH` (`qt_frontend/build_debug.bat`, presets) — `find_package(Qt6 6.11.1 ...)` and `qt_standard_project_setup(REQUIRES 6.11.1)`; `build_debug.bat` now passes `C:/Qt/6.11.1/msvc2022_64`. `CMakePresets.json` carries no `CMAKE_PREFIX_PATH` (it is supplied on the command line), so no preset change was needed
 - [X] Update the build scripts to point at the Qt 6.11.1 `msvc2022_64` kit: `src/app/seamlylayout/qd.ps1`, `build.ps1` (`$QtPath = C:/Qt/6.10.1/...`), and the debug batch build — `build.ps1` no longer hard-codes a patch release at all: it scans `C:\Qt` for `msvc2022_64` kits, version-sorts them and takes the newest that meets the 6.11.1 minimum, failing with a clear message otherwise (the same fix pattern as `smsi.ps1`/`sd.ps1` below, so a future Qt bump needs no script edits). `qd.ps1` needed no change — it delegates to `run_debug.ps1` → `build.ps1`
 - [X] Bump the versioned QML imports across `src/app/seamlylayout/qt_frontend/qml/*.qml` (`import QtQuick 6.10`, `QtQuick.Controls`, `QtQuick.Dialogs`, `QtQuick.Layouts`, `import QtWebEngine 6.10`) to the 6.11 module versions — all 10 QML files updated (27 import lines); `.claude/rules/qt-style.mdc`'s example imports bumped to match
 - [X] Update the packaging scripts for the new Qt path/version: `packaging/windows/build_installer.ps1` (`$QtBin`), `packaging/windows/SeamlyLayout.iss`, `packaging/macos/build_dmg.sh` (`QT_BIN`), and `docs/packaging-docs/INSTALLER_NOTES.md` — all four updated, plus `packaging/licenses/qt-source-notice.txt` (the LGPL source notice named Qt 6.10)
 - [X] Update SeamlyLayout's CI: bump `.github/workflows/seamlylayout-ci.yml` `QT_VERSION` to `6.11.1`, and evaluate merging that job back into `ci.yml` now that the Qt pin matches the parents (the standalone job's header notes it exists only to carry the 6.10 pin) — `QT_VERSION: '6.11.1'`. **Merge evaluated and deliberately declined:** the Qt pin was the original reason for the split, but the two jobs still use different build systems (CMake/Ninja + Cargo/Corrosion vs. qmake), need different toolchain steps (Rust, cargo cache, the WebEngine module set), and are path-filtered so a layout-only change does not rebuild the parent apps on every platform. Reasoning recorded in the workflow header, `README_WORKFLOWS.md` and `.github/README-BUILDS.md`; revisit only if the parents also move to CMake
-- [X] Update the Windows MSI to ship a single shared Qt 6.11.1 runtime for all three apps: install one Qt kit in `windows-msi.yml` instead of two, collapse the separate `…\SeamlyLayout\` Qt deployment in `packaging/windows/seamly-family.wxs`, adjust `smsi.ps1`, and re-check `SeamlySuitePaths::locateSeamlyLayout()` (the subfolder split may no longer be required) — `windows-msi.yml` installs **one** Qt kit (the two-kit ordering dance and `QT_LAYOUT_DIR` are gone; `qt-modules` is now a matrix field so x64 gets `qtwebengine qtwebchannel qtpositioning` and arm64 just `qtmultimedia`); `smsi.ps1` deploys `windeployqt6`'s output into the same staging tree as the parents' and drops the `layout\` tree and the `LayoutStagingDir` define; `seamly-family.wxs` drops `SEAMLYLAYOUTFOLDER` and installs `SeamlyLayout.exe` into `INSTALLFOLDER`. **`locateSeamlyLayout()` needs no code change** — it already checks the flat layout first; its subdirectory branch is kept (and its doc comment/tests reworded) as a fallback so a seamly2d upgraded in place over a pre-Task-30 MSI install still resolves. MSI rebuild/size verification is part of the verify item below
+- [X] Update the Windows MSI to ship a single shared Qt 6.11.1 runtime for all three apps: install one Qt kit in `windows-msi.yml` instead of two, collapse the separate `…\SeamlyLayout\` Qt deployment in `packaging/windows/seamly-family.wxs`, adjust `smsi.ps1`, and re-check `SeamlySuitePaths::locateSeamlyLayout()` (the subfolder split may no longer be required) — `windows-msi.yml` installs **one** Qt kit (the two-kit ordering dance and `QT_LAYOUT_DIR` are gone; `qt-modules` is now a matrix field so x64 gets `qtwebengine qtwebchannel qtpositioning` and arm64 just `qtmultimedia`); `smsi.ps1` deploys `windeployqt6`'s output into the same staging tree as the parents' and drops the `layout\` tree and the `LayoutStagingDir` define; `seamly-family.wxs` drops `SEAMLYLAYOUTFOLDER` and installs `SeamlyLayout.exe` into `INSTALLFOLDER`. **`locateSeamlyLayout()` needs no code change** — it already checks the flat layout first; its subdirectory branch is kept (and its doc comment/tests reworded) as a fallback so a seamly2d upgraded in place over a pre--30 MSI install still resolves. MSI rebuild/size verification is part of the verify item below
 - [X] Update docs referencing "Qt 6.10": `src/app/seamlylayout/CLAUDE.md`, `README.md`, `.github/copilot-instructions.md`, `rules/architecture.mdc`, `docs/cxxqt-docs/CXXQT_BRIDGE.md`, and `.github/README-BUILDS.md`; note the root `CLAUDE.md` build-notes section if the local layout kit changes — all of those plus `AGENTS.md`, `.claude/rules/{CLAUDE,dependencies,ffi-bridge,licensing,qt-style}.mdc`, `crates/cxxqt_bridge/Cargo.toml`, `qt_frontend/main.cpp`, `qt_frontend/src/PreferencesController.h`, `qml/Main.qml`, `.github/workflows/README_WORKFLOWS.md`, `packaging/windows/README.md` and `README_WINDOWS_BUILD.md`. The root `CLAUDE.md` build-notes section is rewritten: there is no longer a "two toolchains" split — CI and the developer PC are both Qt 6.11.1 — plus an explicit note that the local kit must include `qtwebengine`+`qtwebchannel`+`qtpositioning`. `project-docs/TODO_COMPLETED.md` and `project-docs/PROJECT_PLAN.md` mentions of 6.10 are left as historical record
-- [X] Verify: build and run SeamlyLayout on Qt 6.11.1 locally; run the Qt frontend ctest suites and `cargo test --workspace`; confirm the seamly2d → seamlyLayout handoff still launches and renders; rebuild the MSI and confirm the single-shared-runtime layout installs and all three apps launch — **done 2026-07-25 once Task 44 and Task 48 were fixed.** One caveat, carved out below and tracked as **Task 49**: the handoff *launches* but does not *render*, for a reason that has nothing to do with Qt 6.11.
-  - **Verified on Qt 6.11.1 (earlier, before the Task 44 fix):** `cargo test --workspace` — **251 tests pass**, 0 failures. All four Qt frontend ctest suites build and pass — **AdjustSceneTests 26 passed / 1 skipped, AdjustControllerTests 7, PreferencesModelTests 48, SettingsModelTests 26 = 107 passed, 0 failed**. Every non-WebEngine C++ source in `qt_frontend/src/` compiles clean under MSVC 19.50 against Qt 6.11.1. (The ctest suites were built in a throwaway build directory from a temporary local edit that dropped only the `WebEngineQuick` component — none of the four suites links WebEngine; the edit was reverted and `git diff` on `CMakeLists.txt` shows only the intended Task 30 changes.)
-  - **Full app build and run — now verified.** With `qtwebchannel`/`qtpositioning` installed (Task 44), `scripts\sb.ps1 -SkipParents` configures and builds the whole thing clean: `find_package(Qt6 6.11.1 ... WebEngineQuick)` succeeds, Corrosion/cxx-qt rebuild `cxxqt_bridge`, and `[86/86] Linking CXX executable SeamlyLayout.exe` completes. Launching that exe brings up the QML UI and the process loads **`Qt6Core.dll`, `Qt6WebEngineQuick.dll` and `Qt6WebEngineCore.dll`, all `6.11.1.0`** — so the bumped `import QtWebEngine 6.11` and the whole QML/WebEngine load path are exercised, not just linked
-  - **Parent release tree rebuilt.** `build/` was wiped and rebuilt with the 6.11.1 kit; after the **Task 48** fix `build/src/app/{seamly2d,seamlyme}/bin/Qt6Core.dll` both report `6.11.1.0` (they reported `6.8.7.0` before it) and both exes start from their `bin` directories
+- [X] Verify: build and run SeamlyLayout on Qt 6.11.1 locally; run the Qt frontend ctest suites and `cargo test --workspace`; confirm the seamly2d → seamlyLayout handoff still launches and renders; rebuild the MSI and confirm the single-shared-runtime layout installs and all three apps launch — **done 2026-07-25 once  44 and  48 were fixed.** One caveat, carved out below and tracked as ** 49**: the handoff *launches* but does not *render*, for a reason that has nothing to do with Qt 6.11.
+  - **Verified on Qt 6.11.1 (earlier, before the  44 fix):** `cargo test --workspace` — **251 tests pass**, 0 failures. All four Qt frontend ctest suites build and pass — **AdjustSceneTests 26 passed / 1 skipped, AdjustControllerTests 7, PreferencesModelTests 48, SettingsModelTests 26 = 107 passed, 0 failed**. Every non-WebEngine C++ source in `qt_frontend/src/` compiles clean under MSVC 19.50 against Qt 6.11.1. (The ctest suites were built in a throwaway build directory from a temporary local edit that dropped only the `WebEngineQuick` component — none of the four suites links WebEngine; the edit was reverted and `git diff` on `CMakeLists.txt` shows only the intended  30 changes.)
+  - **Full app build and run — now verified.** With `qtwebchannel`/`qtpositioning` installed ( 44), `scripts\sb.ps1 -SkipParents` configures and builds the whole thing clean: `find_package(Qt6 6.11.1 ... WebEngineQuick)` succeeds, Corrosion/cxx-qt rebuild `cxxqt_bridge`, and `[86/86] Linking CXX executable SeamlyLayout.exe` completes. Launching that exe brings up the QML UI and the process loads **`Qt6Core.dll`, `Qt6WebEngineQuick.dll` and `Qt6WebEngineCore.dll`, all `6.11.1.0`** — so the bumped `import QtWebEngine 6.11` and the whole QML/WebEngine load path are exercised, not just linked
+  - **Parent release tree rebuilt.** `build/` was wiped and rebuilt with the 6.11.1 kit; after the ** 48** fix `build/src/app/{seamly2d,seamlyme}/bin/Qt6Core.dll` both report `6.11.1.0` (they reported `6.8.7.0` before it) and both exes start from their `bin` directories
   - **MSI rebuilt and checked.** `packaging\windows\smsi.ps1` (plain default invocation, no `-WinDeployQt6`) → `Seamly-x64.msi`, **165.3 MB — down from 186.8 MB**, `wix msi validate` clean apart from the expected ICE61. ProductVersion `26.7.34941`, UpgradeCode unchanged `{CBF4B5F1-C32C-4DBB-B385-3EE4A7B30658}`. Staging has **no `layout\` tree** and exactly **one** `Qt6Core.dll` (`parent\`, `6.11.1.0`). Expanding the MSI (`msiexec /a`, 1623 files) gives a flat `Seamly2D\` install directory with no `SeamlyLayout\` subdirectory, one Qt runtime, and all three exes side by side — and **`seamly2d.exe`, `seamlyme.exe` and `SeamlyLayout.exe` all launch from it, each loading the same single `Qt6Core.dll 6.11.1.0`** from the install folder. (Note: `msiexec /a` needs a short target path — extracting under a long path fails at `InstallFinalize` with 1603 on MAX_PATH. A full elevated `msiexec /i` system install was not performed.)
-  - **Caveat — the handoff launches but does not render, and never did (Task 49).** `SeamlyLayout.exe <file>.svg` starts and shows an empty canvas: `qt_frontend/main.cpp` never reads its command line, so the `.pieces.svg` path seamly2d passes to `QProcess::startDetached()` is discarded. Pre-existing and unrelated to the Qt bump (no commit ever added argument handling), so it does not hold up this task — see **Task 49**
+  - **Caveat — the handoff launches but does not render, and never did ( 49).** `SeamlyLayout.exe <file>.svg` starts and shows an empty canvas: `qt_frontend/main.cpp` never reads its command line, so the `.pieces.svg` path seamly2d passes to `QProcess::startDetached()` is discarded. Pre-existing and unrelated to the Qt bump (no commit ever added argument handling), so it does not hold up this task — see ** 49**
 
-## Task 31 — Fix `smsi.ps1` Qt-kit detection and the stale SeamlyLayout runtime (found building the MSI 2026-07-23) (completed 2026-07-25)
+##  31 — Fix `smsi.ps1` Qt-kit detection and the stale SeamlyLayout runtime (found building the MSI 2026-07-23) (completed 2026-07-25)
 
-Problems hit while building the Windows MSI locally on 2026-07-23 with `packaging/windows/smsi.ps1`, on a machine that has moved to Qt 6.11.1 (Qt 6.10.x uninstalled). A valid MSI was still produced (`scripts/seamly-build-msi/x64/Seamly-x64.msi`, x64;1033, 187 MB, fixed UpgradeCode, 1691 files, `wix msi validate` clean apart from the expected ICE61) by forcing `-WinDeployQt6` to the 6.11.1 tool — but the documented default invocation fails, and SeamlyLayout's payload is a stale/mismatched build. These overlap with **Task 30** (the Qt 6.10 → 6.11 unification); track and close them together.
+Problems hit while building the Windows MSI locally on 2026-07-23 with `packaging/windows/smsi.ps1`, on a machine that has moved to Qt 6.11.1 (Qt 6.10.x uninstalled). A valid MSI was still produced (`scripts/seamly-build-msi/x64/Seamly-x64.msi`, x64;1033, 187 MB, fixed UpgradeCode, 1691 files, `wix msi validate` clean apart from the expected ICE61) by forcing `-WinDeployQt6` to the 6.11.1 tool — but the documented default invocation fails, and SeamlyLayout's payload is a stale/mismatched build. These overlap with ** 30** (the Qt 6.10 → 6.11 unification); track and close them together.
 
 - [X] `Find-WinDeployQt6` in `smsi.ps1` is hard-pinned to `^6\.10\.\d+$` and throws `windeployqt6 not found under 'C:\Qt\6.10.x\msvc2022_64\bin'` on a 6.11-only machine, so the documented default `.\packaging\windows\smsi.ps1` fails outright — had to pass `-WinDeployQt6 'C:\Qt\6.11.1\msvc2022_64\bin\windeployqt6.exe'` by hand. Fix: detect SeamlyLayout's actual Qt kit (e.g. read `CMAKE_PREFIX_PATH` from `src/app/seamlylayout/qt_frontend/build/Release/CMakeCache.txt`) or widen/parameterize the version match so it follows whatever Qt SeamlyLayout was built against, not a fixed 6.10 — done both ways: `Find-WinDeployQt6` now takes the build directory, reads `CMAKE_PREFIX_PATH` from its `CMakeCache.txt` (so the deployed runtime always matches the exe's own kit) and falls back to the newest installed `msvc2022_64` kit of **any** version. No Qt version is hard-coded anywhere in the function; `-WinDeployQt6` still overrides
-- [X] The prebuilt `src/app/seamlylayout/qt_frontend/build/Release/SeamlyLayout.exe` was compiled against **Qt 6.10.1** (per its `CMakeCache.txt`), which is no longer installed; the MSI therefore ships that 6.10-linked exe wrapped in a **6.11.1** Qt runtime deployed by 6.11's `windeployqt6`. It only runs by virtue of Qt's within-6.x forward binary compatibility — not a clean matched build. Fix: rebuild SeamlyLayout on Qt 6.11.1 (Task 30), then rebuild the MSI so the exe and its deployed runtime are the same Qt version, and re-verify SeamlyLayout launches from the installed tree — **done 2026-07-25** once Task 44 unblocked the build. SeamlyLayout is rebuilt from scratch against Qt 6.11.1, the MSI was rebuilt from that tree, and `SeamlyLayout.exe` launches from the expanded install directory loading the shared `Qt6Core.dll 6.11.1.0` — exe and runtime are now the same Qt by construction, not by forward compatibility
-- [X] The MSI is ~187 MB because it still ships two full Qt runtimes (the shared parent 6.11.1 runtime in `…\Seamly2D\` plus SeamlyLayout's own copy in `…\Seamly2D\SeamlyLayout\`). Once SeamlyLayout is on 6.11.1, collapse to one shared runtime and drop the subfolder split (already a Task 30 subtask — verify the MSI size drops and `SeamlySuitePaths::locateSeamlyLayout()` still resolves) — **measured 2026-07-25: 186.8 MB → 165.3 MB, a 21.5 MB / 11.5% drop.** Smaller than a naive "one runtime instead of two" estimate suggests, because the surviving shared runtime must still carry Qt WebEngine (its `.pak` locale resources and `QtWebEngineProcess.exe` dominate the payload) — what the collapse removes is the duplicated Qt core/GUI/QML DLL set, not WebEngine. Layout confirmed: one `Qt6Core.dll` in staging, no `layout\` tree, and the expanded install directory is flat with no `SeamlyLayout\` subdirectory, so `locateSeamlyLayout()`'s flat-layout branch is the one that resolves
+- [X] The prebuilt `src/app/seamlylayout/qt_frontend/build/Release/SeamlyLayout.exe` was compiled against **Qt 6.10.1** (per its `CMakeCache.txt`), which is no longer installed; the MSI therefore ships that 6.10-linked exe wrapped in a **6.11.1** Qt runtime deployed by 6.11's `windeployqt6`. It only runs by virtue of Qt's within-6.x forward binary compatibility — not a clean matched build. Fix: rebuild SeamlyLayout on Qt 6.11.1 ( 30), then rebuild the MSI so the exe and its deployed runtime are the same Qt version, and re-verify SeamlyLayout launches from the installed tree — **done 2026-07-25** once  44 unblocked the build. SeamlyLayout is rebuilt from scratch against Qt 6.11.1, the MSI was rebuilt from that tree, and `SeamlyLayout.exe` launches from the expanded install directory loading the shared `Qt6Core.dll 6.11.1.0` — exe and runtime are now the same Qt by construction, not by forward compatibility
+- [X] The MSI is ~187 MB because it still ships two full Qt runtimes (the shared parent 6.11.1 runtime in `…\Seamly2D\` plus SeamlyLayout's own copy in `…\Seamly2D\SeamlyLayout\`). Once SeamlyLayout is on 6.11.1, collapse to one shared runtime and drop the subfolder split (already a  30 subtask — verify the MSI size drops and `SeamlySuitePaths::locateSeamlyLayout()` still resolves) — **measured 2026-07-25: 186.8 MB → 165.3 MB, a 21.5 MB / 11.5% drop.** Smaller than a naive "one runtime instead of two" estimate suggests, because the surviving shared runtime must still carry Qt WebEngine (its `.pak` locale resources and `QtWebEngineProcess.exe` dominate the payload) — what the collapse removes is the duplicated Qt core/GUI/QML DLL set, not WebEngine. Layout confirmed: one `Qt6Core.dll` in staging, no `layout\` tree, and the expanded install directory is flat with no `SeamlyLayout\` subdirectory, so `locateSeamlyLayout()`'s flat-layout branch is the one that resolves
 - [X] Update the `smsi.ps1` docstring, `packaging/windows/README.md`, and `packaging/windows/README_WINDOWS_BUILD.md` once the Qt-kit detection is fixed, so the "install Qt 6.10.x or pass `-WinDeployQt6`" guidance no longer points at the retired 6.10 kit — all three updated: the `smsi.ps1` `.PARAMETER WinDeployQt6` block and staging-layout docstring describe the CMakeCache-based detection and the single merged runtime; `README.md`'s prerequisites now say Qt 6.11.1 (and that the kit needs the WebEngine dependency modules); `README_WINDOWS_BUILD.md` §3.1–3.3 are marked **RESOLVED** with what replaced them, and §2 documents that the plain default invocation now works
 
-## Task 44 — Local Qt 6.11.1 kit is missing `qtwebchannel` + `qtpositioning`, blocking any SeamlyLayout build (found doing Task 30, 2026-07-25) (completed 2026-07-25)
+##  44 — Local Qt 6.11.1 kit is missing `qtwebchannel` + `qtpositioning`, blocking any SeamlyLayout build (found doing  30, 2026-07-25) (completed 2026-07-25)
 
 The developer PC has Qt **6.11.1** `msvc2022_64` with **Qt WebEngine** installed, but **not** the two modules Qt WebEngine itself depends on. `C:\Qt\6.11.1\msvc2022_64\lib\cmake\Qt6WebEngineCore\Qt6WebEngineCoreDependencies.cmake` declares:
 
@@ -925,15 +756,15 @@ Qt6WebEngineQuick could not be found because dependency Qt6WebEngineCore could n
 CMake Error at CMakeLists.txt:41 (find_package): Failed to find required Qt component "WebEngineQuick".
 ```
 
-This is a **machine-setup gap, not a Qt 6.11 problem** — the same requirement is already handled in CI (`seamlylayout-ci.yml` and `windows-msi.yml` both pass `modules: qtwebengine qtwebchannel qtpositioning`, because `aqtinstall` does not auto-resolve a module's Qt dependencies either). The Qt online installer has the same behaviour: ticking **Qt WebEngine** does not pull in **Qt WebChannel** or **Qt Positioning**. It blocks the final verification subtask of **Task 30** and the rebuild subtasks of **Task 31**.
+This is a **machine-setup gap, not a Qt 6.11 problem** — the same requirement is already handled in CI (`seamlylayout-ci.yml` and `windows-msi.yml` both pass `modules: qtwebengine qtwebchannel qtpositioning`, because `aqtinstall` does not auto-resolve a module's Qt dependencies either). The Qt online installer has the same behaviour: ticking **Qt WebEngine** does not pull in **Qt WebChannel** or **Qt Positioning**. It blocks the final verification subtask of ** 30** and the rebuild subtasks of ** 31**.
 
 - [X] Install **Qt WebChannel** and **Qt Positioning** for the Qt 6.11.1 `msvc2022_64` kit (Qt Maintenance Tool → Add or remove components → Qt 6.11.1 → MSVC 2022 64-bit → Additional Libraries, or `MaintenanceTool` CLI with a Qt Account), then confirm `C:\Qt\6.11.1\msvc2022_64\lib\cmake\Qt6WebChannel\` and `...\Qt6Positioning\` exist — installed 2026-07-25 via the CLI: `C:\Qt\MaintenanceTool.exe install qt.qt6.6111.addons.qtwebchannel qt.qt6.6111.addons.qtpositioning --accept-licenses --accept-obligations --confirm-command --default-answer` (it logs in with the stored Qt Account and reports "Components installed successfully"). **Name the parent packages, not the `….win64_msvc2022_64` leaves** — those are virtual and the tool rejects them with *"Cannot install … Component is virtual"*; the parent selects the right arch child for the installed kit. Both CMake config packages now exist (`Qt6WebChannel`, `Qt6WebChannelPrivate`, `Qt6WebChannelQuick`, `Qt6WebChannelQuickPrivate`, `Qt6Positioning`, `Qt6PositioningPrivate`, `Qt6PositioningQuick`, `Qt6PositioningQuickPrivate`)
-- [X] Re-run the SeamlyLayout release build (`cmake --preset release -DCMAKE_PREFIX_PATH=C:/Qt/6.11.1/msvc2022_64` + `cmake --build --preset release`) and confirm `find_package(Qt6 6.11.1 ... WebEngineQuick)` now succeeds and `SeamlyLayout.exe` links — run through `scripts\sb.ps1 -SkipParents` (which delegates to `src/app/seamlylayout/build.ps1`, the wrapper that also pins `QMAKE`/`PATH` for Cargo per Task 47): configure succeeds, Corrosion rebuilds `cxxqt_bridge`, and the build ends `[86/86] Linking CXX executable SeamlyLayout.exe`
-- [X] Close out the blocked items: **Task 30**'s final verify subtask (run the app, QML/WebEngine load path, seamly2d → seamlyLayout handoff, MSI rebuild + single-shared-runtime install check) and **Task 31**'s rebuild/size subtasks — all closed; see those tasks for the measurements. The one item that could **not** be closed is the handoff *rendering*, which turned out to be an unrelated pre-existing gap in SeamlyLayout's argument handling — logged as **Task 49**
+- [X] Re-run the SeamlyLayout release build (`cmake --preset release -DCMAKE_PREFIX_PATH=C:/Qt/6.11.1/msvc2022_64` + `cmake --build --preset release`) and confirm `find_package(Qt6 6.11.1 ... WebEngineQuick)` now succeeds and `SeamlyLayout.exe` links — run through `scripts\sb.ps1 -SkipParents` (which delegates to `src/app/seamlylayout/build.ps1`, the wrapper that also pins `QMAKE`/`PATH` for Cargo per  47): configure succeeds, Corrosion rebuilds `cxxqt_bridge`, and the build ends `[86/86] Linking CXX executable SeamlyLayout.exe`
+- [X] Close out the blocked items: ** 30**'s final verify subtask (run the app, QML/WebEngine load path, seamly2d → seamlyLayout handoff, MSI rebuild + single-shared-runtime install check) and ** 31**'s rebuild/size subtasks — all closed; see those tasks for the measurements. The one item that could **not** be closed is the handoff *rendering*, which turned out to be an unrelated pre-existing gap in SeamlyLayout's argument handling — logged as ** 49**
 - [X] Record the module requirement so it is not rediscovered: added to the root `CLAUDE.md` build-notes section and the `.github/README-BUILDS.md` toolchain section (with the exact `find_package` error text), and to `packaging/windows/README.md`'s prerequisites
 - [X] Consider making the requirement fail fast and legibly: have `src/app/seamlylayout/build.ps1` check for `lib\cmake\Qt6WebChannel` / `Qt6Positioning` in the kit it selects and error with the install instructions, instead of letting CMake emit the indirect "dependency Qt6WebEngineCore could not be found" message — added next to the existing `mkspecs` guard: the script checks `lib\cmake\{Qt6WebEngine,Qt6WebChannel,Qt6Positioning}` in the selected kit and, if any is absent, aborts naming exactly which module(s) are missing plus both install routes (Maintenance Tool GUI path and the `MaintenanceTool.exe install` command line, including the "name the parent package, not the virtual `.win64_msvc2022_64` child" trap)
 
-## Task 48 — qmake post-link runs a bare `windeployqt`, deploying the WRONG Qt runtime beside the exes (found doing Task 30, 2026-07-25) (completed 2026-07-25)
+##  48 — qmake post-link runs a bare `windeployqt`, deploying the WRONG Qt runtime beside the exes (found doing  30, 2026-07-25) (completed 2026-07-25)
 
 **Severity: produces a broken build tree that would be packaged into the MSI.**
 
@@ -947,7 +778,7 @@ win32-msvc{
 }
 ```
 
-On this machine both `windeployqt` and `windeployqt6` on `PATH` resolve to Qt Design Studio's reduced kit (see **Task 47**), which is **Qt 6.8.7**:
+On this machine both `windeployqt` and `windeployqt6` on `PATH` resolve to Qt Design Studio's reduced kit (see ** 47**), which is **Qt 6.8.7**:
 
 ```text
 windeployqt  -> C:\Qt\Tools\QtDesignStudio\qt6_design_studio_reduced_version\bin\windeployqt.exe
@@ -973,10 +804,10 @@ win32-arm64-msvc{
 - [X] Change the `win32-msvc` branch in `src/app/seamly2d/seamly2d.pro`, `src/app/seamlyme/seamlyme.pro` and `src/test/Seamly2DTest/Seamly2DTest.pro` to use `qtPrepareTool(WINDEPLOYQT, windeployqt)` + `$$WINDEPLOYQT`, matching the `win32-arm64-msvc` branch, so the deploy tool always comes from the Qt that qmake belongs to rather than from `PATH` — all three changed, each with a comment explaining why the bare name is unsafe. The x64 branch needs no `--qtpaths` argument (that is an arm64 cross-build concern); `qtPrepareTool` alone is the fix
 - [X] Rebuild the parents and confirm the deployed `Qt6Core.dll` matches the kit that compiled them (expect `6.11.1.0`), and that `seamly2d.exe` and `seamlyme.exe` actually start from `build/src/app/<app>/bin` — clean `scripts\sb.ps1 -Clean` rebuild: both `build\src\app\seamly2d\bin\Qt6Core.dll` and `...\seamlyme\bin\Qt6Core.dll` now report FileVersion **`6.11.1.0`** (was `6.8.7.0`), and both exes launch from their `bin` directories and stay up
 - [X] Add a guard to `scripts/sb.ps1` (and consider `scripts/sd.ps1`): after the build, compare the deployed `Qt6Core.dll` FileVersion against the selected kit's and fail loudly on a mismatch — this bug was invisible until the DLL version was checked by hand — added to both. `sb.ps1` gets an `Assert-DeployedQtVersion` helper run over both parent `bin` dirs; `sd.ps1` checks its debug `Qt6Cored.dll` inline. Both compare only major.minor.patch against `qmake -query QT_VERSION` (Qt DLLs carry a fourth `0` field) and throw naming both versions, the likely Design Studio cause, and the fix. Also fixed a latent bug found by the rebuild: `sb.ps1` splatted an **array** into `build.ps1` (`@('-Preset','release','-NoRun')`), which passes elements positionally, so the layout step died on `ValidateSet` — now a hashtable splat
-- [X] Re-verify the Windows MSI once the parents deploy a matching runtime, and correct any claim in `packaging/windows/README_WINDOWS_BUILD.md` about which Qt the 2026-07-23 MSI actually shipped — MSI rebuilt from the fixed trees (see Task 30's verify item for size/contents). `README_WINDOWS_BUILD.md` gains **§3.4** describing the bug and its fix, and states plainly that the 2026-07-23 MSI's parent runtime came from a `PATH`-resolved `windeployqt`, so which Qt it shipped is **not** determined by that build and cannot be reconstructed now that the tree has been wiped — the 186.8 MB figure records the two-runtime layout only, not a Qt version
+- [X] Re-verify the Windows MSI once the parents deploy a matching runtime, and correct any claim in `packaging/windows/README_WINDOWS_BUILD.md` about which Qt the 2026-07-23 MSI actually shipped — MSI rebuilt from the fixed trees (see  30's verify item for size/contents). `README_WINDOWS_BUILD.md` gains **§3.4** describing the bug and its fix, and states plainly that the 2026-07-23 MSI's parent runtime came from a `PATH`-resolved `windeployqt`, so which Qt it shipped is **not** determined by that build and cannot be reconstructed now that the tree has been wiped — the 186.8 MB figure records the two-runtime layout only, not a Qt version
 - [X] Check whether the macOS `macdeployqt` post-link (`seamly2d.pro`, around line 363) has the same PATH-resolution exposure — it uses `$$[QT_INSTALL_BINS]/macdeployqt`, which looks correct, but confirm — **confirmed safe.** All three macOS call sites are absolute: `seamly2d.pro:359` and `:363` (the `!macSign` and `macSign` branches) and `seamlyme.pro:242` all invoke `$$[QT_INSTALL_BINS]/macdeployqt`, which resolves from the Qt qmake belongs to. No bare `macdeployqt` anywhere in the tree
 
-## Task 20 — GitHub workflow to build seamlylayout on push (Qt 6.10) (2026-07-21)
+##  20 — GitHub workflow to build seamlylayout on push (Qt 6.10) (2026-07-21)
 
 New standalone, path-filtered workflow `.github/workflows/seamlylayout-ci.yml` builds the seamlyLayout daughter app (Rust core + Qt 6.10 QML frontend) and runs its tests on `ubuntu-latest`, kept fully independent of `ci.yml` (which pins Qt 6.8.3 for seamly2d/seamlyme) until the whole suite moves to Qt 6.10.
 
@@ -986,11 +817,11 @@ New standalone, path-filtered workflow `.github/workflows/seamlylayout-ci.yml` b
 - [X] Run the seamlylayout unit tests (Rust tests and the Qt frontend tests, e.g. `PreferencesModelTests`) in the workflow — `xvfb-run -a ctest --preset debug --output-on-failure` (AdjustScene/AdjustController/PreferencesModel/SettingsModel suites) and `cargo test --workspace` (Rust core crates)
 - [X] Keep the job independent of the Qt 6.8.3 seamly2d/seamlyme jobs so a seamlylayout failure doesn't block them (and vice versa); use path filters so it only runs when seamlylayout files change — a separate workflow file with its own triggers achieves full independence; path filters on `src/app/seamlylayout/**` (+ the workflow file) scope it to seamlylayout changes only
 - [X] Note the future consolidation in the workflow comments: when seamly2d/seamlyme move to Qt 6.10, merge this into the shared CI toolchain — recorded in the workflow's header comment block and the `QT_VERSION` env comment
-- [X] Document the new workflow in `.github/README-BUILDS.md` and `.github/workflows/README_WORKFLOWS.md` — added a "Continuous integration (CI)" section (two-workflow table + rationale) to `README-BUILDS.md` and a "SeamlyLayout CI" subsection to `README_WORKFLOWS.md`; refreshed the two stale "Task 20 (still open)" references in `README-BUILDS.md`
+- [X] Document the new workflow in `.github/README-BUILDS.md` and `.github/workflows/README_WORKFLOWS.md` — added a "Continuous integration (CI)" section (two-workflow table + rationale) to `README-BUILDS.md` and a "SeamlyLayout CI" subsection to `README_WORKFLOWS.md`; refreshed the two stale " 20 (still open)" references in `README-BUILDS.md`
 - [X] Cross-platform build fixes surfaced by the first CI runs (the app had only ever been built on Windows): (1) added the WebEngine module deps above; (2) the Linux/macOS final link failed with "cannot open output file SeamlyLayout: Is a directory" because the `qt_add_qml_module` URI equals the executable target name — on Windows the `.exe` suffix avoids the clash, elsewhere the module's `SeamlyLayout/` dir collides with the binary. Fixed by giving the QML module a distinct `OUTPUT_DIRECTORY` (`qml_modules/SeamlyLayout`), keeping the leaf name so `import SeamlyLayout` still resolves; runtime QML still loads from compiled-in resources. Verified with a local Windows debug build (relinks `SeamlyLayout.exe`, module now under `qml_modules/`)
 - [X] Verified by the workflow's own run on PR #15 → `run-seamlyLayout`: **all steps green** (configure+build, `ctest`, `cargo test --workspace`) in 7m23s once the two fixes above landed
 
-## Task 15 — Unify app settings/preferences directories under one `Seamly` folder (Windows) (2026-07-20)
+##  15 — Unify app settings/preferences directories under one `Seamly` folder (Windows) (2026-07-20)
 
 Organization name unified to `"Seamly"` everywhere (`VER_COMPANYNAME_STR` in `src/libs/vmisc/projectversion.h`, `app.setOrganizationName("Seamly")` in `src/app/seamlylayout/qt_frontend/main.cpp`), so every app now gets its own directory nested under one shared organization folder: `AppData\Local\Seamly\Seamly2D`, `...\Seamly\SeamlyMe`, `...\Seamly\SeamlyLayout` on Windows.
 
@@ -1001,12 +832,12 @@ Organization name unified to `"Seamly"` everywhere (`VER_COMPANYNAME_STR` in `sr
   - A real bug was caught via the actual build+run (not the IDE's stale clangd diagnostics, which were noise throughout this task): `QFile::copy()` never creates missing parent directories, and the brand-new `"Seamly"` organization folder does not exist on the very first run after upgrading — fixed by adding `QDir().mkpath(dir)` before every copy attempt in `application_2d.cpp`, `application_me.cpp`, and `qttestmainlambda.cpp`
 - [X] One-time user notice: `VAbstractApplication::NotifySeamlySettingsMigrated()` shown only in confirmed GUI mode, after command-line parsing (never during a headless CLI export or an automated test, since `isAppInGUIMode()`/`m_testMode` aren't reliable until after `VCommandLine::Get()`/`parseCommandLine()` run); seamlyLayout's Inno Setup upgrade-guard dialog (`SeamlyLayout.iss`) also mentions the org-folder rename
 - [X] seamlyLayout's exe-relative `settings\` directory was already read-only (a legacy-migration source only, confirmed by an audit of every `applicationDirPath()` use in the tree) — no code change needed, only documentation
-- [X] Installers/packaging updated: `SeamlyLayout.iss` (runtime-folder comment block + `CurPageChanged` upgrade-guard dialog now also detects the legacy `"Seamly Systems"` folder) and `build_installer.ps1` comments; Task 13's MSI installer doesn't exist yet, so nothing to update there
+- [X] Installers/packaging updated: `SeamlyLayout.iss` (runtime-folder comment block + `CurPageChanged` upgrade-guard dialog now also detects the legacy `"Seamly Systems"` folder) and `build_installer.ps1` comments;  13's MSI installer doesn't exist yet, so nothing to update there
 - [X] No test code changes needed: no test hardcoded the old organization-name-derived paths; `qttestmainlambda.cpp`'s `TestApplication2D::openSettings()` was updated to mirror `Application2D::openSettings()` so the suite keeps resolving settings the way the real app does, with the migration notice always suppressed (null out-parameter) since a modal dialog would hang an automated run. Automated coverage for the real cross-organization `AppConfigLocation` bridge was deliberately left to manual/build verification rather than a unit test, since exercising it for real means mutating global `QCoreApplication::organizationName()` and touching real OS user-profile directories — judged not worth the hermeticity risk for a non-destructive, copy-if-missing migration
 - [X] Doxygen briefs + inline comments on all touched functions; `.github/README-BUILDS.md`'s settings-storage section rewritten to describe the actual current-state mechanism (including the corrected Roaming-vs-Local nuance the original doc had missed) instead of the old three-scattered-locations description
 - [X] Verified end-to-end on Windows with the real, pre-existing legacy data on this machine (not synthetic fixtures): `scripts/sd.ps1` debug build + `scripts/st.ps1` (31,443 passed / 0 failed, 23 suites); seamlyLayout Qt frontend debug build + `ctest` (4/4 suites passed) + `cargo test --workspace` (251 passed / 0 failed); ran the real `seamly2d`, `seamlyme`, and `SeamlyLayout` executables and confirmed each app's migrated settings file is byte-identical to its legacy source, with the legacy files left untouched in place
 
-## Task 27 — Fix the 7 pre-existing seamlylayout Rust test failures (layout_tiling, polygon_pack) (2026-07-20)
+##  27 — Fix the 7 pre-existing seamlylayout Rust test failures (layout_tiling, polygon_pack) (2026-07-20)
 
 All 7 failures (3 `layout_tiling`, 4 `polygon_pack`) diagnosed and fixed; `cargo test --workspace` now passes 251/251 (the suite gained one test).
 
@@ -1017,27 +848,27 @@ All 7 failures (3 `layout_tiling`, 4 `polygon_pack`) diagnosed and fixed; `cargo
   - `tiled_svg_col_resets_per_row`: row 2's `d` does start at minX=24; the test expected the old f64 `"M 24.0000,"` formatting but coordinates are integer pixels (`u32`) — now expects `"M 24,"`
 - [X] `polygon_pack` — all 4 shared one **code regression** in `placer.rs`: the OBB fast path accepted the *first* SAT-clear anchor among only the four IFP corner vertices, slamming every piece after the first into the bin's top-RIGHT corner (x=90/95/88 in the failures) instead of packing flush, and letting a 45° corner anchor spuriously beat 0°. Fixed: the fast path now accepts only the IFP's UL-lex-min corner (provably optimal for the orientation when SAT-clear) and otherwise falls through to the exact NFP path; the complexity-guardrail branches got a degraded corner-fallback so complex garments still place when the exact path is bypassed; anchor scoring is unified in a `consider_anchor` helper
 - [X] Verified with the richmond test pattern via a temporary test program driving `svg_extract` → `pack_polygons` on `input/richmond-shirt_this_one.svg`: the 5 small pieces (placket/pocket/cuff/flap, ≤11 verts) pack flush left-to-right with exact 5 px gaps and no overlaps. Known Stage-1 limitation surfaced (pre-existing, unchanged): exact NFP pair computation costs ~1 s/pair on 25+-vertex outlines, so the full 11-piece garment exceeds the placer's 4 s budget → `SearchLimit`. Not user-facing: `packing::pack_pieces`/`pack_polygons` route every trial set the app can produce ({0}, {180}, {0,180}, and even non-orthogonal sets) to the MaxRects packers — the NFP placer is unwired Stage-1 code for future rotation work
-- [X] `cargo test --workspace` clean: 251 passed / 0 failed; all 4 Qt frontend ctest suites pass after rebuild. The Task 20 CI workflow's checklist already includes running the Rust workspace tests, which will catch future drift on push
+- [X] `cargo test --workspace` clean: 251 passed / 0 failed; all 4 Qt frontend ctest suites pass after rebuild. The  20 CI workflow's checklist already includes running the Rust workspace tests, which will catch future drift on push
 - [X] Doxygen-style briefs + inline comments on all touched functions per the seamlylayout rules
 
-## Task 29 — Dependabot: update the `time` crate in seamlylayout (GHSA-r6v5-fh4h-64xc) (2026-07-20)
+##  29 — Dependabot: update the `time` crate in seamlylayout (GHSA-r6v5-fh4h-64xc) (2026-07-20)
 
 GitHub Dependabot alert #1 (moderate): `time` 0.3.46 in `src/app/seamlylayout/Cargo.lock` fell in the vulnerable range `>= 0.3.6, < 0.3.47` (stack-exhaustion DoS, [GHSA-r6v5-fh4h-64xc](https://github.com/advisories/GHSA-r6v5-fh4h-64xc)).
 
 - [X] Identified the dependency chain with `cargo tree -i time`: `time` is pulled in transitively via `lopdf v0.32.0` ← `cxxqt_bridge` (workspace crate)
 - [X] `cargo update -p time` updated the lockfile: `time` 0.3.46 → 0.3.53 (≥ 0.3.47 patched), plus its own transitive companions `time-core` 0.1.8→0.1.9, `time-macros` 0.2.26→0.2.31, `deranged` 0.5.5→0.5.8, `num-conv` 0.2.0→0.2.2 — all semver-compatible lockfile-only bumps, no `Cargo.toml` changes
-- [X] Rebuilt and ran the tests: `cargo test --workspace --no-fail-fast` — 243 passed, 7 failed, and the 7 are exactly the pre-existing Task 27 set (3 `layout_tiling`, 4 `polygon_pack`), nothing new; Qt frontend Debug build (CMake/Ninja, links the updated Rust bridge) + all 4 ctest suites pass (AdjustScene, AdjustController, PreferencesModel, SettingsModel)
-- [X] Committed the updated `Cargo.lock` on the task branch (pushed via the combined Task 28/29/27 PR); Dependabot [alert #1](https://github.com/seamly/Seamly2D/security/dependabot/1) to be confirmed auto-resolved after the merge
+- [X] Rebuilt and ran the tests: `cargo test --workspace --no-fail-fast` — 243 passed, 7 failed, and the 7 are exactly the pre-existing  27 set (3 `layout_tiling`, 4 `polygon_pack`), nothing new; Qt frontend Debug build (CMake/Ninja, links the updated Rust bridge) + all 4 ctest suites pass (AdjustScene, AdjustController, PreferencesModel, SettingsModel)
+- [X] Committed the updated `Cargo.lock` on the task branch (pushed via the combined  28/29/27 PR); Dependabot [alert #1](https://github.com/seamly/Seamly2D/security/dependabot/1) to be confirmed auto-resolved after the merge
 
-## Task 28 — Resolve the uncommitted whitespace-only changes to PreferencesModel.cpp/.h (2026-07-20)
+##  28 — Resolve the uncommitted whitespace-only changes to PreferencesModel.cpp/.h (2026-07-20)
 
-Left over from the Task 19 move: `src/app/seamlylayout/qt_frontend/src/PreferencesModel.cpp` and `.h` sat modified in the working tree with whitespace-only changes (trailing-space trims on a handful of comment lines — `git diff -w` showed no difference), most likely an editor trim-on-save when the files moved on disk.
+Left over from the  19 move: `src/app/seamlylayout/qt_frontend/src/PreferencesModel.cpp` and `.h` sat modified in the working tree with whitespace-only changes (trailing-space trims on a handful of comment lines — `git diff -w` showed no difference), most likely an editor trim-on-save when the files moved on disk.
 
 - [X] Decide: **kept the trims** — committed as a tiny whitespace cleanup on the task branch (removing trailing whitespace is strictly an improvement, and discarding would just let the editor re-trim them on the next save)
 - [X] Clean `git status` after the commit
 - [X] Re-dirtying risk checked: a trailing-whitespace scan of all `.cpp/.h/.rs/.qml` files under `src/app/seamlylayout` found zero remaining occurrences, so the subtree is already fully normalized — no follow-up normalization commit needed; future trim-on-save cannot re-dirty anything
 
-## Task 19 — Move seamlyLayout code from `/seamlyLayout` to `/src/app/seamlylayout` (2026-07-19)
+##  19 — Move seamlyLayout code from `/seamlyLayout` to `/src/app/seamlylayout` (2026-07-19)
 
 Relocated the daughter layout app into the standard app tree alongside `src/app/seamly2d` and `src/app/seamlyme`. It keeps its own build (Rust + Qt 6.10/QML) and stays out of the Seamly2D qmake build.
 
@@ -1045,14 +876,14 @@ Relocated the daughter layout app into the standard app tree alongside `src/app/
 
 - [X] Absorb the nested repo: archived `seamlyLayout/.git` to `C:\Users\susan\Projects\seamlyLayout-dotgit-archive` (it held a unique stash; `main` was fully pushed to `seamly/seamlyLayout`, which keeps the standalone history), moved the tree to `src/app/seamlylayout`, and added 309 curated files (the nested repo's tracked set minus `.vs\` IDE binaries, a stray `docs\status-docs\image\TODO\*.exe`, and `.vscode\extensions.json`)
 - [X] `.gitignore` coverage: the moved subtree keeps its own `src/app/seamlylayout/.gitignore` (still functional for `/target`, `/input`, `/output`, `/logs`, `qt_frontend/build/` etc.); the root `.gitignore` additionally lists the build outputs explicitly and re-includes `src/app/seamlylayout/docs/` past the global `docs/` ignore
-- [X] Updated all old-location references: root `CLAUDE.md`, `TODO.md`/`project-docs/PROJECT_PLAN.md` task text, `project-docs/TODO_COMPLETED.md`/`SESSION_HANDOVER.md`, `.github/README-BUILDS.md`, and the moved tree's own `.clangd` (clangd compile DB path), `qt_frontend/settings/preferences.json` (absolute input/layout/settings paths), `qt_frontend/build_debug.bat`, and its `CLAUDE.md` (the `~/seamlyLayout/` home-data paths in packaging/docs are user-data locations, untouched — Task 15 territory)
+- [X] Updated all old-location references: root `CLAUDE.md`, `TODO.md`/`project-docs/PROJECT_PLAN.md` task text, `project-docs/TODO_COMPLETED.md`/`SESSION_HANDOVER.md`, `.github/README-BUILDS.md`, and the moved tree's own `.clangd` (clangd compile DB path), `qt_frontend/settings/preferences.json` (absolute input/layout/settings paths), `qt_frontend/build_debug.bat`, and its `CLAUDE.md` (the `~/seamlyLayout/` home-data paths in packaging/docs are user-data locations, untouched —  15 territory)
 - [X] seamly2d-side references: updated the development-fallback path in `Application2D::seamlyLayoutFilePath()` (`src/app/seamly2d/core/application_2d.cpp`); the `paths/seamlyLayoutApp` setting is a user-configured value with no baked-in repo path, no change needed
 - [X] Confirmed qmake exclusion: `src/app/app.pro` SUBDIRS lists only `seamlyme` and `seamly2d`
 - [X] Verified the seamlyLayout build from the new location: build script is `src/app/seamlylayout/qd.ps1` (app root, not `qt_frontend/`); CMake configure + debug build + all 4 Qt frontend ctest suites pass (AdjustScene, AdjustController, PreferencesModel, SettingsModel); Rust workspace tests 244 passed / 7 failed — the 7 failures (3 `layout_tiling`, 4 `polygon_pack`) are pre-existing on the nested repo's `main` (crates byte-identical before/after the move), tracked as follow-up work, not caused by the relocation
 - [X] Verified a full Seamly2D build (`scripts/sd.ps1`) is unaffected — Debug build OK
 - [X] Updated `.github/README-BUILDS.md` and the seamlyLayout `CLAUDE.md` for the new paths
 
-## Task 23 — Fix the Seamly2DTests suite hanging at startup on Windows (local runs) (2026-07-18)
+##  23 — Fix the Seamly2DTests suite hanging at startup on Windows (local runs) (2026-07-18)
 
 The debug-built `Seamly2DTests.exe` appeared to hang at startup with no QTest output. **Root cause:** not a deadlock — Qt looks for the platform plugin (`platforms\qwindowsd.dll`) next to the *executable*, and windeployqt only deployed it next to `seamly2d.exe`; the resulting "no Qt platform plugin could be initialized" `qFatal` pops a hidden modal dialog in a debug-CRT build, which blocks forever with zero output.
 
@@ -1060,11 +891,11 @@ The debug-built `Seamly2DTests.exe` appeared to hang at startup with no QTest ou
 - [X] Fix it properly so the suite runs without manual env setup: `Seamly2DTest.pro` now post-links `windeployqt` on the test target plus the `copyToDestdir` xerces-c copy (mirroring `seamly2d.pro`), so the Qt runtime, `platforms\` plugin dir, and `xerces-c_3_3.dll` all land beside `Seamly2DTests.exe` — verified in both the debug (`seamly2d-build-debug\`) and release (`build\`) trees
 - [X] Identify and fix the 2 pre-existing local test failures — both in `TST_VPoster` (`BigPoster` 36≠12 pages, `SmallPoster` 4≠1): the tests sized their page grid from the *system default printer* (`setPageSize(pageLayout().pageSize())` is a no-op), and this machine's default printer uses a 5×7 in page (480×672 px at 96 DPI, allowance 38 px → exactly 6×6 and 2×2 grids). Fixed machine-independently by forcing `QPrinter::PdfFormat` + explicit A4 — the same configuration CI effectively runs with (no printers installed → PDF/A4 fallback), so CI behavior is unchanged
 - [X] Make the suite easy to run: `scripts/st.ps1` ("seamly2d tests", GPLv3 header + `.SYNOPSIS`, `sd.ps1` style) sets `PATH`/`QT_PLUGIN_PATH` as a fallback for old build trees, runs `Seamly2DTests.exe`, and works around the lost-stdout issue via `SEAMLY_TEST_LOG_DIR` — honored by `qttestmainlambda.cpp`, which appends a per-suite `-o <dir>/<Suite>.txt,txt` file logger (a single `-o` is overwritten by every `qExec`); the script aggregates the logs into a pass/fail table with full `FAIL!` details and exits with the suite's exit code; `-Release` runs the `build\` tree
-- [X] Verify: full suite passes locally in both trees — debug and release each 31,443 passed / 0 failed across 23 suites (exit code 0), including `TST_SvgTextItem` (Task 10) and `TST_SvgComponentTags` (Task 11); Windows test-run procedure documented in `.github/README-BUILDS.md`
+- [X] Verify: full suite passes locally in both trees — debug and release each 31,443 passed / 0 failed across 23 suites (exit code 0), including `TST_SvgTextItem` ( 10) and `TST_SvgComponentTags` ( 11); Windows test-run procedure documented in `.github/README-BUILDS.md`
 
 Note: if the release `build\` tree has stale per-subdir Makefiles (new sources missing → LNK2019), delete `build\src\**\Makefile*` and rebuild so qmake regenerates them.
 
-## Task 10 — Export label text as real SVG text (not paths or path outlines) (2026-07-18)
+##  10 — Export label text as real SVG text (not paths or path outlines) (2026-07-18)
 
 Labels exported as glyph outlines even with "text as paths" off: `QGraphicsSimpleTextItem` with a pen set paints text through a `QTextLayout` outline format, so `QSvgGenerator` never received a text draw call (0 `<text>` in the baseline).
 
@@ -1076,9 +907,9 @@ Labels exported as glyph outlines even with "text as paths" off: `QGraphicsSimpl
 - [X] Update the label bullet of the `data-*` contract in `project-docs/SVG-DATA-ATTRIBUTES.md` and the mirror in `src/app/seamlylayout/docs/status-docs/svg-data-attributes.md`
 - [X] Doxygen briefs + inline comments on all touched functions; unit tests `tst_svgtextitem.cpp` added to `Seamly2DTest` (`<text>` emission, font styling, multi-line, DXF-discovery cast) — run in CI (`linux-test`); the local Windows debug suite hangs at startup (pre-existing, unrelated)
 
-Note: the `textAsPaths == true` branch emits filled glyph *outlines*, which remains the behavior for outline fonts; an optional single-stroke (Hershey) alternative is tracked separately in Task 22.
+Note: the `textAsPaths == true` branch emits filled glyph *outlines*, which remains the behavior for outline fonts; an optional single-stroke (Hershey) alternative is tracked separately in  22.
 
-## Task 11 — Add `cut_path` to the SVG component groups (2026-07-18)
+##  11 — Add `cut_path` to the SVG component groups (2026-07-18)
 
 A cut path is a closed internal path that is cut out of the piece and can have its own seam allowance. The data model already separated them (`VLayoutPiecePath::isCutPath()`; stored as `m_cutoutPaths` on `VLayoutPiece`), but `createCutoutPathItem()` (`src/libs/vlayout/vlayoutpiece.cpp`) tagged them `internal_path` as a placeholder because the SVG spec defined no dedicated type.
 
@@ -1086,21 +917,21 @@ A cut path is a closed internal path that is cut out of the piece and can have i
 - [X] Add `cut_path` to the type list in `project-docs/NEW-ATTRIBUTES.csv` and document its semantics (closed, cut out, may carry a seam allowance) in `project-docs/SVG-DATA-ATTRIBUTES.md` and the mirror in `src/app/seamlylayout/docs/status-docs/svg-data-attributes.md`
 - [X] Verify export with a pattern containing a cutout internal path (richmond has none — verified with a copy of the richmond pattern with the "Left Cut" internal path of piece "Front" flipped to `cut="true"`, CLI `--format 0 --exportOnlyDetails`): the cutout appears as `piece-1-cut_path-1` (`data-type="cut_path"`, own counter starting at 1, `data-parent="piece-1"`), the piece's 4 plain internal paths keep `data-type="internal_path"` with their own counter, all other pieces unaffected
 - [X] Regression: tagged SVG inspection passes (all 12 pieces, ids/counters/parents correct); the CLI export writes the same `*_pieces.svg` the Layout Mode handoff uses (same `GetItem()` → `SvgGenerator` path), so `.pieces.svg` carries the new type; PDF and PNG exports of the cutout pattern succeed, and DXF/PDF/PNG never read `PieceItemData::ItemType`, so they are unaffected by the tag change
-- [X] Doxygen briefs + inline comments on all touched functions; unit tests `tst_svgcomponenttags.cpp` added to `Seamly2DTest` (item-tree tagging: 1× internal_path + 2× cut_path; end-to-end `SvgGenerator` export: ids, per-type counters, `data-parent`) — all pass locally (run with `QT_PLUGIN_PATH` set per the Task 23 root-cause finding; verified via the QTest file logger) and run in CI (`linux-test`)
+- [X] Doxygen briefs + inline comments on all touched functions; unit tests `tst_svgcomponenttags.cpp` added to `Seamly2DTest` (item-tree tagging: 1× internal_path + 2× cut_path; end-to-end `SvgGenerator` export: ids, per-type counters, `data-parent`) — all pass locally (run with `QT_PLUGIN_PATH` set per the  23 root-cause finding; verified via the QTest file logger) and run in CI (`linux-test`)
 
-## Task 0 — Setup
+##  0 — Setup
 
 - [X] Copy approved plan to `project-docs/PROJECT_PLAN.md`
 - [X] Create `TODO.md` and `project-docs/TODO_COMPLETED.md` tracking files
 - [X] Create project `CLAUDE.md` and `.claude/` settings
 - [X] Export baseline SVG from the test pattern via the installed Seamly2D CLI (`--format 0 --exportOnlyDetails`, measurements passed with `--mfile`) → `src/app/seamlylayout/input/richmond-shirt-baseline_pieces.svg` (then at `status-docs/baseline/`) (2026-07-17)
 
-## Task 1 — Shared data keys (`src/libs/vlayout/vlayoutdef.h`)
+##  1 — Shared data keys (`src/libs/vlayout/vlayoutdef.h`)
 
 - [X] Add `PieceItemData::Key` data-key enum (ObjectName / ItemType / PieceLetter) — wrapped in a namespace to avoid collision with `VDrawTool::ObjectName`
 - [X] Remove duplicated `static const int ObjectName = 0;` from `svg_generator.cpp` and `vlayoutpiece.cpp`
 
-## Task 2 — Restructure piece item tree (`src/libs/vlayout/vlayoutpiece.cpp` / `.h`)
+##  2 — Restructure piece item tree (`src/libs/vlayout/vlayoutpiece.cpp` / `.h`)
 
 - [X] `GetItem()`: root becomes empty container item; set ObjectName + PieceLetter data
 - [X] Add `createSeamlineItem()` child (from `createMainItem()` body), tag `"seamline"`; remove `createMainItem()`
@@ -1110,12 +941,12 @@ A cut path is a closed internal path that is cut out of the piece and can have i
 - [X] `VLayoutPiece::Create`: store piece letter in `VLayoutPieceData` with getter/setter
 - [X] Doxygen briefs + inline comments on all touched functions
 
-## Task 3 — DXF text traversal guard (`src/app/seamly2d/mainwindowsnogui.cpp`)
+##  3 — DXF text traversal guard (`src/app/seamly2d/mainwindowsnogui.cpp`)
 
 - [X] Make `PrepareTextForDXF` / `RestoreTextAfterDXF` scan descendants recursively (shared `collectTextItems()` helper)
 - [X] Fix pre-existing `paperItems.at(i)` → `.at(j)` bug
 
-## Task 4 — SvgGenerator data-* attributes (`src/libs/vformat/svg_generator.cpp` / `.h`)
+##  4 — SvgGenerator data-* attributes (`src/libs/vformat/svg_generator.cpp` / `.h`)
 
 - [X] Constructor: add `patternName` param; members `m_patternName`, `m_pieceCount`
 - [X] Factor render block into `renderSceneToDom(QGraphicsScene*)`
@@ -1125,31 +956,31 @@ A cut path is a closed internal path that is cut out of the piece and can have i
 - [X] Robustness: remove all `M0,0`/empty-`d` paths; fix nested empty-group removal; clean origin paths before empty groups
 - [X] Doxygen briefs + inline comments on all touched functions
 
-## Task 5 — Export callers (`src/app/seamly2d/mainwindowsnogui.cpp`)
+##  5 — Export callers (`src/app/seamly2d/mainwindowsnogui.cpp`)
 
 - [X] Pass `doc->GetPatternName()` to `SvgGenerator` in both `exportSVG` overloads
 
-## Task 6 — Programmatic tagged-SVG generation (`src/app/seamly2d/mainwindowsnogui.cpp` / `.h`)
+##  6 — Programmatic tagged-SVG generation (`src/app/seamly2d/mainwindowsnogui.cpp` / `.h`)
 
 - [X] Factor dialog-independent core out of `exportPiecesAsFlatLayout()` (`arrangePieceItemsFlat()`)
 - [X] Add `generatePiecesSvg(const QString &filePath)` producing the tagged SVG from `pieceList` (text kept as real text; success checked via the file on disk)
 
-## Task 9 — Launch SeamlyLayout development build from Layout Mode (branch `run-seamlyLayout`)
+##  9 — Launch SeamlyLayout development build from Layout Mode (branch `run-seamlyLayout`)
 
 - [X] Layout Mode buttons run `C:\Users\susan\Projects\Seamly2D-private\src\app\seamlylayout\qt_frontend\build\Debug\SeamlyLayout.exe`: added the development-build location as a lookup fallback in `Application2D::seamlyLayoutFilePath()` (after the settings override and the install-directory check)
 - [X] Doxygen brief + inline comments updated on the touched function
 
-## Task 8 — Verification (2026-07-17)
+##  8 — Verification (2026-07-17)
 
 - [X] Build `vlayout`, `vformat`, `seamly2d` — built clean on branch `run-seamlyLayout` (which carries the `svg-update` work) with qmake + jom, Qt 6.10.1 msvc2022_64 kit and the MSVC toolset from VS 18 Community (the only Qt/VS installed on this machine); all apps, libs and tests link
 - [X] Layout Mode click produces tagged SVG; SeamlyLayout launches with it — verified in the running GUI (Shift+L on the loaded richmond test pattern): `<basename>.pieces.svg` written beside the pattern file, SeamlyLayout development build launched detached with the SVG path as its argument, and the generated SVG passes the full structural inspection
 - [X] Manual SVG exports carry the attributes — CLI `--format 0 --exportOnlyDetails` with and without `--text2paths`, both fully tagged (12 pieces; seamline/cutline/internal_path/grainline/piece_label/pattern_label groups)
 - [X] SVG inspection — script-verified: every group under `pattern-1` has `data-type`/`data-type-number`/`data-parent`, pattern/piece groups carry `data-name`, per-type counters and structured ids correct, all ids unique, no empty groups, no `M0,0`/empty-`d` paths
 - [X] Visual diff vs baseline (`src/app/seamlylayout/input/richmond-shirt-baseline_pieces.svg`, then at `status-docs/baseline/`) — canvas/viewBox identical; all 53 geometry paths (seamlines, cutlines, internal paths, grainlines) byte-identical; stroke colors/line weights identical; only the 64 label glyph-outline paths differ (font outline rendering of the older installed baseline build), same count/colors/placement
-- [X] DXF / PDF / PNG export regression — flat DXF (AC1027) has 2305 polylines including label outlines (validates the recursive text traversal of Task 3), AAMA DXF keeps 34 TEXT label entities, PDF valid (%PDF-1.4, proper EOF), PNG valid 7318×3423
+- [X] DXF / PDF / PNG export regression — flat DXF (AC1027) has 2305 polylines including label outlines (validates the recursive text traversal of  3), AAMA DXF keeps 34 TEXT label entities, PDF valid (%PDF-1.4, proper EOF), PNG valid 7318×3423
 - [X] `data-*` contract documented in `project-docs/SVG-DATA-ATTRIBUTES.md` and mirrored to `src/app/seamlylayout/docs/status-docs/svg-data-attributes.md`
 
-## Task 12 — Local debug-build script for seamly2d (Qt 6.10.x + VS 18 Community) (2026-07-17)
+##  12 — Local debug-build script for seamly2d (Qt 6.10.x + VS 18 Community) (2026-07-17)
 
 - [X] Create `scripts/sd.ps1` (s-prefix naming rule; "seamly2d debug", mirroring seamlyLayout's `qd.ps1`) with the project's GPLv3-or-later header (2026 Seamly2D Project, slspencer) and inline comments
 - [X] Auto-locate the newest Qt `6.10.x\msvc2022_64` kit under `C:\Qt` and the VS 18 Community `vcvars64.bat`; fail early with a clear message naming what is missing (vcvars output — including the harmless vswhere warning — is suppressed; failure still caught via exit code)
@@ -1157,7 +988,7 @@ A cut path is a closed internal path that is cut out of the piece and can have i
 - [X] Verified end-to-end on this machine: debug `seamly2d.exe` (29.7 MB, `-MDd`) lands in `seamly2d-build-debug\src\app\seamly2d\bin\` with the Qt debug DLLs (Qt6Cored.dll, Qt6Guid.dll, Qt6Widgetsd.dll, ...) deployed by the windeployqt post-link step, and the executable launches to its main window
 - [X] Usage documented: `.SYNOPSIS`/`.DESCRIPTION`/`.EXAMPLE` comment-based help in the script (incl. optional `-Run` switch to launch after build); `CLAUDE.md` gained a "Build Notes" section mentioning the script
 
-## Task 7 — Rewire Layout Mode entry (`src/app/seamly2d/mainwindow.cpp`, `core/application_2d.*`)
+##  7 — Rewire Layout Mode entry (`src/app/seamly2d/mainwindow.cpp`, `core/application_2d.*`)
 
 - [X] `showLayoutMode()`: guards + `preparePiecesForLayout` kept; `exportPiecesToSeamlyLayout()` writes `<basename>.pieces.svg` beside the pattern file (replaces the built-in layout-settings auto-click)
 - [X] Add `seamlyLayoutFilePath()` to `Application2D` (settings override first, then app directory) + `paths/seamlyLayoutApp` settings key with getter/setter
@@ -1166,7 +997,7 @@ A cut path is a closed internal path that is cut out of the piece and can have i
 - [X] Error dialogs for unsaved pattern / failed generation / missing executable; on failure `showLayoutMode()` reverts to the prior mode (`exportPiecesToSeamlyLayout()` returns bool)
 - [X] Doxygen briefs + inline comments on all touched functions
 
-## Task 58 — Migrate the SeamlyLayout tests to `src/test/SeamlyLayoutTest`
+##  58 — Migrate the SeamlyLayout tests to `src/test/SeamlyLayoutTest`
 
 Every other app in the suite keeps its tests under `src/test/` — `Seamly2DTest` (which holds the seamly2d *and* seamlyme suites), `ParserTest`, `TranslationsTest`, `CollectionTest` — but SeamlyLayout's tests live inside the app tree at `src/app/seamlylayout/qt_frontend/tests/`. Migrating the app into the Seamly2D structure (this file's purpose) means its tests belong in the same place as the rest of the suite's, at **`src/test/SeamlyLayoutTest`**. Write the migration plan first, then carry it out.
 
@@ -1189,17 +1020,17 @@ Every other app in the suite keeps its tests under `src/test/` — `Seamly2DTest
 - [X] Confirm `src/test/test.pro` is untouched and that nothing in the qmake tree (`Seamly.pro`, `test.pro`) globs subdirectories, so the new directory cannot be pulled into the parent build — confirmed: `test.pro` is byte-for-byte unchanged, and all three `SUBDIRS` lists (`Seamly.pro` → `src out`; `src/src.pro` → `libs app test`; `src/test/test.pro` → the four qmake suites) are explicit literals. There is no `$$files()`, wildcard, or glob anywhere in the `.pro` tree, so `SeamlyLayoutTest` cannot be picked up by the qmake build
 - [X] Extend the `seamlylayout-ci.yml` path filters — both the `push` and the `pull_request` triggers are limited to `src/app/seamlylayout/**`, so after the move a test-only change would trigger **no** CI at all; add `src/test/SeamlyLayoutTest/**` to both — added to both triggers, and the workflow's "Independent triggers" header comment updated to describe the two-path filter
 - [X] Check the reverse direction too: confirm a change under `src/test/SeamlyLayoutTest/**` does not need to trigger `ci.yml`'s parent-app jobs (the parents never compile these files), and note the finding — **no change needed, for two independent reasons.** `ci.yml` has no `paths:` filter at all (it triggers on every `pull_request`, and on `push` to `develop`/`feat-*`), so nothing there can be starved by the move. And even when it runs, its `make check` only builds `src/test/test.pro`'s four explicit `SUBDIRS`, which exclude `SeamlyLayoutTest` — so the parent jobs neither miss nor waste work on these files
-- [X] Build and run the tests locally — `src/app/seamlylayout/build.ps1` (or `qd.ps1`) then `ctest --preset debug` — and confirm all four suites are discovered at the new path and pass, with the same case counts as before the move — **all four discovered and green** (`100% tests passed, 0 tests failed out of 4`): `AdjustSceneTests` 26 passed / 1 skipped, `AdjustControllerTests` 7, `PreferencesModelTests` **48**, `SettingsModelTests` 26 — 107 cases, 0 failures. The 48 matches the count Task 18 recorded before the move ("43 → 48 PreferencesModelTests cases"), confirming nothing was dropped. Two pre-existing blockers had to be cleared first — see the two subtasks below
+- [X] Build and run the tests locally — `src/app/seamlylayout/build.ps1` (or `qd.ps1`) then `ctest --preset debug` — and confirm all four suites are discovered at the new path and pass, with the same case counts as before the move — **all four discovered and green** (`100% tests passed, 0 tests failed out of 4`): `AdjustSceneTests` 26 passed / 1 skipped, `AdjustControllerTests` 7, `PreferencesModelTests` **48**, `SettingsModelTests` 26 — 107 cases, 0 failures. The 48 matches the count  18 recorded before the move ("43 → 48 PreferencesModelTests cases"), confirming nothing was dropped. Two pre-existing blockers had to be cleared first — see the two subtasks below
 - [X] Run `cargo test --workspace` to confirm the Rust side is untouched by the move — **251 tests passed across 22 targets, 0 failures**, exactly as expected: the move never touched `crates/`
-- [X] Update the docs that name the old path: `src/app/seamlylayout/docs/testing-docs/UNIT_TEST_COMMANDS.md`, `.github/README-BUILDS.md`, and `src/app/seamlylayout/CLAUDE.md` / `AGENTS.md` if they point at `qt_frontend/tests`; state in `UNIT_TEST_COMMANDS.md` why the Rust tests did not move — `UNIT_TEST_COMMANDS.md` gained a "Where the tests live" section (both suites, both locations, the Rust rationale, and how to run the Qt/C++ suites); `.github/README-BUILDS.md` gained a "Where each app's tests live (Task 58)" table covering the qmake-vs-CMake split and the CI path-filter change; `src/app/seamlylayout/.claude/rules/testing.mdc` now states the Qt/C++ location and that Rust tests must not be relocated. `CLAUDE.md` / `AGENTS.md` never named `qt_frontend/tests`, so neither needed a change. The historical entries in `docs/status-docs/SEAMLYLAYOUT_COMPLETED.md` and `TODO.md` were left as the record of what the paths were at the time
+- [X] Update the docs that name the old path: `src/app/seamlylayout/docs/testing-docs/UNIT_TEST_COMMANDS.md`, `.github/README-BUILDS.md`, and `src/app/seamlylayout/CLAUDE.md` / `AGENTS.md` if they point at `qt_frontend/tests`; state in `UNIT_TEST_COMMANDS.md` why the Rust tests did not move — `UNIT_TEST_COMMANDS.md` gained a "Where the tests live" section (both suites, both locations, the Rust rationale, and how to run the Qt/C++ suites); `.github/README-BUILDS.md` gained a "Where each app's tests live ( 58)" table covering the qmake-vs-CMake split and the CI path-filter change; `src/app/seamlylayout/.claude/rules/testing.mdc` now states the Qt/C++ location and that Rust tests must not be relocated. `CLAUDE.md` / `AGENTS.md` never named `qt_frontend/tests`, so neither needed a change. The historical entries in `docs/status-docs/SEAMLYLAYOUT_COMPLETED.md` and `TODO.md` were left as the record of what the paths were at the time
 - [X] Verify CI is green on `seamlylayout-ci.yml` — that run is the real proof the relative CMake path resolves on Linux as well as Windows — **green.** On PR [#20](https://github.com/seamly/Seamly2D/pull/20), *Linux: Build & test SeamlyLayout (Qt 6.11)* passed in **4m6s**, discovering and running all four suites at the new path under `xvfb`, which confirms the relative CMake path resolves on Linux too. All **12** checks passed (Windows x64 + arm64 cross-compile, macOS, Linux AppImage, Linux unit tests, CodeQL, CodeSee, Analyze actions/python/rust, version); merged as `8ddab2a4c3`
 
 **Two pre-existing defects found and fixed here, because both blocked the local verification this task requires:**
 
-- [X] `src/app/seamlylayout/build.ps1:117` probed for a CMake package directory named **`Qt6WebEngine`**, which Qt has never shipped — the WebEngine packages are `Qt6WebEngineCore` / `Qt6WebEngineQuick` / `Qt6WebEngineWidgets`. The guard therefore fired on *every* correctly installed kit, aborting the build with "missing required module(s): Qt6WebEngine" and a long install instruction for modules that were already present (`Qt6WebChannel` and `Qt6Positioning` were both there). Now probes `Qt6WebEngineQuick`, the target `CMakeLists.txt` actually links, with a comment recording why. This is the same guard added to catch the Task 44 setup failure — it was checking the one name that cannot exist
+- [X] `src/app/seamlylayout/build.ps1:117` probed for a CMake package directory named **`Qt6WebEngine`**, which Qt has never shipped — the WebEngine packages are `Qt6WebEngineCore` / `Qt6WebEngineQuick` / `Qt6WebEngineWidgets`. The guard therefore fired on *every* correctly installed kit, aborting the build with "missing required module(s): Qt6WebEngine" and a long install instruction for modules that were already present (`Qt6WebChannel` and `Qt6Positioning` were both there). Now probes `Qt6WebEngineQuick`, the target `CMakeLists.txt` actually links, with a comment recording why. This is the same guard added to catch the  44 setup failure — it was checking the one name that cannot exist
 - [X] `ctest --preset debug` could not run on Windows from a shell that had not sourced the Qt kit: the four test exes are launched straight out of the build tree with no `windeployqt` output beside them, so Qt's DLLs and the platform plugin were unreachable and the suites aborted at startup ("could not find or load the Qt platform plugin"). Added a `WIN32`-guarded `ENVIRONMENT_MODIFICATION` test property prepending `$<TARGET_FILE_DIR:Qt6::Core>` to `PATH` for the test run only — expressed as a generator expression so it follows whichever kit CMake found rather than pinning a version. Linux/macOS need no equivalent (CI installs Qt onto the loader path; RPATH covers local runs). Verified by running `ctest --preset debug` in a shell with no Qt on `PATH`: all four pass
 
-## Task SettingsFiles.5 — one-shot fresh-install data notice (completed 2026-08-31)
+##  SettingsFiles.5 — one-shot fresh-install data notice (completed 2026-08-31)
 
 Decision (2026-08-31): at the first app run after a fresh install, show a popup: the sample data and any existing user files (patterns, measurements, images, layouts, and more) are left in their original location as a backup, zipped into a zip file as a second backup, and copied to the new SeamlyData directory for the programs to use.
 
@@ -1213,7 +1044,7 @@ Mechanism: the seeder writes `[notices] firstRunDataNotice=pending` into `qt6_co
 
 Shipped in merge `4ded2549d0` (task-first-run-notice into run-seamlyLayout), pushed without the skip token.
 
-## Task Layout.11 — layouts fallback resolves under <Documents>/SeamlyData, not the home directory (completed 2026-09-01)
+##  Layout.11 — layouts fallback resolves under <Documents>/SeamlyData, not the home directory (completed 2026-09-01)
 
 **Superseded 2026-09-15 by `Installer.6`** (`project-docs/TODO_INSTALLER.md`): the
 no-installer fallback is now `~/seamly2d/layouts`, matching the reverted
@@ -1247,7 +1078,7 @@ Note: `VCommonSettings::getDefaultDataRoot()` (Seamly2D/SeamlyMe) still returns
 `<Documents>/Seamly` — a different leaf than the MSI default `<Documents>\SeamlyData`.
 Not changed here; SeamlyLayout does not link vmisc.
 
-## Task Seamly2D.5 / Layout.9 — Piece-mode handoff passes a stringified SVG, not a file (completed 2026-09-02)
+##  Seamly2D.5 / Layout.9 — Piece-mode handoff passes a stringified SVG, not a file (completed 2026-09-02)
 
 Found during MSI Test Case 1 verification
 (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, step 6b-ii). The two halves
@@ -1313,7 +1144,7 @@ not part of `Seamly2D.5`/`Layout.9`. It is still open; see `SESSION_HANDOVER.md`
 `seamly_suite_paths.cpp` and `TST_SeamlySuitePaths` changes are verified by
 `ci.yml` only, and that verification is deferred until the next full CI run.
 
-## Task InstLinuxAppimage.1 — Linux AppImage now bundles SeamlyLayout (completed 2026-09-14)
+##  InstLinuxAppimage.1 — Linux AppImage now bundles SeamlyLayout (completed 2026-09-14)
 
 `ci.yml`'s `linux` job built and packaged only Seamly2D (SeamlyMe rides along
 via the qmake install, no separate build step); SeamlyLayout was never built
@@ -1359,7 +1190,7 @@ one.
 - [x] `~AdjustScene` disconnects `selectionChanged`; a selected piece at scene destruction called a slot on a dead object.
 - [x] Tests: `AdjustSceneTests` — lower two pieces, right press after lower, left click after lower.
 
-## Task Layout.2 - in 'Export SVG' menu selection, create three options for text mode (completed 2026-09-24)
+##  Layout.2 - in 'Export SVG' menu selection, create three options for text mode (completed 2026-09-24)
 
 Replace the single "SVG" item in the SeamlyLayout Exports menu (`src/app/seamlylayout/qt_frontend/qml/ExportMenu.qml`, `exportSvgRequested()` wired through `Main.qml` to the Rust backend in `src/app/seamlylayout/crates/cxxqt_bridge/src/exports.rs`) with three SVG export modes differing in how label text is written.
 
@@ -1367,7 +1198,7 @@ Replace the single "SVG" item in the SeamlyLayout Exports menu (`src/app/seamlyl
 - [x] Layout.22 - **Text as `<text>` in a Hershey/single-line font** — same searchable/editable/machine-readable intent as mode 1, but using a bundled single-line font so the result is also friendly to CAD/CAM tools that resolve text. **Implementation note:** true Hershey fonts are stroke data, not installable outline fonts — for `<text>` + `font-family` to work this mode needs a "hairline" single-line TTF/OTF (an engineered font whose outline doubles back on itself to look like one stroke) embedded via `@font-face`. Known candidates: CamBam Stick Fonts (free, 9 variants, designed for CNC/plotting), MecSoft/Rhino single-stroke fonts, commercial single-line TTF bundles — verify redistribution/embedding license compatibility with the MIT Rust core before bundling. Caveats: hairline TTFs are still doubled-back outlines (stroke width not controllable via the font), and consumers that ignore embedded fonts will substitute — so mode 3 remains the guaranteed-fidelity choice for cutters. Record the font choice and rationale in `DECISIONS.md`.
 - [x] Layout.23 - **Text converted to paths (single-stroke)** — each label rendered as single-stroke `<path>` polylines from Hershey glyph data (**decision:** the path conversion uses the Hershey font, not the designer's outline font — a plotter then draws each character in one pen pass instead of tracing hollow glyph contours). Compatible with CAD/CAM/cutters/plotters/engravers with no font dependency in the consumer. Keep the original string machine-readable via `data-*`/`<desc>` on the label group (text is no longer searchable/editable as SVG text).
 
-**Dependency:** all three modes need real `<text>` elements in the incoming svg file or stringified svg variable (Task 10) — even mode 3 needs the label *strings* to re-render them in stroke glyphs. Already-outlined input (Seamly2D `--text2paths`) can only be passed through as-is; the UI must handle path-only input (disable the text modes with an explanatory tooltip, or export the existing paths with a warning). Optional Hershey display/export on the Seamly2D side is Task 22.
+**Dependency:** all three modes need real `<text>` elements in the incoming svg file or stringified svg variable ( 10) — even mode 3 needs the label *strings* to re-render them in stroke glyphs. Already-outlined input (Seamly2D `--text2paths`) can only be passed through as-is; the UI must handle path-only input (disable the text modes with an explanatory tooltip, or export the existing paths with a warning). Optional Hershey display/export on the Seamly2D side is  22.
 
 - [x] Layout.24 - Replace the single "SVG" `MenuItem` with a three-entry submenu (or dialog choice) in `ExportMenu.qml`; add per-mode tooltips summarizing the compatibility/editability trade-off; wire new signals through `TopMenuBar.qml`/`Main.qml` to the bridge
 - [x] Layout.25 - Mode 1: pass `<text>` through in the designer's font and embed the font as a subsetted `@font-face` data-URI (WOFF/TTF); document the font-licensing caveat (embedding rights vary by font license) in the export docs
@@ -1383,7 +1214,7 @@ Replace the single "SVG" item in the SeamlyLayout Exports menu (`src/app/seamlyl
   - [x] Layout.210.3 - Update `project-docs/seamlylayout-docs/status-docs/seamlylayout_svg-data-attributes.md`, the root `project-docs/SVG-DATA-ATTRIBUTES.md` mirror, and `project-docs/seamlylayout-docs` export docs
   - [x] Layout.210.4 - Doxygen briefs + inline comments on all touched functions
 
-## Task Layout.14 — Ship third-party license notices in every installer (completed 2026-09-25)
+##  Layout.14 — Ship third-party license notices in every installer (completed 2026-09-25)
 
 No installer ships license notices for the Rust crates linked into SeamlyLayout (163 crates at 2026-09-24).
 Apache-2.0 and BSD licenses require the notice with every binary distribution. The Windows MSI ships only the
@@ -1421,7 +1252,7 @@ LGPL notices in `src/app/seamlylayout/packaging/licenses/`, but none exist.
 - [x] `VPatternLabelData::defaultPieceLabelPos`, `defaultPatternLabelPos`, `hasCornerAnchors`
 - [x] Tests: `TST_VPiece` — `PieceLabelCenteredRightOfBoundingBoxCenter`, `PatternLabelRightOfPieceLabel`, `PatternLabelTakesPieceLabelPlaceWithoutPieceLabel`
 
-## Task Layout.4 — One writer for the SeamlyLayout debug log (completed 2026-09-27)
+##  Layout.4 — One writer for the SeamlyLayout debug log (completed 2026-09-27)
 
 - [x] Layout.41 Owner recorded in `seamlylayout_SEAMLYLAYOUT_DECISIONS.md`: C++ `Logger`; Rust sends lines through a registered sink
 - [x] Layout.42 `crates/cxxqt_bridge/src/log_sink.rs`, `seamly_logger_write_utf8()`; line format and call-site signatures unchanged
@@ -1431,7 +1262,7 @@ LGPL notices in `src/app/seamlylayout/packaging/licenses/`, but none exist.
 - [x] Layout.46 Briefs and comments on touched functions
 - `SEAMLY_LOG_FILE` removed; `Logger::filePath()` added
 
-## Task Seamly2D.10 — New-piece pattern label sits left of the grainline (completed 2026-10-03)
+##  Seamly2D.10 — New-piece pattern label sits left of the grainline (completed 2026-10-03)
 
 - [x] Seamly2D.10.1 Cause, seen on `male_shirt` piece Z: pattern label right of piece label fell outside a narrow piece; `UpdateLabelItem` containment shift moved it back onto the piece label
 - [x] Seamly2D.10.2 `defaultPatternLabelPos`: right edge 1 cm left of grainline left edge; vertically centered
@@ -1441,7 +1272,7 @@ LGPL notices in `src/app/seamlylayout/packaging/licenses/`, but none exist.
 - [x] Seamly2D.10.6 `@brief` and contract updated
 - [x] Seamly2D.10.7 Tests: `TST_VPiece` — `PatternLabelLeftOfVerticalGrainline`, `PatternLabelLeftOfSlantedGrainline`, `PatternLabelLeftOfCenterWithoutGrainline`
 
-## Task Layout.21 — Rename "teaching version" to "annotated version" (completed 2026-10-03)
+##  Layout.21 — Rename "teaching version" to "annotated version" (completed 2026-10-03)
 
 "Teaching" sounds amateur. "Annotated" is the professional term (user decision, 2026-10-03).
 
@@ -1454,7 +1285,7 @@ LGPL notices in `src/app/seamlylayout/packaging/licenses/`, but none exist.
 - [x] Layout.21.7 Docs: `dxf-docs/*.md`, `status-docs/*.md`, `.claude/rules/seamlylayout_guidelines_export_dxf.mdc`
 - [x] Layout.21.8 `grep -ri teaching` over `src/app/seamlylayout` and `src/test/SeamlyLayoutTest` returns nothing
 
-## Task Layout.17 — HPGL cut-lines export name has `_cutlines` (completed 2026-10-03)
+##  Layout.17 — HPGL cut-lines export name has `_cutlines` (completed 2026-10-03)
 
 - [x] Layout.17.1 `Main.qml` `onExportHpglRequested`: mode `"cut"` → `male_shirt_cutlines_202610011721.plt`
 - [x] Layout.17.2 `makeExportFileName` segment parameter; `_tiled` stays after the timestamp (done with DXF.10)
@@ -1463,7 +1294,7 @@ LGPL notices in `src/app/seamlylayout/packaging/licenses/`, but none exist.
 - [x] Layout.17.5 `export-docs/seamlylayout_EXPORT_WORKFLOW.md`; `Main.qml` name comments
 - [x] Layout.17.6 Tests: `export_name_segment_names_each_mode`, `default_export_file_name_with_mode_segments`, `tab_file_path_adds_label_before_extension`
 
-## Task Layout.18 — SVG export name shows the label text mode (completed 2026-10-03)
+##  Layout.18 — SVG export name shows the label text mode (completed 2026-10-03)
 
 One Rust mapping serves Layout.17 and Layout.18: `exports::export_name_segment(format, mode)`, QML `appController.exportNameSegment`.
 
@@ -1474,7 +1305,7 @@ One Rust mapping serves Layout.17 and Layout.18: `exports::export_name_segment(f
 - [x] Layout.18.5 `export-docs/seamlylayout_EXPORT_WORKFLOW.md`; `Main.qml` name comments
 - [x] Layout.18.6 Tests: same as Layout.17.6
 
-## Task Layout.20 — Annotated DXF export name has `_annotated` (completed 2026-10-03)
+##  Layout.20 — Annotated DXF export name has `_annotated` (completed 2026-10-03)
 
 - [x] Layout.20.1 `Main.qml` `requestDxfExport`: Standard/Annotated dialog opens before the save dialog
 - [x] Layout.20.2 Annotated puts `_annotated` before the timestamp: `male_shirt_R12_annotated_202610011721.dxf`
@@ -1489,21 +1320,21 @@ One Rust mapping serves Layout.17 and Layout.18: `exports::export_name_segment(f
 
 # SeamlyLayout completed work relocated 2026-10-13
 
-## Task Layout.01 - Open seamlylayout.exe
+##  Layout.01 - Open seamlylayout.exe
 
 - [x] Layout.01 While in 'Piece Mode' in Seamly2D, pressing the 'Layout' button on the menu should immediately run seamlylayout.exe without displaying the old Seamly2D layout canvas or calling vlayout which has been superceded by the seamlylayout.exe application. The old vlayout code has been superceded by seamlylayout.exe
 
-## Task Layout.02 - Layout Settings
+##  Layout.02 - Layout Settings
 
 - [x] Layout.02 - In the settings dialog, section 'Layout Mode', add a checkbox for 'Any'; when 'Any' is checked the layout algorithm should ignore the grainline direction when placing the pieces efficiently.
 
-## Task Layout.03 - layout algorithm improvement
+##  Layout.03 - layout algorithm improvement
 
 - [x] Layout.031 - The layout algorithm has suffered regression - the pieces are nested sub-optimally (there is a lot of space between the pieces). Fix the layout algorithm so that the pieces only have the gap specified between them.
 
 - [x] Layout.032 - Implement the 'Layout Mode' == 'None' option so that the grainline direction is ignored while the pieces are efficiently arranged.
 
-## Task Layout.1 - 'Adjust Mode' improvement
+##  Layout.1 - 'Adjust Mode' improvement
 
 - [x] Layout.11 - The 'Adjust Layout' feature has suffered regression - when 'Adjust Layout' opens there are no pattern pieces to adjust - the pieces from the main SeamlyLayout canvas should be available in 'Adjust Layout', otherwise there is nothing to adjust and save back to the main SeamlyLayout canvas.
 
@@ -1513,7 +1344,7 @@ One Rust mapping serves Layout.17 and Layout.18: `exports::export_name_segment(f
   - [x] Layout.13.1 - the layout with updates from 'adjust mode' ('adjust mode' closed via 'Save')
   - [x] Layout.13.2 - the layout without updates from 'adjust mode' ('adjust mode' closed via 'Cancel')
 
-## Task Layout.3 — Multisize handoff and layout: nested (piece groups) or marker (single pieces) (completed 2026-10-21)
+##  Layout.3 — Multisize handoff and layout: nested (piece groups) or marker (single pieces) (completed 2026-10-21)
 
 A `.smms` pattern sends all sizes in one SVG. Nested packs size groups; Marker packs individual pieces.
 
@@ -1580,7 +1411,7 @@ Handoff shape: see `project-docs/docs-data/SVG-DATA-ATTRIBUTES.md`, "Multisize p
 
 - [x] Layout.39 Doxygen briefs + inline comments on touched functions; document both layouts in the SeamlyLayout docs
 
-## Task Layout.5 - Implement additional export formats
+##  Layout.5 - Implement additional export formats
 
 - [x] Layout.52 HPGL — unlocks the whole plotter and cutter class
 - [x] Layout.53 PS/EPS — one writer covers both and retires pdftops
@@ -1588,7 +1419,7 @@ Handoff shape: see `project-docs/docs-data/SVG-DATA-ATTRIBUTES.md`, "Multisize p
 - [x] Layout.55 DXF-ASTM - improve current export so that it meets the DXF-ASTM standard
 - [x] Layout.57 DXF-ASTM (CLO3D) — Export menu item: D6673-10 file plus CLO3D group 250 (0 = boundary, 2 = sew line)
 
-## Completed subtasks from Task Layout.6 - DXF-ASTM: D6673 features without a Seamly2D source
+## Completed subtasks from  Layout.6 - DXF-ASTM: D6673 features without a Seamly2D source
 
   - [x] Layout.61.1 Trigger: DXF-ASTM export from the "Nested" tab of a multisize layout; the handoff DOM goes to `do_export_dxf` (`DxfGradingSource`)
 
@@ -1607,7 +1438,7 @@ Handoff shape: see `project-docs/docs-data/SVG-DATA-ATTRIBUTES.md`, "Multisize p
       - Marker `jacket2_40-146_marker_allsizes_R13_202610121149.dxf`: nothing graded. `Sample Size:` and `Grade Rule Table:` blank, no `.rul`, layer 2 in all 25 blocks (Layout.25, 27.1, 27.3)
       - Nested `jacket2_40-146_nested_allsizes_R13_202610121136.dxf`: aw.fyi reads sample size 500 and 104 layer 5 lines. 4 pieces graded; Detail (3), (6), (7), (8) sample size only (Layout.27.3)
 
-## Task Layout.67 — Multisize tabs: Marker, Nested, Base Size, then each size (completed 2026-10-21)
+##  Layout.67 — Multisize tabs: Marker, Nested, Base Size, then each size (completed 2026-10-21)
 
 Decision (2026-10-13): all tabs use the imported SVG, not grade rules. DXF-ASTM exports one size per file. Supersedes Layout.22, Layout.23, Layout.27.10, and Layout.61.7.3.
 
@@ -1636,7 +1467,7 @@ Decision (2026-10-13): all tabs use the imported SVG, not grade rules. DXF-ASTM 
 
 - [x] Layout.67.9 Base Size "Export Complete" must name both `.dxf` and `.rul` files (MSI 26.10.1311, `jacket2_basesize_screenshot_1.png`). Signal `export_companion_written`.
 
-## Task Layout.25 — Multisize Marker layout: extend the media height until every piece fits (completed 2026-10-21)
+##  Layout.25 — Multisize Marker layout: extend the media height until every piece fits (completed 2026-10-21)
 
 All multisize tabs (Marker, Nested, individual sizes) extend the media length to fit their pieces (decision D3).
 
@@ -1664,7 +1495,7 @@ Decision (2026-10-13): extend rolls beyond 500 in when needed.
 
 - [x] Layout.25.7 User check, "Media grows to fit". Passed (MSI 26.10.2023).
 
-## Completed subtasks from Task Layout.71 — Multisize: widen the media for a piece wider than it
+## Completed subtasks from  Layout.71 — Multisize: widen the media for a piece wider than it
 
 - [x] Layout.71.1 `layout_engine::required_bin_width`: widest piece, each in its narrowest trial angle; `layout_utils` widens the bin to it when `extend_media` is set. Tiled paper unchanged
 
@@ -1676,7 +1507,7 @@ Decision (2026-10-13): extend rolls beyond 500 in when needed.
 
 - [x] Layout.71.5 Docs: layout workflows
 
-## Completed subtasks from Task Layout.72 — Individual pattern: a piece wider or longer than the media
+## Completed subtasks from  Layout.72 — Individual pattern: a piece wider or longer than the media
 
 - [x] Layout.72.1 `geometry::half_plane_clip`: cut a closed or open polyline with an axis-parallel line; each vertex keeps its source index; a concave outline gives one polygon per region
 
@@ -1692,7 +1523,7 @@ Decision (2026-10-13): extend rolls beyond 500 in when needed.
 
 - [x] Layout.72.7 Docs: `SVG-DATA-ATTRIBUTES.md` "SeamlyLayout split parts", layout workflows. `TEST_CHECKLIST.md` lines are in Layout.72.8: the user's checklist edits are in `stash@{0}`
 
-## Task Layout.26 — DXF-ASTM Missing Piece Data dialog: one readable line per piece (completed 2026-10-21)
+##  Layout.26 — DXF-ASTM Missing Piece Data dialog: one readable line per piece (completed 2026-10-21)
 
 jacket2 hides piece labels and grainlines (`visible="false"`), so missing-data warnings are expected. Old MSI samples used Cyrillic names (Layout.40). Evidence: `jacket2_marker_screenshot_2.png`, `jacket2_nested_screenshot_1.png`.
 
@@ -1711,7 +1542,7 @@ jacket2 hides piece labels and grainlines (`visible="false"`), so missing-data w
 
 - [x] Layout.26.7 User check: jacket2 Base Size 500, Export > DXF-ASTM (R13); the dialog scrolls and its buttons stay visible. Passed (MSI 26.10.2023).
 
-## Completed subtasks from Task Layout.27 — DXF-ASTM grading fails for jacket2_40-146 from the "Nested" tab
+## Completed subtasks from  Layout.27 — DXF-ASTM grading fails for jacket2_40-146 from the "Nested" tab
 
   - [x] Layout.27.3.1 Seamly2D: `VLayoutPiece::unifyTurnPoints`, called by `MainWindowsNoGUI::unifySizeTurnPoints` after the size loop. Node vertex indices per line: `VAbstractPiece::nodeVertexIndices`. A closed loop that starts at another node in another size (built-in seam line) is matched by node position. Tests: 5 in `TST_SvgComponentTags`, `TST_VAbstractPiece::NodeVertexIndices`. `cl /Zs` check passed; Qt suites not run
 
@@ -1720,7 +1551,7 @@ jacket2 hides piece labels and grainlines (`visible="false"`), so missing-data w
 
 - [x] Layout.27.9 Duplicate vertices: aw.fyi reports layers 84 (54) and 87 (450) in the graded nested file only. `GradeSize::vertex_at` inserts a key point 0.000001–0.01 mm from a dense vertex (`SAME_VERTEX_MM` = 1e-6). Snap to the vertex within 0.01 mm; drop a curve key point that lands on the vertex of the key point before or after it. Test: no consecutive dense or reduced vertices closer than 0.01 mm
 
-## Task Layout.40 — Local MSI ships stale sample patterns
+##  Layout.40 — Local MSI ships stale sample patterns
 
 The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`src/app/share/samples/patterns/`) has English names. `copyToDestdir` in `common.pri` skips a file that exists, so `src/app/seamly2d/bin/samples` and `src/app/seamlyme/bin/samples` keep copies from 2026-08-10. `smsi.ps1` stages those `bin` folders. CI builds from a clean checkout and is not affected.
 
@@ -1729,7 +1560,7 @@ The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`sr
   - MSI 26.10.1311: the staged copy and the installed copy (`C:\Program Files\SeamlyApps\samples\patterns\`) match the repo copy
 - [x] Layout.40.3 `common.pri` is a `*.pri` change: the merge commit runs full CI (no skip-ci token)
 
-## Task Layout.28 — Built-in seam allowance: show the seam line (completed 2026-11-14)
+##  Layout.28 — Built-in seam allowance: show the seam line (completed 2026-11-14)
 
 - [x] Layout.28.1 Seamly2D: seam line = main path offset inward by each node's width (wider of before and after; piece width when the node sets none)
   - `VPiece::builtInSeamLinePoints()`. A curve spreads the widths of its ends along its length. Corner types shape only the cut line: seam line corners are plain offset corners (user confirmed)
@@ -1755,7 +1586,7 @@ The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`sr
 
 - [x] Layout.28.7 App check: built-in seam allowance.
 
-## Task Layout.68 — PDF true size and scale check grid (completed 2026-11-14)
+##  Layout.68 — PDF true size and scale check grid (completed 2026-11-14)
 
 Cause (MSI 26.10.1311): PDF used 72 dpi, not 96. Pages and pieces were 4/3 too large.
 
@@ -1779,11 +1610,11 @@ Cause (MSI 26.10.1311): PDF used 72 dpi, not 96. Pages and pieces were 4/3 too l
   - Tests: 4 `scale_grid`; `jacket2_scale_grid_on_every_layout_but_marker`; `cut_mode_drops_the_scale_grid`; `SettingsModelTests::scaleGrid_defaultsOffAndRoundtrips`. Doc: `SVG-DATA-ATTRIBUTES.md` "Scale check grid".
 - [x] Layout.68.10–68.13 App checks: Settings option; grid on every layout but Marker; grid in exports, not in DXF or HPGL cutter files; printed grid measures 3 cm or 2 in.
 
-## Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
+##  Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
 
-## Task Layout.9 — Piece-mode handoff passes a stringified SVG document
+##  Layout.9 — Piece-mode handoff passes a stringified SVG document
 
-## Task Layout.100 — Remove the DXF-ASTM (R12) export code and menu option (completed 2026-11-14)
+##  Layout.100 — Remove the DXF-ASTM (R12) export code and menu option (completed 2026-11-14)
 
 - [x] Layout.100.1 `ExportMenu.qml` "DXF-ASTM (R12)" item removed; `TopMenuBar.qml` and `Main.qml` handlers removed. The View menu keeps its one "DXF-ASTM" item (opens a .dxf).
 - [x] Layout.100.2 `Main.qml` `pendingDxfVersion` defaults move to R13.
@@ -1802,14 +1633,14 @@ Cause (MSI 26.10.1311): PDF used 72 dpi, not 96. Pages and pieces were 4/3 too l
 
 - Layout.90, Layout.91: DXF paper space and model space. Research: `dxf-docs/seamlylayout_DXF_PAPER_AND_MODEL_SPACE.md`. User decision: P1 (no paper space viewport) and M1 (no extents or limits in the header). No code change. `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md` Decisions records them.
 
-## Task Layout.111 — Create Layout: fold line warning on male_shirt
+##  Layout.111 — Create Layout: fold line warning on male_shirt
 
 - Closed, no code change (user decision): the warning was correct.
 - The warning named the old CollarTopInterface half piece: its outline lay on both sides of its fold line.
 - A mirrored piece has no fold line, so `fold_line_edge.rs` does not plan it on the fold edge and gives no warning.
 - Screenshot: `test-seamly-layout\layouts\male_shirt\20261030_male_shirt\Layoutwarning-Screenshot 2026-11-01 191530.png`.
 
-## Task Layout.112 — Read an open cut line that ends on the fold line
+##  Layout.112 — Read an open cut line that ends on the fold line
 
 - Rule and Seamly2D side: Seamly2D.71.11. A piece with a fold line sends an open `cutline`; its `fold_line` runs from the cut line end to the cut line begin.
 - Layout.112.1: new `geometry::fold_line_join` (`line_closes_on_fold`, `distance_to_segment`, 0.1 mm). DXF-ASTM `converter` closes an open cut line along the fold line before it picks the boundary. `piece_divider` makes parts from it; a part on the fold line keeps its cut line open there. Packing (`svg_extract`) uses the implicit closing edge; tiling reads piece rectangles only. No change needed there.
@@ -1820,7 +1651,7 @@ Cause (MSI 26.10.1311): PDF used 72 dpi, not 96. Pages and pieces were 4/3 too l
 - Verified: `cargo test --workspace` all pass (261 cxxqt_bridge); `ctest --preset debug` 7/7.
 - Layout Mode (`VLayoutPiece`) sends this cut line since Seamly2D.71.14, before the `layout_handoff` switch.
 
-## Task Layout.112 follow-on — Read a seam line that ends on the fold line
+##  Layout.112 follow-on — Read a seam line that ends on the fold line
 
 - Rule (user decision, Seamly2D.71.13): neither the `seamline` nor the `cutline` has an edge on the fold line. Each starts at the fold line end and ends at the fold line start.
 - DXF-ASTM `converter::extract_astm_piece` adds the fold line edge to the outer line: the `cutline`, or the `seamline` of a piece without a `cutline`. A `seamline` beside a `cutline` is a sew line (layer 14) and stays as sent.
@@ -1829,12 +1660,12 @@ Cause (MSI 26.10.1311): PDF used 72 dpi, not 96. Pages and pieces were 4/3 too l
 - Docs: `SVG-DATA-ATTRIBUTES.md` (`seamline`, `cutline`, `fold_line`, split parts), `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, module docs in `fold_line_join.rs`, `astm_mirror.rs`, `svg_extract.rs`, `piece_divider.rs`.
 - Verified: `cargo test --workspace` all pass; `ctest --preset debug` 7/7.
 
-### [x] Task Layout.107 — Remove the production handoff comparison switch
+### [x]  Layout.107 — Remove the production handoff comparison switch
 
 - [x] Removed the production comparison writer and unused file-writing helper after all 25 real-pattern comparisons passed at 0.01 px.
 - [x] Updated active documentation to use the reproducible test-only capture application.
 - [x] GUI and CLI use the fitted handoff writer. Integrated Windows Qt suites, CTest 8/8, Rust workspace tests, and MSI validation passed.
-### [x] Task Layout.300 - Remove the capability of extending the media for media=paper and paperType=sheet
+### [x]  Layout.300 - Remove the capability of extending the media for media=paper and paperType=sheet
 
 - [x] remove capability to extend media length or width when media=paper and paperType=sheet.
 - [x] delete tests for this capability
@@ -1843,7 +1674,7 @@ Cause (MSI 26.10.1311): PDF used 72 dpi, not 96. Pages and pieces were 4/3 too l
 - [x] verify that the tests for this capability have been removed
 
 
-## Task DXF.21 — A straight internal line declares no turn or curve points (completed 2026-11-12)
+##  DXF.21 — A straight internal line declares no turn or curve points (completed 2026-11-12)
 
 aw.fyi report on `male_shirt_R13_202610101837.dxf`: FullSleeve_M, 10 of 80 declared points miscategorized. They are both ends of the 4 pleat lines (L8) and the slit (L11), each a 2-vertex straight line. The 2026-10-07 report flagged the same ends as layer 2 points; this one flags them as layer 3 points. Both "not needed – definite".
 
@@ -1855,7 +1686,7 @@ aw.fyi report on `male_shirt_R13_202610101837.dxf`: FullSleeve_M, 10 of 80 decla
   - Done: `male_shirt_R13_202611012029.dxf` report in `test-seamly-layout/layouts/male_shirt/20261030_male_shirt/`. Pleat and slit ends not flagged. FullSleeve_M: 2 points "may be" miscategorized (advisory).
 - Checked on `male_shirt_202610101837.svg`: FullSleeve_M layer 3 70 → 60 points. No other block changed.
 
-## Task DXF.22 — FrontPanel L1 junction: aw.fyi contradicts itself (obsolete 2026-11-12)
+##  DXF.22 — FrontPanel L1 junction: aw.fyi contradicts itself (obsolete 2026-11-12)
 
 FrontPanel_M top edge, where the straight line meets the curve (L1 71.10, 1068.59; L14 71.35, 1058.59).
 
@@ -1870,7 +1701,7 @@ FrontPanel_M top edge, where the straight line meets the curve (L1 71.10, 1068.5
   - Include jacket2 Detail (4) size 240, L1 pt 14: aw.fyi reads a 6.5° bend over 10 mm as a missing corner (DXF.23)
   - Obsolete: no later report repeats either finding. `male_shirt_R13_202611012029.dxf`: FrontPanel_M not flagged. jacket2 Base Size 500 reports (R13 Fabric 2026-10-23, CLO3D Lining 2026-11-07, R13 Lining 2026-11-08): 0 departures.
 
-## Task DXF.3 — Write DXF R13 (AC1012) (completed 2026-11-12)
+##  DXF.3 — Write DXF R13 (AC1012) (completed 2026-11-12)
 
 D6673 §1.2 / 4.1 names AutoCAD R13. `$ACADVER` was `AC1009` (R12 syntax). R13 needs entity handles, a full TABLES section, CLASSES, and OBJECTS.
 
@@ -1885,7 +1716,7 @@ Menu (user decision): **DXF-ASTM (R13)**, **DXF-ASTM (CLO3D)**. CLO3D writes R13
 - [x] DXF.3.6 Rust tests: header version, unique handles, required sections present (`writer_r13_test.rs`, `exports.rs` `do_export_dxf_writes_r13_when_asked`)
 - [x] DXF.3.7 Update the compliance doc "Decisions" row for DXF version
 
-## Task DXF.8 — Re-validate (completed 2026-11-12)
+##  DXF.8 — Re-validate (completed 2026-11-12)
 
 - [x] DXF.8.1 Export male_shirt as DXF-ASTM and DXF-ASTM (CLO3D) after each task
 - [x] DXF.8.2 User: run the files through https://aw.fyi/dxf; save the report beside the files
@@ -1897,7 +1728,7 @@ Menu (user decision): **DXF-ASTM (R13)**, **DXF-ASTM (CLO3D)**. CLO3D writes R13
 
 Reports on male_shirt (2026-10-03 to 2026-10-10) and jacket2 (2026-10-12).
 
-| Finding | Severity | Task |
+| Finding | Severity |  |
 |---|---|---|
 | Declared points miscategorized: curve points on layer 2 (7 pieces) | departure | DXF.1 |
 | Reconstruction from layers 2/3 off layer 84 by 0.532 (ShortSleeve_M), layer 87 by 0.942 (FullSleeve_M); limit 0.5 | extension | DXF.2 |
@@ -1921,7 +1752,7 @@ Reports on male_shirt (2026-10-03 to 2026-10-10) and jacket2 (2026-10-12).
 | jacket2 Detail (4) and Detail (6) size 240: bend not a turn point | departure | Reader advisory (DXF.23) |
 | jacket2 piece-113 L14 16 curve points, Detail (4) size 500 L1 13 curve points; each fits 3 primitives | advisory | No action |
 
-## Task Layout.999 — Remove the option for 'Sheet' in Layout settings (completed 2026-11-14)
+##  Layout.999 — Remove the option for 'Sheet' in Layout settings (completed 2026-11-14)
 
 'Paper > Sheet' is a subset of 'Paper > Tiled', so 'Paper > Sheet' is redundant and its complex procesing is unnecessary.
 
@@ -1945,7 +1776,7 @@ Reports on male_shirt (2026-10-03 to 2026-10-10) and jacket2 (2026-10-12).
   - [x] 'Fabric > Folded' operates properly
   - [x] 'Fabric > Not Folded' operates properly
 
-## Task Layout.110 — Piece mode: Flip choice mirrors the piece (completed 2026-11-14)
+##  Layout.110 — Piece mode: Flip choice mirrors the piece (completed 2026-11-14)
 
 Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Flip did not mirror the piece.
 
@@ -1955,7 +1786,7 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 - [x] Layout.110.3 Test: `TST_VPiece::PieceFlipTransformMirrorsAboutCenter`.
 - [x] Layout.110.4 App check, male_shirt Piece mode: Flip > Horizontal, Vertical, Both, None mirror the outline. A dot marks the current choice (`AGENT_CHECKLIST.md` section 24).
 
-## Task Layout.804 — Nested multisize: stack the sizes on one point (completed 2026-11-14)
+##  Layout.804 — Nested multisize: stack the sizes on one point (completed 2026-11-14)
 
 - [x] Layout.804.1 Decisions (user): fold line first, at its lower end (left end if level). Same rules in both apps. Tie: longer other edge, then lower corner, then left corner.
 - [x] Layout.804.2 Stack point per size, in the grain frame:
@@ -1966,7 +1797,7 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 - [x] Layout.804.4 Tests: `stack_point.rs` (11), `TestHandoffAnnotationAlignment` `stackPoint*` (7), `anchor_on_the_cut_line_is_inside`. Fixture `jacket2_40-146_handoff.svg` realigned. `cargo test --workspace` 689 pass; `ctest --preset debug` 8/8.
 - [x] Layout.804.5 MSI: 4 Qt suites pass. jacket2 Nested: Back and Detail 2 stack on the lower fold line end; other pieces on one cut line corner; no import warning (`AGENT_CHECKLIST.md` section 39).
 
-## Task Layout.74 — Nested multisize: one color per size, with a legend (completed 2026-11-14)
+##  Layout.74 — Nested multisize: one color per size, with a legend (completed 2026-11-14)
 
 - [x] Layout.74.1 Size colors: `size_colors::size_palette`. Layout.82 replaced the palette.
 - [x] Layout.74.2 `color_pieces_by_size` colors each piece by its size. Nested tab and every export except DXF.
@@ -1974,14 +1805,14 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 - [x] Layout.74.4 App check, jacket2 Nested, Export SVG, PDF, PNG: size colors and legend on the canvas and in the exports.
   - Tests: 5 `size_colors`; `jacket2_nested_colors_sizes_and_adds_legend`, `jacket2_nested_tiled_legend_has_tile_rows`, `size_legend_text_is_label_text`, `cut_mode_drops_the_size_legend`. Doc: `SVG-DATA-ATTRIBUTES.md` "Nested size colors".
 
-## Task Layout.76 — Multisize: size label on each piece (completed 2026-11-14)
+##  Layout.76 — Multisize: size label on each piece (completed 2026-11-14)
 
 - [x] Layout.76.1 `size_labels::add_size_labels` (in `finish_import`) adds `<g data-type="size_label">` "Size <size>", Arial 24 px, 5 px past the grainline front end, level after layout. Text modes, HPGL, DXF (layer 15) and the outline search treat it as a label.
   - Decision: no grainline → label level at the outline centre. jacket2 hides its grainlines.
   - Tests: 5 `size_labels`; `jacket2_size_labels_reach_the_exports`. Doc: `SVG-DATA-ATTRIBUTES.md` "Size labels".
 - [x] Layout.76.2 App check: import canvas and size-tab exports (SVG, PDF, DXF) show the size label.
 
-## Task Layout.77 — Piece material: one import tab and one layout per material (completed 2026-11-14)
+##  Layout.77 — Piece material: one import tab and one layout per material (completed 2026-11-14)
 
 - [x] Layout.77.0 Seamly2D:
   - [x] Layout.77.0.1 Piece attribute `material`, default `Fabric`. Pattern format 0.7.6 (`v0.7.6.xsd`). `VAbstractPiece::getMaterial`; read by `VPattern::parsePieceElement`; written by `PatternPieceTool::addAttributes`.
@@ -1996,11 +1827,11 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
   - Tests: 3 `material_split`; `material_segment_goes_after_the_variant_and_before_the_tab`. Doc: `SVG-DATA-ATTRIBUTES.md` "Materials", `NEW-ATTRIBUTES.csv`.
 - [x] Layout.77.3 Schema 0.7.6 adds optional `material`. `VPatternConverter::toVersion0_7_6` reads a 0.7.5 piece as Fabric. Fold line node ids belong to Layout.80.
 
-## Task Layout.800 — Export > SVG submenu: remove the checkboxes (completed 2026-11-14)
+##  Layout.800 — Export > SVG submenu: remove the checkboxes (completed 2026-11-14)
 
 - [x] Removed the checkboxes and their obsolete code. They did not work and added no value. The selected item highlights and exports the file.
 
-## Task Layout.801 — Split piece part labels (completed 2026-11-14)
+##  Layout.801 — Split piece part labels (completed 2026-11-14)
 
 - [x] Layout.801.1 Fallback: a part label wider than the part's longest cut edge gets a smaller font, so its width equals the edge length. `<text>` gets `textLength` (edge length) and `lengthAdjust="spacingAndGlyphs"`.
 - [x] Layout.801.2 Decision: the Hershey font (`svg_label_text::stroke_text_width`) measures the label. It needs no system font. A renderer that ignores `textLength` draws the label shorter than the edge.
@@ -2009,7 +1840,7 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 - [x] Layout.801.5 Decision (user): keep the 0.25 in text. `part_label_placement.rs` `place_part_label` lays a too-wide label level across the part, in the clear row nearest the cut edge. Clear: no outline edge, path or other text within 0.25 em. No clear row: the 801.1 shrink.
   - Tests: `part_label_placement` (5), `piece_divider` `part_label_fits_its_part`. `cargo test --workspace` 677 pass; `ctest --preset debug` 8/8.
 
-## Task Layout.802 — Layout Mode Any: turn a too-wide piece 90° (completed 2026-11-14)
+##  Layout.802 — Layout Mode Any: turn a too-wide piece 90° (completed 2026-11-14)
 
 - [x] Layout.802.1 Cause: the width check used the piece's `data-rotation` rule. Seamly2D writes `0` (Rotation None) by default, so Layout Mode Any tried 0° only.
 - [x] Layout.802.2 `piece_extractor::turn_wide_pieces_to_fit`: in Layout Mode Any, a piece wider than the media gets quarter turns if a 90° turn fits. Called by `piece_divider` `prepared_pieces` and `do_process_layout`. Tiled paper: no change.
@@ -2017,7 +1848,7 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 - [x] Layout.802.4 Tests: `wide_piece_turns_only_when_the_turn_fits`, `any_mode_turns_a_wide_piece_that_fits_turned`, `piece_rotation_controls_split_and_stays_on_parts`. `cargo test --workspace` 672 pass; `ctest --preset debug` 8/8.
 - [x] Layout.802.5 App check: trousers, Paper Roll 16 in, Layout Mode Any. Dialog lists Back only; `Union_piece` (21.7 × 2.4 in) placed whole, turned 90° (`AGENT_CHECKLIST.md` section 38).
 
-## Task SeamlyMe.1 — Open pickers start in the user measurement directories (completed 2026-11-14)
+##  SeamlyMe.1 — Open pickers start in the user measurement directories (completed 2026-11-14)
 
 `TMainWindow::OpenIndividual()`, `OpenMultisize()`, `OpenTemplate()` start in the settings paths:
 
@@ -2030,67 +1861,67 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 - [x] SeamlyMe.1.3 All three paths follow the configured or renamed data root. Pickers keep newly created start folders and report directory-creation failures. `TST_DataRoot`: 29 pass.
 - [x] SeamlyMe.1.4 Briefs updated.
 
-## Task SeamlyMe.2 — Open dialog starts in measurements/individual (completed 2026-11-14)
+##  SeamlyMe.2 — Open dialog starts in measurements/individual (completed 2026-11-14)
 
 - [x] No subtasks. SeamlyMe.1.1 covers it: Open Individual starts in `<dataRoot>/measurements/individual`.
 
-## Task Seamly2D.72 — Pattern schema: every draft block has `<images>` (completed 2026-11-14)
+##  Seamly2D.72 — Pattern schema: every draft block has `<images>` (completed 2026-11-14)
 
 - [x] Cause: upstream `fixGroupsOrder()` added `<groups>` and `<images>` before validation. A pre-v0.7.1 pattern with `<groups>` failed (`jacket1_52-176.sm2d`).
 - [x] Decision (user): schema v0.7.8 requires `<images>` in each `draftBlock`, after `groups`. Seamly2D converts, then saves in v0.7.8.
 - [x] `VPatternConverter::toVersion0_7_8()` adds missing `<groups>` and `<images>`. `fixGroupsOrder()` only reorders. The writer adds `<images>` to each new draft block.
 - [x] Tests: `PatternConverterTests` 9 pass. `nmake check`, CTest 8/8, Cargo, MSI validation pass. User check pass.
 
-## Task Seamly2D.11 — Built-in seam allowance: calculation, display, export (completed 2026-11-14)
+##  Seamly2D.11 — Built-in seam allowance: calculation, display, export (completed 2026-11-14)
 
-- [x] Seamly2D.11.1–11.7: "Completed subtasks from Task Seamly2D.11".
+- [x] Seamly2D.11.1–11.7: "Completed subtasks from  Seamly2D.11".
 - [x] Seamly2D.11.10 Cause: the inward offset turned a short spline chord around at a 76° corner (`male_shirt.sm2d`, D11, D12). `CheckLoops()` missed the spike.
   - Fix: `removeConsumedEdges()` (`vpiece.cpp`) before `Equidistant()`. Seam line only.
   - Test: `TST_VPiece::BuiltInSeamLineMeetsAtAcuteCorner`.
 - [x] Seamly2D.11.8 `nmake check` pass. Seamly2D.11.9 user check (`AGENT_CHECKLIST.md` §27) pass.
 
-## Task Seamly2D.9 — Label template file name in Pattern Preferences and Piece Properties (completed 2026-11-14)
+##  Seamly2D.9 — Label template file name in Pattern Preferences and Piece Properties (completed 2026-11-14)
 
 - [x] File name beside `Edit template`. "none" when the stored lines match no known file. Tooltip: absolute path. Refreshes after an edit.
 - [x] Piece defaults resolve through `NewPieceDefaults::pieceLabelTemplateFile(lines)`.
 - [x] Decision: no schema change. The template file is dialog state; the pattern stores the label lines.
 - [x] Tests and Qt suites pass. User check pass.
 
-## Task Seamly2D.50 — Piece Mode: drill holes (completed 2026-11-14)
+##  Seamly2D.50 — Piece Mode: drill holes (completed 2026-11-14)
 
 - [x] Own Piece Properties page, separate from notches. Needs a positive constant diameter and a valid anchor.
 - [x] DXF R13 layer 13, group 30 = diameter.
 - [x] Schema v0.7.9 with conversion. Qt and Rust suites pass. User check pass.
 
-## Task Seamly2D.60 — Stripe and plaid reference lines (completed 2026-11-14)
+##  Seamly2D.60 — Stripe and plaid reference lines (completed 2026-11-14)
 
 - [x] Main-path point nodes define reference-only lines in Piece Mode.
 - [x] DXF R13 layers 9 and 10. Packing bounds unchanged.
 - [x] Schema v0.7.9 with conversion. Producer, transform, DXF, packing and dialog tests pass. User check pass.
 
-## Task Seamly2D.62 — Piece Mode: Flip Piece tool (completed 2026-11-14)
+##  Seamly2D.62 — Piece Mode: Flip Piece tool (completed 2026-11-14)
 
 - [x] None, Horizontal, Vertical, Both, from Piece Properties and the Piece Mode context menu. Works on any piece, also Union, Flip, Copy and Mirror on Foldline results.
 - [x] Decision (Layout.110): the flip mirrors the displayed geometry. Labels and grainline keep their place and readability. Stored geometry and flip schema unchanged.
 - [x] Tests and Qt suites pass. User check: single, copied and re-flipped pieces, each direction.
 
-## Task Seamly2D.61 — Piece Mode: Copy Piece tool (completed 2026-11-14)
+##  Seamly2D.61 — Piece Mode: Copy Piece tool (completed 2026-11-14)
 
 - [x] The copy gets its own modeling nodes and paths. It keeps live draft links, also Union producers.
 - [x] Name and letter suffixes, also on copies of copies. Editable with Pattern Piece Tool. One-step undo and redo.
 - [x] No schema change. Tests and Qt suites pass. User check: copies of Union, Flip (V, H), Copy and Mirror on Foldline pieces.
 
-## Task Seamly2D.4 — Preferences > Paths has no bodyscans row (completed 2026-11-14)
+##  Seamly2D.4 — Preferences > Paths has no bodyscans row (completed 2026-11-14)
 
 - [x] User check pass.
 
-## Task Layout.78 — Nested SVG export: one group per size (completed 2026-11-14)
+##  Layout.78 — Nested SVG export: one group per size (completed 2026-11-14)
 
 - [x] `size_groups::group_pieces_by_size` (in `export_svg`): `<g id="size_<size>" data-type="size" data-size="<size>">`, largest first. `flatten_dom` first; piece-sets removed. Only Nested changes.
 - [x] Tests: 4 `size_groups`; `jacket2_nested_svg_export_groups_pieces_by_size`. Doc: `SVG-DATA-ATTRIBUTES.md` "Nested SVG export".
 - [x] App check: Inkscape lists `size_720` … `size_220`; hiding a group hides one size.
 
-## Task Layout.80 — Fold lines (completed 2026-11-14)
+##  Layout.80 — Fold lines (completed 2026-11-14)
 
 - [x] Seamly2D: Preferences > Pattern > Fold Lines defaults (`VCommonSettings::getDefaultFoldLine*`). Path node menu "Fold Line": two neighbouring point nodes (`VPiece::foldLineNodeIndexes`). No seam allowance on the fold line; it checks and locks "On fold".
   - Decision (Seamly2D.71.11, 71.13, 71.14): seam line and cut line have no edge on the fold line, in Piece mode and in the handoff SVG.
@@ -2105,49 +1936,49 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 - [x] Tests: `TST_VPiece` fold line and Piece Mirror tests; `TST_SvgComponentTags::FoldLineSendsFoldLineGroup`; Rust `fold_line_edge`, `astm_mirror`, layer 6 and left-edge tests. App checks pass (`AGENT_CHECKLIST.md` sections 20, 21).
 - [ ] Layout.80.6.3 Adjust Mode: fold line moves with its piece. Not checked off when the task moved here.
 
-## Task Layout.84 — Nested non-DXF exports: smallest size's grainline and labels only (completed 2026-11-14)
+##  Layout.84 — Nested non-DXF exports: smallest size's grainline and labels only (completed 2026-11-14)
 
 - [x] `nested_annotations::keep_smallest_size_annotations` in `clone_export_layout_doc` and `sheets::build_sheet_export_inputs`. All exports but DXF-ASTM. Outlines, notches and fold lines of every size stay.
 - [x] SVG: kept groups go in `<g id="labels_and_grainlines">`, below the size groups.
   - Decision: it takes the place of the stripped `Rectangles` group (`contentRect`).
 - [x] Tests: 5 `nested_annotations`; 2 jacket2 `layout_utils` tests. App check pass.
 
-## Task Layout.82 — Nested: wider range of size colors (completed 2026-11-14)
+##  Layout.82 — Nested: wider range of size colors (completed 2026-11-14)
 
 - [x] `size_colors::palette_colors`: OKLCH, lightness 0.40–0.80, 10° hue steps. Each size takes the candidate farthest in OKLab from white and from earlier sizes. jacket2 closest pair 0.11 (was 0.012).
 - [x] Tests: 3 `size_colors`. Doc: `SVG-DATA-ATTRIBUTES.md` "Nested size colors". App check pass.
 
-## Task Layout.89 — Oversized-pieces dialog text too dark (completed 2026-11-14)
+##  Layout.89 — Oversized-pieces dialog text too dark (completed 2026-11-14)
 
 - [x] Cause: the screenshot came from a `qml` preview with no Fusion style and no `Theme`. SeamlyLayout already used `Theme.textOnDark`.
 - [x] `Main.qml` `oversizedPiecesLabel`: `Theme.violetLight` (2.1:1) → `Theme.textOnDark` (7.9:1). App check pass.
 
-## Task Layout.88 — Export menu: DXF note cut off (completed 2026-11-14)
+##  Layout.88 — Export menu: DXF note cut off (completed 2026-11-14)
 
 - [x] Cause: a Qt Quick `Menu` keeps its 200 px implicit width and elides longer items.
 - [x] `ExportMenu.qml` `fittedWidth`: Export menu and SVG submenu take the width of their widest shown item. App check pass.
 
-## Task Layout.72 — Split oversized individual pieces (completed 2026-11-14)
+##  Layout.72 — Split oversized individual pieces (completed 2026-11-14)
 
-- [x] Layout.72.1–72.7: "Completed subtasks from Task Layout.72".
+- [x] Layout.72.1–72.7: "Completed subtasks from  Layout.72".
 - [x] Rules: split only if no allowed rotation fits; fewest equal parts; cut edges get no seam allowance and 2 match notches. Tiled paper: no dialog.
 - [x] Layout.72.9 Dialog names each too-large dimension with piece and media sizes, in the settings unit. The list scrolls past 40% of the window.
 - [x] Layout.72.8 App check (trousers, Paper Roll 16 in): dialog list, Cancel, Split, Make the media bigger; split PDF parts and DXF-ASTM blocks `Back (1/2)`, `Back (2/2)`.
 
-## Task Layout.83 — Nested legend: square color swatches (completed 2026-11-14)
+##  Layout.83 — Nested legend: square color swatches (completed 2026-11-14)
 
 - [x] `SizeLegend::element`: one 32 × 32 px filled `rect` per size (was a 32 px line). Row height 24 → 40 px.
 - [x] Test: `legend_swatches_are_filled_squares`. App check pass.
 
-## Task Layout.86 — Export > DXF submenu (completed 2026-11-14)
+##  Layout.86 — Export > DXF submenu (completed 2026-11-14)
 
 - [x] One "DXF" item. Submenu: DXF-ASTM (R13), DXF-ASTM (CLO3D), DXF-AAMA (R11). App check pass.
 
-## Task Layout.87 — Marker: PDF (Tiled) disabled (completed 2026-11-14)
+##  Layout.87 — Marker: PDF (Tiled) disabled (completed 2026-11-14)
 
 - [x] Marker tab: PDF (Tiled) disabled, because it locked up SeamlyLayout. "Export all tabs" writes the other tabs. App check pass.
 
-## Task Layout.85 — Export DXF-AAMA (R11) (completed 2026-11-14)
+##  Layout.85 — Export DXF-AAMA (R11) (completed 2026-11-14)
 
 - [x] Export > DXF > "DXF-AAMA (R11)": ANSI/AAMA-292 in DXF R11 (AC1009). DXF-ASTM writer; `DxfAstmExportOptions::aama` selects layers 1–14. Reference: `dxf-docs/seamlylayout_DXF_AAMA.md`.
 - [x] All notches V notches on layer 4; labels on layer 1; `.rul` first line `ANSI/AAMA VERSION:1.0.0`; mirror line starts the boundary.
@@ -2155,20 +1986,20 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 - [x] Decision: labels on layer 1, as the Seamly2D and Valentina AAMA writers do. No `Category:`: the handoff has no value for it.
 - [x] Tests: 7 `writer_astm_test` `aama_*`; `exports.rs` AAMA tests. ezdxf `recover`: 0 errors. App check pass.
 
-## Task Layout.95 — Piece Properties: Rotation radio buttons (completed 2026-11-14)
+##  Layout.95 — Piece Properties: Rotation radio buttons (completed 2026-11-14)
 
 - [x] None, 1-Way (360), 2-Way (180), 4-Way (90), Any (1). Default None; None writes no line. `PieceRotation`, `VPieceLabelData::getRotationWay`.
 - [x] Schema 0.7.7 `rotationWay` type `pieceRotation`. Converter `rotationWayToV0_7_7`: empty, unknown or translated value → None.
   - Decision: new format 0.7.7, because builds already wrote 0.7.6 files with free-text values.
 - [x] Tests: `PieceRotationValuesRoundTrip`, `ConverterSetsRotationWay`. App check pass.
 
-## Task Layout.96 — Piece Properties: Tilt radio buttons and degrees (completed 2026-11-14)
+##  Layout.96 — Piece Properties: Tilt radio buttons and degrees (completed 2026-11-14)
 
 - [x] None, CCW, CW; "Degrees" spin box 0–90, enabled for CCW and CW. Default None, 0. `PieceTilt`, `VPieceLabelData::getTiltDegrees`.
 - [x] Schema 0.7.7: `tilt` type `pieceTilt`, new `tiltDegrees`. Converter `tiltToV0_7_7`: "CCW 15" → CCW, 15; past 90 → 0; other → None.
 - [x] Tests: `PieceTiltValuesRoundTrip`, `ConverterSplitsTilt`. App check pass.
 
-## Task Layout.98 — Piece Properties: Flip radio buttons (completed 2026-11-14)
+##  Layout.98 — Piece Properties: Flip radio buttons (completed 2026-11-14)
 
 - [x] None, Horizontal, Vertical, Both; default None. `PieceFlip`, `VAbstractPiece::getFlip`. Replaces "Forbid flipping"; `IsForbidFlipping()` is true for None.
 - [x] Schema 0.7.7 `flip`; `forbidFlipping` removed (`removeForbidFlippingV0_7_7`).
@@ -2177,7 +2008,7 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 - [x] Piece context menu "Flip" submenu. The canvas flip fault is fixed by Layout.110 (Seamly2D.62).
 - [x] Tests: `PieceFlipValuesRoundTrip`, `LayoutPieceKeepsFlip`, `ConverterRemovesForbidFlipping`. App check pass.
 
-## Task Layout.92 — Layout canvas material tabs (completed 2026-11-14)
+##  Layout.92 — Layout canvas material tabs (completed 2026-11-14)
 
 - [x] Create Layout lays out every material: shown material first, then tab order. One progress popup names the material. `layout_views::layout_jobs`, `TabLayoutQueue`.
 - [x] Right canvas: material tabs above the layout tabs (`MaterialTabBar`). Exports use the shown material.
@@ -2185,14 +2016,14 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
   - Decision: a material switch keeps every layout, its shown tab and its Adjust edits (`layout_views::MaterialLayout`). Replaces Layout.77.1.2.
 - [x] Tests: 4 new `layout_views` tests. App check pass.
 
-## Task Layout.94 — Multisize: grainline and labels at the base size's place (completed 2026-11-14)
+##  Layout.94 — Multisize: grainline and labels at the base size's place (completed 2026-11-14)
 
 - [x] `annotation_alignment.rs` (in `finish_import`): every size's grainline, piece label and pattern label at the base size's offset from the outline box centre.
 - [x] `svg_dom::center_piece_sets` centres on the cut line (else the seam line). Nested stacks within 0.5 px.
 - [x] Import warning names items past a size's cut line. Layout.108 fits every size in Seamly2D; the warning stays for older SVGs.
 - [x] Tests: 5 `annotation_alignment`; `jacket2_nested_stacks_each_piece_set_annotations`. App check pass.
 
-## Task Layout.108 — Seamly2D: multisize grainline and labels in one place, inside every cut line (completed 2026-11-14)
+##  Layout.108 — Seamly2D: multisize grainline and labels in one place, inside every cut line (completed 2026-11-14)
 
 - [x] `layout_handoff` (the new SVG writer, after Dead.4.4.3) moves each size's grainline and labels before the handoff.
 - [x] Reference point: fold line start when every size has one; else the cut line box centre (seam line if no cut line).
@@ -2217,13 +2048,13 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 
 ## [x] Layout.105 — rewrite or leave the untracked `AAMA-INTEROP.md` - Known differences: `Units: MM` (output: `Units:METRIC`); total quantity (output: `R,L`); size in cm; notch segments on layer 4 (output: notch points); `--gsize` exports (Seamly2D has none now).
 
-### [x] Task Layout.106 — Verify - Seamly2D: build the pieces for the SVG sent to SeamlyLayout with `layout_handoff`, not `VLayoutPiece`
+### [x]  Layout.106 — Verify - Seamly2D: build the pieces for the SVG sent to SeamlyLayout with `layout_handoff`, not `VLayoutPiece`
 
-### [x] Task Layout.109 - Verify - SeamlyLayout > Layout Settings > Media Type=Fabric
+### [x]  Layout.109 - Verify - SeamlyLayout > Layout Settings > Media Type=Fabric
 
-### [x] Task Layout.103 — Verify - DXF units: `METRIC` (in mm) or `ENGLISH` (in inches), these are the options for DXF units.
+### [x]  Layout.103 — Verify - DXF units: `METRIC` (in mm) or `ENGLISH` (in inches), these are the options for DXF units.
 
-### [x] Task Layout.101 - Verify - `SEAMLY_DATA_DIR` for SeamlyLayout
+### [x]  Layout.101 - Verify - `SEAMLY_DATA_DIR` for SeamlyLayout
 
 ### [x] Layout.X5 - Display the media dimensions (WxH) in each layout tab, of the layout displayed in that tab.
 
@@ -2253,8 +2084,8 @@ Fault (Layout.98.6, male_shirt): Flip menu item had no check mark. Choosing a Fl
 
 ### [x] Layout.Y10 - Large patterns: display SVGs over the 2 MB `data:` URL limit in both canvases. jacket2 (16 pieces): Fabric graded pieces, Marker and Nested layouts did not display.
 
-### [x] Task Seamly2D.71 - Implement - Piece Mode - Foldline processing, graphic and text
-## [x] Task CLI.1 - Audit & fix the CLI parameters so that each option works
+### [x]  Seamly2D.71 - Implement - Piece Mode - Foldline processing, graphic and text
+## [x]  CLI.1 - Audit & fix the CLI parameters so that each option works
 
 Branch `feature/cli-1`. Plan `CLI_1_PLAN.md`, matrix `CLI_1_OPTION_MATRIX.md`, results `CLI_1_TEST_RESULTS.md`.
 
@@ -2272,7 +2103,7 @@ Branch `feature/cli-1`. Plan `CLI_1_PLAN.md`, matrix `CLI_1_OPTION_MATRIX.md`, r
 - [x] CLI.1.12 `TST_VCommandLine` covers every option and the failure modes.
 - [x] CLI.1.13 `--help` text and `CLI_PARAMETERS.md` describe the verified behavior.
 
-## [x] Task CLI.3 - Legacy layout options as direct `--layout-*` flags
+## [x]  CLI.3 - Legacy layout options as direct `--layout-*` flags
 
 Seamly2D `--layout-<name> <value>` → SeamlyLayout `--<name> <value>` → `layout_tiling::apply_layout_flags`.
 The merged settings are checked by `validate_settings_json` and loaded through SettingsModel.
@@ -2291,31 +2122,19 @@ The merged settings are checked by `validate_settings_json` and loaded through S
 | `-c`/`--crop`, `-u`/`--unite` | always: a roll is trimmed below the lowest piece and exports as one page |
 | `--text2paths` | `--text2paths` |
 | `--exportOnlyDetails` | `--layout-no-packing` |
-| fabric (new) | `--layout-media`, `--layout-fabric-width`, `--layout-fabric-folded`, `--layout-selvedge-width` |
+| fabric (new) | `--layout-media`, `--layout-fabric-width`, `--layout-fabric-folded`, `--layout-selvedge-width` 
 
-- [x] CLI.3.1 Names: `--layout-` plus the setting in kebab-case (Seamly2D); the same without the prefix (SeamlyLayout). Precedence: saved settings, `--layout-settings`, then the flags; a specific margin wins over `--layout-margins`. Paper, tile and roll flags imply paper media; fabric flags imply fabric; two media are an error.
-- [x] CLI.3.2 Paper, tile size and orientation, custom tile size, roll width, unit, margins, no margins, gap.
-- [x] CLI.3.3 Layout mode, nap direction (implies withNap), no-grainline rotation.
-- [x] CLI.3.4 Roll export trims unused length and writes one page: `shirt-pdf-roll-36in`, `flags-roll-width-pdf` (one page, height under the 500 in default).
-- [x] CLI.3.5 Text as paths: `--text2paths` (SVG single-stroke paths, PDF glyph outlines; PS and EPS draw paths already).
-- [x] CLI.3.6 `--layout-no-packing`: pieces where Piece mode places them; no view, no oversize choice, no pdf-tiled.
-- [x] CLI.3.7 Decisions:
-  - `--savelen`, `--groups`, `--shiftlen`: not ported. The SeamlyLayout packer has its own piece order search and trims the used length.
-  - `--bdxf`: not ported. The writer and DXF-ASTM/AAMA readers use ASCII DXF.
-  - BMP, TIFF, PPM: not ported. PNG and JPEG cover raster output.
-  - OBJ: not ported. 3D output is 3MF (paid module).
-  - DXF flavor and version: `--layout-export-options` `dxfVersion` R13 (AC1012) or R11 (AC1009), `aama`, `clo3dGroup250`; verified by `shirt-dxf-r13`, `shirt-dxf-aama-r11`, `shirt-dxf-clo3d`. Other AutoCAD versions are not offered.
-- [x] CLI.3.8 Tests: `TST_VCommandLine::LayoutFlags*`, `LayoutNoPackingCombinations`; `StartupOptionsTests::layoutFlags_storedInTableOrder`, `noPacking_refusesLayoutChoices`; Rust `settings_flags`; CLI suite `flags-*`, `no-packing-*`.
-- [x] CLI.3.9 `CLI_PARAMETERS.md` and `--help` list the flags.
+### [x] S2D.78 Command line - multisize files - currently there is no option to select the base size of a multisize file. the '--gsize' parameter allows selecting a numeric size. The command line parameter to select the base size could be '--basesize'. for a multisize file, either --gsize or --basesize is required -- both --gsize and --basesize cannot be used together.
 
-### [x] S2D.76 — Keep grainlines aligned with flipped anchors
+
+### [x] S2D.76 Piece Mode - flipped operation should flip anchor points: when a piece is flipped in Piece Mode it's grainlines aren't flipped when the grainline is based on an anchorpoint. This indicates that the anchor points weren't flipped. Anchor points should be flipped too.
 
 - Applied the piece display transform to the grainline position and direction.
 - Removed the display transform when storing grainline edits.
 - Kept draft anchor coordinates unchanged.
 - Passed 24 live geometry cases across flips, tilts, and anchor modes. The suite passed 33 checks.
 
-### [x] S2D.77 — Enable the Copy Piece toolbox button
+### [x] S2D.77 Piece Mode - Copy Piece button: Currently the 'Copy Piece' button is disabled. Enable the 'Copy Piece' button by calling the same code as the 'Copy Piece' option in the piece context menu.
 
 - Bound the button to the existing Copy Piece action.
 - Verified the enabled state across Draft and Piece modes.
