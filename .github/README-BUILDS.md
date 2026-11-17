@@ -24,7 +24,7 @@ Every app in the suite builds against the **same Qt release, 6.11.3** — CI and
 
 | | Where | Qt | Compiler | Notes |
 |---|---|---|---|---|
-| **CI** | GitHub hosted runner | 6.11.3 | MSVC 2022 | Used by `ci-layout.yml`, the one CI workflow; its `QT_VERSION` names this release |
+| **CI** | GitHub hosted runner | 6.11.3 | MSVC 2022 | Used by `ci-layout.yml`, the `run-seamlyLayout` CI workflow; its `QT_VERSION` names this release |
 | **Local** | Developer PC | 6.11.3 `msvc2022_64` | VS 18 Community (`vcvars64.bat`) | qmake + jom by hand for the parents; CMake + Ninja + Cargo for seamlyLayout; release shadow-build in `build/` (gitignored) |
 
 - **The parents have no standalone local build or test script; they build as part of the per-platform suite script.** `scripts/sb.ps1` (release suite build), `scripts/sd.ps1` (debug seamly2d) and `scripts/st.ps1` (test runner) were deleted in August 2026. `ci-layout.yml` remains the verification path; `packaging/windows/local_build_msi.ps1`, `packaging/linux/local_build_appimage.sh` and `packaging/macos/local_build_dmg.sh` are the sanctioned local dev-machine equivalents (see "Per-platform build & packaging" below). Everything below about deployed-runtime pins and stale trees still applies to a hand-built tree.
@@ -34,7 +34,7 @@ Every app in the suite builds against the **same Qt release, 6.11.3** — CI and
 
 ## Continuous integration (CI)
 
-**One GitHub Actions workflow builds the suite: `ci-layout.yml`** (see the `README_WORKFLOWS.md` in `.github/workflows/` for the full description). Every app pins the same Qt, 6.11.3, through its single `QT_VERSION`:
+**One GitHub Actions workflow builds the suite on `run-seamlyLayout`: `ci-layout.yml`** (see the `README_WORKFLOWS.md` in `.github/workflows/` for the full description). `ci.yml` is upstream's workflow for `develop`; this project does not edit it. Every app pins the same Qt, 6.11.3, through its single `QT_VERSION`:
 
 | Workflow | App(s) | Qt | Runner(s) | What it does |
 |---|---|---|---|---|
