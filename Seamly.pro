@@ -10,6 +10,11 @@ count(LIST, 1, >): error("The build will fail. Path '$${PWD}' contains space!!!"
 LIST = $$split(OUT_PWD,' ')
 count(LIST, 1, >): error("The build will fail. Path '$${OUT_PWD}' contains space!!!")
 
+# ===== Build version header =====
+# Create the header here, once. Under make -j, the subproject qmake runs start in parallel;
+# a run that reads the header while another writes it reads an empty file.
+include(project_version.pri)
+
 # ===== SUBDIRS =====
 # - `TEMPLATE = subdirs` requires each SUBDIRS entry to contain its own .pro file, so no
 # additional top-level .pro file is required.
