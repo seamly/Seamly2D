@@ -16,12 +16,14 @@ Tasks in this file are numbered with prefix `PrivateRust.`
 ## Facts (checked 2026-11-17)
 
 | Rust code | `.rs` files | License now | Public on `origin` since |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `src/app/seamlylayout/crates/` (15 crates), `Cargo.toml`, `Cargo.lock` | 85 | MIT | 2026-07-19 |
 | `src/app/seamlycli/` (Rust + Iced) | 10 | GPL-3.0-or-later | 2026-11-16 |
 
 - Total: 50,677 lines of Rust.
 - Sole author: slspencer. One Dependabot version bump. Sue can relicense.
+- Sue maintains `FashionFreedom/Seamly2D`.
+- Upstream releases: weekly tag `v<date>.<n>`, marked Latest. Upstream workflows have no tag or release triggers.
 - Relicensing does not recall published copies. A holder of a published version keeps its MIT or GPL grant.
 - `seamly/Seamly2D` is a public fork of `FashionFreedom/Seamly2D`. The fork network shares objects: any pushed commit is readable by SHA through every repository in it.
 - Exposure: 1 fork (`elros88`, 2024, no Rust), 8 stars, 116 clones / 29 unique in 14 days (CI checkouts count).
@@ -42,14 +44,14 @@ Tasks in this file are numbered with prefix `PrivateRust.`
 ## Target layout
 
 | Item | Location |
-|---|---|
+| --- | --- |
 | Rust crates, `Cargo.toml`, `Cargo.lock`, Rust tests | Private repo |
 | SeamlyCLI source | Private repo |
 | `packaging/licenses/about.toml`, `rust_crate_notices.hbs` | Private repo |
 | Qt frontend C++ and QML | Public repo (MIT) |
 | Generated headers | Public: `src/app/seamlylayout/bridge_generated/include/` |
 | Core version, per-platform URL, SHA-256 | Public: `src/app/seamlylayout/bridge_generated/core_release.cmake` |
-| Prebuilt package (lib, CMake config, notices, `seamlycli.exe`) | Private CI builds it; public download host serves it |
+| Prebuilt package (lib, CMake config, notices, `seamlycli.exe`) | Private CI builds it; `FashionFreedom/Seamly2D` releases serve it |
 
 ## Public build modes
 
@@ -59,17 +61,19 @@ Tasks in this file are numbered with prefix `PrivateRust.`
 
 ## Decisions
 
-| # | Decision | Options | Recommendation |
-|---|---|---|---|
-| D1 | Scope | SeamlyLayout crates only; also SeamlyCLI | Both |
-| D2 | Public history | Keep; rewrite `origin` and ask GitHub Support to purge | Rewrite, last, after the new build passes |
-| D3 | Private repo | Reuse `seamly/seamlyLayout` (stale since 2026-07-17); new repo | New repo; archive the old one |
-| D4 | Package host | Public binary-only repo releases; `seamly/Seamly2D` releases; private host with token | Public binary-only repo |
-| D5 | Licensor | Seamly Systems, Inc.; Seamly2D Project | Seamly Systems, Inc.; proprietary, free redistribution |
-| D6 | Upstream | Frontend plus download hook; SeamlyLayout left out | Ask `FashionFreedom` maintainers before the endgame PR |
+User decisions, 2026-11-17:
+
+| # | Decision | Choice |
+| --- | --- | --- |
+| D1 | Scope | SeamlyLayout crates and SeamlyCLI |
+| D2 | Public history | Rewrite `origin` and ask GitHub Support to purge. Last step, after the new build passes |
+| D3 | Private repo | New repo under `seamly`. Archive the stale `seamly/seamlyLayout` |
+| D4 | Package host | `FashionFreedom/Seamly2D` releases |
+| D5 | Licensor | Seamly Systems, Inc. Proprietary, free redistribution |
+| D6 | Upstream | `FashionFreedom/Seamly2D` is the public repo. It gets the frontend, generated headers, and download hook |
 
 - D2 reason: current algorithms are the main asset, and exposure is low. Cost: rewrite breaks every clone and `.worktrees/` checkout.
-- D4 reason: a private host blocks public CI, fork PRs, and outside builders. `seamly/Seamly2D` releases would mix core tags with app releases.
+- D4 constraints: tag `seamlylayout-core-v<version>`; create with `--latest=false` so weekly app releases stay Latest; never delete a core release, because old builds pin it.
 - D5 reason: "Seamly2D Project" is not a legal entity. A licensor must be one.
 
 ## Task PrivateRust.0 — Stop-gap
@@ -78,29 +82,30 @@ Tasks in this file are numbered with prefix `PrivateRust.`
 
 ## Task PrivateRust.1 — License groundwork
 
-- [ ] PrivateRust.1.1 Record D1–D6 in this file.
+- [x] PrivateRust.1.1 Record D1–D6 in this file.
 - [ ] PrivateRust.1.2 Counsel check: Seamly2D (GPL) and SeamlyLayout (proprietary core) ship in one installer and talk only through `--svg-stdin` and command-line arguments. No linking.
-- [ ] PrivateRust.1.3 Write the binary license: redistribution, linking with the MIT frontend, inclusion in Seamly2D installers.
-- [ ] PrivateRust.1.4 Private repo: proprietary `LICENSE`, Rust file headers, `Cargo.toml` `license-file` and `publish = false`.
-- [ ] PrivateRust.1.5 `about.toml`: elect MIT or Apache-2.0 for `r-efi`, `hershey`, `self_cell`. Add the MPL-2.0 source pointer for `resvg`, `usvg`.
+- [ ] PrivateRust.1.3 Sue assigns, in writing, her copyright in the Rust code to Seamly Systems, Inc. Counsel confirms the form.
+- [ ] PrivateRust.1.4 Write the binary license, licensor Seamly Systems, Inc.: redistribution, linking with the MIT frontend, inclusion in Seamly2D installers.
+- [ ] PrivateRust.1.5 Private repo: proprietary `LICENSE` (Copyright 2026 Seamly Systems, Inc.), Rust file headers, `publish = false`. Every `Cargo.toml`, SeamlyCLI's `GPL-3.0-or-later` too, uses `license-file`.
+- [ ] PrivateRust.1.6 `about.toml`: elect MIT or Apache-2.0 for `r-efi`, `hershey`, `self_cell`. Add the MPL-2.0 source pointer for `resvg`, `usvg`.
 
 ## Task PrivateRust.2 — Private repository
 
-- [ ] PrivateRust.2.1 Create the private repo (D3).
+- [ ] PrivateRust.2.1 Create the private repo under `seamly` (D3). Archive `seamly/seamlyLayout`.
 - [ ] PrivateRust.2.2 In a fresh clone, not the shared working tree, keep the Rust history: `git filter-repo --path src/app/seamlylayout/crates/ --path src/app/seamlylayout/Cargo.toml --path src/app/seamlylayout/Cargo.lock --path src/app/seamlycli/ --path packaging/licenses/about.toml --path packaging/licenses/rust_crate_notices.hbs`. Push it to the private repo.
 - [ ] PrivateRust.2.3 Root `Cargo.toml` workspace. `cargo test --workspace` and SeamlyCLI `cargo test --release --locked` pass.
 - [ ] PrivateRust.2.4 Move Rust docs and agent rules. List first, then move:
   - `.claude/rules/seamlylayout_rust-style.md`, `seamlylayout_ffi-bridge.md`, `seamlylayout-architecture.md`, `seamlylayout_dependencies.md`, `seamlylayout_guidelines_*.md`, `seamlylayout_svg-processing.md`, Rust parts of `seamlylayout_testing.md`.
   - `project-docs/docs-seamlylayout/dxf-docs/` files with Rust snippets (5 files).
   - Rust design notes in other `project-docs/docs-seamlylayout/` files.
-- [ ] PrivateRust.2.5 Add `CLAUDE.md`, rules, and `.claude/agents/seamlylayout-developer.md` to the private repo.
+- [ ] PrivateRust.2.5 Add `CLAUDE.md`, rules, and `.claude/agents/seamlylayout-developer.md` to the private repo. Its file header rule: Author `slspencer`, Copyright `2026 Seamly Systems, Inc.`, license `Proprietary`.
 
 ## Task PrivateRust.3 — Private CI and release package
 
 - [ ] PrivateRust.3.1 Build the `cxxqt_bridge` release staticlib and SeamlyCLI per target, Qt 6.11.3, `QMAKE` set:
 
 | Target | Runner | Constraint |
-|---|---|---|
+| --- | --- | --- |
 | windows-x64 | Windows, MSVC | Toolset not newer than public builders; `/MD` runtime |
 | linux-x64 | `ubuntu-22.04` | Same glibc and GCC as the AppImage build |
 | macos-universal | `macos-26` | `lipo` x86_64 + arm64; `MACOSX_DEPLOYMENT_TARGET` = DMG minimum |
@@ -115,7 +120,8 @@ Tasks in this file are numbered with prefix `PrivateRust.`
   - `seamlycli.exe` (windows-x64);
   - `LICENSE`, `SHA256SUMS`.
 - [ ] PrivateRust.3.4 `cargo test --workspace` and SeamlyCLI tests gate the release.
-- [ ] PrivateRust.3.5 Tag `core-v<version>` starts the release. CI uploads the zips to the D4 host with a scoped token.
+- [ ] PrivateRust.3.5 Tag `core-v<version>` in the private repo starts the release. CI runs `gh release create seamlylayout-core-v<version> --repo FashionFreedom/Seamly2D --latest=false` and uploads the zips.
+- [ ] PrivateRust.3.6 Token: fine-grained PAT or GitHub App, `FashionFreedom/Seamly2D` only, `contents: write`. Store it as a private repo secret.
 
 ## Task PrivateRust.4 — Public build switch
 
@@ -144,13 +150,13 @@ Tasks in this file are numbered with prefix `PrivateRust.`
 - [ ] PrivateRust.5.5 Sue deletes the two stale remote branches.
 - [ ] PrivateRust.5.6 Delete the `Swatinem/rust-cache` entries on `seamly/Seamly2D` (`gh cache delete`).
 
-## Task PrivateRust.6 — Public history rewrite (only if D2 = rewrite)
+## Task PrivateRust.6 — Public history rewrite
 
 - [ ] PrivateRust.6.1 Start only after PrivateRust.7.1 and 7.2 pass.
 - [ ] PrivateRust.6.2 Fresh `--mirror` clone. `git filter-repo --invert-paths` with the PrivateRust.2.2 paths. Optional: `--replace-text` for Rust snippets in docs.
 - [ ] PrivateRust.6.3 Check: `git log --all --oneline -- '*.rs' '*Cargo.toml' '*Cargo.lock'` is empty.
 - [ ] PrivateRust.6.4 Sue force-pushes all branches and tags. Every clone and `.worktrees/` checkout re-clones.
-- [ ] PrivateRust.6.5 Sue asks GitHub Support to purge cached views and unreachable objects in the fork network. Until then old SHAs stay readable, also through `FashionFreedom/Seamly2D`.
+- [ ] PrivateRust.6.5 Sue, as `FashionFreedom/Seamly2D` maintainer, asks GitHub Support to purge cached views and unreachable objects in the fork network. Until then old SHAs stay readable, also through `FashionFreedom/Seamly2D`.
 - [ ] PrivateRust.6.6 Before the endgame push to `FashionFreedom:run-seamlyLayout`, repeat the 6.3 check on the pushed branch.
 
 ## Task PrivateRust.7 — Verify
