@@ -61,7 +61,7 @@ Tasks in this file are numbered with prefix `PrivateRust.`
 | Qt frontend C++ and QML | Public repo (MIT) |
 | `seamlylayout_core.h` (C API) | Public: `src/app/seamlylayout/core_release/` |
 | Core version, per-platform URL, SHA-256 | Public: `src/app/seamlylayout/core_release/core_release.cmake` |
-| Relief and Hershey fonts with licenses | Public: `src/fonts/` |
+| Relief and Hershey fonts with licenses | Public: `src/fonts/`; compiled into `seamlylayout.exe` as Qt resources |
 | Prebuilt package (core library, CMake config, notices, `seamlycli.exe`) | Private CI builds it; `FashionFreedom/Seamly2D` releases serve it |
 
 ## Core library
@@ -76,6 +76,7 @@ Tasks in this file are numbered with prefix `PrivateRust.`
 | `int seamlylayout_core_api_version()` | Frontend refuses a library with another API version |
 | `void seamlylayout_core_register_qml_types()` | Calls `qmlRegisterType<AppController>("SeamlyLayout", 1, 0, "AppController")` |
 | `QObject* seamlylayout_core_create_controller(QObject* parent)` | Gives `HeadlessExport` an `AppController` |
+| `int seamlylayout_core_set_label_fonts(const uint8_t* relief_otf, size_t relief_size, const uint8_t* hershey_jhf, size_t hershey_size)` | Gives the core the label fonts from the exe's Qt resources. The core copies the bytes. Returns 0, or an error code for invalid font data |
 
 - Symbol control: Windows `__declspec(dllexport)`; Linux `-fvisibility=hidden` and a version script; macOS `-exported_symbols_list`.
 - Windows: library and exe both use the `/MD` runtime, so a `QObject` made in one can be deleted in the other.
@@ -100,18 +101,13 @@ User decisions, 2026-11-17:
 | D6 | Upstream | `FashionFreedom/Seamly2D` is the public repo. It gets the frontend, `seamlylayout_core.h`, fonts, and download hook |
 | D7 | Separation | Rust core in its own shared library, not linked into `seamlylayout.exe` |
 | D8 | Fonts | Move the crate fonts to `src/fonts/` |
+| D9 | Font delivery | Qt resources in `seamlylayout.exe`. The frontend passes the font bytes to the core once at startup |
 
 - D2 reason: current algorithms are the main asset, and exposure is low. Cost: rewrite breaks every clone and `.worktrees/` checkout.
 - D4 constraints: tag `seamlylayout-core-v<version>`; create with `--latest=false` so weekly app releases stay Latest; never delete a core release, because old builds pin it.
 - D5 reason: "Seamly2D Project" is not a legal entity. A licensor must be one.
 
-Open:
-
-| # | Decision | Options | Recommendation |
-| --- | --- | --- | --- |
-| F1 | How the Rust gets the fonts | Load the files at run time; embed at build time from `src/fonts/` | Load at run time |
-
-- F1 reason: the proprietary library then holds no third-party fonts, and the private repo needs no font copy outside tests. Cost: Rust and frontend changes (PrivateRust.8.3–8.5).
+- D9 reason: the proprietary library holds no third-party fonts. No font files to install, so no font path per platform. Cost: one more exported function.
 
 ## Task PrivateRust.0 — Stop-gap
 
@@ -132,17 +128,17 @@ Open:
 
 Do this before PrivateRust.2.2, so the fonts stay public.
 
-- [ ] PrivateRust.8.1 Decide F1.
+- [x] PrivateRust.8.1 Decide how the Rust gets the fonts: D9, Qt resources in `seamlylayout.exe` (user decision 2026-11-17).
 - [ ] PrivateRust.8.2 `git mv` the fonts and their licenses:
   - `crates/svg_label_text/assets/fonts/ReliefSingleLineOutline-Regular.otf`, `OFL.txt` → `src/fonts/relief_single_line/`.
   - `crates/svg_label_text/assets/hershey/futural.jhf`, `HERSHEY_LICENSE.txt` → `src/fonts/hershey/`.
-- [ ] PrivateRust.8.3 F1 = run time: `svg_label_text` reads both files from a font directory the frontend sets once at startup. Replace the `include_bytes!` / `include_str!` constants.
-- [ ] PrivateRust.8.4 F1 = run time: the frontend resolves the font directory from `QCoreApplication::applicationDirPath()` (macOS: `../Resources/fonts`) and passes it before the first import.
-- [ ] PrivateRust.8.5 F1 = run time: a missing or unreadable font file gives an error that names the path. Unit test it.
-- [ ] PrivateRust.8.6 F1 = build time: point the `include_bytes!` / `include_str!` paths at `src/fonts/`. After the split, the private build fetches `src/fonts/` from the public repo at a pinned commit.
-- [ ] PrivateRust.8.7 Tests: `svg_label_text_tests.rs` reads the fonts from the new location. After the split, the private repo keeps a test copy.
-- [ ] PrivateRust.8.8 Packaging (F1 = run time): stage `src/fonts/` with its licenses beside SeamlyLayout in the MSI, AppImage, and DMG.
-- [ ] PrivateRust.8.9 Update `.claude/rules/seamlylayout_licensing.md` asset table and `packaging/licenses/` notices for the new paths.
+- [ ] PrivateRust.8.3 `svg_label_text`: replace the `include_bytes!` / `include_str!` constants (`font_embedding.rs:31`, `hershey_strokes.rs:22`) with fonts set once at run time. Label text before the fonts are set gives an error.
+- [ ] PrivateRust.8.4 `cxxqt_bridge`: add `extern "C"` `seamlylayout_core_set_label_fonts` (see Core library). It copies the bytes and checks that both fonts parse. Declare it in a new public `src/app/seamlylayout/core_release/seamlylayout_core.h`.
+- [ ] PrivateRust.8.5 Frontend: add the two font files to a Qt resource under `/fonts`. `seamlyLayout_main.mm` reads them and calls `seamlylayout_core_set_label_fonts` before the QML engine loads and before a headless export. A failure gives an error and a nonzero exit.
+- [ ] PrivateRust.8.6 Unit tests: label text before the fonts are set gives an error; invalid font bytes give an error.
+- [ ] PrivateRust.8.7 Rust tests read the fonts from `src/fonts/` through a path from `CARGO_MANIFEST_DIR`. After the split, the private repo keeps a test copy.
+- [ ] PrivateRust.8.8 Check that the MSI, AppImage, and DMG still ship `relief_singleline_OFL.txt` and `hershey_fonts_notice.txt` from `packaging/licenses/`.
+- [ ] PrivateRust.8.9 Update the font paths in `.claude/rules/seamlylayout_licensing.md` (asset table: add `src/fonts/`) and `project-docs/docs-seamlylayout/status-docs/seamlylayout_SEAMLYLAYOUT_DECISIONS.md`.
 
 ## Task PrivateRust.2 — Private repository
 
@@ -168,7 +164,7 @@ Do this before PrivateRust.2.2, so the fonts stay public.
 | windows-arm64 | later | No arm64 MSI yet |
 
 - [ ] PrivateRust.3.3 Release profile: `lto = "fat"`, `codegen-units = 1`, `debug = false`, `--remap-path-prefix`. Strip the shared library.
-- [ ] PrivateRust.3.4 Symbol audit: only the three exported functions are visible (`dumpbin /exports`, `nm -D --defined-only`, `nm -gU`).
+- [ ] PrivateRust.3.4 Symbol audit: only the four exported functions are visible (`dumpbin /exports`, `nm -D --defined-only`, `nm -gU`).
 - [ ] PrivateRust.3.5 Package contents:
   - core library; Windows import `.lib`;
   - `seamlylayout_core.h`;

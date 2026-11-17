@@ -5,14 +5,15 @@
 ### 2026-11-17 — Plan: private Rust source
 
 - Plan: `project-docs/docs-cicd/TODO_PRIVATE_RUST_SOURCE.md` (prefix `PrivateRust.`). Order 0 → 1 → 8 → 2 → 3 → 4 → 5 → 7 → 6.
-- Decisions D1–D8 recorded. D7: Rust core in shared library `seamlylayout_core`; `seamlylayout.exe` holds open-source code only.
+- Decisions D1–D9 recorded. D7: Rust core in shared library `seamlylayout_core`; `seamlylayout.exe` holds open-source code only.
 - D8: crate fonts (Relief, Hershey) move to `src/fonts/` and stay public.
 - Done: 1.1; 1.3 (copyright assigned to Seamly Systems, Inc.).
 - Open 1.2: counsel re-confirms. Proprietary code still runs on the PC: core library, `seamlycli.exe`.
-- Open F1: Rust loads fonts at run time (recommended) or embeds them at build time.
+- D9: fonts compiled into `seamlylayout.exe` as Qt resources; frontend passes the bytes to the core at startup.
 - Stop-gap 0.1: keep new Rust commits off `run-seamlyLayout` until PrivateRust.5.
 - No code changes. Plan and handover commits only.
-- Next: Sue decides F1; then PrivateRust.8.
+- Open: Rust commits for PrivateRust.8 on `run-seamlyLayout` despite stop-gap 0.1 (Sue).
+- Next: PrivateRust.8.
 
 ### 2026-11-17 — CI: fold label test and push builds
 
