@@ -2307,3 +2307,10 @@ The merged settings are checked by `validate_settings_json` and loaded through S
   - DXF flavor and version: `--layout-export-options` `dxfVersion` R13 (AC1012) or R11 (AC1009), `aama`, `clo3dGroup250`; verified by `shirt-dxf-r13`, `shirt-dxf-aama-r11`, `shirt-dxf-clo3d`. Other AutoCAD versions are not offered.
 - [x] CLI.3.8 Tests: `TST_VCommandLine::LayoutFlags*`, `LayoutNoPackingCombinations`; `StartupOptionsTests::layoutFlags_storedInTableOrder`, `noPacking_refusesLayoutChoices`; Rust `settings_flags`; CLI suite `flags-*`, `no-packing-*`.
 - [x] CLI.3.9 `CLI_PARAMETERS.md` and `--help` list the flags.
+
+### [x] S2D.76 — Keep grainlines aligned with flipped anchors
+
+- Applied the piece display transform to the grainline position and direction.
+- Removed the display transform when storing grainline edits.
+- Kept draft anchor coordinates unchanged.
+- Passed 24 live geometry cases across flips, tilts, and anchor modes. The suite passed 33 checks.

@@ -1,5 +1,22 @@
 # Session handover
 
+## 2026-11-16 — S2D.76 flipped grainline anchors
+
+- Grainlines now use the same display flip and tilt as their anchor points.
+- Grainline edits remove the display transform before storing pattern coordinates.
+- Draft coordinates remain unchanged.
+- Tests cover 24 combinations of flips, tilts, and anchor modes, with repeated refreshes.
+- The piece markings suite passed 33 checks.
+- All branches start at local run-seamlyLayout commit 31a216de4a.
+- The main checkout and its three uncommitted documentation edits remain unchanged.
+- The four branches remain local and unmerged.
+- Verification used Qt 6.11.3 and MSVC 2022.
+- The combined focused harness passed 130 checks.
+- Existing SeamlyLayout debug checks passed 8/8. Rust workspace tests passed 734 checks.
+- The full MSI build did not run. Native visual acceptance checks remain for the user.
+- The origin fetch did not finish. Local develop matched its stored origin ref and was already an ancestor.
+- Next: review the branches, merge the accepted changes, and run the full Windows build.
+
 ## 2026-11-16 — Returned to the main worktree
 
 - The user ended the isolated CLI work and requested a return to Seamly2D-private.

@@ -13,6 +13,8 @@ class TST_PieceMarkings : public QObject
 {
     Q_OBJECT
 private slots:
+    void flippedGrainlineFollowsAnchors_data();
+    void flippedGrainlineFollowsAnchors();
     void anchorAdditionUndoRedo();
     void roundTripAndDetach();
     void rejectsUnsafeValues();
