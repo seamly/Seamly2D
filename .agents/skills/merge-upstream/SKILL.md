@@ -22,6 +22,8 @@ Enable `git config rerere.enabled true` so Git reuses recorded conflict resoluti
 - `.github/workflows/ci.yml` is upstream's workflow for `develop`. Take upstream's version as is;
   it must stay identical to `develop`'s copy. `ci-layout.yml` is ours, for `run-seamlyLayout`.
   Port wanted upstream `ci.yml` changes into `ci-layout.yml` by hand.
+  Do not port the `version` job: upstream writes `YYYY.M.D.HHMM`; ours writes `YY.M.DDHH`,
+  the 3-part form `packaging/version.sh` and the MSI `ProductVersion` need.
 - `MainWindowsNoGUI::exportEPS`, `exportPS`, `convertPdfToPs` (pdftops), retired in `14e1d8723b`.
   `develop` restores them whenever it edits nearby lines. Delete them on each merge.
   Upstream keeps them until the endgame PR (user decision). Do not propose an early upstream PR.

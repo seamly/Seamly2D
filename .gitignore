@@ -260,7 +260,7 @@ target_wrapper.bat
 /docs/
 
 # Ignore build outputs and local state
-# packaging/version.sh or common.pri writes the build version header
+# packaging/version.sh or project_version.pri writes the build version header
 src/libs/vmisc/project_version_number.h
 src/app/seamlylayout/target/
 src/app/seamlylayout/logs/

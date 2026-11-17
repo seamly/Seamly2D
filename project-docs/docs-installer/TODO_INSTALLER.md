@@ -125,6 +125,8 @@ Task Layout.14 ships notices for the Rust crates, the Qt runtime and the SVG exp
 A push of `run-seamlyLayout` to `origin` runs `ci-layout.yml`. Turn on the next platform only after the previous one builds its artifact in CI (user decision).
 
 - [ ] Installer.8.1 - Windows 11 x64 `.msi` only. `linux` and `macos` jobs off (`false &&`), arm64 matrix entry commented out. `windows-msi` does not wait for `linux-test`. Open: CI pass.
+  - Run 44165339525 failed in `version.sh`: the `version` job wrote `YYYY.M.D.HHMM`, not `YY.M.DDHH`. A `develop` merge brought upstream's formula back. Fixed.
+  - Same run, `linux-test`: parallel qmake runs wrote and read the missing version header at the same time. `Seamly.pro` now creates it first (`project_version.pri`). Fixed.
 - [ ] Installer.8.2 - Windows 11 arm64 `.msi`: uncomment the arm64 matrix entry.
 - [ ] Installer.8.3 - Linux Debian (latest) artifact. Open decision: `.deb` package, or AppImage built on Debian (the `linux` job builds an AppImage on `ubuntu-22.04`).
 - [ ] Installer.8.4 - macOS (latest) artifact: turn on the `macos` job.

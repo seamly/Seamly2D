@@ -54,7 +54,7 @@
 #ifndef PROJECTVERSION_H
 #define PROJECTVERSION_H
 
-// packaging/version.sh or common.pri generates this header. Git ignores it.
+// packaging/version.sh or project_version.pri generates this header. Git ignores it.
 #include "project_version_number.h"
 
 class QString;
