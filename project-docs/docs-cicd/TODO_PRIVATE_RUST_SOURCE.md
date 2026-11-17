@@ -84,7 +84,9 @@ User decisions, 2026-11-17:
 
 - [x] PrivateRust.1.1 Record D1–D6 in this file.
 - [ ] PrivateRust.1.2 Counsel check: Seamly2D (GPL) and SeamlyLayout (proprietary core) ship in one installer and talk only through `--svg-stdin` and command-line arguments. No linking.
-- [ ] PrivateRust.1.3 Sue assigns, in writing, her copyright in the Rust code to Seamly Systems, Inc. Counsel confirms the form.
+  - 2026-11-17: counsel answered yes. Stated basis: all code on the user's PC is open source (Qt, C++).
+  - Open: that basis does not match this plan. The proprietary Rust runs on the user's PC, compiled into `seamlylayout.exe` and as `seamlycli.exe`. Counsel re-confirms with this fact.
+- [x] PrivateRust.1.3 Sue assigns, in writing, her copyright in the Rust code to Seamly Systems, Inc. Done 2026-11-17.
 - [ ] PrivateRust.1.4 Write the binary license, licensor Seamly Systems, Inc.: redistribution, linking with the MIT frontend, inclusion in Seamly2D installers.
 - [ ] PrivateRust.1.5 Private repo: proprietary `LICENSE` (Copyright 2026 Seamly Systems, Inc.), Rust file headers, `publish = false`. Every `Cargo.toml`, SeamlyCLI's `GPL-3.0-or-later` too, uses `license-file`.
 - [ ] PrivateRust.1.6 `about.toml`: elect MIT or Apache-2.0 for `r-efi`, `hershey`, `self_cell`. Add the MPL-2.0 source pointer for `resvg`, `usvg`.
