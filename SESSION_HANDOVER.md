@@ -1,43 +1,25 @@
 # Session handover
 
-## 2026-11-16 — S2D.73 export verification
+## 2026-11-16 — Feature branches merged and deleted
 
-- The existing Export Pieces implementation remains unchanged.
-- Added exact UTF-8 file checks for generated individual and multisize SVG documents.
-- The focused SVG file suite passed all eight checks.
-- S2D.73.5 remains open for the user.
-
-## 2026-11-16 — S2D.75 flipped piece handoff
-
-- The shared handoff writer now mirrors piece geometry before annotation alignment and sheet placement.
-- Export Pieces and the SVG handoff use this writer.
+- Merged all four feature branches into local run-seamlyLayout with separate merge commits.
+- S2D.73 adds generated SVG file checks. Its merge commit is 22c5463a1d.
+- S2D.75 preserves flipped geometry in Export Pieces and the SVG handoff. Its merge commit is 9426a55bd7.
 - Export Drafts retains the construction scene, as the user requested.
-- Tests cover all flips, two sizes, seam allowances, fold lines, paths, notches, markings, and grainlines.
-- The handoff piece suite passed 41 checks. The handoff document suite passed 33 checks.
-
-## 2026-11-16 — S2D.76 flipped grainline anchors
-
-- Grainlines now use the same display flip and tilt as their anchor points.
-- Grainline edits remove the display transform before storing pattern coordinates.
-- Draft coordinates remain unchanged.
-- Tests cover 24 combinations of flips, tilts, and anchor modes, with repeated refreshes.
-- The piece markings suite passed 33 checks.
-
-## 2026-11-16 — S2D.77 Copy Piece button
-
-- The toolbox button now uses duplicate_piece_action as its default action.
-- The button follows the action state and calls the existing context-menu copy implementation.
-- The main-window check passed: Draft mode disabled, Piece mode enabled, shared action, copy, undo, and redo.
-- The existing piece copy suite passed 15 checks.
-- All branches start at local run-seamlyLayout commit 31a216de4a.
-- The main checkout and its three uncommitted documentation edits remain unchanged.
-- The four branches remain local and unmerged.
-- Verification used Qt 6.11.3 and MSVC 2022.
-- The combined focused harness passed 130 checks.
-- Existing SeamlyLayout debug checks passed 8/8. Rust workspace tests passed 734 checks.
-- The full MSI build did not run. Native visual acceptance checks remain for the user.
-- The origin fetch did not finish. Local develop matched its stored origin ref and was already an ancestor.
-- Next: review the branches, merge the accepted changes, and run the full Windows build.
+- S2D.76 aligns grainlines with flipped anchors. Its merge commit is c2e06fd010.
+- S2D.77 binds the Copy Piece button to its action. Its merge commit is 3497cab77d.
+- Deleted the four merged task branches and their clean feature worktrees.
+- The detached CLI reference worktree remains unchanged.
+- Restored the three existing documentation edits as uncommitted changes.
+- TODO_COMPLETED.md retains the saved content and both new completion records.
+- TODO_SEAMLYLAYOUT.md matches its backup byte for byte.
+- TODO_SEAMLY2D.md retains the user edits and the merged test results. Its completed S2D.76 and S2D.77 descriptions moved to TODO_COMPLETED.md.
+- Kept the safety stash ff305da614b6aabdb03002debf7b190ca3f8509f and the external documentation backup.
+- Prior verification passed: 130 focused checks, eight SeamlyLayout checks, and 734 Rust tests.
+- The main-window Copy Piece check passed, including mode changes, copy, undo, and redo.
+- Merge resolutions changed documentation only. The merged feature source matches the tested commits.
+- The full Windows build and user visual checks remain pending.
+- No push was requested or performed.
 
 ## 2026-11-16 — Returned to the main worktree
 
