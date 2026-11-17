@@ -310,6 +310,7 @@
     </property>
     <addaction name="calculator_Action"/>
     <addaction name="decimalChart_Action"/>
+    <addaction name="seamlycli_Action"/>
    </widget>
    <addaction name="file_Menu"/>
    <addaction name="edit_Menu"/>
@@ -4331,6 +4332,14 @@
    </property>
    <property name="shortcut">
     <string notr="true">V, L</string>
+   </property>
+  </action>
+  <action name="seamlycli_Action">
+   <property name="text">
+    <string>SeamlyCLI</string>
+   </property>
+   <property name="toolTip">
+    <string>Open SeamlyCLI</string>
    </property>
   </action>
   <action name="calculator_Action">

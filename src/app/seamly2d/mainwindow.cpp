@@ -123,6 +123,7 @@
 #include <QAction>
 #include <QProcess>
 #include <QSettings>
+#include <QStandardPaths>
 #include <QtGlobal>
 #include <QDesktopServices>
 #include <chrono>
@@ -7168,6 +7169,24 @@ void MainWindow::createActions()
     });
 
     //Utilities menu
+    connect(ui->seamlycli_Action, &QAction::triggered, this, [this]()
+    {
+        const QDir application_directory(QCoreApplication::applicationDirPath());
+        const QStringList search_directories{
+            application_directory.absolutePath(),
+            application_directory.absoluteFilePath(QStringLiteral("../../seamlycli/target/release"))
+        };
+        QString executable = QStandardPaths::findExecutable(QStringLiteral("seamlycli"), search_directories);
+        if (executable.isEmpty())
+        {
+            executable = QStandardPaths::findExecutable(QStringLiteral("seamlycli"));
+        }
+        if (executable.isEmpty() || !QProcess::startDetached(executable, QStringList()))
+        {
+            QMessageBox::warning(this, tr("SeamlyCLI"), tr("Cannot start SeamlyCLI. Check that SeamlyCLI is installed."));
+        }
+    });
+
     connect(ui->calculator_Action, &QAction::triggered, this, [this]()
     {
         CalculatorDialog *calcDialog = new CalculatorDialog(this);

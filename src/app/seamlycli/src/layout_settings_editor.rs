@@ -85,8 +85,6 @@ impl Default for LayoutSettingsEditor {
             number("Media", "fabricHeight", "Fabric length (0: no end)", "0"),
             choice("Media", "fabricFolded", "Folded fabric", YES_NO, "false"),
             number("Media", "selvedgeWidth", "Selvedge width", "0"),
-            number("Media", "pageWidth", "Layout width", "36"),
-            number("Media", "pageHeight", "Layout length", "48"),
             number("Margins", "marginTop", "Top", "0.25"),
             number("Margins", "marginBottom", "Bottom", "0.25"),
             number("Margins", "marginLeft", "Left", "0.25"),
@@ -145,7 +143,7 @@ impl LayoutSettingsEditor {
             let value = if field.choices.is_empty() || field.key == "rotationStep" {
                 let number = field.value.trim().parse::<f64>()
                     .map_err(|_| format!("Enter a number for {}.", field.label))?;
-                let positive = matches!(field.key, "tileWidth" | "tileHeight" | "pageWidth" | "pageHeight");
+                let positive = matches!(field.key, "tileWidth" | "tileHeight");
                 if !number.is_finite() || number < 0.0 || (positive && number == 0.0) {
                     return Err(format!("Enter a valid positive value for {}.", field.label));
                 }
@@ -223,7 +221,8 @@ mod tests {
         let json = LayoutSettingsEditor::default().json().unwrap();
         assert_eq!(json["tileSize"], "Letter");
         assert_eq!(json["unit"], "in");
-        assert_eq!(json["pageWidth"], 36.0);
+        assert!(json.get("pageWidth").is_none());
+        assert!(json.get("pageHeight").is_none());
         assert_eq!(json["fabricFolded"], false);
     }
 
@@ -241,7 +240,7 @@ mod tests {
         let mut editor = LayoutSettingsEditor::default();
         editor.update(Message::Edited(0, "mm".to_string()), true);
         let json = editor.json().unwrap();
-        assert_eq!(json["pageWidth"], 914.4);
+        assert_eq!(json["rollWidth"], 914.4);
         assert_eq!(json["marginLeft"], 6.35);
         assert_eq!(json["rotationStep"], 0.0);
     }

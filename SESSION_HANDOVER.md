@@ -1,5 +1,41 @@
 # Session handover
 
+## 2026-11-16 — Utilities menu launches SeamlyCLI
+
+- Added Utilities > SeamlyCLI in Seamly2D.
+- The action finds SeamlyCLI beside Seamly2D, in the development release directory, or through PATH.
+- The action starts a detached process and reports launch failures.
+- The Qt 6.11.3 Windows build passed with the existing MSVC Makefile.
+- Menu launch verification remains pending. The installed Seamly2D still runs and remains unchanged.
+- Files: `src/app/seamly2d/mainwindow.cpp` and `mainwindow.ui`.
+- No commit or push.
+
+## 2026-11-16 — SeamlyCLI results buttons
+
+- Added Exit to close SeamlyCLI from the results page.
+- Placed Start Over and Exit in a fixed footer at the bottom right. Back remains at the left.
+- All 25 SeamlyCLI release unit tests passed. Visual verification remains pending.
+- File: `src/app/seamlycli/src/app_view.rs`.
+- No commit or push.
+
+## 2026-11-16 — SeamlyCLI export buttons and command text
+
+- Renamed Run to Create Layout.
+- Placed Cancel and Create Layout in a fixed footer at the bottom right of the export screen.
+- Cancel closes SeamlyCLI before export. The buttons remain disabled during export.
+- Increased command text to 18 pixels on the export and results screens.
+- All 25 SeamlyCLI release unit tests passed. Visual verification remains pending.
+- File: `src/app/seamlycli/src/app_view.rs`.
+- No commit or push.
+
+## 2026-11-16 — Remove superfluous SeamlyCLI settings
+
+- Removed Layout width and Layout length from the settings editor and generated JSON.
+- Updated regression checks for omitted page dimensions and unit conversion of roll width.
+- All 25 SeamlyCLI release unit tests passed.
+- File: `src/app/seamlycli/src/layout_settings_editor.rs`.
+- No commit or push.
+
 ## 2026-11-16 — Translation test linker failure
 
 - The user reported `LNK1104` while the linker replaced `src/test/TranslationsTest/bin/TranslationsTest.exe`.

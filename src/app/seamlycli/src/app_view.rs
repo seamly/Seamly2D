@@ -87,6 +87,7 @@ enum Message {
     DxfSelected(DxfVariant),
     Back,
     Run,
+    Exit,
     SessionDone(Result<SessionResult, String>),
     Copy(String),
     StartOver,
@@ -158,7 +159,7 @@ impl App {
         (!trimmed.is_empty()).then(|| PathBuf::from(trimmed))
     } // fn optional
 
-    /// @brief The request of the current choices; the DXF options file is written at Run.
+    /// @brief Build the current request before Create Layout writes the DXF options file.
     fn request(&self, export_options: Option<PathBuf>) -> ExportRequest {
         ExportRequest {
             seamly2d: PathBuf::from(self.seamly2d.trim()),
@@ -304,6 +305,7 @@ impl App {
                     _ => Screen::Inputs,
                 }; // previous screen
             } // Back
+            Message::Exit => return iced::exit(),
             Message::Run => {
                 self.error = None;
                 let output_folder = PathBuf::from(self.output_folder.trim());
@@ -398,7 +400,39 @@ impl App {
         if let Some(error) = &self.error {
             page = page.push(text(error.clone()).style(text::danger));
         } // if an error
-        scrollable(container(page).width(Length::Fill)).into()
+        let content = scrollable(container(page).width(Length::Fill));
+        if self.screen == Screen::Format {
+            column![
+                content.height(Length::Fill),
+                row![
+                    button("Back").on_press_maybe(self.busy.is_none().then_some(Message::Back)),
+                    horizontal_space(),
+                    button("Cancel").on_press_maybe(self.busy.is_none().then_some(Message::Exit)),
+                    button("Create Layout")
+                        .on_press_maybe((self.busy.is_none() && self.format.is_some()).then_some(Message::Run)),
+                ]
+                .spacing(8)
+                .padding(18),
+            ]
+            .height(Length::Fill)
+            .into()
+        } else if self.screen == Screen::Results {
+            column![
+                content.height(Length::Fill),
+                row![
+                    button("Back").on_press(Message::Back),
+                    horizontal_space(),
+                    button("Start Over").on_press(Message::StartOver),
+                    button("Exit").on_press(Message::Exit),
+                ]
+                .spacing(8)
+                .padding(18),
+            ]
+            .height(Length::Fill)
+            .into()
+        } else {
+            content.into()
+        }
     } // fn view
 
     /// @brief One labelled path field with a Browse button.
@@ -515,16 +549,7 @@ impl App {
             page = page.push(text(format!("{}: {}", item.name, item.reason)).style(text::secondary));
         } // for each unavailable format
         page = page.push(text("Commands").size(18));
-        page = page.push(self.commands_view());
-        page.push(
-            row![
-                button("Back").on_press_maybe(self.busy.is_none().then_some(Message::Back)),
-                horizontal_space(),
-                button("Run").on_press_maybe((self.busy.is_none() && self.format.is_some()).then_some(Message::Run)),
-            ]
-            .spacing(8),
-        )
-        .into()
+        page.push(self.commands_view()).into()
     } // fn format_view
 
     fn commands_view(&self) -> Element<'_, Message> {
@@ -534,7 +559,7 @@ impl App {
             list = list.push(
                 column![
                     row![text(material).size(16), horizontal_space(), button("Copy").width(Length::Fixed(72.0)).on_press(Message::Copy(run.command.clone()))],
-                    text(run.command.clone()).size(13),
+                    text(run.command.clone()).size(18),
                 ]
                 .spacing(4),
             );
@@ -557,7 +582,7 @@ impl App {
                     .size(16)
                     .style(if material.succeeded() { text::success } else { text::danger }),
                 text(detail),
-                row![text(material.run.command.clone()).size(12), horizontal_space(), button("Copy").width(Length::Fixed(72.0)).on_press(Message::Copy(material.run.command.clone()))],
+                row![text(material.run.command.clone()).size(18), horizontal_space(), button("Copy").width(Length::Fixed(72.0)).on_press(Message::Copy(material.run.command.clone()))],
             ]
             .spacing(4);
             for companion in &material.companions {
@@ -575,9 +600,7 @@ impl App {
             Some(Err(error)) => text(format!("Archive failed: {error}")).style(text::danger),
             None => text("No archive: a material failed.").style(text::danger),
         }; // archive
-        page.push(archive)
-            .push(row![button("Back").on_press(Message::Back), horizontal_space(), button("Start over").on_press(Message::StartOver)])
-            .into()
+        page.push(archive).into()
     } // fn results_view
 } // impl App
 
