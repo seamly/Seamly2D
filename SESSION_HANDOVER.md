@@ -9,13 +9,15 @@
 - Fix 66a7d9c969: `VLayoutPiece::createFoldLineLabelItem` uses `QFontMetricsF` in both branches. MSVC syntax check passed; Windows cannot reproduce.
 - Fix ab86c39682: `ci-layout.yml` linux, macos, windows-msi jobs run on push to `run-seamlyLayout`. Publish jobs unchanged.
 - 3bd7434c3f: CI builds only the Windows x64 MSI. Platform order is in `TODO_INSTALLER.md` Installer.8 (user decision).
-- 74a618eaf7: `ci.yml` renamed `ci-layout.yml` (user decision); all references follow. `license_notices` tests pass.
-- Local `run-seamlyLayout`: 11 commits ahead of origin. Merges carry no skip-ci token.
+- 74a618eaf7: our workflow is `ci-layout.yml` (`CI Layout`), push trigger `run-seamlyLayout` only. `license_notices` tests pass.
+- a91d3e7e96: upstream `ci.yml` restored beside it, identical to `develop`'s copy (user decision). Rule in CLAUDE.md CI section.
+- Upstream `ci.yml` fails on our tree (no `Seamly2D.pro`, `scripts/version.sh`, `seamly2d-installer.nsi`). It runs on: Monday 01:30 UTC schedule (default branch `run-seamlyLayout`), every PR, the upstream PR.
+- Local `run-seamlyLayout`: 14 commits ahead of origin. Merges carry no skip-ci token.
 - Not run since: Linux ctest and cargo (11-02), platform builds (10-19). More failures possible.
 - Extra origin branches: `gh-pages` (`document` job, `builddocs.yml`), `dependabot/cargo/src/app/seamlycli/cargo-4cb1234933` (PR #32).
 - Open: Export Draft Blocks SVG writer to replace `SvgGenerator` (a: vformat draft-only writer, recommended; b: `QSvgGenerator`).
 - Open: skip-ci default in CLAUDE.md stops push builds; keep or drop.
-- Open: `.github/README.md` badge names upstream `ci.yml`; change it at the upstream handoff.
+- Open: stop upstream `ci.yml` runs in seamly/Seamly2D (`gh workflow disable ci.yml`, recommended) or accept a failed run each Monday and on PRs.
 - Next: Sue pushes; watch the x64 MSI job; then Installer.8.2 (arm64).
 
 ### 2026-11-16 — Utilities menu launches SeamlyCLI
