@@ -13,12 +13,14 @@ description: Merge upstream FashionFreedom develop into run-seamlyLayout. Use on
 6. Run `git grep -n "convertPdfToPs\|PDFTOPS"`. Expect no hits.
 7. Build with `packaging\windows\local_build_msi.ps1`. A failure stops the merge.
 8. Commit, merge `--no-ff` into `run-seamlyLayout`. Sue pushes.
-9. Full CI: `gh workflow run ci.yml --ref run-seamlyLayout`.
+9. Full CI: `gh workflow run ci-layout.yml --ref run-seamlyLayout`.
 
 Enable `git config rerere.enabled true` so Git reuses recorded conflict resolutions.
 
 ## Retired code that `develop` still has
 
+- `.github/workflows/ci.yml`: this branch renamed it `ci-layout.yml`. Keep `ci.yml` deleted.
+  Port wanted upstream `ci.yml` changes into `ci-layout.yml` by hand.
 - `MainWindowsNoGUI::exportEPS`, `exportPS`, `convertPdfToPs` (pdftops), retired in `14e1d8723b`.
   `develop` restores them whenever it edits nearby lines. Delete them on each merge.
   Upstream keeps them until the endgame PR (user decision). Do not propose an early upstream PR.

@@ -8,7 +8,7 @@ Check off all completed tasks & subtasks and move completed tasks to TODO_COMPLE
 
 All TODO_MIGRATE.md tasks begin with 'M.' and all tasks are numbered
 
-## Task M.1 — Implement tasks in TODO_INSTALLER.md to build Seamly pre-releases using github.com/seamly/seamly2d GitHub workflow ci.yml file to build after each pull-request to the run-seamlylayout branch (not the default branch)
+## Task M.1 — Implement tasks in TODO_INSTALLER.md to build Seamly pre-releases using github.com/seamly/seamly2d GitHub workflow ci-layout.yml file to build after each pull-request to the run-seamlylayout branch (not the default branch)
 
 ## Task M.2 - Test Seamly pre-releases installation for 3 use cases: a. where Seamly is not previously installed, b. where Seamly version without SeamlyLayout is installed, c. where Seamly version with SeamlyLayout is installed
 
@@ -26,11 +26,11 @@ All TODO_MIGRATE.md tasks begin with 'M.' and all tasks are numbered
 - M.3.4 - Linux AppImage .appimage file
 - M.3.5 - Linux FlatPak
 
-## Task M.4 - Re-organize all files needed to build the Seamly executables with the GitHub CI/CD ci.yml file so that all files are under the .github directory; update the CI/CD files with the new locations of moved files; build & test the updated
+## Task M.4 - Re-organize all files needed to build the Seamly executables with the GitHub CI/CD ci-layout.yml file so that all files are under the .github directory; update the CI/CD files with the new locations of moved files; build & test the updated
 
 - M.4.0 - Re-organize files
-- M.4.1 - Update ci.yml and related files to reflect new location
-- M.4.2 - Build pre-releases with ci.yml
+- M.4.1 - Update ci-layout.yml and related files to reflect new location
+- M.4.2 - Build pre-releases with ci-layout.yml
 - M.4.3 - Test pre-releases
 - M.4.3.1 - Windows x64 .msi
 - M.4.3.2 - Windows arm64 .msi
@@ -67,8 +67,8 @@ Rename the settings sources in `src/libs/vmisc/` so each name says which app it 
 - [ ] Update the `@file` line in each of the six license-header blocks (e.g. `//  @file   vcommonsettings.h`), and the `@brief`/`@class` text of anything that names the old class, leaving the existing `@author`/`@date`/copyright lines as they are
 - [ ] Update the docs that name these paths **or classes** — `.github/README-BUILDS.md:17` (`VSettings`, `src/libs/vmisc/vsettings.cpp`) and `:77` (`VCommonSettings::dataRoot()` and the rest of that API row) at minimum — and decide whether historical entries (`project-docs/TODO_COMPLETED.md`, `SESSION_HANDOVER.md`, `project-docs/TODO_SEAMLY2D.md` Task 42, `project-docs/TODO_SEAMLYME.md` Task 43) get rewritten or left as the record of what things were called at the time; record the decision either way
 - [ ] Amend Task 52 above — it points at "the eight `vsettings.cpp` accessors" and at `VCommonSettings::mergeStrayCommonSettings()` / `getLabelTemplatePath()` — so whoever picks it up looks for `settings_seamly2d.cpp` and `SettingsCommon`
-- [ ] Verify the build and the four test binaries through `ci.yml` — the local build and test scripts were deleted in August 2026. If you do build by hand, wipe the shadow-build tree first; a stale `Makefile`/object tree can link an old object and mask a missed include (Task 46)
-- [ ] Confirm CI stays green on `ci.yml`, the one workflow that compiles these sources
+- [ ] Verify the build and the four test binaries through `ci-layout.yml` — the local build and test scripts were deleted in August 2026. If you do build by hand, wipe the shadow-build tree first; a stale `Makefile`/object tree can link an old object and mask a missed include (Task 46)
+- [ ] Confirm CI stays green on `ci-layout.yml`, the one workflow that compiles these sources
 
 ## Task M.7 - Implement tasks in TODO_SEAMLYTEAM.md
 
@@ -88,7 +88,7 @@ Do this only when the migration is pushed upstream — the badges link to
 `FashionFreedom/Seamly2D/releases/latest`, so repointing them before the release
 that carries the new artifacts breaks the live public download links.
 
-- [ ] Windows x64 — `Seamly2D-windows.zip` (NSIS) → **`seamly-x64.msi`**, which `ci.yml`'s `windows-msi` job now builds and the `publish` job attaches to the pre-release (Task Installer.1.1). The NSIS x64 package is no longer produced at all.
+- [ ] Windows x64 — `Seamly2D-windows.zip` (NSIS) → **`seamly-x64.msi`**, which `ci-layout.yml`'s `windows-msi` job now builds and the `publish` job attaches to the pre-release (Task Installer.1.1). The NSIS x64 package is no longer produced at all.
 - [ ] Windows arm64 — `Seamly2D-win-arm64.zip` (NSIS) → **`seamly-arm64.msi`**, from the same `windows-msi` matrix (Task Installer.1.2). **NSIS is retired entirely**; no workflow runs `makensis` any more.
 - [ ] MacOS
 - [ ] Linux appimage

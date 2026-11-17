@@ -38,7 +38,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started on GitFlow, Issues, Branc
 
 ## Build method
 
-* Review our [GitHub Action CI script](workflows/ci.yml).
+* Review our [GitHub Action CI script](workflows/ci-layout.yml).
 
 ## Tools for improved Code reviews, Pull Requests, and Commits
 

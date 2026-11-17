@@ -55,7 +55,7 @@ Richmond files: `git show d3197ee973^:test-seamly-layout-input/richmond-shirt_v1
 ## Next
 
 - The local merge into `run-seamlyLayout` is complete. No push was requested. Packaging changes require full CI on the next push.
-- Before a release: `gh workflow run ci.yml --ref run-seamlyLayout` covers Linux and macOS.
+- Before a release: `gh workflow run ci-layout.yml --ref run-seamlyLayout` covers Linux and macOS.
 - `CLI_1_TASK.md` stays untracked: it mentions agents, which committed `.md` files may not.
 
 ## 2026-11-16 — Command line help in the Help menu

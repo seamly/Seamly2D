@@ -11,7 +11,7 @@
 # **  the wrong Qt/CRT runtime); this script exists because the local Qt kit is
 # **  the same 6.11.3 release CI installs, so that risk does not apply here.
 # **  Treat any MSI this script produces as a local dev build, not a release
-# **  artifact - releases still go through `gh workflow run ci.yml`.
+# **  artifact - releases still go through `gh workflow run ci-layout.yml`.
 # **
 # ** @copyright
 # **  Copyright (C) 2026 Seamly2D Project
@@ -54,7 +54,7 @@
 .PARAMETER Version
     Project version as YY.M.DDHH. packaging\version.sh writes it for
     seamly2d, seamlyme and SeamlyLayout; smsi.ps1 uses it as the MSI's ProductVersion.
-    Default: computed from the current local time, the same formula ci.yml's
+    Default: computed from the current local time, the same formula ci-layout.yml's
     version job uses.
 
 .PARAMETER SkipValidation
@@ -105,7 +105,7 @@ if (-not $Version) {
 Write-Host "version: $Version"
 
 # packaging\version.sh writes the version YY.M.DDHH into the generated, git-ignored
-# src\libs\vmisc\project_version_number.h, the same way every ci.yml build job does.
+# src\libs\vmisc\project_version_number.h, the same way every ci-layout.yml build job does.
 $bash = Get-Command bash -ErrorAction SilentlyContinue
 if (-not $bash) {
     throw "packaging\version.sh needs bash (Git for Windows ships it) - install Git for Windows."
@@ -223,7 +223,7 @@ $smsiArgsQuoted = ($smsiArgs | ForEach-Object { "`"$_`"" }) -join ' '
 #
 # The SeamlyLayout release build always builds its Qt test executables, so
 # `ctest --preset release` runs them without a second, debug build. Release
-# binaries skip Q_ASSERT; ci.yml's linux-test job still runs the debug build.
+# binaries skip Q_ASSERT; ci-layout.yml's linux-test job still runs the debug build.
 # `cargo test` builds its own debug profile in src\app\seamlylayout\target.
 #
 # QT_FORCE_STDERR_LOGGING=1: when ctest pipes its output, QtTest sends its

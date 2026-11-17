@@ -2,7 +2,7 @@
 
 ## Overview
 
-The code signing workflow is integrated into the main CI workflow (`ci.yml`) and provides secure digital signing for Windows executables using Google Cloud KMS with CloudHSM.
+The code signing workflow is integrated into the main CI workflow (`ci-layout.yml`) and provides secure digital signing for Windows executables using Google Cloud KMS with CloudHSM.
 
 ## Implementation
 

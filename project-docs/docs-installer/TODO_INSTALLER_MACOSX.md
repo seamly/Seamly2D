@@ -60,7 +60,7 @@ For more information, see: https://docs.brew.sh/Tap-Trust"
 ## Task InstMacOS.1 — Unify settings directories: macOS build
 
 - [ ] InstMacOS.1.1 Verify: fresh install and upgrade-with-legacy-data on macOS; both apps retain preferences after migration — **not verified**, no macOS hardware available in this environment; code changes are cross-platform Qt/CMake, build-verified on Windows (seamlyLayout debug build + all 4 Qt frontend ctest suites + full `cargo test --workspace`, all passing, 2026-07-20), and the `Q_OS_MACOS` branches compile out on other platforms, but real macOS runtime behavior (including the `macos-15` CI runner, which currently only builds seamly2d/seamlyme, not seamlyLayout) remains unexercised
-- [ ] InstMacOS.1.2 Verify the macOS build succeeds in GitHub Actions on origin, branch `run-seamlyLayout` (`.github/workflows/ci.yml`'s `macos` job) — note: that job currently builds only seamly2d/seamlyme via qmake (`Seamly.pro`), not seamlyLayout, so a green run confirms the org-name change doesn't break the parent-app macOS build but does not exercise seamlyLayout's own `Q_OS_MACOS` settings-path code (see Task 20 for adding seamlyLayout to CI)
+- [ ] InstMacOS.1.2 Verify the macOS build succeeds in GitHub Actions on origin, branch `run-seamlyLayout` (`.github/workflows/ci-layout.yml`'s `macos` job) — note: that job currently builds only seamly2d/seamlyme via qmake (`Seamly.pro`), not seamlyLayout, so a green run confirms the org-name change doesn't break the parent-app macOS build but does not exercise seamlyLayout's own `Q_OS_MACOS` settings-path code (see Task 20 for adding seamlyLayout to CI)
 
 ## Task InstMacOS.2 — macOS: let the user choose the `seamlyData` user-data directory (default `~/seamlyData`)
 

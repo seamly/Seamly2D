@@ -151,7 +151,7 @@ install at `%ProgramFiles%\Seamly2D\output\`.
 An ordinary (non-packaged) Linux install used to log next to the executable
 instead. `LoggerTests` locked one `AppConfigLocation`-rooted path on every
 platform; the Linux exception never actually ran under CI until SeamlyLayout's
-Qt suites were wired into `ci.yml`'s `linux-test` job (2026-09-13), and failed
+Qt suites were wired into `ci-layout.yml`'s `linux-test` job (2026-09-13), and failed
 against that lock — removed rather than special-cased, since a stable,
 predictable log path beats matching the install directory either way.
 

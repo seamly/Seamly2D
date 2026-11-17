@@ -7,9 +7,9 @@
 # **  Local, developer-machine build of the Linux x86_64 AppImage: builds
 # **  seamly2d, seamlyme and SeamlyLayout release binaries, runs the Qt and
 # **  Rust test suites, then packages all three into one AppImage with
-# **  linuxdeploy. Mirrors ci.yml's linux-test and linux jobs. Treat the
+# **  linuxdeploy. Mirrors ci-layout.yml's linux-test and linux jobs. Treat the
 # **  AppImage this produces as a local dev build, not a release artifact -
-# **  releases still go through `gh workflow run ci.yml`.
+# **  releases still go through `gh workflow run ci-layout.yml`.
 # **
 # ** @copyright
 # **  Copyright (C) 2026 Seamly2D Project
@@ -66,7 +66,7 @@ version_ge() {
 }
 
 # --- Version --------------------------------------------------------------------
-# Same YY.M.DDHH formula ci.yml's version job uses.
+# Same YY.M.DDHH formula ci-layout.yml's version job uses.
 if [ -z "${VERSION}" ]; then
     read -r YEAR MONTH DAY HOUR MINUTE <<< "$(date +'%Y %m %d %H %M')"
     VERSION="$((10#${YEAR} - 2000)).$((10#${MONTH})).$((10#${DAY} * 100 + 10#${HOUR}))"

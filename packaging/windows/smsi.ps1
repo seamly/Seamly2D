@@ -7,7 +7,7 @@
 # **  "seamly msi" — stage the built Seamly app suite (seamly2d, seamlyme,
 # **  SeamlyLayout) and build the Windows MSI installer from
 # **  packaging\windows\smsi.wxs with the WiX toolset.
-# **  Driven by the ci.yml windows-msi job against the in-source CI build
+# **  Driven by the ci-layout.yml windows-msi job against the in-source CI build
 # **  output. Every input is named on the command line; the script detects
 # **  nothing from the machine it runs on.
 # **
@@ -64,7 +64,7 @@
         build\Release)
       * the WiX .NET tool:      dotnet tool install --global wix
         and its UI extension:   wix extension add --global WixToolset.UI.wixext
-      * the MSVC developer environment, which sets VCToolsRedistDir (ci.yml
+      * the MSVC developer environment, which sets VCToolsRedistDir (ci-layout.yml
         uses ilammy/msvc-dev-cmd)
 
     The MSI ProductVersion is the project version YY.M.DDHH, unchanged, so
@@ -76,7 +76,7 @@
     Target architecture of the MSI: x64 (default) or arm64.
 
 .PARAMETER Version
-    Project version as YY.M.DDHH (the ci.yml scheme), where DDHH is
+    Project version as YY.M.DDHH (the ci-layout.yml scheme), where DDHH is
     day * 100 + hour (0-23). Required.
 
 .PARAMETER Seamly2DBin
@@ -94,7 +94,7 @@
 .PARAMETER SeamlyLayoutBuildDir
     Directory holding the release seamlylayout.exe.
     Default: <repo>\src\app\seamlylayout\qt_frontend\build\Release — where
-    ci.yml's `cmake --build --preset release` step writes it.
+    ci-layout.yml's `cmake --build --preset release` step writes it.
 
 .PARAMETER WinDeployQt
     Full path of windeployqt.exe from the Qt kit SeamlyLayout was built
@@ -109,12 +109,12 @@
     .\packaging\windows\smsi.ps1 -Arch x64 -Version 26.8.15.570 `
         -Seamly2DBin src\app\seamly2d\bin -SeamlyMeBin src\app\seamlyme\bin `
         -WinDeployQt "$env:QT_ROOT_DIR\bin\windeployqt.exe"
-    The invocation ci.yml's windows-msi job runs, for either architecture.
+    The invocation ci-layout.yml's windows-msi job runs, for either architecture.
 
 .NOTES
     "smsi" = seamly msi. This script only packages; it never builds. The
     scripts that produced its input trees locally (sb.ps1, sd.ps1) were
-    deleted in August 2026, so either build the trees by hand or let ci.yml's
+    deleted in August 2026, so either build the trees by hand or let ci-layout.yml's
     windows-msi job do the whole job. Output and staging live in
     packaging\windows\seamly-msi\ (or whatever -OutputDirName names), which
     .gitignore lists by name.
@@ -137,7 +137,7 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$SeamlyMeBin,
 
-    # SeamlyLayout's CMake release output. Defaults to ci.yml's build path.
+    # SeamlyLayout's CMake release output. Defaults to ci-layout.yml's build path.
     [string]$SeamlyLayoutBuildDir,
 
     # SeamlyCLI release output. Required for the x64 package.
@@ -151,7 +151,7 @@ param(
     [switch]$SkipValidation,
 
     # Staging/output directory name under packaging\windows\. Keep in sync
-    # with .gitignore and ci.yml's windows-msi artifact/signing paths.
+    # with .gitignore and ci-layout.yml's windows-msi artifact/signing paths.
     [string]$OutputDirName = 'seamly-msi'
 )
 
@@ -218,7 +218,7 @@ function Assert-ProjectVersion {
 # @brief  Locate the MSVC CRT redistributable DLL directory for an architecture.
 #
 # Reads VCToolsRedistDir, set by the MSVC developer environment (vcvars, or
-# ilammy/msvc-dev-cmd in ci.yml). Returns the Microsoft.VC*.CRT folder holding
+# ilammy/msvc-dev-cmd in ci-layout.yml). Returns the Microsoft.VC*.CRT folder holding
 # msvcp140.dll, vcruntime140.dll, etc., which the script copies app-locally
 # (no merge modules, no vc_redist.exe chaining — see
 # packaging\windows\README.md). This keeps the shipped CRT matched to the

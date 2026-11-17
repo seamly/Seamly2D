@@ -2,10 +2,10 @@
 
 ## Automated Workflows
 
-### [CI](ci.yml) - Main Continuous Integration Workflow
+### [CI](ci-layout.yml) - Main Continuous Integration Workflow
 **Triggers**: Pull requests, pushes to `run-seamlyLayout`, manual dispatch. Pushes carry a `paths-ignore` for `**.md` / `project-docs/**` / `LICENSE`, so documentation changes never start a build; `pull_request` is deliberately unfiltered so a docs-only PR still reports its checks. `concurrency: cancel-in-progress` supersedes older in-progress runs on the same ref.
 
-> **A full run costs ~50 minutes** across Linux, macOS and Windows x64/arm64. The task workflow in [CLAUDE.md](../../CLAUDE.md) therefore puts `[skip ci]` in the step-8 merge commit by default and clears the accumulated skips with one deliberate `gh workflow run ci.yml --ref run-seamlyLayout` before a milestone. Omit the skip when the task touched workflows, packaging, build files (`*.pro`, `CMakeLists.txt`, `Cargo.toml`) or platform-specific code — the local Windows build cannot verify those.
+> **A full run costs ~50 minutes** across Linux, macOS and Windows x64/arm64. The task workflow in [CLAUDE.md](../../CLAUDE.md) therefore puts `[skip ci]` in the step-8 merge commit by default and clears the accumulated skips with one deliberate `gh workflow run ci-layout.yml --ref run-seamlyLayout` before a milestone. Omit the skip when the task touched workflows, packaging, build files (`*.pro`, `CMakeLists.txt`, `Cargo.toml`) or platform-specific code — the local Windows build cannot verify those.
 
 **Features**:
 - **Tests**: Runs Linux unit tests, then builds all platforms with downloadable artifacts, on pull requests, pushes to `run-seamlyLayout`, manual dispatch and the weekly schedule
@@ -39,11 +39,11 @@ Each leg installs one Qt 6.11.3 kit, builds the apps, then runs [`smsi.ps1`](../
 
 ### SeamlyLayout CI
 
-**What CI no longer does:** SeamlyLayout's unit tests do not run on GitHub any more. Run both locally — `ctest --preset debug` in `src/app/seamlylayout/qt_frontend/`, and `cargo test --workspace` in `src/app/seamlylayout/`. Add the two test steps to `ci.yml` if that coverage is wanted back.
+**What CI no longer does:** SeamlyLayout's unit tests do not run on GitHub any more. Run both locally — `ctest --preset debug` in `src/app/seamlylayout/qt_frontend/`, and `cargo test --workspace` in `src/app/seamlylayout/`. Add the two test steps to `ci-layout.yml` if that coverage is wanted back.
 
 ### Windows MSI — removed 2026-08-11
 
-`windows-msi.yml` built the same two `.msi` packages on a `packaging/windows/**` path trigger. `ci.yml`'s `windows-msi` job (described above) already builds both arches and feeds `publish`, so the file only duplicated the work and gave the build steps a second copy to drift out of step. The Windows packaging description now lives in the [CI](ci.yml) section above.
+`windows-msi.yml` built the same two `.msi` packages on a `packaging/windows/**` path trigger. `ci-layout.yml`'s `windows-msi` job (described above) already builds both arches and feeds `publish`, so the file only duplicated the work and gave the build steps a second copy to drift out of step. The Windows packaging description now lives in the [CI](ci-layout.yml) section above.
 
 ### [Weblate](auto-merge-weblate.yml)
 
@@ -92,5 +92,5 @@ To restore normal signing after emergency:
 - [Install Qt](https://github.com/marketplace/actions/install-qt). Referenced as `jurplel/install-qt-action`, installs the Qt platform across all the three different runners (ubuntu-18.04, macos-latest, windows-2022) consistently. Internally it uses the [aqtinstall](https://github.com/miurahr/aqtinstall/) installer written in Python. Worth knowing if those errors propagate up through the GitHub action.
 - [Enable Developer Command Prompt](https://github.com/marketplace/actions/enable-developer-command-prompt) Referenced as `ilammy/msvc-dev-cmd`, sets up the command line environment on the windows-2022 runner (`PATH` and such) to expose Microsoft Visual C++.
 - [softprops/action-gh-release](https://github.com/marketplace/actions/gh-release). Referenced as `softprops/action-gh-release`, creates a release and uploads all artifacts to that release.
-- [WiX Toolset](https://wixtoolset.org/) Not an action — installed in [ci.yml](ci.yml) as the `wix` .NET global tool (pinned to `6.*`; v7 is gated behind an Open Source Maintenance Fee EULA, error `WIX7015`). It builds the bundled Seamly suite MSI from [`packaging/windows/smsi.wxs`](../../packaging/windows/smsi.wxs); the `WixToolset.UI.wixext` extension (version-matched to the core tool) supplies the directory-chooser installer UI, and `WixToolset.Util.wixext` supplies the `RemoveFolderEx` used to clear a pre-MSI installation.
+- [WiX Toolset](https://wixtoolset.org/) Not an action — installed in [ci-layout.yml](ci-layout.yml) as the `wix` .NET global tool (pinned to `6.*`; v7 is gated behind an Open Source Maintenance Fee EULA, error `WIX7015`). It builds the bundled Seamly suite MSI from [`packaging/windows/smsi.wxs`](../../packaging/windows/smsi.wxs); the `WixToolset.UI.wixext` extension (version-matched to the core tool) supplies the directory-chooser installer UI, and `WixToolset.Util.wixext` supplies the `RemoveFolderEx` used to clear a pre-MSI installation.
 - **NSIS is retired**. No workflow runs `makensis` any more; Windows ships `seamly-x64.msi` and `seamly-arm64.msi` only. Its on-disk footprint is transcribed into [`packaging/windows/smsi.wxs`](/packaging/windows/smsi.wxs), above the `RemoveLegacyProgramFiles` component, and that comment is now the only record of what the MSI's removal authoring has to clean up.

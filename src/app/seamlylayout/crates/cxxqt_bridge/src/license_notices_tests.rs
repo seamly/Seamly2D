@@ -47,14 +47,14 @@ fn rust_crate_notices_match_cargo_lock() {
 
 #[test]
 fn qt_notices_match_ci_qt_version() {
-    // ci.yml sets the Qt release every package is built with: QT_VERSION: '6.11.3'
-    let ci = std::fs::read_to_string(workspace_path("../../../.github/workflows/ci.yml")).expect("ci.yml readable");
+    // ci-layout.yml sets the Qt release every package is built with: QT_VERSION: '6.11.3'
+    let ci = std::fs::read_to_string(workspace_path("../../../.github/workflows/ci-layout.yml")).expect("ci-layout.yml readable");
     let ci_version = ci
         .lines()
         .find_map(|line| line.trim().strip_prefix("QT_VERSION:"))
         .and_then(|value| value.split('\'').nth(1))
         .map(str::to_string)
-        .expect("QT_VERSION in ci.yml");
+        .expect("QT_VERSION in ci-layout.yml");
 
     let notices = std::fs::read_to_string(workspace_path("../../../packaging/licenses/qt_notices.txt"))
         .expect("qt_notices.txt readable");
