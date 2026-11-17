@@ -27,7 +27,7 @@ Layout mode sends the pieces SVG to SeamlyLayout as a string in memory (`generat
   - Start folder: `VSettings::getLayoutPath()` (Preferences > Paths > Layout). User decision.
   - Write UTF-8. A write error shows a message box with the path.
 - [x] Seamly2D.73.4 Tests: default file name format; the file content equals the `generateHandoffSvgDocument()` string.
-  - `TST_HandoffSvgFile`: 7/7 pass in a scratch QtTest harness. `nmake check` runs with the next `local_build_msi.ps1`.
+  - `TST_HandoffSvgFile`: 8/8 pass in a focused QtTest harness. Generated individual and multisize SVG files retain their exact UTF-8 bytes. `nmake check` runs with the next `local_build_msi.ps1`.
 - [ ] Seamly2D.73.5 Verify (User): Piece mode > Details > Export Pieces. SeamlyLayout opens the file and shows the same pieces as Layout mode. Also with a multisize pattern.
 
 ### [ ] Task Seamly2D.200 - Implement - Preferences > Paths: remove the entry for the SeamlyLayout application
