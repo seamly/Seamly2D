@@ -1,5 +1,25 @@
 # Session handover
 
+## 2026-11-16 — Translation test linker failure
+
+- The user reported `LNK1104` while the linker replaced `src/test/TranslationsTest/bin/TranslationsTest.exe`.
+- No translation test process remained during inspection. The executable accepted exclusive write access.
+- The targeted MSVC `nmake` retry linked `TranslationsTest.exe` successfully.
+- The rebuilt `TranslationsTest.exe` returned exit code 0 with Qt 6.11.3 and the offscreen backend.
+- The original lock owner remains unknown. No source change was necessary.
+- The complete MSI build still needs a successful run.
+
+## 2026-11-16 — Requested MSI build and branch cleanup
+
+- Deleted the local `intermediate` branch at `bc458ff16a` at the user's request.
+- Ran `packaging/windows/local_build_msi.ps1` with tests and MSI validation enabled, version `26.11.1620`.
+- The sandbox blocked NuGet configuration access. The retry used approved access to the installed build tools.
+- Seamly2D and SeamlyMe built. `CollectionTest` returned exit code 1 during `nmake check`.
+- The script stopped before SeamlyLayout, SeamlyCLI, and MSI packaging.
+- The diagnostic CollectionTest rerun passed. Its final suite reported 52 passed and four skipped.
+- Results: `build/collection_test_msi_failure.txt`. The original failure remains unexplained.
+- The full build remains incomplete. No commit or push followed this run.
+
 ## 2026-11-16 — SeamlyCLI application and installer
 
 - Work uses Seamly2D-private on run-seamlyLayout.

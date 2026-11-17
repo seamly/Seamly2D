@@ -2157,6 +2157,38 @@ The merged settings are checked by `validate_settings_json` and loaded through S
 - Verified a button click creates one copy. Undo removes it, and redo restores it.
 - The existing piece copy suite passed 15 checks.
 
+### [x] S2D.73 - Implement - Piece Mode - Export Pieces to an SVG file from Piece Mode
+
+Layout mode sends the pieces SVG to SeamlyLayout as a string in memory (`generateHandoffSvgDocument()`). Export Pieces writes the same string to an SVG file that the user selects.
+copy the .png file used for export drafts in Draft mode. 
+
+- [x] S2D.73.1 Details menu: add `export_pieces_action` below Copy Piece (`duplicate_piece_action`).
+  - Text "Export Pieces"; tooltip "Export Pieces (E, P)"; shortcut `E, P`. All three come from develop.
+  - Icon `:/toolicon/32x32/export.png` (develop's icon; already in `toolicon.qrc`).
+  - Enabled in Piece mode only, like Copy Piece.
+  - Piece mode toolbox, Details page: `export_pieces_tool_button` below `copy_piece_tool_button` (y 154). Add 48 px to `details_Page` and `piece_ToolBox` heights. The button triggers `export_pieces_action`.
+
+- [x] S2D.73.2 Build the string with the Layout mode steps: pieces with "in layout" set, `preparePiecesForLayout()`, `prepareMultisizePieceLists()`, `generateHandoffSvgDocument()`.
+  - Move the steps into one function. Layout mode and Export Pieces call it. Do not copy the steps.
+  - Same messages as Layout mode: no piece in layout, empty SVG, grainline and label warnings.
+  - Cancel in the multisize dialog stops the export with no message.
+  - The mode and the scene do not change.
+
+- [x] S2D.73.3 File picker: `QFileDialog::getSaveFileName`, filter "SVG Files (*.svg)".
+  - Default file name: `<patternbasename>_pieces_<YYMMDDHHMM>.svg`. `FileName()` gives the base name ("unnamed" for a new pattern). Time: `QDateTime::currentDateTime().toString("yyMMddHHmm")`.
+  - Start folder: `VSettings::getLayoutPath()` (Preferences > Paths > Layout). User decision.
+  - Write UTF-8. A write error shows a message box with the path.
+
+- [x] S2D.73.4 Tests: default file name format; the file content equals the `generateHandoffSvgDocument()` string.
+  - `TST_HandoffSvgFile`: 7/7 pass in a scratch QtTest harness. `nmake check` runs with the next `local_build_msi.ps1`.
+- [ ] S2D.73.5 Verify (User): Piece mode > Details > Export Pieces. SeamlyLayout opens the file and shows the same pieces as Layout mode. Also with a multisize pattern.
+
+### [x] S2D.75 Piece Mode - handoff flipped pieces to seamlylayout: when a piece is flipped in Piece Mode then the handover to seamlylayout should display the piece as flipped. Currently a flipped piece is displayed in the seamlylayout input canvas in it's original orientation -- this is incorrect, the flipped piece should retain it's flipped orientation.
+
+### [x] S2D.76 Piece Mode - flipped operation should flip anchor points: when a piece is flipped in Piece Mode it's grainlines aren't flipped when the grainline is based on an anchorpoint. This indicates that the anchor points weren't flipped. Anchor points should be flipped too.
+
+### [x] S2D.77 Piece Mode - Copy Piece button: Currently the 'Copy Piece' button is disabled. Enable the 'Copy Piece' button by calling the same code as the 'Copy Piece' option in the piece context menu.
+
 Fix: the button copied only a piece selected before the click. A click on a piece after the button did nothing.
 
 - Copy Piece is now a pick tool (`Tool::CopyPiece`), like Union and Piece Mirror.
