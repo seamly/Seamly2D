@@ -1,6 +1,21 @@
 # Session handover
 
-## 2026-11-16 — Utilities menu launches SeamlyCLI
+## Current status
+
+### 2026-11-17 — CI: fold label test and push builds
+
+- CI failure 11-02 to 11-17: `TST_HandoffDocument::pieceMatchesOldWriter` fold rows; label 0.19 px off, Linux only.
+- Cause: old writer sized the label with `QGraphicsSimpleTextItem::boundingRect()`; on Linux its height differs from `QFontMetricsF::height()`.
+- Fix 66a7d9c969: `VLayoutPiece::createFoldLineLabelItem` uses `QFontMetricsF` in both branches. MSVC syntax check passed; Windows cannot reproduce.
+- Fix ab86c39682: `ci.yml` linux, macos, windows-msi jobs run on push to `run-seamlyLayout`. Publish jobs unchanged.
+- Local `run-seamlyLayout`: 4 commits ahead of origin. Merges carry no skip-ci token.
+- Not run since: Linux ctest and cargo (11-02), platform builds (10-19). More failures possible.
+- Extra origin branches: `gh-pages` (`document` job, `builddocs.yml`), `dependabot/cargo/src/app/seamlycli/cargo-4cb1234933` (PR #32).
+- Open: Export Draft Blocks SVG writer to replace `SvgGenerator` (a: vformat draft-only writer, recommended; b: `QSvgGenerator`).
+- Open: skip-ci default in CLAUDE.md stops push builds; keep or drop.
+- Next: Sue pushes; watch CI; fix the next failure; then Dead.4.5 (remove vlayout).
+
+### 2026-11-16 — Utilities menu launches SeamlyCLI
 
 - Added Utilities > SeamlyCLI in Seamly2D.
 - The action finds SeamlyCLI beside Seamly2D, in the development release directory, or through PATH.
@@ -10,7 +25,7 @@
 - Files: `src/app/seamly2d/mainwindow.cpp` and `mainwindow.ui`.
 - No commit or push.
 
-## 2026-11-16 — SeamlyCLI results buttons
+### 2026-11-16 — SeamlyCLI results buttons
 
 - Added Exit to close SeamlyCLI from the results page.
 - Placed Start Over and Exit in a fixed footer at the bottom right. Back remains at the left.
@@ -18,7 +33,7 @@
 - File: `src/app/seamlycli/src/app_view.rs`.
 - No commit or push.
 
-## 2026-11-16 — SeamlyCLI export buttons and command text
+### 2026-11-16 — SeamlyCLI export buttons and command text
 
 - Renamed Run to Create Layout.
 - Placed Cancel and Create Layout in a fixed footer at the bottom right of the export screen.
@@ -28,7 +43,7 @@
 - File: `src/app/seamlycli/src/app_view.rs`.
 - No commit or push.
 
-## 2026-11-16 — Remove superfluous SeamlyCLI settings
+### 2026-11-16 — Remove superfluous SeamlyCLI settings
 
 - Removed Layout width and Layout length from the settings editor and generated JSON.
 - Updated regression checks for omitted page dimensions and unit conversion of roll width.
@@ -36,224 +51,10 @@
 - File: `src/app/seamlycli/src/layout_settings_editor.rs`.
 - No commit or push.
 
-## 2026-11-16 — Translation test linker failure
-
-- The user reported `LNK1104` while the linker replaced `src/test/TranslationsTest/bin/TranslationsTest.exe`.
-- No translation test process remained during inspection. The executable accepted exclusive write access.
-- The targeted MSVC `nmake` retry linked `TranslationsTest.exe` successfully.
-- The rebuilt `TranslationsTest.exe` returned exit code 0 with Qt 6.11.3 and the offscreen backend.
-- The original lock owner remains unknown. No source change was necessary.
-- The complete MSI build still needs a successful run.
-
-## 2026-11-16 — Requested MSI build and branch cleanup
-
-- Deleted the local `intermediate` branch at `bc458ff16a` at the user's request.
-- Ran `packaging/windows/local_build_msi.ps1` with tests and MSI validation enabled, version `26.11.1620`.
-- The sandbox blocked NuGet configuration access. The retry used approved access to the installed build tools.
-- Seamly2D and SeamlyMe built. `CollectionTest` returned exit code 1 during `nmake check`.
-- The script stopped before SeamlyLayout, SeamlyCLI, and MSI packaging.
-- The diagnostic CollectionTest rerun passed. Its final suite reported 52 passed and four skipped.
-- Results: `build/collection_test_msi_failure.txt`. The original failure remains unexplained.
-- The full build remains incomplete. No commit or push followed this run.
-
-## 2026-11-16 — SeamlyCLI application and installer
-
-- Work uses Seamly2D-private on run-seamlyLayout.
-- SeamlyCLI now resides in src/app/seamlycli and builds seamlycli.exe with Rust and Iced.
-- The app needs no Qt to build or show its interface.
-- Multisize report queries and exports support the required --basesize selection.
-- The interface finds seamly2d through PATH and has no program selector.
-- Pattern and measurement pickers use Seamly2D Preferences.
-- Measurement selection uses the pattern or current measurement file to choose the individual or multisize folder.
-- The interface edits layout settings or uses a selected JSON file with disabled controls.
-- Unit changes convert physical lengths.
-- The x64 MSI builds and packages SeamlyCLI with shortcuts and system PATH registration.
-- ARM64 keeps its existing three applications.
-- The complete Windows build and its Qt/Rust checks passed.
-- The final SeamlyCLI build passed 25 unit tests.
-- Visual checks covered the preference folders, disabled controls, and successful SVG/ZIP creation from entered settings.
-- Development seamly2d/bin held Qt 6.11.1 DLLs. The matching packaged Qt 6.11.3 runtime passed the export checks.
-- No installer ran on the user's system. No push was requested.
-
-
-## 2026-11-16 — Copy Piece pick tool
-
-- Defect: the Copy Piece button copied only a piece selected before the click. A click on a piece after the button did nothing.
-- Fix: `Tool::CopyPiece` pick tool, like Union and Piece Mirror. Merged into local `run-seamlyLayout` with the skip-ci token.
-- Files: `def.h`, `mainwindow.cpp/.h/.ui`, `cursor.qrc`, two new cursor PNGs, 18 `LAST_ONE_DO_NOT_USE` asserts (55 → 56).
-- The cursor uses the uncommitted working-copy `copy_piece@2x.png` icon. Redraw it if the icon changes.
-- Verified: scratch compile of the changed files. Not verified: MSI build, run-time check (open in `TODO_COMPLETED.md` S2D.77).
-- Uncommitted icon, packaging, CLI, and doc edits from other sessions remain untouched.
-
-## 2026-11-16 — Fix multisize collection tests
-
-- The MSI build stopped because 10 CollectionTest cases omitted the required multisize size option.
-- Added --basesize to the successful multisize TestMode case and the shared GOST collection command.
-- Updated src/test/CollectionTest/tst_seamly2dcommandline.cpp and its required license header.
-- Rebuilt CollectionTest. The SeamlyMe suite passed 17 checks. The Seamly2D suite passed 52 checks, with four filesystem skips.
-- The focused nmake check returned zero. The full MSI build remains unverified.
-- The existing three documentation edits remain unchanged. No commit or push.
-- Next step: rerun packaging/windows/local_build_msi.ps1 to complete all tests and MSI packaging.
-
-## 2026-11-16 — Feature branches merged and deleted
-
-- Merged all four feature branches into local run-seamlyLayout with separate merge commits.
-- S2D.73 adds generated SVG file checks. Its merge commit is 22c5463a1d.
-- S2D.75 preserves flipped geometry in Export Pieces and the SVG handoff. Its merge commit is 9426a55bd7.
-- Export Drafts retains the construction scene, as the user requested.
-- S2D.76 aligns grainlines with flipped anchors. Its merge commit is c2e06fd010.
-- S2D.77 binds the Copy Piece button to its action. Its merge commit is 3497cab77d.
-- Deleted the four merged task branches and their clean feature worktrees.
-- The detached CLI reference worktree remains unchanged.
-- Restored the three existing documentation edits as uncommitted changes.
-- TODO_COMPLETED.md retains the saved content and both new completion records.
-- TODO_SEAMLYLAYOUT.md matches its backup byte for byte.
-- TODO_SEAMLY2D.md retains the user edits and the merged test results. Its completed S2D.76 and S2D.77 descriptions moved to TODO_COMPLETED.md.
-- Kept the safety stash ff305da614b6aabdb03002debf7b190ca3f8509f and the external documentation backup.
-- Prior verification passed: 130 focused checks, eight SeamlyLayout checks, and 734 Rust tests.
-- The main-window Copy Piece check passed, including mode changes, copy, undo, and redo.
-- Merge resolutions changed documentation only. The merged feature source matches the tested commits.
-- The full Windows build and user visual checks remain pending.
-- No push was requested or performed.
-
-## 2026-11-16 — Returned to the main worktree
-
-- The user ended the isolated CLI work and requested a return to Seamly2D-private.
-- The main worktree now checks out run-seamlyLayout with all CLI commits through 7f4a5c4173.
-- The CLI worktree remains detached at 7f4a5c4173 as a reference.
-- Both worktrees share one repository. The handoff required no merge or duplicate commits.
-- Restored three pre-existing documentation edits without conflicts.
-- Verified the two TODO files byte for byte against the backup.
-- Verified TODO_COMPLETED.md contains the original edits and the new CLI completion records.
-- Kept the safety stash and an external backup of the three files.
-- Continue project work in the main worktree. No push was requested.
-- The source files did not change during the handoff. The recorded CLI test results still apply.
-
-
-## 2026-11-16 — S2D.78 multisize base size
-
-- Implemented --basesize in the CLI worktree on run-seamlyLayout.
-- Multisize console runs require --gsize or --basesize. Both options together cause exit 64.
-- --basesize reads the active measurement base and converts its unit. Individual measurements cause exit 65.
-- --gheight can accompany either size option.
-- --basesize exports one size by default. An explicit --layout-view still selects a multisize view.
-- --layout-info with --basesize retains all available views.
-- GUI file opening does not require a size selection.
-- Added descriptions and limits to the native help dialog. Updated its jacket example.
-- Windows build passed. All 40 Qt suites passed: 32640 checks, zero failures.
-- All seven basesize CLI cases passed. Four geometry checks cover numeric selection, measurement overrides, and unit conversion.
-- All 834 Rust tests and nine available SeamlyLayout release checks passed.
-- Work remains in the CLI worktree. No push was requested.
-
-
-## 2026-11-16 — CLI help examples
-
-- Added the Examples tab to the command line dialog in the CLI worktree on run-seamlyLayout.
-- Added SVG and tiled PDF commands for male_shirt.sm2d, with Paper > Tiled > Letter.
-- Added a DXF R13 command for jacket2_40-146.sm2d, with a custom 42.00-inch paper roll.
-- The jacket command selects Fabric and the base size.
-- Paths come from the executable and the pattern and layout folders in Preferences.
-- Added a Copy command button. The tab retains adjustable columns, filtering, and the application theme.
-- Windows build passed. All 40 Qt suites passed: 32630 checks, zero failures.
-- Rust workspace: 834 passed. SeamlyLayout: all nine release checks passed; this checkout has no debug build.
-- Inspected the native dialog with separate preview settings. The sample commands did not run.
-- The user requested a local commit and integration into run-seamlyLayout. No push was requested.
-
-
-## 2026-11-16 — CLI worktree location
-
-- Continue CLI work only in `C:\Users\susan\Projects\seamly2d-cli-1`, on `run-seamlyLayout`, as requested.
-- The CLI worktree contains the merged table dialog updates at `cd044d9b09`.
-- The main `Seamly2D-private` checkout remains detached at `cd044d9b09`. This preserves its files while the CLI worktree holds the branch.
-- The two folders share Git history. At the final handoff, release the branch from the CLI worktree and check it out in the main folder.
-- Do not edit files in the main folder during CLI work. Do not push without a request.
-
-## 2026-11-16 — Command line help tables
-
-- Replaced the console-style help window with native Qt tables that use the parent window's font and palette.
-- Added adjustable columns, filtering, sorting, and tabs for options, limits, exit codes, and removed options.
-- Windows Qt 6.11.3 build passed. All 40 Qt suites passed: 32629 checks, zero failures.
-- Tests cover font and palette inheritance, registered descriptions, filtering, column resizing, and closing without exiting.
-- The user stopped computer control before the visual check. Visual verification remains pending.
-- Merged `task-command-line-help-table` locally into `run-seamlyLayout` at the user's request. No push.
-
-## 2026-11-16 — CLI feature merged locally
-
-- Merged `feature/cli-1` through `fa4e0e47ad` into `run-seamlyLayout` at the user's request.
-- The merge had no conflicts. The source files match the tested feature branch.
-- Windows verification from the feature branch: the build passed; all 40 Qt suites passed with zero failures.
-- Linux and macOS verification remains deferred to CI.
-- No push. Both branch worktrees remain available.
-
-## 2026-11-16 — Command line help in the Help menu
-
-- Added **Help > Command line options** on `feature/cli-1`.
-- The window uses `VCommandLine::helpText()` for registered descriptions, limits, removed options, and exit codes.
-- `--basename` remains removed; the window explains `--layout-export` and `--layout-output` as its replacements.
-- Shared the dialog with the existing console-free `--help` fallback. Closing it from the menu does not exit Seamly2D.
-- Verified the Windows Qt 6.11.3 build and all 40 Qt suites: 32628 passed, zero failures.
-- The CLI suite includes 31 passing checks, including help content, scrolling, and closing without exiting.
-- Linux and macOS verification remains deferred to CI. No merge or push.
-
-## Current status
-
-### 2026-11-16 — CLI.3 direct layout flags (feature/cli-1)
-
-- Done; CLI.3 moved to `TODO_COMPLETED.md`. `TODO_CLI.md` keeps CLI.2 only (CLI.2.1 Richmond files, CLI.2.2 CAD import check).
-- Seamly2D `--layout-<name> <value>` → SeamlyLayout `--<name> <value>` → `layout_tiling::apply_layout_flags` (precedence saved < `--layout-settings` < flags; media implications; conflicts → exit 64).
-- `--layout-no-packing` (`--no-packing`): pieces where Piece mode places them; bridge `useHandoffPositions`.
-- `--text2paths` back for SVG, PDF, tiled PDF, PS, EPS.
-- Decisions (CLI.3.1, CLI.3.7) are recorded in `TODO_COMPLETED.md`; Sue may rename flags.
-- Tests: CLI suite 130/130 (with `-RichmondRoot`); import check 30 files/0 fail; `cargo test --workspace` 734/0; `TST_VCommandLine` 29; `ctest` 9/9; Python headless runner pass.
-- Richmond pattern and `2025-06-08-Sue.smis`: `git show d3197ee973^:test-seamly-layout-input/<file>`; not re-added (personal measurements).
-- Import check with Inkscape 1.4.4, ezdxf, pypdf: 59 files, 0 fail. Open: a CAD program and a cutter (none installed); Linux/macOS (no WSL, no Docker, no Mac); CI (no push).
-- Next: Sue reviews and merges `feature/cli-1` (not pushed).
-
-### 2026-11-16 — CLI.1 audit and repair (feature/cli-1)
-
-- Done; CLI.1 in `TODO_COMPLETED.md`. Branch `feature/cli-1`, not merged, not pushed. Plan `CLI_1_PLAN.md` (D1–D17); matrix `CLI_1_OPTION_MATRIX.md`; results and acceptance checklist `CLI_1_TEST_RESULTS.md`.
-- New options: Seamly2D `--layout-material`, `--layout-view`, `--layout-oversize`, `--layout-info`, `--text2paths`; SeamlyLayout `--material`, `--view`, `--oversize`, `--info`, `--text2paths`. Removed `--layout-scale`/`--scale` (PNG fixed at 96 px/in).
-- Tests: CLI suite 106/106; `local_build_msi.ps1` pass (`nmake check`, `ctest` 9/9, `cargo test` 730/0, MSI built, not installed); `TST_VCommandLine` 26; CollectionTest 69/0 (start in `bin`); tester 15/0; Python runners pass.
-- Tester: `src/app/seamlycli` (Rust/Iced, `--batch`), built in `target\release`.
-- Blocked: Linux/macOS (no WSL, no Mac), CI (no push), Richmond `.sm2d` (not on this machine).
-- Next: Sue reviews and merges. CLI.3 keeps the direct layout flags (names and precedence need Sue); CLI.2.1 needs the Richmond files.
-
-### 2026-11-15 — Piece mode Details > Export Pieces (Seamly2D.73)
-
-- `export_pieces_action` (E, P) below Copy Piece; `export_pieces_tool_button` below `copy_piece_tool_button`; toolbox +48 px. Piece mode only.
-- `MainWindow::createPiecesSvg()`: one function for Layout mode and Export Pieces; Layout mode messages verbatim. Opening-pattern guard removed.
-- `exportPiecesToSvgFile()`: `handleArrowTool(true)`; save dialog in `getLayoutPath()`; adds `.svg` when no suffix; write error message box.
-- New `layout_handoff/handoff_svg_file.*`: `pieces_svg_file_name()`, `write_svg_file()` (QSaveFile, UTF-8). New `TST_HandoffSvgFile`.
-- Checked: scratch harness `TST_HandoffSvgFile` 7/7 pass; `mainwindow.cpp` compiles (no new warnings). `nmake check` not run.
-- Built in worktree `export-pieces`; merged `--no-ff` with no skip-ci token (`.pro`, `.pri` changed); branch and worktree deleted.
-- Open: Seamly2D.73.5 user check and the Qt suites with the next `local_build_msi.ps1`.
-
-### 2026-11-15 — Preferences > Paths: SeamlyLayout row removed (Seamly2D.200)
-
-- `preferencespathpage.cpp`: row 10 "SeamlyLayout Application" removed from `initializeTable()`, `Apply()`, `defaultPath()`, `editPath()`. Table has 10 rows.
-- Kept `paths/seamlyLayoutApp` and `VSettings::get/setSeamlyLayoutAppPath()`: `smsi_ensure_user_data.ps1` seeds the key; `Application2D::seamlyLayoutFilePath()` reads it first.
-- Checked: `cl /Zs` on the file passes. No new test (UI row only).
-- Built in worktree `layout-app-path`; merged `--no-ff` with no skip-ci token (diff removes an `#ifdef Q_OS_WIN` block); branch and worktree deleted.
-- Open: Seamly2D.200.2 build check with the next `local_build_msi.ps1`.
-
-### 2026-11-15 — Upstream `develop` merge in progress (a85828a6d0)
-
-- `git merge develop` on `run-seamlyLayout` (bc458ff16a). Backup branch `intermediate` at the same commit. Not committed.
-- Staged: `common.pri` = HEAD (no OpenSSL); `out/out.pro` removed; upstream DMG files in `packaging/macos/dmg/` (InstMacOS.01).
-- `vcmdexport.*` → `command_line.*`: develop's method names, HEAD's `--layout-*` logic. Help prints to the console when stdout or stderr has a handle, else the upstream dialog.
-- `mainwindow.cpp`: `DoExport` dropped; HEAD's `processCommandLine` and `exportLayoutFromCommandLine` with develop's names. Test files staged with the new names.
-- Copy Piece: develop's Duplicate code removed. New `PatternPieceTool::copyPiece()` runs the right-click item and Details > Copy Piece (Ctrl+D, `duplicate_piece_action`). Both use `copy_piece.png`.
-- New icon `toolicon/32x32/copy_piece.png` and `@2x` in `toolicon.qrc`; source `toolicon/svg/copy_piece.svg`. Edit menu Duplicate item removed.
-- Unstaged: Piece mode Details page `copy_piece_tool_button` below the mirror button; triggers `duplicate_piece_action`. Toolbox +48 px.
-- All conflicts resolved and staged. `mainwindowsnogui.cpp`: old print and export code stays deleted; header has both authors, "2013-2017 Valentina project", "2017-2026 Seamly2D project", SPDX.
-- `vabstracttool.*`: our public `PrepareNodes`/`PrepareNode`; develop's `bloack_name` dropped; `blockName` → `block_name` in `AddRecord` and `PrepareNode`.
-- Kept develop #1827 (062a71c901): the Move tool moves its rotation point with the objects, selected or not. It deletes 2 `TST_VToolMove` tests.
-- Checked: no `convertPdfToPs`/`PDFTOPS` in code; no old `VCommandLine` names. Then: ask before `local_build_msi.ps1`; commit. No skip-ci token: `*.pro`, `*.pri`, packaging changed.
-- TODO: `TODO_CLI.md` new CLI.3 (legacy layout options as `--layout-*` flags); CLI.1 paths now `command_line.cpp`.
-- TODO: `TODO_SEAMLY2D.md` new Seamly2D.73 (Details > Export Pieces writes the handoff SVG string to a file).
-
 ## Decisions to retain
 
+- Only `develop` and `run-seamlyLayout` belong on seamly/Seamly2D (user, 2026-11-17).
+- A push to `run-seamlyLayout` builds all platforms; it does not publish (user, 2026-11-17).
 - CLI Linux and macOS checks run in CI (`gh workflow run ci.yml`), not in a local WSL install (user, 2026-11-16).
 - SeamlyLayout is complete after the `develop` merge. Next focus: CLI layouts from pattern and measurement files plus parameters (user, 2026-11-15).
 - Adopt develop's `command_line.*` file names and lowerCamel `VCommandLine` method names: they match the code style (user, 2026-11-15).
@@ -289,11 +90,3 @@
 - [SVG attribute contract](project-docs/docs-data/SVG-DATA-ATTRIBUTES.md)
 - [Installer TODO](project-docs/docs-installer/TODO_INSTALLER.md)
 - [Completed work archive](project-docs/TODO_COMPLETED.md)
-
-### Verification in the CLI worktree — 2026-11-16
-
-- Rebuilt Seamly2D and Seamly2DTests in `C:\Users\susan\Projects\seamly2d-cli-1` with Qt 6.11.3.
-- All 40 Qt suites passed: 32629 checks, zero failures, zero skips.
-- The CLI suite passed 32 checks, including table content, font and palette inheritance, filtering, resizing, and closing.
-- The updated application is `src/app/seamly2d/bin/seamly2d.exe` in this checkout. The installed application was not replaced.
-- Continue CLI work here on `run-seamlyLayout`. No push or handoff to the main checkout occurred.
