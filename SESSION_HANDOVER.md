@@ -1,5 +1,14 @@
 # Session handover
 
+## 2026-11-16 — Copy Piece pick tool
+
+- Defect: the Copy Piece button copied only a piece selected before the click. A click on a piece after the button did nothing.
+- Fix: `Tool::CopyPiece` pick tool, like Union and Piece Mirror. Merged into local `run-seamlyLayout` with the skip-ci token.
+- Files: `def.h`, `mainwindow.cpp/.h/.ui`, `cursor.qrc`, two new cursor PNGs, 18 `LAST_ONE_DO_NOT_USE` asserts (55 → 56).
+- The cursor uses the uncommitted working-copy `copy_piece@2x.png` icon. Redraw it if the icon changes.
+- Verified: scratch compile of the changed files. Not verified: MSI build, run-time check (open in `TODO_COMPLETED.md` S2D.77).
+- Uncommitted icon, packaging, CLI, and doc edits from other sessions remain untouched.
+
 ## 2026-11-16 — Fix multisize collection tests
 
 - The MSI build stopped because 10 CollectionTest cases omitted the required multisize size option.
