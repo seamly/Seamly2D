@@ -8,12 +8,13 @@
 - Cause: old writer sized the label with `QGraphicsSimpleTextItem::boundingRect()`; on Linux its height differs from `QFontMetricsF::height()`.
 - Fix 66a7d9c969: `VLayoutPiece::createFoldLineLabelItem` uses `QFontMetricsF` in both branches. MSVC syntax check passed; Windows cannot reproduce.
 - Fix ab86c39682: `ci.yml` linux, macos, windows-msi jobs run on push to `run-seamlyLayout`. Publish jobs unchanged.
-- Local `run-seamlyLayout`: 4 commits ahead of origin. Merges carry no skip-ci token.
+- 3bd7434c3f: CI builds only the Windows x64 MSI. Platform order is in `TODO_INSTALLER.md` Installer.8 (user decision).
+- Local `run-seamlyLayout`: 8 commits ahead of origin. Merges carry no skip-ci token.
 - Not run since: Linux ctest and cargo (11-02), platform builds (10-19). More failures possible.
 - Extra origin branches: `gh-pages` (`document` job, `builddocs.yml`), `dependabot/cargo/src/app/seamlycli/cargo-4cb1234933` (PR #32).
 - Open: Export Draft Blocks SVG writer to replace `SvgGenerator` (a: vformat draft-only writer, recommended; b: `QSvgGenerator`).
 - Open: skip-ci default in CLAUDE.md stops push builds; keep or drop.
-- Next: Sue pushes; watch CI; fix the next failure; then Dead.4.5 (remove vlayout).
+- Next: Sue pushes; watch the x64 MSI job; then Installer.8.2 (arm64).
 
 ### 2026-11-16 — Utilities menu launches SeamlyCLI
 
