@@ -19,7 +19,8 @@ Enable `git config rerere.enabled true` so Git reuses recorded conflict resoluti
 
 ## Retired code that `develop` still has
 
-- `.github/workflows/ci.yml`: this branch renamed it `ci-layout.yml`. Keep `ci.yml` deleted.
+- `.github/workflows/ci.yml` is upstream's workflow for `develop`. Take upstream's version as is;
+  it must stay identical to `develop`'s copy. `ci-layout.yml` is ours, for `run-seamlyLayout`.
   Port wanted upstream `ci.yml` changes into `ci-layout.yml` by hand.
 - `MainWindowsNoGUI::exportEPS`, `exportPS`, `convertPdfToPs` (pdftops), retired in `14e1d8723b`.
   `develop` restores them whenever it edits nearby lines. Delete them on each merge.

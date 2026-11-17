@@ -1,6 +1,10 @@
-name: CI
+name: CI Layout
 
 # For a description, see README_WORKFLOWS.md in this folder
+#
+# Two CI workflows live side by side:
+# - ci-layout.yml (this file) builds run-seamlyLayout.
+# - ci.yml is upstream's workflow for develop. Keep it identical to develop's copy; never edit it here.
 
 on:
   workflow_dispatch:
@@ -8,10 +12,9 @@ on:
   schedule:
     - cron: '0 0 * * 1' # Runs Monday 00:00 UTC
   push:
-    # Limit to branches of record. A PR branch push then fires pull_request
+    # Only the branch of record. A PR branch push then fires pull_request
     # only, not push too, so Linux tests, version, etc. do not run twice per commit.
     branches:
-      - develop
       - run-seamlyLayout
     # Skip docs-only pushes. `CMakeLists.txt` is a build input, so do
     # not ignore all `.txt` files. If any file does not match `paths-ignore`,
@@ -26,7 +29,7 @@ on:
 
 # Keep only the newest run for each ref to avoid redundant ~50-minute builds.
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-layout-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:

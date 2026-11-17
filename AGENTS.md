@@ -124,7 +124,10 @@ The Qt kit must include:
 ### CI
 
 * Use Qt 6.11.3 with MSVC 2022.
-* `ci-layout.yml` is the CI workflow on Github. It builds all three apps. Set the Qt release in its `QT_VERSION`.
+* Two workflows, one per branch (user decision):
+  - `ci-layout.yml` (`CI Layout`): ours, for `run-seamlyLayout`. Edit only this one.
+  - `ci.yml` (`CI`): upstream's, for `develop`. Keep it identical to `develop`'s copy. Never edit it on `run-seamlyLayout`.
+* `ci-layout.yml` builds all three apps. Set the Qt release in its `QT_VERSION`.
 `packaging/windows/build_local_msi.ps1' is the CI workflow on the local pc. It builds seamly2d, seamlyme, and seamlylayout and creates the windows msi file.
 
 ### Local Windows Build

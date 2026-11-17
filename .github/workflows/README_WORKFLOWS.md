@@ -2,7 +2,14 @@
 
 ## Automated Workflows
 
-### [CI](ci-layout.yml) - Main Continuous Integration Workflow
+Two CI workflows, one per branch:
+
+| File | Name | Branch | Owner |
+| --- | --- | --- | --- |
+| [ci-layout.yml](ci-layout.yml) | CI Layout | `run-seamlyLayout` | this project; edit only this one |
+| [ci.yml](ci.yml) | CI | `develop` | upstream; keep identical to `develop`'s copy |
+
+### [CI Layout](ci-layout.yml) - Main Continuous Integration Workflow
 **Triggers**: Pull requests, pushes to `run-seamlyLayout`, manual dispatch. Pushes carry a `paths-ignore` for `**.md` / `project-docs/**` / `LICENSE`, so documentation changes never start a build; `pull_request` is deliberately unfiltered so a docs-only PR still reports its checks. `concurrency: cancel-in-progress` supersedes older in-progress runs on the same ref.
 
 > **A full run costs ~50 minutes** across Linux, macOS and Windows x64/arm64. The task workflow in [CLAUDE.md](../../CLAUDE.md) therefore puts `[skip ci]` in the step-8 merge commit by default and clears the accumulated skips with one deliberate `gh workflow run ci-layout.yml --ref run-seamlyLayout` before a milestone. Omit the skip when the task touched workflows, packaging, build files (`*.pro`, `CMakeLists.txt`, `Cargo.toml`) or platform-specific code — the local Windows build cannot verify those.
