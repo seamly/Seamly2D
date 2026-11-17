@@ -2,6 +2,14 @@
 
 Older `SESSION_HANDOVER.md` entries, newest first. Grep it; do not Read it whole.
 
+### 2026-11-16 — Remove superfluous SeamlyCLI settings
+
+- Removed Layout width and Layout length from the settings editor and generated JSON.
+- Updated regression checks for omitted page dimensions and unit conversion of roll width.
+- All 25 SeamlyCLI release unit tests passed.
+- File: `src/app/seamlycli/src/layout_settings_editor.rs`.
+- No commit or push.
+
 ### 2026-11-16 — Translation test linker failure
 
 - The user reported `LNK1104` while the linker replaced `src/test/TranslationsTest/bin/TranslationsTest.exe`.

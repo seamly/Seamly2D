@@ -10,7 +10,9 @@ Tasks in this file are numbered with prefix `PrivateRust.`
 ## Goal
 
 - Public repository: no Rust source.
-- Public repository keeps: SeamlyLayout Qt frontend (C++, QML), CXX-Qt generated headers, pinned download of the prebuilt Rust library.
+- `seamlylayout.exe` holds only open-source code: Qt frontend (C++, QML).
+- Proprietary Rust ships as separate files: the `seamlylayout_core` shared library and `seamlycli.exe`.
+- Public repository keeps: Qt frontend, C header `seamlylayout_core.h`, pinned download of the prebuilt core, fonts in `src/fonts/`.
 - Private repository: all Rust source, Rust tests, Rust build and release.
 
 ## Facts (checked 2026-11-17)
@@ -21,19 +23,26 @@ Tasks in this file are numbered with prefix `PrivateRust.`
 | `src/app/seamlycli/` (Rust + Iced) | 10 | GPL-3.0-or-later | 2026-11-16 |
 
 - Total: 50,677 lines of Rust.
-- Sole author: slspencer. One Dependabot version bump. Sue can relicense.
+- Sole author: slspencer. One Dependabot version bump. Copyright assigned to Seamly Systems, Inc.
 - Sue maintains `FashionFreedom/Seamly2D`.
 - Upstream releases: weekly tag `v<date>.<n>`, marked Latest. Upstream workflows have no tag or release triggers.
 - Relicensing does not recall published copies. A holder of a published version keeps its MIT or GPL grant.
 - `seamly/Seamly2D` is a public fork of `FashionFreedom/Seamly2D`. The fork network shares objects: any pushed commit is readable by SHA through every repository in it.
 - Exposure: 1 fork (`elros88`, 2024, no Rust), 8 stars, 116 clones / 29 unique in 14 days (CI checkouts count).
 - `upstream/develop` holds no Rust.
-- Bridge: crate `cxxqt_bridge` (`staticlib`) exposes one QObject, `AppController`. Release `.lib`: 85 MB.
-- Frontend use: `qt_frontend/src/HeadlessExport.cpp` includes `cxxqt_bridge/src/lib.cxxqt.h`. `qt_frontend/seamlyLayout_main.mm` calls `qmlRegisterType<AppController>`.
-- Generated headers: 221 KB in `<build>/cxxqt/crates/cxxqt_bridge/include/` (`cxxqt_bridge/`, `cxx-qt/`, `cxx-qt-lib/`, `rust/`).
-- Generated QML: none. Runtime `qmlRegisterType` replaces `qmldir`/`qmltypes`. If the bridge later uses `QmlModule`, ship those files too.
-- Generated C++ and moc output compile into the staticlib. The public build needs only the headers.
-- LGPLv3: Qt links dynamically, so users can swap Qt. No LGPL duty requires Rust source or generated code.
+- Today the Rust links statically into `seamlylayout.exe`: crate `cxxqt_bridge` is a `staticlib` (release `.lib`: 85 MB). The staged exe holds source paths of 12 crates.
+- Bridge: one QObject, `AppController`. All 45 methods are `Q_INVOKABLE`. It has 11 signals.
+- Frontend use of `AppController`:
+  - `qt_frontend/seamlyLayout_main.mm`: `qmlRegisterType<AppController>`.
+  - `qt_frontend/src/HeadlessExport.cpp`: includes `cxxqt_bridge/src/lib.cxxqt.h`; calls 33 methods; connects 3 signals.
+  - QML: uses only properties, invokables, and signals.
+- So the frontend can reach `AppController` through `QMetaObject` alone. No generated header is needed outside the core library.
+- Generated QML: none. Runtime `qmlRegisterType` replaces `qmldir`/`qmltypes`.
+- LGPLv3: the core library and the exe link Qt dynamically. No LGPL duty requires Rust source or generated code.
+- Fonts inside the crates, embedded with `include_bytes!` / `include_str!`:
+  - `crates/svg_label_text/assets/fonts/ReliefSingleLineOutline-Regular.otf`, `OFL.txt` (used in `font_embedding.rs:31`, `svg_label_text_tests.rs:11`).
+  - `crates/svg_label_text/assets/hershey/futural.jhf`, `HERSHEY_LICENSE.txt` (used in `hershey_strokes.rs:22`).
+- Test SVGs read with `include_str!` sit in `#[cfg(test)]` modules. They are not in the release exe.
 - Dependency licenses: no blocker.
   - `resvg`, `usvg`: MPL-2.0. Ship the notice and a source pointer (crates.io). Do not modify them.
   - `r-efi`, `hershey`, `self_cell`: dual license with an LGPL or GPL option. Elect MIT or Apache-2.0.
@@ -47,17 +56,35 @@ Tasks in this file are numbered with prefix `PrivateRust.`
 | --- | --- |
 | Rust crates, `Cargo.toml`, `Cargo.lock`, Rust tests | Private repo |
 | SeamlyCLI source | Private repo |
+| CXX-Qt generated code, export file of the core library | Private repo |
 | `packaging/licenses/about.toml`, `rust_crate_notices.hbs` | Private repo |
 | Qt frontend C++ and QML | Public repo (MIT) |
-| Generated headers | Public: `src/app/seamlylayout/bridge_generated/include/` |
-| Core version, per-platform URL, SHA-256 | Public: `src/app/seamlylayout/bridge_generated/core_release.cmake` |
-| Prebuilt package (lib, CMake config, notices, `seamlycli.exe`) | Private CI builds it; `FashionFreedom/Seamly2D` releases serve it |
+| `seamlylayout_core.h` (C API) | Public: `src/app/seamlylayout/core_release/` |
+| Core version, per-platform URL, SHA-256 | Public: `src/app/seamlylayout/core_release/core_release.cmake` |
+| Relief and Hershey fonts with licenses | Public: `src/fonts/` |
+| Prebuilt package (core library, CMake config, notices, `seamlycli.exe`) | Private CI builds it; `FashionFreedom/Seamly2D` releases serve it |
+
+## Core library
+
+- Private CMake target `seamlylayout_core`, `SHARED`: the `cxxqt_bridge` staticlib plus one C++ export file.
+- Files: `seamlylayout_core.dll` (Windows), `libseamlylayout_core.so` (Linux), `libseamlylayout_core.dylib` (macOS).
+- It links Qt Core and Qt Qml dynamically.
+- Exported symbols, and no others:
+
+| Function | Purpose |
+| --- | --- |
+| `int seamlylayout_core_api_version()` | Frontend refuses a library with another API version |
+| `void seamlylayout_core_register_qml_types()` | Calls `qmlRegisterType<AppController>("SeamlyLayout", 1, 0, "AppController")` |
+| `QObject* seamlylayout_core_create_controller(QObject* parent)` | Gives `HeadlessExport` an `AppController` |
+
+- Symbol control: Windows `__declspec(dllexport)`; Linux `-fvisibility=hidden` and a version script; macOS `-exported_symbols_list`.
+- Windows: library and exe both use the `/MD` runtime, so a `QObject` made in one can be deleted in the other.
 
 ## Public build modes
 
 - Package mode (default): CMake `FetchContent` downloads the pinned zip with `URL_HASH SHA256`, then `find_package(SeamlyLayoutCore CONFIG REQUIRED)`.
-- Source mode: `-DSEAMLYLAYOUT_CORE_SOURCE_DIR=<private checkout>` runs the current `cxx_qt_import_crate` path. Sue edits Rust and frontend together in this mode.
-- Both modes define target `cxxqt_bridge`. `target_link_libraries(SeamlyLayout ...)` stays unchanged.
+- Source mode: `-DSEAMLYLAYOUT_CORE_SOURCE_DIR=<private checkout>` builds the core library from source. Sue edits Rust and frontend together in this mode.
+- Both modes give imported target `SeamlyLayoutCore::seamlylayout_core`.
 
 ## Decisions
 
@@ -70,11 +97,21 @@ User decisions, 2026-11-17:
 | D3 | Private repo | New repo under `seamly`. Archive the stale `seamly/seamlyLayout` |
 | D4 | Package host | `FashionFreedom/Seamly2D` releases |
 | D5 | Licensor | Seamly Systems, Inc. Proprietary, free redistribution |
-| D6 | Upstream | `FashionFreedom/Seamly2D` is the public repo. It gets the frontend, generated headers, and download hook |
+| D6 | Upstream | `FashionFreedom/Seamly2D` is the public repo. It gets the frontend, `seamlylayout_core.h`, fonts, and download hook |
+| D7 | Separation | Rust core in its own shared library, not linked into `seamlylayout.exe` |
+| D8 | Fonts | Move the crate fonts to `src/fonts/` |
 
 - D2 reason: current algorithms are the main asset, and exposure is low. Cost: rewrite breaks every clone and `.worktrees/` checkout.
 - D4 constraints: tag `seamlylayout-core-v<version>`; create with `--latest=false` so weekly app releases stay Latest; never delete a core release, because old builds pin it.
 - D5 reason: "Seamly2D Project" is not a legal entity. A licensor must be one.
+
+Open:
+
+| # | Decision | Options | Recommendation |
+| --- | --- | --- | --- |
+| F1 | How the Rust gets the fonts | Load the files at run time; embed at build time from `src/fonts/` | Load at run time |
+
+- F1 reason: the proprietary library then holds no third-party fonts, and the private repo needs no font copy outside tests. Cost: Rust and frontend changes (PrivateRust.8.3–8.5).
 
 ## Task PrivateRust.0 — Stop-gap
 
@@ -85,11 +122,27 @@ User decisions, 2026-11-17:
 - [x] PrivateRust.1.1 Record D1–D6 in this file.
 - [ ] PrivateRust.1.2 Counsel check: Seamly2D (GPL) and SeamlyLayout (proprietary core) ship in one installer and talk only through `--svg-stdin` and command-line arguments. No linking.
   - 2026-11-17: counsel answered yes. Stated basis: all code on the user's PC is open source (Qt, C++).
-  - Open: that basis does not match this plan. The proprietary Rust runs on the user's PC, compiled into `seamlylayout.exe` and as `seamlycli.exe`. Counsel re-confirms with this fact.
+  - Open: with D7, `seamlylayout.exe` is open source only. Proprietary code still runs on the user's PC: `seamlylayout_core` (loaded into the SeamlyLayout process) and `seamlycli.exe`. Counsel re-confirms with this fact.
 - [x] PrivateRust.1.3 Sue assigns, in writing, her copyright in the Rust code to Seamly Systems, Inc. Done 2026-11-17.
-- [ ] PrivateRust.1.4 Write the binary license, licensor Seamly Systems, Inc.: redistribution, linking with the MIT frontend, inclusion in Seamly2D installers.
+- [ ] PrivateRust.1.4 Write the binary license, licensor Seamly Systems, Inc.: redistribution, use by the MIT frontend, inclusion in Seamly2D installers.
 - [ ] PrivateRust.1.5 Private repo: proprietary `LICENSE` (Copyright 2026 Seamly Systems, Inc.), Rust file headers, `publish = false`. Every `Cargo.toml`, SeamlyCLI's `GPL-3.0-or-later` too, uses `license-file`.
 - [ ] PrivateRust.1.6 `about.toml`: elect MIT or Apache-2.0 for `r-efi`, `hershey`, `self_cell`. Add the MPL-2.0 source pointer for `resvg`, `usvg`.
+
+## Task PrivateRust.8 — Move crate fonts to `src/fonts/`
+
+Do this before PrivateRust.2.2, so the fonts stay public.
+
+- [ ] PrivateRust.8.1 Decide F1.
+- [ ] PrivateRust.8.2 `git mv` the fonts and their licenses:
+  - `crates/svg_label_text/assets/fonts/ReliefSingleLineOutline-Regular.otf`, `OFL.txt` → `src/fonts/relief_single_line/`.
+  - `crates/svg_label_text/assets/hershey/futural.jhf`, `HERSHEY_LICENSE.txt` → `src/fonts/hershey/`.
+- [ ] PrivateRust.8.3 F1 = run time: `svg_label_text` reads both files from a font directory the frontend sets once at startup. Replace the `include_bytes!` / `include_str!` constants.
+- [ ] PrivateRust.8.4 F1 = run time: the frontend resolves the font directory from `QCoreApplication::applicationDirPath()` (macOS: `../Resources/fonts`) and passes it before the first import.
+- [ ] PrivateRust.8.5 F1 = run time: a missing or unreadable font file gives an error that names the path. Unit test it.
+- [ ] PrivateRust.8.6 F1 = build time: point the `include_bytes!` / `include_str!` paths at `src/fonts/`. After the split, the private build fetches `src/fonts/` from the public repo at a pinned commit.
+- [ ] PrivateRust.8.7 Tests: `svg_label_text_tests.rs` reads the fonts from the new location. After the split, the private repo keeps a test copy.
+- [ ] PrivateRust.8.8 Packaging (F1 = run time): stage `src/fonts/` with its licenses beside SeamlyLayout in the MSI, AppImage, and DMG.
+- [ ] PrivateRust.8.9 Update `.claude/rules/seamlylayout_licensing.md` asset table and `packaging/licenses/` notices for the new paths.
 
 ## Task PrivateRust.2 — Private repository
 
@@ -104,40 +157,44 @@ User decisions, 2026-11-17:
 
 ## Task PrivateRust.3 — Private CI and release package
 
-- [ ] PrivateRust.3.1 Build the `cxxqt_bridge` release staticlib and SeamlyCLI per target, Qt 6.11.3, `QMAKE` set:
+- [ ] PrivateRust.3.1 Add the `seamlylayout_core` shared library target and its export file (see Core library).
+- [ ] PrivateRust.3.2 Build the core library and SeamlyCLI per target, Qt 6.11.3, `QMAKE` set:
 
 | Target | Runner | Constraint |
 | --- | --- | --- |
-| windows-x64 | Windows, MSVC | Toolset not newer than public builders; `/MD` runtime |
+| windows-x64 | Windows, MSVC | `/MD` runtime |
 | linux-x64 | `ubuntu-22.04` | Same glibc and GCC as the AppImage build |
-| macos-universal | `macos-26` | `lipo` x86_64 + arm64; `MACOSX_DEPLOYMENT_TARGET` = DMG minimum |
+| macos-universal | `macos-26` | `lipo` x86_64 + arm64; `MACOSX_DEPLOYMENT_TARGET` = DMG minimum; `@rpath` install name |
 | windows-arm64 | later | No arm64 MSI yet |
 
-- [ ] PrivateRust.3.2 Package profile: `lto = "fat"`, `codegen-units = 1`, `debug = false`, `--remap-path-prefix`. Strip local symbols. Check with `nm` / `dumpbin /symbols`: no crate-internal names.
-- [ ] PrivateRust.3.3 Package contents:
-  - lib;
-  - generated headers and their hash;
-  - `SeamlyLayoutCoreConfig.cmake`: imported target, link libraries from `cargo rustc -- --print native-static-libs`, Qt version used;
+- [ ] PrivateRust.3.3 Release profile: `lto = "fat"`, `codegen-units = 1`, `debug = false`, `--remap-path-prefix`. Strip the shared library.
+- [ ] PrivateRust.3.4 Symbol audit: only the three exported functions are visible (`dumpbin /exports`, `nm -D --defined-only`, `nm -gU`).
+- [ ] PrivateRust.3.5 Package contents:
+  - core library; Windows import `.lib`;
+  - `seamlylayout_core.h`;
+  - `SeamlyLayoutCoreConfig.cmake`: imported target, API version, Qt version used;
   - `rust_crate_notices.txt`;
   - `seamlycli.exe` (windows-x64);
   - `LICENSE`, `SHA256SUMS`.
-- [ ] PrivateRust.3.4 `cargo test --workspace` and SeamlyCLI tests gate the release.
-- [ ] PrivateRust.3.5 Tag `core-v<version>` in the private repo starts the release. CI runs `gh release create seamlylayout-core-v<version> --repo FashionFreedom/Seamly2D --latest=false` and uploads the zips.
-- [ ] PrivateRust.3.6 Token: fine-grained PAT or GitHub App, `FashionFreedom/Seamly2D` only, `contents: write`. Store it as a private repo secret.
+- [ ] PrivateRust.3.6 `cargo test --workspace`, SeamlyCLI tests, and a load test of the core library gate the release.
+- [ ] PrivateRust.3.7 Tag `core-v<version>` in the private repo starts the release. CI runs `gh release create seamlylayout-core-v<version> --repo FashionFreedom/Seamly2D --latest=false` and uploads the zips.
+- [ ] PrivateRust.3.8 Token: fine-grained PAT or GitHub App, `FashionFreedom/Seamly2D` only, `contents: write`. Store it as a private repo secret.
+- [ ] PrivateRust.3.9 Windows: private CI signs `seamlylayout_core.dll` and `seamlycli.exe` before packaging. Same certificate and timestamp as `TODO_CODE_SIGNING.md` CodeSign.1.
 
 ## Task PrivateRust.4 — Public build switch
 
-- [ ] PrivateRust.4.1 Add `src/app/seamlylayout/bridge_generated/`: headers, `core_release.cmake`, `README.md` (headers MIT; `cxx` and `cxx-qt` headers keep their MIT/Apache notices).
-- [ ] PrivateRust.4.2 `qt_frontend/CMakeLists.txt`: add package mode and source mode. Package mode does not fetch `cxx-qt-cmake`.
-- [ ] PrivateRust.4.3 Configure checks:
-  - Qt version ≥ package Qt version.
-  - Package headers hash = committed headers hash.
-  - Source mode: generated headers = committed headers.
-- [ ] PrivateRust.4.4 Add `packaging/update_layout_core.ps1` and `.sh`: download a version, verify SHA-256, copy headers, write `core_release.cmake`. Sue runs it and commits.
-- [ ] PrivateRust.4.5 `local_build_msi.ps1`, `local_build_appimage.sh`, `local_build_dmg.sh`: remove `cargo` steps. Take `seamlycli.exe` and Rust notices from the package. Source mode also runs the private `cargo test`.
-- [ ] PrivateRust.4.6 `ci-layout.yml`: remove `dtolnay/rust-toolchain`, `Swatinem/rust-cache`, `cargo` steps, SeamlyCLI build. Pass the package directory to `smsi.ps1 -SeamlyCLIBin`.
-- [ ] PrivateRust.4.7 `generate_license_notices.py`: remove the cargo-about step. Copy `rust_crate_notices.txt` from the package.
-- [ ] PrivateRust.4.8 ctest smoke test: `SeamlyLayout --info <fixture.svg>` exits 0. It proves the prebuilt lib links and runs.
+- [ ] PrivateRust.4.1 Add `src/app/seamlylayout/core_release/`: `seamlylayout_core.h`, `core_release.cmake`.
+- [ ] PrivateRust.4.2 `seamlyLayout_main.mm`: replace `qmlRegisterType<AppController>` with `seamlylayout_core_register_qml_types()`. Check `seamlylayout_core_api_version()` first.
+- [ ] PrivateRust.4.3 `HeadlessExport.cpp`: remove the `lib.cxxqt.h` include. Get the controller from `seamlylayout_core_create_controller()`. Call the 33 methods with `QMetaObject::invokeMethod`. Connect the 3 signals by name.
+- [ ] PrivateRust.4.4 Startup check: every method and signal name the frontend uses exists in the controller's `QMetaObject`. A missing name gives an error that names it.
+- [ ] PrivateRust.4.5 `qt_frontend/CMakeLists.txt`: package mode and source mode. Remove `FetchContent(CxxQt)` and `cxx_qt_import_crate` from package mode. Link `SeamlyLayoutCore::seamlylayout_core`.
+- [ ] PrivateRust.4.6 Configure checks: Qt version ≥ package Qt version; package `seamlylayout_core.h` hash = committed header hash.
+- [ ] PrivateRust.4.7 Add `packaging/update_layout_core.ps1` and `.sh`: download a version, verify SHA-256, copy `seamlylayout_core.h`, write `core_release.cmake`. Sue runs it and commits.
+- [ ] PrivateRust.4.8 Stage the core library beside `seamlylayout.exe`: MSI component (`smsi.ps1`, WiX), AppImage `usr/lib`, DMG `Contents/Frameworks`.
+- [ ] PrivateRust.4.9 `local_build_msi.ps1`, `local_build_appimage.sh`, `local_build_dmg.sh`: remove `cargo` steps. Take the core library, `seamlycli.exe`, and Rust notices from the package. Source mode also runs the private `cargo test`.
+- [ ] PrivateRust.4.10 `ci-layout.yml`: remove `dtolnay/rust-toolchain`, `Swatinem/rust-cache`, `cargo` steps, SeamlyCLI build. Pass the package directory to `smsi.ps1 -SeamlyCLIBin`.
+- [ ] PrivateRust.4.11 `generate_license_notices.py`: remove the cargo-about step. Copy `rust_crate_notices.txt` from the package.
+- [ ] PrivateRust.4.12 ctest smoke tests: `SeamlyLayout --info <fixture.svg>` exits 0; one headless export per format exits 0. They prove the library loads and every name-based call resolves.
 
 ## Task PrivateRust.5 — Remove Rust from the public tree
 
@@ -163,19 +220,20 @@ User decisions, 2026-11-17:
 
 ## Task PrivateRust.7 — Verify
 
-- [ ] PrivateRust.7.1 Windows: fresh public clone, no Rust on PATH. `local_build_msi.ps1` passes. Install the MSI. SeamlyLayout imports a handoff, creates a layout, exports DXF and PDF. SeamlyCLI starts.
+- [ ] PrivateRust.7.1 Windows: fresh public clone, no Rust on PATH. `local_build_msi.ps1` passes. Install the MSI. SeamlyLayout imports a handoff, creates a layout, exports DXF and PDF with label text. SeamlyCLI starts.
 - [ ] PrivateRust.7.2 `gh workflow run ci-layout.yml`: Linux and macOS jobs pass without Rust.
 - [ ] PrivateRust.7.3 Source mode: a Rust edit in the private checkout shows in the next build.
-- [ ] PrivateRust.7.4 Symbol audit of the shipped libs passes (PrivateRust.3.2).
+- [ ] PrivateRust.7.4 `seamlylayout.exe` holds no Rust: no `crates\` source paths, no Rust symbols.
 - [ ] PrivateRust.7.5 `git ls-files '*.rs'` in the public repo is empty.
 
 ## Order
 
-PrivateRust.0 → 1 → 2 → 3 → 4 → 5 → 7 → 6.
+PrivateRust.0 → 1 → 8 → 2 → 3 → 4 → 5 → 7 → 6.
 
 ## Costs and risks
 
-- The prebuilt lib pins public builders: Qt ≥ 6.11.3, MSVC toolset ≥ private build, glibc and GCC ≥ `ubuntu-22.04`. A Qt upgrade needs a new core release.
+- The prebuilt library pins public builders: Qt ≥ 6.11.3, glibc and GCC ≥ `ubuntu-22.04`. A Qt upgrade needs a new core release.
+- Name-based calls lose compile-time checks. PrivateRust.4.4 and 4.12 catch a renamed or removed method.
 - A bridge API change takes two steps: core release, then public pin update.
 - Public builds cannot debug Rust. Use source mode.
 - A binary slows reverse engineering. It does not stop it.

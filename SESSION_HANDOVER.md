@@ -2,6 +2,18 @@
 
 ## Current status
 
+### 2026-11-17 — Plan: private Rust source
+
+- Plan: `project-docs/docs-cicd/TODO_PRIVATE_RUST_SOURCE.md` (prefix `PrivateRust.`). Order 0 → 1 → 8 → 2 → 3 → 4 → 5 → 7 → 6.
+- Decisions D1–D8 recorded. D7: Rust core in shared library `seamlylayout_core`; `seamlylayout.exe` holds open-source code only.
+- D8: crate fonts (Relief, Hershey) move to `src/fonts/` and stay public.
+- Done: 1.1; 1.3 (copyright assigned to Seamly Systems, Inc.).
+- Open 1.2: counsel re-confirms. Proprietary code still runs on the PC: core library, `seamlycli.exe`.
+- Open F1: Rust loads fonts at run time (recommended) or embeds them at build time.
+- Stop-gap 0.1: keep new Rust commits off `run-seamlyLayout` until PrivateRust.5.
+- No code changes. Plan and handover commits only.
+- Next: Sue decides F1; then PrivateRust.8.
+
 ### 2026-11-17 — CI: fold label test and push builds
 
 - CI failure 11-02 to 11-17: `TST_HandoffDocument::pieceMatchesOldWriter` fold rows; label 0.19 px off, Linux only.
@@ -46,14 +58,6 @@
 - Increased command text to 18 pixels on the export and results screens.
 - All 25 SeamlyCLI release unit tests passed. Visual verification remains pending.
 - File: `src/app/seamlycli/src/app_view.rs`.
-- No commit or push.
-
-### 2026-11-16 — Remove superfluous SeamlyCLI settings
-
-- Removed Layout width and Layout length from the settings editor and generated JSON.
-- Updated regression checks for omitted page dimensions and unit conversion of roll width.
-- All 25 SeamlyCLI release unit tests passed.
-- File: `src/app/seamlycli/src/layout_settings_editor.rs`.
 - No commit or push.
 
 ## Decisions to retain
