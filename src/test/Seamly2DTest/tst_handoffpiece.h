@@ -42,6 +42,8 @@ public:
     explicit TST_HandoffPiece(QObject *parent = nullptr);
 
 private slots:
+    void flippedGeometryKeepsPieceOrientation_data() const;
+    void flippedGeometryKeepsPieceOrientation() const;
     void seamAndCutLinesMatchOldWriter_data() const;
     void seamAndCutLinesMatchOldWriter() const;
     void noSeamAllowanceHasNoCutLineOrNotches() const;

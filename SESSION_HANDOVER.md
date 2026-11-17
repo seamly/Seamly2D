@@ -6,6 +6,14 @@
 - Added exact UTF-8 file checks for generated individual and multisize SVG documents.
 - The focused SVG file suite passed all eight checks.
 - S2D.73.5 remains open for the user.
+
+## 2026-11-16 — S2D.75 flipped piece handoff
+
+- The shared handoff writer now mirrors piece geometry before annotation alignment and sheet placement.
+- Export Pieces and the SVG handoff use this writer.
+- Export Drafts retains the construction scene, as the user requested.
+- Tests cover all flips, two sizes, seam allowances, fold lines, paths, notches, markings, and grainlines.
+- The handoff piece suite passed 41 checks. The handoff document suite passed 33 checks.
 - All branches start at local run-seamlyLayout commit 31a216de4a.
 - The main checkout and its three uncommitted documentation edits remain unchanged.
 - The four branches remain local and unmerged.
