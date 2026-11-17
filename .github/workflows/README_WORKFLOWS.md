@@ -7,7 +7,7 @@ Two CI workflows, one per branch:
 | File | Name | Branch | Owner |
 | --- | --- | --- | --- |
 | [ci-layout.yml](ci-layout.yml) | CI Layout | `run-seamlyLayout` | this project; edit only this one |
-| [ci.yml](ci.yml) | CI | `develop` | upstream; keep identical to `develop`'s copy |
+| [ci.yml](ci.yml) | CI | `develop` | upstream; keep identical to `develop`'s copy; disabled in seamly/Seamly2D |
 
 ### [CI Layout](ci-layout.yml) - Main Continuous Integration Workflow
 **Triggers**: Pull requests, pushes to `run-seamlyLayout`, manual dispatch. Pushes carry a `paths-ignore` for `**.md` / `project-docs/**` / `LICENSE`, so documentation changes never start a build; `pull_request` is deliberately unfiltered so a docs-only PR still reports its checks. `concurrency: cancel-in-progress` supersedes older in-progress runs on the same ref.

@@ -112,6 +112,7 @@ cmd.exe /c "`"C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary
 - Two workflows, one per branch (user decision):
   - `ci-layout.yml` (`CI Layout`): ours, for `run-seamlyLayout`. Edit only this one.
   - `ci.yml` (`CI`): upstream's, for `develop`. Keep it identical to `develop`'s copy. Never edit it on `run-seamlyLayout`.
+  - `CI` is disabled in seamly/Seamly2D (user decision): it fails on our tree. Upstream still runs it.
 - `ci-layout.yml` builds the three apps on Windows, Linux, and macOS. Its `QT_VERSION` sets the Qt release.
 - `version.sh` makes the version for `ci-layout.yml` and `local_build_msi.ps1`.
 
