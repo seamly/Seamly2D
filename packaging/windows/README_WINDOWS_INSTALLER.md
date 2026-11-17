@@ -101,7 +101,7 @@ quietly lacks that whole area.
 
 ## Package build flow
 
-[`smsi.ps1`](smsi.ps1) builds packages; only `ci.yml`'s `windows-msi` job
+[`smsi.ps1`](smsi.ps1) builds packages; only `ci-layout.yml`'s `windows-msi` job
 runs it. Every input is a named parameter — nothing inherited from the build
 machine. Parameter table: [`README_WINDOWS_BUILD.md`](README_WINDOWS_BUILD.md).
 
@@ -216,7 +216,7 @@ tests call that directly).
 | Optional desktop shortcuts | `smsi_shortcuts.wxs` |
 | Install-info registry rows, per-user settings removal | `smsi_registry.wxs` |
 | Staging, version mapping, `wix build` over every `*.wxs` | `smsi.ps1` |
-| Only invocation | `.github/workflows/ci.yml`, job `windows-msi` |
+| Only invocation | `.github/workflows/ci-layout.yml`, job `windows-msi` |
 | Built-package / real-install assertions | `smsi_check_authoring.ps1`, `local_install_msi.ps1` |
 | Data root resolution/seeding | `src/libs/vmisc/vcommonsettings.cpp` |
 | App call sites | `application_2d.cpp`, `application_me.cpp` |

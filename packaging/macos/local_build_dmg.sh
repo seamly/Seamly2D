@@ -8,12 +8,12 @@
 # **  seamlyme and SeamlyLayout release binaries, runs the Qt and Rust test
 # **  suites, then packages all three .app bundles into one DMG via
 # **  packaging/macos/macos.pro's seamlysuitedmg target (the same hdiutil
-# **  step ci.yml's macos job uses). ci.yml's macos job does not run these
+# **  step ci-layout.yml's macos job uses). ci-layout.yml's macos job does not run these
 # **  test suites itself - it gates on the linux-test job's coverage instead.
 # **  This script runs them anyway for a safer local loop; pass --skip-tests
 # **  to match CI's behavior exactly. Treat the DMG this produces as a local
 # **  dev build, not a release artifact - releases still go through
-# **  `gh workflow run ci.yml`. Signing/notarization needs CI secrets and is
+# **  `gh workflow run ci-layout.yml`. Signing/notarization needs CI secrets and is
 # **  skipped here.
 # **
 # ** @copyright
@@ -70,7 +70,7 @@ version_ge() {
 }
 
 # --- Version --------------------------------------------------------------------
-# Same YY.M.DDHH formula ci.yml's version job uses.
+# Same YY.M.DDHH formula ci-layout.yml's version job uses.
 if [ -z "${VERSION}" ]; then
     read -r YEAR MONTH DAY HOUR MINUTE <<< "$(date +'%Y %m %d %H %M')"
     VERSION="$((10#${YEAR} - 2000)).$((10#${MONTH})).$((10#${DAY} * 100 + 10#${HOUR}))"
@@ -130,7 +130,7 @@ fi
 # --- Build + test (debug) -----------------------------------------------------------
 if [ "${SKIP_TESTS}" -eq 1 ]; then
     echo ""
-    echo "unit tests: SKIPPED (--skip-tests) - matches ci.yml's macos job, which does not run its own tests."
+    echo "unit tests: SKIPPED (--skip-tests) - matches ci-layout.yml's macos job, which does not run its own tests."
 else
     echo ""
     echo "=== qmake/make: seamly2d + seamlyme + unit tests ==="

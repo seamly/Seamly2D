@@ -81,7 +81,7 @@ All apps use Qt 6.11.3.
 * Purpose: Creates layouts of Seamly2D pattern pieces for cutting and downstream software.
 * Code: Rust converted to C++ with `cxx-qt`.
 * GUI: Qt 6.11 / QML generated from Rust / Ice using cxx_qt::bridge.
-* Build: local - `packaging/<platform>/local_build_*.ps1|.sh`; GitHub - ci.yml
+* Build: local - `packaging/<platform>/local_build_*.ps1|.sh`; GitHub - ci-layout.yml
 * Merge its local `AGENTS.md` and `rules.md` requirements into the project-level files.
 * File header:
 
@@ -124,7 +124,7 @@ The Qt kit must include:
 ### CI
 
 * Use Qt 6.11.3 with MSVC 2022.
-* `ci.yml` is the CI workflow on Github. It builds all three apps. Set the Qt release in its `QT_VERSION`.
+* `ci-layout.yml` is the CI workflow on Github. It builds all three apps. Set the Qt release in its `QT_VERSION`.
 `packaging/windows/build_local_msi.ps1' is the CI workflow on the local pc. It builds seamly2d, seamlyme, and seamlylayout and creates the windows msi file.
 
 ### Local Windows Build
@@ -132,7 +132,7 @@ The Qt kit must include:
 SeamlyLayout builds as part of the per-platform suite script, not standalone:
 `packaging/windows/local_build_msi.ps1`, `packaging/linux/local_build_appimage.sh`,
 `packaging/macos/local_build_dmg.sh`. Each builds all three apps and packages
-them together. `ci.yml` runs `cmake --preset release`/`debug` directly and
+them together. `ci-layout.yml` runs `cmake --preset release`/`debug` directly and
 never calls these scripts, so a change to one needs no CI run.
 
 Use Qt 6.11.3 `msvc2022_64` with the VS 18 Community MSVC environment.
@@ -309,7 +309,7 @@ For code changes:
 * run the tests that still run locally — SeamlyLayout `ctest --preset debug` and
   `cargo test --workspace`.
 
-Seamly2D and SeamlyMe have no local build or test script. `ci.yml` verifies
+Seamly2D and SeamlyMe have no local build or test script. `ci-layout.yml` verifies
 them. A skip-ci push defers that verification. See CI Cost Control.
 
 Do not proceed after a failing required test or build.
@@ -350,7 +350,7 @@ No PR is required for normal task work.
 
 ## CI Cost Control
 
-A push to `run-seamlyLayout` can start the full multi-platform `ci.yml` suite.
+A push to `run-seamlyLayout` can start the full multi-platform `ci-layout.yml` suite.
 
 Use the CI skip token in the step 8 merge commit subject by default.
 
@@ -399,7 +399,7 @@ Before relying on documentation path exclusions, inspect:
 
 Run the full CI suite before a release or upstream handoff:
 
-`gh workflow run ci.yml --ref run-seamlyLayout`
+`gh workflow run ci-layout.yml --ref run-seamlyLayout`
 
 Wait for it to pass.
 
@@ -408,7 +408,7 @@ is deferred verification, and nothing runs locally to catch a break sooner.
 
 ## Documentation-Only Changes
 
-When every changed path is covered by `ci.yml` `paths-ignore`:
+When every changed path is covered by `ci-layout.yml` `paths-ignore`:
 
 * skip task-workflow steps 1–5 and 8;
 * stage and commit on the current branch;

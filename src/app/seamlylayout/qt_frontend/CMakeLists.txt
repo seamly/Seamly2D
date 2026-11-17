@@ -47,7 +47,7 @@ endif() # MSVC
 # Qt 6.11 — require minimum 6.11.3; all modules must be LGPLv3 (no GPL modules)
 #
 # Task 30: bumped from 6.10.1 so SeamlyLayout shares the same Qt release as the
-# seamly2d/seamlyme parent apps (Qt 6.11.3 msvc2022_64, matching ci.yml). One Qt
+# seamly2d/seamlyme parent apps (Qt 6.11.3 msvc2022_64, matching ci-layout.yml). One Qt
 # version across the family lets the Windows MSI ship a single shared Qt runtime
 # instead of two side-by-side copies with colliding DLL names.
 # ---------------------------------------------------------------------------

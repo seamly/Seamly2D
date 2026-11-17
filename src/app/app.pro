@@ -30,7 +30,7 @@ SUBDIRS = \
 #
 #   3. It would impose a Rust toolchain and Ninja on every qmake build. A plain
 #      `qmake Seamly.pro && nmake` would then require rustup and cargo, breaking
-#      the Linux job in '.github/workflows/ci.yml', which builds only the
+#      the Linux job in '.github/workflows/ci-layout.yml', which builds only the
 #      parent apps and never installs Rust.
 #
 # How SeamlyLayout is built instead:
@@ -39,7 +39,7 @@ SUBDIRS = \
 #                packaging/macos/local_build_dmg.sh (macOS) - each builds
 #                all three apps with CMake/Ninja + Cargo for SeamlyLayout
 #                and packages them together
-#   * in CI    - .github/workflows/ci.yml builds and tests it on Linux in the
+#   * in CI    - .github/workflows/ci-layout.yml builds and tests it on Linux in the
 #                'linux-test' job, then packages it in the 'windows-msi',
 #                'linux' (AppImage) and 'macos' (DMG) jobs; the 'macos' job
 #                builds it via CMake/Ninja + Cargo as a separate step BEFORE

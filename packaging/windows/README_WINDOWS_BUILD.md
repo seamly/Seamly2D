@@ -9,10 +9,10 @@ One MSI per arch bundles **seamly2d**, **seamlyme**, **SeamlyLayout** (`seamly-x
 **CI only.** `smsi.ps1` takes every input on the command line; detects nothing from the host.
 
 ```powershell
-gh workflow run ci.yml --ref run-seamlyLayout
+gh workflow run ci-layout.yml --ref run-seamlyLayout
 ```
 
-`ci.yml`'s `windows-msi` job matrixes over `arch`. Each leg builds all three apps, then calls:
+`ci-layout.yml`'s `windows-msi` job matrixes over `arch`. Each leg builds all three apps, then calls:
 
 ```powershell
 .\packaging\windows\smsi.ps1 -Arch <arch> -Version $env:VERSION_NUMBER `
@@ -30,7 +30,7 @@ gh workflow run ci.yml --ref run-seamlyLayout
 | `-WinDeployQt` | yes | — | `windeployqt.exe` from the kit SeamlyLayout built against. |
 | `-SeamlyLayoutBuildDir` | no | `src\app\seamlylayout\qt_frontend\build\Release` | Where `cmake --build --preset release` writes `seamlylayout.exe`. |
 | `-SkipValidation` | no | off | Skips `wix msi validate` only. |
-| `-OutputDirName` | no | `seamly-msi` | Rename needs matching `.gitignore` and `ci.yml` changes. |
+| `-OutputDirName` | no | `seamly-msi` | Rename needs matching `.gitignore` and `ci-layout.yml` changes. |
 
 - `VCToolsRedistDir` must be set by `ilammy/msvc-dev-cmd` — the only CRT redist source.
 - Use `windeployqt`, not `windeployqt6` (matches `.pro` files' `qtPrepareTool(WINDEPLOYQT, windeployqt)`).
@@ -39,7 +39,7 @@ gh workflow run ci.yml --ref run-seamlyLayout
 
 Native build on `windows-11-arm`, nothing cross-compiled. Re-check Qt arm64 WebEngine availability at any Qt bump.
 
-## Code signing (ci.yml)
+## Code signing (ci-layout.yml)
 
 CI signs with jsign + Google Cloud KMS, gated on `SEAMLY_SIGNING_*` secrets (skipped when absent). See `.github/workflows/CODE_SIGNING.md`.
 
@@ -75,7 +75,7 @@ for the Linux/macOS equivalents of this script).
 | `-SkipValidation` | no | off | Passed through to `smsi.ps1`. |
 
 Treat the MSI it produces as a local dev build, not a release artifact —
-releases still go through `gh workflow run ci.yml`.
+releases still go through `gh workflow run ci-layout.yml`.
 
 ## 2. What the script does
 
@@ -129,5 +129,5 @@ Both `x64` and `arm64` build natively (`windows-11-arm` runner); nothing is cros
 
 ## 5. Runtime rules
 
-- A Qt kit satisfying `find_package(Qt6 … WebEngineQuick)` can still fail to deploy — it must also carry Qt WebChannel and Qt Positioning, hence `ci.yml` installs `qtwebengine qtwebchannel qtpositioning` on both legs.
+- A Qt kit satisfying `find_package(Qt6 … WebEngineQuick)` can still fail to deploy — it must also carry Qt WebChannel and Qt Positioning, hence `ci-layout.yml` installs `qtwebengine qtwebchannel qtpositioning` on both legs.
 - No Qt tool is invoked by bare name (`qtPrepareTool(WINDEPLOYQT, windeployqt)` in the `.pro` files), so the deployed runtime is always the kit that compiled the exe. `scripts\sb.ps1`/`sd.ps1` used to check the deployed `Qt6Core.dll` FileVersion against the kit; both were deleted August 2026. **Check that FileVersion by hand before packaging a local tree** — a mismatch is otherwise invisible.

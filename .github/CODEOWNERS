@@ -5,7 +5,7 @@
 ## Signing workflow files and scripts
 
 .github/workflows/signing/ @FashionFreedom/seamlysigners
-.github/workflows/ci.yml @FashionFreedom/seamlysigners
+.github/workflows/ci-layout.yml @FashionFreedom/seamlysigners
 
 ## Signing documentation and configuration
 

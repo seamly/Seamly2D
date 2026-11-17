@@ -20,17 +20,17 @@ rather than running `sudo apt install` itself. A Qt 6.11.3+ `gcc_64` kit under
 
 Switch: `--skip-tests` — skip `make check`, `ctest`, and `cargo test`. Only
 for a packaging-only change; these suites have no other local runner on
-Linux besides `ci.yml`'s `linux-test` job.
+Linux besides `ci-layout.yml`'s `linux-test` job.
 
 ## macOS
 
 `packaging/macos/local_build_dmg.sh` is the build. It builds Seamly2D,
 SeamlyMe and SeamlyLayout release binaries, runs the Qt and Rust unit tests,
 then packages the macOS DMG via `packaging/macos/macos.pro`'s
-`seamlysuitedmg` target (the same `hdiutil` step `ci.yml`'s `macos` job
+`seamlysuitedmg` target (the same `hdiutil` step `ci-layout.yml`'s `macos` job
 uses). The output is unsigned and not notarized — signing needs CI secrets.
 
-`ci.yml`'s `macos` job does not run its own tests; it gates on the
+`ci-layout.yml`'s `macos` job does not run its own tests; it gates on the
 `linux-test` job's coverage. This script runs the Qt and Rust suites anyway
 for a safer local loop — pass `--skip-tests` to match CI's behavior exactly.
 

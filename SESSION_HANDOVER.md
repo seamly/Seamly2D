@@ -7,7 +7,7 @@
 - CI failure 11-02 to 11-17: `TST_HandoffDocument::pieceMatchesOldWriter` fold rows; label 0.19 px off, Linux only.
 - Cause: old writer sized the label with `QGraphicsSimpleTextItem::boundingRect()`; on Linux its height differs from `QFontMetricsF::height()`.
 - Fix 66a7d9c969: `VLayoutPiece::createFoldLineLabelItem` uses `QFontMetricsF` in both branches. MSVC syntax check passed; Windows cannot reproduce.
-- Fix ab86c39682: `ci.yml` linux, macos, windows-msi jobs run on push to `run-seamlyLayout`. Publish jobs unchanged.
+- Fix ab86c39682: `ci-layout.yml` linux, macos, windows-msi jobs run on push to `run-seamlyLayout`. Publish jobs unchanged.
 - 3bd7434c3f: CI builds only the Windows x64 MSI. Platform order is in `TODO_INSTALLER.md` Installer.8 (user decision).
 - Local `run-seamlyLayout`: 8 commits ahead of origin. Merges carry no skip-ci token.
 - Not run since: Linux ctest and cargo (11-02), platform builds (10-19). More failures possible.
@@ -56,7 +56,7 @@
 
 - Only `develop` and `run-seamlyLayout` belong on seamly/Seamly2D (user, 2026-11-17).
 - A push to `run-seamlyLayout` builds all platforms; it does not publish (user, 2026-11-17).
-- CLI Linux and macOS checks run in CI (`gh workflow run ci.yml`), not in a local WSL install (user, 2026-11-16).
+- CLI Linux and macOS checks run in CI (`gh workflow run ci-layout.yml`), not in a local WSL install (user, 2026-11-16).
 - SeamlyLayout is complete after the `develop` merge. Next focus: CLI layouts from pattern and measurement files plus parameters (user, 2026-11-15).
 - Adopt develop's `command_line.*` file names and lowerCamel `VCommandLine` method names: they match the code style (user, 2026-11-15).
 - Own CLI design (`--layout-export` to SeamlyLayout) replaces upstream console export. Lost legacy options go to `TODO_CLI.md` CLI.3 (user, 2026-11-15).

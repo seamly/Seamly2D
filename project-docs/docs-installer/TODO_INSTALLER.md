@@ -26,12 +26,12 @@ Notes:
 - **Data-root relocation asks first** — prompt Y/N before copying existing data
    files to a new directory location.
 
-## Installer.1 — Create .msi/.pkg/.appimage/flatpak artifacts as pre-releases in github workflow ci.yml file
+## Installer.1 — Create .msi/.pkg/.appimage/flatpak artifacts as pre-releases in github workflow ci-layout.yml file
 
 - [x] Task Installer.1.1 - Windows x64 .msi - refer to tasks in project-docs\TODO.md to define the .msi capabilities and options
 
 - [x] Task Installer.1.2 - Windows arm64 .msi - should re-implement the Windows x64 .msi capabilities - track tasks in project-docs\TODO_INSTALLER_WIN_ARM64.md
-  - `ci.yml`'s `windows-msi` job is now a **matrix over `arch`** (`x64`, `arm64`, `fail-fast: false`) — `windows-msi.yml`'s `msi` job verbatim, minus its own version step. 
+  - `ci-layout.yml`'s `windows-msi` job is now a **matrix over `arch`** (`x64`, `arm64`, `fail-fast: false`) — `windows-msi.yml`'s `msi` job verbatim, minus its own version step. 
   - **NSIS retired.** The `windows` job is deleted; nothing runs `makensis` any more. `publish` releases `seamly-x64.msi` + `seamly-arm64.msi` in place of `Seamly2D-win-arm64.zip`.
   - **Verification is CI-only** (no arm64 hardware here): the arm64 leg has to build, validate and pass `smsi_check_authoring.ps1` in the run for this change. A real arm64 install still has never been run — that stays Installer.2.2.
 
@@ -97,11 +97,11 @@ two-variant page), `smsi_fix_dialog_lines.ps1` finds no non-Line overflow.
 Not yet verified: an actual click-through on Windows (Change → BrowseDlg →
 OK), and a full `local_build_msi.ps1` run.
 
-## Installer.4 - Re-organize all directories, files, and scripts needed to build the Seamly executables with the GitHub CI/CD ci.yml file so that all CI/CD build information is under the .github directory tree; remove unnecessary and unused CI/CD files; copy files to new location if the original file is under the src/ or share/ directories; update the CI/CD files with the new locations of moved files; build & test the updated CI/CD workflow and artifacts
+## Installer.4 - Re-organize all directories, files, and scripts needed to build the Seamly executables with the GitHub CI/CD ci-layout.yml file so that all CI/CD build information is under the .github directory tree; remove unnecessary and unused CI/CD files; copy files to new location if the original file is under the src/ or share/ directories; update the CI/CD files with the new locations of moved files; build & test the updated CI/CD workflow and artifacts
 
-- Installer.4.1 - Re-organize files; Update ci.yml and related files to reflect new file locations
+- Installer.4.1 - Re-organize files; Update ci-layout.yml and related files to reflect new file locations
   - **DONE 2026-08-10 — `.github/workflows/action.yaml` deleted.** It was never a workflow: it is Corrosion's own `setup_test_environment` *composite action* (`name`/`description`/`inputs`/`runs`, no `jobs`), added by accident in `d1bb78c495` ("updated ilammy action in .yml/.yaml files", 2026-08-03). GitHub tried to run it as a workflow on every push and failed with *"Required property is missing: jobs"*, which is what made the branch look red. Nothing in the repo referenced it, and Corrosion is fetched by CMake rather than vendored, so there was nowhere for it to belong.
-- Installer.4.2 - Build pre-releases with ci.yml
+- Installer.4.2 - Build pre-releases with ci-layout.yml
 - Installer.4.3 - Test pre-releases
 - Installer.4.3.1 - Windows x64 .msi
 - Installer.4.3.2 - Windows arm64 .msi
@@ -120,9 +120,9 @@ Task Layout.14 ships notices for the Rust crates, the Qt runtime and the SVG exp
 - [ ] Installer.7.3 - MSVC runtime DLLs (Microsoft redistributable terms), Windows only
 - [ ] Installer.7.4 - Add the notices to `packaging/licenses/` (all three installers pick up that folder); document in `.github/README-BUILDS.md`
 
-## [ ] Installer.8 - Prove each platform build in `ci.yml`, one platform at a time
+## [ ] Installer.8 - Prove each platform build in `ci-layout.yml`, one platform at a time
 
-A push of `run-seamlyLayout` to `origin` runs `ci.yml`. Turn on the next platform only after the previous one builds its artifact in CI (user decision).
+A push of `run-seamlyLayout` to `origin` runs `ci-layout.yml`. Turn on the next platform only after the previous one builds its artifact in CI (user decision).
 
 - [ ] Installer.8.1 - Windows 11 x64 `.msi` only. `linux` and `macos` jobs off (`false &&`), arm64 matrix entry commented out. `windows-msi` does not wait for `linux-test`. Open: CI pass.
 - [ ] Installer.8.2 - Windows 11 arm64 `.msi`: uncomment the arm64 matrix entry.

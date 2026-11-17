@@ -10,7 +10,7 @@ macx{
     APPLE_NOTARIZE_KEY_ID = $(APPLE_NOTARIZE_KEY_ID)
     APPLE_NOTARIZE_ISSUER_ID = $(APPLE_NOTARIZE_ISSUER_ID)
 
-    # SeamlyLayout.app is built by CMake/Cargo before qmake runs (see ci.yml's
+    # SeamlyLayout.app is built by CMake/Cargo before qmake runs (see ci-layout.yml's
     # 'Build SeamlyLayout release' step) — this rule packages that bundle
     # alongside the qmake-built Seamly2D and SeamlyME bundles into one DMG.
     seamlysuitedmg.target = Seamly2D-macos.dmg

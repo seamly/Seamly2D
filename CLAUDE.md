@@ -92,10 +92,10 @@ cmd.exe /c "`"C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary
 - `packaging\windows\local_build_msi.ps1` is the build. Use it for every local Windows build.
 - Ask Sue before you start it. She batches several tasks per build.
 - It builds the three apps (release), runs `nmake check` (4 Qt suites), `ctest --preset release`, and `cargo test --workspace`, then packages the x64 MSI (`smsi.ps1`, `wix build`).
-- A failing suite stops the build. It mirrors `ci.yml`'s `windows-test` and `windows-msi` (x64) jobs.
+- A failing suite stops the build. It mirrors `ci-layout.yml`'s `windows-test` and `windows-msi` (x64) jobs.
 - `-SkipTests`: `CONFIG+=noTests`, no tests. Only for a packaging-only change.
 - `-SkipValidation`: skips the `wix msi validate` ICE pass.
-- Output is a local dev build. Releases go through `gh workflow run ci.yml`.
+- Output is a local dev build. Releases go through `gh workflow run ci-layout.yml`.
 - No arm64 MSI script exists yet.
 - `src\app\seamlylayout\build.ps1`, `qd.ps1`, `qr.ps1`, `run_debug.ps1`, `run_release.ps1` are removed (user decision): they built SeamlyLayout alone.
 - Needs VS 18 Community, Rust on PATH, and a Qt 6.11.3 `msvc2022_64` kit with `qtwebengine`, `qtwebchannel`, `qtpositioning`, `qtserialport`, `WebEngineView`, `QtWebEngineQuick`, `Qt6WebEngineCore`.
@@ -109,8 +109,8 @@ cmd.exe /c "`"C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary
 
 ### CI
 
-- `ci.yml` builds the three apps on Windows, Linux, and macOS. Its `QT_VERSION` sets the Qt release.
-- `version.sh` makes the version for `ci.yml` and `local_build_msi.ps1`.
+- `ci-layout.yml` builds the three apps on Windows, Linux, and macOS. Its `QT_VERSION` sets the Qt release.
+- `version.sh` makes the version for `ci-layout.yml` and `local_build_msi.ps1`.
 
 ## Coding Rules
 
@@ -178,17 +178,17 @@ cmd.exe /c "`"C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary
 
 ## CI Cost Control
 
-- A push to `run-seamlyLayout` can start the full multi-platform `ci.yml`.
+- A push to `run-seamlyLayout` can start the full multi-platform `ci-layout.yml`.
 - The token is `[skip ci]`. Never write the literal token in commit-message prose; write `skip-ci`.
 - Put the token in the step 6 merge subject by default. User decision (2026-08-15): verify releases with a manual `workflow_dispatch` run.
 - Omit the token when functional changes touch `.github/workflows/**`, `packaging/**`, `*.pro`, `*.pri`, `CMakeLists.txt`, `Cargo.toml`, Linux- or macOS-specific code, `#ifdef Q_OS_*`, or arm64 handling.
 - Comment-only exception: keep the token when every changed line is a comment or doc string. Inspect the diff first.
 - `paths-ignore` evaluates the whole push. Check `git diff --name-only origin/run-seamlyLayout..HEAD`.
-- Before a release or upstream handoff, run `gh workflow run ci.yml --ref run-seamlyLayout` and wait for a pass. Skip-ci defers that verification.
+- Before a release or upstream handoff, run `gh workflow run ci-layout.yml --ref run-seamlyLayout` and wait for a pass. Skip-ci defers that verification.
 
 ## Documentation-Only Changes
 
-When every changed path is in `ci.yml` `paths-ignore` (`*.md`, `project-docs/**`, `LICENSE`, `.claude/**`, `.vscode/**`):
+When every changed path is in `ci-layout.yml` `paths-ignore` (`*.md`, `project-docs/**`, `LICENSE`, `.claude/**`, `.vscode/**`):
 
 - skip workflow steps 1, 3, and 6;
 - commit on the current branch. Sue pushes.

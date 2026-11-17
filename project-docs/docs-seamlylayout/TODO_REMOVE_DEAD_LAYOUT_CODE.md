@@ -8,7 +8,7 @@ Check off all completed tasks & subtasks and move completed tasks to TODO_COMPLE
 
 All TODO_MIGRATE.md tasks begin with 'Dead.' and all tasks are numbered.
 
-## Task Dead.2 - Test the build pipeline -- ci.yml
+## Task Dead.2 - Test the build pipeline -- ci-layout.yml
 
 ## Task Dead.3 - Test the functionality (requires install & user testing)
 

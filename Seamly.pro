@@ -20,16 +20,16 @@ count(LIST, 1, >): error("The build will fail. Path '$${OUT_PWD}' contains space
 #
 # - The windows build DOES NOT use qmake -- it uses powershell scripts (.ps1) outside of qmake,
 # that utilize WIX configuration files (.wsx) to build an MSI each for x64 and arm64 archictectures 
-# in the `packaging/windows` tree. No SUBDIRS entry needed for windows MSI packaging; see ci.yml, 
+# in the `packaging/windows` tree. No SUBDIRS entry needed for windows MSI packaging; see ci-layout.yml, 
 # 'Windows: Build MSI (${{ matrix.arch }})' job.
 #
 # - The linux build DOES use qmake -- `qmake -config release` + `make` builds Seamly2D
 # directly from `Seamly.pro` at project root (no separate packaging subdir required), then
 # `make install` populates `AppDir/`, which the external `linuxdeploy-x86_64.AppImage` tool 
-# wraps into the .AppImage file; see ci.yml, 'Linux: Build AppImage' job. 
+# wraps into the .AppImage file; see ci-layout.yml, 'Linux: Build AppImage' job. 
 # No SUBDIRS entry needed for linux APPIMAGE packaging.
 #
-# - FlatPak packaging is not yet implemented (see TODO_INSTALLER_LINUX_FLATPAK.md); see ci.yml,
+# - FlatPak packaging is not yet implemented (see TODO_INSTALLER_LINUX_FLATPAK.md); see ci-layout.yml,
 # No SUBDIRS entry needed for linux FLATPAK packaging.
 #
 # - The macos build DOES use qmake -- Seamly2D-macos.dmg, containing Seamly2D.app, seamlyme.app,
