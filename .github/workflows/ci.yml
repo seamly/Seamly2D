@@ -129,11 +129,11 @@ jobs:
 
   # ---------------------------------------------------------------------------
   # Create Linux APPIMAGE.
-  # Runs on non-push events, for non-weblate users, on any branch
+  # Runs on non-push events and on pushes to run-seamlyLayout, for non-weblate users
   # For x64 arch.
   # TODO: implement for arm64 arch.
   linux:
-    if: github.event_name != 'push' && github.event.pull_request.user.login != 'weblate'
+    if: (github.event_name != 'push' || github.ref == 'refs/heads/run-seamlyLayout') && github.event.pull_request.user.login != 'weblate'
     name: 'Linux: Build AppImage'
     runs-on: ubuntu-22.04
     needs: [version, linux-test]
@@ -236,9 +236,9 @@ jobs:
 
   # ---------------------------------------------------------------------------
   # Build the MacOS DMG.
-  # Runs on non-push events, for non-weblate users, on any branch
+  # Runs on non-push events and on pushes to run-seamlyLayout, for non-weblate users
   macos:
-    if: github.event_name != 'push' && github.event.pull_request.user.login != 'weblate'
+    if: (github.event_name != 'push' || github.ref == 'refs/heads/run-seamlyLayout') && github.event.pull_request.user.login != 'weblate'
     name: 'macOS: Build DMG'
     runs-on: macos-26
     needs: [version, linux-test]
@@ -335,10 +335,10 @@ jobs:
 
   # ---------------------------------------------------------------------------
   # Build Windows MSIs. 
-  # Runs on non-push events, for non-weblate users, for any branch
+  # Runs on non-push events and on pushes to run-seamlyLayout, for non-weblate users
   # For x64 and arm64 arches
   windows-msi:
-    if: github.event_name != 'push' && github.event.pull_request.user.login != 'weblate'
+    if: (github.event_name != 'push' || github.ref == 'refs/heads/run-seamlyLayout') && github.event.pull_request.user.login != 'weblate'
     name: 'Windows: Build MSI - (${{ matrix.arch }})'
     runs-on: ${{ matrix.runner }}
     needs: [version, linux-test]
