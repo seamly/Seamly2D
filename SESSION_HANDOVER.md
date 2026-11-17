@@ -13,7 +13,6 @@
 - a91d3e7e96: upstream `ci.yml` restored beside it, identical to `develop`'s copy (user decision). Rule in CLAUDE.md CI section.
 - Upstream `ci.yml` fails on our tree (no `Seamly2D.pro`, `scripts/version.sh`, `seamly2d-installer.nsi`).
 - Workflow "CI" (`ci.yml`) disabled in seamly/Seamly2D: `gh workflow disable ci.yml` (user decision). Upstream still runs it. Re-enable: `gh workflow enable ci.yml --repo seamly/Seamly2D`.
-- Open: upstream's `ci.yml` will run on the upstream PR and fail on our tree.
 - Local `run-seamlyLayout`: 15 commits ahead of origin. Merges carry no skip-ci token.
 - Not run since: Linux ctest and cargo (11-02), platform builds (10-19). More failures possible.
 - Extra origin branches: `gh-pages` (`document` job, `builddocs.yml`), `dependabot/cargo/src/app/seamlycli/cargo-4cb1234933` (PR #32).
@@ -59,6 +58,7 @@
 
 ## Decisions to retain
 
+- Upstream `ci.yml` may fail on the final upstream PR. Handle it then (user, 2026-11-17).
 - Only `develop` and `run-seamlyLayout` belong on seamly/Seamly2D (user, 2026-11-17).
 - A push to `run-seamlyLayout` builds all platforms; it does not publish (user, 2026-11-17).
 - CLI Linux and macOS checks run in CI (`gh workflow run ci-layout.yml`), not in a local WSL install (user, 2026-11-16).
