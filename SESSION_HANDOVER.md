@@ -12,7 +12,7 @@
 - D9: fonts compiled into `seamlylayout.exe` as Qt resources; frontend passes the bytes to the core at startup.
 - Stop-gap 0.1: keep new Rust commits off `run-seamlyLayout` until PrivateRust.5.
 - No code changes. Plan and handover commits only.
-- Open: Rust commits for PrivateRust.8 on `run-seamlyLayout` despite stop-gap 0.1 (Sue).
+- 2026-11-18 user decision: PrivateRust.8 Rust commits wait on local branch `task-move-label-fonts` until the split. Do not merge or delete it.
 - Next: PrivateRust.8.
 
 ### 2026-11-17 — CI: fold label test and push builds

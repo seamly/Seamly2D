@@ -112,6 +112,8 @@ User decisions, 2026-11-17:
 ## Task PrivateRust.0 — Stop-gap
 
 - [ ] PrivateRust.0.1 Keep new Rust commits off `run-seamlyLayout` until PrivateRust.5 lands. Each push of `run-seamlyLayout` publishes them.
+  - User decision 2026-11-18: Rust commits wait on local branches until the split. Do not merge or delete those branches.
+  - A local branch has no backup until the private repo exists (PrivateRust.2.1).
 
 ## Task PrivateRust.1 — License groundwork
 
@@ -126,7 +128,11 @@ User decisions, 2026-11-17:
 
 ## Task PrivateRust.8 — Move crate fonts to `src/fonts/`
 
-Do this before PrivateRust.2.2, so the fonts stay public.
+Work on local branch `task-move-label-fonts` (PrivateRust.0.1). At the split:
+
+- Rust changes go to the private repo after PrivateRust.2.2.
+- The public part (`src/fonts/`, Qt resource, `seamlylayout_core.h`, `seamlyLayout_main.mm`, docs) merges into `run-seamlyLayout` with PrivateRust.4.
+- It lands before PrivateRust.5.1 deletes `crates/`, so the fonts stay public.
 
 - [x] PrivateRust.8.1 Decide how the Rust gets the fonts: D9, Qt resources in `seamlylayout.exe` (user decision 2026-11-17).
 - [ ] PrivateRust.8.2 `git mv` the fonts and their licenses:
@@ -224,7 +230,7 @@ Do this before PrivateRust.2.2, so the fonts stay public.
 
 ## Order
 
-PrivateRust.0 → 1 → 8 → 2 → 3 → 4 → 5 → 7 → 6.
+PrivateRust.0 → 1 → 8 (local branch) → 2 → 3 → 4 (with the public part of 8) → 5 → 7 → 6.
 
 ## Costs and risks
 
