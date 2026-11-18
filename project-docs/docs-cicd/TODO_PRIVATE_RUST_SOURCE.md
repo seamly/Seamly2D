@@ -39,6 +39,10 @@ Tasks in this file are numbered with prefix `PrivateRust.`
 - So the frontend can reach `AppController` through `QMetaObject` alone. No generated header is needed outside the core library.
 - Generated QML: none. Runtime `qmlRegisterType` replaces `qmldir`/`qmltypes`.
 - LGPLv3: the core library and the exe link Qt dynamically. No LGPL duty requires Rust source or generated code.
+- Qt: Community (LGPLv3) only, never a commercial license (Sue, 2026-11-18). All modules SeamlyLayout links are LGPLv3.
+- So the Qt frontend can also stay proprietary. LGPLv3 duties: dynamic linking, Qt notices, Qt source or a written offer, an EULA that allows Qt changes and reverse engineering to debug them.
+- Generated code from `moc`, `rcc`, `qmlcachegen` can stay private: Qt GPL Exception 1.0 (`C:/Qt/Docs/Qt-6.11.3/qtdoc/qt-gpl-exception-1-0.html`).
+- Frontend and SeamlyCLI headers: 118 MIT, 24 LGPL-3.0 (frontend), 11 GPL-3.0 (SeamlyCLI). Sole author slspencer.
 - Fonts inside the crates, embedded with `include_bytes!` / `include_str!`:
   - `crates/svg_label_text/assets/fonts/ReliefSingleLineOutline-Regular.otf`, `OFL.txt` (used in `font_embedding.rs:31`, `svg_label_text_tests.rs:11`).
   - `crates/svg_label_text/assets/hershey/futural.jhf`, `HERSHEY_LICENSE.txt` (used in `hershey_strokes.rs:22`).
@@ -122,7 +126,8 @@ User decisions, 2026-11-17:
   - 2026-11-17: counsel answered yes. Stated basis: all code on the user's PC is open source (Qt, C++).
   - Open: with D7, `seamlylayout.exe` is open source only. Proprietary code still runs on the user's PC: `seamlylayout_core` (loaded into the SeamlyLayout process) and `seamlycli.exe`. Counsel re-confirms with this fact.
 - [x] PrivateRust.1.3 Sue assigns, in writing, her copyright in the Rust code to Seamly Systems, Inc. Done 2026-11-17.
-- [ ] PrivateRust.1.4 Write the binary license, licensor Seamly Systems, Inc.: redistribution, use by the MIT frontend, inclusion in Seamly2D installers.
+  - Open: extend the assignment to the Qt frontend (C++, QML) and SeamlyCLI if they become proprietary.
+- [ ] PrivateRust.1.4 Write the binary license, licensor Seamly Systems, Inc.: redistribution, use by the MIT frontend, inclusion in Seamly2D installers. If SeamlyLayout uses Qt: allow Qt changes and reverse engineering to debug them (LGPLv3 §4).
 - [ ] PrivateRust.1.5 Private repo: proprietary `LICENSE` (Copyright 2026 Seamly Systems, Inc.), Rust file headers, `publish = false`. Every `Cargo.toml`, SeamlyCLI's `GPL-3.0-or-later` too, uses `license-file`.
 - [ ] PrivateRust.1.6 `about.toml`: elect MIT or Apache-2.0 for `r-efi`, `hershey`, `self_cell`. Add the MPL-2.0 source pointer for `resvg`, `usvg`.
 
